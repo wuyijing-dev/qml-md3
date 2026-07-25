@@ -10,13 +10,17 @@ Item {
     property bool railExpanded: false
     property string railHeader: ""
     property string cacheMode: "lru"
-    property int cacheLimit: 8
+    property int cacheLimit: 4
     property real contentPadding: 20
     property url sourceBase: ""
     property bool asynchronous: true
-    property bool prefetchNeighbors: true
+    property bool prefetchNeighbors: false
     property bool warmStart: false
     property bool showBusyIndicator: false
+    property bool showSkeleton: true
+    property string skeletonLayout: "page"
+    property string pageTransition: "fadeThrough"
+    property int pageTransitionDuration: Md3Motion.spatialDuration
     property alias pageHost: host
     property alias rail: rail
 
@@ -89,6 +93,10 @@ Item {
             prefetchNeighbors: root.prefetchNeighbors
             warmStart: root.warmStart
             showBusyIndicator: root.showBusyIndicator
+            showSkeleton: root.showSkeleton
+            skeletonLayout: root.skeletonLayout
+            pageTransition: root.pageTransition
+            pageTransitionDuration: root.pageTransitionDuration
         }
     }
 

@@ -65,5 +65,28 @@ Flickable {
                 { title: "Three", color: Md3Theme.colorScheme.tertiaryContainer }
             ]
         }
+
+        Text {
+            text: qsTr("Skeleton")
+            color: Md3Theme.colorScheme.colorOnSurface
+            font.pixelSize: Md3Theme.typography.titleMedium.size
+        }
+        Md3Card {
+            variant: Md3Card.Outlined
+            Layout.fillWidth: true
+            Layout.preferredHeight: 220
+            Md3SkeletonPane {
+                anchors.fill: parent
+                anchors.margins: 16
+                layout: "page"
+            }
+        }
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 12
+            Md3Skeleton { variant: Md3Skeleton.Circular; width: 48; height: 48 }
+            Md3Skeleton { variant: Md3Skeleton.Text; Layout.fillWidth: true; height: 14 }
+            Md3Skeleton { variant: Md3Skeleton.Rounded; width: 72; height: 32 }
+        }
     }
 }

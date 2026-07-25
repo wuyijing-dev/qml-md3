@@ -103,6 +103,7 @@ public:
     bool systemAccentSupported() const;
 
     Q_INVOKABLE void bindWindow(QObject *window);
+    Q_INVOKABLE void unbindWindow(QObject *window);
     Q_INVOKABLE void applyCornerPreference(QObject *window, bool rounded);
     Q_INVOKABLE void setMaximizeButtonRect(QObject *window, qreal x, qreal y, qreal w, qreal h);
     Q_INVOKABLE void clearMaximizeButtonRect(QObject *window);
@@ -166,11 +167,11 @@ signals:
 
 private:
     friend class Md3WinNativeFilter;
-    Md3WinNativeFilter *m_filter = nullptr;
 #if defined(Q_OS_WIN)
     void *m_iconBig = nullptr;
     void *m_iconSmall = nullptr;
     void *m_trayIcon = nullptr;
+    void *m_trayHwnd = nullptr;
     bool m_trayAdded = false;
     QVector<void *> m_thumbIcons;
     void *m_iconicBitmap = nullptr;

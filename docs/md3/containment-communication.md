@@ -21,6 +21,21 @@
 
 Motion: enter `medium4` emphasizedDecelerate; scrim fade `short4`
 
+## Dialog window (separate OS window)
+`Md3DialogWindow` is a top-level `Window` (QWidget-like), not an overlay.
+
+| API | Notes |
+|-----|-------|
+| `openDialog(owner)` / `closeDialog()` | Show / hide; sets `transientParent` |
+| `dialogModality` | `Qt.ApplicationModal` / `WindowModal` / `NonModal` |
+| `showPinButton` | **Default true** — title-bar always-on-top pin |
+| `pinned` / `setPinned()` | Syncs with `Md3WindowHelper.setAlwaysOnTop` |
+| `showMinimizeButton` / `showMaximizeButton` | Default false for modal dialogs |
+| `dialogText` + default content + footer OK/Cancel | M3 action row |
+
+Use `Md3Dialog` for in-page scrim overlays; use `Md3DialogWindow` when you need a second HWND / independent taskbar entry / tool window.
+
+
 ## Fullscreen dialog
 - surface fill, top app bar with close + confirm
 

@@ -17,12 +17,8 @@ Md3WindowHelper::~Md3WindowHelper()
     clearThumbIcons();
     clearIconicBitmap();
     clearWinIcons();
+    Md3WinNativeFilter::instance()->unregisterHelper(this);
 #endif
-    if (m_filter) {
-        qApp->removeNativeEventFilter(m_filter);
-        delete m_filter;
-        m_filter = nullptr;
-    }
 }
 
 QString Md3WindowHelper::platformId() const
@@ -139,15 +135,21 @@ void Md3WindowHelper::bindWindow(QObject *window)
 #if defined(Q_OS_WIN)
     md3EnsureWinChromeStyles(qw);
     applyCornerPreference(qw, true);
-
-    if (!m_filter) {
-        m_filter = new Md3WinNativeFilter;
-        qApp->installNativeEventFilter(m_filter);
-    }
-    m_filter->window = qw;
-    m_filter->helper = this;
+    Md3WinNativeFilter::instance()->registerWindow(qw, this);
 #else
     Q_UNUSED(qw);
+#endif
+}
+
+void Md3WindowHelper::unbindWindow(QObject *window)
+{
+#if defined(Q_OS_WIN)
+    auto *qw = qobject_cast<QWindow *>(window);
+    if (!qw)
+        return;
+    Md3WinNativeFilter::instance()->unregisterWindow(qw);
+#else
+    Q_UNUSED(window);
 #endif
 }
 
@@ -157,13 +159,10 @@ void Md3WindowHelper::setMaximizeButtonRect(QObject *window, qreal x, qreal y, q
     auto *qw = qobject_cast<QWindow *>(window);
     if (!qw)
         return;
-    if (!m_filter) {
-        m_filter = new Md3WinNativeFilter;
-        qApp->installNativeEventFilter(m_filter);
-    }
-    m_filter->window = qw;
-    m_filter->helper = this;
-    m_filter->maximizeButton = QRectF(x, y, w, h);
+    auto *filter = Md3WinNativeFilter::instance();
+    filter->registerWindow(qw, this);
+    if (Md3WinChromeState *st = filter->stateForWindow(qw))
+        st->maximizeButton = QRectF(x, y, w, h);
 #else
     Q_UNUSED(window);
     Q_UNUSED(x);
@@ -176,9 +175,11 @@ void Md3WindowHelper::setMaximizeButtonRect(QObject *window, qreal x, qreal y, q
 void Md3WindowHelper::clearMaximizeButtonRect(QObject *window)
 {
 #if defined(Q_OS_WIN)
-    Q_UNUSED(window);
-    if (m_filter)
-        m_filter->maximizeButton = QRectF();
+    auto *qw = qobject_cast<QWindow *>(window);
+    if (!qw)
+        return;
+    if (Md3WinChromeState *st = Md3WinNativeFilter::instance()->stateForWindow(qw))
+        st->maximizeButton = QRectF();
 #else
     Q_UNUSED(window);
 #endif
@@ -190,13 +191,10 @@ void Md3WindowHelper::setCaptionHitRect(QObject *window, qreal x, qreal y, qreal
     auto *qw = qobject_cast<QWindow *>(window);
     if (!qw)
         return;
-    if (!m_filter) {
-        m_filter = new Md3WinNativeFilter;
-        qApp->installNativeEventFilter(m_filter);
-    }
-    m_filter->window = qw;
-    m_filter->helper = this;
-    m_filter->captionHit = QRectF(x, y, w, h);
+    auto *filter = Md3WinNativeFilter::instance();
+    filter->registerWindow(qw, this);
+    if (Md3WinChromeState *st = filter->stateForWindow(qw))
+        st->captionHit = QRectF(x, y, w, h);
 #else
     Q_UNUSED(window);
     Q_UNUSED(x);
@@ -209,9 +207,11 @@ void Md3WindowHelper::setCaptionHitRect(QObject *window, qreal x, qreal y, qreal
 void Md3WindowHelper::clearCaptionHitRect(QObject *window)
 {
 #if defined(Q_OS_WIN)
-    Q_UNUSED(window);
-    if (m_filter)
-        m_filter->captionHit = QRectF();
+    auto *qw = qobject_cast<QWindow *>(window);
+    if (!qw)
+        return;
+    if (Md3WinChromeState *st = Md3WinNativeFilter::instance()->stateForWindow(qw))
+        st->captionHit = QRectF();
 #else
     Q_UNUSED(window);
 #endif

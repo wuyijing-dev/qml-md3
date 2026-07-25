@@ -29,5 +29,26 @@ Width 80 collapsed / 256 expanded; destinations with pill
 ## Navigation drawer
 Width 360; modal scrim; destination pill
 
-## Tab bar
-Primary / secondary indicator; labelLarge; indicator height 3; motion short4 emphasized
+## Page host transitions
+`Md3PageHost` / `Md3ApplicationWindow`:
+
+| `pageTransition` | Behavior |
+|------------------|----------|
+| `none` | Instant swap |
+| `fade` | Cross-fade |
+| `slide` | Horizontal shared-axis (direction follows index) |
+| `slideUp` | Subtle vertical enter |
+| `fadeThrough` | MD fade-through (exit then enter + scale) — default |
+| `scale` | Soft scale + fade |
+
+`pageTransitionDuration` defaults to `Md3Motion.spatialDuration`.
+
+## Skeleton
+| Type | Role |
+|------|------|
+| `Md3Skeleton` | Single bone (`Text` / `Circular` / `Rounded` / `Rectangular`) + shimmer |
+| `Md3SkeletonPane` | Page / list / cards placeholder layout |
+| `pageSkeleton` | When true, PageHost shows pane while destination loads |
+
+Cold navigation clears the previous page (`displayedIndex = -1`) before showing the skeleton, then plays an enter transition when Ready.
+

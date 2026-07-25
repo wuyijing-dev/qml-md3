@@ -66,6 +66,51 @@ Flickable {
             font.family: Md3Theme.typography.fontFamily
         }
 
+        Text {
+            text: qsTr("Page transition")
+            color: Md3Theme.colorScheme.colorOnSurface
+            font.pixelSize: Md3Theme.typography.titleSmall.size
+        }
+        Md3ButtonGroup {
+            Layout.fillWidth: true
+            layout: Md3ButtonGroup.Connected
+            variant: Md3ButtonGroup.Outlined
+            buttonHeight: 32
+            fontSize: 11
+            model: [
+                { text: "Through" },
+                { text: "Fade" },
+                { text: "Slide" },
+                { text: "Up" },
+                { text: "Scale" },
+                { text: "None" }
+            ]
+            onClicked: function (index) {
+                if (!root.appWin)
+                    return
+                const modes = ["fadeThrough", "fade", "slide", "slideUp", "scale", "none"]
+                root.appWin.pageTransition = modes[index]
+            }
+        }
+        Row {
+            spacing: 12
+            Md3Switch {
+                id: skeletonSwitch
+                checked: root.appWin ? root.appWin.pageSkeleton : true
+                accessibleName: qsTr("Page skeleton while loading")
+                onToggled: function (on) {
+                    if (root.appWin)
+                        root.appWin.pageSkeleton = on
+                }
+            }
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: qsTr("Skeleton while loading")
+                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                font.pixelSize: 12
+            }
+        }
+
         RowLayout {
             visible: Md3WindowCapabilities.isWindows && root.appWin
             Layout.fillWidth: true

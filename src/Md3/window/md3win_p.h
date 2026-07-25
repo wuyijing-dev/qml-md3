@@ -5,6 +5,7 @@
 #include <QAbstractNativeEventFilter>
 #include <QColor>
 #include <QFile>
+#include <QHash>
 #include <QIcon>
 #include <QImage>
 #include <QPointer>
@@ -133,13 +134,26 @@ UINT md3GetDpiForWindow(HWND hwnd);
 QString md3QrcPathFromUrl(const QUrl &iconUrl);
 QIcon md3LoadIconMultiSize(const QUrl &iconUrl);
 
-class Md3WinNativeFilter : public QAbstractNativeEventFilter
+/// Per-HWND chrome hit-test state (supports multiple top-level windows).
+struct Md3WinChromeState
 {
-public:
     QPointer<QWindow> window;
     QPointer<Md3WindowHelper> helper;
     QRectF maximizeButton;
     QRectF captionHit;
+};
+
+class Md3WinNativeFilter : public QAbstractNativeEventFilter
+{
+public:
+    QHash<quintptr, Md3WinChromeState> chromeByHwnd;
+
+    static Md3WinNativeFilter *instance();
+    void registerWindow(QWindow *window, Md3WindowHelper *helper);
+    void unregisterWindow(QWindow *window);
+    void unregisterHelper(Md3WindowHelper *helper);
+    Md3WinChromeState *stateForHwnd(quintptr hwnd);
+    Md3WinChromeState *stateForWindow(QWindow *window);
 
     bool nativeEventFilter(const QByteArray &eventType, void *message, qintptr *result) override;
 };

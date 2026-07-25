@@ -453,9 +453,13 @@ bool Md3WindowHelper::respondIconicThumbnail(void *hwndPtr, int width, int heigh
         const QIcon icon = md3LoadIconMultiSize(m_iconicUrl);
         img = icon.pixmap(QSize(width, height)).toImage();
     }
-    if (img.isNull() && m_filter && m_filter->window) {
-        const QPixmap grab = m_filter->window->screen()->grabWindow(m_filter->window->winId());
-        img = grab.toImage().scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    if (img.isNull()) {
+        if (Md3WinChromeState *st = Md3WinNativeFilter::instance()->stateForHwnd(quintptr(hwnd))) {
+            if (st->window && st->window->screen()) {
+                const QPixmap grab = st->window->screen()->grabWindow(st->window->winId());
+                img = grab.toImage().scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            }
+        }
     }
     if (img.isNull())
         return false;
@@ -471,9 +475,12 @@ bool Md3WindowHelper::respondIconicThumbnail(void *hwndPtr, int width, int heigh
 bool Md3WindowHelper::respondIconicLivePreview(void *hwndPtr)
 {
     const HWND hwnd = static_cast<HWND>(hwndPtr);
-    if (!hwnd || !m_filter || !m_filter->window)
+    if (!hwnd)
         return false;
-    const QPixmap grab = m_filter->window->screen()->grabWindow(m_filter->window->winId());
+    Md3WinChromeState *st = Md3WinNativeFilter::instance()->stateForHwnd(quintptr(hwnd));
+    if (!st || !st->window || !st->window->screen())
+        return false;
+    const QPixmap grab = st->window->screen()->grabWindow(st->window->winId());
     HBITMAP hbmp = md3CreateHBitmapFromImage(grab.toImage());
     if (!hbmp)
         return false;

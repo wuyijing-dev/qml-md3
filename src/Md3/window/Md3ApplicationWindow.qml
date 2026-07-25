@@ -13,6 +13,7 @@ Window {
     property bool showWindowBorder: true
     property alias titleBarItem: titleBarLoader.item
     property alias overlay: overlayHost.data
+    property alias overlayItem: overlayHost
     property Component titleBar: null
     /// App icon for title bar + taskbar / Alt-Tab (qrc or file URL)
     property url windowIcon: ""
@@ -28,6 +29,9 @@ Window {
     property real backdropTint: 0.08
     property real backdropContentTint: 0.18
     property real backdropTitleTint: 0.06
+    /// Title-bar pin (always-on-top). On by default.
+    property bool showPinButton: true
+    property bool pinned: false
 
     /// Circular reveal when toggling light/dark (Material-style wipe from click)
     property bool themeRevealEnabled: true
@@ -44,14 +48,19 @@ Window {
     property string railHeader: ""
     /// "none" | "one" | "lru" | "all" — "lru" keeps last pageCacheLimit pages for instant revisit
     property string pageCacheMode: "lru"
-    property int pageCacheLimit: 8
+    property int pageCacheLimit: 4
     property real pagePadding: 20
-    property bool pagePrefetch: true
+    property bool pagePrefetch: false
     property bool pageAsync: true
     /// Background-warm all destinations (off by default — competes with UI)
     property bool pageWarmStart: false
     /// Resolve relative destination sources against this URL (Gallery: Qt.resolvedUrl("."))
     property url pageSourceBase: ""
+    /// "none" | "fade" | "slide" | "slideUp" | "fadeThrough" | "scale"
+    property string pageTransition: "fadeThrough"
+    property int pageTransitionDuration: Md3Motion.spatialDuration
+    /// Show Md3SkeletonPane while a destination loads
+    property bool pageSkeleton: true
     property alias pageHost: windowBody.pageHost
 
     readonly property bool usesDestinations: destinations && destinations.length > 0
@@ -162,9 +171,9 @@ Window {
 
     onWindowIconChanged: _applyWindowIcon()
     onEffectiveRadiusChanged: windowHelper.applyCornerPreference(root, effectiveRadius > 0)
-    onVisibilityChanged: {
+    onVisibilityChanged: function () {
         windowHelper.applyCornerPreference(root, effectiveRadius > 0)
-        if (visibility !== Window.Hidden)
+        if (root.visibility !== Window.Hidden)
             Qt.callLater(function () {
                 root._applyWindowIcon()
                 root._syncWinNative()
@@ -316,7 +325,13 @@ Window {
     }
 
     function setAlwaysOnTop(onTop) {
-        windowHelper.setAlwaysOnTop(root, !!onTop)
+        root.pinned = !!onTop
+        windowHelper.setAlwaysOnTop(root, root.pinned)
+    }
+
+    onPinnedChanged: {
+        if (windowHelper.alwaysOnTopSupported)
+            windowHelper.setAlwaysOnTop(root, root.pinned)
     }
 
     function setWindowCloaked(cloaked) {
@@ -428,6 +443,8 @@ Window {
                     title: root.title
                     appIcon: root.windowIcon
                     showAppIcon: true
+                    showPin: root.showPinButton
+                    pinned: root.pinned
                     targetWindow: root
                     windowHelper: windowHelper
                     cornerRadius: root.effectiveRadius
@@ -436,6 +453,7 @@ Window {
                     leadingInset: windowHelper.trafficLightsInset > 0
                                   ? windowHelper.trafficLightsInset
                                   : Md3WindowCapabilities.trafficLightsInset
+                    onPinToggled: function (onTop) { root.pinned = onTop }
                 }
             }
 
@@ -466,6 +484,9 @@ Window {
                     prefetchNeighbors: root.pagePrefetch
                     warmStart: root.pageWarmStart
                     showBusyIndicator: false
+                    showSkeleton: root.pageSkeleton
+                    pageTransition: root.pageTransition
+                    pageTransitionDuration: root.pageTransitionDuration
                     onDestinationActivated: function (index) {
                         if (root.currentIndex !== index)
                             root.currentIndex = index

@@ -4,15 +4,92 @@
 #include <QScreen>
 #include <cstring>
 
+Md3WinNativeFilter *Md3WinNativeFilter::instance()
+{
+    static Md3WinNativeFilter *filter = nullptr;
+    if (!filter) {
+        filter = new Md3WinNativeFilter;
+        qApp->installNativeEventFilter(filter);
+    }
+    return filter;
+}
+
+void Md3WinNativeFilter::registerWindow(QWindow *window, Md3WindowHelper *helper)
+{
+#if defined(Q_OS_WIN)
+    if (!window || !helper)
+        return;
+    const HWND hwnd = md3HwndOf(window);
+    if (!hwnd)
+        return;
+    Md3WinChromeState &st = chromeByHwnd[quintptr(hwnd)];
+    st.window = window;
+    st.helper = helper;
+#else
+    Q_UNUSED(window);
+    Q_UNUSED(helper);
+#endif
+}
+
+void Md3WinNativeFilter::unregisterWindow(QWindow *window)
+{
+#if defined(Q_OS_WIN)
+    if (!window)
+        return;
+    const HWND hwnd = md3HwndOf(window);
+    if (hwnd)
+        chromeByHwnd.remove(quintptr(hwnd));
+#else
+    Q_UNUSED(window);
+#endif
+}
+
+void Md3WinNativeFilter::unregisterHelper(Md3WindowHelper *helper)
+{
+    if (!helper)
+        return;
+    for (auto it = chromeByHwnd.begin(); it != chromeByHwnd.end();) {
+        if (it.value().helper == helper)
+            it = chromeByHwnd.erase(it);
+        else
+            ++it;
+    }
+}
+
+Md3WinChromeState *Md3WinNativeFilter::stateForHwnd(quintptr hwnd)
+{
+    auto it = chromeByHwnd.find(hwnd);
+    if (it == chromeByHwnd.end())
+        return nullptr;
+    return &it.value();
+}
+
+Md3WinChromeState *Md3WinNativeFilter::stateForWindow(QWindow *window)
+{
+#if defined(Q_OS_WIN)
+    if (!window)
+        return nullptr;
+    return stateForHwnd(quintptr(md3HwndOf(window)));
+#else
+    Q_UNUSED(window);
+    return nullptr;
+#endif
+}
+
 bool Md3WinNativeFilter::nativeEventFilter(const QByteArray &eventType, void *message, qintptr *result)
 {
 #if defined(Q_OS_WIN)
     Q_UNUSED(eventType);
     auto *msg = static_cast<MSG *>(message);
-    if (!msg || !window || !result)
+    if (!msg || !result)
         return false;
-    if (msg->hwnd != reinterpret_cast<HWND>(window->winId()))
+
+    Md3WinChromeState *st = stateForHwnd(quintptr(msg->hwnd));
+    if (!st || !st->window)
         return false;
+
+    QWindow *window = st->window;
+    Md3WindowHelper *helper = st->helper;
 
     if (msg->message == WM_NCCALCSIZE && msg->wParam == TRUE) {
         auto *params = reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam);
@@ -56,11 +133,11 @@ bool Md3WinNativeFilter::nativeEventFilter(const QByteArray &eventType, void *me
             if (nearR) { *result = HTRIGHT; return true; }
         }
 
-        if (!maximizeButton.isEmpty() && maximizeButton.contains(local)) {
+        if (!st->maximizeButton.isEmpty() && st->maximizeButton.contains(local)) {
             *result = HTMAXBUTTON;
             return true;
         }
-        if (!captionHit.isEmpty() && captionHit.contains(local)) {
+        if (!st->captionHit.isEmpty() && st->captionHit.contains(local)) {
             *result = HTCAPTION;
             return true;
         }

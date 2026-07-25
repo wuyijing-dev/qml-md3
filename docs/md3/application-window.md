@@ -18,6 +18,7 @@ Apps use **Md3ApplicationWindow** instead of a bare `Window`. Chrome (title bar,
 | Window controls (min / max / close) | `Md3CaptionButtons` (Win/Linux) |
 | Overlay traffic lights (macOS) | `trafficLightsInset` + no client caption |
 | Custom title-bar buttons | `Md3TitleBarButton` + `extraActions` |
+| Pin / always-on-top | `Md3TitleBar.showPin` + `pinned` (**default on**) |
 | App theme control in chrome | `showThemeToggle` + circular reveal + DWM dark mode |
 | Win11 Snap Layouts (maximize hover) | `HTMAXBUTTON` via `Md3WindowHelper` |
 | System menu (icon / right-click / Alt+Space) | `showSystemMenu` |

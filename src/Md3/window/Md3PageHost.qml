@@ -2,26 +2,29 @@ import QtQuick
 import QtQuick.Window
 
 /*
-  Instant navigation host:
-  - Revisit: visibility flip only (no reload)
-  - Cold open: keep previous page visible until target Ready (no blank hitch)
+  Instant navigation host with MD3 page transitions + skeleton loading:
+  - Revisit: animated swap (or instant if pageTransition === "none")
+  - Cold open: skeleton overlay until Ready, then enter transition
   - cacheMode: "none" | "one" | "lru" | "all"
-  - LRU keeps last cacheLimit pages warm
 */
 Item {
     id: root
 
     property var model: []
     property int currentIndex: 0
-    /// Index actually shown (may lag currentIndex while loading)
     property int displayedIndex: 0
     property string cacheMode: "lru"
-    property int cacheLimit: 8
+    property int cacheLimit: 4
     property real contentPadding: 20
     property bool asynchronous: true
-    property bool prefetchNeighbors: true
+    property bool prefetchNeighbors: false
     property bool warmStart: false
     property bool showBusyIndicator: false
+    property bool showSkeleton: true
+    property string skeletonLayout: "page"
+    /// "none" | "fade" | "slide" | "slideUp" | "fadeThrough" | "scale"
+    property string pageTransition: "fadeThrough"
+    property int pageTransitionDuration: Md3Motion.spatialDuration
     property url sourceBase: ""
 
     readonly property var currentItem: {
@@ -32,11 +35,23 @@ Item {
         const ldr = _loaderAt(currentIndex)
         return currentIndex !== displayedIndex
                 || !!(ldr && ldr.status === Loader.Loading)
+                || transitioning
+    }
+    readonly property bool awaitingTarget: {
+        const ldr = _loaderAt(currentIndex)
+        return displayedIndex < 0
+                || (!!ldr && ldr.status !== Loader.Ready && currentIndex !== displayedIndex)
     }
 
-    property var keepFlags: []   // bool[] — pages allowed to stay loaded
-    property var lruOrder: []    // oldest → newest indices
+    property var keepFlags: []
+    property var lruOrder: []
     property int generation: 0
+
+    property bool transitioning: false
+    property int transitionFrom: -1
+    property int transitionTo: -1
+    property int transitionDir: 1
+    property real transitionProgress: 1
 
     function entryAt(index) {
         if (!model || index < 0 || index >= model.length)
@@ -106,6 +121,8 @@ Item {
         root.generation
         if (index === displayedIndex || index === currentIndex)
             return true
+        if (transitioning && (index === transitionFrom || index === transitionTo))
+            return true
         if (index < 0 || index >= keepFlags.length)
             return false
         if (!keepFlags[index])
@@ -113,10 +130,10 @@ Item {
         if (cacheMode === "all")
             return true
         if (cacheMode === "one")
-            return false // only current/displayed via early return
+            return false
         if (cacheMode === "lru")
-            return true // keepFlags already pruned
-        return false // none
+            return true
+        return false
     }
 
     function _evict() {
@@ -124,15 +141,20 @@ Item {
             return
         if (cacheMode === "one") {
             for (let i = 0; i < keepFlags.length; ++i) {
-                if (i !== displayedIndex && i !== currentIndex && keepFlags[i])
+                if (i !== displayedIndex && i !== currentIndex
+                        && !(transitioning && (i === transitionFrom || i === transitionTo))
+                        && keepFlags[i])
                     _setKeep(i, false)
             }
             return
         }
-        // lru
         const protectedIdx = {}
         protectedIdx[displayedIndex] = true
         protectedIdx[currentIndex] = true
+        if (transitioning) {
+            protectedIdx[transitionFrom] = true
+            protectedIdx[transitionTo] = true
+        }
         let kept = 0
         const order = lruOrder.slice()
         for (let i = order.length - 1; i >= 0; --i) {
@@ -146,7 +168,6 @@ Item {
                 continue
             }
             _setKeep(idx, false)
-            // remove from lru
             const pruned = []
             for (let j = 0; j < lruOrder.length; ++j) {
                 if (lruOrder[j] !== idx)
@@ -188,13 +209,61 @@ Item {
             loader.source = url
     }
 
+    function _finishTransition() {
+        if (transitionTo >= 0)
+            displayedIndex = transitionTo
+        transitioning = false
+        transitionFrom = -1
+        transitionTo = -1
+        transitionProgress = 1
+        generation++
+        _evict()
+        if (prefetchNeighbors)
+            Qt.callLater(_prefetchAround, displayedIndex)
+    }
+
+    function _startTransition(fromIndex, toIndex) {
+        // onLoaded + onStatusChanged both call _tryShow — ignore duplicate
+        if (transitioning && transitionTo === toIndex)
+            return
+        if (pageAnim.running) {
+            pageAnim.stop()
+            if (transitionTo >= 0)
+                displayedIndex = transitionTo
+            transitioning = false
+            transitionFrom = -1
+            transitionTo = -1
+            transitionProgress = 1
+            fromIndex = displayedIndex
+        }
+        if (pageTransition === "none" || fromIndex === toIndex) {
+            displayedIndex = toIndex
+            transitioning = false
+            transitionProgress = 1
+            _evict()
+            return
+        }
+        // fromIndex < 0 → enter-only (after skeleton / cleared previous page)
+
+        transitionFrom = fromIndex
+        transitionTo = toIndex
+        transitionDir = (fromIndex < 0 || toIndex >= fromIndex) ? 1 : -1
+        transitioning = true
+        transitionProgress = 0
+        if (fromIndex >= 0)
+            _setKeep(fromIndex, true)
+        _setKeep(toIndex, true)
+        generation++
+        pageAnim.start()
+    }
+
     function _tryShow(index) {
         const ldr = _loaderAt(index)
         if (!ldr)
             return false
         if (ldr.status === Loader.Ready && ldr.item) {
             if (displayedIndex !== index)
-                displayedIndex = index
+                _startTransition(displayedIndex, index)
             return true
         }
         return false
@@ -203,24 +272,38 @@ Item {
     function navigateTo(index) {
         if (!model || index < 0 || index >= model.length)
             return
+        if (transitioning && index === transitionTo)
+            return
 
         currentIndex = index
         _touchLru(index)
         _setKeep(index, true)
 
-        // Hot path: already Ready → instant swap
+        // Hot path: already Ready → transition (or instant)
         if (_tryShow(index)) {
-            _evict()
+            if (!transitioning)
+                _evict()
             if (prefetchNeighbors)
                 Qt.callLater(_prefetchAround, index)
             return
         }
 
-        // Cold path: load async, keep previous page on screen
+        // Cold path: remove previous page from view, then skeleton until Ready
+        if (pageAnim.running) {
+            pageAnim.stop()
+            transitioning = false
+            transitionFrom = -1
+            transitionTo = -1
+            transitionProgress = 1
+        }
+        displayedIndex = -1
+        generation++
+
         const ldr = _loaderAt(index)
         if (ldr && ldr.active)
             _fillLoader(ldr, index)
-        generation++
+        else if (ldr)
+            _setKeep(index, true)
         _evict()
         if (prefetchNeighbors)
             Qt.callLater(_prefetchAround, index)
@@ -245,6 +328,18 @@ Item {
             return
         warmTimer.cursor = 0
         warmTimer.start()
+    }
+
+    NumberAnimation {
+        id: pageAnim
+        target: root
+        property: "transitionProgress"
+        from: 0
+        to: 1
+        duration: root.pageTransitionDuration
+        easing.type: Easing.BezierSpline
+        easing.bezierCurve: Md3Motion.emphasized
+        onFinished: root._finishTransition()
     }
 
     Timer {
@@ -281,6 +376,9 @@ Item {
     }
 
     onModelChanged: {
+        if (pageAnim.running)
+            pageAnim.stop()
+        transitioning = false
         lruOrder = []
         keepFlags = []
         if (model && currentIndex >= model.length)
@@ -324,20 +422,103 @@ Item {
             readonly property bool keep: root._shouldKeep(index)
             readonly property bool isDisplayed: index === root.displayedIndex
             readonly property bool isTarget: index === root.currentIndex
+            readonly property bool isLeaving: root.transitioning && index === root.transitionFrom
+            readonly property bool isEntering: root.transitioning && index === root.transitionTo
+            readonly property real t: root.transitionProgress
+            readonly property string mode: root.pageTransition
+            readonly property int dir: root.transitionDir
 
             active: keep
-            visible: keep && isDisplayed
-            enabled: visible
-            // Always async — never block UI thread on QML compile
+            enabled: (isDisplayed && !root.transitioning) || isEntering
             asynchronous: true
-            z: isDisplayed ? 2 : (isTarget ? 1 : 0)
+            z: isEntering ? 3 : (isLeaving ? 2 : (isDisplayed ? 1 : 0))
+
+            opacity: {
+                if (isEntering) {
+                    if (mode === "fadeThrough")
+                        return t < 0.35 ? 0 : (t - 0.35) / 0.65
+                    return t
+                }
+                if (isLeaving) {
+                    if (mode === "fadeThrough")
+                        return t < 0.35 ? (1 - t / 0.35) : 0
+                    return 1 - t
+                }
+                if (isDisplayed && !root.transitioning)
+                    return 1
+                return 0
+            }
+
+            transform: [
+                Translate {
+                    x: {
+                        if (mode !== "slide")
+                            return 0
+                        const w = pageLoader.width
+                        if (isEntering)
+                            return (1 - pageLoader.t) * w * pageLoader.dir
+                        if (isLeaving)
+                            return pageLoader.t * w * (-pageLoader.dir)
+                        return 0
+                    }
+                    y: {
+                        if (mode !== "slideUp")
+                            return 0
+                        const h = pageLoader.height
+                        if (isEntering)
+                            return (1 - pageLoader.t) * h * 0.08
+                        if (isLeaving)
+                            return pageLoader.t * h * (-0.04)
+                        return 0
+                    }
+                },
+                Scale {
+                    origin.x: pageLoader.width / 2
+                    origin.y: pageLoader.height / 2
+                    xScale: {
+                        if (mode !== "scale" && mode !== "fadeThrough")
+                            return 1
+                        if (isEntering) {
+                            if (mode === "fadeThrough")
+                                return 0.92 + 0.08 * pageLoader.t
+                            return 0.94 + 0.06 * pageLoader.t
+                        }
+                        if (isLeaving) {
+                            if (mode === "fadeThrough")
+                                return 1 - 0.04 * pageLoader.t
+                            return 1 - 0.06 * pageLoader.t
+                        }
+                        return 1
+                    }
+                    yScale: {
+                        if (mode !== "scale" && mode !== "fadeThrough")
+                            return 1
+                        if (isEntering) {
+                            if (mode === "fadeThrough")
+                                return 0.92 + 0.08 * pageLoader.t
+                            return 0.94 + 0.06 * pageLoader.t
+                        }
+                        if (isLeaving) {
+                            if (mode === "fadeThrough")
+                                return 1 - 0.04 * pageLoader.t
+                            return 1 - 0.06 * pageLoader.t
+                        }
+                        return 1
+                    }
+                }
+            ]
+
+            visible: keep && (opacity > 0.01 || isDisplayed || isEntering || isLeaving)
 
             onActiveChanged: {
-                if (active)
+                if (active) {
                     root._fillLoader(pageLoader, index)
-                else {
+                } else {
+                    // Drop compiled tree promptly to reclaim memory
                     source = ""
                     sourceComponent = null
+                    if (typeof setSource === "function")
+                        setSource("")
                 }
             }
 
@@ -364,9 +545,26 @@ Item {
         }
     }
 
+    Md3SkeletonPane {
+        anchors.fill: parent
+        anchors.margins: root.contentPadding
+        z: 8
+        layout: root.skeletonLayout
+        active: visible
+        visible: root.showSkeleton && root.awaitingTarget && !root.transitioning
+        opacity: visible ? 1 : 0
+        Behavior on opacity {
+            NumberAnimation {
+                duration: Md3Motion.short2
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.standard
+            }
+        }
+    }
+
     Text {
         anchors.centerIn: parent
-        visible: root.showBusyIndicator && root.loading && root.displayedIndex === root.currentIndex
+        visible: root.showBusyIndicator && root.awaitingTarget && !root.showSkeleton
         text: qsTr("Loading…")
         color: Md3Theme.colorScheme.colorOnSurfaceVariant
         font.family: Md3Theme.typography.fontFamily

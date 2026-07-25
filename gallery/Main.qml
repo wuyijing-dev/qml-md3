@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Window
 import Md3
 
 Md3ApplicationWindow {
@@ -6,26 +7,36 @@ Md3ApplicationWindow {
     width: 1180
     height: 760
     title: qsTr("Md3 Gallery")
-    // Title bar + Windows taskbar / Alt-Tab
     windowIcon: "qrc:/md3/icons/app-icon.png"
     roundedCorners: true
     cornerRadius: Md3WindowCapabilities.windowCornerRadius
     syncImmersiveDarkMode: true
-    systemBackdrop: 0 // Md3WindowHelper.BackdropNone — toggle on Window page
+    systemBackdrop: 0
     nativeBorderColor: ""
 
     pageSourceBase: Qt.resolvedUrl("./")
     navigationRail: true
     railExpanded: false
     railHeader: qsTr("Gallery")
-    pageCacheMode: "lru"
-    pageCacheLimit: 8
-    pagePrefetch: true
+    // Keep only the current page resident — closest to a single-page Electron shell
+    pageCacheMode: "one"
+    pageCacheLimit: 1
+    pagePrefetch: false
     pageWarmStart: false
     pageAsync: true
     pagePadding: 20
+    pageSkeleton: true
+    pageTransition: "fadeThrough"
+    pageTransitionDuration: Md3Motion.spatialDuration
+
+    property bool showPerformancePanel: true
 
     readonly property string pageRoot: "qrc:/qt/qml/Gallery/gallery/pages/"
+    readonly property int windowPageIndex: 16
+    readonly property bool perfSampling: showPerformancePanel
+                                         && visible
+                                         && visibility !== Window.Minimized
+                                         && visibility !== Window.Hidden
 
     destinations: [
         { title: "Tokens", icon: "palette", source: pageRoot + "TokensPage.qml" },
@@ -43,11 +54,35 @@ Md3ApplicationWindow {
         { title: "Extras", icon: "extension", source: pageRoot + "ExtrasPage.qml" },
         { title: "Motion", icon: "animation", source: pageRoot + "MotionPage.qml" },
         { title: "Theme", icon: "contrast", source: pageRoot + "ThemePage.qml" },
+        { title: "Charts", icon: "show_chart", source: pageRoot + "ChartsPage.qml" },
         { title: "Window", icon: "web_asset", source: pageRoot + "WindowPage.qml" },
         { title: "Scene: Login", icon: "login", source: pageRoot + "scenes/LoginScene.qml" },
         { title: "Scene: Settings", icon: "settings", source: pageRoot + "scenes/SettingsScene.qml" },
         { title: "Scene: List-Detail", icon: "view_sidebar", source: pageRoot + "scenes/ListDetailScene.qml" }
     ]
+
+    PerformanceMonitor {
+        id: perfMonitor
+        historySize: 16
+        sampleIntervalMs: 1000
+        active: window.perfSampling
+        Component.onCompleted: bindWindow(window)
+    }
+
+    PerformancePanel {
+        id: perfPanel
+        // contentItem avoids chrome / rounded-mask clipping of overlayHost
+        parent: window.contentItem
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 16
+        z: 100000
+        visible: window.showPerformancePanel
+        compact: true
+        expanded: true
+        monitor: perfMonitor
+    }
 
     titleBar: Component {
         Md3TitleBar {
@@ -94,12 +129,21 @@ Md3ApplicationWindow {
 
             trailingContent: [
                 Md3TitleBarButton {
+                    icon: "speed"
+                    buttonWidth: 36
+                    buttonHeight: 28
+                    iconSize: 14
+                    checked: window.showPerformancePanel
+                    accessibleName: qsTr("Performance monitor")
+                    onClicked: window.showPerformancePanel = !window.showPerformancePanel
+                },
+                Md3TitleBarButton {
                     icon: "info"
                     buttonWidth: 36
                     buttonHeight: 28
                     iconSize: 14
                     accessibleName: qsTr("Window page")
-                    onClicked: window.navigateTo(15)
+                    onClicked: window.navigateTo(window.windowPageIndex)
                 }
             ]
         }

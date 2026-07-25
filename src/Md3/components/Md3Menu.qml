@@ -13,41 +13,114 @@ Item {
     property real menuY: 0
     property real menuWidth: 0 // 0 = content width
     property bool modal: true
+    /// Cascading: parent of this submenu (null = root menu)
+    property var parentMenu: null
+    /// Currently open child submenu
+    property var childMenu: null
+    readonly property bool isSubMenu: parentMenu !== null
     default property alias content: column.data
+    readonly property alias itemColumn: column
 
     readonly property real containerRadius: Md3Theme.shape.large
+    readonly property var __md3Menu: root
+
+    function clearItems() {
+        const kids = []
+        for (let i = 0; i < column.children.length; ++i)
+            kids.push(column.children[i])
+        for (let i = 0; i < kids.length; ++i) {
+            if (kids[i])
+                kids[i].destroy()
+        }
+    }
+
+    function _contentItem() {
+        const win = Window.window
+        return (win && win.contentItem) ? win.contentItem : null
+    }
+
+    function hostEnsureParent(contentItem) {
+        const target = contentItem || _contentItem()
+        if (!target)
+            return
+        if (host.parent !== target) {
+            host.parent = target
+            host.x = 0
+            host.y = 0
+            host.anchors.fill = target
+        }
+        host.z = root.isSubMenu ? 6000 : 5000
+    }
 
     function popup(x, y) {
+        hostEnsureParent(_contentItem())
         menuX = x
         menuY = y
         open = true
     }
 
     function dismiss() {
+        if (childMenu) {
+            childMenu.dismiss()
+            childMenu = null
+        }
         open = false
+        parentMenu = null
     }
 
-    // Map local (caller) coords into the overlay host
+    function dismissCascade() {
+        let m = root
+        while (m && m.parentMenu)
+            m = m.parentMenu
+        if (m)
+            m.dismiss()
+    }
+
     function popupAtItem(item, x, y) {
-        if (!item || !host)
+        if (!item)
             return
-        const p = item.mapToItem(host, x, y)
+        const target = _contentItem() || host
+        const p = item.mapToItem(target, x, y)
         popup(p.x, p.y)
+    }
+
+    /// Open `menu` as a cascading submenu anchored to `anchorItem`.
+    function openSubMenu(menu, anchorItem) {
+        if (!menu || !anchorItem)
+            return
+        if (childMenu && childMenu !== menu) {
+            childMenu.dismiss()
+            childMenu = null
+        }
+        childMenu = menu
+        menu.parentMenu = root
+        menu.modal = false
+        const target = _contentItem() || host
+        menu.hostEnsureParent(target)
+        const p = anchorItem.mapToItem(target, anchorItem.width, 0)
+        let x = p.x + 4
+        let y = Math.max(8, p.y - 8)
+        const mw = menu.menuWidth > 0 ? menu.menuWidth : 200
+        if (target.width > 0 && x + mw > target.width - 8)
+            x = Math.max(8, p.x - mw - 4)
+        menu.popup(x, y)
     }
 
     Item {
         id: host
-        parent: Window.window ? Window.window.contentItem : root.parent
-        anchors.fill: parent
+        // Reparented to Window.contentItem on first popup
+        parent: root
+        width: 0
+        height: 0
         z: 5000
-        // Hide when fully closed so we never steal clicks (opacity-0 Items still receive mouse)
         visible: root.open || panel.opacity > 0.01
+                 || (root.childMenu && root.childMenu.open)
 
         Rectangle {
             anchors.fill: parent
             color: Md3Theme.colorScheme.scrim
-            opacity: root.open && root.modal ? 0.08 : 0
-            visible: opacity > 0.001
+            opacity: root.open && root.modal && !root.isSubMenu ? 0.08 : 0
+            visible: opacity > 0.001 && parent.width > 8
             Behavior on opacity {
                 NumberAnimation {
                     duration: Md3Motion.short2
@@ -57,8 +130,8 @@ Item {
             }
             MouseArea {
                 anchors.fill: parent
-                enabled: root.open && root.modal
-                onClicked: root.dismiss()
+                enabled: root.open && root.modal && !root.isSubMenu
+                onClicked: root.dismissCascade()
             }
         }
 
@@ -71,6 +144,7 @@ Item {
 
         Rectangle {
             id: panel
+            readonly property var __md3Menu: root
             x: root.menuX
             width: root.menuWidth > 0 ? root.menuWidth : Math.max(112, column.implicitWidth)
             height: column.implicitHeight + 16
@@ -83,8 +157,6 @@ Item {
             y: root.menuY + yOffset
             opacity: root.open ? 1 : 0
             scale: root.open ? 1 : 0.96
-
-            // Closed panel must not eat input
             enabled: root.open || opacity > 0.01
 
             Behavior on opacity {
@@ -119,4 +191,6 @@ Item {
             }
         }
     }
+
+    Component.onDestruction: dismiss()
 }

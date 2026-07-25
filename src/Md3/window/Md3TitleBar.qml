@@ -17,6 +17,12 @@ Rectangle {
     property bool showTitle: true
     property bool showAppIcon: true
     property bool showThemeToggle: true
+    /// Pin / always-on-top (shown by default)
+    property bool showPin: true
+    property bool pinned: false
+    property bool showMinimize: true
+    property bool showMaximize: true
+    property bool showClose: true
     property bool dragEnabled: Md3WindowCapabilities.systemMove
     property bool nativeCaptionHit: Md3WindowCapabilities.captionHitTest
     property real leadingInset: Md3WindowCapabilities.trafficLightsInset
@@ -48,6 +54,23 @@ Rectangle {
 
     signal leadingClicked()
     signal themeToggled()
+    signal pinToggled(bool pinned)
+
+    function setPinned(onTop) {
+        root.pinned = !!onTop
+        if (root.windowHelper && root.targetWindow
+                && root.windowHelper.alwaysOnTopSupported)
+            root.windowHelper.setAlwaysOnTop(root.targetWindow, root.pinned)
+        else if (root.targetWindow)
+            root.targetWindow.flags = root.pinned
+                    ? (root.targetWindow.flags | Qt.WindowStaysOnTopHint)
+                    : (root.targetWindow.flags & ~Qt.WindowStaysOnTopHint)
+        root.pinToggled(root.pinned)
+    }
+
+    function togglePinned() {
+        setPinned(!root.pinned)
+    }
 
     function reportNativeHits() {
         if (!root.windowHelper || !root.targetWindow)
@@ -161,6 +184,8 @@ Rectangle {
             if (mouse.button !== Qt.LeftButton)
                 return
             if (!root.targetWindow || !Md3WindowCapabilities.doubleClickMaximize)
+                return
+            if (!root.showMaximize)
                 return
             if (root.targetWindow.visibility === Window.Maximized)
                 root.targetWindow.showNormal()
@@ -309,12 +334,27 @@ Rectangle {
                 }
             }
 
+            Md3TitleBarButton {
+                id: pinBtn
+                visible: root.showPin
+                buttonHeight: root.baseHeight
+                buttonWidth: 40
+                iconSize: 14
+                icon: "push_pin"
+                checked: root.pinned
+                accessibleName: root.pinned ? qsTr("Unpin window") : qsTr("Pin window on top")
+                onClicked: root.togglePinned()
+            }
+
             Md3CaptionButtons {
                 id: caption
                 height: root.baseHeight
                 targetWindow: root.targetWindow
                 windowHelper: root.windowHelper
                 cornerRadius: root.cornerRadius
+                showMinimize: root.showMinimize
+                showMaximize: root.showMaximize
+                showClose: root.showClose
             }
         }
     }

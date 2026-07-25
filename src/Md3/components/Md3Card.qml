@@ -8,14 +8,14 @@ Item {
     property int variant: Md3Card.Elevated
     property bool clickable: false
     property bool enabled: true
+    property real padding: 16
     default property alias content: contentHost.data
 
     signal clicked()
 
-    implicitWidth: 280
-    implicitHeight: contentHost.implicitHeight + 32
-    width: implicitWidth
-    height: implicitHeight
+    // Intrinsic only — never bind width/height to implicit* (Layout + fill children loop).
+    implicitWidth: Math.max(280, contentHost.implicitWidth + padding * 2)
+    implicitHeight: contentHost.implicitHeight + padding * 2
 
     readonly property real elev: variant === Md3Card.Elevated ? 1 : 0
     readonly property color containerColor: {
@@ -60,8 +60,15 @@ Item {
 
         Item {
             id: contentHost
-            anchors.fill: parent
-            anchors.margins: 16
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: root.padding
+            // Explicit card height (Layouts) → fill; otherwise size to children only.
+            height: root.height >= root.padding * 2 + 1
+                    ? root.height - root.padding * 2
+                    : implicitHeight
+            implicitWidth: childrenRect.width
             implicitHeight: childrenRect.height
         }
     }

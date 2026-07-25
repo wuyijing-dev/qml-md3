@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Window
 
 Item {
     id: root
@@ -6,12 +7,15 @@ Item {
     property string text: ""
     property string icon: ""
     property string trailingIcon: ""
-    property bool hasSubMenu: false
     property bool enabled: true
     property bool destructive: false
     property bool selected: false
     property bool showCheck: false
-    property bool leadingCheck: true // MD3 context menus: leading check when selected
+    property bool leadingCheck: true
+    /// Nested cascading menu (Md3Menu). Hover / click opens it to the side.
+    /// Use `var` so inline / sibling menus assign reliably across Loaders.
+    property var submenu: null
+    readonly property bool hasSubMenu: submenu !== null && submenu !== undefined
 
     signal clicked()
 
@@ -21,9 +25,42 @@ Item {
     readonly property string resolvedTrailing: {
         if (trailingIcon.length > 0)
             return trailingIcon
-        if (hasSubMenu)
+        if (submenu !== null)
             return "chevron_right"
         return ""
+    }
+
+    function ownerMenu() {
+        let p = parent
+        while (p) {
+            if (p.__md3Menu)
+                return p.__md3Menu
+            p = p.parent
+        }
+        return null
+    }
+
+    function openSubmenu() {
+        if (!submenu)
+            return
+        const owner = ownerMenu()
+        if (owner && typeof owner.openSubMenu === "function")
+            owner.openSubMenu(submenu, root)
+        else {
+            submenu.modal = false
+            const win = Window.window
+            if (!win)
+                return
+            const host = win.contentItem
+            const p = root.mapToItem(host, root.width, 0)
+            submenu.popup(p.x + 2, p.y - 8)
+        }
+    }
+
+    function closeSiblingSubmenus() {
+        const owner = ownerMenu()
+        if (owner && owner.childMenu && owner.childMenu !== submenu)
+            owner.childMenu.dismiss()
     }
 
     height: 48
@@ -36,6 +73,12 @@ Item {
         font.family: Md3Theme.typography.fontFamily
         font.pixelSize: Md3Theme.typography.bodyLarge.size
         text: root.text
+    }
+
+    Timer {
+        id: openSubTimer
+        interval: 180
+        onTriggered: root.openSubmenu()
     }
 
     Rectangle {
@@ -72,7 +115,6 @@ Item {
             radius: bg.radius
         }
 
-        // Leading cluster
         Row {
             id: leading
             anchors.left: parent.left
@@ -120,13 +162,6 @@ Item {
                                                : Md3Theme.colorScheme.colorOnSurfaceVariant))
                            : Md3Theme.colorScheme.disabledContent()
                 anchors.verticalCenter: parent.verticalCenter
-                Behavior on iconColor {
-                    ColorAnimation {
-                        duration: Md3Motion.short4
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Md3Motion.standard
-                    }
-                }
             }
 
             Text {
@@ -146,17 +181,9 @@ Item {
                 font.family: Md3Theme.typography.fontFamily
                 font.pixelSize: Md3Theme.typography.bodyLarge.size
                 anchors.verticalCenter: parent.verticalCenter
-                Behavior on color {
-                    ColorAnimation {
-                        duration: Md3Motion.short4
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Md3Motion.standard
-                    }
-                }
             }
         }
 
-        // Trailing cluster
         Row {
             anchors.right: parent.right
             anchors.rightMargin: 12
@@ -169,22 +196,6 @@ Item {
                 size: 20
                 iconColor: Md3Theme.colorScheme.primary
                 anchors.verticalCenter: parent.verticalCenter
-                opacity: visible ? 1 : 0
-                scale: visible ? 1 : 0.6
-                Behavior on scale {
-                    NumberAnimation {
-                        duration: Md3Motion.spatialSnapDuration
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Md3Motion.emphasized
-                    }
-                }
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: Md3Motion.short3
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Md3Motion.standard
-                    }
-                }
             }
 
             Md3Icon {
@@ -204,10 +215,23 @@ Item {
         hoverEnabled: true
         enabled: root.enabled
         cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-        onClicked: function (mouse) {
-            const local = mapToItem(bg, mouse.x, mouse.y)
+        onEntered: {
+            root.closeSiblingSubmenus()
+            if (root.submenu)
+                openSubTimer.restart()
+        }
+        onExited: openSubTimer.stop()
+        onClicked: function (ev) {
+            const local = mapToItem(bg, ev.x, ev.y)
             ripple.pulse(local.x, local.y)
+            if (root.submenu) {
+                root.openSubmenu()
+                return
+            }
             root.clicked()
+            const owner = root.ownerMenu()
+            if (owner && typeof owner.dismissCascade === "function")
+                owner.dismissCascade()
         }
     }
 }

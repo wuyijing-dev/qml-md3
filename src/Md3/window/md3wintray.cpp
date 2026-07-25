@@ -28,6 +28,7 @@ bool Md3WindowHelper::showSystemTrayIcon(QObject *window, const QUrl &iconUrl, c
         m_trayIcon = nullptr;
     }
     m_trayIcon = hIcon;
+    m_trayHwnd = hwnd;
 
     NOTIFYICONDATAW nid{};
     nid.cbSize = sizeof(nid);
@@ -65,9 +66,7 @@ void Md3WindowHelper::hideSystemTrayIcon()
 #if defined(Q_OS_WIN)
     if (!m_trayAdded)
         return;
-    HWND hwnd = nullptr;
-    if (m_filter && m_filter->window)
-        hwnd = md3HwndOf(m_filter->window);
+    HWND hwnd = static_cast<HWND>(m_trayHwnd);
     if (hwnd) {
         NOTIFYICONDATAW nid{};
         nid.cbSize = sizeof(nid);
@@ -76,6 +75,7 @@ void Md3WindowHelper::hideSystemTrayIcon()
         Shell_NotifyIconW(NIM_DELETE, &nid);
     }
     m_trayAdded = false;
+    m_trayHwnd = nullptr;
     if (m_trayIcon) {
         DestroyIcon(static_cast<HICON>(m_trayIcon));
         m_trayIcon = nullptr;
@@ -86,9 +86,9 @@ void Md3WindowHelper::hideSystemTrayIcon()
 bool Md3WindowHelper::showTrayNotification(const QString &title, const QString &body, int timeoutMs)
 {
 #if defined(Q_OS_WIN)
-    if (!m_trayAdded || !m_filter || !m_filter->window)
+    if (!m_trayAdded || !m_trayHwnd)
         return false;
-    const HWND hwnd = md3HwndOf(m_filter->window);
+    const HWND hwnd = static_cast<HWND>(m_trayHwnd);
     if (!hwnd)
         return false;
 

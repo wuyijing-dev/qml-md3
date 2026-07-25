@@ -66,6 +66,7 @@ qt_add_qml_module(Md3
         src/Md3/window/Md3PageHost.qml
         src/Md3/window/Md3WindowBody.qml
         src/Md3/window/Md3ApplicationWindow.qml
+        src/Md3/window/Md3DialogWindow.qml
         src/Md3/layout/Md3AnimatedFlow.qml
         src/Md3/components/Md3Button.qml
         src/Md3/components/Md3IconButton.qml
@@ -122,6 +123,9 @@ qt_add_qml_module(Md3
         src/Md3/components/Md3Banner.qml
         src/Md3/components/Md3Carousel.qml
         src/Md3/components/Md3Form.qml
+        src/Md3/components/Md3LineChart.qml
+        src/Md3/components/Md3Skeleton.qml
+        src/Md3/components/Md3SkeletonPane.qml
     RESOURCES
         resources/fonts/Roboto-Regular.ttf
         resources/fonts/Roboto-Medium.ttf
@@ -173,8 +177,12 @@ qt_add_qml_module(appQML_MD3
     URI Gallery
     VERSION 1.0
     ${MD3_QML_NO_CACHEGEN}
+    SOURCES
+        gallery/performancemonitor.h
+        gallery/performancemonitor.cpp
     QML_FILES
         gallery/Main.qml
+        gallery/PerformancePanel.qml
         gallery/pages/TokensPage.qml
         gallery/pages/ButtonsPage.qml
         gallery/pages/FabPage.qml
@@ -190,6 +198,7 @@ qt_add_qml_module(appQML_MD3
         gallery/pages/ExtrasPage.qml
         gallery/pages/MotionPage.qml
         gallery/pages/ThemePage.qml
+        gallery/pages/ChartsPage.qml
         gallery/pages/WindowPage.qml
         gallery/pages/scenes/LoginScene.qml
         gallery/pages/scenes/SettingsScene.qml
@@ -203,9 +212,10 @@ set_target_properties(appQML_MD3 PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
+target_include_directories(appQML_MD3 PRIVATE gallery)
 target_link_libraries(appQML_MD3 PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::QuickEffects Md3)
 if (WIN32)
-    target_link_libraries(appQML_MD3 PRIVATE shell32)
+    target_link_libraries(appQML_MD3 PRIVATE shell32 psapi)
 endif()
 
 include(GNUInstallDirs)
