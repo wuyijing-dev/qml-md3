@@ -1,0 +1,31 @@
+# Normalize text for cross-platform (Windows / macOS / Linux) sync.
+* text=auto eol=lf
+
+# Keep Windows-native scripts / manifests as CRLF when checked out on Windows.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.rc text eol=crlf
+*.manifest text eol=crlf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.icns binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+*.zip binary
+*.7z binary
+*.dll binary
+*.exe binary
+*.lib binary
+*.a binary
+*.so binary
+*.dylib binary
+*.pdb binary

@@ -1,0 +1,85 @@
+# Build trees (Qt Creator / CMake / Ninja / MSVC / MinGW)
+/build/
+/out/
+/cmake-build-*/
+/_build/
+/Debug/
+/Release/
+/RelWithDebInfo/
+/MinSizeRel/
+
+# Qt Creator / IDE local state
+/.qtcreator/
+CMakeLists.txt.user*
+*.pro.user*
+*.qmlproject.user*
+*.autosave
+.vs/
+.idea/
+*.swp
+*~
+
+# CMake / compile artifacts outside build dir
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+Testing/
+*.ninja
+.ninja_deps
+.ninja_log
+
+# Qt / QML generated
+*.qmlc
+*.jsc
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*_qmltyperegistrations.cpp
+*.rcc/
+
+# Compiler / linker leftovers
+*.obj
+*.o
+*.a
+*.lib
+*.dll
+*.dylib
+*.so
+*.so.*
+*.exe
+*.pdb
+*.ilk
+*.exp
+*.idb
+*.pch
+*.gch
+
+# OS junk
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# Env / secrets (never commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+
+# Python tooling (if any)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Coverage / logs
+*.log
+coverage/
+*.gcda
+*.gcno

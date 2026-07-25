@@ -1,0 +1,35 @@
+import QtQuick
+
+QtObject {
+    // macOS — system traffic lights; leave leading inset; corners usually system-owned
+    readonly property string id: "macos"
+    readonly property bool customChrome: true
+    readonly property bool captionButtons: false
+    readonly property real trafficLightsInset: 78
+    readonly property bool systemMove: true
+    readonly property bool systemResize: true
+    readonly property bool doubleClickMaximize: true
+    // Frameless + client radius can fight system shadow; keep subtle
+    readonly property real windowCornerRadius: 10
+    readonly property bool roundedCorners: true
+    readonly property bool snapLayouts: false
+    readonly property bool systemBackdrop: false // vibrancy reserved
+    readonly property bool systemMenu: false
+    readonly property bool immersiveDarkMode: false
+    readonly property bool captionHitTest: false
+    readonly property bool taskbarProgress: false
+    readonly property bool taskbarOverlay: false
+    readonly property bool peekControl: false
+    readonly property bool excludeFromCapture: false
+    readonly property bool jumpList: false
+    readonly property bool thumbBar: false
+    readonly property bool iconicThumbnail: false
+    readonly property bool systemTray: false
+    readonly property bool perMonitorDpiV2: false
+    readonly property bool alwaysOnTop: false
+    readonly property bool thumbnailClip: false
+    readonly property bool applicationRestart: false
+    readonly property bool preferredAppMode: false
+    readonly property bool windowCloak: false
+    readonly property bool systemAccent: false
+}

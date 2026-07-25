@@ -1,0 +1,99 @@
+import QtQuick
+
+// Built-in body: left NavigationRail + lazy Md3PageHost (used by Md3ApplicationWindow)
+Item {
+    id: root
+
+    property var destinations: []
+    property int currentIndex: 0
+    property bool railVisible: true
+    property bool railExpanded: false
+    property string railHeader: ""
+    property string cacheMode: "lru"
+    property int cacheLimit: 8
+    property real contentPadding: 20
+    property url sourceBase: ""
+    property bool asynchronous: true
+    property bool prefetchNeighbors: true
+    property bool warmStart: false
+    property bool showBusyIndicator: false
+    property alias pageHost: host
+    property alias rail: rail
+
+    signal destinationActivated(int index)
+    signal railExpandRequested(bool expanded)
+
+    function navigateTo(index) {
+        if (!destinations || index < 0 || index >= destinations.length)
+            return
+        host.navigateTo(index)
+        if (currentIndex !== host.currentIndex)
+            currentIndex = host.currentIndex
+        if (rail.currentIndex !== currentIndex)
+            rail.currentIndex = currentIndex
+        destinationActivated(currentIndex)
+    }
+
+    onCurrentIndexChanged: {
+        if (host.currentIndex !== currentIndex)
+            host.navigateTo(currentIndex)
+        if (rail.currentIndex !== currentIndex)
+            rail.currentIndex = currentIndex
+    }
+
+    readonly property var railModel: {
+        const src = destinations || []
+        const out = []
+        for (let i = 0; i < src.length; ++i) {
+            const e = src[i] || {}
+            out.push({
+                icon: e.icon !== undefined && e.icon !== "" ? e.icon : "circle",
+                label: e.label !== undefined && e.label !== ""
+                       ? e.label
+                       : (e.title !== undefined ? e.title : "")
+            })
+        }
+        return out
+    }
+
+    Row {
+        anchors.fill: parent
+        spacing: 0
+
+        Md3NavigationRail {
+            id: rail
+            visible: root.railVisible && root.destinations && root.destinations.length > 0
+            height: parent.height
+            width: visible ? (root.railExpanded ? 256 : 80) : 0
+            expanded: root.railExpanded
+            headerLabel: root.railHeader
+            model: root.railModel
+            currentIndex: root.currentIndex
+            showExpandToggle: true
+            onCurrentIndexChangedByUser: function (index) {
+                root.navigateTo(index)
+            }
+            onExpandToggleClicked: root.railExpandRequested(!root.railExpanded)
+        }
+
+        Md3PageHost {
+            id: host
+            width: parent.width - rail.width
+            height: parent.height
+            model: root.destinations
+            cacheMode: root.cacheMode
+            cacheLimit: root.cacheLimit
+            contentPadding: root.contentPadding
+            sourceBase: root.sourceBase
+            asynchronous: root.asynchronous
+            prefetchNeighbors: root.prefetchNeighbors
+            warmStart: root.warmStart
+            showBusyIndicator: root.showBusyIndicator
+        }
+    }
+
+    Component.onCompleted: {
+        host.navigateTo(currentIndex)
+        rail.currentIndex = currentIndex
+    }
+}

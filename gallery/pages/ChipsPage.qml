@@ -1,0 +1,115 @@
+import QtQuick
+import QtQuick.Layouts
+import Md3
+
+Flickable {
+    id: root
+    contentWidth: width
+    contentHeight: column.height
+    clip: true
+
+    ColumnLayout {
+        id: column
+        width: root.width
+        spacing: 16
+
+        Text {
+            text: "Chips"
+            color: Md3Theme.colorScheme.colorOnSurface
+            font.pixelSize: Md3Theme.typography.headlineMedium.size
+            font.family: Md3Theme.typography.fontFamily
+        }
+
+        Text {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            text: "ChipGroup keeps chips as one layout unit — in Md3AnimatedFlow / title bar it moves with spatial easing when the row wraps."
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.bodyMedium.size
+            font.family: Md3Theme.typography.fontFamily
+        }
+
+        Text {
+            text: "Chip group (single)"
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.titleSmall.size
+        }
+        Md3ChipGroup {
+            selectionMode: Md3ChipGroup.Single
+            currentIndex: 1
+            model: [
+                { text: "News", icon: "newspaper" },
+                { text: "Maps", icon: "map" },
+                { text: "Images", icon: "image" }
+            ]
+        }
+
+        Text {
+            text: "Chip group (multiple)"
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.titleSmall.size
+        }
+        Md3ChipGroup {
+            selectionMode: Md3ChipGroup.Multiple
+            selectedIndices: [0, 2]
+            model: [
+                { text: "Filter A" },
+                { text: "Filter B" },
+                { text: "Filter C" },
+                { text: "Filter D" }
+            ]
+        }
+
+        Text {
+            text: "Animated flow (resize window / narrow the pane)"
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.titleSmall.size
+        }
+        Md3AnimatedFlow {
+            Layout.fillWidth: true
+            spacing: 8
+            rowSpacing: 8
+            Md3ChipGroup {
+                model: [
+                    { text: "Alpha" },
+                    { text: "Beta" },
+                    { text: "Gamma" }
+                ]
+            }
+            Md3ButtonGroup {
+                layout: Md3ButtonGroup.Standard
+                variant: Md3ButtonGroup.Outlined
+                model: [
+                    { text: "One" },
+                    { text: "Two" },
+                    { text: "Three" }
+                ]
+            }
+            Md3AssistChip { text: "Assist"; icon: "edit" }
+            Md3FilterChip { text: "Filter"; selected: true }
+            Md3SuggestionChip { text: "Suggestion" }
+            Md3InputChip {
+                id: inputChipDemo
+                text: "Input"
+                avatarIcon: "person"
+                onRemoved: inputChipDemo.text = "Removed"
+            }
+        }
+
+        Text {
+            text: "Loose chips"
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.titleSmall.size
+        }
+        Md3AnimatedFlow {
+            Layout.fillWidth: true
+            spacing: 8
+            Md3AssistChip { text: "Assist"; icon: "edit" }
+            Md3AssistChip { text: "Elevated assist"; elevated: true; icon: "add" }
+            Md3FilterChip { text: "Filter"; selected: true }
+            Md3FilterChip { text: "Unselected" }
+            Md3SuggestionChip { text: "Suggestion" }
+            Md3SuggestionChip { text: "Elevated"; elevated: true }
+        }
+    }
+}
