@@ -48,8 +48,6 @@ Item {
     readonly property bool isWavy: style !== Md3CircularProgressIndicator.Standard
     property bool _treeShown: true
     readonly property bool sceneActive: enabled && _treeShown
-    readonly property int paintStride: Qt.platform.os === "windows" ? 2 : 1
-    property int _paintGate: 0
     readonly property real radius: Math.min(width, height) / 2 - strokeWidth - (isWavy ? amplitude : 0)
 
     property real sweepDir: 1
@@ -108,8 +106,7 @@ Item {
                     return
                 ctx.beginPath()
                 ctx.strokeStyle = color
-                const dens = Qt.platform.os === "windows" ? 16 : 28
-                const steps = Math.max(16, Math.ceil(Math.abs(sweepAngle) * dens))
+                const steps = Math.max(24, Math.ceil(Math.abs(sweepAngle) * 28))
                 for (let i = 0; i <= steps; ++i) {
                     const t = i / steps
                     const a = start + sweepAngle * t
@@ -153,11 +150,7 @@ Item {
                     root.sweepDir = 1
                 }
             }
-            root._paintGate++
-            if (root._paintGate >= root.paintStride) {
-                root._paintGate = 0
-                canvas.requestPaint()
-            }
+            canvas.requestPaint()
         }
     }
 

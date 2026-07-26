@@ -33,8 +33,6 @@ Item {
 
     property bool _treeShown: true
     readonly property bool sceneActive: enabled && _treeShown
-    readonly property int paintStride: Qt.platform.os === "windows" ? 2 : 1
-    property int _paintGate: 0
     readonly property real radius: indicatorSize / 2 - strokeWidth
 
     property real rotation: -Math.PI / 2
@@ -144,11 +142,7 @@ Item {
                 root.sweep = Math.PI * 0.3
                 root.sweepDir = 1
             }
-            root._paintGate++
-            if (root._paintGate >= root.paintStride) {
-                root._paintGate = 0
-                canvas.requestPaint()
-            }
+            canvas.requestPaint()
         }
     }
 

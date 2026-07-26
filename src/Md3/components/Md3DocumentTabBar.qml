@@ -39,18 +39,71 @@ Item {
     width: parent ? parent.width : 400
     clip: false
 
-    // Drag empty chrome to move window (browser title-tab strip)
-    MouseArea {
-        anchors.fill: parent
-        z: -1
-        enabled: root.showWindowControls && root.targetWindow
-                 && Md3WindowCapabilities.systemMove
-        acceptedButtons: Qt.LeftButton
-        onPressed: function (mouse) {
-            if (root.targetWindow && typeof root.targetWindow.startSystemMove === "function")
-                root.targetWindow.startSystemMove()
+    // Drag empty chrome / left grip to move window (browser title-tab strip).
+    // z:-1 never receives events; use a real grip + native caption hit on Windows.
+    Item {
+        id: windowDragGrip
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        width: root.showWindowControls ? 44 : 0
+        visible: width > 0
+        z: 6
+
+        Md3Icon {
+            anchors.centerIn: parent
+            icon: "web_asset"
+            size: 18
+            iconColor: Md3Theme.colorScheme.colorOnSurfaceVariant
+            opacity: 0.7
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.LeftButton
+            enabled: root.showWindowControls && root.targetWindow
+                     && Md3WindowCapabilities.systemMove
+            cursorShape: Qt.SizeAllCursor
+            onPressed: {
+                if (root.targetWindow && typeof root.targetWindow.startSystemMove === "function")
+                    root.targetWindow.startSystemMove()
+            }
+            onDoubleClicked: {
+                if (!root.targetWindow)
+                    return
+                if (root.targetWindow.visibility === Window.Maximized)
+                    root.targetWindow.showNormal()
+                else
+                    root.targetWindow.showMaximized()
+            }
         }
     }
+
+    function reportNativeHits() {
+        if (!root.windowHelper || !root.targetWindow)
+            return
+        if (!root.showWindowControls || !Md3WindowCapabilities.captionHitTest) {
+            root.windowHelper.clearCaptionHitRect(root.targetWindow)
+            return
+        }
+        const host = root.targetWindow.contentItem
+        if (!host)
+            return
+        // Caption drag = grip + strip above tabs (not the tab buttons / caption buttons).
+        const p = windowDragGrip.mapToItem(host, 0, 0)
+        root.windowHelper.setCaptionHitRect(root.targetWindow, p.x, p.y,
+                                           windowDragGrip.width, root.height)
+    }
+
+    Component.onCompleted: Qt.callLater(reportNativeHits)
+    Component.onDestruction: {
+        if (root.windowHelper && root.targetWindow)
+            root.windowHelper.clearCaptionHitRect(root.targetWindow)
+    }
+    onWidthChanged: Qt.callLater(reportNativeHits)
+    onHeightChanged: Qt.callLater(reportNativeHits)
+    onShowWindowControlsChanged: Qt.callLater(reportNativeHits)
+    onTargetWindowChanged: Qt.callLater(reportNativeHits)
 
     readonly property color barColor: {
         const w = Window.window
@@ -336,7 +389,7 @@ Item {
         anchors.right: trailingTools.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        anchors.leftMargin: 6
+        anchors.leftMargin: root.showWindowControls ? 44 : 6
         anchors.rightMargin: 2
         anchors.topMargin: 4
         anchors.bottomMargin: 0

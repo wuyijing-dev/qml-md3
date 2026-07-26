@@ -229,6 +229,7 @@ Window {
                 pageSourceBase: root.pageSourceBase,
                 systemBackdrop: root.systemBackdrop,
                 cornerRadius: root.cornerRadius,
+                browserChrome: true,
                 documentTabsCloseWindowWhenEmpty: true
             })
             if (!w)

@@ -18,6 +18,8 @@ Md3ApplicationWindow {
     documentTabsEnabled: true
     documentTabsManaged: true
     documentTabsCloseWindowWhenEmpty: true
+    /// Same browser chrome as main — tab strip is the title bar (draggable).
+    browserChrome: true
     pageCacheMode: "adaptive"
     pageCacheLimit: 3
     pageIdleTrimMs: 45000
@@ -47,5 +49,9 @@ Md3ApplicationWindow {
         visible = true
         raise()
         requestActivate()
+        Qt.callLater(function () {
+            if (documentTabBar && typeof documentTabBar.reportNativeHits === "function")
+                documentTabBar.reportNativeHits()
+        })
     }
 }

@@ -46,13 +46,9 @@ Item {
     readonly property bool isWavy: style !== Md3LinearProgressIndicator.Standard
     readonly property real progress: Math.max(0, Math.min(1, value))
     readonly property real barWidth: indeterminate ? Math.max(48, width * 0.35) : width * progress
-    /// Pause when off-screen / cached page (parent Loader opacity/visible).
-    /// Windows Canvas+D3D is far costlier than Linux GL — never paint hidden trees.
+    /// Pause when off-screen / cached (does not change on-screen quality).
     property bool _treeShown: true
     readonly property bool sceneActive: enabled && _treeShown
-    /// Paint every N vsyncs (2 ≈ 30fps). Windows benefits most.
-    readonly property int paintStride: Qt.platform.os === "windows" ? 2 : 1
-    property int _paintGate: 0
 
     function _refreshTreeShown() {
         let ok = visible && opacity > 0.01
@@ -139,9 +135,8 @@ Item {
                 ctx.lineCap = "round"
                 ctx.lineJoin = "round"
                 ctx.strokeStyle = color
-                // ~3–4px steps (was 2) — fewer path points, still smooth enough
-                const stepPx = Qt.platform.os === "windows" ? 4 : 3
-                const steps = Math.max(2, Math.ceil((toX - fromX) / stepPx))
+                // ~2px steps like Flutter CustomPainter density
+                const steps = Math.max(2, Math.ceil((toX - fromX) / 2))
                 for (let i = 0; i <= steps; ++i) {
                     const t = i / steps
                     const x = fromX + (toX - fromX) * t
@@ -182,11 +177,7 @@ Item {
                 if (root.travelX > root.width)
                     root.travelX = -root.barWidth
             }
-            root._paintGate++
-            if (root._paintGate >= root.paintStride) {
-                root._paintGate = 0
-                wave.requestPaint()
-            }
+            wave.requestPaint()
         }
     }
 
