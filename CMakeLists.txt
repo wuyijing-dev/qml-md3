@@ -33,12 +33,8 @@ qt_add_qml_module(Md3
     SOURCES
         src/Md3/window/md3windowhelper.h
         src/Md3/window/md3windowhelper.cpp
-        src/Md3/window/md3win_p.h
-        src/Md3/window/md3win_p.cpp
-        src/Md3/window/md3winchrome.cpp
-        src/Md3/window/md3winicons.cpp
-        src/Md3/window/md3wintaskbar.cpp
-        src/Md3/window/md3wintray.cpp
+        src/Md3/window/md3graphics.h
+        src/Md3/window/md3graphics.cpp
     QML_FILES
         src/Md3/foundation/Md3Theme.qml
         src/Md3/foundation/Md3Motion.qml
@@ -139,9 +135,34 @@ qt_add_qml_module(Md3
 target_link_libraries(Md3 PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::QuickEffects)
 target_include_directories(Md3 PRIVATE src/Md3/window)
 
+# Exactly one platform native translation unit set — no cross-platform #else stubs.
+set(MD3_PLATFORM_SOURCES)
 if (WIN32)
+    list(APPEND MD3_PLATFORM_SOURCES
+        src/Md3/window/platforms/windows/md3win_p.h
+        src/Md3/window/platforms/windows/md3win_p.cpp
+        src/Md3/window/platforms/windows/md3win_host.cpp
+        src/Md3/window/platforms/windows/md3winchrome.cpp
+        src/Md3/window/platforms/windows/md3winicons.cpp
+        src/Md3/window/platforms/windows/md3wintaskbar.cpp
+        src/Md3/window/platforms/windows/md3wintray.cpp
+    )
+    target_include_directories(Md3 PRIVATE src/Md3/window/platforms/windows)
     target_link_libraries(Md3 PRIVATE dwmapi shell32 ole32 propsys advapi32)
+elseif (APPLE)
+    list(APPEND MD3_PLATFORM_SOURCES
+        src/Md3/window/platforms/macos/md3macosnative.cpp
+    )
+elseif (UNIX)
+    list(APPEND MD3_PLATFORM_SOURCES
+        src/Md3/window/platforms/linux/md3linuxnative.cpp
+    )
+else()
+    list(APPEND MD3_PLATFORM_SOURCES
+        src/Md3/window/platforms/mobile/md3mobilenative.cpp
+    )
 endif()
+target_sources(Md3 PRIVATE ${MD3_PLATFORM_SOURCES})
 
 qt_add_executable(appQML_MD3 src/main.cpp)
 
@@ -214,7 +235,7 @@ set_target_properties(appQML_MD3 PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-target_include_directories(appQML_MD3 PRIVATE gallery)
+target_include_directories(appQML_MD3 PRIVATE gallery src/Md3/window)
 target_link_libraries(appQML_MD3 PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::QuickEffects Md3)
 if (WIN32)
     target_link_libraries(appQML_MD3 PRIVATE shell32 psapi)

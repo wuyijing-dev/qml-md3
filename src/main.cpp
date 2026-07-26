@@ -9,6 +9,8 @@
 #include <QTextStream>
 #include <QDebug>
 
+#include "md3graphics.h"
+
 #if defined(Q_OS_WIN)
 #  include <windows.h>
 // Declared in shobjidl.h / exported from shell32 — avoid pulling COM headers into main.
@@ -122,16 +124,12 @@ int main(int argc, char *argv[])
                 GetProcAddress(user32, "SetProcessDpiAwarenessContext")))
             setDpi(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     }
-#endif
-
-    // Required for Win11 Mica/Acrylic (and rounded transparent frames) to composite
-    // under the Qt Quick scene — must be set before the first QQuickWindow.
-    QQuickWindow::setDefaultAlphaBuffer(true);
-
-#if defined(Q_OS_WIN)
     // Stable taskbar / jump-list identity for the Gallery (before any HWND)
     SetCurrentProcessExplicitAppUserModelID(L"QML_MD3.Md3Gallery");
 #endif
+
+    // RHI backend + alpha buffer — must run before QGuiApplication / first QQuickWindow.
+    Md3Graphics::applyEarly(argc, argv);
 
     QGuiApplication app(argc, argv);
     QCoreApplication::setOrganizationName(QStringLiteral("QML_MD3"));

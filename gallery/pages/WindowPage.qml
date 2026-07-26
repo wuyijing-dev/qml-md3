@@ -76,6 +76,38 @@ Flickable {
         }
 
         Text {
+            text: qsTr("Graphics (RHI)")
+            color: Md3Theme.colorScheme.colorOnSurface
+            font.pixelSize: Md3Theme.typography.titleSmall.size
+        }
+
+        Text {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            text: qsTr("Platform=%1 · current=%2 · preferred=%3%4\nCLI: --rhi-backend=vulkan|opengl|d3d11|d3d12|software · env MD3_RHI_BACKEND")
+                  .arg(Md3Graphics.platformName)
+                  .arg(Md3Graphics.currentBackend)
+                  .arg(Md3Graphics.preferredBackend)
+                  .arg(Md3Graphics.restartRequired ? qsTr(" · restart required") : "")
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.bodySmall.size
+            font.family: Md3Theme.typography.fontFamily
+        }
+
+        Flow {
+            Layout.fillWidth: true
+            spacing: 8
+            Repeater {
+                model: Md3Graphics.availableBackends
+                Md3FilterChip {
+                    text: modelData
+                    selected: Md3Graphics.preferredBackend === modelData
+                    onClicked: Md3Graphics.setBackend(modelData)
+                }
+            }
+        }
+
+        Text {
             text: qsTr("Page transition")
             color: Md3Theme.colorScheme.colorOnSurface
             font.pixelSize: Md3Theme.typography.titleSmall.size

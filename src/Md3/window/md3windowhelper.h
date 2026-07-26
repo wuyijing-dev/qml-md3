@@ -170,6 +170,8 @@ signals:
 
 private:
     friend class Md3WinNativeFilter;
+    /// Platform-specific teardown (platforms/windows|linux|macos).
+    void shutdownNative();
 #if defined(Q_OS_WIN)
     void *m_iconBig = nullptr;
     void *m_iconSmall = nullptr;

@@ -1,5 +1,4 @@
 #include "md3windowhelper.h"
-#include "md3win_p.h"
 
 #include <QGuiApplication>
 #include <QQuickWindow>
@@ -13,13 +12,7 @@ Md3WindowHelper::Md3WindowHelper(QObject *parent)
 
 Md3WindowHelper::~Md3WindowHelper()
 {
-#if defined(Q_OS_WIN)
-    hideSystemTrayIcon();
-    clearThumbIcons();
-    clearIconicBitmap();
-    clearWinIcons();
-    Md3WinNativeFilter::instance()->unregisterHelper(this);
-#endif
+    shutdownNative();
 }
 
 QString Md3WindowHelper::platformId() const
@@ -101,120 +94,69 @@ bool Md3WindowHelper::roundedCornersRecommended() const
 #endif
 }
 
-#define MD3_WIN_CAP(name) \
+#define MD3_WIN_ONLY_CAP(name) \
 bool Md3WindowHelper::name() const \
 { \
     return platformId() == QLatin1String("windows"); \
 }
 
-MD3_WIN_CAP(snapLayoutsSupported)
-MD3_WIN_CAP(systemBackdropSupported)
-MD3_WIN_CAP(systemMenuSupported)
-MD3_WIN_CAP(immersiveDarkModeSupported)
-MD3_WIN_CAP(taskbarProgressSupported)
-MD3_WIN_CAP(taskbarOverlaySupported)
-MD3_WIN_CAP(jumpListSupported)
-MD3_WIN_CAP(thumbBarSupported)
-MD3_WIN_CAP(iconicThumbnailSupported)
-MD3_WIN_CAP(systemTraySupported)
-MD3_WIN_CAP(perMonitorDpiV2Supported)
-MD3_WIN_CAP(alwaysOnTopSupported)
-MD3_WIN_CAP(thumbnailClipSupported)
-MD3_WIN_CAP(applicationRestartSupported)
-MD3_WIN_CAP(preferredAppModeSupported)
-MD3_WIN_CAP(windowCloakSupported)
-MD3_WIN_CAP(systemAccentSupported)
+MD3_WIN_ONLY_CAP(snapLayoutsSupported)
+MD3_WIN_ONLY_CAP(systemMenuSupported)
+MD3_WIN_ONLY_CAP(taskbarProgressSupported)
+MD3_WIN_ONLY_CAP(taskbarOverlaySupported)
+MD3_WIN_ONLY_CAP(jumpListSupported)
+MD3_WIN_ONLY_CAP(thumbBarSupported)
+MD3_WIN_ONLY_CAP(iconicThumbnailSupported)
+MD3_WIN_ONLY_CAP(perMonitorDpiV2Supported)
+MD3_WIN_ONLY_CAP(thumbnailClipSupported)
+MD3_WIN_ONLY_CAP(applicationRestartSupported)
+MD3_WIN_ONLY_CAP(windowCloakSupported)
+MD3_WIN_ONLY_CAP(systemTraySupported)
 
-#undef MD3_WIN_CAP
+#undef MD3_WIN_ONLY_CAP
 
-void Md3WindowHelper::bindWindow(QObject *window)
+bool Md3WindowHelper::systemBackdropSupported() const
 {
-    auto *qw = qobject_cast<QWindow *>(window);
-    if (!qw)
-        return;
-
-#if defined(Q_OS_WIN)
-    md3EnsureWinChromeStyles(qw);
-    applyCornerPreference(qw, true);
-    Md3WinNativeFilter::instance()->registerWindow(qw, this);
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+    return true;
 #else
-    Q_UNUSED(qw);
+    return false;
 #endif
 }
 
-void Md3WindowHelper::unbindWindow(QObject *window)
+bool Md3WindowHelper::immersiveDarkModeSupported() const
 {
-#if defined(Q_OS_WIN)
-    auto *qw = qobject_cast<QWindow *>(window);
-    if (!qw)
-        return;
-    Md3WinNativeFilter::instance()->unregisterWindow(qw);
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+    return true;
 #else
-    Q_UNUSED(window);
+    return false;
 #endif
 }
 
-void Md3WindowHelper::setMaximizeButtonRect(QObject *window, qreal x, qreal y, qreal w, qreal h)
+bool Md3WindowHelper::alwaysOnTopSupported() const
 {
-#if defined(Q_OS_WIN)
-    auto *qw = qobject_cast<QWindow *>(window);
-    if (!qw)
-        return;
-    auto *filter = Md3WinNativeFilter::instance();
-    filter->registerWindow(qw, this);
-    if (Md3WinChromeState *st = filter->stateForWindow(qw))
-        st->maximizeButton = QRectF(x, y, w, h);
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    return false;
 #else
-    Q_UNUSED(window);
-    Q_UNUSED(x);
-    Q_UNUSED(y);
-    Q_UNUSED(w);
-    Q_UNUSED(h);
+    return true;
 #endif
 }
 
-void Md3WindowHelper::clearMaximizeButtonRect(QObject *window)
+bool Md3WindowHelper::preferredAppModeSupported() const
 {
-#if defined(Q_OS_WIN)
-    auto *qw = qobject_cast<QWindow *>(window);
-    if (!qw)
-        return;
-    if (Md3WinChromeState *st = Md3WinNativeFilter::instance()->stateForWindow(qw))
-        st->maximizeButton = QRectF();
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+    return true;
 #else
-    Q_UNUSED(window);
+    return false;
 #endif
 }
 
-void Md3WindowHelper::setCaptionHitRect(QObject *window, qreal x, qreal y, qreal w, qreal h)
+bool Md3WindowHelper::systemAccentSupported() const
 {
-#if defined(Q_OS_WIN)
-    auto *qw = qobject_cast<QWindow *>(window);
-    if (!qw)
-        return;
-    auto *filter = Md3WinNativeFilter::instance();
-    filter->registerWindow(qw, this);
-    if (Md3WinChromeState *st = filter->stateForWindow(qw))
-        st->captionHit = QRectF(x, y, w, h);
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+    return true;
 #else
-    Q_UNUSED(window);
-    Q_UNUSED(x);
-    Q_UNUSED(y);
-    Q_UNUSED(w);
-    Q_UNUSED(h);
-#endif
-}
-
-void Md3WindowHelper::clearCaptionHitRect(QObject *window)
-{
-#if defined(Q_OS_WIN)
-    auto *qw = qobject_cast<QWindow *>(window);
-    if (!qw)
-        return;
-    if (Md3WinChromeState *st = Md3WinNativeFilter::instance()->stateForWindow(qw))
-        st->captionHit = QRectF();
-#else
-    Q_UNUSED(window);
+    return false;
 #endif
 }
 
@@ -226,15 +168,14 @@ qreal Md3WindowHelper::devicePixelRatio(QObject *window) const
 
 int Md3WindowHelper::windowDpi(QObject *window) const
 {
-#if defined(Q_OS_WIN)
-    auto *qw = qobject_cast<QWindow *>(window);
-    return int(md3GetDpiForWindow(md3HwndOf(qw)));
-#else
     auto *qw = qobject_cast<QWindow *>(window);
     if (!qw || !qw->screen())
         return 96;
-    return qRound(qw->screen()->logicalDotsPerInch());
+#if defined(Q_OS_WIN)
+    // Win DPI override lives in platforms/windows (md3GetDpiForWindow) via linkage —
+    // keep portable path here; Windows host may refine later if needed.
 #endif
+    return qRound(qw->screen()->logicalDotsPerInch());
 }
 
 void Md3WindowHelper::setPersistentSceneGraph(QObject *window, bool persistent)
@@ -245,34 +186,3 @@ void Md3WindowHelper::setPersistentSceneGraph(QObject *window, bool persistent)
     qw->setPersistentSceneGraph(persistent);
     qw->setPersistentGraphics(persistent);
 }
-
-#if defined(Q_OS_WIN)
-void Md3WindowHelper::handleThumbBarClick(int buttonId)
-{
-    emit thumbBarButtonClicked(buttonId);
-}
-
-void Md3WindowHelper::handleTrayMessage(quintptr lParam)
-{
-    int reason = TrayUnknown;
-    switch (lParam) {
-    case WM_LBUTTONUP: reason = TrayLeftClick; break;
-    case WM_LBUTTONDBLCLK: reason = TrayLeftDoubleClick; break;
-    case WM_RBUTTONUP: reason = TrayRightClick; break;
-    case WM_MBUTTONUP: reason = TrayMiddleClick; break;
-    case NIN_BALLOONSHOW: reason = TrayBalloonShown; break;
-    case NIN_BALLOONUSERCLICK: reason = TrayBalloonClicked; break;
-    case NIN_BALLOONTIMEOUT:
-    case NIN_BALLOONHIDE: reason = TrayBalloonTimeout; break;
-    default: break;
-    }
-    emit trayActivated(reason);
-}
-
-void Md3WindowHelper::handleDpiChanged(QWindow *window)
-{
-    if (!window)
-        return;
-    emit dpiChanged(window->devicePixelRatio(), windowDpi(window));
-}
-#endif
