@@ -41,6 +41,7 @@ class Md3WindowHelper : public QObject
     Q_PROPERTY(bool systemAccentSupported READ systemAccentSupported CONSTANT)
     Q_PROPERTY(qreal windowCornerRadius READ windowCornerRadius CONSTANT)
     Q_PROPERTY(bool roundedCornersRecommended READ roundedCornersRecommended CONSTANT)
+    Q_PROPERTY(QString lastNativeStatus READ lastNativeStatus NOTIFY lastNativeStatusChanged)
 
 public:
     enum SystemBackdrop {
@@ -159,6 +160,8 @@ public:
     Q_INVOKABLE bool setDockBadge(int count);
     /// Inhibit idle/screensaver (org.freedesktop.ScreenSaver). Linux desktop only.
     Q_INVOKABLE bool setIdleInhibit(bool inhibit, const QString &reason = QString());
+    /// True when compositor blur protocol is available (KF6 / X11 KWin atom).
+    Q_INVOKABLE bool blurBehindAvailable() const;
 
     /// Windows accent / wallpaper sampling for Material You seed.
     Q_INVOKABLE QString systemAccentColor() const;
@@ -170,15 +173,20 @@ public:
     /// When false, QQuickWindow may release the scene graph while not visible (saves GPU memory).
     Q_INVOKABLE void setPersistentSceneGraph(QObject *window, bool persistent);
 
+    QString lastNativeStatus() const { return m_lastNativeStatus; }
+
 signals:
     void thumbBarButtonClicked(int buttonId);
     void trayActivated(int reason);
     void dpiChanged(qreal devicePixelRatio, int dpi);
+    void lastNativeStatusChanged();
 
 private:
     friend class Md3WinNativeFilter;
     /// Platform-specific teardown (platforms/windows|linux|macos).
     void shutdownNative();
+    void reportNativeStatus(const QString &status);
+    QString m_lastNativeStatus;
 #if defined(Q_OS_WIN)
     void *m_iconBig = nullptr;
     void *m_iconSmall = nullptr;

@@ -496,7 +496,7 @@ Flickable {
                 Text {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    text: qsTr("Wayland/X11：客户端装饰、半透明背景与模糊提示、Dock 进度（LauncherEntry）、SNI 托盘、桌面通知、系统强调色、空闲抑制。任务栏图标需匹配 .desktop 的 app_id。")
+                    text: qsTr("Wayland 下「真模糊」需要合成器协议（Plasma + KF6WindowSystem + 开启 Blur 特效）。否则只会半透明。置顶/抢焦点也常被 Wayland 禁止——点按钮后看下方状态与桌面通知。")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.bodyMedium.size
                     font.family: Md3Theme.typography.fontFamily
@@ -506,12 +506,27 @@ Flickable {
                     visible: root.appWin && Md3WindowCapabilities.isLinux
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    text: qsTr("已绑定 — Wayland=%1 背景=%2 强调色=%3")
-                          .arg(nativeHelper.wayland ? "yes" : "no")
-                          .arg(root.appWin ? root.appWin.systemBackdrop : -1)
+                    text: qsTr("已绑定 — Wayland=%1 模糊协议=%2 强调色=%3")
+                          .arg(nativeHelper.wayland ? qsTr("是") : qsTr("否"))
+                          .arg((root.appWin.windowNative
+                                ? root.appWin.windowNative.blurBehindAvailable()
+                                : nativeHelper.blurBehindAvailable()) ? qsTr("可用") : qsTr("不可用"))
                           .arg(nativeHelper.systemAccentColor())
                     color: Md3Theme.colorScheme.primary
                     font.pixelSize: Md3Theme.typography.bodySmall.size
+                }
+
+                Text {
+                    visible: Md3WindowCapabilities.isLinux
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    text: qsTr("原生反馈：%1").arg(
+                              (root.appWin && root.appWin.windowNative
+                               ? root.appWin.windowNative.lastNativeStatus
+                               : nativeHelper.lastNativeStatus) || qsTr("（点击下方按钮后显示）"))
+                    color: Md3Theme.colorScheme.tertiary
+                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                    font.family: Md3Theme.typography.fontFamily
                 }
 
                 RowLayout {
@@ -535,6 +550,17 @@ Flickable {
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.labelLarge.size
                 }
+                Text {
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    visible: Md3WindowCapabilities.isLinux
+                             && !(root.appWin && root.appWin.windowNative
+                                  ? root.appWin.windowNative.blurBehindAvailable()
+                                  : nativeHelper.blurBehindAvailable())
+                    text: qsTr("提示：未检测到模糊协议。Debian/Ubuntu 可装 libkf6windowsystem-dev 后重新 cmake；Plasma 系统设置 → 桌面特效 → 启用「模糊」。")
+                    color: Md3Theme.colorScheme.error
+                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                }
                 Md3ButtonGroup {
                     enabled: Md3WindowCapabilities.isLinux
                     Layout.fillWidth: true
@@ -542,7 +568,13 @@ Flickable {
                     variant: Md3ButtonGroup.Outlined
                     buttonHeight: 36
                     currentIndex: root.appWin && root.appWin.systemBackdrop > 0 ? 1 : 0
-                    model: [ { text: qsTr("关闭") }, { text: qsTr("开启（模糊提示）") } ]
+                    model: [
+                        { text: qsTr("关闭") },
+                        { text: (root.appWin && root.appWin.windowNative
+                                 ? root.appWin.windowNative.blurBehindAvailable()
+                                 : nativeHelper.blurBehindAvailable())
+                              ? qsTr("开启（合成器模糊）") : qsTr("开启（仅半透明）") }
+                    ]
                     onClicked: function (index) { root.applyBackdrop(index === 0 ? 0 : 1) }
                 }
 
@@ -550,6 +582,13 @@ Flickable {
                     text: qsTr("窗口操作")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.labelLarge.size
+                }
+                Text {
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    text: qsTr("「请求注意」请先切到其他窗口再点；「前置」在已聚焦时无变化；「允许空闲」需先成功「禁止休眠」。")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: Md3Theme.typography.bodySmall.size
                 }
                 Flow {
                     Layout.fillWidth: true

@@ -89,5 +89,12 @@ bool Md3WindowHelper::setDockBadge(int count)
 
 bool Md3WindowHelper::setIdleInhibit(bool inhibit, const QString &reason)
 {
-    return Md3Linux::setIdleInhibit(inhibit, reason);
+    bool ok = false;
+    reportNativeStatus(Md3Linux::setIdleInhibit(inhibit, reason, &ok));
+    return ok;
+}
+
+bool Md3WindowHelper::blurBehindAvailable() const
+{
+    return Md3Linux::blurBehindAvailable();
 }

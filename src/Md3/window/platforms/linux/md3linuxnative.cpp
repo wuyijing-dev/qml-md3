@@ -118,11 +118,27 @@ void Md3WindowHelper::setSystemBackdrop(QObject *window, int backdrop)
         return;
     qw->setProperty("_md3_waylandBackdrop", backdrop);
     const bool soft = backdrop > 0;
-    Md3Linux::applyBlurHint(qw, soft);
     if (auto *quick = qobject_cast<QQuickWindow *>(qw)) {
         if (soft)
             quick->setColor(Qt::transparent);
     }
+    reportNativeStatus(Md3Linux::applyBlurBehind(qw, soft));
+}
+
+void Md3WindowHelper::setAlwaysOnTop(QObject *window, bool onTop)
+{
+    auto *qw = qobject_cast<QWindow *>(window);
+    if (!qw)
+        return;
+    reportNativeStatus(Md3Linux::setKeepAbove(qw, onTop));
+}
+
+void Md3WindowHelper::flashTaskbar(QObject *window, bool flash)
+{
+    auto *qw = qobject_cast<QWindow *>(window);
+    if (!qw)
+        return;
+    reportNativeStatus(Md3Linux::requestAttention(qw, flash));
 }
 
 void Md3WindowHelper::setBorderColor(QObject *window, const QString &cssColor)
@@ -139,7 +155,6 @@ void Md3WindowHelper::setCaptionTextColor(QObject *window, const QString &cssCol
 
 void Md3WindowHelper::setExcludedFromPeek(QObject *window, bool excluded)
 {
-    // No peek protocol on Wayland; stash for potential compositor-specific hooks.
     if (auto *qw = qobject_cast<QWindow *>(window))
         qw->setProperty("_md3_excludePeek", excluded);
 }
@@ -152,21 +167,11 @@ void Md3WindowHelper::setDisallowPeek(QObject *window, bool disallow)
 
 void Md3WindowHelper::setExcludeFromCapture(QObject *window, bool exclude)
 {
-    // Wayland has no portable exclude-from-capture; keep as hint for portals/extensions.
     if (auto *qw = qobject_cast<QWindow *>(window))
         qw->setProperty("_md3_excludeFromCapture", exclude);
 }
 
-void Md3WindowHelper::setAlwaysOnTop(QObject *window, bool onTop)
-{
-    if (auto *qw = qobject_cast<QWindow *>(window))
-        qw->setFlag(Qt::WindowStaysOnTopHint, onTop);
-}
-
-void Md3WindowHelper::setWindowCloaked(QObject *, bool)
-{
-    // No Win-style cloak on Wayland/X11.
-}
+void Md3WindowHelper::setWindowCloaked(QObject *, bool) {}
 
 void Md3WindowHelper::setPreferredAppMode(bool dark)
 {
@@ -256,15 +261,6 @@ bool Md3WindowHelper::moveToMonitor(QObject *window, int monitorIndex)
     qw->setPosition(ag.x() + (ag.width() - qw->width()) / 2,
                     ag.y() + (ag.height() - qw->height()) / 2);
     return true;
-}
-
-void Md3WindowHelper::flashTaskbar(QObject *window, bool flash)
-{
-    if (auto *qw = qobject_cast<QWindow *>(window))
-        qw->alert(flash ? 0 : -1);
-    QVariantMap props;
-    props.insert(QStringLiteral("urgent"), flash);
-    Md3Linux::emitLauncherUpdate(props);
 }
 
 bool Md3WindowHelper::setWindowIcon(QObject *window, const QUrl &iconUrl)

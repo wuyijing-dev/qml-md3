@@ -449,6 +449,12 @@ Window {
 
     function setSystemBackdropMode(mode) {
         systemBackdrop = mode
+        // Linux：降低内容遮罩透明度，否则半透明/模糊几乎看不见
+        if (Md3WindowCapabilities.isLinux && mode > 0) {
+            backdropTint = 0.12
+            backdropContentTint = 0.28
+            backdropTitleTint = 0.08
+        }
         _syncWinNative()
     }
 

@@ -7,6 +7,7 @@
 #include <QDBusConnection>
 #include <QDBusMessage>
 #include <QDBusInterface>
+#include <QDBusObjectPath>
 #include <QDBusReply>
 #include <QVariantMap>
 
@@ -94,47 +95,115 @@ QString resolveIconPath(const QUrl &iconUrl)
     return path;
 }
 
-void applyBlurHint(QWindow *window, bool enable)
+QString setIdleInhibit(bool inhibit, const QString &reason, bool *ok)
 {
-    if (!window)
-        return;
-    // Best-effort hints for KWin / compositor blur rules (X11 + some Wayland clients).
-    window->setProperty("_KDE_NET_WM_BLUR_BEHIND_REGION", enable);
-    window->setProperty("KWinForceBlur", enable);
-    window->setProperty("_md3_blurBehind", enable);
-}
-
-bool setIdleInhibit(bool inhibit, const QString &reason)
-{
+    if (ok)
+        *ok = false;
     if (!QDBusConnection::sessionBus().isConnected())
-        return false;
+        return QStringLiteral("无会话总线，无法抑制空闲");
 
-    QDBusInterface iface(QStringLiteral("org.freedesktop.ScreenSaver"),
-                         QStringLiteral("/org/freedesktop/ScreenSaver"),
-                         QStringLiteral("org.freedesktop.ScreenSaver"),
-                         QDBusConnection::sessionBus());
-    if (!iface.isValid())
-        return false;
+    static uint ssCookie = 0;
+    static uint gnomeCookie = 0;
+    static QString portalRequest;
 
-    static uint cookie = 0;
+    const QString appName = QGuiApplication::applicationName().isEmpty()
+            ? QStringLiteral("Md3")
+            : QGuiApplication::applicationName();
+    const QString why = reason.isEmpty() ? QStringLiteral("Md3 idle inhibit") : reason;
+
     if (inhibit) {
-        const QString appName = QGuiApplication::applicationName().isEmpty()
-                ? QStringLiteral("Md3")
-                : QGuiApplication::applicationName();
-        QDBusReply<uint> reply = iface.call(QStringLiteral("Inhibit"), appName,
-                                            reason.isEmpty() ? QStringLiteral("Md3 idle inhibit")
-                                                             : reason);
-        if (!reply.isValid())
-            return false;
-        cookie = reply.value();
-        return true;
+        // 1) org.freedesktop.ScreenSaver
+        {
+            QDBusInterface iface(QStringLiteral("org.freedesktop.ScreenSaver"),
+                                 QStringLiteral("/org/freedesktop/ScreenSaver"),
+                                 QStringLiteral("org.freedesktop.ScreenSaver"),
+                                 QDBusConnection::sessionBus());
+            if (iface.isValid()) {
+                QDBusReply<uint> reply = iface.call(QStringLiteral("Inhibit"), appName, why);
+                if (reply.isValid()) {
+                    ssCookie = reply.value();
+                    if (ok) *ok = true;
+                    return QStringLiteral("已抑制空闲（ScreenSaver cookie=%1）").arg(ssCookie);
+                }
+            }
+        }
+        // 2) GNOME SessionManager (flags: 8 = idle)
+        {
+            QDBusInterface iface(QStringLiteral("org.gnome.SessionManager"),
+                                 QStringLiteral("/org/gnome/SessionManager"),
+                                 QStringLiteral("org.gnome.SessionManager"),
+                                 QDBusConnection::sessionBus());
+            if (iface.isValid()) {
+                QDBusReply<uint> reply = iface.call(QStringLiteral("Inhibit"),
+                                                    appName, uint(0), why, uint(8));
+                if (reply.isValid()) {
+                    gnomeCookie = reply.value();
+                    if (ok) *ok = true;
+                    return QStringLiteral("已抑制空闲（GNOME SessionManager）");
+                }
+            }
+        }
+        // 3) xdg-desktop-portal Inhibit (flags 8 = idle)
+        {
+            QDBusInterface iface(QStringLiteral("org.freedesktop.portal.Desktop"),
+                                 QStringLiteral("/org/freedesktop/portal/desktop"),
+                                 QStringLiteral("org.freedesktop.portal.Inhibit"),
+                                 QDBusConnection::sessionBus());
+            if (iface.isValid()) {
+                QVariantMap opts;
+                opts.insert(QStringLiteral("reason"), why);
+                QDBusReply<QDBusObjectPath> reply = iface.call(
+                    QStringLiteral("Inhibit"),
+                    desktopFileId(),
+                    QString(), // window handle
+                    why,
+                    uint(8),
+                    opts);
+                if (reply.isValid()) {
+                    portalRequest = reply.value().path();
+                    if (ok) *ok = true;
+                    return QStringLiteral("已抑制空闲（xdg-desktop-portal）");
+                }
+            }
+        }
+        return QStringLiteral("抑制失败：桌面未提供 ScreenSaver/SessionManager/Portal");
     }
 
-    if (cookie == 0)
-        return true;
-    iface.call(QStringLiteral("UnInhibit"), cookie);
-    cookie = 0;
-    return true;
+    // Uninhibit
+    bool cleared = false;
+    if (ssCookie) {
+        QDBusInterface iface(QStringLiteral("org.freedesktop.ScreenSaver"),
+                             QStringLiteral("/org/freedesktop/ScreenSaver"),
+                             QStringLiteral("org.freedesktop.ScreenSaver"),
+                             QDBusConnection::sessionBus());
+        if (iface.isValid())
+            iface.call(QStringLiteral("UnInhibit"), ssCookie);
+        ssCookie = 0;
+        cleared = true;
+    }
+    if (gnomeCookie) {
+        QDBusInterface iface(QStringLiteral("org.gnome.SessionManager"),
+                             QStringLiteral("/org/gnome/SessionManager"),
+                             QStringLiteral("org.gnome.SessionManager"),
+                             QDBusConnection::sessionBus());
+        if (iface.isValid())
+            iface.call(QStringLiteral("Uninhibit"), gnomeCookie);
+        gnomeCookie = 0;
+        cleared = true;
+    }
+    if (!portalRequest.isEmpty()) {
+        QDBusInterface iface(QStringLiteral("org.freedesktop.portal.Desktop"),
+                             portalRequest,
+                             QStringLiteral("org.freedesktop.portal.Request"),
+                             QDBusConnection::sessionBus());
+        if (iface.isValid())
+            iface.call(QStringLiteral("Close"));
+        portalRequest.clear();
+        cleared = true;
+    }
+    if (ok) *ok = true;
+    return cleared ? QStringLiteral("已允许空闲（已解除抑制）")
+                   : QStringLiteral("当前没有活动的空闲抑制（请先点「禁止休眠」）");
 }
 
 } // namespace Md3Linux

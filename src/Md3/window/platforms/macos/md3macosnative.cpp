@@ -154,3 +154,4 @@ bool Md3WindowHelper::setDockBadge(int count)
 }
 
 bool Md3WindowHelper::setIdleInhibit(bool, const QString &) { return false; }
+bool Md3WindowHelper::blurBehindAvailable() const { return false; }

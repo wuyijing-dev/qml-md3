@@ -157,6 +157,7 @@ elseif (UNIX)
     list(APPEND MD3_PLATFORM_SOURCES
         src/Md3/window/platforms/linux/md3linux_p.h
         src/Md3/window/platforms/linux/md3linux_dbus.cpp
+        src/Md3/window/platforms/linux/md3linux_effects.cpp
         src/Md3/window/platforms/linux/md3linuxnative.cpp
         src/Md3/window/platforms/linux/md3linuxdock.cpp
         src/Md3/window/platforms/linux/md3linuxtray.cpp
@@ -164,6 +165,30 @@ elseif (UNIX)
     target_include_directories(Md3 PRIVATE src/Md3/window/platforms/linux)
     find_package(Qt6 REQUIRED COMPONENTS DBus Widgets)
     target_link_libraries(Md3 PRIVATE Qt6::DBus Qt6::Widgets)
+
+    # Real Wayland/X11 blur + KeepAbove when Plasma KF is present.
+    find_package(KF6WindowSystem QUIET)
+    if (KF6WindowSystem_FOUND)
+        target_link_libraries(Md3 PRIVATE KF6::WindowSystem)
+        target_compile_definitions(Md3 PRIVATE MD3_HAVE_KWINDOWSYSTEM=1)
+        message(STATUS "Md3: KF6WindowSystem found — compositor blur/keep-above enabled")
+    else()
+        find_package(KF5WindowSystem QUIET)
+        if (KF5WindowSystem_FOUND)
+            target_link_libraries(Md3 PRIVATE KF5::WindowSystem)
+            target_compile_definitions(Md3 PRIVATE MD3_HAVE_KWINDOWSYSTEM=1)
+            message(STATUS "Md3: KF5WindowSystem found — compositor blur/keep-above enabled")
+        else()
+            message(STATUS "Md3: KF WindowSystem not found — soft backdrop is transparent only on Wayland")
+        endif()
+    endif()
+
+    find_package(XCB COMPONENTS XCB QUIET)
+    if (TARGET XCB::XCB)
+        target_link_libraries(Md3 PRIVATE XCB::XCB)
+        target_compile_definitions(Md3 PRIVATE MD3_HAVE_XCB=1)
+        message(STATUS "Md3: XCB found — X11 KWin blur atom enabled")
+    endif()
 else()
     list(APPEND MD3_PLATFORM_SOURCES
         src/Md3/window/platforms/mobile/md3mobilenative.cpp

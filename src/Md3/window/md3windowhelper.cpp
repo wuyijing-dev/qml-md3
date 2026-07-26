@@ -1,5 +1,9 @@
 #include "md3windowhelper.h"
 
+#if defined(Q_OS_LINUX)
+#  include "md3linux_p.h"
+#endif
+
 #include <QGuiApplication>
 #include <QQuickWindow>
 #include <QScreen>
@@ -200,8 +204,20 @@ void Md3WindowHelper::raiseWindow(QObject *window)
     auto *qw = qobject_cast<QWindow *>(window);
     if (!qw)
         return;
+#if defined(Q_OS_LINUX)
+    reportNativeStatus(Md3Linux::forceRaise(qw));
+#else
     if (qw->windowStates() & Qt::WindowMinimized)
         qw->showNormal();
     qw->raise();
     qw->requestActivate();
+#endif
+}
+
+void Md3WindowHelper::reportNativeStatus(const QString &status)
+{
+    if (m_lastNativeStatus == status)
+        return;
+    m_lastNativeStatus = status;
+    emit lastNativeStatusChanged();
 }
