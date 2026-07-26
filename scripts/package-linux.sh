@@ -1,26 +1,29 @@
 #!/usr/bin/env bash
-# One-shot: build Md3 (library only) and package into a standalone folder.
+# One-shot: build Md3 (library only), stage to dist/Md3, then install to system.
 #
 # Usage:
-#   ./scripts/package-linux.sh
-#   PREFIX=$HOME/opt/Md3 ./scripts/package-linux.sh
+#   ./scripts/package-linux.sh                 # SHARED=1 (default) → /usr/local
+#   SHARED=0 ./scripts/package-linux.sh        # static .a package
+#   PREFIX=$HOME/.local ./scripts/package-linux.sh
+#   SYS_PREFIX=/opt/md3 ./scripts/package-linux.sh
+#   SKIP_SYSTEM_INSTALL=1 ./scripts/package-linux.sh   # only dist/Md3
 #   CMAKE_PREFIX_PATH=$HOME/Qt/6.10.2/gcc_64 ./scripts/package-linux.sh
 #
-# Output (default):
-#   dist/Md3/
-#     lib/libMd3.a
-#     lib/libMd3plugin.a          (if present)
-#     lib/qml/Md3/                qmldir / qmltypes
-#     lib/cmake/Md3/              Md3Config.cmake
-#     lib/Md3/stubs/              static plugin init sources
-#     include/Md3/                C++ headers
-#   dist/Md3-linux-<arch>.tar.gz  (optional archive)
+# Outputs:
+#   dist/Md3/                     staged package (always)
+#   dist/Md3-linux-<arch>.tar.gz  optional archive
+#   $SYS_PREFIX                   system install (default /usr/local)
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="${BUILD_DIR:-$ROOT/build-lib}"
-PREFIX="${PREFIX:-$ROOT/dist/Md3}"
+STAGE_PREFIX="${STAGE_PREFIX:-$ROOT/dist/Md3}"
+# PREFIX overrides stage dir for backwards compat; SYS_PREFIX is system install root
+PREFIX="${PREFIX:-$STAGE_PREFIX}"
+SYS_PREFIX="${SYS_PREFIX:-/usr/local}"
+SHARED="${SHARED:-1}"
+SKIP_SYSTEM_INSTALL="${SKIP_SYSTEM_INSTALL:-0}"
 JOBS="${JOBS:-$(nproc 2>/dev/null || echo 4)}"
 BUILD_TYPE="${BUILD_TYPE:-Release}"
 MAKE_TARBALL="${MAKE_TARBALL:-1}"
@@ -70,6 +73,21 @@ need_cmd() {
     command -v "$1" >/dev/null 2>&1 || die "missing command: $1"
 }
 
+install_to_prefix() {
+    local dest="$1"
+    info "Install → $dest"
+    if mkdir -p "$dest" 2>/dev/null && [[ -w "$dest" ]]; then
+        cmake --install "$BUILD_DIR" --prefix "$dest"
+        return 0
+    fi
+    if command -v sudo >/dev/null 2>&1; then
+        info "Need elevated rights for $dest — using sudo"
+        sudo cmake --install "$BUILD_DIR" --prefix "$dest"
+        return 0
+    fi
+    die "cannot write to $dest (try PREFIX=\$HOME/.local or install sudo)"
+}
+
 need_cmd cmake
 need_cmd tar
 
@@ -84,13 +102,28 @@ fi
 QT_PREFIX="$(detect_qt_prefix)" || die \
     "Qt6 not found. Set CMAKE_PREFIX_PATH (e.g. \$HOME/Qt/6.10.2/gcc_64)."
 
-info "ROOT        = $ROOT"
-info "BUILD_DIR   = $BUILD_DIR"
-info "PREFIX      = $PREFIX"
-info "Qt prefix   = $QT_PREFIX"
-info "Generator   = $GENERATOR ($JOBS jobs, $BUILD_TYPE)"
+if [[ "$SHARED" == "1" || "$SHARED" == "ON" || "$SHARED" == "on" || "$SHARED" == "true" ]]; then
+    SHARED_ON=ON
+    SHARED_LABEL=shared
+else
+    SHARED_ON=OFF
+    SHARED_LABEL=static
+fi
 
-# Always clean build tree so NO_CACHEGEN / install rules from latest sources apply
+# If user set PREFIX to a system path, treat it as SYS_PREFIX and keep stage in dist/Md3
+if [[ "$PREFIX" == "/usr" || "$PREFIX" == "/usr/local" || "$PREFIX" == /opt/* ]]; then
+    SYS_PREFIX="$PREFIX"
+    PREFIX="$STAGE_PREFIX"
+fi
+
+info "ROOT         = $ROOT"
+info "BUILD_DIR    = $BUILD_DIR"
+info "STAGE        = $PREFIX"
+info "SYS_PREFIX   = $SYS_PREFIX"
+info "SHARED       = $SHARED_ON ($SHARED_LABEL)"
+info "Qt prefix    = $QT_PREFIX"
+info "Generator    = $GENERATOR ($JOBS jobs, $BUILD_TYPE)"
+
 info "Clean build dir $BUILD_DIR"
 rm -rf "$BUILD_DIR"
 
@@ -99,6 +132,7 @@ CMAKE_ARGS=(
     -B "$BUILD_DIR"
     -G "$GENERATOR"
     -DMD3_BUILD_GALLERY=OFF
+    -DMD3_BUILD_SHARED="$SHARED_ON"
     -DCMAKE_BUILD_TYPE="$BUILD_TYPE"
     -DCMAKE_INSTALL_PREFIX="$PREFIX"
     -DCMAKE_PREFIX_PATH="$QT_PREFIX"
@@ -110,42 +144,78 @@ cmake "${CMAKE_ARGS[@]}"
 info "Build"
 cmake --build "$BUILD_DIR" --parallel "$JOBS"
 
-info "Install → $PREFIX"
+info "Stage → $PREFIX"
 rm -rf "$PREFIX"
 cmake --install "$BUILD_DIR" --prefix "$PREFIX"
 
-# Sanity layout
-[[ -d "$PREFIX/include/Md3" ]] || die "missing include/Md3 after install"
-[[ -d "$PREFIX/lib/cmake/Md3" ]] || die "missing lib/cmake/Md3 after install"
+[[ -d "$PREFIX/include/Md3" ]] || die "missing include/Md3 after stage"
+[[ -d "$PREFIX/lib/cmake/Md3" ]] || die "missing lib/cmake/Md3 after stage"
 
 LIB_HIT=""
-for n in libMd3.a libMd3.so; do
-    if [[ -f "$PREFIX/lib/$n" ]]; then
-        LIB_HIT="$PREFIX/lib/$n"
-        break
+find_lib() {
+    local dir="$1" pattern="$2"
+    # Prefer exact file, then glob (SONAME)
+    if [[ -f "$dir/$pattern" ]]; then
+        echo "$dir/$pattern"
+        return 0
     fi
-done
-[[ -n "$LIB_HIT" ]] || die "missing libMd3 under $PREFIX/lib"
+    local hit
+    hit="$(compgen -G "$dir/$pattern" 2>/dev/null | head -n1 || true)"
+    [[ -n "$hit" ]] && echo "$hit" && return 0
+    return 1
+}
 
-# Guard: plugin must not require qmlcache symbols missing from the package
-PLUGIN_HIT=""
-for n in libMd3plugin.a libMd3plugin.so; do
-    if [[ -f "$PREFIX/lib/$n" ]]; then
-        PLUGIN_HIT="$PREFIX/lib/$n"
-        break
+if [[ "$SHARED_ON" == "ON" ]]; then
+    for libdir in "$PREFIX/lib" "$PREFIX/lib64"; do
+        [[ -d "$libdir" ]] || continue
+        LIB_HIT="$(find_lib "$libdir" "libMd3.so" || find_lib "$libdir" "libMd3.so.*" || true)"
+        [[ -n "$LIB_HIT" ]] && break
+    done
+    if [[ -z "$LIB_HIT" ]]; then
+        for n in Md3.dll libMd3.dll; do
+            if [[ -f "$PREFIX/bin/$n" ]]; then
+                LIB_HIT="$PREFIX/bin/$n"
+                break
+            fi
+        done
     fi
-done
-if [[ -n "$PLUGIN_HIT" ]] && command -v nm >/dev/null 2>&1; then
-    if nm -u "$PLUGIN_HIT" 2>/dev/null | grep -q "qInitResources_qmlcache"; then
-        die "package still references qInitResources_qmlcache (NO_CACHEGEN not applied). Delete $BUILD_DIR and retry."
-    fi
-    if ! nm "$LIB_HIT" 2>/dev/null | grep -q "qml_register_types_Md3"; then
-        die "libMd3 is missing qml_register_types_Md3 — package incomplete"
+    [[ -n "$LIB_HIT" ]] || die "missing libMd3.so under $PREFIX/lib (shared build)"
+else
+    for n in libMd3.a libMd3.so; do
+        if [[ -f "$PREFIX/lib/$n" ]]; then
+            LIB_HIT="$PREFIX/lib/$n"
+            break
+        fi
+        if [[ -f "$PREFIX/lib64/$n" ]]; then
+            LIB_HIT="$PREFIX/lib64/$n"
+            break
+        fi
+    done
+    [[ -n "$LIB_HIT" ]] || die "missing libMd3 under $PREFIX/lib"
+
+    PLUGIN_HIT=""
+    for n in libMd3plugin.a libMd3plugin.so; do
+        if [[ -f "$PREFIX/lib/$n" ]]; then
+            PLUGIN_HIT="$PREFIX/lib/$n"
+            break
+        fi
+        if [[ -f "$PREFIX/lib64/$n" ]]; then
+            PLUGIN_HIT="$PREFIX/lib64/$n"
+            break
+        fi
+    done
+    if [[ -n "$PLUGIN_HIT" ]] && command -v nm >/dev/null 2>&1; then
+        if nm -u "$PLUGIN_HIT" 2>/dev/null | grep -q "qInitResources_qmlcache"; then
+            die "static package still references qInitResources_qmlcache. Delete $BUILD_DIR and retry."
+        fi
+        if ! nm "$LIB_HIT" 2>/dev/null | grep -q "qml_register_types_Md3"; then
+            die "libMd3 is missing qml_register_types_Md3 — package incomplete"
+        fi
     fi
 fi
 
 cat > "$PREFIX/README.md" <<EOF
-# Md3 packaged library
+# Md3 packaged library ($SHARED_LABEL)
 
 Built by \`scripts/package-linux.sh\` from QML_MD3.
 
@@ -153,41 +223,63 @@ Built by \`scripts/package-linux.sh\` from QML_MD3.
 
 | Path | Content |
 |------|---------|
-| \`lib/libMd3.*\` | Core static/shared library |
-| \`lib/libMd3plugin.*\` | QML plugin (static) |
-| \`lib/Md3/stubs/\` | Static plugin / rcc init \`.cpp\` |
-| \`lib/qml/Md3/\` | \`qmldir\` / qmltypes |
-| \`lib/cmake/Md3/\` | \`find_package(Md3)\` config |
-| \`include/Md3/\` | C++ headers (\`md3.h\`, …) |
+| \`lib/libMd3.*\` | Core library ($SHARED_LABEL) |
+| \`lib/libMd3plugin.*\` | QML plugin |
+| \`lib/Md3/stubs/\` | Static plugin init sources (static builds) |
+| \`lib/qml/Md3/\` | qmldir / qmltypes |
+| \`lib/cmake/Md3/\` | \`find_package(Md3)\` |
+| \`include/Md3/\` | C++ headers |
 
-## Use from CMake
+## CMake
 
 \`\`\`cmake
-list(APPEND CMAKE_PREFIX_PATH "${PREFIX}")
+list(APPEND CMAKE_PREFIX_PATH "${SYS_PREFIX}")
+# or: list(APPEND CMAKE_PREFIX_PATH "${PREFIX}")
 find_package(Md3 REQUIRED)
 target_link_libraries(yourApp PRIVATE Md3::Md3)
-if (TARGET Md3plugin)
-    target_link_libraries(yourApp PRIVATE Md3plugin)
-endif()
-if (TARGET Md3plugin_init)
-    target_link_libraries(yourApp PRIVATE Md3plugin_init)
-endif()
 \`\`\`
 
-Qt used to build this package: \`${QT_PREFIX}\`
+Qt used: \`${QT_PREFIX}\`
 EOF
 
-info "Package ready: $PREFIX"
-ls -la "$PREFIX/lib" | sed -n '1,30p' || true
+info "Stage ready: $PREFIX ($SHARED_LABEL)"
+ls -la "$PREFIX/lib" 2>/dev/null | sed -n '1,30p' || ls -la "$PREFIX/lib64" 2>/dev/null | sed -n '1,30p' || true
+
+if [[ "$SKIP_SYSTEM_INSTALL" != "1" ]]; then
+    install_to_prefix "$SYS_PREFIX"
+    if [[ "$SHARED_ON" == "ON" ]] && [[ "$SYS_PREFIX" == "/usr" || "$SYS_PREFIX" == "/usr/local" ]]; then
+        if command -v ldconfig >/dev/null 2>&1; then
+            info "Running ldconfig"
+            if [[ -w /etc/ld.so.cache ]] 2>/dev/null || [[ $(id -u) -eq 0 ]]; then
+                ldconfig || true
+            elif command -v sudo >/dev/null 2>&1; then
+                sudo ldconfig || true
+            else
+                info "Skip ldconfig (no permission); run: sudo ldconfig"
+            fi
+        fi
+    fi
+    info "System install done: $SYS_PREFIX"
+else
+    info "SKIP_SYSTEM_INSTALL=1 — staged only at $PREFIX"
+fi
 
 if [[ "$MAKE_TARBALL" == "1" ]]; then
     ARCH="$(uname -m)"
-    OUT_TGZ="$ROOT/dist/Md3-linux-${ARCH}.tar.gz"
+    OUT_TGZ="$ROOT/dist/Md3-linux-${ARCH}-${SHARED_LABEL}.tar.gz"
     mkdir -p "$ROOT/dist"
     tar -C "$(dirname "$PREFIX")" -czf "$OUT_TGZ" "$(basename "$PREFIX")"
     info "Archive: $OUT_TGZ"
 fi
 
-info "Done."
-echo "  find_package: list(APPEND CMAKE_PREFIX_PATH \"$PREFIX\")"
-echo "  run wizard with: -DMD3_ROOT still points at sources; for prebuilt use PREFIX above"
+info "Done ($SHARED_LABEL)."
+echo "  staged:        $PREFIX"
+if [[ "$SKIP_SYSTEM_INSTALL" != "1" ]]; then
+    echo "  system:        $SYS_PREFIX"
+    echo "  find_package:  list(APPEND CMAKE_PREFIX_PATH \"$SYS_PREFIX\")"
+    if [[ "$SHARED_ON" == "ON" ]]; then
+        echo "  runtime:       sudo ldconfig   # if libs not found at run time"
+    fi
+else
+    echo "  find_package:  list(APPEND CMAKE_PREFIX_PATH \"$PREFIX\")"
+fi

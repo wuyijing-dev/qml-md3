@@ -21,22 +21,24 @@ When this repo is added via `add_subdirectory` from another project, `MD3_BUILD_
 
 ## CMake — packaged `./Md3` (recommended for apps)
 
-1. Run `scripts/package-linux.sh` or `scripts/package-windows.ps1`
-2. Copy `dist/Md3` beside your `CMakeLists.txt` as `./Md3`
+1. Run `scripts/package-linux.sh` or `scripts/package-windows.ps1`  
+   (default **shared**; stages `dist/Md3` and installs to `/usr/local` or `%LOCALAPPDATA%\Md3`)
+2. Copy `dist/Md3` beside your `CMakeLists.txt` as `./Md3`, **or** use the system install prefix
 3. In CMake:
 
 ```cmake
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Md3")
+# or: list(APPEND CMAKE_PREFIX_PATH "/usr/local")
 find_package(Md3 REQUIRED CONFIG)
 
 target_link_libraries(yourApp PRIVATE Md3::Md3 Qt6::Quick)
-# Prefer helper (whole-archive static plugin):
+# Shared: normal link. Static: whole-archive via helper.
 if (TARGET Md3::QmlPlugin)
     target_link_libraries(yourApp PRIVATE Md3::QmlPlugin)
 endif()
 ```
 
-4. In `main.cpp`:
+4. In `main.cpp` (required for **static** packages; recommended when linking the plugin):
 
 ```cpp
 #include <QtQml/qqmlextensionplugin.h>
@@ -51,7 +53,7 @@ int main(int argc, char *argv[]) {
 ### Manual install prefix
 
 ```bash
-cmake -S . -B build-lib -DMD3_BUILD_GALLERY=OFF
+cmake -S . -B build-lib -DMD3_BUILD_GALLERY=OFF -DMD3_BUILD_SHARED=ON
 cmake --build build-lib
 cmake --install build-lib --prefix /opt/md3
 ```
@@ -65,11 +67,11 @@ Installed / packaged layout:
 
 | Path | Content |
 |------|---------|
-| `lib/libMd3.*` | Core library |
-| `lib/libMd3plugin.*` | Static QML plugin |
-| `lib/Md3/stubs/` | Plugin / rcc init sources |
+| `lib/libMd3.*` / `bin/*.dll` | Core library (shared default or static) |
+| `lib/libMd3plugin.*` | QML plugin |
+| `lib/Md3/stubs/` | Plugin / rcc init sources (static) |
 | `lib/qml/Md3/` | `qmldir`, qmltypes |
-| `lib/cmake/Md3/` | `find_package(Md3)` |
+| `lib/cmake/Md3/` | `find_package(Md3)` (`Md3_SHARED` set) |
 | `include/Md3/` | C++ headers |
 
 ## QML
@@ -91,7 +93,7 @@ Md3ApplicationWindow {
 ```cpp
 #include "md3.h"
 #include <QtQml/qqmlextensionplugin.h>
-Q_IMPORT_QML_PLUGIN(Md3Plugin)   // required when linking packaged static Md3
+Q_IMPORT_QML_PLUGIN(Md3Plugin)   // required for packaged static Md3; OK for shared
 
 int main(int argc, char *argv[]) {
     return Md3::run(argc, argv, "MyApp"); // loads MyApp/Main.qml
@@ -135,10 +137,11 @@ Roboto + Material Icons ship in the Md3 module qrc. Prefer **`Md3::run` / `Md3::
 | Option | Default | Meaning |
 |--------|---------|---------|
 | `MD3_BUILD_GALLERY` | OFF when used as subdirectory | Build Gallery executable |
-| `MD3_BUILD_SHARED` | OFF | Shared `Md3` instead of static |
+| `MD3_BUILD_SHARED` | OFF (CMake); packaging scripts default **ON** | Shared `Md3` instead of static |
 
 ## Linux notes
 
+- After shared install to `/usr` or `/usr/local`, run `sudo ldconfig` (package script does this when possible).
 - Package built with KF6 WindowSystem needs `libkf6windowsystem-dev` at **link** time of the app.
 - System Qt may warn about missing `Qt6::qtquick2plugin` link targets; install `qml6-module-qtquick*` packages if QML fails at runtime for Qt modules.
 

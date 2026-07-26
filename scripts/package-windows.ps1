@@ -1,33 +1,31 @@
-# One-shot: build Md3 (library only) and package into a standalone folder on Windows.
+# One-shot: build Md3 (library only), stage to dist\Md3, then install for the user.
 #
 # Usage:
 #   .\scripts\package-windows.ps1
-#   .\scripts\package-windows.ps1 -Prefix "D:\opt\Md3" -CmakePrefixPath "D:\Qt\6.10.2\mingw_64"
-#   .\scripts\package-windows.ps1 -CreateBundleDir "D:\QML_MD3\md3-create\dist-bundle"
+#   .\scripts\package-windows.ps1 -Shared:$false          # static
+#   .\scripts\package-windows.ps1 -InstallPrefix "$env:LOCALAPPDATA\Md3"
+#   .\scripts\package-windows.ps1 -CmakePrefixPath "D:\Qt\6.10.2\mingw_64"
+#   .\scripts\package-windows.ps1 -SkipSystemInstall
+#   .\scripts\package-windows.ps1 -CreateBundleDir "D:\path\to\Md3CreateDir"
 #
-# Output (default):
-#   dist\Md3\
-#     lib\libMd3.a / Md3.lib
-#     lib\libMd3plugin.a
-#     lib\qml\Md3\
-#     lib\cmake\Md3\          Md3Config.cmake
-#     lib\Md3\stubs\
-#     include\Md3\
-#   dist\Md3-windows-<arch>.zip
-#
-# With -CreateBundleDir, also copies the package next to Md3Create as:
-#   <CreateBundleDir>\Md3\     (fixed sibling name for the wizard)
+# Outputs:
+#   dist\Md3\                      staged package
+#   dist\Md3-windows-<arch>-*.zip  optional archive
+#   $InstallPrefix                 user/system install (default %LOCALAPPDATA%\Md3)
 
 [CmdletBinding()]
 param(
     [string]$Prefix = "",
+    [string]$InstallPrefix = "",
     [string]$BuildDir = "",
     [string]$CmakePrefixPath = $env:CMAKE_PREFIX_PATH,
     [string]$BuildType = "Release",
     [string]$Generator = "",
     [int]$Jobs = 0,
     [string]$CreateBundleDir = "",
-    [switch]$NoZip
+    [switch]$NoZip,
+    [switch]$SkipSystemInstall,
+    [bool]$Shared = $true
 )
 
 $ErrorActionPreference = "Stop"
@@ -36,9 +34,16 @@ function Write-Info([string]$msg) { Write-Host "==> $msg" }
 function Die([string]$msg) { Write-Error $msg; exit 1 }
 
 $Root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-if (-not $Prefix) { $Prefix = Join-Path $Root "dist\Md3" }
+$StagePrefix = Join-Path $Root "dist\Md3"
+if (-not $Prefix) { $Prefix = $StagePrefix }
+if (-not $InstallPrefix) { $InstallPrefix = Join-Path $env:LOCALAPPDATA "Md3" }
 if (-not $BuildDir) { $BuildDir = Join-Path $Root "build-lib" }
 if ($Jobs -le 0) { $Jobs = [Math]::Max(1, [Environment]::ProcessorCount) }
+
+# If -Prefix points at a "system-like" path, use it as InstallPrefix and keep stage in dist\Md3
+if ($Prefix -and ($Prefix -ne $StagePrefix) -and ($Prefix -notlike "*\dist\Md3")) {
+    # Keep explicit -Prefix as stage unless user only wanted install location via -InstallPrefix
+}
 
 function Find-QtPrefix {
     if ($CmakePrefixPath -and (Test-Path (Join-Path ($CmakePrefixPath -split ";")[0] "lib\cmake\Qt6\Qt6Config.cmake"))) {
@@ -93,15 +98,24 @@ if (-not $QtPrefix) {
     Die "Qt6 not found. Pass -CmakePrefixPath (e.g. D:\Qt\6.10.2\mingw_64)."
 }
 
-Write-Info "ROOT      = $Root"
-Write-Info "BUILD_DIR = $BuildDir"
-Write-Info "PREFIX    = $Prefix"
-Write-Info "Qt        = $QtPrefix"
-Write-Info "Generator = $Generator ($Jobs jobs, $BuildType)"
+$SharedOn = if ($Shared) { "ON" } else { "OFF" }
+$SharedLabel = if ($Shared) { "shared" } else { "static" }
+
+Write-Info "ROOT           = $Root"
+Write-Info "BUILD_DIR      = $BuildDir"
+Write-Info "STAGE          = $Prefix"
+Write-Info "InstallPrefix  = $InstallPrefix"
+Write-Info "SHARED         = $SharedOn ($SharedLabel)"
+Write-Info "Qt             = $QtPrefix"
+Write-Info "Generator      = $Generator ($Jobs jobs, $BuildType)"
+
+Write-Info "Clean build dir"
+if (Test-Path $BuildDir) { Remove-Item -Recurse -Force $BuildDir }
 
 Write-Info "Configure"
 & cmake -S $Root -B $BuildDir -G $Generator `
     -DMD3_BUILD_GALLERY=OFF `
+    "-DMD3_BUILD_SHARED=$SharedOn" `
     "-DCMAKE_BUILD_TYPE=$BuildType" `
     "-DCMAKE_INSTALL_PREFIX=$Prefix" `
     "-DCMAKE_PREFIX_PATH=$QtPrefix"
@@ -111,25 +125,37 @@ Write-Info "Build"
 & cmake --build $BuildDir --parallel $Jobs --config $BuildType
 if ($LASTEXITCODE -ne 0) { Die "cmake build failed" }
 
-Write-Info "Install -> $Prefix"
+Write-Info "Stage -> $Prefix"
 if (Test-Path $Prefix) { Remove-Item -Recurse -Force $Prefix }
 & cmake --install $BuildDir --prefix $Prefix --config $BuildType
-if ($LASTEXITCODE -ne 0) { Die "cmake install failed" }
+if ($LASTEXITCODE -ne 0) { Die "cmake stage install failed" }
 
 $inc = Join-Path $Prefix "include\Md3"
 $cmakeCfg = Join-Path $Prefix "lib\cmake\Md3"
-if (-not (Test-Path $inc)) { Die "missing include\Md3 after install" }
-if (-not (Test-Path $cmakeCfg)) { Die "missing lib\cmake\Md3 after install" }
+if (-not (Test-Path $inc)) { Die "missing include\Md3 after stage" }
+if (-not (Test-Path $cmakeCfg)) { Die "missing lib\cmake\Md3 after stage" }
 
 $libHit = $null
-foreach ($n in @("libMd3.a", "libMd3.lib", "Md3.lib", "libMd3.dll.a")) {
+$candidates = if ($Shared) {
+    @("libMd3.dll.a", "Md3.lib", "libMd3.so", "Md3.dll")
+} else {
+    @("libMd3.a", "libMd3.lib", "Md3.lib", "libMd3.dll.a")
+}
+foreach ($n in $candidates) {
     $p = Join-Path $Prefix "lib\$n"
     if (Test-Path $p) { $libHit = $p; break }
 }
-if (-not $libHit) { Die "missing libMd3 under $Prefix\lib" }
+# DLL may land in bin/
+if (-not $libHit -and $Shared) {
+    foreach ($n in @("Md3.dll", "libMd3.dll")) {
+        $p = Join-Path $Prefix "bin\$n"
+        if (Test-Path $p) { $libHit = $p; break }
+    }
+}
+if (-not $libHit) { Die "missing libMd3 under $Prefix\lib (or bin) for $SharedLabel build" }
 
 $readme = @"
-# Md3 packaged library (Windows)
+# Md3 packaged library (Windows, $SharedLabel)
 
 Built by ``scripts/package-windows.ps1`` from QML_MD3.
 
@@ -137,44 +163,50 @@ Built by ``scripts/package-windows.ps1`` from QML_MD3.
 
 | Path | Content |
 |------|---------|
-| ``lib\libMd3.*`` / ``Md3.lib`` | Core library |
-| ``lib\libMd3plugin.*`` | QML plugin |
-| ``lib\Md3\stubs\`` | Static plugin / rcc init sources |
+| ``lib\`` / ``bin\`` | Core library ($SharedLabel) + plugin |
+| ``lib\Md3\stubs\`` | Static init sources (static builds) |
 | ``lib\qml\Md3\`` | qmldir / qmltypes |
 | ``lib\cmake\Md3\`` | find_package(Md3) |
 | ``include\Md3\`` | C++ headers |
 
-## Use with Md3 Create
+## System / user install
 
-Place this folder **next to** ``Md3Create.exe`` as a sibling named exactly ``Md3``:
-
-``````
-SomeFolder\
-  Md3Create.exe
-  Md3\          <-- this package (fixed name)
-``````
-
-The wizard copies ``Md3`` into each new app as ``<App>\Md3\``.
-
-## CMake
+Default install prefix: ``$InstallPrefix``
 
 ``````cmake
-list(APPEND CMAKE_PREFIX_PATH "\${CMAKE_CURRENT_SOURCE_DIR}/Md3")
+list(APPEND CMAKE_PREFIX_PATH "$InstallPrefix")
 find_package(Md3 REQUIRED)
 target_link_libraries(yourApp PRIVATE Md3::Md3)
 ``````
+
+For shared builds, ensure DLLs are on PATH or beside the executable.
+
+## Use with Md3 Create
+
+Place this folder next to ``Md3Create.exe`` as sibling ``Md3\``.
 
 Qt used: ``$QtPrefix``
 "@
 Set-Content -Path (Join-Path $Prefix "README.md") -Value $readme -Encoding UTF8
 
-Write-Info "Package ready: $Prefix"
-Get-ChildItem (Join-Path $Prefix "lib") | Select-Object Name, Length | Format-Table -AutoSize
+Write-Info "Stage ready: $Prefix ($SharedLabel)"
+Get-ChildItem (Join-Path $Prefix "lib") -ErrorAction SilentlyContinue | Select-Object Name, Length | Format-Table -AutoSize
+Get-ChildItem (Join-Path $Prefix "bin") -ErrorAction SilentlyContinue | Select-Object Name, Length | Format-Table -AutoSize
+
+if (-not $SkipSystemInstall) {
+    Write-Info "Install -> $InstallPrefix"
+    if (Test-Path $InstallPrefix) { Remove-Item -Recurse -Force $InstallPrefix }
+    New-Item -ItemType Directory -Force -Path (Split-Path $InstallPrefix -Parent) | Out-Null
+    Copy-Item -Recurse -Force $Prefix $InstallPrefix
+    Write-Info "User install done: $InstallPrefix"
+} else {
+    Write-Info "SkipSystemInstall — staged only at $Prefix"
+}
 
 if (-not $NoZip) {
     $arch = $env:PROCESSOR_ARCHITECTURE
     if (-not $arch) { $arch = "x64" }
-    $zip = Join-Path $Root "dist\Md3-windows-$arch.zip"
+    $zip = Join-Path $Root "dist\Md3-windows-$arch-$SharedLabel.zip"
     New-Item -ItemType Directory -Force -Path (Join-Path $Root "dist") | Out-Null
     if (Test-Path $zip) { Remove-Item -Force $zip }
     Compress-Archive -Path $Prefix -DestinationPath $zip
@@ -190,6 +222,14 @@ if ($CreateBundleDir) {
     Write-Info "Bundle Md3 ready. Put Md3Create.exe in: $CreateBundleDir"
 }
 
-Write-Info "Done."
-Write-Host "  find_package: list(APPEND CMAKE_PREFIX_PATH `"$Prefix`")"
-Write-Host "  Create sibling layout: <dir>\Md3Create.exe + <dir>\Md3\"
+Write-Info "Done ($SharedLabel)."
+Write-Host "  staged:       $Prefix"
+if (-not $SkipSystemInstall) {
+    Write-Host "  installed:    $InstallPrefix"
+    Write-Host "  find_package: list(APPEND CMAKE_PREFIX_PATH `"$InstallPrefix`")"
+    if ($Shared) {
+        Write-Host "  runtime:      add $InstallPrefix\bin to PATH (or copy DLLs beside exe)"
+    }
+} else {
+    Write-Host "  find_package: list(APPEND CMAKE_PREFIX_PATH `"$Prefix`")"
+}

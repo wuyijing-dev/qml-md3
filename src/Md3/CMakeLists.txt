@@ -62,7 +62,7 @@ set_source_files_properties(
 set(MD3_QML_NO_CACHEGEN)
 # Skip qmlcache for static library packages: cachegen objects are easy to omit from
 # install/find_package and then show up as undefined qInitResources_qmlcache_*.
-# QML still runs; AOT cache is a build-tree optimization.
+# Shared builds also keep NO_CACHEGEN for a simpler install layout.
 set(MD3_QML_NO_CACHEGEN NO_CACHEGEN)
 qt_add_qml_module(Md3
     URI Md3
@@ -303,6 +303,13 @@ if (UNIX AND NOT APPLE)
     if (KF6WindowSystem_FOUND OR KF5WindowSystem_FOUND)
         set(MD3_PACKAGE_NEEDS_KWINDOWSYSTEM 1)
     endif()
+endif()
+
+# Recorded for find_package consumers (shared vs static package layout)
+if (MD3_BUILD_SHARED)
+    set(MD3_PACKAGE_SHARED 1)
+else()
+    set(MD3_PACKAGE_SHARED 0)
 endif()
 
 configure_package_config_file(

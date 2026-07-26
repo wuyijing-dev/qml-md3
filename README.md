@@ -56,24 +56,29 @@ cmake --install build-lib --prefix dist
 
 Produces target **`Md3`** / **`Md3::Md3`** (static QML module `URI Md3`). Gallery is not built.
 
-### Linux — one-click package (libs + cmake + headers)
+### Linux — one-click package (shared by default + system install)
 
 ```bash
 ./scripts/package-linux.sh
-# or: PREFIX=$HOME/opt/Md3 CMAKE_PREFIX_PATH=$HOME/Qt/6.10.2/gcc_64 ./scripts/package-linux.sh
+# stages dist/Md3, installs to /usr/local, runs ldconfig
+# static: SHARED=0 ./scripts/package-linux.sh
+# stage only: SKIP_SYSTEM_INSTALL=1 ./scripts/package-linux.sh
+CMAKE_PREFIX_PATH=$HOME/Qt/6.10.2/gcc_64 ./scripts/package-linux.sh
 ```
 
-### Windows — one-click package
+### Windows — one-click package (shared by default + user install)
 
 ```powershell
 .\scripts\package-windows.ps1
-# or:
+# installs to %LOCALAPPDATA%\Md3 by default
 .\scripts\package-windows.ps1 -CmakePrefixPath "D:\Qt\6.10.2\mingw_64"
+.\scripts\package-windows.ps1 -Shared:$false          # static
+.\scripts\package-windows.ps1 -SkipSystemInstall      # stage only
 # Place next to Md3Create.exe as fixed sibling name "Md3":
 .\scripts\package-windows.ps1 -CreateBundleDir "D:\path\to\Md3CreateDir"
 ```
 
-Both write `dist/Md3/` (`lib/`, `include/`, `lib/cmake/Md3/`) plus a zip/tarball. With Md3 Create, keep this layout:
+Both write `dist/Md3/` (`lib/`, `include/`, `lib/cmake/Md3/`, and `bin/` for Windows DLLs) plus a zip/tarball. With Md3 Create, keep this layout:
 
 ```text
 SomeFolder\
@@ -143,12 +148,12 @@ int main(int argc, char *argv[]) {
 | Option | Default | Meaning |
 |--------|---------|---------|
 | `MD3_BUILD_GALLERY` | ON if top-level, **OFF** if `add_subdirectory` | Build Gallery app |
-| `MD3_BUILD_SHARED` | OFF | Shared instead of static `Md3` |
+| `MD3_BUILD_SHARED` | OFF (scripts default ON) | Shared instead of static `Md3` |
 
 ## Docs
 
 - [docs/api/README.md](docs/api/README.md) — **完整控件 API**（一控件一文档，含全部属性/信号/方法）
-- [docs/packaging.md](docs/packaging.md) — **预编译包 / 同目录 `Md3/` / 静态插件**
+- [docs/packaging.md](docs/packaging.md) — **预编译包（默认 shared）/ 系统安装 / 同目录 `Md3/`**
 - [docs/integration.md](docs/integration.md) — CMake + `Md3::run`
 - [docs/tokens.md](docs/tokens.md) — 主题令牌
 - [CHANGELOG.md](CHANGELOG.md)
