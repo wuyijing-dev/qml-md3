@@ -31,14 +31,44 @@ Item {
         }
     }
 
-    readonly property bool sceneActive: enabled && visible && opacity > 0.01
-                                        && (!Window.window || Window.window.visibility !== Window.Hidden)
+    property bool _treeShown: true
+    readonly property bool sceneActive: enabled && _treeShown
+    readonly property int paintStride: Qt.platform.os === "windows" ? 2 : 1
+    property int _paintGate: 0
     readonly property real radius: indicatorSize / 2 - strokeWidth
 
     property real rotation: -Math.PI / 2
     property real sweep: Math.PI * 0.65
     property real sweepDir: 1
     property real spinSpeed: Math.PI * 2 / (Md3Motion.progressSpin / 1000)
+
+    function _refreshTreeShown() {
+        let ok = visible && opacity > 0.01
+        let p = parent
+        while (ok && p) {
+            if (p.visible === false)
+                ok = false
+            else if (p.opacity !== undefined && p.opacity < 0.01)
+                ok = false
+            else
+                p = p.parent
+        }
+        const w = Window.window
+        if (!w || w.visibility === Window.Hidden || w.visibility === Window.Minimized)
+            ok = false
+        if (_treeShown !== ok)
+            _treeShown = ok
+    }
+
+    Timer {
+        interval: 200
+        running: root.enabled && root.indeterminate
+        repeat: true
+        onTriggered: root._refreshTreeShown()
+    }
+    Component.onCompleted: _refreshTreeShown()
+    onVisibleChanged: _refreshTreeShown()
+    onOpacityChanged: _refreshTreeShown()
 
     implicitWidth: Math.max(indicatorSize, labelItem.visible ? labelItem.implicitWidth : 0)
     implicitHeight: indicatorSize + (labelItem.visible ? labelItem.implicitHeight + 8 : 0)
@@ -114,7 +144,11 @@ Item {
                 root.sweep = Math.PI * 0.3
                 root.sweepDir = 1
             }
-            canvas.requestPaint()
+            root._paintGate++
+            if (root._paintGate >= root.paintStride) {
+                root._paintGate = 0
+                canvas.requestPaint()
+            }
         }
     }
 

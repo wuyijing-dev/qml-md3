@@ -12,6 +12,14 @@ Item {
     property bool closable: true
     property bool tearOffEnabled: true
     property bool reorderEnabled: true
+    /// Browser-style: this strip is the window title bar (drag + caption buttons).
+    property bool showWindowControls: false
+    property var targetWindow: null
+    property var windowHelper: null
+    property real cornerRadius: 0
+    property bool showMinimize: true
+    property bool showMaximize: true
+    property bool showClose: true
     property real tabHeight: 32
     property real minTabWidth: 120
     property real maxTabWidth: 240
@@ -26,10 +34,23 @@ Item {
     signal tabMoved(int from, int to)
     signal tabTearOff(int index, real globalX, real globalY)
 
-    implicitHeight: tabHeight + 6
+    implicitHeight: tabHeight + (showWindowControls ? 4 : 6)
     height: implicitHeight
     width: parent ? parent.width : 400
     clip: false
+
+    // Drag empty chrome to move window (browser title-tab strip)
+    MouseArea {
+        anchors.fill: parent
+        z: -1
+        enabled: root.showWindowControls && root.targetWindow
+                 && Md3WindowCapabilities.systemMove
+        acceptedButtons: Qt.LeftButton
+        onPressed: function (mouse) {
+            if (root.targetWindow && typeof root.targetWindow.startSystemMove === "function")
+                root.targetWindow.startSystemMove()
+        }
+    }
 
     readonly property color barColor: {
         const w = Window.window
@@ -274,6 +295,39 @@ Item {
                 }
             }
         }
+
+        // Extra actions before caption (theme / perf / …)
+        Loader {
+            id: actionsLoader
+            anchors.verticalCenter: parent.verticalCenter
+            height: parent.height
+            sourceComponent: root.windowActions
+            width: item ? (item.implicitWidth > 0 ? item.implicitWidth : item.width) : 0
+        }
+
+        Md3CaptionButtons {
+            visible: root.showWindowControls
+            height: Math.min(32, parent.height)
+            anchors.verticalCenter: parent.verticalCenter
+            targetWindow: root.targetWindow
+            windowHelper: root.windowHelper
+            cornerRadius: root.cornerRadius
+            showMinimize: root.showMinimize
+            showMaximize: root.showMaximize
+            showClose: root.showClose
+        }
+    }
+
+    property Component windowActions: null
+    property alias trailingExtraData: trailingExtraRow.data
+    property alias trailingExtraItem: trailingExtraRow
+
+    // Keep empty row for imperative injectors
+    Item {
+        id: trailingExtraRow
+        width: 0
+        height: 0
+        visible: false
     }
 
     ListView {

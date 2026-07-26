@@ -46,11 +46,41 @@ Item {
     readonly property real sweepMin: Math.PI * 0.28
     readonly property real sweepMax: Math.PI * 1.15
     readonly property bool isWavy: style !== Md3CircularProgressIndicator.Standard
-    readonly property bool sceneActive: enabled && visible && opacity > 0.01
-                                        && (!Window.window || Window.window.visibility !== Window.Hidden)
+    property bool _treeShown: true
+    readonly property bool sceneActive: enabled && _treeShown
+    readonly property int paintStride: Qt.platform.os === "windows" ? 2 : 1
+    property int _paintGate: 0
     readonly property real radius: Math.min(width, height) / 2 - strokeWidth - (isWavy ? amplitude : 0)
 
     property real sweepDir: 1
+
+    function _refreshTreeShown() {
+        let ok = visible && opacity > 0.01
+        let p = parent
+        while (ok && p) {
+            if (p.visible === false)
+                ok = false
+            else if (p.opacity !== undefined && p.opacity < 0.01)
+                ok = false
+            else
+                p = p.parent
+        }
+        const w = Window.window
+        if (!w || w.visibility === Window.Hidden || w.visibility === Window.Minimized)
+            ok = false
+        if (_treeShown !== ok)
+            _treeShown = ok
+    }
+
+    Timer {
+        interval: 200
+        running: root.enabled && (root.indeterminate || root.isWavy)
+        repeat: true
+        onTriggered: root._refreshTreeShown()
+    }
+    Component.onCompleted: _refreshTreeShown()
+    onVisibleChanged: _refreshTreeShown()
+    onOpacityChanged: _refreshTreeShown()
 
     width: size
     height: size
@@ -78,7 +108,8 @@ Item {
                     return
                 ctx.beginPath()
                 ctx.strokeStyle = color
-                const steps = Math.max(24, Math.ceil(Math.abs(sweepAngle) * 28))
+                const dens = Qt.platform.os === "windows" ? 16 : 28
+                const steps = Math.max(16, Math.ceil(Math.abs(sweepAngle) * dens))
                 for (let i = 0; i <= steps; ++i) {
                     const t = i / steps
                     const a = start + sweepAngle * t
@@ -122,7 +153,11 @@ Item {
                     root.sweepDir = 1
                 }
             }
-            canvas.requestPaint()
+            root._paintGate++
+            if (root._paintGate >= root.paintStride) {
+                root._paintGate = 0
+                canvas.requestPaint()
+            }
         }
     }
 

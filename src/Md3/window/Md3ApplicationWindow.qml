@@ -69,6 +69,8 @@ Window {
     // --- Document tabs (Explorer / browser style) ---
     /// Show the Win11-style tab strip under the title bar.
     property bool documentTabsEnabled: false
+    /// Browser-like chrome: tab strip replaces the title bar (tabs + caption only).
+    property bool browserChrome: false
     /// Auto-handle activate / close / add / reorder / tear-off + keep tabs in sync with
     /// `currentIndex` / destinations. Turn off only if you want fully custom handlers.
     property bool documentTabsManaged: true
@@ -80,6 +82,7 @@ Window {
     property bool documentTabsTearOff: true
     property bool documentTabsShowAdd: true
     property alias documentTabBar: docTabBar
+    property alias documentTabActions: docTabBar.windowActions
     property bool _docTabSyncing: false
 
     signal documentTabActivated(int index)
@@ -275,6 +278,14 @@ Window {
         _managedSyncTabFromPage()
     }
 
+    onBrowserChromeChanged: {
+        if (browserChrome) {
+            documentTabsEnabled = true
+            if (documentTabsManaged)
+                Qt.callLater(_ensureManagedTabs)
+        }
+    }
+
     onDocumentTabsEnabledChanged: {
         if (documentTabsEnabled)
             Qt.callLater(_ensureManagedTabs)
@@ -308,7 +319,13 @@ Window {
     /// Access native helper (signals: thumbBarButtonClicked, trayActivated, dpiChanged).
     readonly property alias windowNative: windowHelper
 
-    readonly property real chromeTop: (showTitleBar && customChrome) ? titleBarLoader.height : 0
+    readonly property real chromeTop: {
+        if (root.browserChrome && docTabBar.visible)
+            return docTabBar.height
+        if (showTitleBar && customChrome && !root.browserChrome)
+            return titleBarLoader.height
+        return 0
+    }
     readonly property real edge: 6
     readonly property bool canResize: customChrome && Md3WindowCapabilities.systemResize
                                       && !isMaximizedLike
@@ -653,7 +670,7 @@ Window {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                active: root.showTitleBar && root.customChrome
+                active: root.showTitleBar && root.customChrome && !root.browserChrome
                 height: active && item ? item.height : 0
                 z: 100
                 sourceComponent: root.titleBar !== null ? root.titleBar : defaultTitleBar
@@ -698,15 +715,19 @@ Window {
                 id: docTabBar
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.top: titleBarLoader.bottom
+                anchors.top: root.browserChrome ? parent.top : titleBarLoader.bottom
                 z: 90
-                visible: root.documentTabsEnabled
+                visible: root.documentTabsEnabled || root.browserChrome
                 height: visible ? implicitHeight : 0
                 model: root.documentTabs
                 currentIndex: root.documentTabIndex
                 closable: root.documentTabsClosable
                 tearOffEnabled: root.documentTabsTearOff
                 showAddButton: root.documentTabsShowAdd
+                showWindowControls: root.browserChrome && root.customChrome
+                targetWindow: root
+                windowHelper: windowHelper
+                cornerRadius: root.effectiveRadius
                 onCurrentIndexChanged: {
                     if (root.documentTabIndex !== currentIndex)
                         root.documentTabIndex = currentIndex

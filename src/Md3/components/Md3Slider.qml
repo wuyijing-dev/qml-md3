@@ -159,12 +159,7 @@ Item {
             color: root.activeColor
             border.width: 0
 
-            Md3Shadow {
-                anchors.fill: parent
-                elevation: root.enabled ? 1 : 0
-                cornerRadius: handle.radius
-            }
-
+            // No MultiEffect shadow — thumb is tiny; blur layers dominate Windows CPU while dragging.
             Item {
                 anchors.centerIn: parent
                 width: 48

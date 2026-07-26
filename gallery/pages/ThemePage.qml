@@ -12,6 +12,19 @@ Flickable {
     LayoutMirroring.enabled: rtlSwitch.checked
     LayoutMirroring.childrenInherit: true
 
+    QtObject {
+        id: seedDraft
+        property real hue: Md3Theme.seed.hslHue
+        property real chroma: Math.max(0.15, Math.min(0.75, Md3Theme.seed.hslSaturation))
+    }
+    // Windows: full-scheme apply every mouse move recolors the whole app + MultiEffects → huge CPU.
+    Timer {
+        id: seedApplyTimer
+        interval: 50
+        repeat: false
+        onTriggered: Md3Theme.applySeed(Qt.hsla(seedDraft.hue, seedDraft.chroma, 0.40, 1))
+    }
+
     component Swatch: Rectangle {
         property string roleName: ""
         property color roleColor: "transparent"
@@ -102,7 +115,9 @@ Flickable {
                 value: Md3Theme.seed.hslHue
                 showStopIndicator: false
                 onMoved: function (v) {
-                    Md3Theme.applySeed(Qt.hsla(v, chromaSlider.value, 0.40, 1))
+                    seedDraft.hue = v
+                    seedDraft.chroma = chromaSlider.value
+                    seedApplyTimer.restart()
                 }
             }
         }
@@ -123,7 +138,9 @@ Flickable {
                 value: Math.max(0.15, Math.min(0.75, Md3Theme.seed.hslSaturation))
                 showStopIndicator: false
                 onMoved: function (v) {
-                    Md3Theme.applySeed(Qt.hsla(hueSlider.value, v, 0.40, 1))
+                    seedDraft.hue = hueSlider.value
+                    seedDraft.chroma = v
+                    seedApplyTimer.restart()
                 }
             }
         }

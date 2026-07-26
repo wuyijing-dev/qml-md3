@@ -95,12 +95,6 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         x: root.xFor(thumbValue)
 
-        Md3Shadow {
-            anchors.fill: parent
-            elevation: root.enabled ? 1 : 0
-            cornerRadius: parent.radius
-        }
-
         MouseArea {
             anchors.fill: parent
             anchors.margins: -14

@@ -18,11 +18,7 @@ Md3ApplicationWindow {
     navigationRail: true
     railExpanded: false
     railHeader: qsTr("组件图库")
-    // WinUI3-like Frame navigation (low memory + smooth enter):
-    // - adaptive@3 + idle trim → usually 1–2 pages resident
-    // - async load: keep previous page on screen (no UI freeze / skeleton)
-    // - after Ready, start slide next frame(s) so first layout doesn't hitch the anim
-    // - slide @450ms — slower, closer to WinUI NavigationThemeTransition pacing
+    // WinUI3-like Frame navigation (low memory + smooth enter)
     pageCacheMode: "adaptive"
     pageCacheLimit: 3
     pageIdleTrimMs: 20000
@@ -34,8 +30,9 @@ Md3ApplicationWindow {
     pageTransition: "slide"
     pageTransitionDuration: 450
 
-    // Win11-style tabs — managed API handles close / add / reorder / tear-off
+    // Browser-style chrome: tabs replace the title bar
     documentTabsEnabled: true
+    browserChrome: true
 
     property bool showPerformancePanel: true
     readonly property string pageRoot: "qrc:/qt/qml/Gallery/gallery/pages/"
@@ -68,17 +65,51 @@ Md3ApplicationWindow {
         { title: qsTr("场景：列表详情"), icon: "view_sidebar", source: pageRoot + "scenes/ListDetailScene.qml" }
     ]
 
+    documentTabActions: Component {
+        Row {
+            spacing: 0
+            Md3TitleBarButton {
+                icon: Md3Theme.dark ? "light_mode" : "dark_mode"
+                buttonWidth: 36
+                buttonHeight: 28
+                iconSize: 14
+                accessibleName: Md3Theme.dark ? qsTr("浅色") : qsTr("深色")
+                onClicked: window.toggleThemeFrom(this)
+            }
+            Md3TitleBarButton {
+                icon: "speed"
+                buttonWidth: 36
+                buttonHeight: 28
+                iconSize: 14
+                checked: window.showPerformancePanel
+                accessibleName: qsTr("Performance monitor")
+                onClicked: window.showPerformancePanel = !window.showPerformancePanel
+            }
+            Md3TitleBarButton {
+                icon: "tab"
+                buttonWidth: 36
+                buttonHeight: 28
+                iconSize: 14
+                accessibleName: qsTr("New tab")
+                onClicked: window.addTab(window.currentIndex)
+            }
+            Md3TitleBarButton {
+                icon: "info"
+                buttonWidth: 36
+                buttonHeight: 28
+                iconSize: 14
+                accessibleName: qsTr("窗口页面")
+                onClicked: window.openTab(window.windowPageIndex, false)
+            }
+        }
+    }
+
     PerformanceMonitor {
         id: perfMonitor
-        historySize: 12
-        sampleIntervalMs: 1500
         active: window.perfSampling
-        Component.onCompleted: bindWindow(window)
     }
 
     PerformancePanel {
-        id: perfPanel
-        parent: window.contentItem
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.rightMargin: 16
@@ -88,78 +119,5 @@ Md3ApplicationWindow {
         compact: true
         expanded: false
         monitor: perfMonitor
-    }
-
-    titleBar: Component {
-        Md3TitleBar {
-            title: window.title
-            appIcon: window.windowIcon
-            showAppIcon: true
-            preferredHeight: 28
-            barHeight: 28
-            responsiveMode: 0
-            collapseWidth: 960
-            minTitleWidth: 100
-            maxTitleWidth: 200
-            showThemeToggle: true
-
-            Md3ChipGroup {
-                selectionMode: Md3ChipGroup.Single
-                currentIndex: 0
-                chipHeight: 22
-                iconSize: 14
-                fontSize: 11
-                spacing: 4
-                model: [
-                    { text: "Docs", icon: "description" },
-                    { text: "API", icon: "code" },
-                    { text: "Samples", icon: "science" }
-                ]
-            }
-            Md3ButtonGroup {
-                layout: Md3ButtonGroup.Connected
-                variant: Md3ButtonGroup.Outlined
-                currentIndex: 0
-                buttonHeight: 22
-                iconSize: 14
-                fontSize: 11
-                model: [
-                    { text: "Light", icon: "light_mode" },
-                    { text: "Dark", icon: "dark_mode" }
-                ]
-                onClicked: function (index) {
-                    if ((index === 1) !== Md3Theme.dark)
-                        window.toggleThemeFrom(this)
-                }
-            }
-
-            trailingContent: [
-                Md3TitleBarButton {
-                    icon: "speed"
-                    buttonWidth: 36
-                    buttonHeight: 28
-                    iconSize: 14
-                    checked: window.showPerformancePanel
-                    accessibleName: qsTr("Performance monitor")
-                    onClicked: window.showPerformancePanel = !window.showPerformancePanel
-                },
-                Md3TitleBarButton {
-                    icon: "tab"
-                    buttonWidth: 36
-                    buttonHeight: 28
-                    iconSize: 14
-                    accessibleName: qsTr("New tab")
-                    onClicked: window.addTab(window.currentIndex)
-                },
-                Md3TitleBarButton {
-                    icon: "info"
-                    buttonWidth: 36
-                    buttonHeight: 28
-                    iconSize: 14
-                    accessibleName: qsTr("窗口页面")
-                    onClicked: window.openTab(window.windowPageIndex, false)
-                }
-            ]
-        }
     }
 }

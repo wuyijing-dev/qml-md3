@@ -46,8 +46,41 @@ Item {
     readonly property bool isWavy: style !== Md3LinearProgressIndicator.Standard
     readonly property real progress: Math.max(0, Math.min(1, value))
     readonly property real barWidth: indeterminate ? Math.max(48, width * 0.35) : width * progress
-    readonly property bool sceneActive: enabled && visible && opacity > 0.01
-                                        && (!Window.window || Window.window.visibility !== Window.Hidden)
+    /// Pause when off-screen / cached page (parent Loader opacity/visible).
+    /// Windows Canvas+D3D is far costlier than Linux GL — never paint hidden trees.
+    property bool _treeShown: true
+    readonly property bool sceneActive: enabled && _treeShown
+    /// Paint every N vsyncs (2 ≈ 30fps). Windows benefits most.
+    readonly property int paintStride: Qt.platform.os === "windows" ? 2 : 1
+    property int _paintGate: 0
+
+    function _refreshTreeShown() {
+        let ok = visible && opacity > 0.01
+        let p = parent
+        while (ok && p) {
+            if (p.visible === false)
+                ok = false
+            else if (p.opacity !== undefined && p.opacity < 0.01)
+                ok = false
+            else
+                p = p.parent
+        }
+        const w = Window.window
+        if (!w || w.visibility === Window.Hidden || w.visibility === Window.Minimized)
+            ok = false
+        if (_treeShown !== ok)
+            _treeShown = ok
+    }
+
+    Timer {
+        interval: 200
+        running: root.enabled && (root.isWavy || root.indeterminate)
+        repeat: true
+        onTriggered: root._refreshTreeShown()
+    }
+    Component.onCompleted: _refreshTreeShown()
+    onVisibleChanged: _refreshTreeShown()
+    onOpacityChanged: _refreshTreeShown()
 
     property real travelX: -barWidth
 
@@ -106,8 +139,9 @@ Item {
                 ctx.lineCap = "round"
                 ctx.lineJoin = "round"
                 ctx.strokeStyle = color
-                // ~2px steps like Flutter CustomPainter density
-                const steps = Math.max(2, Math.ceil((toX - fromX) / 2))
+                // ~3–4px steps (was 2) — fewer path points, still smooth enough
+                const stepPx = Qt.platform.os === "windows" ? 4 : 3
+                const steps = Math.max(2, Math.ceil((toX - fromX) / stepPx))
                 for (let i = 0; i <= steps; ++i) {
                     const t = i / steps
                     const x = fromX + (toX - fromX) * t
@@ -148,7 +182,11 @@ Item {
                 if (root.travelX > root.width)
                     root.travelX = -root.barWidth
             }
-            wave.requestPaint()
+            root._paintGate++
+            if (root._paintGate >= root.paintStride) {
+                root._paintGate = 0
+                wave.requestPaint()
+            }
         }
     }
 
