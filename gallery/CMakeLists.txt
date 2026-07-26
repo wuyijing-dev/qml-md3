@@ -5,6 +5,10 @@ if (NOT TARGET Md3)
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 QuickEffects)
+if (UNIX AND NOT APPLE)
+    # PerformanceMonitor / Linux chrome helpers need Widgets + DBus
+    find_package(Qt6 REQUIRED COMPONENTS Widgets DBus)
+endif()
 
 set(MD3_QML_NO_CACHEGEN)
 if (WIN32)
