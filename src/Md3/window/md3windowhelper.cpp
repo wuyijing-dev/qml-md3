@@ -2,6 +2,7 @@
 #include "md3win_p.h"
 
 #include <QGuiApplication>
+#include <QQuickWindow>
 #include <QScreen>
 #include <QWindow>
 
@@ -234,6 +235,15 @@ int Md3WindowHelper::windowDpi(QObject *window) const
         return 96;
     return qRound(qw->screen()->logicalDotsPerInch());
 #endif
+}
+
+void Md3WindowHelper::setPersistentSceneGraph(QObject *window, bool persistent)
+{
+    auto *qw = qobject_cast<QQuickWindow *>(window);
+    if (!qw)
+        return;
+    qw->setPersistentSceneGraph(persistent);
+    qw->setPersistentGraphics(persistent);
 }
 
 #if defined(Q_OS_WIN)

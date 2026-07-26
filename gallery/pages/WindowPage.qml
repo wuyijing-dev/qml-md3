@@ -67,6 +67,15 @@ Flickable {
         }
 
         Text {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            text: qsTr("Document tabs (Win11 Explorer style): enable with documentTabsEnabled. + adds a tab with pop-in; drag out of the window to tear off. Managed API — openTab / addTab / closeTab — so apps need almost no glue code.")
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.bodyMedium.size
+            font.family: Md3Theme.typography.fontFamily
+        }
+
+        Text {
             text: qsTr("Page transition")
             color: Md3Theme.colorScheme.colorOnSurface
             font.pixelSize: Md3Theme.typography.titleSmall.size

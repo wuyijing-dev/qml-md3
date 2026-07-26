@@ -160,6 +160,9 @@ public:
     Q_INVOKABLE qreal devicePixelRatio(QObject *window) const;
     Q_INVOKABLE int windowDpi(QObject *window) const;
 
+    /// When false, QQuickWindow may release the scene graph while not visible (saves GPU memory).
+    Q_INVOKABLE void setPersistentSceneGraph(QObject *window, bool persistent);
+
 signals:
     void thumbBarButtonClicked(int buttonId);
     void trayActivated(int reason);

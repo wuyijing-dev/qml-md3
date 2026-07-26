@@ -4,7 +4,7 @@ import QtQuick.Window
 Rectangle {
     id: root
 
-    /// [{ text, icon?, children?: [...] }] — children nest into cascading submenus
+    /// [{ text, icon?, items?: [...] }] — use `items` (not `children`; that clashes with Item)
     property var model: []
     signal itemClicked(string path)
 
@@ -13,27 +13,50 @@ Rectangle {
     width: parent ? parent.width : 400
     color: Md3Theme.colorScheme.surfaceContainer
 
+    function _kidsOf(entry) {
+        if (!entry)
+            return []
+        if (entry.items && entry.items.length)
+            return entry.items
+        // Back-compat with older `children` key (avoid reading Item.children)
+        if (entry.items === undefined && entry.children && entry.children.length
+                && typeof entry.children.length === "number"
+                && !(entry.children[0] instanceof Item))
+            return entry.children
+        return []
+    }
+
     function _buildItems(menu, entries, pathPrefix) {
         if (!menu)
             return
         menu.clearItems()
         if (!entries)
             return
+        const hostCol = menu.itemColumn
+        if (!hostCol)
+            return
         for (let i = 0; i < entries.length; ++i) {
             const e = entries[i] || {}
             const label = e.text !== undefined ? e.text : String(e)
             const path = pathPrefix.length ? (pathPrefix + "/" + label) : label
-            const hasKids = e.children && e.children.length > 0
-            const item = itemComp.createObject(menu, {
-                text: label,
-                icon: e.icon !== undefined ? e.icon : ""
-            })
+            const kids = root._kidsOf(e)
+            const hasKids = kids.length > 0
+            // Must parent into itemColumn — createObject(menu) stacks on the 0×0 controller
+            const item = (typeof menu.addItemObject === "function")
+                         ? menu.addItemObject(itemComp, {
+                               text: label,
+                               icon: e.icon !== undefined ? e.icon : ""
+                           })
+                         : itemComp.createObject(hostCol, {
+                               text: label,
+                               icon: e.icon !== undefined ? e.icon : ""
+                           })
             if (!item)
                 continue
             if (hasKids) {
                 const sub = menuComp.createObject(root)
                 item.submenu = sub
-                _buildItems(sub, e.children, path)
+                _buildItems(sub, kids, path)
             } else {
                 item.clicked.connect(function () {
                     root.itemClicked(path)
@@ -47,7 +70,9 @@ Rectangle {
         menu.menuWidth = 220
         if (menu.open)
             menu.dismiss()
-        root._buildItems(menu, dest.childrenModel, dest.title)
+        // Ensure previous dynamic items are gone before rebuilding
+        menu.clearItems()
+        root._buildItems(menu, dest.submenuItems, dest.title)
         const win = Window.window
         const target = (win && win.contentItem) ? win.contentItem : null
         const p = dest.mapToItem(target, 0, dest.height)
@@ -80,22 +105,31 @@ Rectangle {
             delegate: Item {
                 id: dest
                 required property int index
+                // Avoid modelData.children clashing with Item.children — copy fields explicitly
                 required property var modelData
 
                 readonly property string title: {
                     const m = modelData
-                    if (m && m.text !== undefined)
-                        return m.text
-                    return String(m)
+                    if (!m)
+                        return ""
+                    if (m.text !== undefined)
+                        return String(m.text)
+                    if (m.title !== undefined)
+                        return String(m.title)
+                    return ""
                 }
-                readonly property var childrenModel: {
-                    const m = modelData
-                    return (m && m.children !== undefined) ? m.children : []
-                }
+                readonly property var submenuItems: root._kidsOf(modelData)
 
-                // Size from label only — never anchors.centerIn + width: label (binding loop → width 0)
-                width: Math.max(48, label.implicitWidth + 24)
-                height: row.height
+                // Explicit metrics — never bind width to a centered Text
+                width: Math.max(56, metrics.advanceWidth + 28)
+                height: Math.max(1, row.height)
+
+                TextMetrics {
+                    id: metrics
+                    font.family: Md3Theme.typography.fontFamily
+                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                    text: dest.title
+                }
 
                 Rectangle {
                     anchors.fill: parent
@@ -109,14 +143,11 @@ Rectangle {
                 }
 
                 Text {
-                    id: label
-                    // Position without anchors that participate in width resolution
-                    x: Math.round((parent.width - implicitWidth) / 2)
-                    y: Math.round((parent.height - implicitHeight) / 2)
+                    anchors.centerIn: parent
                     text: dest.title
                     color: Md3Theme.colorScheme.colorOnSurface
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                    font.family: metrics.font.family
+                    font.pixelSize: metrics.font.pixelSize
                 }
 
                 MouseArea {

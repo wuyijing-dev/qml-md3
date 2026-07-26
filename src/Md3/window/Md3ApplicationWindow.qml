@@ -46,9 +46,12 @@ Window {
     property bool navigationRail: true
     property bool railExpanded: false
     property string railHeader: ""
-    /// "none" | "one" | "lru" | "all" — "lru" keeps last pageCacheLimit pages for instant revisit
+    /// "none" | "one" | "lru" | "all" | "adaptive"
+    /// adaptive: keep up to pageCacheLimit while navigating; trim to 1 after idle
     property string pageCacheMode: "lru"
     property int pageCacheLimit: 4
+    /// Idle time before adaptive mode drops to a single resident page
+    property int pageIdleTrimMs: 45000
     property real pagePadding: 20
     property bool pagePrefetch: false
     property bool pageAsync: true
@@ -63,6 +66,28 @@ Window {
     property bool pageSkeleton: true
     property alias pageHost: windowBody.pageHost
 
+    // --- Document tabs (Explorer / browser style) ---
+    /// Show the Win11-style tab strip under the title bar.
+    property bool documentTabsEnabled: false
+    /// Auto-handle activate / close / add / reorder / tear-off + keep tabs in sync with
+    /// `currentIndex` / destinations. Turn off only if you want fully custom handlers.
+    property bool documentTabsManaged: true
+    /// Close this window when the last tab is closed (typical for torn-off windows).
+    property bool documentTabsCloseWindowWhenEmpty: false
+    property var documentTabs: []
+    property int documentTabIndex: 0
+    property bool documentTabsClosable: true
+    property bool documentTabsTearOff: true
+    property bool documentTabsShowAdd: true
+    property alias documentTabBar: docTabBar
+    property bool _docTabSyncing: false
+
+    signal documentTabActivated(int index)
+    signal documentTabCloseRequested(int index)
+    signal documentTabAddRequested()
+    signal documentTabMoved(int from, int to)
+    signal documentTabTearOff(int index, real globalX, real globalY)
+
     readonly property bool usesDestinations: destinations && destinations.length > 0
 
     default property alias content: customContent.data
@@ -74,9 +99,185 @@ Window {
             currentIndex = index
     }
 
+    /// Build a tab model entry from a destinations index.
+    function documentTabMeta(pageIndex) {
+        const d = destinations && destinations[pageIndex]
+        return {
+            title: d && d.title !== undefined ? d.title : qsTr("Tab"),
+            icon: d && d.icon !== undefined ? d.icon : "web_asset",
+            pageIndex: pageIndex
+        }
+    }
+
+    /// Open `pageIndex` in the current tab (`asNew=false`) or a new tab (`asNew=true`).
+    function openTab(pageIndex, asNew) {
+        if (!usesDestinations || pageIndex < 0 || pageIndex >= destinations.length)
+            return
+        _docTabSyncing = true
+        const tabs = (documentTabs || []).slice()
+        if (asNew || !tabs.length) {
+            tabs.push(documentTabMeta(pageIndex))
+            documentTabs = tabs
+            documentTabIndex = tabs.length - 1
+        } else {
+            const i = Math.max(0, Math.min(documentTabIndex, tabs.length - 1))
+            tabs[i] = documentTabMeta(pageIndex)
+            documentTabs = tabs
+            documentTabIndex = i
+        }
+        if (currentIndex !== pageIndex)
+            navigateTo(pageIndex)
+        title = documentTabs[documentTabIndex].title
+        _docTabSyncing = false
+    }
+
+    function addTab(pageIndex) {
+        openTab(pageIndex !== undefined ? pageIndex : currentIndex, true)
+    }
+
+    function closeTab(index) {
+        if (index === undefined)
+            index = documentTabIndex
+        if (!documentTabs || index < 0 || index >= documentTabs.length)
+            return
+        if (documentTabs.length <= 1) {
+            if (documentTabsCloseWindowWhenEmpty)
+                close()
+            return
+        }
+        _docTabSyncing = true
+        const tabs = documentTabs.slice()
+        const was = documentTabIndex
+        tabs.splice(index, 1)
+        documentTabs = tabs
+        let next = was
+        if (index < was)
+            next = was - 1
+        else if (index === was)
+            next = Math.min(was, tabs.length - 1)
+        documentTabIndex = Math.max(0, Math.min(next, tabs.length - 1))
+        const t = tabs[documentTabIndex]
+        if (t && t.pageIndex !== undefined)
+            navigateTo(t.pageIndex)
+        title = t ? t.title : root.title
+        _docTabSyncing = false
+    }
+
+    function moveTab(from, to) {
+        if (!documentTabs || from === to || from < 0 || to < 0
+                || from >= documentTabs.length || to >= documentTabs.length)
+            return
+        const tabs = documentTabs.slice()
+        const item = tabs.splice(from, 1)[0]
+        tabs.splice(to, 0, item)
+        documentTabs = tabs
+        if (documentTabIndex === from)
+            documentTabIndex = to
+        else if (from < documentTabIndex && to >= documentTabIndex)
+            documentTabIndex--
+        else if (from > documentTabIndex && to <= documentTabIndex)
+            documentTabIndex++
+    }
+
+    function activateTab(index) {
+        if (!documentTabs || index < 0 || index >= documentTabs.length)
+            return
+        _docTabSyncing = true
+        documentTabIndex = index
+        const t = documentTabs[index]
+        if (t && t.pageIndex !== undefined && currentIndex !== t.pageIndex)
+            navigateTo(t.pageIndex)
+        if (t && t.title)
+            title = t.title
+        _docTabSyncing = false
+    }
+
+    function tearOffTab(index, globalX, globalY) {
+        if (!documentTabs || documentTabs.length <= 1
+                || index < 0 || index >= documentTabs.length)
+            return
+        _docTabSyncing = true
+        const tabs = documentTabs.slice()
+        const torn = tabs.splice(index, 1)[0]
+        documentTabs = tabs
+        documentTabIndex = Math.max(0, Math.min(
+            documentTabIndex === index
+                ? (index > 0 ? index - 1 : 0)
+                : (documentTabIndex > index ? documentTabIndex - 1 : documentTabIndex),
+            tabs.length - 1))
+        const t = tabs[documentTabIndex]
+        if (t && t.pageIndex !== undefined)
+            navigateTo(t.pageIndex)
+        if (t && t.title)
+            title = t.title
+        _docTabSyncing = false
+
+        const url = Qt.resolvedUrl("Md3TabWindow.qml")
+        const comp = Qt.createComponent(url)
+        function spawn() {
+            const w = comp.createObject(null, {
+                catalog: root.destinations,
+                initialTabs: [torn],
+                x: Math.max(0, (globalX !== undefined ? globalX : root.x + 48) - 96),
+                y: Math.max(0, (globalY !== undefined ? globalY : root.y + 48) - 20),
+                width: Math.min(960, root.width),
+                height: Math.min(640, root.height),
+                windowIcon: root.windowIcon,
+                pageSourceBase: root.pageSourceBase,
+                systemBackdrop: root.systemBackdrop,
+                cornerRadius: root.cornerRadius,
+                documentTabsCloseWindowWhenEmpty: true
+            })
+            if (!w)
+                console.warn("Md3ApplicationWindow: tear-off createObject failed")
+        }
+        if (comp.status === Component.Ready)
+            spawn()
+        else if (comp.status === Component.Error)
+            console.warn("Md3ApplicationWindow tear-off:", comp.errorString())
+        else
+            comp.statusChanged.connect(function () {
+                if (comp.status === Component.Ready)
+                    spawn()
+                else if (comp.status === Component.Error)
+                    console.warn("Md3ApplicationWindow tear-off:", comp.errorString())
+            })
+    }
+
+    function _managedSyncTabFromPage() {
+        if (_docTabSyncing || !documentTabsManaged || !documentTabsEnabled)
+            return
+        if (!documentTabs || documentTabs.length === 0)
+            return
+        _docTabSyncing = true
+        const tabs = documentTabs.slice()
+        const i = Math.max(0, Math.min(documentTabIndex, tabs.length - 1))
+        tabs[i] = documentTabMeta(currentIndex)
+        documentTabs = tabs
+        documentTabIndex = i
+        title = tabs[i].title
+        _docTabSyncing = false
+    }
+
+    function _ensureManagedTabs() {
+        if (!documentTabsEnabled || !documentTabsManaged || !usesDestinations)
+            return
+        if (documentTabs && documentTabs.length > 0)
+            return
+        documentTabs = [documentTabMeta(currentIndex)]
+        documentTabIndex = 0
+        title = documentTabs[0].title
+    }
+
     onCurrentIndexChanged: {
         if (usesDestinations && windowBody.currentIndex !== currentIndex)
             windowBody.currentIndex = currentIndex
+        _managedSyncTabFromPage()
+    }
+
+    onDocumentTabsEnabledChanged: {
+        if (documentTabsEnabled)
+            Qt.callLater(_ensureManagedTabs)
     }
 
     readonly property bool isMaximizedLike: visibility === Window.Maximized
@@ -167,12 +368,17 @@ Window {
         windowHelper.applyCornerPreference(root, root.effectiveRadius > 0)
         _applyWindowIcon()
         _syncWinNative()
+        _ensureManagedTabs()
     }
 
     onWindowIconChanged: _applyWindowIcon()
     onEffectiveRadiusChanged: windowHelper.applyCornerPreference(root, effectiveRadius > 0)
     onVisibilityChanged: function () {
         windowHelper.applyCornerPreference(root, effectiveRadius > 0)
+        // Drop persistent scene graph while minimized — reclaim GPU/CPU memory
+        const save = root.visibility === Window.Minimized
+                     || root.visibility === Window.Hidden
+        windowHelper.setPersistentSceneGraph(root, !save)
         if (root.visibility !== Window.Hidden)
             Qt.callLater(function () {
                 root._applyWindowIcon()
@@ -457,11 +663,55 @@ Window {
                 }
             }
 
+            Md3DocumentTabBar {
+                id: docTabBar
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: titleBarLoader.bottom
+                z: 90
+                visible: root.documentTabsEnabled
+                height: visible ? implicitHeight : 0
+                model: root.documentTabs
+                currentIndex: root.documentTabIndex
+                closable: root.documentTabsClosable
+                tearOffEnabled: root.documentTabsTearOff
+                showAddButton: root.documentTabsShowAdd
+                onCurrentIndexChanged: {
+                    if (root.documentTabIndex !== currentIndex)
+                        root.documentTabIndex = currentIndex
+                }
+                onTabActivated: function (index) {
+                    if (root.documentTabsManaged)
+                        root.activateTab(index)
+                    root.documentTabActivated(index)
+                }
+                onTabCloseRequested: function (index) {
+                    if (root.documentTabsManaged)
+                        root.closeTab(index)
+                    root.documentTabCloseRequested(index)
+                }
+                onTabAddRequested: {
+                    if (root.documentTabsManaged)
+                        root.addTab(root.currentIndex)
+                    root.documentTabAddRequested()
+                }
+                onTabMoved: function (from, to) {
+                    if (root.documentTabsManaged)
+                        root.moveTab(from, to)
+                    root.documentTabMoved(from, to)
+                }
+                onTabTearOff: function (index, gx, gy) {
+                    if (root.documentTabsManaged)
+                        root.tearOffTab(index, gx, gy)
+                    root.documentTabTearOff(index, gx, gy)
+                }
+            }
+
             Item {
                 id: contentHost
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.top: titleBarLoader.bottom
+                anchors.top: docTabBar.visible ? docTabBar.bottom : titleBarLoader.bottom
                 anchors.bottom: parent.bottom
                 clip: true
                 z: 0
@@ -478,6 +728,7 @@ Window {
                     railHeader: root.railHeader
                     cacheMode: root.pageCacheMode
                     cacheLimit: root.pageCacheLimit
+                    idleTrimMs: root.pageIdleTrimMs
                     contentPadding: root.pagePadding
                     sourceBase: root.pageSourceBase
                     asynchronous: root.pageAsync

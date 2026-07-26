@@ -57,7 +57,9 @@ destinations: [
 |-----|------|
 | `destinations` | `{ title\|label, icon, source\|component }` |
 | `navigationRail` | Show left rail (default true) |
-| `pageCacheMode` | `none` only current; `one` current+previous; `all` keep visited |
+| `pageCacheMode` | `none` / `one` / `lru` / `all` / `adaptive` |
+| `pageCacheLimit` | Max resident pages for `lru` / `adaptive` |
+| `pageIdleTrimMs` | Adaptive: idle duration before trimming to 1 page |
 | `navigateTo(i)` / `currentIndex` | Switch page |
 | `pageHost` | Access `Md3PageHost` (e.g. `currentItem`) |
 

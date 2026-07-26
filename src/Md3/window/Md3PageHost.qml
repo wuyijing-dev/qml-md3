@@ -4,8 +4,10 @@ import QtQuick.Window
 /*
   Instant navigation host with MD3 page transitions + skeleton loading:
   - Revisit: animated swap (or instant if pageTransition === "none")
-  - Cold open: skeleton overlay until Ready, then enter transition
-  - cacheMode: "none" | "one" | "lru" | "all"
+  - Cold open: keep previous page, skeleton overlays as the incoming-page
+    placeholder until Ready, then animate previous → next
+  - cacheMode: "none" | "one" | "lru" | "all" | "adaptive"
+    adaptive: keep more pages while the user is active; trim to 1 after idle
 */
 Item {
     id: root
@@ -15,6 +17,12 @@ Item {
     property int displayedIndex: 0
     property string cacheMode: "lru"
     property int cacheLimit: 4
+    /// Adaptive: milliseconds without navigation before trimming to one page
+    property int idleTrimMs: 45000
+    /// Adaptive: minimum / starting resident pages while idle
+    property int adaptiveCacheMin: 1
+    property int _liveCacheLimit: 1
+    property bool _adaptivePrefetch: false
     property real contentPadding: 20
     property bool asynchronous: true
     property bool prefetchNeighbors: false
@@ -37,10 +45,12 @@ Item {
                 || !!(ldr && ldr.status === Loader.Loading)
                 || transitioning
     }
+    /// True while the destination page is loading and not yet Ready.
     readonly property bool awaitingTarget: {
+        if (currentIndex === displayedIndex || transitioning)
+            return false
         const ldr = _loaderAt(currentIndex)
-        return displayedIndex < 0
-                || (!!ldr && ldr.status !== Loader.Ready && currentIndex !== displayedIndex)
+        return !ldr || ldr.status !== Loader.Ready || !ldr.item
     }
 
     property var keepFlags: []
@@ -117,6 +127,35 @@ Item {
         lruOrder = next
     }
 
+    function noteActivity() {
+        if (cacheMode !== "adaptive")
+            return
+        // Grow toward cacheLimit while the user keeps navigating
+        _liveCacheLimit = Math.min(cacheLimit, Math.max(adaptiveCacheMin, _liveCacheLimit + 1))
+        _adaptivePrefetch = _liveCacheLimit >= 2
+        idleTrimTimer.interval = Math.max(5000, idleTrimMs)
+        idleTrimTimer.restart()
+        generation++
+        _evict()
+        if (_adaptivePrefetch)
+            Qt.callLater(_prefetchAround, currentIndex)
+    }
+
+    function _trimForIdle() {
+        if (cacheMode !== "adaptive")
+            return
+        _liveCacheLimit = adaptiveCacheMin
+        _adaptivePrefetch = false
+        generation++
+        _evict()
+    }
+
+    function _effectiveLimit() {
+        if (cacheMode === "adaptive")
+            return Math.max(1, _liveCacheLimit)
+        return cacheLimit
+    }
+
     function _shouldKeep(index) {
         root.generation
         if (index === displayedIndex || index === currentIndex)
@@ -131,7 +170,7 @@ Item {
             return true
         if (cacheMode === "one")
             return false
-        if (cacheMode === "lru")
+        if (cacheMode === "lru" || cacheMode === "adaptive")
             return true
         return false
     }
@@ -139,7 +178,8 @@ Item {
     function _evict() {
         if (cacheMode === "all" || cacheMode === "none")
             return
-        if (cacheMode === "one") {
+        if (cacheMode === "one"
+                || (cacheMode === "adaptive" && _effectiveLimit() <= 1)) {
             for (let i = 0; i < keepFlags.length; ++i) {
                 if (i !== displayedIndex && i !== currentIndex
                         && !(transitioning && (i === transitionFrom || i === transitionTo))
@@ -148,6 +188,7 @@ Item {
             }
             return
         }
+        const limit = _effectiveLimit()
         const protectedIdx = {}
         protectedIdx[displayedIndex] = true
         protectedIdx[currentIndex] = true
@@ -163,7 +204,7 @@ Item {
                 kept++
                 continue
             }
-            if (kept < root.cacheLimit) {
+            if (kept < limit) {
                 kept++
                 continue
             }
@@ -243,7 +284,7 @@ Item {
             _evict()
             return
         }
-        // fromIndex < 0 → enter-only (after skeleton / cleared previous page)
+        // fromIndex < 0 → enter-only (initial / no previous page)
 
         transitionFrom = fromIndex
         transitionTo = toIndex
@@ -278,25 +319,28 @@ Item {
         currentIndex = index
         _touchLru(index)
         _setKeep(index, true)
+        noteActivity()
 
         // Hot path: already Ready → transition (or instant)
         if (_tryShow(index)) {
             if (!transitioning)
                 _evict()
-            if (prefetchNeighbors)
+            if (prefetchNeighbors || _adaptivePrefetch)
                 Qt.callLater(_prefetchAround, index)
             return
         }
 
-        // Cold path: remove previous page from view, then skeleton until Ready
+        // Cold path: keep previous page visible; skeleton sits on top as the
+        // incoming-page placeholder until Ready, then full leave→enter transition.
         if (pageAnim.running) {
             pageAnim.stop()
+            if (transitionTo >= 0 && transitionTo !== index)
+                displayedIndex = transitionTo
             transitioning = false
             transitionFrom = -1
             transitionTo = -1
             transitionProgress = 1
         }
-        displayedIndex = -1
         generation++
 
         const ldr = _loaderAt(index)
@@ -305,12 +349,14 @@ Item {
         else if (ldr)
             _setKeep(index, true)
         _evict()
-        if (prefetchNeighbors)
+        if (prefetchNeighbors || _adaptivePrefetch)
             Qt.callLater(_prefetchAround, index)
     }
 
     function _prefetchAround(center) {
         if (!model)
+            return
+        if (!(prefetchNeighbors || _adaptivePrefetch))
             return
         const pair = [center - 1, center + 1]
         for (let i = 0; i < pair.length; ++i) {
@@ -328,6 +374,13 @@ Item {
             return
         warmTimer.cursor = 0
         warmTimer.start()
+    }
+
+    Timer {
+        id: idleTrimTimer
+        interval: Math.max(5000, root.idleTrimMs)
+        repeat: false
+        onTriggered: root._trimForIdle()
     }
 
     NumberAnimation {
@@ -369,9 +422,13 @@ Item {
         _touchLru(currentIndex)
         displayedIndex = currentIndex
         generation++
+        if (cacheMode === "adaptive") {
+            _liveCacheLimit = adaptiveCacheMin
+            idleTrimTimer.restart()
+        }
         if (warmStart)
             Qt.callLater(_warmAll)
-        else if (prefetchNeighbors)
+        else if (prefetchNeighbors || _adaptivePrefetch)
             Qt.callLater(_prefetchAround, currentIndex)
     }
 
@@ -387,14 +444,25 @@ Item {
         _ensureKeepArray()
         _setKeep(currentIndex, true)
         _touchLru(currentIndex)
+        if (cacheMode === "adaptive")
+            _liveCacheLimit = adaptiveCacheMin
         if (warmStart)
             Qt.callLater(_warmAll)
-        else if (prefetchNeighbors)
+        else if (prefetchNeighbors || _adaptivePrefetch)
             Qt.callLater(_prefetchAround, currentIndex)
     }
 
-    onCacheModeChanged: _evict()
+    onCacheModeChanged: {
+        if (cacheMode === "adaptive") {
+            _liveCacheLimit = adaptiveCacheMin
+            idleTrimTimer.restart()
+        }
+        _evict()
+    }
     onCacheLimitChanged: _evict()
+    onIdleTrimMsChanged: {
+        idleTrimTimer.interval = Math.max(5000, idleTrimMs)
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -545,20 +613,46 @@ Item {
         }
     }
 
-    Md3SkeletonPane {
+    // Incoming-page placeholder: stacked above the still-visible previous page
+    Rectangle {
+        id: skeletonHost
         anchors.fill: parent
         anchors.margins: root.contentPadding
         z: 8
-        layout: root.skeletonLayout
-        active: visible
-        visible: root.showSkeleton && root.awaitingTarget && !root.transitioning
-        opacity: visible ? 1 : 0
+        radius: Md3Theme.shape.large
+        color: {
+            const w = Window.window
+            if (w && w.usesSystemBackdrop) {
+                const t = w.backdropContentTint !== undefined ? w.backdropContentTint : 0.42
+                return Qt.alpha(Md3Theme.colorScheme.surface, Math.max(0.92, t))
+            }
+            return Md3Theme.colorScheme.surface
+        }
+        readonly property bool show: root.showSkeleton && root.awaitingTarget
+        visible: opacity > 0.01
+        opacity: show ? 1 : 0
+        scale: show ? 1 : 0.98
+        transformOrigin: Item.Center
+
         Behavior on opacity {
             NumberAnimation {
-                duration: Md3Motion.short2
+                duration: Md3Motion.short3
                 easing.type: Easing.BezierSpline
                 easing.bezierCurve: Md3Motion.standard
             }
+        }
+        Behavior on scale {
+            NumberAnimation {
+                duration: Md3Motion.short3
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.emphasizedDecelerate
+            }
+        }
+
+        Md3SkeletonPane {
+            anchors.fill: parent
+            layout: root.skeletonLayout
+            active: skeletonHost.show
         }
     }
 

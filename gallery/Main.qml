@@ -18,9 +18,10 @@ Md3ApplicationWindow {
     navigationRail: true
     railExpanded: false
     railHeader: qsTr("Gallery")
-    // Keep only the current page resident — closest to a single-page Electron shell
-    pageCacheMode: "one"
-    pageCacheLimit: 1
+    // Adaptive cache: keep more pages while navigating; trim to 1 after idle
+    pageCacheMode: "adaptive"
+    pageCacheLimit: 4
+    pageIdleTrimMs: 45000
     pagePrefetch: false
     pageWarmStart: false
     pageAsync: true
@@ -29,8 +30,10 @@ Md3ApplicationWindow {
     pageTransition: "fadeThrough"
     pageTransitionDuration: Md3Motion.spatialDuration
 
-    property bool showPerformancePanel: true
+    // Win11-style tabs — managed API handles close / add / reorder / tear-off
+    documentTabsEnabled: true
 
+    property bool showPerformancePanel: true
     readonly property string pageRoot: "qrc:/qt/qml/Gallery/gallery/pages/"
     readonly property int windowPageIndex: 16
     readonly property bool perfSampling: showPerformancePanel
@@ -63,15 +66,14 @@ Md3ApplicationWindow {
 
     PerformanceMonitor {
         id: perfMonitor
-        historySize: 16
-        sampleIntervalMs: 1000
+        historySize: 12
+        sampleIntervalMs: 1500
         active: window.perfSampling
         Component.onCompleted: bindWindow(window)
     }
 
     PerformancePanel {
         id: perfPanel
-        // contentItem avoids chrome / rounded-mask clipping of overlayHost
         parent: window.contentItem
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -80,7 +82,7 @@ Md3ApplicationWindow {
         z: 100000
         visible: window.showPerformancePanel
         compact: true
-        expanded: true
+        expanded: false
         monitor: perfMonitor
     }
 
@@ -138,12 +140,20 @@ Md3ApplicationWindow {
                     onClicked: window.showPerformancePanel = !window.showPerformancePanel
                 },
                 Md3TitleBarButton {
+                    icon: "tab"
+                    buttonWidth: 36
+                    buttonHeight: 28
+                    iconSize: 14
+                    accessibleName: qsTr("New tab")
+                    onClicked: window.addTab(window.currentIndex)
+                },
+                Md3TitleBarButton {
                     icon: "info"
                     buttonWidth: 36
                     buttonHeight: 28
                     iconSize: 14
                     accessibleName: qsTr("Window page")
-                    onClicked: window.navigateTo(window.windowPageIndex)
+                    onClicked: window.openTab(window.windowPageIndex, false)
                 }
             ]
         }

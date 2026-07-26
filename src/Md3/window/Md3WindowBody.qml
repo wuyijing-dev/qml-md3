@@ -11,6 +11,7 @@ Item {
     property string railHeader: ""
     property string cacheMode: "lru"
     property int cacheLimit: 4
+    property int idleTrimMs: 45000
     property real contentPadding: 20
     property url sourceBase: ""
     property bool asynchronous: true
@@ -87,6 +88,7 @@ Item {
             model: root.destinations
             cacheMode: root.cacheMode
             cacheLimit: root.cacheLimit
+            idleTrimMs: root.idleTrimMs
             contentPadding: root.contentPadding
             sourceBase: root.sourceBase
             asynchronous: root.asynchronous

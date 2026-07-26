@@ -6,7 +6,7 @@
 - Item height 48; highlight inset 8 with **large** radius pill; hover via state layer
 - Leading icon + label; optional trailing chevron (`submenu` / `hasSubMenu`) / check
 - **Cascading submenus**: `Md3MenuItem { submenu: Md3Menu { ... } }` — hover or click opens to the side; `dismissCascade()` closes the chain
-- Menu bar model may nest `children` recursively for multi-level menus
+- Menu bar model nests with `items` (prefer over `children`, which clashes with `Item.children`)
 - Selected: secondaryContainer fill + leading or trailing check (`leadingCheck`)
 - Divider: outlineVariant, 16 horizontal inset
 - Motion: enter short4 emphasizedDecelerate; item color short4 standard

@@ -58,11 +58,11 @@ Item {
             model: [
                 {
                     text: "File",
-                    children: [
+                    items: [
                         {
                             text: "New",
                             icon: "note_add",
-                            children: [
+                            items: [
                                 { text: "Document", icon: "description" },
                                 { text: "Spreadsheet", icon: "table_chart" },
                                 { text: "Folder", icon: "folder" }
@@ -74,7 +74,7 @@ Item {
                 },
                 {
                     text: "Edit",
-                    children: [
+                    items: [
                         { text: "Cut", icon: "content_cut" },
                         { text: "Copy", icon: "content_copy" },
                         { text: "Paste", icon: "content_paste" }
@@ -82,11 +82,11 @@ Item {
                 },
                 {
                     text: "View",
-                    children: [
+                    items: [
                         {
                             text: "Zoom",
                             icon: "search",
-                            children: [
+                            items: [
                                 { text: "Zoom in", icon: "zoom_in" },
                                 { text: "Zoom out", icon: "zoom_out" },
                                 { text: "Reset", icon: "restart_alt" }

@@ -25,13 +25,33 @@ Item {
     readonly property var __md3Menu: root
 
     function clearItems() {
+        // Destroy any items wrongly parented to the 0×0 controller (legacy createObject(menu))
+        const strays = []
+        for (let i = 0; i < root.children.length; ++i) {
+            const c = root.children[i]
+            if (c && c !== host)
+                strays.push(c)
+        }
+        for (let s = 0; s < strays.length; ++s) {
+            strays[s].visible = false
+            strays[s].parent = null
+            strays[s].destroy()
+        }
         const kids = []
         for (let i = 0; i < column.children.length; ++i)
             kids.push(column.children[i])
         for (let i = 0; i < kids.length; ++i) {
-            if (kids[i])
-                kids[i].destroy()
+            if (!kids[i])
+                continue
+            kids[i].visible = false
+            kids[i].parent = null
+            kids[i].destroy()
         }
+    }
+
+    function addItemObject(comp, props) {
+        // Always parent into the visible column — never the 0×0 controller
+        return comp.createObject(column, props || {})
     }
 
     function _contentItem() {

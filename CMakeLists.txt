@@ -67,6 +67,7 @@ qt_add_qml_module(Md3
         src/Md3/window/Md3WindowBody.qml
         src/Md3/window/Md3ApplicationWindow.qml
         src/Md3/window/Md3DialogWindow.qml
+        src/Md3/window/Md3TabWindow.qml
         src/Md3/layout/Md3AnimatedFlow.qml
         src/Md3/components/Md3Button.qml
         src/Md3/components/Md3IconButton.qml
@@ -105,6 +106,7 @@ qt_add_qml_module(Md3
         src/Md3/components/Md3NavigationRail.qml
         src/Md3/components/Md3NavigationDrawer.qml
         src/Md3/components/Md3TabBar.qml
+        src/Md3/components/Md3DocumentTabBar.qml
         src/Md3/components/Md3Scaffold.qml
         src/Md3/components/Md3Menu.qml
         src/Md3/components/Md3MenuItem.qml

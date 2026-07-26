@@ -50,5 +50,5 @@ Width 360; modal scrim; destination pill
 | `Md3SkeletonPane` | Page / list / cards placeholder layout |
 | `pageSkeleton` | When true, PageHost shows pane while destination loads |
 
-Cold navigation clears the previous page (`displayedIndex = -1`) before showing the skeleton, then plays an enter transition when Ready.
+Cold navigation keeps the previous page visible and stacks a skeleton layer on top as the incoming-page placeholder; when Ready, the skeleton fades out and the normal leave→enter transition runs.
 
