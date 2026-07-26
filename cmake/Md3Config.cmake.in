@@ -117,16 +117,20 @@ if (NOT TARGET Md3plugin_init AND EXISTS "${_MD3_STUBDIR}")
     endif()
 endif()
 
-# Convenience: INTERFACE that pulls plugin with whole-archive semantics
+# Convenience: whole-archive plugin then Md3 (correct ld order for static QML)
 if (TARGET Md3plugin AND NOT TARGET Md3::QmlPlugin)
     add_library(Md3::QmlPlugin INTERFACE IMPORTED GLOBAL)
-    set_target_properties(Md3::QmlPlugin PROPERTIES
-        INTERFACE_LINK_LIBRARIES "$<LINK_LIBRARY:WHOLE_ARCHIVE,Md3plugin>"
-    )
+    set(_md3_qml_link "")
+    list(APPEND _md3_qml_link "$<LINK_LIBRARY:WHOLE_ARCHIVE,Md3plugin>")
     if (TARGET Md3plugin_init)
-        set_property(TARGET Md3::QmlPlugin APPEND PROPERTY
-            INTERFACE_LINK_LIBRARIES "$<LINK_LIBRARY:WHOLE_ARCHIVE,Md3plugin_init>")
+        list(APPEND _md3_qml_link "$<LINK_LIBRARY:WHOLE_ARCHIVE,Md3plugin_init>")
     endif()
+    if (TARGET Md3::Md3)
+        list(APPEND _md3_qml_link "$<LINK_LIBRARY:WHOLE_ARCHIVE,Md3::Md3>")
+    endif()
+    set_target_properties(Md3::QmlPlugin PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${_md3_qml_link}"
+    )
 endif()
 
 if (EXISTS "${_MD3_QMLDIR}")

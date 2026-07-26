@@ -138,7 +138,9 @@ cmake -S . -B build -G Ninja -DMD3_ROOT=/path/to/QML_MD3
 
 | Symptom | Fix |
 |---------|-----|
-| `module "Md3" is not installed` | Add `Q_IMPORT_QML_PLUGIN(Md3Plugin)`; link plugin with `WHOLE_ARCHIVE` / `Md3::QmlPlugin` |
+| `module "Md3" is not installed` | `Q_IMPORT_QML_PLUGIN(Md3Plugin)` + whole-archive plugin **then** Md3 |
+| `undefined reference` to `qml_register_types_Md3` / `qInitResources_*` | Link order: plugin before Md3; use `WHOLE_ARCHIVE` for both. **Re-run** `package-linux.sh` after pulling (NO_CACHEGEN) |
+| `undefined reference` to `qInitResources_qmlcache_*` | Old package with cachegen — rebuild package from latest QML_MD3 |
 | `cannot open output file Md3Create: Is a directory` | Do not create a folder named `Md3Create` under `build/`. Exe is `build/bin/Md3Create` |
 | `undefined reference` to `KWindowEffects` / `KX11Extras` | `sudo apt install libkf6windowsystem-dev`, reconfigure; or rebuild package after installing KF |
 | CMake looks under `build/Md3` | Wrong — put `Md3/` next to **source** `CMakeLists.txt` |
