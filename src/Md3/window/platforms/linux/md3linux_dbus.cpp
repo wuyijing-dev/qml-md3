@@ -20,6 +20,28 @@ QString &desktopIdStorage()
     return id;
 }
 
+/// D-Bus object paths may only contain [A-Za-z0-9_].
+QString sanitizeDbusPathElement(QString id)
+{
+    id = id.trimmed();
+    if (id.endsWith(QLatin1String(".desktop")))
+        id.chop(8);
+    QString out;
+    out.reserve(id.size());
+    for (QChar c : id) {
+        if (c.isLetterOrNumber() || c == QLatin1Char('_') || c == QLatin1Char('-') || c == QLatin1Char('.'))
+            out.append(c == QLatin1Char('-') || c == QLatin1Char('.') ? QLatin1Char('_') : c);
+        else if (c.isSpace())
+            out.append(QLatin1Char('_'));
+    }
+    out.remove(QLatin1Char('.'));
+    while (out.contains(QLatin1String("__")))
+        out.replace(QLatin1String("__"), QLatin1String("_"));
+    if (out.isEmpty() || !out.at(0).isLetter())
+        out.prepend(QStringLiteral("app_"));
+    return out;
+}
+
 } // namespace
 
 QString desktopFileId()
@@ -29,13 +51,12 @@ QString desktopFileId()
 
 void setDesktopFileId(const QString &id)
 {
-    QString clean = id.trimmed();
-    if (clean.endsWith(QLatin1String(".desktop")))
-        clean.chop(8);
-    if (clean.isEmpty())
+    const QString safe = sanitizeDbusPathElement(id);
+    if (safe.isEmpty())
         return;
-    desktopIdStorage() = clean;
-    QGuiApplication::setDesktopFileName(clean);
+    desktopIdStorage() = safe;
+    // Keep a stable XDG desktop id (no spaces).
+    QGuiApplication::setDesktopFileName(safe);
 }
 
 void emitLauncherUpdate(const QVariantMap &properties)
@@ -43,9 +64,11 @@ void emitLauncherUpdate(const QVariantMap &properties)
     if (!QDBusConnection::sessionBus().isConnected())
         return;
 
-    const QString appUri = QStringLiteral("application://%1.desktop").arg(desktopFileId());
+    const QString id = sanitizeDbusPathElement(desktopFileId());
+    const QString appUri = QStringLiteral("application://%1.desktop").arg(id);
+    const QString path = QStringLiteral("/com/canonical/unity/launcherentry/%1").arg(id);
     QDBusMessage signal = QDBusMessage::createSignal(
-        QStringLiteral("/com/canonical/unity/launcherentry/%1").arg(desktopFileId()),
+        path,
         QStringLiteral("com.canonical.Unity.LauncherEntry"),
         QStringLiteral("Update"));
     signal << appUri << properties;

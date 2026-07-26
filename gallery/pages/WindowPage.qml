@@ -249,13 +249,17 @@ Flickable {
                     spacing: 12
                     Text { text: qsTr("色调"); color: Md3Theme.colorScheme.colorOnSurface }
                     Md3Slider {
+                        id: winTintSlider
                         Layout.fillWidth: true
                         from: 0; to: 0.85
                         value: root.appWin ? root.appWin.backdropTint : 0.08
-                        onMoved: {
-                            root.appWin.backdropTint = value
-                            root.appWin.backdropContentTint = Math.min(0.9, value + 0.1)
-                            root.appWin.backdropTitleTint = Math.max(0, value * 0.6)
+                        onMoved: function () {
+                            if (!root.appWin)
+                                return
+                            const v = winTintSlider.value
+                            root.appWin.backdropTint = v
+                            root.appWin.backdropContentTint = Math.min(0.9, v + 0.1)
+                            root.appWin.backdropTitleTint = Math.max(0, v * 0.6)
                         }
                     }
                 }
@@ -354,7 +358,10 @@ Flickable {
                         id: winProgress
                         Layout.fillWidth: true
                         from: 0; to: 1; value: 0.35
-                        onMoved: if (root.appWin) root.appWin.setTaskbarProgress(value)
+                        onMoved: function () {
+                            if (root.appWin)
+                                root.appWin.setTaskbarProgress(winProgress.value)
+                        }
                     }
                     Text {
                         text: Math.round(winProgress.value * 100) + "%"
@@ -673,7 +680,10 @@ Flickable {
                         id: linuxProgress
                         Layout.fillWidth: true
                         from: 0; to: 1; value: 0.35
-                        onMoved: if (root.appWin) root.appWin.setTaskbarProgress(value)
+                        onMoved: function () {
+                            if (root.appWin)
+                                root.appWin.setTaskbarProgress(linuxProgress.value)
+                        }
                     }
                     Text {
                         text: Math.round(linuxProgress.value * 100) + "%"

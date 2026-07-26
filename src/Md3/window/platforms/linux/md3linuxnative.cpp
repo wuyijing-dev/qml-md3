@@ -50,11 +50,11 @@ void Md3WindowHelper::bindWindow(QObject *window)
     auto *qw = qobject_cast<QWindow *>(window);
     if (!qw)
         return;
-    // Wayland app_id / XDG desktop file — groups taskbar entry with .desktop.
+    // Prefer explicit desktop id; never use display name (spaces break D-Bus paths).
     if (!QGuiApplication::desktopFileName().isEmpty())
         Md3Linux::setDesktopFileId(QGuiApplication::desktopFileName());
-    else if (!QGuiApplication::applicationName().isEmpty())
-        Md3Linux::setDesktopFileId(QGuiApplication::applicationName());
+    else
+        Md3Linux::setDesktopFileId(QStringLiteral("appQML_MD3"));
     applyCornerPreference(qw, true);
     qw->requestActivate();
 }
