@@ -27,8 +27,11 @@ Rectangle {
         const w = Window.window
         if (w && w.usesSystemBackdrop) {
             const t = w.backdropTitleTint !== undefined ? w.backdropTitleTint : 0.22
-            return Qt.alpha(Md3Theme.colorScheme.surfaceContainer, Math.max(0.15, t + 0.05))
+            return Qt.alpha(Md3Theme.colorScheme.surfaceContainer, Math.max(0.12, Math.min(0.4, t + 0.05)))
         }
+        // Avoid opaque fill when Window attachment is not ready yet (covers Mica).
+        if (!w)
+            return "transparent"
         return Md3Theme.colorScheme.surface
     }
     clip: true
@@ -166,6 +169,38 @@ Rectangle {
                 height: Math.max(0, root.model.length) * (root.destinationHeight + root.destinationSpacing)
                        - (root.model.length > 0 ? root.destinationSpacing : 0)
 
+            // Active indicator: jumps to the clicked row instantly, then grows
+            // horizontally from center → edges (not a slide from the previous item).
+            property real _indicatorReveal: 1
+            property int _lastIndicatorIndex: -1
+
+            Connections {
+                target: root
+                function onCurrentIndexChanged() {
+                    if (destinations._lastIndicatorIndex < 0) {
+                        destinations._lastIndicatorIndex = root.currentIndex
+                        destinations._indicatorReveal = 1
+                        return
+                    }
+                    if (destinations._lastIndicatorIndex === root.currentIndex)
+                        return
+                    destinations._lastIndicatorIndex = root.currentIndex
+                    destinations._indicatorReveal = 0
+                    indicatorRevealAnim.restart()
+                }
+            }
+
+            NumberAnimation {
+                id: indicatorRevealAnim
+                target: destinations
+                property: "_indicatorReveal"
+                from: 0
+                to: 1
+                duration: Md3Motion.short4
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.emphasizedDecelerate
+            }
+
             Rectangle {
                 id: activeIndicator
                 x: root.indicatorInset
@@ -173,7 +208,7 @@ Rectangle {
                        ? Math.max(root.collapsedIndicatorWidth, destinations.width - root.indicatorInset * 2)
                        : root.collapsedIndicatorWidth
                 height: root.expanded ? root.destinationHeight : root.collapsedIndicatorHeight
-                // Keep vertical center fixed while morphing (don't bind y to live height)
+                // Instant Y — no travel from previous destination
                 y: root.destinationY(root.currentIndex)
                    + (root.destinationHeight - (root.expanded ? root.destinationHeight
                                                               : root.collapsedIndicatorHeight)) / 2
@@ -181,6 +216,12 @@ Rectangle {
                 color: Md3Theme.colorScheme.secondaryContainer
                 visible: root.model.length > 0
                 z: 0
+                transform: Scale {
+                    origin.x: activeIndicator.width / 2
+                    origin.y: activeIndicator.height / 2
+                    xScale: Math.max(0.001, destinations._indicatorReveal)
+                    yScale: 1
+                }
 
                 Behavior on x {
                     NumberAnimation {
@@ -189,14 +230,8 @@ Rectangle {
                         easing.bezierCurve: Md3Motion.emphasized
                     }
                 }
-                Behavior on y {
-                    NumberAnimation {
-                        duration: root.expandDuration
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Md3Motion.emphasized
-                    }
-                }
                 Behavior on width {
+                    enabled: !indicatorRevealAnim.running
                     NumberAnimation {
                         duration: root.expandDuration
                         easing.type: Easing.BezierSpline
@@ -341,8 +376,10 @@ Rectangle {
                         onClicked: function (mouse) {
                             const local = mapToItem(hit, mouse.x, mouse.y)
                             ripple.pulse(local.x, local.y)
+                            // Page switch first (parent navigateTo), then indicator morph.
+                            if (dest.index !== root.currentIndex)
+                                root.currentIndexChangedByUser(dest.index)
                             root.currentIndex = dest.index
-                            root.currentIndexChangedByUser(dest.index)
                         }
                     }
                 }

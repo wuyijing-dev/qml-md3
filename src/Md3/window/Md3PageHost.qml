@@ -2,11 +2,11 @@ import QtQuick
 import QtQuick.Window
 
 /*
-  Instant navigation host with MD3 page transitions + skeleton loading:
-  - Revisit: animated swap (or instant if pageTransition === "none")
-  - Cold open: keep previous page, skeleton overlays as the incoming-page
-    placeholder until Ready, then animate previous → next
+  Instant navigation host with MD3 / WinUI-style page transitions:
+  - Revisit (cached): animated swap (or instant if pageTransition === "none")
+  - Cold open: sync (asynchronous:false) creates immediately; async shows skeleton
   - cacheMode: "none" | "one" | "lru" | "all" | "adaptive"
+    WinUI-like low memory: "one" (Disabled) or "lru" with limit 2 (Enabled tiny cache)
     adaptive: keep more pages while the user is active; trim to 1 after idle
 */
 Item {
@@ -62,6 +62,9 @@ Item {
     property int transitionTo: -1
     property int transitionDir: 1
     property real transitionProgress: 1
+    /// Defer enter transition after Loader.Ready so first layout doesn't hitch the anim.
+    property int _pendingShowIndex: -1
+    property int _pendingShowPasses: 0
 
     function entryAt(index) {
         if (!model || index < 0 || index >= model.length)
@@ -298,13 +301,42 @@ Item {
         pageAnim.start()
     }
 
+    function _flushPendingShow() {
+        const index = _pendingShowIndex
+        if (index < 0 || index !== currentIndex)
+            return
+        const ldr = _loaderAt(index)
+        if (!ldr || ldr.status !== Loader.Ready || !ldr.item)
+            return
+        if (displayedIndex === index) {
+            _pendingShowIndex = -1
+            return
+        }
+        // One extra frame lets bindings/layout from Ready settle before slide starts.
+        if (_pendingShowPasses < 1) {
+            _pendingShowPasses++
+            Qt.callLater(_flushPendingShow)
+            return
+        }
+        _pendingShowIndex = -1
+        _startTransition(displayedIndex, index)
+    }
+
     function _tryShow(index) {
         const ldr = _loaderAt(index)
         if (!ldr)
             return false
         if (ldr.status === Loader.Ready && ldr.item) {
-            if (displayedIndex !== index)
-                _startTransition(displayedIndex, index)
+            if (displayedIndex !== index) {
+                // Async: don't start slide in the same frame as instantiate/layout.
+                if (asynchronous && !transitioning) {
+                    _pendingShowIndex = index
+                    _pendingShowPasses = 0
+                    Qt.callLater(_flushPendingShow)
+                } else {
+                    _startTransition(displayedIndex, index)
+                }
+            }
             return true
         }
         return false
@@ -317,6 +349,7 @@ Item {
             return
 
         currentIndex = index
+        _pendingShowIndex = -1
         _touchLru(index)
         _setKeep(index, true)
         noteActivity()
@@ -391,7 +424,9 @@ Item {
         to: 1
         duration: root.pageTransitionDuration
         easing.type: Easing.BezierSpline
-        easing.bezierCurve: Md3Motion.emphasized
+        easing.bezierCurve: root.pageTransition === "slide"
+                            ? Md3Motion.emphasizedDecelerate
+                            : Md3Motion.emphasized
         onFinished: root._finishTransition()
     }
 
@@ -468,9 +503,12 @@ Item {
         anchors.fill: parent
         color: {
             const w = Window.window
-            if (w && w.usesSystemBackdrop) {
-                const t = w.backdropContentTint !== undefined ? w.backdropContentTint : 0.42
-                return Qt.alpha(Md3Theme.colorScheme.surface, t)
+            // Never fall back to opaque surface — that paints over DWM Mica/Acrylic.
+            if (!w)
+                return "transparent"
+            if (w.usesSystemBackdrop) {
+                const t = w.backdropContentTint !== undefined ? w.backdropContentTint : 0.12
+                return Qt.alpha(Md3Theme.colorScheme.surface, Math.min(0.55, Math.max(0, t)))
             }
             return Md3Theme.colorScheme.surface
         }
@@ -498,10 +536,16 @@ Item {
 
             active: keep
             enabled: (isDisplayed && !root.transitioning) || isEntering
-            asynchronous: true
+            asynchronous: root.asynchronous
             z: isEntering ? 3 : (isLeaving ? 2 : (isDisplayed ? 1 : 0))
 
             opacity: {
+                // WinUI SlideNavigationTransition keeps both pages opaque while sliding.
+                if (mode === "slide") {
+                    if (isEntering || isLeaving || (isDisplayed && !root.transitioning))
+                        return 1
+                    return 0
+                }
                 if (isEntering) {
                     if (mode === "fadeThrough")
                         return t < 0.35 ? 0 : (t - 0.35) / 0.65
@@ -622,9 +666,12 @@ Item {
         radius: Md3Theme.shape.large
         color: {
             const w = Window.window
-            if (w && w.usesSystemBackdrop) {
-                const t = w.backdropContentTint !== undefined ? w.backdropContentTint : 0.42
-                return Qt.alpha(Md3Theme.colorScheme.surface, Math.max(0.92, t))
+            if (!w)
+                return "transparent"
+            if (w.usesSystemBackdrop) {
+                const t = w.backdropContentTint !== undefined ? w.backdropContentTint : 0.12
+                // Skeleton may be denser, but must not go fully opaque over Mica.
+                return Qt.alpha(Md3Theme.colorScheme.surface, Math.min(0.72, Math.max(0.35, t + 0.25)))
             }
             return Md3Theme.colorScheme.surface
         }

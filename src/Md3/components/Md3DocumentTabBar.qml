@@ -31,8 +31,23 @@ Item {
     width: parent ? parent.width : 400
     clip: false
 
-    readonly property color barColor: Md3Theme.colorScheme.surfaceContainerHigh
-    readonly property color tabSelected: Md3Theme.colorScheme.surface
+    readonly property color barColor: {
+        const w = Window.window
+        if (w && w.usesSystemBackdrop) {
+            const t = w.backdropTitleTint !== undefined ? w.backdropTitleTint : 0.08
+            return Qt.alpha(Md3Theme.colorScheme.surfaceContainerHigh,
+                            Math.min(0.45, Math.max(0.08, t + 0.12)))
+        }
+        return Md3Theme.colorScheme.surfaceContainerHigh
+    }
+    readonly property color tabSelected: {
+        const w = Window.window
+        if (w && w.usesSystemBackdrop) {
+            const t = w.backdropContentTint !== undefined ? w.backdropContentTint : 0.12
+            return Qt.alpha(Md3Theme.colorScheme.surface, Math.min(0.55, Math.max(0.15, t + 0.15)))
+        }
+        return Md3Theme.colorScheme.surface
+    }
     readonly property color tabHover: Md3Theme.colorScheme.withOpacity(
                                           Md3Theme.colorScheme.colorOnSurface, 0.05)
     readonly property real tabRadius: 8

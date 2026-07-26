@@ -135,8 +135,8 @@ Rectangle {
         const base = Md3Theme.colorScheme.surfaceContainer
         if (root.targetWindow && root.targetWindow.usesSystemBackdrop) {
             const t = root.targetWindow.backdropTitleTint !== undefined
-                      ? root.targetWindow.backdropTitleTint : 0.18
-            return Qt.alpha(base, t)
+                      ? root.targetWindow.backdropTitleTint : 0.05
+            return Qt.alpha(base, Math.min(0.4, Math.max(0.04, t)))
         }
         return base
     }

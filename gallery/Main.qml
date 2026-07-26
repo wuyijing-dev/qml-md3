@@ -18,17 +18,21 @@ Md3ApplicationWindow {
     navigationRail: true
     railExpanded: false
     railHeader: qsTr("组件图库")
-    // Adaptive cache: keep more pages while navigating; trim to 1 after idle
+    // WinUI3-like Frame navigation (low memory + smooth enter):
+    // - adaptive@3 + idle trim → usually 1–2 pages resident
+    // - async load: keep previous page on screen (no UI freeze / skeleton)
+    // - after Ready, start slide next frame(s) so first layout doesn't hitch the anim
+    // - slide @450ms — slower, closer to WinUI NavigationThemeTransition pacing
     pageCacheMode: "adaptive"
-    pageCacheLimit: 4
-    pageIdleTrimMs: 45000
-    pagePrefetch: false
+    pageCacheLimit: 3
+    pageIdleTrimMs: 20000
+    pagePrefetch: true
     pageWarmStart: false
     pageAsync: true
     pagePadding: 20
-    pageSkeleton: true
-    pageTransition: "fadeThrough"
-    pageTransitionDuration: Md3Motion.spatialDuration
+    pageSkeleton: false
+    pageTransition: "slide"
+    pageTransitionDuration: 450
 
     // Win11-style tabs — managed API handles close / add / reorder / tear-off
     documentTabsEnabled: true

@@ -26,9 +26,9 @@ Window {
     readonly property bool usesSystemBackdrop: systemBackdrop > 0
     /// How much MD3 surface tints over Mica (0=pure wallpaper blur, 1=solid).
     /// Keep low — Fluent apps are mostly material with light tint.
-    property real backdropTint: 0.08
-    property real backdropContentTint: 0.18
-    property real backdropTitleTint: 0.06
+    property real backdropTint: 0.06
+    property real backdropContentTint: 0.12
+    property real backdropTitleTint: 0.05
     /// Title-bar pin (always-on-top). On by default.
     property bool showPinButton: true
     property bool pinned: false
@@ -448,14 +448,23 @@ Window {
     }
 
     function setSystemBackdropMode(mode) {
+        const turningOn = mode > 0 && systemBackdrop <= 0
         systemBackdrop = mode
-        // Linux：降低内容遮罩透明度，否则半透明/模糊几乎看不见
-        if (Md3WindowCapabilities.isLinux && mode > 0) {
-            backdropTint = 0.12
-            backdropContentTint = 0.28
-            backdropTitleTint = 0.08
+        if (mode > 0) {
+            // Linux：半透明要看得见模糊，遮罩略高
+            if (Md3WindowCapabilities.isLinux) {
+                backdropTint = 0.12
+                backdropContentTint = 0.28
+                backdropTitleTint = 0.08
+            } else if (Md3WindowCapabilities.isWindows && turningOn) {
+                // Fluent：刚打开材质时用低色调，避免内容层把云母/亚克力盖成实心
+                backdropTint = 0.06
+                backdropContentTint = 0.12
+                backdropTitleTint = 0.05
+            }
         }
-        _syncWinNative()
+        // Let Window.color binding flip to transparent before DWM attributes.
+        Qt.callLater(function () { root._syncWinNative() })
     }
 
     /// Flash the Windows taskbar button (attention).

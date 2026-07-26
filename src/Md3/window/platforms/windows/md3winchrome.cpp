@@ -5,6 +5,7 @@
 #include <QImage>
 #include <QScreen>
 #include <QWindow>
+#include <QColor>
 
 #if defined(Q_OS_WIN)
 #  include <dwmapi.h>
@@ -91,6 +92,8 @@ void Md3WindowHelper::setSystemBackdrop(QObject *window, int backdrop)
     DwmSetWindowAttribute(hwnd, DWMWA_REDIRECTIONBITMAP_ALPHA, &alpha, sizeof(alpha));
 
     if (type != DWMSBT_NONE) {
+        // QML Window.color must be transparent; reinforce here for DWM sampling.
+        qw->setColor(QColor(Qt::transparent));
         const MARGINS margins{ -1, -1, -1, -1 };
         DwmExtendFrameIntoClientArea(hwnd, &margins);
         const COLORREF noColor = DWMWA_COLOR_NONE;
