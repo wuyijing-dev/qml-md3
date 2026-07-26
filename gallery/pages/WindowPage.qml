@@ -564,9 +564,23 @@ Flickable {
                              && !(root.appWin && root.appWin.windowNative
                                   ? root.appWin.windowNative.blurBehindAvailable()
                                   : nativeHelper.blurBehindAvailable())
-                    text: qsTr("提示：未检测到模糊协议。Debian/Ubuntu 可装 libkf6windowsystem-dev 后重新 cmake；Plasma 系统设置 → 桌面特效 → 启用「模糊」。")
+                    text: qsTr("提示：未检测到模糊协议。Debian/Ubuntu 可装 libkf6windowsystem-dev 后重新 cmake；也可点下方按钮一键启用 KWin 模糊并打开设置。")
                     color: Md3Theme.colorScheme.error
                     font.pixelSize: Md3Theme.typography.bodySmall.size
+                }
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    visible: Md3WindowCapabilities.isLinux
+                    Md3Button {
+                        text: qsTr("一键开启模糊设置")
+                        onClicked: {
+                            if (root.appWin)
+                                root.appWin.openBlurSettings()
+                            else
+                                nativeHelper.openBlurSettings()
+                        }
+                    }
                 }
                 Md3ButtonGroup {
                     enabled: Md3WindowCapabilities.isLinux

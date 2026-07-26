@@ -1,7 +1,12 @@
 #include "md3linux_p.h"
 
 #include <QGuiApplication>
+#include <QProcess>
 #include <QWindow>
+
+#include <QDBusConnection>
+#include <QDBusInterface>
+#include <QDBusReply>
 
 #if defined(MD3_HAVE_KWINDOWSYSTEM)
 #  include <KWindowEffects>
@@ -14,6 +19,33 @@
 
 namespace Md3Linux {
 
+namespace {
+
+bool tryLoadKwinEffect(const QString &effectId)
+{
+    QDBusInterface effects(QStringLiteral("org.kde.KWin"),
+                           QStringLiteral("/Effects"),
+                           QStringLiteral("org.kde.kwin.Effects"),
+                           QDBusConnection::sessionBus());
+    if (!effects.isValid())
+        return false;
+
+    QDBusReply<bool> loaded = effects.call(QStringLiteral("isEffectLoaded"), effectId);
+    if (loaded.isValid() && loaded.value())
+        return true;
+
+    effects.call(QStringLiteral("loadEffect"), effectId);
+    QDBusReply<bool> after = effects.call(QStringLiteral("isEffectLoaded"), effectId);
+    return after.isValid() && after.value();
+}
+
+bool launchSettings(const QString &program, const QStringList &args)
+{
+    return QProcess::startDetached(program, args);
+}
+
+} // namespace
+
 bool blurBehindAvailable()
 {
 #if defined(MD3_HAVE_KWINDOWSYSTEM)
@@ -21,6 +53,40 @@ bool blurBehindAvailable()
 #else
     return false;
 #endif
+}
+
+QString openCompositorBlurSettings()
+{
+    const bool blurOn = tryLoadKwinEffect(QStringLiteral("blur"));
+    // Optional companion effect used with translucent surfaces.
+    tryLoadKwinEffect(QStringLiteral("contrast"));
+
+    struct Cmd { QString program; QStringList args; };
+    const Cmd candidates[] = {
+        { QStringLiteral("systemsettings"), { QStringLiteral("kcm_kwin_effects") } },
+        { QStringLiteral("systemsettings"), { QStringLiteral("kwincompositing") } },
+        { QStringLiteral("kcmshell6"), { QStringLiteral("kcm_kwin_effects") } },
+        { QStringLiteral("kcmshell6"), { QStringLiteral("kwincompositing") } },
+        { QStringLiteral("systemsettings5"), { QStringLiteral("kcm_kwin_effects") } },
+        { QStringLiteral("kcmshell5"), { QStringLiteral("kwincompositing") } },
+        { QStringLiteral("gnome-control-center"), { QStringLiteral("multitasking") } },
+    };
+
+    bool opened = false;
+    for (const Cmd &c : candidates) {
+        if (launchSettings(c.program, c.args)) {
+            opened = true;
+            break;
+        }
+    }
+
+    if (blurOn && opened)
+        return QStringLiteral("已启用 KWin「模糊」，并打开桌面特效设置");
+    if (blurOn && !opened)
+        return QStringLiteral("已启用 KWin「模糊」；未能自动打开设置，请手动确认特效已勾选");
+    if (!blurOn && opened)
+        return QStringLiteral("已打开桌面特效设置 — 请找到并启用「模糊 / Blur」（非 Plasma 时可能无效）");
+    return QStringLiteral("无法打开设置。Plasma：系统设置 → 桌面特效 → 启用「模糊」；并安装 libkf6windowsystem-dev 后重编");
 }
 
 QString applyBlurBehind(QWindow *window, bool enable)

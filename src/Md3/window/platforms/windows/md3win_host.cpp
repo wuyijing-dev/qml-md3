@@ -123,3 +123,9 @@ bool Md3WindowHelper::blurBehindAvailable() const
 {
     return false;
 }
+
+bool Md3WindowHelper::openBlurSettings()
+{
+    reportNativeStatus(QStringLiteral("当前平台无 Linux 合成器模糊设置入口"));
+    return false;
+}

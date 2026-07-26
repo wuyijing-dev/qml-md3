@@ -553,6 +553,10 @@ Window {
         return windowHelper.setIdleInhibit(!!inhibit, reason || "")
     }
 
+    function openBlurSettings() {
+        return windowHelper.openBlurSettings()
+    }
+
     onPinnedChanged: {
         if (windowHelper.alwaysOnTopSupported)
             windowHelper.setAlwaysOnTop(root, root.pinned)

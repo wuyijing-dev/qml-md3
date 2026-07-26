@@ -98,3 +98,11 @@ bool Md3WindowHelper::blurBehindAvailable() const
 {
     return Md3Linux::blurBehindAvailable();
 }
+
+bool Md3WindowHelper::openBlurSettings()
+{
+    const QString status = Md3Linux::openCompositorBlurSettings();
+    reportNativeStatus(status);
+    // Treat as success if we either loaded the effect or opened a settings UI.
+    return status.contains(QStringLiteral("已启用")) || status.contains(QStringLiteral("已打开"));
+}

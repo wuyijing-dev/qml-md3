@@ -162,6 +162,8 @@ public:
     Q_INVOKABLE bool setIdleInhibit(bool inhibit, const QString &reason = QString());
     /// True when compositor blur protocol is available (KF6 / X11 KWin atom).
     Q_INVOKABLE bool blurBehindAvailable() const;
+    /// One-click: enable KWin Blur when possible and open desktop-effects settings.
+    Q_INVOKABLE bool openBlurSettings();
 
     /// Windows accent / wallpaper sampling for Material You seed.
     Q_INVOKABLE QString systemAccentColor() const;

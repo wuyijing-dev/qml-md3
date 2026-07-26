@@ -23,6 +23,9 @@ QString resolveIconPath(const QUrl &iconUrl);
 QString applyBlurBehind(QWindow *window, bool enable);
 bool blurBehindAvailable();
 
+/// Try load KWin blur via D-Bus, then open Plasma desktop-effects settings.
+QString openCompositorBlurSettings();
+
 /// Keep-above via KF6 when possible, else Qt flag. Returns status.
 QString setKeepAbove(QWindow *window, bool onTop);
 
