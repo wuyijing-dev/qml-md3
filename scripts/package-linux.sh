@@ -90,6 +90,10 @@ info "PREFIX      = $PREFIX"
 info "Qt prefix   = $QT_PREFIX"
 info "Generator   = $GENERATOR ($JOBS jobs, $BUILD_TYPE)"
 
+# Always clean build tree so NO_CACHEGEN / install rules from latest sources apply
+info "Clean build dir $BUILD_DIR"
+rm -rf "$BUILD_DIR"
+
 CMAKE_ARGS=(
     -S "$ROOT"
     -B "$BUILD_DIR"
@@ -122,6 +126,23 @@ for n in libMd3.a libMd3.so; do
     fi
 done
 [[ -n "$LIB_HIT" ]] || die "missing libMd3 under $PREFIX/lib"
+
+# Guard: plugin must not require qmlcache symbols missing from the package
+PLUGIN_HIT=""
+for n in libMd3plugin.a libMd3plugin.so; do
+    if [[ -f "$PREFIX/lib/$n" ]]; then
+        PLUGIN_HIT="$PREFIX/lib/$n"
+        break
+    fi
+done
+if [[ -n "$PLUGIN_HIT" ]] && command -v nm >/dev/null 2>&1; then
+    if nm -u "$PLUGIN_HIT" 2>/dev/null | grep -q "qInitResources_qmlcache"; then
+        die "package still references qInitResources_qmlcache (NO_CACHEGEN not applied). Delete $BUILD_DIR and retry."
+    fi
+    if ! nm "$LIB_HIT" 2>/dev/null | grep -q "qml_register_types_Md3"; then
+        die "libMd3 is missing qml_register_types_Md3 — package incomplete"
+    fi
+fi
 
 cat > "$PREFIX/README.md" <<EOF
 # Md3 packaged library
