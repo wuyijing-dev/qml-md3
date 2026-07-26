@@ -56,15 +56,32 @@ Produces target **`Md3`** / **`Md3::Md3`** (static QML module `URI Md3`). Galler
 ### Linux — one-click package (libs + cmake + headers)
 
 ```bash
-chmod +x scripts/package-linux.sh
 ./scripts/package-linux.sh
 # or: PREFIX=$HOME/opt/Md3 CMAKE_PREFIX_PATH=$HOME/Qt/6.10.2/gcc_64 ./scripts/package-linux.sh
 ```
 
-Writes a standalone tree under `dist/Md3/` (`lib/`, `include/`, `lib/cmake/Md3/`) plus `dist/Md3-linux-*.tar.gz`. Consumers:
+### Windows — one-click package
+
+```powershell
+.\scripts\package-windows.ps1
+# or:
+.\scripts\package-windows.ps1 -CmakePrefixPath "D:\Qt\6.10.2\mingw_64"
+# Place next to Md3Create.exe as fixed sibling name "Md3":
+.\scripts\package-windows.ps1 -CreateBundleDir "D:\path\to\Md3CreateDir"
+```
+
+Both write `dist/Md3/` (`lib/`, `include/`, `lib/cmake/Md3/`) plus a zip/tarball. With Md3 Create, keep this layout:
+
+```text
+SomeFolder\
+  Md3Create.exe
+  Md3\              # fixed name — same directory as the wizard
+```
+
+Generated apps get `./Md3` in the project root (same directory as `CMakeLists.txt`).
 
 ```cmake
-list(APPEND CMAKE_PREFIX_PATH "/path/to/dist/Md3")
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Md3")
 find_package(Md3 REQUIRED)
 target_link_libraries(app PRIVATE Md3::Md3)
 ```
