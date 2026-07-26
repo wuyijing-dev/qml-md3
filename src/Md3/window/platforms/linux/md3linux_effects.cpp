@@ -12,6 +12,10 @@
 #  include <KWindowEffects>
 #  include <KWindowSystem>
 #  include <netwm_def.h>
+#  if __has_include(<KX11Extras>)
+#    include <KX11Extras>
+#    define MD3_USE_KX11EXTRAS 1
+#  endif
 #endif
 
 // Note: do not use QtGui private QPA headers (not installed on many distros).
@@ -20,6 +24,11 @@
 namespace Md3Linux {
 
 namespace {
+
+bool isXcbPlatform()
+{
+    return QGuiApplication::platformName().contains(QLatin1String("xcb"), Qt::CaseInsensitive);
+}
 
 bool tryLoadKwinEffect(const QString &effectId)
 {
@@ -58,7 +67,6 @@ bool blurBehindAvailable()
 QString openCompositorBlurSettings()
 {
     const bool blurOn = tryLoadKwinEffect(QStringLiteral("blur"));
-    // Optional companion effect used with translucent surfaces.
     tryLoadKwinEffect(QStringLiteral("contrast"));
 
     struct Cmd { QString program; QStringList args; };
@@ -121,7 +129,20 @@ QString setKeepAbove(QWindow *window, bool onTop)
 
     window->setFlag(Qt::WindowStaysOnTopHint, onTop);
 
-#if defined(MD3_HAVE_KWINDOWSYSTEM)
+#if defined(MD3_USE_KX11EXTRAS)
+    // KF6+: X11-only APIs moved to KX11Extras (no longer on KWindowSystem).
+    if (isXcbPlatform()) {
+        if (onTop)
+            KX11Extras::setState(window->winId(), NET::KeepAbove);
+        else
+            KX11Extras::clearState(window->winId(), NET::KeepAbove);
+        return onTop ? QStringLiteral("已请求置顶（KX11Extras KeepAbove）")
+                     : QStringLiteral("已取消置顶");
+    }
+    return onTop
+            ? QStringLiteral("已设置 Qt::WindowStaysOnTopHint（Wayland 由合成器决定是否生效）")
+            : QStringLiteral("已取消置顶标志");
+#elif defined(MD3_HAVE_KWINDOWSYSTEM)
     if (onTop)
         KWindowSystem::setState(window->winId(), NET::KeepAbove);
     else
@@ -149,7 +170,12 @@ QString forceRaise(QWindow *window)
     window->raise();
     window->requestActivate();
 
-#if defined(MD3_HAVE_KWINDOWSYSTEM)
+#if defined(MD3_USE_KX11EXTRAS)
+    if (isXcbPlatform()) {
+        KX11Extras::forceActiveWindow(window->winId());
+        return QStringLiteral("已调用 KX11Extras::forceActiveWindow / raise");
+    }
+#elif defined(MD3_HAVE_KWINDOWSYSTEM)
     KWindowSystem::forceActiveWindow(window->winId());
     return QStringLiteral("已调用 forceActiveWindow / raise");
 #endif
