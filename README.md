@@ -41,6 +41,9 @@ Rectangle {
 
 ## Build
 
+完整打包与「同目录 `./Md3`」约定见 **[docs/packaging.md](docs/packaging.md)**。  
+接入方式总览见 **[docs/integration.md](docs/integration.md)**。
+
 ### Library only (no Gallery)
 
 ```powershell
@@ -145,13 +148,14 @@ int main(int argc, char *argv[]) {
 ## Docs
 
 - [docs/api/README.md](docs/api/README.md) — **完整控件 API**（一控件一文档，含全部属性/信号/方法）
+- [docs/packaging.md](docs/packaging.md) — **预编译包 / 同目录 `Md3/` / 静态插件**
 - [docs/integration.md](docs/integration.md) — CMake + `Md3::run`
 - [docs/tokens.md](docs/tokens.md) — 主题令牌
 - [CHANGELOG.md](CHANGELOG.md)
 
-Sibling tools (repo parent `QML_MD3/`):
+Sibling tools:
 
-- [`../md3-create`](../md3-create) — **QML 新建工程向导**（选 Qt 版本 / 模板，生成接入本库的应用）
+- [QML_Md3_Generation](https://github.com/wuyijing-dev/QML_Md3_Generation) — **QML 新建工程向导**（同目录 `Md3/` 包）
 
 Regenerate QML API pages after editing controls:
 
