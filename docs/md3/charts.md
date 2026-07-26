@@ -1,34 +1,24 @@
 # Line chart
 
-## Sources
-- Material 3 color tokens
-- **Renderer:** Qt Quick Scene Graph (`QSGGeometry`) — GPU path used by production chart UIs
-- Downsample: min/max buckets ≈ pixel density (same idea as LTTB / trading terminals)
-- Archived: `src/Md3/components/archive/Md3LineChart.Canvas.qml` (pure QML Canvas — too slow)
+## Approach
+| Layer | Role |
+|-------|------|
+| **`Md3LineChart.qml`** | `QtQuick.Shapes` GPU stroke (`RoundCap` / `RoundJoin`) — Canvas-quality look |
+| **`Md3ChartData` (C++)** | Million-scale generate / ingest + min/max downsample only |
 
-## Why not Canvas / QPainter?
-| Path | Role |
-|------|------|
-| QML `Canvas` | JS + CPU raster — unsuitable for large / animated series |
-| `QQuickPaintedItem` / QPainter | Still CPU blit each frame |
-| **Scene Graph geometry** | Upload verts once per update; GPU draws strips — industry default in Qt |
+QML cannot paint a million vertices every frame. After downsample to ~2.5× plot width, Shapes is fast and looks like the old Canvas charts.
 
-## Md3LineChart (C++)
+## Md3LineChart
 | API | Notes |
 |-----|-------|
-| `values` / `series` | Small/medium series from QML |
-| `fillSine(n)` / `setFloatValues(bytes)` | Million-scale — build or ingest in C++ |
-| `rawPointCount` / `renderedPointCount` | Diagnostics |
-| `showArea` / `smooth` / `showDots` / `showGrid` | Visual toggles |
-| `minY` / `maxY` | Optional fixed scale |
+| `values` / `series` | Prefer already-small or `Md3ChartData.points` |
+| `live` | Small animated sine in QML (`FrameAnimation`) |
+| Theme | Defaults bind `Md3Theme` (`primary`, `outlineVariant`, …) |
 
-Future bar / area / scatter charts should share the same Scene Graph + downsample pattern.
-
-## Gallery performance HUD
-Not part of the Md3 module. Lives under `gallery/`:
-
-| File | Role |
-|------|------|
-| `gallery/performancemonitor.*` | Real `frameSwapped` FPS + Win process CPU / working set |
-| `gallery/PerformancePanel.qml` | Floating HUD using `Md3LineChart` |
-| Title-bar `speed` toggle | Show / hide panel |
+## Md3ChartData
+| API | Notes |
+|-----|-------|
+| `fillSine(n)` | Build in C++ |
+| `points` | Downsampled `number[]` for the Shape chart |
+| `rawCount` / `pointCount` | Diagnostics |
+| `targetPoints` | Cap after downsample (set from chart width) |

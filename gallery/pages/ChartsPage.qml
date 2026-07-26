@@ -5,25 +5,6 @@ import Md3
 Item {
     id: root
 
-    property real phase: 0
-
-    readonly property var liveValues: {
-        const p = root.phase
-        const out = []
-        for (let i = 0; i < 40; ++i) {
-            const t = p + i * 0.22
-            out.push(50 + Math.sin(t) * 28 + Math.sin(t * 0.37) * 12)
-        }
-        return out
-    }
-
-    Timer {
-        interval: 32
-        running: root.visible
-        repeat: true
-        onTriggered: root.phase += 0.08
-    }
-
     Flickable {
         anchors.fill: parent
         contentWidth: width
@@ -42,7 +23,7 @@ Item {
             }
             Text {
                 Layout.fillWidth: true
-                text: qsTr("C++ Scene Graph 折线图：CPU 降采样 + GPU 几何。百万点请用 fillSine() / setFloatValues()，勿经 QML 传大数组。")
+                text: qsTr("QML Shapes 描边（圆角接合）+ Md3ChartData C++ 降采样。百万点先在 C++ 生成/压缩，再交给 Shape 绘制。")
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: Md3Theme.typography.bodyMedium.size
                 wrapMode: Text.Wrap
@@ -63,16 +44,14 @@ Item {
                     Md3LineChart {
                         width: parent.width
                         height: 160
-                        values: root.liveValues
+                        live: root.visible
+                        livePointCount: 48
                         showDots: false
                         showArea: true
+                        smooth: true
                         minY: 0
                         maxY: 100
                         horizontalGridLines: 4
-                        lineColor: Md3Theme.colorScheme.primary
-                        fillColor: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.primary, 0.20)
-                        gridColor: Md3Theme.colorScheme.outlineVariant
-                        axisLabelColor: Md3Theme.colorScheme.colorOnSurfaceVariant
                     }
                 }
             }
@@ -102,9 +81,8 @@ Item {
                         ]
                         showDots: true
                         showArea: true
+                        smooth: true
                         horizontalGridLines: 4
-                        gridColor: Md3Theme.colorScheme.outlineVariant
-                        axisLabelColor: Md3Theme.colorScheme.colorOnSurfaceVariant
                     }
                 }
             }
@@ -120,38 +98,44 @@ Item {
                         width: parent.width
                         Text {
                             Layout.fillWidth: true
-                            text: qsTr("Large series (GPU + downsample)")
+                            text: qsTr("Large series (C++ downsample → Shapes)")
                             color: Md3Theme.colorScheme.colorOnSurface
                             font.pixelSize: Md3Theme.typography.titleSmall.size
                         }
                         Md3Button {
-                            text: bigChart.rawPointCount >= 1000000 ? qsTr("1M pts") : qsTr("生成 100万点")
+                            text: bigData.rawCount >= 1000000 ? qsTr("1M pts") : qsTr("生成 100万点")
                             variant: Md3Button.Outlined
-                            onClicked: bigChart.fillSine(1000000)
+                            onClicked: {
+                                bigData.targetPoints = Math.max(64, Math.floor(bigChart.width * 2.5))
+                                bigData.fillSine(1000000)
+                            }
                         }
                     }
                     Text {
                         width: parent.width
-                        visible: bigChart.rawPointCount > 0
-                        text: qsTr("原始 %1 点 → 渲染 %2 点（Scene Graph）")
-                              .arg(bigChart.rawPointCount)
-                              .arg(bigChart.renderedPointCount)
+                        visible: bigData.rawCount > 0
+                        text: qsTr("原始 %1 点 → 绘制 %2 点（Shapes）")
+                              .arg(bigData.rawCount)
+                              .arg(bigData.pointCount)
                         color: Md3Theme.colorScheme.colorOnSurfaceVariant
                         font.pixelSize: Md3Theme.typography.bodySmall.size
                         wrapMode: Text.Wrap
                     }
+                    Md3ChartData { id: bigData }
                     Md3LineChart {
                         id: bigChart
                         width: parent.width
                         height: 160
+                        values: bigData.points
                         smooth: false
                         showDots: false
                         showArea: true
                         horizontalGridLines: 4
-                        lineColor: Md3Theme.colorScheme.primary
-                        fillColor: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.primary, 0.20)
-                        gridColor: Md3Theme.colorScheme.outlineVariant
-                        axisLabelColor: Md3Theme.colorScheme.colorOnSurfaceVariant
+                        onWidthChanged: {
+                            if (bigData.rawCount > 0) {
+                                bigData.targetPoints = Math.max(64, Math.floor(width * 2.5))
+                            }
+                        }
                     }
                 }
             }
@@ -175,9 +159,7 @@ Item {
                         smooth: false
                         showDots: true
                         lineColor: Md3Theme.colorScheme.tertiary
-                        fillColor: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.tertiary, 0.2)
-                        gridColor: Md3Theme.colorScheme.outlineVariant
-                        axisLabelColor: Md3Theme.colorScheme.colorOnSurfaceVariant
+                        fillColor: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.tertiary, 0.22)
                         horizontalGridLines: 3
                     }
                 }

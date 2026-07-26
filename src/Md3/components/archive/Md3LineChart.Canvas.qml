@@ -1,8 +1,7 @@
 import QtQuick
 
-/// ARCHIVED — pure QML Canvas implementation.
-/// Kept for reference only. Production chart is C++ Scene Graph: src/Md3/charts/md3linechart.*
-/// Do not re-add this file to qt_add_qml_module.
+/// ARCHIVED — pure QML Canvas line chart (reference).
+/// Production: Md3LineChart.qml (Shapes) + Md3ChartData (C++ downsample).
 Item {
     id: root
 
