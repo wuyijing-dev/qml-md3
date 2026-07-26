@@ -53,6 +53,23 @@ cmake --install build-lib --prefix dist
 
 Produces target **`Md3`** / **`Md3::Md3`** (static QML module `URI Md3`). Gallery is not built.
 
+### Linux — one-click package (libs + cmake + headers)
+
+```bash
+chmod +x scripts/package-linux.sh
+./scripts/package-linux.sh
+# or: PREFIX=$HOME/opt/Md3 CMAKE_PREFIX_PATH=$HOME/Qt/6.10.2/gcc_64 ./scripts/package-linux.sh
+```
+
+Writes a standalone tree under `dist/Md3/` (`lib/`, `include/`, `lib/cmake/Md3/`) plus `dist/Md3-linux-*.tar.gz`. Consumers:
+
+```cmake
+list(APPEND CMAKE_PREFIX_PATH "/path/to/dist/Md3")
+find_package(Md3 REQUIRED)
+target_link_libraries(app PRIVATE Md3::Md3)
+```
+
+
 ### Library + Gallery (default for this repo)
 
 ```powershell

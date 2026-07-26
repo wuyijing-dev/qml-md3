@@ -22,23 +22,35 @@ When this repo is added via `add_subdirectory` from another project, `MD3_BUILD_
 ## CMake — install + find_package
 
 ```bash
+# One-click on Linux (recommended)
+./scripts/package-linux.sh
+# → dist/Md3/  (lib + include + cmake) and dist/Md3-linux-*.tar.gz
+
+# Or manually
 cmake -S QML_MD3 -B build-lib -DMD3_BUILD_GALLERY=OFF -DCMAKE_PREFIX_PATH=…
 cmake --build build-lib
-cmake --install build-lib --prefix /opt/md3
+cmake --install build-lib --prefix /opt/md3   # or ./dist/Md3
 ```
 
 ```cmake
-list(APPEND CMAKE_PREFIX_PATH "/opt/md3")
+list(APPEND CMAKE_PREFIX_PATH "/path/to/dist/Md3")  # or /opt/md3
 find_package(Md3 REQUIRED)
 target_link_libraries(yourApp PRIVATE Md3::Md3 Qt6::Quick)
+if (TARGET Md3plugin)
+    target_link_libraries(yourApp PRIVATE Md3plugin)
+endif()
+if (TARGET Md3plugin_init)
+    target_link_libraries(yourApp PRIVATE Md3plugin_init)
+endif()
 ```
 
-Installed layout (typical):
+Installed layout:
 
-- `lib/libMd3.a` (+ `Md3plugin` / resource objects)
-- `lib/qml/Md3/` — `qmldir`, qmltypes, cached QML
-- `lib/cmake/Md3/` — `Md3Config.cmake`
-- `include/Md3/` — optional C++ headers (`md3graphics.h`, `md3chartdata.h`, …)
+- `lib/libMd3.a` (+ `libMd3plugin.a`)
+- `lib/Md3/stubs/` — static QML/plugin init `.cpp`
+- `lib/qml/Md3/` — `qmldir`, qmltypes
+- `lib/cmake/Md3/` — `Md3Config.cmake` (`find_package(Md3)`)
+- `include/Md3/` — C++ headers (`md3.h`, `md3graphics.h`, …)
 
 ## QML
 

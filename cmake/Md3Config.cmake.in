@@ -1,21 +1,95 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
-find_dependency(Qt6 COMPONENTS Quick QuickControls2 QuickEffects REQUIRED)
+find_dependency(Qt6 COMPONENTS Quick QuickControls2 QuickEffects QuickShapesPrivate REQUIRED)
+if (UNIX AND NOT APPLE)
+    find_dependency(Qt6 COMPONENTS Widgets DBus REQUIRED)
+endif()
 
-# Installed Config is a stub: prefer add_subdirectory(QML_MD3) so the static
-# QML module + plugin link correctly into your executable.
-if (NOT TARGET Md3 AND NOT TARGET Md3::Md3)
+set(_MD3_PREFIX "${PACKAGE_PREFIX_DIR}")
+set(_MD3_LIBDIR "${_MD3_PREFIX}/@CMAKE_INSTALL_LIBDIR@")
+set(_MD3_INCLUDEDIR "${_MD3_PREFIX}/@CMAKE_INSTALL_INCLUDEDIR@")
+set(_MD3_QMLDIR "${_MD3_LIBDIR}/qml")
+set(_MD3_STUBDIR "${_MD3_LIBDIR}/Md3/stubs")
+
+# Resolve static / shared library file names
+set(_MD3_CORE_LIB "")
+foreach (_n IN ITEMS libMd3.a libMd3.so libMd3.dll.a Md3.lib)
+    if (EXISTS "${_MD3_LIBDIR}/${_n}")
+        set(_MD3_CORE_LIB "${_MD3_LIBDIR}/${_n}")
+        break()
+    endif()
+endforeach()
+
+set(_MD3_PLUGIN_LIB "")
+foreach (_n IN ITEMS libMd3plugin.a libMd3plugin.so libMd3plugin.dll.a Md3plugin.lib)
+    if (EXISTS "${_MD3_LIBDIR}/${_n}")
+        set(_MD3_PLUGIN_LIB "${_MD3_LIBDIR}/${_n}")
+        break()
+    endif()
+endforeach()
+
+if (_MD3_CORE_LIB STREQUAL "")
     set(${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE
-        "Md3 is intended to be consumed via add_subdirectory(path/to/QML_MD3) "
-        "with MD3_BUILD_GALLERY=OFF. find_package(Md3) alone does not import "
-        "the static QML plugin target graph.")
+        "Md3 package incomplete: no libMd3 under ${_MD3_LIBDIR}. "
+        "Rebuild with scripts/package-linux.sh or cmake --install.")
     set(${CMAKE_FIND_PACKAGE_NAME}_FOUND FALSE)
     return()
 endif()
 
-if (TARGET Md3::Md3 AND NOT TARGET Md3)
+if (NOT TARGET Md3::Md3)
+    get_filename_component(_md3_ext "${_MD3_CORE_LIB}" EXT)
+    if (_md3_ext STREQUAL ".a" OR _md3_ext STREQUAL ".lib")
+        add_library(Md3::Md3 STATIC IMPORTED GLOBAL)
+    else()
+        add_library(Md3::Md3 SHARED IMPORTED GLOBAL)
+    endif()
+    set_target_properties(Md3::Md3 PROPERTIES
+        IMPORTED_LOCATION "${_MD3_CORE_LIB}"
+        INTERFACE_INCLUDE_DIRECTORIES "${_MD3_INCLUDEDIR}/Md3;${_MD3_INCLUDEDIR}"
+        INTERFACE_LINK_LIBRARIES "Qt6::Quick;Qt6::QuickControls2;Qt6::QuickEffects;Qt6::QuickShapesPrivate"
+    )
+    if (UNIX AND NOT APPLE)
+        set_property(TARGET Md3::Md3 APPEND PROPERTY
+            INTERFACE_LINK_LIBRARIES Qt6::Widgets Qt6::DBus)
+    endif()
+    if (WIN32)
+        set_property(TARGET Md3::Md3 APPEND PROPERTY
+            INTERFACE_LINK_LIBRARIES dwmapi shell32 shlwapi ole32 propsys advapi32)
+    endif()
+endif()
+
+if (NOT TARGET Md3)
     add_library(Md3 ALIAS Md3::Md3)
 endif()
+
+if (_MD3_PLUGIN_LIB AND NOT TARGET Md3plugin)
+    get_filename_component(_plug_ext "${_MD3_PLUGIN_LIB}" EXT)
+    if (_plug_ext STREQUAL ".a" OR _plug_ext STREQUAL ".lib")
+        add_library(Md3plugin STATIC IMPORTED GLOBAL)
+    else()
+        add_library(Md3plugin SHARED IMPORTED GLOBAL)
+    endif()
+    set_target_properties(Md3plugin PROPERTIES
+        IMPORTED_LOCATION "${_MD3_PLUGIN_LIB}"
+    )
+endif()
+
+# Static QML registration stubs (shipped next to the libs)
+if (NOT TARGET Md3plugin_init AND EXISTS "${_MD3_STUBDIR}")
+    file(GLOB _MD3_STUBS CONFIGURE_DEPENDS "${_MD3_STUBDIR}/*.cpp")
+    if (_MD3_STUBS)
+        add_library(Md3plugin_init STATIC ${_MD3_STUBS})
+        target_link_libraries(Md3plugin_init PUBLIC Qt6::Qml Qt6::Quick)
+    endif()
+endif()
+
+if (EXISTS "${_MD3_QMLDIR}")
+    list(APPEND CMAKE_QML_IMPORT_PATH "${_MD3_QMLDIR}")
+    set(CMAKE_QML_IMPORT_PATH "${CMAKE_QML_IMPORT_PATH}" CACHE STRING "" FORCE)
+endif()
+
+set(Md3_INCLUDE_DIRS "${_MD3_INCLUDEDIR}/Md3")
+set(Md3_LIBRARIES Md3::Md3)
 
 check_required_components(Md3)

@@ -276,7 +276,25 @@ install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Md3
     OPTIONAL
 )
 
-# Build-tree helper package (add_subdirectory remains the primary integration path)
+# Static-plugin / rcc init stubs — required when linking prebuilt static Md3
+install(CODE "
+    set(_md3_bin \"${CMAKE_CURRENT_BINARY_DIR}\")
+    set(_stub_dest \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/Md3/stubs\")
+    file(MAKE_DIRECTORY \"\${_stub_dest}\")
+    set(_stub_files \"\")
+    if (EXISTS \"\${_md3_bin}/Md3plugin_init.cpp\")
+        list(APPEND _stub_files \"\${_md3_bin}/Md3plugin_init.cpp\")
+    endif()
+    file(GLOB _rcc_inits \"\${_md3_bin}/.qt/rcc/*_init.cpp\")
+    list(APPEND _stub_files \${_rcc_inits})
+    foreach (_s IN LISTS _stub_files)
+        if (EXISTS \"\${_s}\")
+            file(INSTALL DESTINATION \"\${_stub_dest}\" TYPE FILE FILES \"\${_s}\")
+        endif()
+    endforeach()
+")
+
+# Build-tree helper package (add_subdirectory remains a valid integration path)
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
     ${MD3_ROOT}/cmake/Md3Config.cmake.in

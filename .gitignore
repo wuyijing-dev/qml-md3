@@ -90,4 +90,5 @@ coverage/
 
 /build-lib/
 /build-mingw*/
+/dist/
 
