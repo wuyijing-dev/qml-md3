@@ -101,3 +101,6 @@ bool Md3WindowHelper::setWindowIcon(QObject *window, const QUrl &iconUrl)
 bool Md3WindowHelper::showSystemTrayIcon(QObject *, const QUrl &, const QString &) { return false; }
 void Md3WindowHelper::hideSystemTrayIcon() {}
 bool Md3WindowHelper::showTrayNotification(const QString &, const QString &, int) { return false; }
+
+bool Md3WindowHelper::setDockBadge(int) { return false; }
+bool Md3WindowHelper::setIdleInhibit(bool, const QString &) { return false; }

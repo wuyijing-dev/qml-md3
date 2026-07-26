@@ -1,6 +1,7 @@
 #include "md3windowhelper.h"
 #include "md3win_p.h"
 
+#include <QGuiApplication>
 #include <QWindow>
 
 // Windows-only translation unit (CMake WIN32). Tray / DPI host handlers.
@@ -99,4 +100,20 @@ void Md3WindowHelper::handleDpiChanged(QWindow *window)
     if (!window)
         return;
     emit dpiChanged(window->devicePixelRatio(), windowDpi(window));
+}
+
+bool Md3WindowHelper::setDockBadge(int count)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    QGuiApplication::setBadgeNumber(qMax(0, count));
+    return true;
+#else
+    Q_UNUSED(count);
+    return false;
+#endif
+}
+
+bool Md3WindowHelper::setIdleInhibit(bool, const QString &)
+{
+    return false;
 }

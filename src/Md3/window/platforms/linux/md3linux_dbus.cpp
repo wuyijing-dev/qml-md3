@@ -104,4 +104,37 @@ void applyBlurHint(QWindow *window, bool enable)
     window->setProperty("_md3_blurBehind", enable);
 }
 
+bool setIdleInhibit(bool inhibit, const QString &reason)
+{
+    if (!QDBusConnection::sessionBus().isConnected())
+        return false;
+
+    QDBusInterface iface(QStringLiteral("org.freedesktop.ScreenSaver"),
+                         QStringLiteral("/org/freedesktop/ScreenSaver"),
+                         QStringLiteral("org.freedesktop.ScreenSaver"),
+                         QDBusConnection::sessionBus());
+    if (!iface.isValid())
+        return false;
+
+    static uint cookie = 0;
+    if (inhibit) {
+        const QString appName = QGuiApplication::applicationName().isEmpty()
+                ? QStringLiteral("Md3")
+                : QGuiApplication::applicationName();
+        QDBusReply<uint> reply = iface.call(QStringLiteral("Inhibit"), appName,
+                                            reason.isEmpty() ? QStringLiteral("Md3 idle inhibit")
+                                                             : reason);
+        if (!reply.isValid())
+            return false;
+        cookie = reply.value();
+        return true;
+    }
+
+    if (cookie == 0)
+        return true;
+    iface.call(QStringLiteral("UnInhibit"), cookie);
+    cookie = 0;
+    return true;
+}
+
 } // namespace Md3Linux

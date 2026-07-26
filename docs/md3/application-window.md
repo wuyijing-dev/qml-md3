@@ -168,15 +168,18 @@ Capability: `Md3WindowCapabilities.snapLayouts` / `captionHitTest` / `systemMenu
 | `systemMove` / resize | yes | yes | yes | no |
 | `snapLayouts` | **yes** | — | — | — |
 | `captionHitTest` | **yes** | — | **yes** (CSD) | — |
-| `systemMenu` | **yes** | — | **yes** (QMenu) | — |
+| `systemMenu` | **yes** | — | **yes** | — |
 | `immersiveDarkMode` | **yes** | **yes** | **yes** | — |
-| `systemBackdrop` | **yes** (opt-in) | soft | **yes** (blur hint) | — |
-| `taskbarProgress` / overlay | **yes** | — | **yes** (Unity/Plasma) | — |
-| `peekControl` / `excludeFromCapture` | **yes** | — | — | — |
+| `systemBackdrop` | **yes** | soft | soft (alpha/blur hint) | — |
+| `taskbarProgress` | **yes** | — | **yes** (LauncherEntry) | — |
+| `taskbarOverlay` / peek / capture | **yes** | — | — | — |
 | `jumpList` / `thumbBar` / iconic | **yes** | — | — | — |
 | `systemTray` | **yes** | — | **yes** (SNI) | — |
-| `alwaysOnTop` / cloak / accent | **yes** | partial | **yes** | — |
-| `perMonitorDpiV2` | **yes** | — | **yes** (fractional) | — |
+| `alwaysOnTop` / accent | **yes** | partial | **yes** | — |
+| `perMonitorDpi` / fractional scale | **yes** | — | **yes** | — |
+| Dock badge / idle inhibit | badge | badge | **yes** | — |
+
+Linux notes: Wayland taskbar icon comes from the `.desktop` file (`QGuiApplication::setDesktopFileName`); see `resources/linux/appQML_MD3.desktop`.
 
 Radius is **0 while maximized/fullscreen**.
 

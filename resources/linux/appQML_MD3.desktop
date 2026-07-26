@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Md3 Gallery
+Comment=QML Material Design 3 component gallery
+Exec=appQML_MD3
+Icon=appQML_MD3
+Terminal=false
+Categories=Development;Qt;
+StartupWMClass=appQML_MD3
+# Install beside the binary or into ~/.local/share/applications/
+# and ensure Icon= resolves (or point Icon= to an absolute PNG path).

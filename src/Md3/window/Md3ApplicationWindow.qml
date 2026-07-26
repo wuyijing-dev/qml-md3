@@ -535,6 +535,18 @@ Window {
         windowHelper.setAlwaysOnTop(root, root.pinned)
     }
 
+    function raiseWindow() {
+        windowHelper.raiseWindow(root)
+    }
+
+    function setDockBadge(count) {
+        return windowHelper.setDockBadge(count === undefined ? 0 : count)
+    }
+
+    function setIdleInhibit(inhibit, reason) {
+        return windowHelper.setIdleInhibit(!!inhibit, reason || "")
+    }
+
     onPinnedChanged: {
         if (windowHelper.alwaysOnTopSupported)
             windowHelper.setAlwaysOnTop(root, root.pinned)

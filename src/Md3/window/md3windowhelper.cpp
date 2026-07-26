@@ -110,14 +110,14 @@ bool Md3WindowHelper::name() const \
 MD3_WIN_ONLY_CAP(snapLayoutsSupported)
 MD3_WIN_OR_LINUX_CAP(systemMenuSupported)
 MD3_WIN_OR_LINUX_CAP(taskbarProgressSupported)
-MD3_WIN_OR_LINUX_CAP(taskbarOverlaySupported)
+MD3_WIN_ONLY_CAP(taskbarOverlaySupported)
 MD3_WIN_ONLY_CAP(jumpListSupported)
 MD3_WIN_ONLY_CAP(thumbBarSupported)
 MD3_WIN_ONLY_CAP(iconicThumbnailSupported)
 MD3_WIN_OR_LINUX_CAP(perMonitorDpiV2Supported)
 MD3_WIN_ONLY_CAP(thumbnailClipSupported)
-MD3_WIN_OR_LINUX_CAP(applicationRestartSupported)
-MD3_WIN_OR_LINUX_CAP(windowCloakSupported)
+MD3_WIN_ONLY_CAP(applicationRestartSupported)
+MD3_WIN_ONLY_CAP(windowCloakSupported)
 MD3_WIN_OR_LINUX_CAP(systemTraySupported)
 
 #undef MD3_WIN_ONLY_CAP
@@ -193,4 +193,15 @@ void Md3WindowHelper::setPersistentSceneGraph(QObject *window, bool persistent)
         return;
     qw->setPersistentSceneGraph(persistent);
     qw->setPersistentGraphics(persistent);
+}
+
+void Md3WindowHelper::raiseWindow(QObject *window)
+{
+    auto *qw = qobject_cast<QWindow *>(window);
+    if (!qw)
+        return;
+    if (qw->windowStates() & Qt::WindowMinimized)
+        qw->showNormal();
+    qw->raise();
+    qw->requestActivate();
 }

@@ -84,6 +84,14 @@ void Md3WindowHelper::showSystemMenu(QObject *window, qreal globalX, qreal globa
     const bool maximized = qw->windowStates() & Qt::WindowMaximized;
     menu.addAction(maximized ? QObject::tr("Restore") : QObject::tr("Maximize"),
                    qw, [qw] { toggleMaximized(qw); });
+    const bool fullscreen = qw->windowStates() & Qt::WindowFullScreen;
+    menu.addAction(fullscreen ? QObject::tr("Exit Full Screen") : QObject::tr("Full Screen"),
+                   qw, [qw, fullscreen] {
+        if (fullscreen)
+            qw->showNormal();
+        else
+            qw->showFullScreen();
+    });
     menu.addSeparator();
     QAction *pin = menu.addAction(QObject::tr("Always on Top"));
     pin->setCheckable(true);
@@ -155,14 +163,9 @@ void Md3WindowHelper::setAlwaysOnTop(QObject *window, bool onTop)
         qw->setFlag(Qt::WindowStaysOnTopHint, onTop);
 }
 
-void Md3WindowHelper::setWindowCloaked(QObject *window, bool cloaked)
+void Md3WindowHelper::setWindowCloaked(QObject *, bool)
 {
-    auto *qw = qobject_cast<QWindow *>(window);
-    if (!qw)
-        return;
-    // Opacity cloak keeps the surface mapped (closer to Win cloak than hide()).
-    qw->setOpacity(cloaked ? 0.0 : 1.0);
-    qw->setProperty("_md3_cloaked", cloaked);
+    // No Win-style cloak on Wayland/X11.
 }
 
 void Md3WindowHelper::setPreferredAppMode(bool dark)

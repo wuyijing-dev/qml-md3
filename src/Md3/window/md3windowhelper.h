@@ -153,6 +153,13 @@ public:
     Q_INVOKABLE bool registerApplicationRestart(const QString &commandLineArgs = QString());
     Q_INVOKABLE void unregisterApplicationRestart();
 
+    /// Raise + activate (xdg-activation / focus). Safe on all platforms.
+    Q_INVOKABLE void raiseWindow(QObject *window);
+    /// Dock/taskbar numeric badge (Unity/Plasma count + Qt setBadgeNumber where available).
+    Q_INVOKABLE bool setDockBadge(int count);
+    /// Inhibit idle/screensaver (org.freedesktop.ScreenSaver). Linux desktop only.
+    Q_INVOKABLE bool setIdleInhibit(bool inhibit, const QString &reason = QString());
+
     /// Windows accent / wallpaper sampling for Material You seed.
     Q_INVOKABLE QString systemAccentColor() const;
     Q_INVOKABLE QString wallpaperSeedColor() const;
