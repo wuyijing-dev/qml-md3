@@ -105,6 +105,7 @@ if (_MD3_PLUGIN_LIB AND NOT TARGET Md3plugin)
     set_target_properties(Md3plugin PROPERTIES
         IMPORTED_LOCATION "${_MD3_PLUGIN_LIB}"
     )
+    # Hint for apps: link with WHOLE_ARCHIVE and Q_IMPORT_QML_PLUGIN(Md3Plugin)
 endif()
 
 # Static QML registration stubs (shipped next to the libs)
@@ -113,6 +114,18 @@ if (NOT TARGET Md3plugin_init AND EXISTS "${_MD3_STUBDIR}")
     if (_MD3_STUBS)
         add_library(Md3plugin_init STATIC ${_MD3_STUBS})
         target_link_libraries(Md3plugin_init PUBLIC Qt6::Qml Qt6::Quick)
+    endif()
+endif()
+
+# Convenience: INTERFACE that pulls plugin with whole-archive semantics
+if (TARGET Md3plugin AND NOT TARGET Md3::QmlPlugin)
+    add_library(Md3::QmlPlugin INTERFACE IMPORTED GLOBAL)
+    set_target_properties(Md3::QmlPlugin PROPERTIES
+        INTERFACE_LINK_LIBRARIES "$<LINK_LIBRARY:WHOLE_ARCHIVE,Md3plugin>"
+    )
+    if (TARGET Md3plugin_init)
+        set_property(TARGET Md3::QmlPlugin APPEND PROPERTY
+            INTERFACE_LINK_LIBRARIES "$<LINK_LIBRARY:WHOLE_ARCHIVE,Md3plugin_init>")
     endif()
 endif()
 
