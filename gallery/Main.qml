@@ -6,7 +6,7 @@ Md3ApplicationWindow {
     id: window
     width: 1180
     height: 760
-    title: qsTr("Md3 Gallery")
+    title: qsTr("Md3 图库")
     windowIcon: "qrc:/md3/icons/app-icon.png"
     roundedCorners: true
     cornerRadius: Md3WindowCapabilities.windowCornerRadius
@@ -17,7 +17,7 @@ Md3ApplicationWindow {
     pageSourceBase: Qt.resolvedUrl("./")
     navigationRail: true
     railExpanded: false
-    railHeader: qsTr("Gallery")
+    railHeader: qsTr("组件图库")
     // Adaptive cache: keep more pages while navigating; trim to 1 after idle
     pageCacheMode: "adaptive"
     pageCacheLimit: 4
@@ -42,26 +42,26 @@ Md3ApplicationWindow {
                                          && visibility !== Window.Hidden
 
     destinations: [
-        { title: "Tokens", icon: "palette", source: pageRoot + "TokensPage.qml" },
-        { title: "Buttons", icon: "smart_button", source: pageRoot + "ButtonsPage.qml" },
-        { title: "FAB", icon: "add_circle", source: pageRoot + "FabPage.qml" },
-        { title: "Selection", icon: "check_box", source: pageRoot + "SelectionPage.qml" },
-        { title: "Text fields", icon: "edit", source: pageRoot + "TextFieldsPage.qml" },
-        { title: "Chips", icon: "label", source: pageRoot + "ChipsPage.qml" },
-        { title: "Containment", icon: "dashboard", source: pageRoot + "ContainmentPage.qml" },
-        { title: "Communication", icon: "chat", source: pageRoot + "CommunicationPage.qml" },
-        { title: "Navigation", icon: "menu", source: pageRoot + "NavigationPage.qml" },
-        { title: "Menus", icon: "more_vert", source: pageRoot + "MenusPage.qml" },
-        { title: "Pickers", icon: "calendar_month", source: pageRoot + "PickersPage.qml" },
-        { title: "Search", icon: "search", source: pageRoot + "SearchPage.qml" },
-        { title: "Extras", icon: "extension", source: pageRoot + "ExtrasPage.qml" },
-        { title: "Motion", icon: "animation", source: pageRoot + "MotionPage.qml" },
-        { title: "Theme", icon: "contrast", source: pageRoot + "ThemePage.qml" },
-        { title: "Charts", icon: "show_chart", source: pageRoot + "ChartsPage.qml" },
-        { title: "Window", icon: "web_asset", source: pageRoot + "WindowPage.qml" },
-        { title: "Scene: Login", icon: "login", source: pageRoot + "scenes/LoginScene.qml" },
-        { title: "Scene: Settings", icon: "settings", source: pageRoot + "scenes/SettingsScene.qml" },
-        { title: "Scene: List-Detail", icon: "view_sidebar", source: pageRoot + "scenes/ListDetailScene.qml" }
+        { title: qsTr("令牌"), icon: "palette", source: pageRoot + "TokensPage.qml" },
+        { title: qsTr("按钮"), icon: "smart_button", source: pageRoot + "ButtonsPage.qml" },
+        { title: qsTr("FAB"), icon: "add_circle", source: pageRoot + "FabPage.qml" },
+        { title: qsTr("选择"), icon: "check_box", source: pageRoot + "SelectionPage.qml" },
+        { title: qsTr("文本框"), icon: "edit", source: pageRoot + "TextFieldsPage.qml" },
+        { title: qsTr("芯片"), icon: "label", source: pageRoot + "ChipsPage.qml" },
+        { title: qsTr("容器"), icon: "dashboard", source: pageRoot + "ContainmentPage.qml" },
+        { title: qsTr("反馈"), icon: "chat", source: pageRoot + "CommunicationPage.qml" },
+        { title: qsTr("导航"), icon: "menu", source: pageRoot + "NavigationPage.qml" },
+        { title: qsTr("菜单"), icon: "more_vert", source: pageRoot + "MenusPage.qml" },
+        { title: qsTr("选择器"), icon: "calendar_month", source: pageRoot + "PickersPage.qml" },
+        { title: qsTr("搜索"), icon: "search", source: pageRoot + "SearchPage.qml" },
+        { title: qsTr("扩展"), icon: "extension", source: pageRoot + "ExtrasPage.qml" },
+        { title: qsTr("动效"), icon: "animation", source: pageRoot + "MotionPage.qml" },
+        { title: qsTr("主题"), icon: "contrast", source: pageRoot + "ThemePage.qml" },
+        { title: qsTr("图表"), icon: "show_chart", source: pageRoot + "ChartsPage.qml" },
+        { title: qsTr("窗口"), icon: "web_asset", source: pageRoot + "WindowPage.qml" },
+        { title: qsTr("场景：登录"), icon: "login", source: pageRoot + "scenes/LoginScene.qml" },
+        { title: qsTr("场景：设置"), icon: "settings", source: pageRoot + "scenes/SettingsScene.qml" },
+        { title: qsTr("场景：列表详情"), icon: "view_sidebar", source: pageRoot + "scenes/ListDetailScene.qml" }
     ]
 
     PerformanceMonitor {
@@ -152,7 +152,7 @@ Md3ApplicationWindow {
                     buttonWidth: 36
                     buttonHeight: 28
                     iconSize: 14
-                    accessibleName: qsTr("Window page")
+                    accessibleName: qsTr("窗口页面")
                     onClicked: window.openTab(window.windowPageIndex, false)
                 }
             ]

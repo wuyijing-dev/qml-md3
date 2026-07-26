@@ -62,7 +62,7 @@ Flickable {
         spacing: 16
 
         Text {
-            text: qsTr("Application window")
+            text: qsTr("应用窗口")
             color: Md3Theme.colorScheme.colorOnSurface
             font.pixelSize: Md3Theme.typography.headlineMedium.size
             font.family: Md3Theme.typography.fontFamily
@@ -71,7 +71,7 @@ Flickable {
         Text {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            text: qsTr("Shared settings below; open the tab for your OS (or another) to try native shell controls. Running as %1%2.")
+            text: qsTr("下方为通用设置；按系统切换标签页查看原生能力。当前运行：%1%2。")
                   .arg(Md3WindowCapabilities.platformId)
                   .arg(nativeHelper.wayland ? " · Wayland" : (nativeHelper.xcb ? " · X11" : ""))
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
@@ -81,7 +81,7 @@ Flickable {
 
         // —— Shared ——
         Text {
-            text: qsTr("Shared")
+            text: qsTr("通用")
             color: Md3Theme.colorScheme.colorOnSurface
             font.pixelSize: Md3Theme.typography.titleSmall.size
         }
@@ -89,25 +89,25 @@ Flickable {
         Text {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            text: qsTr("Document tabs: documentTabsEnabled — strip with + / tear-off. API: openTab / addTab / closeTab.")
+            text: qsTr("文档标签：开启 documentTabsEnabled 即可。支持 + 新建、拖出撕离。接口：openTab / addTab / closeTab。")
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.bodySmall.size
             font.family: Md3Theme.typography.fontFamily
         }
 
         Text {
-            text: qsTr("Graphics (RHI)")
+            text: qsTr("图形后端（RHI）")
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.labelLarge.size
         }
         Text {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            text: qsTr("%1 · current=%2 · preferred=%3%4")
+            text: qsTr("%1 · 当前=%2 · 首选=%3%4")
                   .arg(Md3Graphics.platformName)
                   .arg(Md3Graphics.currentBackend)
                   .arg(Md3Graphics.preferredBackend)
-                  .arg(Md3Graphics.restartRequired ? qsTr(" · restart required") : "")
+                  .arg(Md3Graphics.restartRequired ? qsTr(" · 需重启生效") : "")
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.bodySmall.size
             font.family: Md3Theme.typography.fontFamily
@@ -126,7 +126,7 @@ Flickable {
         }
 
         Text {
-            text: qsTr("Page transition")
+            text: qsTr("页面转场")
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.labelLarge.size
         }
@@ -137,12 +137,12 @@ Flickable {
             buttonHeight: 32
             fontSize: 11
             model: [
-                { text: "Through" },
-                { text: "Fade" },
-                { text: "Slide" },
-                { text: "Up" },
-                { text: "Scale" },
-                { text: "None" }
+                { text: qsTr("贯穿") },
+                { text: qsTr("淡入淡出") },
+                { text: qsTr("滑动") },
+                { text: qsTr("上滑") },
+                { text: qsTr("缩放") },
+                { text: qsTr("无") }
             ]
             onClicked: function (index) {
                 if (!root.appWin)
@@ -162,7 +162,7 @@ Flickable {
             }
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: qsTr("Skeleton while loading")
+                text: qsTr("加载时显示骨架屏")
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: 12
             }
@@ -170,7 +170,7 @@ Flickable {
 
         // —— Per-OS tabs ——
         Text {
-            text: qsTr("Platform native")
+            text: qsTr("平台原生")
             color: Md3Theme.colorScheme.colorOnSurface
             font.pixelSize: Md3Theme.typography.titleSmall.size
         }
@@ -192,7 +192,7 @@ Flickable {
             visible: root.platformTab !== root.currentOsTab
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            text: qsTr("Browsing another OS tab — live actions only work on this machine (%1).")
+            text: qsTr("正在浏览其他系统标签；可操作控件仅对本机（%1）生效。")
                   .arg(Md3WindowCapabilities.platformId)
             color: Md3Theme.colorScheme.tertiary
             font.pixelSize: Md3Theme.typography.bodySmall.size
@@ -210,7 +210,7 @@ Flickable {
                 Text {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    text: qsTr("Win10/11 client chrome: Mica/Acrylic, DWM border, taskbar progress/overlay, Jump List, ThumbBar, tray, peek/capture.")
+                    text: qsTr("Windows 10/11 客户区：云母/亚克力、DWM 边框、任务栏进度与角标、跳转列表、缩略图工具栏、托盘、Peek/捕获。")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.bodyMedium.size
                     font.family: Md3Theme.typography.fontFamily
@@ -220,7 +220,7 @@ Flickable {
                     visible: root.appWin && Md3WindowCapabilities.isWindows
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    text: qsTr("Bound — backdrop=%1 border=\"%2\"")
+                    text: qsTr("已绑定 — 背景=%1 边框=\"%2\"")
                           .arg(root.appWin ? root.appWin.systemBackdrop : -1)
                           .arg(root.appWin ? root.appWin.nativeBorderColor : "")
                     color: Md3Theme.colorScheme.primary
@@ -237,7 +237,7 @@ Flickable {
                     }
                     Text {
                         Layout.fillWidth: true
-                        text: qsTr("syncImmersiveDarkMode")
+                        text: qsTr("与主题同步沉浸式深色")
                         color: Md3Theme.colorScheme.colorOnSurface
                         font.pixelSize: Md3Theme.typography.bodyMedium.size
                     }
@@ -247,7 +247,7 @@ Flickable {
                     visible: Md3WindowCapabilities.isWindows && root.appWin
                     Layout.fillWidth: true
                     spacing: 12
-                    Text { text: qsTr("Tint"); color: Md3Theme.colorScheme.colorOnSurface }
+                    Text { text: qsTr("色调"); color: Md3Theme.colorScheme.colorOnSurface }
                     Md3Slider {
                         Layout.fillWidth: true
                         from: 0; to: 0.85
@@ -261,7 +261,7 @@ Flickable {
                 }
 
                 Text {
-                    text: qsTr("System backdrop")
+                    text: qsTr("系统背景材质")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.labelLarge.size
                 }
@@ -273,14 +273,14 @@ Flickable {
                     buttonHeight: 36
                     currentIndex: root.appWin ? Math.max(0, Math.min(4, root.appWin.systemBackdrop)) : 0
                     model: [
-                        { text: "None" }, { text: "Auto" }, { text: "Mica" },
-                        { text: "Acrylic" }, { text: "Tabbed" }
+                        { text: qsTr("无") }, { text: qsTr("自动") }, { text: qsTr("云母") },
+                        { text: qsTr("亚克力") }, { text: qsTr("标签页") }
                     ]
                     onClicked: function (index) { root.applyBackdrop(index) }
                 }
 
                 Text {
-                    text: qsTr("DWM border")
+                    text: qsTr("DWM 边框颜色")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.labelLarge.size
                 }
@@ -289,11 +289,11 @@ Flickable {
                     spacing: 8
                     Repeater {
                         model: [
-                            { label: qsTr("Default"), color: "" },
-                            { label: qsTr("None"), color: "none" },
-                            { label: qsTr("Primary"), color: "primary" },
-                            { label: qsTr("Error"), color: "error" },
-                            { label: qsTr("Outline"), color: "outline" }
+                            { label: qsTr("默认"), color: "" },
+                            { label: qsTr("无"), color: "none" },
+                            { label: qsTr("主色"), color: "primary" },
+                            { label: qsTr("错误色"), color: "error" },
+                            { label: qsTr("轮廓色"), color: "outline" }
                         ]
                         delegate: Md3Button {
                             required property var modelData
@@ -316,18 +316,18 @@ Flickable {
                     spacing: 8
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("Flash taskbar")
+                        text: qsTr("闪烁任务栏")
                         onClicked: if (root.appWin) root.appWin.flashTaskbar(true)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("Stop flash")
+                        text: qsTr("停止闪烁")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.flashTaskbar(false)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("System menu…")
+                        text: qsTr("系统菜单…")
                         variant: Md3Button.Outlined
                         onClicked: {
                             if (!root.appWin) return
@@ -342,7 +342,7 @@ Flickable {
                 }
 
                 Text {
-                    text: qsTr("Taskbar progress / overlay")
+                    text: qsTr("任务栏进度 / 角标")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.labelLarge.size
                 }
@@ -367,37 +367,37 @@ Flickable {
                     spacing: 8
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("Indeterminate")
+                        text: qsTr("不确定进度")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.setTaskbarProgress(0, Md3WindowHelper.ProgressIndeterminate)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("Error")
+                        text: qsTr("错误")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.setTaskbarProgress(winProgress.value, Md3WindowHelper.ProgressError)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("Clear")
+                        text: qsTr("清除")
                         variant: Md3Button.Text
                         onClicked: if (root.appWin) root.appWin.clearTaskbarProgress()
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("Overlay")
-                        onClicked: if (root.appWin) root.appWin.setTaskbarOverlayIcon("qrc:/md3/icons/app-icon-16.png", qsTr("Badge"))
+                        text: qsTr("叠加图标")
+                        onClicked: if (root.appWin) root.appWin.setTaskbarOverlayIcon("qrc:/md3/icons/app-icon-16.png", qsTr("角标"))
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("Clear overlay")
+                        text: qsTr("清除角标")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.clearTaskbarOverlayIcon()
                     }
                 }
 
                 Text {
-                    text: qsTr("Peek / capture / shell")
+                    text: qsTr("Peek、捕获与外壳")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.labelLarge.size
                 }
@@ -413,7 +413,7 @@ Flickable {
                         Text {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
-                            text: qsTr("Exclude from Aero Peek")
+                            text: qsTr("从 Aero Peek 排除")
                             color: Md3Theme.colorScheme.colorOnSurface
                             font.pixelSize: Md3Theme.typography.bodyMedium.size
                         }
@@ -426,7 +426,7 @@ Flickable {
                         }
                         Text {
                             Layout.fillWidth: true
-                            text: qsTr("Disallow peek")
+                            text: qsTr("禁止 Peek 预览")
                             color: Md3Theme.colorScheme.colorOnSurface
                             font.pixelSize: Md3Theme.typography.bodyMedium.size
                         }
@@ -439,7 +439,7 @@ Flickable {
                         }
                         Text {
                             Layout.fillWidth: true
-                            text: qsTr("Exclude from capture")
+                            text: qsTr("排除屏幕捕获")
                             color: Md3Theme.colorScheme.colorOnSurface
                             font.pixelSize: Md3Theme.typography.bodyMedium.size
                         }
@@ -450,39 +450,39 @@ Flickable {
                     spacing: 8
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("Jump List")
+                        text: qsTr("跳转列表")
                         onClicked: if (root.appWin) root.appWin.setJumpListTasks([
-                            { title: qsTr("Gallery"), arguments: "" },
-                            { title: qsTr("Window"), arguments: "--page=window" }
+                            { title: qsTr("打开图库"), arguments: "" },
+                            { title: qsTr("窗口页"), arguments: "--page=window" }
                         ])
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("ThumbBar")
+                        text: qsTr("缩略图栏")
                         onClicked: if (root.appWin) root.appWin.setThumbBarButtons([
-                            { id: 1, icon: "qrc:/md3/icons/app-icon-16.png", tooltip: "A" },
-                            { id: 2, icon: "qrc:/md3/icons/app-icon-16.png", tooltip: "B" }
+                            { id: 1, icon: "qrc:/md3/icons/app-icon-16.png", tooltip: qsTr("操作 A") },
+                            { id: 2, icon: "qrc:/md3/icons/app-icon-16.png", tooltip: qsTr("操作 B") }
                         ])
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("Tray")
-                        onClicked: if (root.appWin) root.appWin.showSystemTrayIcon("qrc:/md3/icons/app-icon-16.png", qsTr("Md3"))
+                        text: qsTr("显示托盘")
+                        onClicked: if (root.appWin) root.appWin.showSystemTrayIcon("qrc:/md3/icons/app-icon-16.png", qsTr("Md3 图库"))
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("Balloon")
+                        text: qsTr("气泡通知")
                         variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.showTrayNotification(qsTr("Md3"), qsTr("Tray notify"), 4000)
+                        onClicked: if (root.appWin) root.appWin.showTrayNotification(qsTr("Md3 图库"), qsTr("托盘通知"), 4000)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("Always on top")
+                        text: qsTr("窗口置顶")
                         onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(true)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("Register restart")
+                        text: qsTr("注册崩溃重启")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.registerApplicationRestart("")
                     }
@@ -496,7 +496,7 @@ Flickable {
                 Text {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    text: qsTr("Wayland/X11: CSD, soft translucent backdrop + blur hints, dock progress (LauncherEntry), SNI tray, FDO notifications, accent (gsettings/KDE), idle inhibit. Taskbar icon needs matching .desktop app_id.")
+                    text: qsTr("Wayland/X11：客户端装饰、半透明背景与模糊提示、Dock 进度（LauncherEntry）、SNI 托盘、桌面通知、系统强调色、空闲抑制。任务栏图标需匹配 .desktop 的 app_id。")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.bodyMedium.size
                     font.family: Md3Theme.typography.fontFamily
@@ -506,7 +506,7 @@ Flickable {
                     visible: root.appWin && Md3WindowCapabilities.isLinux
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    text: qsTr("Bound — wayland=%1 backdrop=%2 accent=%3")
+                    text: qsTr("已绑定 — Wayland=%1 背景=%2 强调色=%3")
                           .arg(nativeHelper.wayland ? "yes" : "no")
                           .arg(root.appWin ? root.appWin.systemBackdrop : -1)
                           .arg(nativeHelper.systemAccentColor())
@@ -524,14 +524,14 @@ Flickable {
                     }
                     Text {
                         Layout.fillWidth: true
-                        text: qsTr("Sync color scheme with theme")
+                        text: qsTr("与主题同步配色方案")
                         color: Md3Theme.colorScheme.colorOnSurface
                         font.pixelSize: Md3Theme.typography.bodyMedium.size
                     }
                 }
 
                 Text {
-                    text: qsTr("Soft backdrop")
+                    text: qsTr("柔和背景")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.labelLarge.size
                 }
@@ -542,12 +542,12 @@ Flickable {
                     variant: Md3ButtonGroup.Outlined
                     buttonHeight: 36
                     currentIndex: root.appWin && root.appWin.systemBackdrop > 0 ? 1 : 0
-                    model: [ { text: qsTr("Off") }, { text: qsTr("On (blur hint)") } ]
+                    model: [ { text: qsTr("关闭") }, { text: qsTr("开启（模糊提示）") } ]
                     onClicked: function (index) { root.applyBackdrop(index === 0 ? 0 : 1) }
                 }
 
                 Text {
-                    text: qsTr("Window actions")
+                    text: qsTr("窗口操作")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.labelLarge.size
                 }
@@ -556,18 +556,18 @@ Flickable {
                     spacing: 8
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("Request attention")
+                        text: qsTr("请求注意")
                         onClicked: if (root.appWin) root.appWin.flashTaskbar(true)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("Stop")
+                        text: qsTr("停止")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.flashTaskbar(false)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("System menu…")
+                        text: qsTr("系统菜单…")
                         variant: Md3Button.Outlined
                         onClicked: {
                             if (!root.appWin) return
@@ -581,48 +581,48 @@ Flickable {
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("Raise")
+                        text: qsTr("前置激活")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.raiseWindow()
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("Always on top")
+                        text: qsTr("窗口置顶")
                         onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(true)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("Clear topmost")
+                        text: qsTr("取消置顶")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(false)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("Idle inhibit")
+                        text: qsTr("禁止休眠/锁屏")
                         variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.setIdleInhibit(true, qsTr("Md3 demo"))
+                        onClicked: if (root.appWin) root.appWin.setIdleInhibit(true, qsTr("Md3 演示"))
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("Allow idle")
+                        text: qsTr("允许空闲")
                         variant: Md3Button.Text
                         onClicked: if (root.appWin) root.appWin.setIdleInhibit(false)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("Prefer dark")
+                        text: qsTr("偏好深色")
                         onClicked: if (root.appWin) root.appWin.setPreferredAppMode(true)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("Prefer light")
+                        text: qsTr("偏好浅色")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.setPreferredAppMode(false)
                     }
                 }
 
                 Text {
-                    text: qsTr("Dock progress / badge")
+                    text: qsTr("Dock 进度 / 角标")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.labelLarge.size
                 }
@@ -647,31 +647,31 @@ Flickable {
                     spacing: 8
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("Indeterminate")
+                        text: qsTr("不确定进度")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.setTaskbarProgress(0, Md3WindowHelper.ProgressIndeterminate)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("Clear progress")
+                        text: qsTr("清除进度")
                         variant: Md3Button.Text
                         onClicked: if (root.appWin) root.appWin.clearTaskbarProgress()
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("Badge 3")
+                        text: qsTr("角标 3")
                         onClicked: if (root.appWin) root.appWin.setDockBadge(3)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("Clear badge")
+                        text: qsTr("清除角标")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.setDockBadge(0)
                     }
                 }
 
                 Text {
-                    text: qsTr("Tray / notify")
+                    text: qsTr("托盘 / 通知")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.labelLarge.size
                 }
@@ -680,24 +680,24 @@ Flickable {
                     spacing: 8
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("Show tray")
-                        onClicked: if (root.appWin) root.appWin.showSystemTrayIcon("qrc:/md3/icons/app-icon-16.png", qsTr("Md3 Gallery"))
+                        text: qsTr("显示托盘")
+                        onClicked: if (root.appWin) root.appWin.showSystemTrayIcon("qrc:/md3/icons/app-icon-16.png", qsTr("Md3 图库"))
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("Notify")
+                        text: qsTr("发送通知")
                         variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.showTrayNotification(qsTr("Md3 Gallery"), qsTr("FreeDesktop notification"), 4000)
+                        onClicked: if (root.appWin) root.appWin.showTrayNotification(qsTr("Md3 图库"), qsTr("桌面通知"), 4000)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("Hide tray")
+                        text: qsTr("隐藏托盘")
                         variant: Md3Button.Text
                         onClicked: if (root.appWin) root.appWin.hideSystemTrayIcon()
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
-                        text: qsTr("Next monitor")
+                        text: qsTr("下一显示器")
                         variant: Md3Button.Outlined
                         onClicked: {
                             if (!root.appWin) return
@@ -712,7 +712,7 @@ Flickable {
                 Text {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    text: qsTr("Install resources/linux/appQML_MD3.desktop for a proper Wayland taskbar icon (setDesktopFileName).")
+                    text: qsTr("安装 resources/linux/appQML_MD3.desktop 以获得正确的 Wayland 任务栏图标（setDesktopFileName）。")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.bodySmall.size
                     font.family: Md3Theme.typography.fontFamily
@@ -726,7 +726,7 @@ Flickable {
                 Text {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    text: qsTr("macOS: leave traffic-lights inset, soft translucent hook, color scheme / accent. System caption buttons stay native.")
+                    text: qsTr("macOS：保留红绿灯留白、半透明背景钩子、配色/强调色。标题按钮保持系统原生。")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.bodyMedium.size
                     font.family: Md3Theme.typography.fontFamily
@@ -735,7 +735,7 @@ Flickable {
                 Text {
                     visible: root.appWin && Md3WindowCapabilities.isMacOS
                     Layout.fillWidth: true
-                    text: qsTr("Bound — trafficLightsInset=%1")
+                    text: qsTr("已绑定 — 红绿灯留白=%1")
                           .arg(nativeHelper.trafficLightsInset)
                     color: Md3Theme.colorScheme.primary
                     font.pixelSize: Md3Theme.typography.bodySmall.size
@@ -751,14 +751,14 @@ Flickable {
                     }
                     Text {
                         Layout.fillWidth: true
-                        text: qsTr("Sync color scheme with theme")
+                        text: qsTr("与主题同步配色方案")
                         color: Md3Theme.colorScheme.colorOnSurface
                         font.pixelSize: Md3Theme.typography.bodyMedium.size
                     }
                 }
 
                 Text {
-                    text: qsTr("Soft backdrop")
+                    text: qsTr("柔和背景")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.labelLarge.size
                 }
@@ -769,7 +769,7 @@ Flickable {
                     variant: Md3ButtonGroup.Outlined
                     buttonHeight: 36
                     currentIndex: root.appWin && root.appWin.systemBackdrop > 0 ? 1 : 0
-                    model: [ { text: qsTr("Off") }, { text: qsTr("On") } ]
+                    model: [ { text: qsTr("关闭") }, { text: qsTr("开启") } ]
                     onClicked: function (index) { root.applyBackdrop(index === 0 ? 0 : 1) }
                 }
 
@@ -778,45 +778,45 @@ Flickable {
                     spacing: 8
                     Md3Button {
                         enabled: Md3WindowCapabilities.isMacOS
-                        text: qsTr("Request attention")
+                        text: qsTr("请求注意")
                         onClicked: if (root.appWin) root.appWin.flashTaskbar(true)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isMacOS
-                        text: qsTr("Raise")
+                        text: qsTr("前置激活")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.raiseWindow()
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isMacOS
-                        text: qsTr("Always on top")
+                        text: qsTr("窗口置顶")
                         onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(true)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isMacOS
-                        text: qsTr("Clear topmost")
+                        text: qsTr("取消置顶")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(false)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isMacOS
-                        text: qsTr("Dock badge 3")
+                        text: qsTr("程序坞角标 3")
                         onClicked: if (root.appWin) root.appWin.setDockBadge(3)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isMacOS
-                        text: qsTr("Clear badge")
+                        text: qsTr("清除角标")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.setDockBadge(0)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isMacOS
-                        text: qsTr("Prefer dark")
+                        text: qsTr("偏好深色")
                         onClicked: if (root.appWin) root.appWin.setPreferredAppMode(true)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isMacOS
-                        text: qsTr("Prefer light")
+                        text: qsTr("偏好浅色")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.setPreferredAppMode(false)
                     }
@@ -828,7 +828,7 @@ Flickable {
             id: shellEventLabel
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            text: qsTr("Shell event: —")
+            text: qsTr("外壳事件：—")
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.bodySmall.size
             font.family: Md3Theme.typography.fontFamily
@@ -836,13 +836,13 @@ Flickable {
         Connections {
             target: root.appWin && root.appWin.windowNative ? root.appWin.windowNative : nativeHelper
             function onThumbBarButtonClicked(buttonId) {
-                shellEventLabel.text = qsTr("Shell event: ThumbBar #%1").arg(buttonId)
+                shellEventLabel.text = qsTr("外壳事件：缩略图栏 #%1").arg(buttonId)
             }
             function onTrayActivated(reason) {
-                shellEventLabel.text = qsTr("Shell event: tray reason=%1").arg(reason)
+                shellEventLabel.text = qsTr("外壳事件：托盘 reason=%1").arg(reason)
             }
             function onDpiChanged(dpr, dpi) {
-                shellEventLabel.text = qsTr("Shell event: dpr=%1 dpi=%2").arg(dpr).arg(dpi)
+                shellEventLabel.text = qsTr("外壳事件：dpr=%1 dpi=%2").arg(dpr).arg(dpi)
             }
         }
 
@@ -852,10 +852,11 @@ Flickable {
             text: {
                 const dpr = root.appWin ? root.appWin.windowDpr : nativeHelper.devicePixelRatio(Window.window)
                 const dpi = root.appWin ? root.appWin.windowDpi : nativeHelper.windowDpi(Window.window)
-                return "runtime=" + Md3WindowCapabilities.platformId
-                      + "  tab=" + ["windows", "linux", "macos"][root.platformTab]
-                      + "  dpr=" + Number(dpr).toFixed(2)
-                      + "  dpi=" + dpi
+                return qsTr("运行环境=%1  标签=%2  dpr=%3  dpi=%4")
+                      .arg(Md3WindowCapabilities.platformId)
+                      .arg([qsTr("Windows"), qsTr("Linux"), qsTr("macOS")][root.platformTab])
+                      .arg(Number(dpr).toFixed(2))
+                      .arg(dpi)
             }
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.family: Md3Theme.typography.fontFamily
