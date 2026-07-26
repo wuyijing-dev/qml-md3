@@ -12,6 +12,9 @@ Rectangle {
     property bool showExpandToggle: true
 
     signal currentIndexChangedByUser(int index)
+    /// Hover intent for PageHost predictive prefetch (L2 / soft L1).
+    signal destinationHovered(int index)
+    signal destinationUnhovered(int index)
     signal expandToggleClicked()
 
     readonly property real destinationHeight: 56
@@ -370,6 +373,8 @@ Rectangle {
                         id: mouse
                         anchors.fill: parent
                         hoverEnabled: true
+                        onEntered: root.destinationHovered(dest.index)
+                        onExited: root.destinationUnhovered(dest.index)
                         onClicked: function (mouse) {
                             const local = mapToItem(hit, mouse.x, mouse.y)
                             ripple.pulse(local.x, local.y)

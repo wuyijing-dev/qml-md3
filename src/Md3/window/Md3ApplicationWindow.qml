@@ -47,16 +47,26 @@ Window {
     property bool navigationRail: true
     property bool railExpanded: false
     property string railHeader: ""
-    /// "none" | "one" | "lru" | "all" | "adaptive"
-    /// adaptive: keep up to pageCacheLimit while navigating; trim to 1 after idle
-    property string pageCacheMode: "lru"
-    property int pageCacheLimit: 4
-    /// Idle time before adaptive mode drops to a single resident page
-    property int pageIdleTrimMs: 45000
+    /// "none" | "one" | "lru" | "all" | "adaptive" | "arc"
+    /// Best combo default: arc + small L1 + L2 + predict(L2) + leave snapshot
+    property string pageCacheMode: "arc"
+    property int pageCacheLimit: 2
+    /// Idle time before adaptive/arc mode drops to a single resident page
+    property int pageIdleTrimMs: 12000
     property real pagePadding: 20
+    /// Prefetch ±1 neighbors into L1 (Item) — off in best combo (use L2 instead)
     property bool pagePrefetch: false
+    /// Markov + rail-hover → L2 Component only
+    property bool pagePredictPrefetch: true
+    /// Keep compiled QQmlComponent after Item teardown
+    property bool pageL2Cache: true
+    property int pageL2CacheLimit: 24
+    /// After startup, compile all destination Components in the background
+    property bool pageL2Warm: true
+    /// Freeze leaving page while cold target loads
+    property bool pageLeaveSnapshot: true
     property bool pageAsync: true
-    /// Background-warm all destinations (off by default — competes with UI)
+    /// Background-warm all destinations as Items (off — high memory)
     property bool pageWarmStart: false
     /// Resolve relative destination sources against this URL (Gallery: Qt.resolvedUrl("."))
     property url pageSourceBase: ""
@@ -719,6 +729,11 @@ Window {
                     sourceBase: root.pageSourceBase
                     asynchronous: root.pageAsync
                     prefetchNeighbors: root.pagePrefetch
+                    predictPrefetch: root.pagePredictPrefetch
+                    l2Components: root.pageL2Cache
+                    l2CacheLimit: root.pageL2CacheLimit
+                    l2WarmIdle: root.pageL2Warm
+                    leaveSnapshot: root.pageLeaveSnapshot
                     warmStart: root.pageWarmStart
                     showBusyIndicator: false
                     showSkeleton: root.pageSkeleton

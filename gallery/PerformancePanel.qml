@@ -134,11 +134,6 @@ Item {
                 valueDecimals: 0
                 labelWidth: 28
                 contentPadding: 4
-                lineColor: Md3Theme.colorScheme.primary
-                fillColor: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.primary, 0.15)
-                gridColor: Md3Theme.colorScheme.outlineVariant
-                axisLabelColor: Md3Theme.colorScheme.colorOnSurfaceVariant
-                surfaceColor: Md3Theme.colorScheme.surfaceContainerHigh
             }
 
             Md3LineChart {
@@ -158,10 +153,6 @@ Item {
                 contentPadding: 4
                 lineColor: Md3Theme.colorScheme.tertiary
                 seriesColors: [Md3Theme.colorScheme.tertiary]
-                fillColor: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.tertiary, 0.12)
-                gridColor: Md3Theme.colorScheme.outlineVariant
-                axisLabelColor: Md3Theme.colorScheme.colorOnSurfaceVariant
-                surfaceColor: Md3Theme.colorScheme.surfaceContainerHigh
             }
         }
     }

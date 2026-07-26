@@ -125,7 +125,9 @@ qt_add_qml_module(Md3
         src/Md3/components/Md3Banner.qml
         src/Md3/components/Md3Carousel.qml
         src/Md3/components/Md3Form.qml
+        src/Md3/components/Md3Chart.qml
         src/Md3/components/Md3LineChart.qml
+        src/Md3/components/Md3BarChart.qml
         src/Md3/components/Md3Skeleton.qml
         src/Md3/components/Md3SkeletonPane.qml
     RESOURCES

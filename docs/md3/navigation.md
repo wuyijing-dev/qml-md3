@@ -52,3 +52,10 @@ Width 360; modal scrim; destination pill
 
 Cold navigation keeps the previous page visible and stacks a skeleton layer on top as the incoming-page placeholder; when Ready, the skeleton fades out and the normal leave→enter transition runs.
 
+## Page cache (`Md3PageHost`)
+- **L1**: resident page `Item`s (default limit **2**, idle trim → 1)
+- **L2**: compiled `Component`s + optional idle warm of all destinations
+- **Leave snapshot**: `ShaderEffectSource` while cold target loads
+- **`arc`**: ARC + cost-aware victims; predict/hover are L2-only unless `pagePrefetch`
+- Per destination: optional `cacheCost`, `cachePin`
+

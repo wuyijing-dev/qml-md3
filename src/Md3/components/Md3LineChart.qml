@@ -1,146 +1,37 @@
 import QtQuick
 import QtQuick.Shapes
 
-/// MD3 line chart — QtQuick.Shapes GPU stroke (RoundCap/Join = Canvas-quality look).
-/// Large series: feed already-downsampled points from Md3ChartData (C++), not raw millions.
-Item {
+/// Line / area chart — QtQuick.Shapes. Extends Md3Chart.
+Md3Chart {
     id: root
 
-    property var values: []
-    property var series: []
-    property var seriesColors: []
-    property color lineColor: Md3Theme.colorScheme.primary
-    property color fillColor: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.primary, 0.20)
-    property color gridColor: Md3Theme.colorScheme.outlineVariant
-    property color axisLabelColor: Md3Theme.colorScheme.colorOnSurfaceVariant
-    property color backgroundColor: "transparent"
-    property color surfaceColor: Md3Theme.colorScheme.surface
-
-    property real lineWidth: 2.5
-    property bool showArea: true
-    property bool showDots: false
-    property bool showGrid: true
-    property bool showYLabels: true
-    property bool showXLabels: false
-    property bool smooth: true
-    property real minY: Number.NaN
-    property real maxY: Number.NaN
-    property int horizontalGridLines: 4
-    property real contentPadding: 8
-    property real labelWidth: showYLabels ? 36 : 0
-    property real dotRadius: 3
-    property string yUnit: ""
-    property int valueDecimals: 0
-    property int smoothMaxPoints: 400
-    property int dotsMaxPoints: 80
-
-    /// Live sine without JS million-alloc; small point count only.
     property bool live: false
     property int livePointCount: 48
     property real liveSpeed: 2.4
     property real livePhase: 0
+    /// Mutated in place — avoids allocating a new array every animation frame.
+    property var liveBuffer: []
 
-    readonly property int rawPointCount: 0
-    property int renderedPointCount: 0
-
-    implicitWidth: 280
-    implicitHeight: 160
-
-    readonly property real _left: contentPadding + labelWidth
-    readonly property real _right: width - contentPadding
-    readonly property real _top: contentPadding + 4
-    readonly property real _bottom: height - contentPadding - (showXLabels ? 16 : 0)
-    readonly property real _plotW: Math.max(1, _right - _left)
-    readonly property real _plotH: Math.max(1, _bottom - _top)
-
-    readonly property var _flatSeries: {
-        if (live)
-            return [liveValues]
-        if (series && series.length > 0)
-            return series
-        return [values]
+    function ensureLiveBuffer() {
+        if (liveBuffer.length === livePointCount)
+            return
+        const out = new Array(livePointCount)
+        for (let i = 0; i < livePointCount; ++i)
+            out[i] = 50
+        liveBuffer = out
     }
 
-    readonly property var liveValues: {
+    function advanceLive(dt) {
+        ensureLiveBuffer()
+        livePhase = (livePhase + liveSpeed * dt) % (Math.PI * 200)
         const p = livePhase
+        const buf = liveBuffer
         const n = livePointCount
-        const out = []
         for (let i = 0; i < n; ++i) {
             const t = p + i * 0.22
-            out.push(50 + Math.sin(t) * 28 + Math.sin(t * 0.37) * 12)
+            buf[i] = 50 + Math.sin(t) * 28 + Math.sin(t * 0.37) * 12
         }
-        return out
-    }
-
-    function _asNumber(v) {
-        if (v === undefined || v === null)
-            return Number.NaN
-        if (typeof v === "number")
-            return v
-        if (typeof v === "object" && v.y !== undefined)
-            return Number(v.y)
-        return Number(v)
-    }
-
-    function _seriesNums(s) {
-        if (!s || s.length === undefined)
-            return []
-        const n = s.length
-        if (n === 0)
-            return []
-        if (typeof s[0] === "number") {
-            const out = new Array(n)
-            for (let i = 0; i < n; ++i)
-                out[i] = s[i]
-            return out
-        }
-        const out = []
-        for (let i = 0; i < n; ++i) {
-            const v = _asNumber(s[i])
-            if (!isNaN(v))
-                out.push(v)
-        }
-        return out
-    }
-
-    function _rangeFromSeries(all) {
-        let lo = minY
-        let hi = maxY
-        if (!isNaN(lo) && !isNaN(hi) && hi > lo)
-            return { min: lo, max: hi }
-        lo = Infinity
-        hi = -Infinity
-        let found = false
-        for (let s = 0; s < all.length; ++s) {
-            const nums = _seriesNums(all[s])
-            for (let i = 0; i < nums.length; ++i) {
-                found = true
-                if (nums[i] < lo) lo = nums[i]
-                if (nums[i] > hi) hi = nums[i]
-            }
-        }
-        if (!found)
-            return { min: 0, max: 1 }
-        if (hi <= lo) {
-            lo -= 1
-            hi += 1
-        }
-        const pad = (hi - lo) * 0.08
-        return { min: lo - pad, max: hi + pad }
-    }
-
-    function _colorAt(index) {
-        if (seriesColors && index < seriesColors.length)
-            return seriesColors[index]
-        if (index === 0)
-            return lineColor
-        const roles = [
-            Md3Theme.colorScheme.primary,
-            Md3Theme.colorScheme.secondary,
-            Md3Theme.colorScheme.tertiary,
-            Md3Theme.colorScheme.error
-        ]
-        return roles[index % roles.length]
+        rebuild()
     }
 
     function _catmull(pts, seg) {
@@ -170,49 +61,54 @@ Item {
         return out
     }
 
-    function _buildGeom() {
-        const all = _flatSeries
-        const range = _rangeFromSeries(all)
+    function rebuild() {
+        if (live)
+            ensureLiveBuffer()
+        const all = live ? [liveBuffer]
+                         : ((series && series.length > 0) ? series : [values])
+        const range = rangeFromSeries(all.length ? all : [[0]])
         const span = Math.max(1e-6, range.max - range.min)
-        const yAt = v => _top + _plotH * (1 - (v - range.min) / span)
-
+        const yAt = v => plotTop + plotHeight * (1 - (v - range.min) / span)
         const model = []
         let rendered = 0
+        const fill0 = resolvedFillColor()
+
         for (let s = 0; s < all.length; ++s) {
-            const nums = _seriesNums(all[s])
+            const nums = seriesNums(all[s])
             if (nums.length < 1)
                 continue
             const n = nums.length
             rendered += n
             let pts = []
             for (let i = 0; i < n; ++i) {
-                const x = n === 1 ? (_left + _plotW / 2) : (_left + _plotW * i / (n - 1))
+                const x = n === 1 ? (plotLeft + plotWidth / 2)
+                                  : (plotLeft + plotWidth * i / (n - 1))
                 pts.push(Qt.point(x, yAt(nums[i])))
             }
-            const useSmooth = smooth && n <= smoothMaxPoints
-            if (useSmooth)
+            if (smooth && !live && n <= smoothMaxPoints)
                 pts = _catmull(pts, 4)
 
-            const col = _colorAt(s)
+            const col = colorAt(s)
             let area = []
             if (showArea && pts.length >= 2) {
                 area = pts.slice()
-                area.push(Qt.point(pts[pts.length - 1].x, _bottom))
-                area.push(Qt.point(pts[0].x, _bottom))
+                area.push(Qt.point(pts[pts.length - 1].x, plotBottom))
+                area.push(Qt.point(pts[0].x, plotBottom))
             }
             model.push({
                 line: pts,
                 area: area,
                 color: col,
-                fill: s === 0 ? fillColor : Qt.rgba(col.r, col.g, col.b, 0.12),
+                fill: s === 0 ? fill0 : Qt.rgba(col.r, col.g, col.b, 0.12),
                 dots: showDots && n <= dotsMaxPoints
             })
         }
-        root.renderedPointCount = rendered
+        renderedPointCount = rendered
         geom.rangeMin = range.min
         geom.rangeMax = range.max
         geom.span = span
         geom.seriesModel = model
+        rebuilt()
     }
 
     QtObject {
@@ -223,33 +119,20 @@ Item {
         property var seriesModel: []
     }
 
-    onWidthChanged: rebuildTimer.restart()
-    onHeightChanged: rebuildTimer.restart()
-    onValuesChanged: rebuildTimer.restart()
-    onSeriesChanged: rebuildTimer.restart()
-    onSeriesColorsChanged: rebuildTimer.restart()
-    onLineColorChanged: rebuildTimer.restart()
-    onFillColorChanged: rebuildTimer.restart()
-    onShowAreaChanged: rebuildTimer.restart()
-    onShowDotsChanged: rebuildTimer.restart()
-    onSmoothChanged: rebuildTimer.restart()
-    onMinYChanged: rebuildTimer.restart()
-    onMaxYChanged: rebuildTimer.restart()
-    onLiveChanged: rebuildTimer.restart()
-    onLiveValuesChanged: if (live) rebuildTimer.restart()
-
-    Timer {
-        id: rebuildTimer
-        interval: 0
-        onTriggered: root._buildGeom()
-    }
-    Component.onCompleted: _buildGeom()
-
     FrameAnimation {
-        running: root.live && root.visible && root.enabled
-        onTriggered: {
-            root.livePhase = (root.livePhase + root.liveSpeed * frameTime) % (Math.PI * 200)
-        }
+        running: root.live && root.chartActive
+        onTriggered: root.advanceLive(frameTime)
+    }
+
+    onLiveChanged: {
+        if (live)
+            ensureLiveBuffer()
+        requestRebuild()
+    }
+    onLivePointCountChanged: {
+        liveBuffer = []
+        ensureLiveBuffer()
+        requestRebuild()
     }
 
     Rectangle {
@@ -258,14 +141,17 @@ Item {
         radius: Md3Theme.shape.small
     }
 
-    // Grid
     Shape {
         anchors.fill: parent
         visible: root.showGrid && root.horizontalGridLines > 0
-        preferredRendererType: Shape.CurveRenderer
+        // Polyline grids/series: GeometryRenderer builds faster than CurveRenderer.
+        preferredRendererType: Shape.GeometryRenderer
         ShapePath {
             strokeWidth: 1
-            strokeColor: Qt.rgba(root.gridColor.r, root.gridColor.g, root.gridColor.b, 0.45)
+            strokeColor: {
+                const c = root.resolvedGridColor()
+                return Qt.rgba(c.r, c.g, c.b, 0.45)
+            }
             fillColor: "transparent"
             PathMultiline {
                 paths: {
@@ -273,8 +159,8 @@ Item {
                     const n = root.horizontalGridLines
                     for (let g = 0; g <= n; ++g) {
                         const t = g / n
-                        const y = root._top + root._plotH * (1 - t)
-                        out.push([Qt.point(root._left, y), Qt.point(root._right, y)])
+                        const y = root.plotTop + root.plotHeight * (1 - t)
+                        out.push([Qt.point(root.plotLeft, y), Qt.point(root.plotRight, y)])
                     }
                     return out
                 }
@@ -282,7 +168,6 @@ Item {
         }
     }
 
-    // Series fills + strokes
     Repeater {
         model: geom.seriesModel
         delegate: Item {
@@ -293,8 +178,8 @@ Item {
 
             Shape {
                 anchors.fill: parent
-                preferredRendererType: Shape.CurveRenderer
-                asynchronous: false
+                preferredRendererType: Shape.GeometryRenderer
+                asynchronous: true
                 visible: modelData.area && modelData.area.length > 2
                 ShapePath {
                     strokeWidth: 0
@@ -305,8 +190,8 @@ Item {
             }
             Shape {
                 anchors.fill: parent
-                preferredRendererType: Shape.CurveRenderer
-                asynchronous: false
+                preferredRendererType: Shape.GeometryRenderer
+                asynchronous: !root.live
                 ShapePath {
                     strokeWidth: root.lineWidth
                     strokeColor: modelData.color
@@ -331,14 +216,13 @@ Item {
                         width: Math.max(2, root.dotRadius * 2 - 2.4)
                         height: width
                         radius: width / 2
-                        color: root.surfaceColor
+                        color: root.resolvedSurfaceColor()
                     }
                 }
             }
         }
     }
 
-    // Y labels
     Repeater {
         model: root.showYLabels ? root.horizontalGridLines + 1 : 0
         delegate: Text {
@@ -346,13 +230,13 @@ Item {
             readonly property real t: index / Math.max(1, root.horizontalGridLines)
             readonly property real v: geom.rangeMin + geom.span * t
             x: 0
-            y: root._top + root._plotH * (1 - t) - 8
-            width: root._left - 6
+            y: root.plotTop + root.plotHeight * (1 - t) - 8
+            width: root.plotLeft - 6
             height: 16
             horizontalAlignment: Text.AlignRight
             verticalAlignment: Text.AlignVCenter
             text: v.toFixed(root.valueDecimals) + root.yUnit
-            color: root.axisLabelColor
+            color: root.resolvedAxisLabelColor()
             font.pixelSize: 11
             font.family: Md3Theme.typography.fontFamily
         }

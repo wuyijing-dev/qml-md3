@@ -16,6 +16,11 @@ Item {
     property url sourceBase: ""
     property bool asynchronous: true
     property bool prefetchNeighbors: false
+    property bool predictPrefetch: true
+    property bool l2Components: true
+    property int l2CacheLimit: 16
+    property bool l2WarmIdle: true
+    property bool leaveSnapshot: true
     property bool warmStart: false
     property bool showBusyIndicator: false
     property bool showSkeleton: true
@@ -79,6 +84,12 @@ Item {
             onCurrentIndexChangedByUser: function (index) {
                 root.navigateTo(index)
             }
+            onDestinationHovered: function (index) {
+                host.prefetchHint(index)
+            }
+            onDestinationUnhovered: function (index) {
+                host.clearPrefetchHint(index)
+            }
             onExpandToggleClicked: root.railExpandRequested(!root.railExpanded)
         }
 
@@ -96,6 +107,11 @@ Item {
             sourceBase: root.sourceBase
             asynchronous: root.asynchronous
             prefetchNeighbors: root.prefetchNeighbors
+            predictPrefetch: root.predictPrefetch
+            l2Components: root.l2Components
+            l2CacheLimit: root.l2CacheLimit
+            l2WarmIdle: root.l2WarmIdle
+            leaveSnapshot: root.leaveSnapshot
             warmStart: root.warmStart
             showBusyIndicator: root.showBusyIndicator
             showSkeleton: root.showSkeleton

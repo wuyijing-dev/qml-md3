@@ -57,11 +57,32 @@ destinations: [
 |-----|------|
 | `destinations` | `{ title\|label, icon, source\|component }` |
 | `navigationRail` | Show left rail (default true) |
-| `pageCacheMode` | `none` / `one` / `lru` / `all` / `adaptive` |
-| `pageCacheLimit` | Max resident pages for `lru` / `adaptive` |
-| `pageIdleTrimMs` | Adaptive: idle duration before trimming to 1 page |
+| `pageCacheMode` | `none` / `one` / `lru` / `all` / `adaptive` / `arc` (default **arc**) |
+| `pageCacheLimit` | Max L1 Item residents (default **2**) |
+| `pageIdleTrimMs` | Trim L1 toward 1 after idle (default **12s**) |
+| `pagePrefetch` | ±1 neighbors into L1 (default **false**) |
+| `pagePredictPrefetch` | Markov + rail hover → L2 only (default **true**) |
+| `pageL2Cache` | Retain compiled `Component` after Item teardown |
+| `pageL2CacheLimit` | Max L2 entries (default **24**) |
+| `pageL2Warm` | Idle-compile all destinations after startup |
+| `pageLeaveSnapshot` | Freeze leave page while cold target loads |
 | `navigateTo(i)` / `currentIndex` | Switch page |
 | `pageHost` | Access `Md3PageHost` (e.g. `currentItem`) |
+
+**Recommended (faster + lean):** `arc` + limit 2 + L2 + predict + leaveSnapshot + l2Warm; keep `pagePrefetch` off.
+
+Destination extras: `cacheCost` (eviction weight), `cachePin` (never L1-evict once resident).
+
+## Page cache strategy (`Md3PageHost`)
+
+| Layer | Contents | Cost |
+|-------|----------|------|
+| L1 | Live `Item` trees (`keepFlags`) | High RAM, instant |
+| L2 | `Qt.createComponent` map | Low RAM, skip re-parse |
+| Leave snap | One `ShaderEffectSource` during cold wait | Temporary texture |
+| Ghost | ARC B1/B2 indices only | Negligible |
+
+`arc` uses Adaptive Replacement Cache (T1 recent / T2 frequent + ghosts) with cost-aware victims. Rail hover emits `destinationHovered` → L2 compile.
 
 Without `destinations`, child content uses the custom content slot (previous behavior).
 

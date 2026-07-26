@@ -19,11 +19,16 @@ Md3ApplicationWindow {
     navigationRail: true
     railExpanded: false
     railHeader: qsTr("组件图库")
-    // WinUI3-like Frame navigation (low memory + smooth enter)
-    pageCacheMode: "adaptive"
-    pageCacheLimit: 3
-    pageIdleTrimMs: 20000
-    pagePrefetch: true
+    // Best combo: small L1 + big L2 + predict(L2) + leave snapshot + idle L2 warm
+    pageCacheMode: "arc"
+    pageCacheLimit: 2
+    pageIdleTrimMs: 12000
+    pagePrefetch: false
+    pagePredictPrefetch: true
+    pageL2Cache: true
+    pageL2CacheLimit: 24
+    pageL2Warm: true
+    pageLeaveSnapshot: true
     pageWarmStart: false
     pageAsync: true
     pagePadding: 20
@@ -59,11 +64,11 @@ Md3ApplicationWindow {
         { title: qsTr("扩展"), icon: "extension", source: pageRoot + "ExtrasPage.qml" },
         { title: qsTr("动效"), icon: "animation", source: pageRoot + "MotionPage.qml" },
         { title: qsTr("主题"), icon: "contrast", source: pageRoot + "ThemePage.qml" },
-        { title: qsTr("图表"), icon: "show_chart", source: pageRoot + "ChartsPage.qml" },
+        { title: qsTr("图表"), icon: "show_chart", source: pageRoot + "ChartsPage.qml", cacheCost: 3 },
         { title: qsTr("窗口"), icon: "web_asset", source: pageRoot + "WindowPage.qml" },
-        { title: qsTr("场景：登录"), icon: "login", source: pageRoot + "scenes/LoginScene.qml" },
-        { title: qsTr("场景：设置"), icon: "settings", source: pageRoot + "scenes/SettingsScene.qml" },
-        { title: qsTr("场景：列表详情"), icon: "view_sidebar", source: pageRoot + "scenes/ListDetailScene.qml" }
+        { title: qsTr("场景：登录"), icon: "login", source: pageRoot + "scenes/LoginScene.qml", cacheCost: 2.5 },
+        { title: qsTr("场景：设置"), icon: "settings", source: pageRoot + "scenes/SettingsScene.qml", cacheCost: 2.5 },
+        { title: qsTr("场景：列表详情"), icon: "view_sidebar", source: pageRoot + "scenes/ListDetailScene.qml", cacheCost: 2.5 }
     ]
 
     PerformanceMonitor {
@@ -79,7 +84,7 @@ Md3ApplicationWindow {
         z: 100000
         visible: window.showPerformancePanel
         compact: true
-        expanded: false
+        expanded: true
         monitor: perfMonitor
     }
 

@@ -3,11 +3,13 @@ import QtQuick.Window
 
 /*
   Instant navigation host with MD3 / WinUI-style page transitions:
-  - Revisit (cached): animated swap (or instant if pageTransition === "none")
-  - Cold open: sync (asynchronous:false) creates immediately; async shows skeleton
-  - cacheMode: "none" | "one" | "lru" | "all" | "adaptive"
-    WinUI-like low memory: "one" (Disabled) or "lru" with limit 2 (Enabled tiny cache)
-    adaptive: keep more pages while the user is active; trim to 1 after idle
+  - Revisit (L1 cached): animated swap (or instant if pageTransition === "none")
+  - Cold open: sync/async Loader; optional L2 QQmlComponent reuse
+  - cacheMode: "none" | "one" | "lru" | "all" | "adaptive" | "arc"
+    adaptive: grow toward cacheLimit while active; trim after idle (ARC victims)
+    arc: ARC (recency+frequency+ghost) + cost-aware victim pick; optional idle trim
+  - L2: keep compiled Component after Item teardown (cheap warm re-open)
+  - Prefetch: ±1 neighbors, Markov next-hop, rail hover hint
 */
 Item {
     id: root
@@ -17,15 +19,25 @@ Item {
     property int displayedIndex: 0
     property string cacheMode: "lru"
     property int cacheLimit: 4
-    /// Adaptive: milliseconds without navigation before trimming to one page
+    /// Adaptive / arc: milliseconds without navigation before trimming to one page
     property int idleTrimMs: 45000
-    /// Adaptive: minimum / starting resident pages while idle
+    /// Adaptive / arc: minimum / starting resident pages while idle
     property int adaptiveCacheMin: 1
     property int _liveCacheLimit: 1
     property bool _adaptivePrefetch: false
     property real contentPadding: 20
     property bool asynchronous: true
     property bool prefetchNeighbors: false
+    /// Keep compiled Components after L1 eviction (re-instantiate without re-parse)
+    property bool l2Components: true
+    /// Max L2 Component entries (metadata + bytecode; cheaper than Item trees)
+    property int l2CacheLimit: 16
+    /// Idle: compile all destination Components (no Item) after startup
+    property bool l2WarmIdle: true
+    /// Markov + hover: L2 always; L1 only if prefetchNeighbors
+    property bool predictPrefetch: true
+    /// Freeze leaving page texture while cold target loads (cheap perceived speed)
+    property bool leaveSnapshot: true
     property bool warmStart: false
     property bool showBusyIndicator: false
     property bool showSkeleton: true
@@ -58,6 +70,22 @@ Item {
     property var keepFlags: []
     property var lruOrder: []
     property int generation: 0
+
+    // --- ARC directory (indices only; ghosts hold no Item / Component) ---
+    property var _arcT1: []
+    property var _arcT2: []
+    property var _arcB1: []
+    property var _arcB2: []
+    property real _arcP: 0
+
+    // --- L2 Component map (url string → Component) ---
+    property var _l2Map: ({})
+    property var _l2Order: []
+
+    // --- Markov transitions: fromIndex → { toIndex: count } ---
+    property var _markov: ({})
+    property int _navPrev: -1
+    property int _hoverHint: -1
 
     property bool transitioning: false
     property int transitionFrom: -1
@@ -97,6 +125,32 @@ Item {
         return pageRepeater.itemAt(index)
     }
 
+    function _usesArc() {
+        return cacheMode === "arc" || cacheMode === "adaptive"
+    }
+
+    function _pageCost(index) {
+        const e = entryAt(index)
+        if (!e)
+            return 1
+        if (e.cacheCost !== undefined && e.cacheCost !== null)
+            return Math.max(0.25, Number(e.cacheCost))
+        const src = String(e.source || "")
+        const title = String(e.title || e.label || "")
+        if (/Charts|chart/i.test(src) || /图表/.test(title))
+            return 3
+        if (/scenes\//i.test(src) || /Scene|场景/.test(title))
+            return 2.5
+        if (/Theme|Motion|Extras|Containment/i.test(src))
+            return 1.5
+        return 1
+    }
+
+    function _isPinned(index) {
+        const e = entryAt(index)
+        return !!(e && e.cachePin)
+    }
+
     function _ensureKeepArray() {
         const n = model ? model.length : 0
         if (keepFlags.length === n)
@@ -120,43 +174,160 @@ Item {
         generation++
     }
 
+    function _listRemove(list, value) {
+        const out = []
+        for (let i = 0; i < list.length; ++i) {
+            if (list[i] !== value)
+                out.push(list[i])
+        }
+        return out
+    }
+
+    function _listContains(list, value) {
+        for (let i = 0; i < list.length; ++i) {
+            if (list[i] === value)
+                return true
+        }
+        return false
+    }
+
+    function _listPushMru(list, value) {
+        const out = _listRemove(list, value)
+        out.push(value)
+        return out
+    }
+
+    function _listTakeLru(list) {
+        if (!list.length)
+            return { list: list, value: -1 }
+        return { list: list.slice(1), value: list[0] }
+    }
+
+    function _listTakeCostVictim(list) {
+        // Prefer highest cacheCost near the LRU end (scan up to 4 LRU candidates)
+        if (!list.length)
+            return { list: list, value: -1 }
+        const scan = Math.min(4, list.length)
+        let bestPos = 0
+        let bestCost = -1
+        for (let i = 0; i < scan; ++i) {
+            const idx = list[i]
+            if (_isPinned(idx) || idx === displayedIndex || idx === currentIndex)
+                continue
+            if (transitioning && (idx === transitionFrom || idx === transitionTo))
+                continue
+            const c = _pageCost(idx)
+            if (c > bestCost) {
+                bestCost = c
+                bestPos = i
+            }
+        }
+        // If all scanned were protected, fall through to classic LRU skip-protected
+        if (bestCost < 0) {
+            for (let j = 0; j < list.length; ++j) {
+                const idx = list[j]
+                if (_isPinned(idx) || idx === displayedIndex || idx === currentIndex)
+                    continue
+                if (transitioning && (idx === transitionFrom || idx === transitionTo))
+                    continue
+                bestPos = j
+                bestCost = 0
+                break
+            }
+        }
+        if (bestCost < 0)
+            return { list: list, value: -1 }
+        const victim = list[bestPos]
+        const out = list.slice(0, bestPos).concat(list.slice(bestPos + 1))
+        return { list: out, value: victim }
+    }
+
     function _touchLru(index) {
         if (index < 0)
             return
-        const next = []
-        for (let i = 0; i < lruOrder.length; ++i) {
-            if (lruOrder[i] !== index)
-                next.push(lruOrder[i])
+        lruOrder = _listPushMru(lruOrder, index)
+    }
+
+    function _recordMarkov(from, to) {
+        if (from < 0 || to < 0 || from === to)
+            return
+        const key = String(from)
+        const row = Object.assign({}, _markov[key] || {})
+        const tk = String(to)
+        row[tk] = (row[tk] || 0) + 1
+        const next = Object.assign({}, _markov)
+        next[key] = row
+        _markov = next
+    }
+
+    function _markovPredict(from) {
+        if (from < 0)
+            return -1
+        const row = _markov[String(from)]
+        if (!row)
+            return -1
+        let best = -1
+        let bestC = 0
+        for (const k in row) {
+            const c = row[k]
+            if (c > bestC) {
+                bestC = c
+                best = Number(k)
+            }
         }
-        next.push(index)
-        lruOrder = next
+        return best
     }
 
     function noteActivity() {
-        if (cacheMode !== "adaptive")
+        if (cacheMode !== "adaptive" && cacheMode !== "arc")
             return
-        // Grow toward cacheLimit while the user keeps navigating
         _liveCacheLimit = Math.min(cacheLimit, Math.max(adaptiveCacheMin, _liveCacheLimit + 1))
-        _adaptivePrefetch = _liveCacheLimit >= 2
+        // Do not auto-inflate L1 neighbors — only explicit prefetchNeighbors.
+        _adaptivePrefetch = false
         idleTrimTimer.interval = Math.max(5000, idleTrimMs)
         idleTrimTimer.restart()
         generation++
         _evict()
-        if (_adaptivePrefetch)
-            Qt.callLater(_prefetchAround, currentIndex)
+        Qt.callLater(_prefetchSmart, currentIndex)
     }
 
     function _trimForIdle() {
-        if (cacheMode !== "adaptive")
+        if (cacheMode !== "adaptive" && cacheMode !== "arc")
             return
         _liveCacheLimit = adaptiveCacheMin
         _adaptivePrefetch = false
         generation++
         _evict()
+        _trimL2()
+        _dismissLeaveSnapshot(true)
+    }
+
+    function _armLeaveSnapshot() {
+        if (!leaveSnapshot)
+            return
+        const ldr = _loaderAt(displayedIndex)
+        if (!ldr || !ldr.item)
+            return
+        leaveSnapFade.stop()
+        leaveSnap.sourceItem = ldr
+        leaveSnap.scheduleUpdate()
+        leaveSnap.opacity = 1
+    }
+
+    function _dismissLeaveSnapshot(immediate) {
+        if (!leaveSnap.sourceItem && leaveSnap.opacity < 0.01)
+            return
+        if (immediate) {
+            leaveSnapFade.stop()
+            leaveSnap.opacity = 0
+            leaveSnap.sourceItem = null
+            return
+        }
+        leaveSnapFade.start()
     }
 
     function _effectiveLimit() {
-        if (cacheMode === "adaptive")
+        if (cacheMode === "adaptive" || cacheMode === "arc")
             return Math.max(1, _liveCacheLimit)
         return cacheLimit
     }
@@ -167,6 +338,8 @@ Item {
             return true
         if (transitioning && (index === transitionFrom || index === transitionTo))
             return true
+        if (_isPinned(index) && keepFlags.length > index && keepFlags[index])
+            return true
         if (index < 0 || index >= keepFlags.length)
             return false
         if (!keepFlags[index])
@@ -175,32 +348,128 @@ Item {
             return true
         if (cacheMode === "one")
             return false
-        if (cacheMode === "lru" || cacheMode === "adaptive")
+        if (cacheMode === "lru" || cacheMode === "adaptive" || cacheMode === "arc")
             return true
         return false
     }
 
-    function _evict() {
-        if (cacheMode === "all" || cacheMode === "none")
-            return
-        if (cacheMode === "one"
-                || (cacheMode === "adaptive" && _effectiveLimit() <= 1)) {
-            for (let i = 0; i < keepFlags.length; ++i) {
-                if (i !== displayedIndex && i !== currentIndex
-                        && !(transitioning && (i === transitionFrom || i === transitionTo))
-                        && keepFlags[i])
-                    _setKeep(i, false)
-            }
-            return
-        }
-        const limit = _effectiveLimit()
-        const protectedIdx = {}
-        protectedIdx[displayedIndex] = true
-        protectedIdx[currentIndex] = true
+    function _protectedSet() {
+        const p = {}
+        p[displayedIndex] = true
+        p[currentIndex] = true
         if (transitioning) {
-            protectedIdx[transitionFrom] = true
-            protectedIdx[transitionTo] = true
+            p[transitionFrom] = true
+            p[transitionTo] = true
         }
+        // cachePin: never evict once resident — do not force-load unvisited pins
+        if (model && keepFlags.length === model.length) {
+            for (let i = 0; i < model.length; ++i) {
+                if (_isPinned(i) && keepFlags[i])
+                    p[i] = true
+            }
+        }
+        return p
+    }
+
+    function _syncKeepFromArc() {
+        const inArc = {}
+        for (let i = 0; i < _arcT1.length; ++i)
+            inArc[_arcT1[i]] = true
+        for (let j = 0; j < _arcT2.length; ++j)
+            inArc[_arcT2[j]] = true
+        const prot = _protectedSet()
+        _ensureKeepArray()
+        const next = keepFlags.slice()
+        for (let k = 0; k < next.length; ++k)
+            next[k] = !!(inArc[k] || prot[k])
+        keepFlags = next
+        generation++
+    }
+
+    function _arcReplaceToward(xInB2) {
+        const c = _effectiveLimit()
+        const p = Math.min(c, Math.max(0, _arcP))
+        const t1Len = _arcT1.length
+        let victim = -1
+        if (t1Len >= 1 && (t1Len > p || (xInB2 && t1Len === Math.floor(p)))) {
+            const r = _listTakeCostVictim(_arcT1)
+            _arcT1 = r.list
+            victim = r.value
+            if (victim >= 0)
+                _arcB1 = _listPushMru(_arcB1, victim)
+        } else {
+            const r = _listTakeCostVictim(_arcT2)
+            _arcT2 = r.list
+            victim = r.value
+            if (victim >= 0)
+                _arcB2 = _listPushMru(_arcB2, victim)
+        }
+        if (victim >= 0)
+            _ensureL2(victim) // demote Item → keep Component
+        return victim
+    }
+
+    function _arcGhostTrim() {
+        const c = _effectiveLimit()
+        const maxGhost = Math.max(c, 1)
+        while (_arcB1.length > maxGhost)
+            _arcB1 = _arcB1.slice(1)
+        while (_arcB2.length > maxGhost)
+            _arcB2 = _arcB2.slice(1)
+        const total = _arcT1.length + _arcT2.length + _arcB1.length + _arcB2.length
+        if (total > 2 * c && _arcB2.length)
+            _arcB2 = _arcB2.slice(1)
+    }
+
+    /// ARC request: updates T1/T2/B1/B2 and L1 keepFlags.
+    function _arcRequest(index) {
+        if (index < 0 || !model || index >= model.length)
+            return
+        const c = Math.max(1, _effectiveLimit())
+        const inT1 = _listContains(_arcT1, index)
+        const inT2 = _listContains(_arcT2, index)
+        if (inT1 || inT2) {
+            _arcT1 = _listRemove(_arcT1, index)
+            _arcT2 = _listPushMru(_arcT2, index)
+            _syncKeepFromArc()
+            return
+        }
+
+        const inB1 = _listContains(_arcB1, index)
+        const inB2 = _listContains(_arcB2, index)
+        if (inB1) {
+            const delta = Math.max(1, Math.floor((_arcB2.length || 1) / Math.max(1, _arcB1.length)))
+            _arcP = Math.min(c, _arcP + delta)
+            if (_arcT1.length + _arcT2.length >= c)
+                _arcReplaceToward(false)
+            _arcB1 = _listRemove(_arcB1, index)
+            _arcT2 = _listPushMru(_arcT2, index)
+        } else if (inB2) {
+            const delta = Math.max(1, Math.floor((_arcB1.length || 1) / Math.max(1, _arcB2.length)))
+            _arcP = Math.max(0, _arcP - delta)
+            if (_arcT1.length + _arcT2.length >= c)
+                _arcReplaceToward(true)
+            _arcB2 = _listRemove(_arcB2, index)
+            _arcT2 = _listPushMru(_arcT2, index)
+        } else {
+            if (_arcT1.length + _arcT2.length >= c) {
+                _arcReplaceToward(false)
+            } else if (_arcT1.length + _arcT2.length + _arcB1.length + _arcB2.length >= c) {
+                if (_arcT1.length + _arcT2.length + _arcB1.length + _arcB2.length >= 2 * c
+                        && _arcB2.length)
+                    _arcB2 = _arcB2.slice(1)
+                if (_arcB1.length)
+                    _arcB1 = _arcB1.slice(1)
+            }
+            _arcT1 = _listPushMru(_arcT1, index)
+        }
+        _arcGhostTrim()
+        _syncKeepFromArc()
+    }
+
+    function _evictLru() {
+        const limit = _effectiveLimit()
+        const protectedIdx = _protectedSet()
         let kept = 0
         const order = lruOrder.slice()
         for (let i = order.length - 1; i >= 0; --i) {
@@ -213,14 +482,49 @@ Item {
                 kept++
                 continue
             }
+            _ensureL2(idx)
             _setKeep(idx, false)
-            const pruned = []
-            for (let j = 0; j < lruOrder.length; ++j) {
-                if (lruOrder[j] !== idx)
-                    pruned.push(lruOrder[j])
-            }
-            lruOrder = pruned
+            lruOrder = _listRemove(lruOrder, idx)
         }
+    }
+
+    function _evict() {
+        if (cacheMode === "all" || cacheMode === "none")
+            return
+        if (cacheMode === "one"
+                || ((cacheMode === "adaptive" || cacheMode === "arc")
+                    && _effectiveLimit() <= 1)) {
+            for (let i = 0; i < keepFlags.length; ++i) {
+                if (!_protectedSet()[i] && keepFlags[i]) {
+                    _ensureL2(i)
+                    _setKeep(i, false)
+                }
+            }
+            if (_usesArc()) {
+                // Keep only protected (+ pinned) in ARC directories
+                const prot = _protectedSet()
+                const filter = function (list) {
+                    const out = []
+                    for (let i = 0; i < list.length; ++i) {
+                        if (prot[list[i]])
+                            out.push(list[i])
+                    }
+                    return out
+                }
+                _arcT1 = filter(_arcT1)
+                _arcT2 = filter(_arcT2)
+            }
+            return
+        }
+        if (_usesArc()) {
+            // Shrink T1∪T2 down to limit via ARC replace
+            let guard = 0
+            while (_arcT1.length + _arcT2.length > _effectiveLimit() && guard++ < 64)
+                _arcReplaceToward(false)
+            _syncKeepFromArc()
+            return
+        }
+        _evictLru()
     }
 
     function _urlFor(index) {
@@ -237,15 +541,80 @@ Item {
         return e.component !== undefined ? e.component : null
     }
 
+    function _ensureL2(index) {
+        if (!l2Components || index < 0)
+            return null
+        const inline = _compFor(index)
+        if (inline)
+            return inline
+        const url = _urlFor(index)
+        if (!url)
+            return null
+        let comp = _l2Map[url]
+        if (comp && (comp.status === Component.Ready || comp.status === Component.Loading)) {
+            _l2Order = _listPushMru(_l2Order, url)
+            return comp
+        }
+        comp = Qt.createComponent(url)
+        if (!comp)
+            return null
+        const next = Object.assign({}, _l2Map)
+        next[url] = comp
+        _l2Map = next
+        _l2Order = _listPushMru(_l2Order, url)
+        _trimL2()
+        return comp
+    }
+
+    function _trimL2() {
+        if (!l2Components)
+            return
+        const limit = Math.max(2, l2CacheLimit)
+        const liveUrls = {}
+        if (model) {
+            for (let i = 0; i < model.length; ++i) {
+                if (keepFlags.length > i && keepFlags[i]) {
+                    const u = _urlFor(i)
+                    if (u)
+                        liveUrls[u] = true
+                }
+            }
+        }
+        while (_l2Order.length > limit) {
+            let dropped = false
+            for (let j = 0; j < _l2Order.length; ++j) {
+                const url = _l2Order[j]
+                if (liveUrls[url])
+                    continue
+                _l2Order = _listRemove(_l2Order, url)
+                const next = Object.assign({}, _l2Map)
+                delete next[url]
+                _l2Map = next
+                dropped = true
+                break
+            }
+            if (!dropped)
+                break
+        }
+    }
+
     function _fillLoader(loader, index) {
         if (!loader)
             return
-        const comp = _compFor(index)
-        if (comp) {
+        const inline = _compFor(index)
+        if (inline) {
             if (loader.source !== "")
                 loader.source = ""
-            if (loader.sourceComponent !== comp)
-                loader.sourceComponent = comp
+            if (loader.sourceComponent !== inline)
+                loader.sourceComponent = inline
+            return
+        }
+        const l2 = _ensureL2(index)
+        if (l2 && l2.status === Component.Ready) {
+            if (loader.source !== "")
+                loader.source = ""
+            if (loader.sourceComponent !== l2)
+                loader.sourceComponent = l2
             return
         }
         const url = _urlFor(index)
@@ -253,6 +622,36 @@ Item {
             loader.sourceComponent = null
         if (String(loader.source) !== url)
             loader.source = url
+    }
+
+    /// Soft-warm: L2 compile always; L1 only when predictive/neighbor prefetch is on.
+    function _warmPage(index, allowL1) {
+        if (!model || index < 0 || index >= model.length)
+            return
+        _ensureL2(index)
+        if (!allowL1)
+            return
+        if (_usesArc())
+            _arcRequest(index)
+        else {
+            _touchLru(index)
+            _setKeep(index, true)
+            _evict()
+        }
+    }
+
+    function prefetchHint(index) {
+        if (!predictPrefetch)
+            return
+        if (!model || index < 0 || index >= model.length)
+            return
+        _hoverHint = index
+        hoverPrefetchTimer.restart()
+    }
+
+    function clearPrefetchHint(index) {
+        if (_hoverHint === index)
+            _hoverHint = -1
     }
 
     function _finishTransition() {
@@ -263,9 +662,9 @@ Item {
         transitionTo = -1
         transitionProgress = 1
         generation++
+        _dismissLeaveSnapshot(false)
         _evict()
-        if (prefetchNeighbors)
-            Qt.callLater(_prefetchAround, displayedIndex)
+        Qt.callLater(_prefetchSmart, displayedIndex)
     }
 
     function _startTransition(fromIndex, toIndex) {
@@ -286,6 +685,7 @@ Item {
             displayedIndex = toIndex
             transitioning = false
             transitionProgress = 1
+            _dismissLeaveSnapshot(true)
             _evict()
             return
         }
@@ -322,6 +722,7 @@ Item {
         }
         _pendingShowIndex = -1
         _startTransition(displayedIndex, index)
+        _dismissLeaveSnapshot(false)
     }
 
     function _tryShow(index) {
@@ -350,23 +751,33 @@ Item {
         if (transitioning && index === transitionTo)
             return
 
+        if (_navPrev >= 0 && _navPrev !== index)
+            _recordMarkov(_navPrev, index)
+        _navPrev = index
+
         currentIndex = index
         _pendingShowIndex = -1
         _touchLru(index)
-        _setKeep(index, true)
+        // Raise adaptive/arc budget first so ARC insert sees the new limit.
         noteActivity()
+        if (_usesArc())
+            _arcRequest(index)
+        else {
+            _setKeep(index, true)
+            _evict()
+        }
 
         // Hot path: already Ready → transition (or instant)
         if (_tryShow(index)) {
+            _dismissLeaveSnapshot(true)
             if (!transitioning)
                 _evict()
-            if (prefetchNeighbors || _adaptivePrefetch)
-                Qt.callLater(_prefetchAround, index)
+            Qt.callLater(_prefetchSmart, index)
             return
         }
 
-        // Cold path: keep previous page visible; skeleton sits on top as the
-        // incoming-page placeholder until Ready, then full leave→enter transition.
+        // Cold path: freeze leave snapshot so eviction / skeleton still feel instant.
+        _armLeaveSnapshot()
         if (pageAnim.running) {
             pageAnim.stop()
             if (transitionTo >= 0 && transitionTo !== index)
@@ -384,24 +795,41 @@ Item {
         else if (ldr)
             _setKeep(index, true)
         _evict()
-        if (prefetchNeighbors || _adaptivePrefetch)
-            Qt.callLater(_prefetchAround, index)
+        Qt.callLater(_prefetchSmart, index)
     }
 
     function _prefetchAround(center) {
         if (!model)
-            return
-        if (!(prefetchNeighbors || _adaptivePrefetch))
             return
         const pair = [center - 1, center + 1]
         for (let i = 0; i < pair.length; ++i) {
             const n = pair[i]
             if (n < 0 || n >= model.length)
                 continue
-            _touchLru(n)
-            _setKeep(n, true)
+            _warmPage(n, true)
         }
-        _evict()
+    }
+
+    function _prefetchSmart(center) {
+        if (!model)
+            return
+        const doNeighbors = prefetchNeighbors
+        const doPredict = predictPrefetch
+        if (!doNeighbors && !doPredict && !l2Components)
+            return
+
+        // Best combo: neighbors optional L1; predict/hover are L2-only.
+        if (doNeighbors)
+            _prefetchAround(center)
+
+        if (doPredict) {
+            const next = _markovPredict(center)
+            if (next >= 0 && next !== center)
+                _ensureL2(next)
+            if (_hoverHint >= 0 && _hoverHint !== center)
+                _ensureL2(_hoverHint)
+        }
+        _trimL2()
     }
 
     function _warmAll() {
@@ -411,11 +839,69 @@ Item {
         warmTimer.start()
     }
 
+    function _warmAllL2() {
+        if (!l2Components || !model || cacheMode === "none")
+            return
+        l2WarmTimer.cursor = 0
+        l2WarmTimer.start()
+    }
+
     Timer {
         id: idleTrimTimer
         interval: Math.max(5000, root.idleTrimMs)
         repeat: false
         onTriggered: root._trimForIdle()
+    }
+
+    Timer {
+        id: hoverPrefetchTimer
+        interval: 90
+        repeat: false
+        onTriggered: {
+            if (root._hoverHint < 0)
+                return
+            // Best combo: hover = L2 only (unless explicit neighbor prefetch).
+            root._warmPage(root._hoverHint, root.prefetchNeighbors)
+        }
+    }
+
+    Timer {
+        id: l2WarmDelay
+        interval: 700
+        repeat: false
+        onTriggered: root._warmAllL2()
+    }
+
+    Timer {
+        id: l2WarmTimer
+        property int cursor: 0
+        interval: 28
+        repeat: true
+        onTriggered: {
+            if (!root.model || !root.l2Components) {
+                stop()
+                return
+            }
+            if (cursor < root.model.length) {
+                root._ensureL2(cursor)
+                cursor++
+            }
+            if (cursor >= root.model.length) {
+                root._trimL2()
+                stop()
+            }
+        }
+    }
+
+    NumberAnimation {
+        id: leaveSnapFade
+        target: leaveSnap
+        property: "opacity"
+        to: 0
+        duration: Md3Motion.short3
+        easing.type: Easing.BezierSpline
+        easing.bezierCurve: Md3Motion.standard
+        onFinished: leaveSnap.sourceItem = null
     }
 
     NumberAnimation {
@@ -443,10 +929,9 @@ Item {
                 return
             }
             if (cursor < root.model.length) {
-                root._touchLru(cursor)
-                root._setKeep(cursor, true)
+                root._ensureL2(cursor)
+                root._warmPage(cursor, true)
                 cursor++
-                root._evict()
             }
             if (cursor >= root.model.length)
                 stop()
@@ -457,16 +942,21 @@ Item {
         _ensureKeepArray()
         _setKeep(currentIndex, true)
         _touchLru(currentIndex)
+        if (_usesArc())
+            _arcRequest(currentIndex)
         displayedIndex = currentIndex
+        _navPrev = currentIndex
         generation++
-        if (cacheMode === "adaptive") {
+        if (cacheMode === "adaptive" || cacheMode === "arc") {
             _liveCacheLimit = adaptiveCacheMin
             idleTrimTimer.restart()
         }
         if (warmStart)
             Qt.callLater(_warmAll)
-        else if (prefetchNeighbors || _adaptivePrefetch)
-            Qt.callLater(_prefetchAround, currentIndex)
+        else
+            Qt.callLater(_prefetchSmart, currentIndex)
+        if (l2WarmIdle && l2Components)
+            l2WarmDelay.start()
     }
 
     onModelChanged: {
@@ -475,22 +965,36 @@ Item {
         transitioning = false
         lruOrder = []
         keepFlags = []
+        _arcT1 = []
+        _arcT2 = []
+        _arcB1 = []
+        _arcB2 = []
+        _arcP = 0
+        _markov = ({})
+        _navPrev = -1
+        _hoverHint = -1
+        _l2Map = ({})
+        _l2Order = []
         if (model && currentIndex >= model.length)
             currentIndex = 0
         displayedIndex = currentIndex
         _ensureKeepArray()
         _setKeep(currentIndex, true)
         _touchLru(currentIndex)
-        if (cacheMode === "adaptive")
+        if (_usesArc())
+            _arcRequest(currentIndex)
+        if (cacheMode === "adaptive" || cacheMode === "arc")
             _liveCacheLimit = adaptiveCacheMin
         if (warmStart)
             Qt.callLater(_warmAll)
-        else if (prefetchNeighbors || _adaptivePrefetch)
-            Qt.callLater(_prefetchAround, currentIndex)
+        else
+            Qt.callLater(_prefetchSmart, currentIndex)
+        if (l2WarmIdle && l2Components)
+            l2WarmDelay.restart()
     }
 
     onCacheModeChanged: {
-        if (cacheMode === "adaptive") {
+        if (cacheMode === "adaptive" || cacheMode === "arc") {
             _liveCacheLimit = adaptiveCacheMin
             idleTrimTimer.restart()
         }
@@ -625,7 +1129,8 @@ Item {
                 if (active) {
                     root._fillLoader(pageLoader, index)
                 } else {
-                    // Drop compiled tree promptly to reclaim memory
+                    // Drop Item tree; L2 Component map retains compiled type.
+                    root._ensureL2(index)
                     source = ""
                     sourceComponent = null
                     if (typeof setSource === "function")
@@ -657,6 +1162,19 @@ Item {
     }
 
     // Incoming-page placeholder: stacked above the still-visible previous page
+    // Leave snapshot: frozen texture while cold target loads (survives L1 eviction)
+    ShaderEffectSource {
+        id: leaveSnap
+        anchors.fill: parent
+        anchors.margins: root.contentPadding
+        z: 7
+        live: false
+        hideSource: false
+        smooth: true
+        visible: opacity > 0.01
+        opacity: 0
+    }
+
     Rectangle {
         id: skeletonHost
         anchors.fill: parent
@@ -671,7 +1189,9 @@ Item {
             }
             return Md3Theme.colorScheme.surface
         }
+        // Prefer leave snapshot over skeleton when both would show.
         readonly property bool show: root.showSkeleton && root.awaitingTarget
+                                    && leaveSnap.opacity < 0.2
         visible: opacity > 0.01
         opacity: show ? 1 : 0
         scale: show ? 1 : 0.98

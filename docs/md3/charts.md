@@ -1,24 +1,29 @@
-# Line chart
+# Charts
 
-## Approach
-| Layer | Role |
-|-------|------|
-| **`Md3LineChart.qml`** | `QtQuick.Shapes` GPU stroke (`RoundCap` / `RoundJoin`) — Canvas-quality look |
-| **`Md3ChartData` (C++)** | Million-scale generate / ingest + min/max downsample only |
+## Hierarchy
+| Type | Role |
+|------|------|
+| **`Md3Chart`** | Base: plot metrics, theme resolve, `pause` / `resume` / `clear` / `fitY`, coalesced rebuild |
+| **`Md3LineChart`** | Shape stroke line/area + optional `live` |
+| **`Md3BarChart`** | Grouped vertical bars |
+| **`Md3ChartData`** | C++ only: million-point ingest + downsample → `points` |
 
-QML cannot paint a million vertices every frame. After downsample to ~2.5× plot width, Shapes is fast and looks like the old Canvas charts.
+## Theme / performance
+- Default colors are **transparent** → resolved from `Md3Theme` at rebuild (no per-role bindings).
+- Seed drag debounces **50 ms**; **dark toggle rebuilds immediately** so circular theme reveal shows NEW theme inside the hole and OLD snapshot outside.
+- Live animation uses `chartActive` (`!paused`, not minimized) — **not** paused during theme reveal.
 
-## Md3LineChart
+## Md3Chart API
 | API | Notes |
 |-----|-------|
-| `values` / `series` | Prefer already-small or `Md3ChartData.points` |
-| `live` | Small animated sine in QML (`FrameAnimation`) |
-| Theme | Defaults bind `Md3Theme` (`primary`, `outlineVariant`, …) |
+| `pause()` / `resume()` / `paused` | Freeze live & optional work |
+| `clear()` / `setValues(list)` / `fitY()` | Data ops |
+| `followTheme` | Debounced theme rebuild |
+| `values` / `series` / `seriesColors` | Shared data |
 
-## Md3ChartData
-| API | Notes |
-|-----|-------|
-| `fillSine(n)` | Build in C++ |
-| `points` | Downsampled `number[]` for the Shape chart |
-| `rawCount` / `pointCount` | Diagnostics |
-| `targetPoints` | Cap after downsample (set from chart width) |
+## Large series
+```qml
+Md3ChartData { id: data }
+Md3LineChart { values: data.points }
+// data.fillSine(1000000)
+```
