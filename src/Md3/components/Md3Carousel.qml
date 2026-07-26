@@ -15,12 +15,14 @@ Item {
     property bool autoPlay: false
     property int autoPlayInterval: 4000
     property bool wrap: true
+    /// Shadow bleed around each card so elevation is not clipped.
+    property real shadowPad: 10
 
     signal indexChangedByUser(int index)
     signal itemClicked(int index)
 
     implicitWidth: parent ? parent.width : 400
-    implicitHeight: itemHeight + (showIndicators ? 28 : 0)
+    implicitHeight: itemHeight + shadowPad * 2 + (showIndicators ? 28 : 0)
     height: implicitHeight
     width: implicitWidth
 
@@ -56,9 +58,10 @@ Item {
         ListView {
             id: view
             Layout.fillWidth: true
-            Layout.preferredHeight: root.itemHeight
+            Layout.preferredHeight: root.itemHeight + root.shadowPad * 2
             orientation: ListView.Horizontal
             spacing: root.spacing
+            // Keep horizontal clip; vertical shadow bleed stays inside preferredHeight.
             clip: true
             model: root.model
             snapMode: ListView.SnapToItem
@@ -69,6 +72,8 @@ Item {
             highlightMoveVelocity: -1
             boundsBehavior: Flickable.StopAtBounds
             currentIndex: root.currentIndex
+            displayMarginBeginning: root.shadowPad
+            displayMarginEnd: root.shadowPad
 
             onCurrentIndexChanged: {
                 if (root.currentIndex !== currentIndex) {
@@ -82,12 +87,14 @@ Item {
                 required property int index
                 required property var modelData
                 width: root.pageWidth
-                height: root.itemHeight
+                height: root.itemHeight + root.shadowPad * 2
 
                 readonly property bool selected: ListView.isCurrentItem
+                readonly property real elev: selected ? 2 : 1
 
-                scale: selected ? 1 : 0.96
-                opacity: selected ? 1 : 0.72
+                // Soft approach — no opacity dimming (reads as a fake shadow).
+                scale: selected ? 1 : 0.985
+                transformOrigin: Item.Center
                 Behavior on scale {
                     NumberAnimation {
                         duration: Md3Motion.spatialSnapDuration
@@ -95,80 +102,91 @@ Item {
                         easing.bezierCurve: Md3Motion.emphasized
                     }
                 }
-                Behavior on opacity {
-                    NumberAnimation { duration: Md3Motion.short4 }
-                }
+                z: selected ? 2 : 1
 
-                Rectangle {
+                Item {
+                    id: cardHost
                     anchors.fill: parent
-                    radius: Md3Theme.shape.extraLarge
-                    color: {
-                        if (delegateRoot.modelData.color !== undefined)
-                            return delegateRoot.modelData.color
-                        return Md3Theme.colorScheme.primaryContainer
-                    }
-                    clip: true
+                    anchors.margins: root.shadowPad
 
-                    Image {
-                        anchors.fill: parent
-                        visible: delegateRoot.modelData.source !== undefined
-                                 && String(delegateRoot.modelData.source).length > 0
-                        source: delegateRoot.modelData.source !== undefined
-                                ? delegateRoot.modelData.source : ""
-                        fillMode: Image.PreserveAspectCrop
+                    Md3Shadow {
+                        anchors.fill: card
+                        elevation: delegateRoot.elev
+                        cornerRadius: card.radius
                     }
 
-                    // Scrim for title legibility
                     Rectangle {
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-                        height: parent.height * 0.45
-                        gradient: Gradient {
-                            GradientStop { position: 0; color: "transparent" }
-                            GradientStop {
-                                position: 1
-                                color: Qt.alpha(Md3Theme.colorScheme.scrim, 0.45)
+                        id: card
+                        anchors.fill: parent
+                        radius: Md3Theme.shape.extraLarge
+                        color: {
+                            if (delegateRoot.modelData.color !== undefined)
+                                return delegateRoot.modelData.color
+                            return Md3Theme.colorScheme.primaryContainer
+                        }
+                        clip: true
+
+                        Image {
+                            anchors.fill: parent
+                            visible: delegateRoot.modelData.source !== undefined
+                                     && String(delegateRoot.modelData.source).length > 0
+                            source: delegateRoot.modelData.source !== undefined
+                                    ? delegateRoot.modelData.source : ""
+                            fillMode: Image.PreserveAspectCrop
+                        }
+
+                        // Bottom scrim for title contrast only (not a drop shadow).
+                        Rectangle {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                            height: Math.min(88, parent.height * 0.42)
+                            gradient: Gradient {
+                                GradientStop { position: 0; color: "transparent" }
+                                GradientStop {
+                                    position: 1
+                                    color: Qt.alpha(Md3Theme.colorScheme.scrim, 0.38)
+                                }
                             }
                         }
-                    }
 
-                    Column {
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-                        anchors.margins: 16
-                        spacing: 4
+                        Column {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                            anchors.margins: 16
+                            spacing: 4
 
-                        Text {
-                            width: parent.width
-                            text: delegateRoot.modelData.title !== undefined
-                                  ? delegateRoot.modelData.title : ""
-                            color: "#FFFFFF"
-                            font.pixelSize: Md3Theme.typography.titleLarge.size
-                            font.family: Md3Theme.typography.fontFamily
-                            font.weight: Font.Medium
-                            elide: Text.ElideRight
+                            Text {
+                                width: parent.width
+                                text: delegateRoot.modelData.title !== undefined
+                                      ? delegateRoot.modelData.title : ""
+                                color: "#FFFFFF"
+                                font.pixelSize: Md3Theme.typography.titleLarge.size
+                                font.family: Md3Theme.typography.fontFamily
+                                font.weight: Font.Medium
+                                elide: Text.ElideRight
+                            }
+                            Text {
+                                width: parent.width
+                                visible: text.length > 0
+                                text: delegateRoot.modelData.subtitle !== undefined
+                                      ? delegateRoot.modelData.subtitle : ""
+                                color: Qt.rgba(1, 1, 1, 0.85)
+                                font.pixelSize: Md3Theme.typography.bodyMedium.size
+                                font.family: Md3Theme.typography.fontFamily
+                                elide: Text.ElideRight
+                            }
                         }
-                        Text {
-                            width: parent.width
-                            visible: text.length > 0
-                            text: delegateRoot.modelData.subtitle !== undefined
-                                  ? delegateRoot.modelData.subtitle : ""
-                            color: Qt.rgba(1, 1, 1, 0.85)
-                            font.pixelSize: Md3Theme.typography.bodyMedium.size
-                            font.family: Md3Theme.typography.fontFamily
-                            elide: Text.ElideRight
-                        }
-                    }
 
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            if (view.currentIndex !== delegateRoot.index)
-                                root.goTo(delegateRoot.index)
-                            else
-                                root.itemClicked(delegateRoot.index)
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                if (view.currentIndex !== delegateRoot.index)
+                                    root.goTo(delegateRoot.index)
+                                else
+                                    root.itemClicked(delegateRoot.index)
+                            }
                         }
                     }
                 }
