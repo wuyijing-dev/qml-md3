@@ -2,8 +2,8 @@ import QtQuick
 
 /*
   Material 3 Expressive / Android volume-style slider:
-  thick capsule track, active+inactive segments, thin vertical handle,
-  continuous end-stop or discrete tick dots.
+  thick capsule track, active+inactive segments, vertical handle
+  taller than the track thickness, continuous end-stop or discrete ticks.
 */
 Item {
     id: root
@@ -14,10 +14,12 @@ Item {
     property real stepSize: 0
     property bool enabled: true
     property bool showLabel: false
-    /// Thick capsule height (MD3 expressive ~20)
-    property real trackHeight: 20
-    property real handleWidth: 10
-    property real handleInset: 2
+    /// Thick capsule height (MD3 expressive ~16–20)
+    property real trackHeight: 16
+    /// Handle thickness (along track). Keep slim.
+    property real handleWidth: 4
+    /// Handle length across track — must exceed trackHeight so thumb reads larger than the bar.
+    property real handleHeight: trackHeight + 16
     property real segmentGap: 6
     /// Show end stop on continuous sliders (small terminal dot)
     property bool showStopIndicator: true
@@ -28,7 +30,7 @@ Item {
 
     signal moved(real value)
 
-    height: Math.max(48, trackHeight + 24)
+    height: Math.max(48, handleHeight + 16)
     implicitWidth: 200
     width: implicitWidth
     activeFocusOnTab: enabled
@@ -84,8 +86,8 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: 4
-        anchors.rightMargin: 4
+        anchors.leftMargin: Math.max(4, root.handleWidth)
+        anchors.rightMargin: Math.max(4, root.handleWidth)
         height: root.trackHeight
 
         readonly property real handleX: {
@@ -96,7 +98,6 @@ Item {
         readonly property real inactiveX: handleX + root.handleWidth + root.segmentGap * 0.5
         readonly property real inactiveW: Math.max(0, width - inactiveX)
 
-        // Inactive (right) capsule segment
         Rectangle {
             id: inactiveSeg
             x: track.inactiveX
@@ -107,7 +108,6 @@ Item {
             visible: width > 0.5
         }
 
-        // Active (left) capsule segment
         Rectangle {
             id: activeSeg
             x: 0
@@ -118,7 +118,6 @@ Item {
             visible: width > 0.5
         }
 
-        // Continuous end-stop
         Rectangle {
             visible: root.showStopIndicator && !root.discrete && track.inactiveW > 12
             width: 4
@@ -131,7 +130,6 @@ Item {
             opacity: root.enabled ? 0.9 : 0.4
         }
 
-        // Discrete ticks
         Repeater {
             model: root.tickCount
             delegate: Rectangle {
@@ -150,30 +148,34 @@ Item {
             }
         }
 
-        // Vertical bar handle (MD3 expressive — wide enough to see between segments)
+        // Thumb: taller than track thickness so it reads as the control, not part of the bar
         Rectangle {
             id: handle
             x: track.handleX
             width: root.handleWidth
-            height: Math.max(12, track.height - root.handleInset * 2)
+            height: root.handleHeight
             radius: width / 2
             anchors.verticalCenter: parent.verticalCenter
             color: root.activeColor
-            border.width: 2
-            border.color: root.enabled ? Md3Theme.colorScheme.colorOnPrimary
-                                       : Md3Theme.colorScheme.surface
+            border.width: 0
+
+            Md3Shadow {
+                anchors.fill: parent
+                elevation: root.enabled ? 1 : 0
+                cornerRadius: handle.radius
+            }
 
             Item {
                 anchors.centerIn: parent
-                width: 44
-                height: 44
+                width: 48
+                height: 48
                 Md3StateOverlay {
                     overlayColor: Md3Theme.colorScheme.primary
                     hovered: mouse.containsMouse
                     focused: root.activeFocus
                     pressed: mouse.pressed
                     controlEnabled: root.enabled
-                    radius: 22
+                    radius: 24
                 }
             }
         }
@@ -202,9 +204,9 @@ Item {
     Md3FocusRing {
         anchors.centerIn: track
         anchors.horizontalCenterOffset: track.handleX + root.handleWidth / 2 - track.width / 2
-        width: 28
-        height: Math.max(28, root.trackHeight + 12)
-        radius: 14
+        width: 32
+        height: Math.max(32, root.handleHeight + 8)
+        radius: 16
         focused: root.activeFocus
         controlEnabled: root.enabled
     }

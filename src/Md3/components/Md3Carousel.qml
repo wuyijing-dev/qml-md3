@@ -1,47 +1,216 @@
 import QtQuick
+import QtQuick.Layouts
 
+// Material 3 hero / multi-browse carousel with peek of the next item.
 Item {
     id: root
 
-    property var model: [] // [{ title, color? }]
+    property var model: [] // [{ title, subtitle?, color?, source? }]
     property int currentIndex: 0
-    property real itemWidth: 280
-    property real itemHeight: 160
+    property real itemHeight: 168
+    /// Fraction of next item visible (peek). 0 = full-bleed page.
+    property real peekRatio: 0.12
+    property real spacing: 12
+    property bool showIndicators: true
+    property bool autoPlay: false
+    property int autoPlayInterval: 4000
+    property bool wrap: true
 
-    width: parent ? parent.width : 400
-    height: itemHeight
+    signal indexChangedByUser(int index)
+    signal itemClicked(int index)
 
-    ListView {
-        id: view
+    implicitWidth: parent ? parent.width : 400
+    implicitHeight: itemHeight + (showIndicators ? 28 : 0)
+    height: implicitHeight
+    width: implicitWidth
+
+    readonly property real pageWidth: Math.max(120, width * (1 - peekRatio) - spacing)
+
+    onCurrentIndexChanged: {
+        if (view.currentIndex !== currentIndex && currentIndex >= 0
+                && currentIndex < view.count)
+            view.currentIndex = currentIndex
+    }
+
+    function goTo(index) {
+        if (!model || model.length === 0)
+            return
+        let i = index
+        if (wrap) {
+            const n = model.length
+            i = ((i % n) + n) % n
+        } else {
+            i = Math.max(0, Math.min(model.length - 1, i))
+        }
+        currentIndex = i
+        view.currentIndex = i
+    }
+
+    function next() { goTo(currentIndex + 1) }
+    function previous() { goTo(currentIndex - 1) }
+
+    ColumnLayout {
         anchors.fill: parent
-        orientation: ListView.Horizontal
         spacing: 8
-        clip: true
-        model: root.model
-        snapMode: ListView.SnapToItem
-        highlightRangeMode: ListView.StrictlyEnforceRange
-        preferredHighlightBegin: 0
-        preferredHighlightEnd: root.itemWidth
-        onCurrentIndexChanged: root.currentIndex = currentIndex
 
-        delegate: Rectangle {
-            required property int index
-            required property var modelData
-            width: root.itemWidth
-            height: root.itemHeight
-            radius: Md3Theme.shape.extraLarge
-            color: modelData.color !== undefined ? modelData.color
-                                                 : Md3Theme.colorScheme.primaryContainer
+        ListView {
+            id: view
+            Layout.fillWidth: true
+            Layout.preferredHeight: root.itemHeight
+            orientation: ListView.Horizontal
+            spacing: root.spacing
+            clip: true
+            model: root.model
+            snapMode: ListView.SnapToItem
+            highlightRangeMode: ListView.StrictlyEnforceRange
+            preferredHighlightBegin: 0
+            preferredHighlightEnd: root.pageWidth
+            highlightMoveDuration: Md3Motion.spatialDuration
+            highlightMoveVelocity: -1
+            boundsBehavior: Flickable.StopAtBounds
+            currentIndex: root.currentIndex
 
-            Text {
-                anchors.left: parent.left
-                anchors.bottom: parent.bottom
-                anchors.margins: 16
-                text: modelData.title !== undefined ? modelData.title : ""
-                color: Md3Theme.colorScheme.colorOnPrimaryContainer
-                font.pixelSize: Md3Theme.typography.titleLarge.size
-                font.family: Md3Theme.typography.fontFamily
+            onCurrentIndexChanged: {
+                if (root.currentIndex !== currentIndex) {
+                    root.currentIndex = currentIndex
+                    root.indexChangedByUser(currentIndex)
+                }
+            }
+
+            delegate: Item {
+                id: delegateRoot
+                required property int index
+                required property var modelData
+                width: root.pageWidth
+                height: root.itemHeight
+
+                readonly property bool selected: ListView.isCurrentItem
+
+                scale: selected ? 1 : 0.96
+                opacity: selected ? 1 : 0.72
+                Behavior on scale {
+                    NumberAnimation {
+                        duration: Md3Motion.spatialSnapDuration
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Md3Motion.emphasized
+                    }
+                }
+                Behavior on opacity {
+                    NumberAnimation { duration: Md3Motion.short4 }
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: Md3Theme.shape.extraLarge
+                    color: {
+                        if (delegateRoot.modelData.color !== undefined)
+                            return delegateRoot.modelData.color
+                        return Md3Theme.colorScheme.primaryContainer
+                    }
+                    clip: true
+
+                    Image {
+                        anchors.fill: parent
+                        visible: delegateRoot.modelData.source !== undefined
+                                 && String(delegateRoot.modelData.source).length > 0
+                        source: delegateRoot.modelData.source !== undefined
+                                ? delegateRoot.modelData.source : ""
+                        fillMode: Image.PreserveAspectCrop
+                    }
+
+                    // Scrim for title legibility
+                    Rectangle {
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        height: parent.height * 0.45
+                        gradient: Gradient {
+                            GradientStop { position: 0; color: "transparent" }
+                            GradientStop {
+                                position: 1
+                                color: Qt.alpha(Md3Theme.colorScheme.scrim, 0.45)
+                            }
+                        }
+                    }
+
+                    Column {
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        anchors.margins: 16
+                        spacing: 4
+
+                        Text {
+                            width: parent.width
+                            text: delegateRoot.modelData.title !== undefined
+                                  ? delegateRoot.modelData.title : ""
+                            color: "#FFFFFF"
+                            font.pixelSize: Md3Theme.typography.titleLarge.size
+                            font.family: Md3Theme.typography.fontFamily
+                            font.weight: Font.Medium
+                            elide: Text.ElideRight
+                        }
+                        Text {
+                            width: parent.width
+                            visible: text.length > 0
+                            text: delegateRoot.modelData.subtitle !== undefined
+                                  ? delegateRoot.modelData.subtitle : ""
+                            color: Qt.rgba(1, 1, 1, 0.85)
+                            font.pixelSize: Md3Theme.typography.bodyMedium.size
+                            font.family: Md3Theme.typography.fontFamily
+                            elide: Text.ElideRight
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            if (view.currentIndex !== delegateRoot.index)
+                                root.goTo(delegateRoot.index)
+                            else
+                                root.itemClicked(delegateRoot.index)
+                        }
+                    }
+                }
             }
         }
+
+        Row {
+            Layout.alignment: Qt.AlignHCenter
+            spacing: 8
+            visible: root.showIndicators && root.model && root.model.length > 1
+
+            Repeater {
+                model: root.model ? root.model.length : 0
+                delegate: Rectangle {
+                    required property int index
+                    width: root.currentIndex === index ? 18 : 8
+                    height: 8
+                    radius: 4
+                    color: root.currentIndex === index
+                           ? Md3Theme.colorScheme.primary
+                           : Md3Theme.colorScheme.outlineVariant
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: Md3Motion.spatialSnapDuration
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Md3Motion.emphasized
+                        }
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.margins: -6
+                        onClicked: root.goTo(index)
+                    }
+                }
+            }
+        }
+    }
+
+    Timer {
+        running: root.autoPlay && root.model && root.model.length > 1
+        interval: root.autoPlayInterval
+        repeat: true
+        onTriggered: root.next()
     }
 }

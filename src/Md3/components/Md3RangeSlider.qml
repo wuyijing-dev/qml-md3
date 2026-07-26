@@ -9,14 +9,16 @@ Item {
     property real secondValue: 0.8
     property real stepSize: 0
     property bool enabled: true
-    property real trackHeight: 20
-    property real handleWidth: 10
-    property real handleInset: 2
+    property real trackHeight: 16
+    /// Slim handle thickness along the track
+    property real handleWidth: 4
+    /// Handle length across track — taller than track thickness
+    property real handleHeight: trackHeight + 16
     property string accessibleName: "Range slider"
 
     signal rangeChanged(real first, real second)
 
-    height: Math.max(48, trackHeight + 24)
+    height: Math.max(48, handleHeight + 16)
     implicitWidth: 240
     width: implicitWidth
 
@@ -60,8 +62,8 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: 4
-        anchors.rightMargin: 4
+        anchors.leftMargin: Math.max(4, root.handleWidth)
+        anchors.rightMargin: Math.max(4, root.handleWidth)
         height: root.trackHeight
 
         readonly property real x0: ((root.firstValue - root.from) / root.span) * Math.max(0, width - root.handleWidth)
@@ -86,14 +88,18 @@ Item {
         property real thumbValue: 0
         property bool isSecond: false
         width: root.handleWidth
-        height: Math.max(12, root.trackHeight - root.handleInset * 2)
+        height: root.handleHeight
         radius: width / 2
         color: root.activeColor
-        border.width: 2
-        border.color: root.enabled ? Md3Theme.colorScheme.colorOnPrimary
-                                   : Md3Theme.colorScheme.surface
+        border.width: 0
         anchors.verticalCenter: parent.verticalCenter
         x: root.xFor(thumbValue)
+
+        Md3Shadow {
+            anchors.fill: parent
+            elevation: root.enabled ? 1 : 0
+            cornerRadius: parent.radius
+        }
 
         MouseArea {
             anchors.fill: parent

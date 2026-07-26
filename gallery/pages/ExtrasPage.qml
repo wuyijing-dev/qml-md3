@@ -57,12 +57,33 @@ Flickable {
                 { name: "Grace", role: "Viewer", status: "Active" }
             ]
         }
+        Text {
+            text: qsTr("Carousel")
+            color: Md3Theme.colorScheme.colorOnSurface
+            font.pixelSize: Md3Theme.typography.titleMedium.size
+        }
         Md3Carousel {
             Layout.fillWidth: true
+            itemHeight: 180
+            peekRatio: 0.14
+            autoPlay: true
+            autoPlayInterval: 4500
             model: [
-                { title: "One", color: Md3Theme.colorScheme.primaryContainer },
-                { title: "Two", color: Md3Theme.colorScheme.secondaryContainer },
-                { title: "Three", color: Md3Theme.colorScheme.tertiaryContainer }
+                {
+                    title: qsTr("主推"),
+                    subtitle: qsTr("左右滑动，可预览下一页"),
+                    color: Md3Theme.colorScheme.primary
+                },
+                {
+                    title: qsTr("次要"),
+                    subtitle: qsTr("指示点可跳转"),
+                    color: Md3Theme.colorScheme.secondary
+                },
+                {
+                    title: qsTr("强调"),
+                    subtitle: qsTr("支持自动轮播"),
+                    color: Md3Theme.colorScheme.tertiary
+                }
             ]
         }
 

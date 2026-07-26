@@ -3,71 +3,24 @@
 #include <QGuiApplication>
 #include <QWindow>
 
-#include <cstring>
-
 #if defined(MD3_HAVE_KWINDOWSYSTEM)
 #  include <KWindowEffects>
 #  include <KWindowSystem>
 #  include <netwm_def.h>
 #endif
 
-#if defined(MD3_HAVE_XCB)
-#  include <QtGui/qpa/qplatformnativeinterface.h>
-#  include <xcb/xcb.h>
-#endif
+// Note: do not use QtGui private QPA headers (not installed on many distros).
+// Real blur on Wayland/X11 requires KF6/KF5 WindowSystem when available.
 
 namespace Md3Linux {
-namespace {
-
-#if defined(MD3_HAVE_XCB)
-bool setX11BlurAtom(QWindow *window, bool enable)
-{
-    if (!window || QGuiApplication::platformName() != QLatin1String("xcb"))
-        return false;
-    auto *native = QGuiApplication::platformNativeInterface();
-    if (!native)
-        return false;
-    xcb_connection_t *conn = static_cast<xcb_connection_t *>(
-        native->nativeResourceForIntegration(QByteArrayLiteral("connection")));
-    const auto wid = static_cast<xcb_window_t>(window->winId());
-    if (!conn || !wid)
-        return false;
-
-    const xcb_intern_atom_cookie_t cookie =
-        xcb_intern_atom(conn, 0, strlen("_KDE_NET_WM_BLUR_BEHIND_REGION"),
-                        "_KDE_NET_WM_BLUR_BEHIND_REGION");
-    xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, cookie, nullptr);
-    if (!reply)
-        return false;
-    const xcb_atom_t atom = reply->atom;
-    free(reply);
-
-    if (!enable) {
-        xcb_delete_property(conn, wid, atom);
-        xcb_flush(conn);
-        return true;
-    }
-    // Empty 32-bit data = blur whole window (KWin convention).
-    xcb_change_property(conn, XCB_PROP_MODE_REPLACE, wid, atom, XCB_ATOM_CARDINAL,
-                        32, 0, nullptr);
-    xcb_flush(conn);
-    return true;
-}
-#endif
-
-} // namespace
 
 bool blurBehindAvailable()
 {
 #if defined(MD3_HAVE_KWINDOWSYSTEM)
-    if (KWindowEffects::isEffectAvailable(KWindowEffects::BlurBehind))
-        return true;
-#endif
-#if defined(MD3_HAVE_XCB)
-    if (QGuiApplication::platformName() == QLatin1String("xcb"))
-        return true;
-#endif
+    return KWindowEffects::isEffectAvailable(KWindowEffects::BlurBehind);
+#else
     return false;
+#endif
 }
 
 QString applyBlurBehind(QWindow *window, bool enable)
@@ -78,7 +31,6 @@ QString applyBlurBehind(QWindow *window, bool enable)
     window->setProperty("_md3_blurBehind", enable);
     window->setProperty("KWinForceBlur", enable);
 
-    bool applied = false;
 #if defined(MD3_HAVE_KWINDOWSYSTEM)
     if (KWindowEffects::isEffectAvailable(KWindowEffects::BlurBehind)) {
         KWindowEffects::enableBlurBehind(window, enable);
@@ -86,19 +38,13 @@ QString applyBlurBehind(QWindow *window, bool enable)
             KWindowEffects::enableBackgroundContrast(window, true, 1.0, 1.0, 1.6);
         else
             KWindowEffects::enableBackgroundContrast(window, false);
-        applied = true;
-    }
-#endif
-#if defined(MD3_HAVE_XCB)
-    if (setX11BlurAtom(window, enable))
-        applied = true;
-#endif
-
-    if (applied)
         return enable ? QStringLiteral("已请求合成器模糊（需 Plasma/KWin 开启 Blur）")
                       : QStringLiteral("已关闭模糊请求");
+    }
+#endif
+
     return enable
-            ? QStringLiteral("当前环境无模糊协议：仅半透明。Plasma 请安装 libkf6windowsystem 并启用 Blur 特效")
+            ? QStringLiteral("当前环境无模糊协议：仅半透明。Plasma 请安装 libkf6windowsystem-dev 并启用 Blur 特效")
             : QStringLiteral("已关闭半透明背景");
 }
 

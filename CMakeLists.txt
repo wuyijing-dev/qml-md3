@@ -182,13 +182,6 @@ elseif (UNIX)
             message(STATUS "Md3: KF WindowSystem not found — soft backdrop is transparent only on Wayland")
         endif()
     endif()
-
-    find_package(XCB COMPONENTS XCB QUIET)
-    if (TARGET XCB::XCB)
-        target_link_libraries(Md3 PRIVATE XCB::XCB)
-        target_compile_definitions(Md3 PRIVATE MD3_HAVE_XCB=1)
-        message(STATUS "Md3: XCB found — X11 KWin blur atom enabled")
-    endif()
 else()
     list(APPEND MD3_PLATFORM_SOURCES
         src/Md3/window/platforms/mobile/md3mobilenative.cpp
