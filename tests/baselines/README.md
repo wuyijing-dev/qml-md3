@@ -1,6 +1,6 @@
 # Visual baselines
 
-Store PNG baselines here per `docs/visual-regression.md`:
+Store PNG baselines here:
 
 ```
 tests/baselines/<component>/<variant>_<light|dark>.png

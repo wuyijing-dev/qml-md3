@@ -1,0 +1,21 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(Qt6 COMPONENTS Quick QuickControls2 QuickEffects REQUIRED)
+
+# Installed Config is a stub: prefer add_subdirectory(QML_MD3) so the static
+# QML module + plugin link correctly into your executable.
+if (NOT TARGET Md3 AND NOT TARGET Md3::Md3)
+    set(${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE
+        "Md3 is intended to be consumed via add_subdirectory(path/to/QML_MD3) "
+        "with MD3_BUILD_GALLERY=OFF. find_package(Md3) alone does not import "
+        "the static QML plugin target graph.")
+    set(${CMAKE_FIND_PACKAGE_NAME}_FOUND FALSE)
+    return()
+endif()
+
+if (TARGET Md3::Md3 AND NOT TARGET Md3)
+    add_library(Md3 ALIAS Md3::Md3)
+endif()
+
+check_required_components(Md3)

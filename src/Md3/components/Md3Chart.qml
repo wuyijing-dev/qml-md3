@@ -36,6 +36,30 @@ Item {
     property int valueDecimals: 0
     property int smoothMaxPoints: 400
     property int dotsMaxPoints: 80
+    /// Category labels for probe / axes (optional, length ≈ values).
+    property var labels: []
+    property string probeTitle: qsTr("Point")
+
+    /// Wheel zoom + drag pan + inertia (X window over data). Default on.
+    property bool interactive: true
+    /// Hover/tap nearest-point readout.
+    property bool showProbe: true
+    /// Visible window in normalized data space [0, 1].
+    property real viewStart: 0
+    property real viewSpan: 1
+    property real minViewSpan: 0.04
+    /// Inertia decay per second after pan release (0 = hard stop).
+    property real panInertia: 0.92
+    property int probeIndex: -1
+    property real probePixelX: 0
+    property real probePixelY: 0
+    property bool probeActive: false
+    /// [{ label, value, color }]
+    property var probeSeries: []
+    /// True while user is dragging / wheeling — charts should skip heavy work.
+    property bool gestureActive: false
+    property real _panVelocity: 0
+    property bool _viewDirty: false
 
     property bool paused: false
     /// Only block when minimized/hidden — never for theme reveal.
@@ -177,11 +201,140 @@ Item {
         series = []
         requestRebuild()
     }
+    function resetView() {
+        _panVelocity = 0
+        gestureActive = false
+        viewStart = 0
+        viewSpan = 1
+        rebuild()
+    }
+    function clampView() {
+        viewSpan = Math.min(1, Math.max(minViewSpan, viewSpan))
+        viewStart = Math.min(Math.max(0, viewStart), Math.max(0, 1 - viewSpan))
+    }
+    function beginGesture() {
+        if (!interactive)
+            return
+        gestureActive = true
+        _panVelocity = 0
+        rebuildTimer.stop()
+    }
+    function endGesture() {
+        gestureActive = false
+        if (_viewDirty) {
+            _viewDirty = false
+            rebuild()
+        }
+    }
+    function _markViewDirty() {
+        _viewDirty = true
+        if (!viewSync.running)
+            viewSync.start()
+    }
+    /// Zoom centered on frac in [0,1] of plot width (0=left).
+    function zoomAt(frac, factor) {
+        if (!interactive)
+            return
+        frac = Math.min(1, Math.max(0, frac))
+        const center = viewStart + viewSpan * frac
+        let next = viewSpan * factor
+        next = Math.min(1, Math.max(minViewSpan, next))
+        viewStart = center - next * frac
+        viewSpan = next
+        clampView()
+        _panVelocity = 0
+        _markViewDirty()
+    }
+    function panByFrac(delta, trackVelocity) {
+        if (!interactive)
+            return
+        viewStart += delta
+        clampView()
+        if (trackVelocity)
+            _panVelocity = delta
+        _markViewDirty()
+    }
+    function setProbe(index, pixelX, seriesInfo, pixelY) {
+        probeIndex = index
+        probePixelX = pixelX
+        if (pixelY !== undefined && pixelY !== null)
+            probePixelY = pixelY
+        probeSeries = seriesInfo || []
+        probeActive = index >= 0
+    }
+    function clearProbe() {
+        probeIndex = -1
+        probeSeries = []
+        probeActive = false
+    }
+    function categoryLabel(index) {
+        if (labels && index >= 0 && index < labels.length
+                && labels[index] !== undefined && labels[index] !== null
+                && String(labels[index]).length)
+            return String(labels[index])
+        return qsTr("#%1").arg(index)
+    }
+    /// Visible sample window for length-n series under viewStart/viewSpan.
+    function windowIndices(n) {
+        if (n <= 1)
+            return { i0: 0, i1: 0, start: 0, end: 0 }
+        const start = viewStart * (n - 1)
+        const end = Math.min(n - 1, (viewStart + viewSpan) * (n - 1))
+        const i0 = Math.max(0, Math.floor(start))
+        const i1 = Math.min(n - 1, Math.ceil(end))
+        return { i0: i0, i1: i1, start: start, end: Math.max(start + 1e-6, end) }
+    }
+    function indexAtPlotX(px, n) {
+        if (n <= 0)
+            return -1
+        if (n === 1)
+            return 0
+        const win = windowIndices(n)
+        const t = (px - plotLeft) / Math.max(1, plotWidth)
+        const idx = Math.round(win.start + t * (win.end - win.start))
+        return Math.min(n - 1, Math.max(0, idx))
+    }
+    function plotXForIndex(index, n) {
+        if (n <= 1)
+            return plotLeft + plotWidth / 2
+        const win = windowIndices(n)
+        const denom = Math.max(1e-6, win.end - win.start)
+        return plotLeft + plotWidth * (index - win.start) / denom
+    }
 
     Timer {
         id: rebuildTimer
         interval: 16
         onTriggered: root.rebuild()
+    }
+    /// Coalesce pan/zoom to one rebuild per frame (smoother than every mouse move).
+    Timer {
+        id: viewSync
+        interval: 0
+        repeat: false
+        onTriggered: {
+            if (!root._viewDirty)
+                return
+            root._viewDirty = false
+            root.rebuild()
+        }
+    }
+    FrameAnimation {
+        running: root.interactive && !root.gestureActive
+                 && Math.abs(root._panVelocity) > 1e-5
+        onTriggered: {
+            root.viewStart += root._panVelocity
+            root.clampView()
+            root._panVelocity *= Math.pow(root.panInertia, Math.max(1, frameTime * 60))
+            if (root.viewStart <= 0 || root.viewStart >= 1 - root.viewSpan)
+                root._panVelocity = 0
+            if (Math.abs(root._panVelocity) < 1e-5) {
+                root._panVelocity = 0
+                root.rebuild()
+            } else {
+                root._markViewDirty()
+            }
+        }
     }
     Timer {
         id: themeDebounce
@@ -211,6 +364,7 @@ Item {
     onMaxYChanged: requestRebuild()
     onHorizontalGridLinesChanged: requestRebuild()
     onLineWidthChanged: requestRebuild()
+    // viewStart / viewSpan: callers (zoom/pan/reset) invoke requestRebuild()
     onLineColorChanged: themeDebounce.restart()
     onFillColorChanged: themeDebounce.restart()
     onGridColorChanged: themeDebounce.restart()

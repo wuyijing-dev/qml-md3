@@ -41,7 +41,7 @@ Md3ApplicationWindow {
     documentTabsTearOff: false
 
     property bool showPerformancePanel: true
-    readonly property string pageRoot: "qrc:/qt/qml/Gallery/gallery/pages/"
+    readonly property string pageRoot: "qrc:/qt/qml/Gallery/pages/"
     readonly property int windowPageIndex: 16
     readonly property bool perfSampling: showPerformancePanel
                                          && visible

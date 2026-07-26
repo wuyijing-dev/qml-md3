@@ -1,0 +1,297 @@
+# Md3 — Material Design 3 QML module (library only; no Gallery).
+# Consumers: add_subdirectory(<repo>) then target_link_libraries(app PRIVATE Md3)
+# Or: cmake -DMD3_BUILD_GALLERY=OFF and install / find_package(Md3)
+
+if (NOT TARGET Qt6::Quick)
+    find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 QuickEffects QuickShapesPrivate)
+endif()
+
+include(GNUInstallDirs)
+
+# Repo root (resources/fonts lives beside src/)
+get_filename_component(MD3_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
+if (NOT DEFINED MD3_VERSION)
+    if (DEFINED PROJECT_VERSION AND NOT PROJECT_VERSION STREQUAL "")
+        set(MD3_VERSION "${PROJECT_VERSION}")
+    else()
+        set(MD3_VERSION "0.1.0")
+    endif()
+endif()
+
+# Fonts live at repo resources/ — mirror under this module as relative RESOURCES.
+# Avoid QT_RESOURCE_ALIAS: Qt Creator MSVC finalize resolves the alias under
+# CMAKE_CURRENT_SOURCE_DIR and fails (e.g. gallery/Roboto-Regular.ttf).
+set(_md3_font_dir "${CMAKE_CURRENT_SOURCE_DIR}/resources/fonts")
+file(MAKE_DIRECTORY "${_md3_font_dir}")
+set(MD3_FONT_NAMES
+    Roboto-Regular.ttf
+    Roboto-Medium.ttf
+    Roboto-Bold.ttf
+    MaterialIcons-Regular.ttf
+    MaterialIconsOutlined-Regular.otf
+)
+set(MD3_FONT_FILES "")
+foreach (_md3_font_name IN LISTS MD3_FONT_NAMES)
+    set(_src "${MD3_ROOT}/resources/fonts/${_md3_font_name}")
+    set(_dst "${_md3_font_dir}/${_md3_font_name}")
+    if (NOT EXISTS "${_src}")
+        message(FATAL_ERROR "Missing font: ${_src}")
+    endif()
+    configure_file("${_src}" "${_dst}" COPYONLY)
+    list(APPEND MD3_FONT_FILES "resources/fonts/${_md3_font_name}")
+endforeach()
+
+option(MD3_BUILD_SHARED "Build Md3 as a shared library" OFF)
+if (MD3_BUILD_SHARED)
+    qt_add_library(Md3 SHARED)
+else()
+    qt_add_library(Md3 STATIC)
+endif()
+
+if (NOT TARGET Md3::Md3)
+    add_library(Md3::Md3 ALIAS Md3)
+endif()
+
+set_source_files_properties(
+    foundation/Md3Theme.qml
+    foundation/Md3Motion.qml
+    window/Md3WindowCapabilities.qml
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE
+)
+
+set(MD3_QML_NO_CACHEGEN)
+if (WIN32)
+    set(MD3_QML_NO_CACHEGEN NO_CACHEGEN)
+endif()
+
+qt_add_qml_module(Md3
+    URI Md3
+    VERSION 1.0
+    OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Md3
+    OUTPUT_TARGETS md3_qml_output_targets
+    ${MD3_QML_NO_CACHEGEN}
+    DEPENDENCIES
+        QtQuick
+        QtQuick.Shapes
+    SOURCES
+        md3.h
+        md3.cpp
+        window/md3windowhelper.h
+        window/md3windowhelper.cpp
+        window/md3graphics.h
+        window/md3graphics.cpp
+        charts/md3chartdata.h
+        charts/md3chartdata.cpp
+    QML_FILES
+        foundation/Md3Theme.qml
+        foundation/Md3Motion.qml
+        foundation/Md3ColorScheme.qml
+        foundation/Md3DynamicScheme.qml
+        foundation/Md3Typography.qml
+        foundation/Md3Shape.qml
+        foundation/Md3Elevation.qml
+        foundation/Md3StateLayer.qml
+        primitives/Md3Surface.qml
+        primitives/Md3Ripple.qml
+        primitives/Md3StateOverlay.qml
+        primitives/Md3FocusRing.qml
+        primitives/Md3Icon.qml
+        primitives/Md3Shadow.qml
+        primitives/Md3Control.qml
+        window/Md3WindowCapabilities.qml
+        window/platforms/Md3WindowPlatformWindows.qml
+        window/platforms/Md3WindowPlatformMacOS.qml
+        window/platforms/Md3WindowPlatformLinux.qml
+        window/platforms/Md3WindowPlatformMobile.qml
+        window/Md3CaptionButtons.qml
+        window/Md3TitleBarButton.qml
+        window/Md3TitleBar.qml
+        window/Md3PageHost.qml
+        window/Md3WindowBody.qml
+        window/Md3ApplicationWindow.qml
+        window/Md3DialogWindow.qml
+        layout/Md3AnimatedFlow.qml
+        components/Md3Button.qml
+        components/Md3IconButton.qml
+        components/Md3ToggleIconButton.qml
+        components/Md3SplitButton.qml
+        components/Md3ButtonGroup.qml
+        components/Md3Fab.qml
+        components/Md3FabMenu.qml
+        components/Md3ExtendedFab.qml
+        components/Md3SegmentedButton.qml
+        components/Md3Checkbox.qml
+        components/Md3Radio.qml
+        components/Md3Switch.qml
+        components/Md3Slider.qml
+        components/Md3RangeSlider.qml
+        components/Md3AssistChip.qml
+        components/Md3FilterChip.qml
+        components/Md3InputChip.qml
+        components/Md3SuggestionChip.qml
+        components/Md3ChipGroup.qml
+        components/Md3TextField.qml
+        components/Md3Card.qml
+        components/Md3Divider.qml
+        components/Md3ListTile.qml
+        components/Md3Dialog.qml
+        components/Md3FullscreenDialog.qml
+        components/Md3BottomSheet.qml
+        components/Md3Badge.qml
+        components/Md3LinearProgressIndicator.qml
+        components/Md3CircularProgressIndicator.qml
+        components/Md3LoadingIndicator.qml
+        components/Md3Snackbar.qml
+        components/Md3TopAppBar.qml
+        components/Md3BottomAppBar.qml
+        components/Md3NavigationBar.qml
+        components/Md3NavigationRail.qml
+        components/Md3NavigationDrawer.qml
+        components/Md3TabBar.qml
+        components/Md3DocumentTabBar.qml
+        components/Md3Scaffold.qml
+        components/Md3Menu.qml
+        components/Md3MenuItem.qml
+        components/Md3MenuDivider.qml
+        components/Md3MenuBar.qml
+        components/Md3DropdownMenu.qml
+        components/Md3Option.qml
+        components/Md3SearchBar.qml
+        components/Md3SearchView.qml
+        components/Md3DatePicker.qml
+        components/Md3TimePicker.qml
+        components/Md3Tooltip.qml
+        components/Md3ExpansionTile.qml
+        components/Md3DataTable.qml
+        components/Md3Stepper.qml
+        components/Md3Banner.qml
+        components/Md3Carousel.qml
+        components/Md3Form.qml
+        components/Md3Chart.qml
+        components/Md3ChartInteraction.qml
+        components/Md3LineChart.qml
+        components/Md3BarChart.qml
+        components/Md3ScatterChart.qml
+        components/Md3PieChart.qml
+        components/Md3CodeBlock.qml
+        components/Md3Skeleton.qml
+        components/Md3SkeletonPane.qml
+    RESOURCES
+        ${MD3_FONT_FILES}
+)
+
+target_link_libraries(Md3
+    PUBLIC Qt6::Quick
+    PRIVATE Qt6::QuickControls2 Qt6::QuickEffects Qt6::QuickShapesPrivate
+)
+target_include_directories(Md3
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/window>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/charts>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Md3>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/window
+        ${CMAKE_CURRENT_SOURCE_DIR}/charts
+)
+
+set(MD3_PLATFORM_SOURCES)
+if (WIN32)
+    list(APPEND MD3_PLATFORM_SOURCES
+        window/platforms/windows/md3win_p.h
+        window/platforms/windows/md3win_p.cpp
+        window/platforms/windows/md3win_host.cpp
+        window/platforms/windows/md3winchrome.cpp
+        window/platforms/windows/md3winicons.cpp
+        window/platforms/windows/md3wintaskbar.cpp
+        window/platforms/windows/md3wintray.cpp
+    )
+    target_include_directories(Md3 PRIVATE window/platforms/windows)
+    target_link_libraries(Md3 PRIVATE dwmapi shell32 shlwapi ole32 propsys advapi32)
+elseif (APPLE)
+    list(APPEND MD3_PLATFORM_SOURCES
+        window/platforms/macos/md3macosnative.cpp
+    )
+elseif (UNIX)
+    list(APPEND MD3_PLATFORM_SOURCES
+        window/platforms/linux/md3linux_p.h
+        window/platforms/linux/md3linux_dbus.cpp
+        window/platforms/linux/md3linux_effects.cpp
+        window/platforms/linux/md3linuxnative.cpp
+        window/platforms/linux/md3linuxdock.cpp
+        window/platforms/linux/md3linuxtray.cpp
+    )
+    target_include_directories(Md3 PRIVATE window/platforms/linux)
+    find_package(Qt6 REQUIRED COMPONENTS DBus Widgets)
+    target_link_libraries(Md3 PRIVATE Qt6::DBus Qt6::Widgets)
+
+    find_package(KF6WindowSystem QUIET)
+    if (KF6WindowSystem_FOUND)
+        target_link_libraries(Md3 PRIVATE KF6::WindowSystem)
+        target_compile_definitions(Md3 PRIVATE MD3_HAVE_KWINDOWSYSTEM=1)
+        message(STATUS "Md3: KF6WindowSystem found — compositor blur/keep-above enabled")
+    else()
+        find_package(KF5WindowSystem QUIET)
+        if (KF5WindowSystem_FOUND)
+            target_link_libraries(Md3 PRIVATE KF5::WindowSystem)
+            target_compile_definitions(Md3 PRIVATE MD3_HAVE_KWINDOWSYSTEM=1)
+            message(STATUS "Md3: KF5WindowSystem found — compositor blur/keep-above enabled")
+        else()
+            message(STATUS "Md3: KF WindowSystem not found — soft backdrop is transparent only on Wayland")
+        endif()
+    endif()
+else()
+    list(APPEND MD3_PLATFORM_SOURCES
+        window/platforms/mobile/md3mobilenative.cpp
+    )
+endif()
+target_sources(Md3 PRIVATE ${MD3_PLATFORM_SOURCES})
+
+install(FILES
+    md3.h
+    window/md3windowhelper.h
+    window/md3graphics.h
+    charts/md3chartdata.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Md3
+)
+
+set(_md3_install_targets Md3)
+if (TARGET Md3plugin)
+    list(APPEND _md3_install_targets Md3plugin)
+endif()
+if (md3_qml_output_targets)
+    list(APPEND _md3_install_targets ${md3_qml_output_targets})
+endif()
+
+# Install binaries/headers for local prefix use. Prefer add_subdirectory for apps.
+install(TARGETS ${_md3_install_targets}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    OBJECTS DESTINATION ${CMAKE_INSTALL_LIBDIR}/objects/Md3
+)
+
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Md3
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/qml
+    OPTIONAL
+)
+
+# Build-tree helper package (add_subdirectory remains the primary integration path)
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+    ${MD3_ROOT}/cmake/Md3Config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/Md3Config.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Md3
+)
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/Md3ConfigVersion.cmake
+    VERSION ${MD3_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/Md3Config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/Md3ConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Md3
+)
+
+message(STATUS "Md3 ${MD3_VERSION}: library URI=Md3 (Gallery excluded from this target)")

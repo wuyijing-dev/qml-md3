@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Shapes
 
 /// Line / area chart — QtQuick.Shapes. Extends Md3Chart.
+/// Supports X zoom/pan (`interactive`) and nearest-point probe (`showProbe`).
 Md3Chart {
     id: root
 
@@ -70,23 +71,28 @@ Md3Chart {
         const span = Math.max(1e-6, range.max - range.min)
         const yAt = v => plotTop + plotHeight * (1 - (v - range.min) / span)
         const model = []
+        const samples = []
         let rendered = 0
         const fill0 = resolvedFillColor()
+        let maxN = 0
 
         for (let s = 0; s < all.length; ++s) {
             const nums = seriesNums(all[s])
             if (nums.length < 1)
                 continue
+            maxN = Math.max(maxN, nums.length)
             const n = nums.length
-            rendered += n
+            const win = windowIndices(n)
+            rendered += Math.max(0, win.i1 - win.i0 + 1)
             let pts = []
-            for (let i = 0; i < n; ++i) {
-                const x = n === 1 ? (plotLeft + plotWidth / 2)
-                                  : (plotLeft + plotWidth * i / (n - 1))
+            const denom = Math.max(1e-6, win.end - win.start)
+            for (let i = win.i0; i <= win.i1; ++i) {
+                const x = plotLeft + plotWidth * (i - win.start) / denom
                 pts.push(Qt.point(x, yAt(nums[i])))
             }
-            if (smooth && !live && n <= smoothMaxPoints)
-                pts = _catmull(pts, 4)
+            // Skip Catmull during pan/zoom — keeps drag at 60fps.
+            if (smooth && !live && !gestureActive && pts.length <= smoothMaxPoints && pts.length >= 3)
+                pts = _catmull(pts, 3)
 
             const col = colorAt(s)
             let area = []
@@ -100,15 +106,45 @@ Md3Chart {
                 area: area,
                 color: col,
                 fill: s === 0 ? fill0 : Qt.rgba(col.r, col.g, col.b, 0.12),
-                dots: showDots && n <= dotsMaxPoints
+                dots: showDots && pts.length <= dotsMaxPoints
             })
+            samples.push({ nums: nums, color: col, label: qsTr("S%1").arg(s + 1) })
         }
         renderedPointCount = rendered
         geom.rangeMin = range.min
         geom.rangeMax = range.max
         geom.span = span
         geom.seriesModel = model
+        geom.samples = samples
+        geom.sampleCount = maxN
         rebuilt()
+        if (probeActive)
+            _updateProbeAtPixel(probePixelX)
+    }
+
+    function _updateProbeAtPixel(px) {
+        if (!showProbe || geom.samples.length < 1) {
+            clearProbe()
+            return
+        }
+        const idx = indexAtPlotX(px, geom.sampleCount)
+        if (idx < 0) {
+            clearProbe()
+            return
+        }
+        const x = plotXForIndex(idx, geom.sampleCount)
+        const info = []
+        let tipY = plotTop + plotHeight / 2
+        const span = Math.max(1e-6, geom.span)
+        for (let s = 0; s < geom.samples.length; ++s) {
+            const sample = geom.samples[s]
+            if (idx >= sample.nums.length)
+                continue
+            const v = sample.nums[idx]
+            info.push({ label: sample.label, value: v, color: sample.color })
+            tipY = plotTop + plotHeight * (1 - (v - geom.rangeMin) / span)
+        }
+        setProbe(idx, x, info, tipY)
     }
 
     QtObject {
@@ -117,6 +153,8 @@ Md3Chart {
         property real rangeMax: 1
         property real span: 1
         property var seriesModel: []
+        property var samples: []
+        property int sampleCount: 0
     }
 
     FrameAnimation {
@@ -141,84 +179,119 @@ Md3Chart {
         radius: Md3Theme.shape.small
     }
 
-    Shape {
+    Item {
+        id: plotClip
         anchors.fill: parent
-        visible: root.showGrid && root.horizontalGridLines > 0
-        // Polyline grids/series: GeometryRenderer builds faster than CurveRenderer.
-        preferredRendererType: Shape.GeometryRenderer
-        ShapePath {
-            strokeWidth: 1
-            strokeColor: {
-                const c = root.resolvedGridColor()
-                return Qt.rgba(c.r, c.g, c.b, 0.45)
-            }
-            fillColor: "transparent"
-            PathMultiline {
-                paths: {
-                    const out = []
-                    const n = root.horizontalGridLines
-                    for (let g = 0; g <= n; ++g) {
-                        const t = g / n
-                        const y = root.plotTop + root.plotHeight * (1 - t)
-                        out.push([Qt.point(root.plotLeft, y), Qt.point(root.plotRight, y)])
+        clip: true
+
+        Shape {
+            anchors.fill: parent
+            visible: root.showGrid && root.horizontalGridLines > 0
+            preferredRendererType: Shape.GeometryRenderer
+            ShapePath {
+                strokeWidth: 1
+                strokeColor: {
+                    const c = root.resolvedGridColor()
+                    return Qt.rgba(c.r, c.g, c.b, 0.45)
+                }
+                fillColor: "transparent"
+                PathMultiline {
+                    paths: {
+                        const out = []
+                        const n = root.horizontalGridLines
+                        for (let g = 0; g <= n; ++g) {
+                            const t = g / n
+                            const y = root.plotTop + root.plotHeight * (1 - t)
+                            out.push([Qt.point(root.plotLeft, y), Qt.point(root.plotRight, y)])
+                        }
+                        return out
                     }
-                    return out
                 }
             }
         }
-    }
 
-    Repeater {
-        model: geom.seriesModel
-        delegate: Item {
-            id: seriesItem
-            required property var modelData
-            readonly property color seriesColor: modelData.color
-            anchors.fill: parent
+        Repeater {
+            model: geom.seriesModel
+            delegate: Item {
+                id: seriesItem
+                required property var modelData
+                readonly property color seriesColor: modelData.color
+                anchors.fill: parent
 
-            Shape {
-                anchors.fill: parent
-                preferredRendererType: Shape.GeometryRenderer
-                asynchronous: true
-                visible: modelData.area && modelData.area.length > 2
-                ShapePath {
-                    strokeWidth: 0
-                    strokeColor: "transparent"
-                    fillColor: modelData.fill
-                    PathPolyline { path: modelData.area }
-                }
-            }
-            Shape {
-                anchors.fill: parent
-                preferredRendererType: Shape.GeometryRenderer
-                asynchronous: !root.live
-                ShapePath {
-                    strokeWidth: root.lineWidth
-                    strokeColor: modelData.color
-                    fillColor: "transparent"
-                    capStyle: ShapePath.RoundCap
-                    joinStyle: ShapePath.RoundJoin
-                    PathPolyline { path: modelData.line }
-                }
-            }
-            Repeater {
-                model: modelData.dots ? modelData.line : []
-                delegate: Rectangle {
-                    required property var modelData
-                    width: root.dotRadius * 2
-                    height: width
-                    radius: width / 2
-                    color: seriesItem.seriesColor
-                    x: modelData.x - width / 2
-                    y: modelData.y - height / 2
-                    Rectangle {
-                        anchors.centerIn: parent
-                        width: Math.max(2, root.dotRadius * 2 - 2.4)
-                        height: width
-                        radius: width / 2
-                        color: root.resolvedSurfaceColor()
+                Shape {
+                    anchors.fill: parent
+                    preferredRendererType: Shape.GeometryRenderer
+                    asynchronous: !root.live && !root.gestureActive
+                    visible: modelData.area && modelData.area.length > 2
+                    ShapePath {
+                        strokeWidth: 0
+                        strokeColor: "transparent"
+                        fillColor: modelData.fill
+                        PathPolyline { path: modelData.area }
                     }
                 }
+                Shape {
+                    anchors.fill: parent
+                    preferredRendererType: Shape.GeometryRenderer
+                    asynchronous: !root.live && !root.gestureActive
+                    ShapePath {
+                        strokeWidth: root.lineWidth
+                        strokeColor: modelData.color
+                        fillColor: "transparent"
+                        capStyle: ShapePath.RoundCap
+                        joinStyle: ShapePath.RoundJoin
+                        PathPolyline { path: modelData.line }
+                    }
+                }
+                Repeater {
+                    model: modelData.dots ? modelData.line : []
+                    delegate: Rectangle {
+                        required property var modelData
+                        width: root.dotRadius * 2
+                        height: width
+                        radius: width / 2
+                        color: seriesItem.seriesColor
+                        x: modelData.x - width / 2
+                        y: modelData.y - height / 2
+                        Rectangle {
+                            anchors.centerIn: parent
+                            width: Math.max(2, root.dotRadius * 2 - 2.4)
+                            height: width
+                            radius: width / 2
+                            color: root.resolvedSurfaceColor()
+                        }
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            visible: root.probeActive && root.showProbe
+            x: root.probePixelX - 0.5
+            y: root.plotTop
+            width: 1
+            height: root.plotHeight
+            color: Md3Theme.colorScheme.outline
+            opacity: 0.7
+            z: 20
+        }
+        Repeater {
+            model: root.probeActive ? root.probeSeries : []
+            delegate: Rectangle {
+                required property var modelData
+                width: 8
+                height: 8
+                radius: 4
+                z: 21
+                color: modelData.color
+                x: root.probePixelX - width / 2
+                y: {
+                    const span = Math.max(1e-6, geom.span)
+                    return root.plotTop + root.plotHeight
+                           * (1 - (modelData.value - geom.rangeMin) / span) - height / 2
+                }
+                border.width: 1.5
+                border.color: root.resolvedSurfaceColor()
             }
         }
     }
@@ -239,6 +312,12 @@ Md3Chart {
             color: root.resolvedAxisLabelColor()
             font.pixelSize: 11
             font.family: Md3Theme.typography.fontFamily
+            z: 5
         }
+    }
+
+    Md3ChartInteraction {
+        chart: root
+        showCrosshair: false
     }
 }

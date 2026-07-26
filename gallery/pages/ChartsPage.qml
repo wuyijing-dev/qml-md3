@@ -48,7 +48,7 @@ Item {
             }
             Text {
                 Layout.fillWidth: true
-                text: qsTr("Md3Chart 基类：pause/resume/clear/fitY。主题 reveal：圆内为新主题实时内容，圆外为旧主题快照。")
+                text: qsTr("折线/柱/散点/饼 · 缩放平移探针 · Md3CodeBlock")
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: Md3Theme.typography.bodyMedium.size
                 wrapMode: Text.Wrap
@@ -136,7 +136,7 @@ Item {
                                 livePointCount: 48
                                 showDots: false
                                 showArea: true
-                                // Live path skips Catmull; toggle still available for static feel demos
+                                showProbe: true
                                 smooth: false
                                 minY: 0
                                 maxY: 100
@@ -155,7 +155,7 @@ Item {
 
             Loader {
                 Layout.fillWidth: true
-                Layout.preferredHeight: active && status === Loader.Ready ? 220 : (active ? 220 : 0)
+                Layout.preferredHeight: active && status === Loader.Ready ? 280 : (active ? 280 : 0)
                 active: root.deferStage >= 1
                 asynchronous: true
                 visible: status === Loader.Ready || active
@@ -165,7 +165,7 @@ Item {
 
             Loader {
                 Layout.fillWidth: true
-                Layout.preferredHeight: active && status === Loader.Ready ? 220 : (active ? 220 : 0)
+                Layout.preferredHeight: active && status === Loader.Ready ? 260 : (active ? 260 : 0)
                 active: root.deferStage >= 1
                 asynchronous: true
                 visible: status === Loader.Ready || active
@@ -192,7 +192,50 @@ Item {
                 opacity: status === Loader.Ready ? 1 : 0.35
                 sourceComponent: sparseCard
             }
+
+            Loader {
+                Layout.fillWidth: true
+                Layout.preferredHeight: active && status === Loader.Ready ? 240 : (active ? 240 : 0)
+                active: root.deferStage >= 2
+                asynchronous: true
+                visible: status === Loader.Ready || active
+                opacity: status === Loader.Ready ? 1 : 0.35
+                sourceComponent: scatterCard
+            }
+
+            Loader {
+                Layout.fillWidth: true
+                Layout.preferredHeight: active && status === Loader.Ready ? 240 : (active ? 240 : 0)
+                active: root.deferStage >= 2
+                asynchronous: true
+                visible: status === Loader.Ready || active
+                opacity: status === Loader.Ready ? 1 : 0.35
+                sourceComponent: pieCard
+            }
+
+            Loader {
+                Layout.fillWidth: true
+                Layout.preferredHeight: active && status === Loader.Ready ? 320 : (active ? 320 : 0)
+                active: root.deferStage >= 2
+                asynchronous: true
+                visible: status === Loader.Ready || active
+                opacity: status === Loader.Ready ? 1 : 0.35
+                sourceComponent: codeCard
+            }
         }
+    }
+
+    function _demoSeriesA() {
+        const a = []
+        for (let i = 0; i < 160; ++i)
+            a.push(42 + Math.sin(i * 0.14) * 22 + Math.sin(i * 0.03) * 8)
+        return a
+    }
+    function _demoSeriesB() {
+        const b = []
+        for (let i = 0; i < 160; ++i)
+            b.push(28 + Math.cos(i * 0.11) * 16 + i * 0.02)
+        return b
     }
 
     Component {
@@ -200,27 +243,42 @@ Item {
         Md3Card {
             variant: Md3Card.Outlined
             width: root.width
-            height: 220
+            height: 280
             Column {
                 width: parent.width
                 spacing: 8
+                RowLayout {
+                    width: parent.width
+                    Text {
+                        Layout.fillWidth: true
+                        text: qsTr("Zoom / pan / probe (wheel · drag · hover)")
+                        color: Md3Theme.colorScheme.colorOnSurface
+                        font.pixelSize: Md3Theme.typography.titleSmall.size
+                    }
+                    Md3Button {
+                        text: qsTr("重置视图")
+                        variant: Md3Button.Outlined
+                        onClicked: interactChart.resetView()
+                    }
+                }
                 Text {
-                    text: qsTr("Multi-series line")
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.pixelSize: Md3Theme.typography.titleSmall.size
+                    width: parent.width
+                    text: qsTr("滚轮缩放 · 拖动平移（带惯性）· 悬停探针 · 双击重置。interactive/showProbe 默认开启。")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                    wrapMode: Text.Wrap
                 }
                 Md3LineChart {
+                    id: interactChart
                     width: parent.width
-                    height: 160
-                    series: [
-                        [12, 18, 15, 28, 24, 36, 32, 40, 38, 48],
-                        [8, 14, 20, 16, 22, 18, 26, 30, 28, 34]
-                    ]
+                    height: 200
+                    valueDecimals: 1
+                    series: [root._demoSeriesA(), root._demoSeriesB()]
                     seriesColors: [
                         Md3Theme.colorScheme.primary,
                         Md3Theme.colorScheme.secondary
                     ]
-                    showDots: true
+                    showDots: false
                     showArea: true
                     smooth: true
                     horizontalGridLines: 4
@@ -234,7 +292,7 @@ Item {
         Md3Card {
             variant: Md3Card.Outlined
             width: root.width
-            height: 220
+            height: 260
             Column {
                 width: parent.width
                 spacing: 8
@@ -242,35 +300,40 @@ Item {
                     width: parent.width
                     Text {
                         Layout.fillWidth: true
-                        text: qsTr("Bar chart (Md3BarChart)")
+                        text: qsTr("Bar · stack / horizontal · zoom+probe")
                         color: Md3Theme.colorScheme.colorOnSurface
                         font.pixelSize: Md3Theme.typography.titleSmall.size
                     }
                     Md3Button {
-                        text: qsTr("清空")
+                        text: barChart.stacked ? qsTr("分组") : qsTr("堆叠")
                         variant: Md3Button.Outlined
-                        onClicked: barChart.clear()
+                        onClicked: barChart.stacked = !barChart.stacked
                     }
                     Md3Button {
-                        text: qsTr("示例数据")
-                        variant: Md3Button.FilledTonal
-                        onClicked: {
-                            barChart.series = [
-                                [12, 18, 15, 28, 24, 36, 32],
-                                [8, 14, 20, 16, 22, 18, 26]
-                            ]
-                            barChart.seriesColors = [
-                                Md3Theme.colorScheme.primary,
-                                Md3Theme.colorScheme.tertiary
-                            ]
-                        }
+                        text: barChart.horizontal ? qsTr("纵向") : qsTr("横向")
+                        variant: Md3Button.Outlined
+                        onClicked: barChart.horizontal = !barChart.horizontal
+                    }
+                    Md3Button {
+                        text: qsTr("重置")
+                        variant: Md3Button.Text
+                        onClicked: barChart.resetView()
                     }
                 }
                 Md3BarChart {
                     id: barChart
                     width: parent.width
-                    height: 150
-                    values: [12, 18, 15, 28, 24, 36, 32, 40]
+                    height: 190
+                    valueDecimals: 0
+                    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+                    series: [
+                        [12, 18, 15, 28, 24, 36, 32],
+                        [8, 14, 20, 16, 22, 18, 26]
+                    ]
+                    seriesColors: [
+                        Md3Theme.colorScheme.primary,
+                        Md3Theme.colorScheme.tertiary
+                    ]
                     horizontalGridLines: 4
                     showYLabels: true
                 }
@@ -330,6 +393,9 @@ Item {
                     smooth: false
                     showDots: false
                     showArea: true
+                    interactive: true
+                    showProbe: true
+                    valueDecimals: 2
                     horizontalGridLines: 4
                     onWidthChanged: {
                         if (bigData.rawCount > 0)
@@ -360,9 +426,124 @@ Item {
                     values: [4, 9, 6, 14, 11, 18, 16, 22]
                     smooth: false
                     showDots: true
+                    showProbe: true
+                    interactive: true
+                    valueDecimals: 0
                     lineColor: Md3Theme.colorScheme.tertiary
                     fillColor: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.tertiary, 0.22)
                     horizontalGridLines: 3
+                }
+            }
+        }
+    }
+
+    Component {
+        id: scatterCard
+        Md3Card {
+            variant: Md3Card.Outlined
+            width: root.width
+            height: 240
+            Column {
+                width: parent.width
+                spacing: 8
+                RowLayout {
+                    width: parent.width
+                    Text {
+                        Layout.fillWidth: true
+                        text: qsTr("Scatter (Md3ScatterChart)")
+                        color: Md3Theme.colorScheme.colorOnSurface
+                        font.pixelSize: Md3Theme.typography.titleSmall.size
+                    }
+                    Md3Button {
+                        text: qsTr("重置")
+                        variant: Md3Button.Outlined
+                        onClicked: scatter.resetView()
+                    }
+                }
+                Md3ScatterChart {
+                    id: scatter
+                    width: parent.width
+                    height: 180
+                    interactive: true
+                    showProbe: true
+                    valueDecimals: 1
+                    series: [
+                        [12, 18, 9, 28, 22, 36, 30, 40, 25, 48, 33, 20],
+                        [8, 14, 20, 11, 26, 18, 32, 24, 38, 16, 28, 22]
+                    ]
+                    pointRadius: 5
+                    horizontalGridLines: 4
+                }
+            }
+        }
+    }
+
+    Component {
+        id: pieCard
+        Md3Card {
+            variant: Md3Card.Outlined
+            width: root.width
+            height: 240
+            Column {
+                width: parent.width
+                spacing: 8
+                RowLayout {
+                    width: parent.width
+                    Text {
+                        Layout.fillWidth: true
+                        text: qsTr("Pie / Donut (Md3PieChart)")
+                        color: Md3Theme.colorScheme.colorOnSurface
+                        font.pixelSize: Md3Theme.typography.titleSmall.size
+                    }
+                    Md3Button {
+                        text: pie.innerRatio > 0.1 ? qsTr("饼图") : qsTr("环图")
+                        variant: Md3Button.Outlined
+                        onClicked: pie.innerRatio = pie.innerRatio > 0.1 ? 0 : 0.58
+                    }
+                }
+                Md3PieChart {
+                    id: pie
+                    width: parent.width
+                    height: 180
+                    showProbe: true
+                    valueDecimals: 0
+                    yUnit: ""
+                    labels: [qsTr("A"), qsTr("B"), qsTr("C"), qsTr("D"), qsTr("E")]
+                    values: [32, 24, 18, 14, 12]
+                    innerRatio: 0.58
+                }
+            }
+        }
+    }
+
+    Component {
+        id: codeCard
+        Md3Card {
+            variant: Md3Card.Outlined
+            width: root.width
+            height: 320
+            Column {
+                width: parent.width
+                spacing: 8
+                Text {
+                    text: qsTr("Code (Md3CodeBlock)")
+                    color: Md3Theme.colorScheme.colorOnSurface
+                    font.pixelSize: Md3Theme.typography.titleSmall.size
+                }
+                Md3CodeBlock {
+                    width: parent.width
+                    height: 260
+                    language: "qml"
+                    showLineNumbers: true
+                    code: "Md3BarChart {
+    interactive: true
+    showProbe: true
+    stacked: true
+    labels: [\"Mon\", \"Tue\", \"Wed\"]
+    series: [[12, 18, 15], [8, 14, 20]]
+}
+Md3ScatterChart { interactive: true; showProbe: true; values: [...] }
+Md3PieChart { innerRatio: 0.55; labels: [\"A\",\"B\"]; values: [40, 60] }"
                 }
             }
         }

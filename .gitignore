@@ -41,6 +41,10 @@ ui_*.h
 *_qmltyperegistrations.cpp
 *.rcc/
 
+# CMake-staged copies (canonical assets stay in /resources/)
+/src/Md3/resources/
+/gallery/md3/
+
 # Compiler / linker leftovers
 *.obj
 *.o
@@ -83,3 +87,7 @@ venv/
 coverage/
 *.gcda
 *.gcno
+
+/build-lib/
+/build-mingw*/
+
