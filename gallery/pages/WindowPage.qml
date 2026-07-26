@@ -9,7 +9,6 @@ Flickable {
     contentHeight: column.height
     clip: true
 
-    // Resolve Md3ApplicationWindow (Window.window custom props can be fragile)
     readonly property var appWin: {
         let p = parent
         while (p) {
@@ -22,6 +21,10 @@ Flickable {
             return w
         return null
     }
+
+    readonly property bool isWin: Md3WindowCapabilities.isWindows
+    readonly property bool isLinux: Md3WindowCapabilities.isLinux
+    readonly property bool isMac: Md3WindowCapabilities.isMacOS
 
     Md3WindowHelper { id: nativeHelper }
     property int _monitorIndex: 0
@@ -60,7 +63,15 @@ Flickable {
         Text {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            text: qsTr("Mica blurs the desktop wallpaper behind the window — use a colorful wallpaper and drag the window over busy areas to see it. Tint≈0 = almost pure material; raise Tint only if text is hard to read. Classic Win7 borders are suppressed via DWM.")
+            text: {
+                if (root.isWin)
+                    return qsTr("Windows: Mica/Acrylic backdrop, DWM chrome, taskbar, tray, and Jump List. Tint≈0 keeps the material soft.")
+                if (root.isLinux)
+                    return qsTr("Linux / Wayland: client-side decoration, soft translucent backdrop + compositor blur hints, dock progress (Plasma), StatusNotifier tray, FreeDesktop notifications, accent from gsettings/KDE. Taskbar icon needs a matching .desktop (app_id).")
+                if (root.isMac)
+                    return qsTr("macOS: traffic-lights inset, soft translucent backdrop hook, system color scheme.")
+                return qsTr("Platform window chrome and shell affordances for the current OS.")
+            }
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.bodyMedium.size
             font.family: Md3Theme.typography.fontFamily
@@ -69,7 +80,7 @@ Flickable {
         Text {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            text: qsTr("Document tabs (Win11 Explorer style): enable with documentTabsEnabled. + adds a tab with pop-in; drag out of the window to tear off. Managed API — openTab / addTab / closeTab — so apps need almost no glue code.")
+            text: qsTr("Document tabs: documentTabsEnabled — Explorer-style strip with + / tear-off. Managed API: openTab / addTab / closeTab.")
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.bodyMedium.size
             font.family: Md3Theme.typography.fontFamily
@@ -84,7 +95,7 @@ Flickable {
         Text {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            text: qsTr("Platform=%1 · current=%2 · preferred=%3%4\nCLI: --rhi-backend=vulkan|opengl|d3d11|d3d12|software · env MD3_RHI_BACKEND")
+            text: qsTr("Platform=%1 · current=%2 · preferred=%3%4\nCLI: --rhi-backend=… · env MD3_RHI_BACKEND")
                   .arg(Md3Graphics.platformName)
                   .arg(Md3Graphics.currentBackend)
                   .arg(Md3Graphics.preferredBackend)
@@ -136,7 +147,6 @@ Flickable {
         Row {
             spacing: 12
             Md3Switch {
-                id: skeletonSwitch
                 checked: root.appWin ? root.appWin.pageSkeleton : true
                 accessibleName: qsTr("Page skeleton while loading")
                 onToggled: function (on) {
@@ -153,7 +163,7 @@ Flickable {
         }
 
         RowLayout {
-            visible: Md3WindowCapabilities.isWindows && root.appWin
+            visible: root.isWin && root.appWin
             Layout.fillWidth: true
             spacing: 12
             Text {
@@ -184,8 +194,8 @@ Flickable {
 
         Text {
             visible: Md3WindowCapabilities.systemBackdrop || Md3WindowCapabilities.immersiveDarkMode
-            text: qsTr("Native window (live)")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            text: qsTr("Native window")
+            color: Md3Theme.colorScheme.colorOnSurface
             font.pixelSize: Md3Theme.typography.titleSmall.size
         }
 
@@ -194,8 +204,9 @@ Flickable {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             text: root.appWin
-                  ? qsTr("Bound window OK — platform=%1 backdrop=%2")
+                  ? qsTr("Bound — platform=%1 · wayland=%2 · backdrop=%3")
                         .arg(Md3WindowCapabilities.platformId)
+                        .arg(nativeHelper.wayland ? "yes" : "no")
                         .arg(root.appWin.systemBackdrop)
                   : qsTr("Window not bound — controls disabled")
             color: root.appWin ? Md3Theme.colorScheme.primary : Md3Theme.colorScheme.error
@@ -207,7 +218,6 @@ Flickable {
             Layout.fillWidth: true
             spacing: 12
             visible: Md3WindowCapabilities.immersiveDarkMode && root.appWin
-
             Md3Switch {
                 checked: root.appWin.syncImmersiveDarkMode
                 onToggled: function (isOn) {
@@ -217,7 +227,7 @@ Flickable {
             Text {
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
-                text: qsTr("syncImmersiveDarkMode (theme=%1)")
+                text: qsTr("Sync color scheme with theme (%1)")
                       .arg(Md3Theme.dark ? "dark" : "light")
                 color: Md3Theme.colorScheme.colorOnSurface
                 font.family: Md3Theme.typography.fontFamily
@@ -225,17 +235,15 @@ Flickable {
             }
         }
 
+        // --- Backdrop: Win11 materials vs Linux soft on/off ---
         Text {
-            visible: Md3WindowCapabilities.systemBackdrop
-            text: Md3WindowCapabilities.isWindows
-                  ? qsTr("System backdrop (Win11)")
-                  : qsTr("System backdrop (soft / blur hint)")
+            visible: Md3WindowCapabilities.systemBackdrop && root.isWin
+            text: qsTr("System backdrop (DWM)")
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.labelLarge.size
         }
-
         Md3ButtonGroup {
-            visible: Md3WindowCapabilities.systemBackdrop
+            visible: Md3WindowCapabilities.systemBackdrop && root.isWin
             Layout.fillWidth: true
             layout: Md3ButtonGroup.Connected
             variant: Md3ButtonGroup.Outlined
@@ -252,17 +260,35 @@ Flickable {
         }
 
         Text {
-            visible: Md3WindowCapabilities.isWindows
+            visible: Md3WindowCapabilities.systemBackdrop && !root.isWin
+            text: qsTr("Soft backdrop")
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.labelLarge.size
+        }
+        Md3ButtonGroup {
+            visible: Md3WindowCapabilities.systemBackdrop && !root.isWin
+            Layout.fillWidth: true
+            layout: Md3ButtonGroup.Connected
+            variant: Md3ButtonGroup.Outlined
+            buttonHeight: 36
+            currentIndex: root.appWin && root.appWin.systemBackdrop > 0 ? 1 : 0
+            model: [
+                { text: qsTr("Off") },
+                { text: qsTr("On (blur hint)") }
+            ]
+            onClicked: function (index) { root.applyBackdrop(index === 0 ? 0 : 1) }
+        }
+
+        Text {
+            visible: root.isWin
             text: qsTr("DWM border color")
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.labelLarge.size
         }
-
         Flow {
-            visible: Md3WindowCapabilities.isWindows
+            visible: root.isWin
             Layout.fillWidth: true
             spacing: 8
-
             Repeater {
                 model: [
                     { label: qsTr("Default"), color: "" },
@@ -289,57 +315,97 @@ Flickable {
             }
         }
 
+        Text {
+            visible: root.appWin
+            text: qsTr("Window actions")
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.labelLarge.size
+        }
         Flow {
-            visible: Md3WindowCapabilities.isWindows
+            visible: root.appWin
             Layout.fillWidth: true
             spacing: 8
 
             Md3Button {
-                text: qsTr("Flash taskbar")
-                onClicked: {
-                    if (root.appWin && typeof root.appWin.flashTaskbar === "function")
-                        root.appWin.flashTaskbar(true)
-                    else if (root.appWin)
-                        nativeHelper.flashTaskbar(root.appWin, true)
-                }
+                text: root.isWin ? qsTr("Flash taskbar") : qsTr("Request attention")
+                onClicked: root.appWin.flashTaskbar(true)
             }
             Md3Button {
-                text: qsTr("Stop flash")
+                text: qsTr("Stop")
                 variant: Md3Button.Outlined
-                onClicked: {
-                    if (root.appWin && typeof root.appWin.flashTaskbar === "function")
-                        root.appWin.flashTaskbar(false)
-                    else if (root.appWin)
-                        nativeHelper.flashTaskbar(root.appWin, false)
-                }
+                onClicked: root.appWin.flashTaskbar(false)
             }
             Md3Button {
+                visible: Md3WindowCapabilities.systemMenu
                 text: qsTr("System menu…")
                 variant: Md3Button.Outlined
                 onClicked: {
-                    if (!root.appWin)
-                        return
                     const g = mapToGlobal(width / 2, height)
                     if (root.appWin.titleBarItem
                             && typeof root.appWin.titleBarItem.openSystemMenu === "function")
                         root.appWin.titleBarItem.openSystemMenu(g.x, g.y)
-                    else if (root.appWin.windowNative) {
-                        root.appWin.windowNative.showSystemMenu(root.appWin, g.x, g.y)
-                    } else {
-                        nativeHelper.bindWindow(root.appWin)
+                    else
                         nativeHelper.showSystemMenu(root.appWin, g.x, g.y)
-                    }
                 }
+            }
+            Md3Button {
+                text: qsTr("Raise / activate")
+                variant: Md3Button.Outlined
+                onClicked: root.appWin.raiseWindow()
+            }
+            Md3Button {
+                visible: Md3WindowCapabilities.alwaysOnTop
+                text: qsTr("Always on top")
+                onClicked: root.appWin.setAlwaysOnTop(true)
+            }
+            Md3Button {
+                visible: Md3WindowCapabilities.alwaysOnTop
+                text: qsTr("Clear topmost")
+                variant: Md3Button.Outlined
+                onClicked: root.appWin.setAlwaysOnTop(false)
+            }
+            Md3Button {
+                text: qsTr("Next monitor")
+                variant: Md3Button.Outlined
+                onClicked: {
+                    const n = root.appWin.monitorCount
+                    if (n <= 1)
+                        return
+                    root._monitorIndex = (root._monitorIndex + 1) % n
+                    root.appWin.moveToMonitor(root._monitorIndex)
+                }
+            }
+            Md3Button {
+                visible: Md3WindowCapabilities.preferredAppMode
+                text: qsTr("Prefer dark")
+                onClicked: root.appWin.setPreferredAppMode(true)
+            }
+            Md3Button {
+                visible: Md3WindowCapabilities.preferredAppMode
+                text: qsTr("Prefer light")
+                variant: Md3Button.Outlined
+                onClicked: root.appWin.setPreferredAppMode(false)
+            }
+            Md3Button {
+                visible: root.isLinux
+                text: qsTr("Idle inhibit")
+                variant: Md3Button.Outlined
+                onClicked: root.appWin.setIdleInhibit(true, qsTr("Md3 Gallery demo"))
+            }
+            Md3Button {
+                visible: root.isLinux
+                text: qsTr("Allow idle")
+                variant: Md3Button.Text
+                onClicked: root.appWin.setIdleInhibit(false)
             }
         }
 
         Text {
             visible: Md3WindowCapabilities.taskbarProgress
-            text: qsTr("Taskbar progress / overlay")
+            text: root.isWin ? qsTr("Taskbar progress") : qsTr("Dock progress")
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.labelLarge.size
         }
-
         RowLayout {
             visible: Md3WindowCapabilities.taskbarProgress && root.appWin
             Layout.fillWidth: true
@@ -367,61 +433,54 @@ Flickable {
                 font.pixelSize: 12
             }
         }
-
         Flow {
-            visible: Md3WindowCapabilities.taskbarProgress
+            visible: Md3WindowCapabilities.taskbarProgress && root.appWin
             Layout.fillWidth: true
             spacing: 8
-
             Md3Button {
                 text: qsTr("Indeterminate")
                 variant: Md3Button.Outlined
-                onClicked: {
-                    if (root.appWin)
-                        root.appWin.setTaskbarProgress(0, Md3WindowHelper.ProgressIndeterminate)
-                }
+                onClicked: root.appWin.setTaskbarProgress(0, Md3WindowHelper.ProgressIndeterminate)
             }
             Md3Button {
                 text: qsTr("Error")
                 variant: Md3Button.Outlined
-                onClicked: {
-                    if (root.appWin)
-                        root.appWin.setTaskbarProgress(taskbarProgressSlider.value,
-                                                       Md3WindowHelper.ProgressError)
-                }
+                onClicked: root.appWin.setTaskbarProgress(taskbarProgressSlider.value,
+                                                          Md3WindowHelper.ProgressError)
             }
             Md3Button {
                 text: qsTr("Paused")
                 variant: Md3Button.Outlined
-                onClicked: {
-                    if (root.appWin)
-                        root.appWin.setTaskbarProgress(taskbarProgressSlider.value,
-                                                       Md3WindowHelper.ProgressPaused)
-                }
+                onClicked: root.appWin.setTaskbarProgress(taskbarProgressSlider.value,
+                                                          Md3WindowHelper.ProgressPaused)
             }
             Md3Button {
-                text: qsTr("Clear progress")
+                text: qsTr("Clear")
                 variant: Md3Button.Text
-                onClicked: {
-                    if (root.appWin)
-                        root.appWin.clearTaskbarProgress()
-                }
+                onClicked: root.appWin.clearTaskbarProgress()
             }
             Md3Button {
-                text: qsTr("Overlay badge")
-                onClicked: {
-                    if (root.appWin)
-                        root.appWin.setTaskbarOverlayIcon("qrc:/md3/icons/app-icon-16.png",
-                                                          qsTr("Notification"))
-                }
+                visible: Md3WindowCapabilities.taskbarOverlay
+                text: qsTr("Overlay icon")
+                onClicked: root.appWin.setTaskbarOverlayIcon("qrc:/md3/icons/app-icon-16.png",
+                                                             qsTr("Notification"))
             }
             Md3Button {
+                visible: Md3WindowCapabilities.taskbarOverlay
                 text: qsTr("Clear overlay")
                 variant: Md3Button.Outlined
-                onClicked: {
-                    if (root.appWin)
-                        root.appWin.clearTaskbarOverlayIcon()
-                }
+                onClicked: root.appWin.clearTaskbarOverlayIcon()
+            }
+            Md3Button {
+                visible: root.isLinux || root.isWin || root.isMac
+                text: qsTr("Dock badge 3")
+                onClicked: root.appWin.setDockBadge(3)
+            }
+            Md3Button {
+                visible: root.isLinux || root.isWin || root.isMac
+                text: qsTr("Clear badge")
+                variant: Md3Button.Outlined
+                onClicked: root.appWin.setDockBadge(0)
             }
         }
 
@@ -431,19 +490,16 @@ Flickable {
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.labelLarge.size
         }
-
         ColumnLayout {
             visible: (Md3WindowCapabilities.peekControl
                       || Md3WindowCapabilities.excludeFromCapture) && root.appWin
             Layout.fillWidth: true
             spacing: 8
-
             RowLayout {
                 visible: Md3WindowCapabilities.peekControl
                 Layout.fillWidth: true
                 spacing: 12
                 Md3Switch {
-                    id: excludePeekSwitch
                     onToggled: function (isOn) {
                         if (root.appWin)
                             root.appWin.setExcludedFromPeek(isOn)
@@ -490,7 +546,7 @@ Flickable {
                 Text {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    text: qsTr("Exclude from screen capture (black box in screenshots)")
+                    text: qsTr("Exclude from screen capture")
                     color: Md3Theme.colorScheme.colorOnSurface
                     font.family: Md3Theme.typography.fontFamily
                     font.pixelSize: Md3Theme.typography.bodyMedium.size
@@ -501,13 +557,15 @@ Flickable {
         Text {
             visible: Md3WindowCapabilities.jumpList || Md3WindowCapabilities.thumbBar
                      || Md3WindowCapabilities.systemTray || Md3WindowCapabilities.iconicThumbnail
+                     || Md3WindowCapabilities.thumbnailClip || Md3WindowCapabilities.applicationRestart
             text: qsTr("Shell extras")
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.labelLarge.size
         }
-
         Flow {
-            visible: Md3WindowCapabilities.isWindows && root.appWin
+            visible: root.appWin && (Md3WindowCapabilities.jumpList || Md3WindowCapabilities.thumbBar
+                     || Md3WindowCapabilities.systemTray || Md3WindowCapabilities.iconicThumbnail
+                     || Md3WindowCapabilities.thumbnailClip || Md3WindowCapabilities.applicationRestart)
             Layout.fillWidth: true
             spacing: 8
 
@@ -517,8 +575,7 @@ Flickable {
                 onClicked: {
                     root.appWin.setJumpListTasks([
                         { title: qsTr("Open Gallery"), arguments: "", description: qsTr("Launch Md3 Gallery") },
-                        { title: qsTr("Window page"), arguments: "--page=window" },
-                        { title: qsTr("Theme page"), arguments: "--page=theme" }
+                        { title: qsTr("Window page"), arguments: "--page=window" }
                     ])
                 }
             }
@@ -558,17 +615,15 @@ Flickable {
             Md3Button {
                 visible: Md3WindowCapabilities.systemTray
                 text: qsTr("Show tray icon")
-                onClicked: {
-                    root.appWin.showSystemTrayIcon("qrc:/md3/icons/app-icon-16.png",
-                                                   qsTr("Md3 Gallery"))
-                }
+                onClicked: root.appWin.showSystemTrayIcon("qrc:/md3/icons/app-icon-16.png",
+                                                          qsTr("Md3 Gallery"))
             }
             Md3Button {
                 visible: Md3WindowCapabilities.systemTray
-                text: qsTr("Tray balloon")
+                text: qsTr("Notify")
                 variant: Md3Button.Outlined
                 onClicked: root.appWin.showTrayNotification(qsTr("Md3 Gallery"),
-                                                            qsTr("Native tray notification"), 4000)
+                                                            qsTr("Desktop notification"), 4000)
             }
             Md3Button {
                 visible: Md3WindowCapabilities.systemTray
@@ -577,19 +632,8 @@ Flickable {
                 onClicked: root.appWin.hideSystemTrayIcon()
             }
             Md3Button {
-                visible: Md3WindowCapabilities.alwaysOnTop
-                text: qsTr("Always on top")
-                onClicked: root.appWin.setAlwaysOnTop(true)
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.alwaysOnTop
-                text: qsTr("Clear topmost")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.setAlwaysOnTop(false)
-            }
-            Md3Button {
                 visible: Md3WindowCapabilities.thumbnailClip
-                text: qsTr("Thumb clip (title)")
+                text: qsTr("Thumb clip")
                 onClicked: root.appWin.setThumbnailClip(0, 0, root.appWin.width, 40)
             }
             Md3Button {
@@ -600,34 +644,6 @@ Flickable {
                     root.appWin.clearThumbnailClip()
                     root.appWin.setThumbnailTooltip("")
                 }
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.thumbnailClip
-                text: qsTr("Thumb tooltip")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.setThumbnailTooltip(qsTr("Md3 Gallery preview"))
-            }
-            Md3Button {
-                text: qsTr("Next monitor")
-                variant: Md3Button.Outlined
-                onClicked: {
-                    const n = root.appWin.monitorCount
-                    if (n <= 1)
-                        return
-                    root._monitorIndex = (root._monitorIndex + 1) % n
-                    root.appWin.moveToMonitor(root._monitorIndex)
-                }
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.preferredAppMode
-                text: qsTr("App mode dark")
-                onClicked: root.appWin.setPreferredAppMode(true)
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.preferredAppMode
-                text: qsTr("App mode light")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.setPreferredAppMode(false)
             }
             Md3Button {
                 visible: Md3WindowCapabilities.applicationRestart
@@ -644,7 +660,7 @@ Flickable {
         }
 
         Text {
-            visible: Md3WindowCapabilities.isWindows
+            visible: Md3WindowCapabilities.systemTray || Md3WindowCapabilities.thumbBar
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             text: qsTr("Last shell event: %1").arg(shellEventLabel.text)
@@ -677,13 +693,15 @@ Flickable {
             text: {
                 const dpr = root.appWin ? root.appWin.windowDpr : nativeHelper.devicePixelRatio(Window.window)
                 const dpi = root.appWin ? root.appWin.windowDpi : nativeHelper.windowDpi(Window.window)
+                const accent = Md3WindowCapabilities.systemAccent
+                        ? nativeHelper.systemAccentColor() : "-"
                 return "platform=" + Md3WindowCapabilities.platformId
+                      + "  wayland=" + (nativeHelper.wayland ? "1" : "0")
                       + "  dpr=" + Number(dpr).toFixed(2)
                       + "  dpi=" + dpi
-                      + "  perMonitorV2=" + Md3WindowCapabilities.perMonitorDpiV2
-                      + "  taskbar=" + nativeHelper.taskbarProgressSupported
-                      + "  jumpList=" + nativeHelper.jumpListSupported
-                      + "  tray=" + nativeHelper.systemTraySupported
+                      + "  accent=" + accent
+                      + "  dockProgress=" + Md3WindowCapabilities.taskbarProgress
+                      + "  tray=" + Md3WindowCapabilities.systemTray
             }
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.family: Md3Theme.typography.fontFamily
