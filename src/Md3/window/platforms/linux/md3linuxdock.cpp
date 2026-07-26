@@ -77,7 +77,8 @@ void Md3WindowHelper::clearIconicThumbnail(QObject *) {}
 bool Md3WindowHelper::setDockBadge(int count)
 {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    QGuiApplication::setBadgeNumber(qMax(0, count));
+    if (auto *app = qGuiApp)
+        app->setBadgeNumber(qMax(0, count));
 #endif
     QVariantMap props;
     props.insert(QStringLiteral("count"), qint64(qMax(0, count)));

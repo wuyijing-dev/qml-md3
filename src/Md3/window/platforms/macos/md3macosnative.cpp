@@ -144,12 +144,13 @@ bool Md3WindowHelper::showTrayNotification(const QString &, const QString &, int
 bool Md3WindowHelper::setDockBadge(int count)
 {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    QGuiApplication::setBadgeNumber(qMax(0, count));
-    return true;
-#else
+    if (auto *app = qGuiApp) {
+        app->setBadgeNumber(qMax(0, count));
+        return true;
+    }
+#endif
     Q_UNUSED(count);
     return false;
-#endif
 }
 
 bool Md3WindowHelper::setIdleInhibit(bool, const QString &) { return false; }
