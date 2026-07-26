@@ -2,6 +2,7 @@
 
 #include <QGuiApplication>
 #include <QIcon>
+#include <QQuickWindow>
 #include <QScreen>
 #include <QStyleHints>
 #include <QWindow>
@@ -38,8 +39,10 @@ void Md3WindowHelper::setSystemBackdrop(QObject *window, int backdrop)
     if (!qw)
         return;
     qw->setProperty("_md3_macosBackdrop", backdrop);
-    if (backdrop > 0)
-        qw->setColor(Qt::transparent);
+    if (backdrop > 0) {
+        if (auto *quick = qobject_cast<QQuickWindow *>(qw))
+            quick->setColor(Qt::transparent);
+    }
 }
 
 void Md3WindowHelper::setBorderColor(QObject *, const QString &) {}
