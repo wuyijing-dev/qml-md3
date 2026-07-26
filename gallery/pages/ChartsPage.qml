@@ -6,6 +6,7 @@ Item {
     id: root
 
     property real phase: 0
+
     readonly property var liveValues: {
         const p = root.phase
         const out = []
@@ -41,7 +42,7 @@ Item {
             }
             Text {
                 Layout.fillWidth: true
-                text: qsTr("MD3 line charts (Flutter / fl_chart style): smooth curves, area fill, grid.")
+                text: qsTr("C++ Scene Graph 折线图：CPU 降采样 + GPU 几何。百万点请用 fillSine() / setFloatValues()，勿经 QML 传大数组。")
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: Md3Theme.typography.bodyMedium.size
                 wrapMode: Text.Wrap
@@ -68,6 +69,10 @@ Item {
                         minY: 0
                         maxY: 100
                         horizontalGridLines: 4
+                        lineColor: Md3Theme.colorScheme.primary
+                        fillColor: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.primary, 0.20)
+                        gridColor: Md3Theme.colorScheme.outlineVariant
+                        axisLabelColor: Md3Theme.colorScheme.colorOnSurfaceVariant
                     }
                 }
             }
@@ -98,6 +103,55 @@ Item {
                         showDots: true
                         showArea: true
                         horizontalGridLines: 4
+                        gridColor: Md3Theme.colorScheme.outlineVariant
+                        axisLabelColor: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    }
+                }
+            }
+
+            Md3Card {
+                variant: Md3Card.Outlined
+                Layout.fillWidth: true
+                Layout.preferredHeight: 240
+                Column {
+                    width: parent.width
+                    spacing: 8
+                    RowLayout {
+                        width: parent.width
+                        Text {
+                            Layout.fillWidth: true
+                            text: qsTr("Large series (GPU + downsample)")
+                            color: Md3Theme.colorScheme.colorOnSurface
+                            font.pixelSize: Md3Theme.typography.titleSmall.size
+                        }
+                        Md3Button {
+                            text: bigChart.rawPointCount >= 1000000 ? qsTr("1M pts") : qsTr("生成 100万点")
+                            variant: Md3Button.Outlined
+                            onClicked: bigChart.fillSine(1000000)
+                        }
+                    }
+                    Text {
+                        width: parent.width
+                        visible: bigChart.rawPointCount > 0
+                        text: qsTr("原始 %1 点 → 渲染 %2 点（Scene Graph）")
+                              .arg(bigChart.rawPointCount)
+                              .arg(bigChart.renderedPointCount)
+                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                        font.pixelSize: Md3Theme.typography.bodySmall.size
+                        wrapMode: Text.Wrap
+                    }
+                    Md3LineChart {
+                        id: bigChart
+                        width: parent.width
+                        height: 160
+                        smooth: false
+                        showDots: false
+                        showArea: true
+                        horizontalGridLines: 4
+                        lineColor: Md3Theme.colorScheme.primary
+                        fillColor: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.primary, 0.20)
+                        gridColor: Md3Theme.colorScheme.outlineVariant
+                        axisLabelColor: Md3Theme.colorScheme.colorOnSurfaceVariant
                     }
                 }
             }
@@ -122,6 +176,8 @@ Item {
                         showDots: true
                         lineColor: Md3Theme.colorScheme.tertiary
                         fillColor: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.tertiary, 0.2)
+                        gridColor: Md3Theme.colorScheme.outlineVariant
+                        axisLabelColor: Md3Theme.colorScheme.colorOnSurfaceVariant
                         horizontalGridLines: 3
                     }
                 }

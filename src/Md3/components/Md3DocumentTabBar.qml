@@ -10,16 +10,8 @@ Item {
     property int currentIndex: 0
     property bool showAddButton: true
     property bool closable: true
-    property bool tearOffEnabled: true
+    property bool tearOffEnabled: false
     property bool reorderEnabled: true
-    /// Browser-style: this strip is the window title bar (drag + caption buttons).
-    property bool showWindowControls: false
-    property var targetWindow: null
-    property var windowHelper: null
-    property real cornerRadius: 0
-    property bool showMinimize: true
-    property bool showMaximize: true
-    property bool showClose: true
     property real tabHeight: 32
     property real minTabWidth: 120
     property real maxTabWidth: 240
@@ -34,92 +26,23 @@ Item {
     signal tabMoved(int from, int to)
     signal tabTearOff(int index, real globalX, real globalY)
 
-    implicitHeight: tabHeight + (showWindowControls ? 4 : 6)
+    implicitHeight: tabHeight + 6
     height: implicitHeight
     width: parent ? parent.width : 400
     clip: false
 
-    // Drag empty chrome / left grip to move window (browser title-tab strip).
-    // z:-1 never receives events; use a real grip + native caption hit on Windows.
-    Item {
-        id: windowDragGrip
-        anchors.left: parent.left
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        width: root.showWindowControls ? 44 : 0
-        visible: width > 0
-        z: 6
-
-        Md3Icon {
-            anchors.centerIn: parent
-            icon: "web_asset"
-            size: 18
-            iconColor: Md3Theme.colorScheme.colorOnSurfaceVariant
-            opacity: 0.7
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.LeftButton
-            enabled: root.showWindowControls && root.targetWindow
-                     && Md3WindowCapabilities.systemMove
-            cursorShape: Qt.SizeAllCursor
-            onPressed: {
-                if (root.targetWindow && typeof root.targetWindow.startSystemMove === "function")
-                    root.targetWindow.startSystemMove()
-            }
-            onDoubleClicked: {
-                if (!root.targetWindow)
-                    return
-                if (root.targetWindow.visibility === Window.Maximized)
-                    root.targetWindow.showNormal()
-                else
-                    root.targetWindow.showMaximized()
-            }
-        }
-    }
-
-    function reportNativeHits() {
-        if (!root.windowHelper || !root.targetWindow)
-            return
-        if (!root.showWindowControls || !Md3WindowCapabilities.captionHitTest) {
-            root.windowHelper.clearCaptionHitRect(root.targetWindow)
-            return
-        }
-        const host = root.targetWindow.contentItem
-        if (!host)
-            return
-        // Caption drag = grip + strip above tabs (not the tab buttons / caption buttons).
-        const p = windowDragGrip.mapToItem(host, 0, 0)
-        root.windowHelper.setCaptionHitRect(root.targetWindow, p.x, p.y,
-                                           windowDragGrip.width, root.height)
-    }
-
-    Component.onCompleted: Qt.callLater(reportNativeHits)
-    Component.onDestruction: {
-        if (root.windowHelper && root.targetWindow)
-            root.windowHelper.clearCaptionHitRect(root.targetWindow)
-    }
-    onWidthChanged: Qt.callLater(reportNativeHits)
-    onHeightChanged: Qt.callLater(reportNativeHits)
-    onShowWindowControlsChanged: Qt.callLater(reportNativeHits)
-    onTargetWindowChanged: Qt.callLater(reportNativeHits)
-
     readonly property color barColor: {
         const w = Window.window
         if (w && w.usesSystemBackdrop) {
-            const t = w.backdropTitleTint !== undefined ? w.backdropTitleTint : 0.08
-            return Qt.alpha(Md3Theme.colorScheme.surfaceContainerHigh,
-                            Math.min(0.45, Math.max(0.08, t + 0.12)))
+            const t = w.backdropTitleTint !== undefined ? w.backdropTitleTint : 0.06
+            return Qt.alpha(Md3Theme.colorScheme.surfaceContainerHigh, Math.max(0.12, t + 0.06))
         }
         return Md3Theme.colorScheme.surfaceContainerHigh
     }
     readonly property color tabSelected: {
         const w = Window.window
-        if (w && w.usesSystemBackdrop) {
-            const t = w.backdropContentTint !== undefined ? w.backdropContentTint : 0.12
-            return Qt.alpha(Md3Theme.colorScheme.surface, Math.min(0.55, Math.max(0.15, t + 0.15)))
-        }
+        if (w && w.usesSystemBackdrop)
+            return Qt.alpha(Md3Theme.colorScheme.surface, 0.55)
         return Md3Theme.colorScheme.surface
     }
     readonly property color tabHover: Md3Theme.colorScheme.withOpacity(
@@ -348,39 +271,6 @@ Item {
                 }
             }
         }
-
-        // Extra actions before caption (theme / perf / …)
-        Loader {
-            id: actionsLoader
-            anchors.verticalCenter: parent.verticalCenter
-            height: parent.height
-            sourceComponent: root.windowActions
-            width: item ? (item.implicitWidth > 0 ? item.implicitWidth : item.width) : 0
-        }
-
-        Md3CaptionButtons {
-            visible: root.showWindowControls
-            height: Math.min(32, parent.height)
-            anchors.verticalCenter: parent.verticalCenter
-            targetWindow: root.targetWindow
-            windowHelper: root.windowHelper
-            cornerRadius: root.cornerRadius
-            showMinimize: root.showMinimize
-            showMaximize: root.showMaximize
-            showClose: root.showClose
-        }
-    }
-
-    property Component windowActions: null
-    property alias trailingExtraData: trailingExtraRow.data
-    property alias trailingExtraItem: trailingExtraRow
-
-    // Keep empty row for imperative injectors
-    Item {
-        id: trailingExtraRow
-        width: 0
-        height: 0
-        visible: false
     }
 
     ListView {
@@ -389,7 +279,7 @@ Item {
         anchors.right: trailingTools.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        anchors.leftMargin: root.showWindowControls ? 44 : 6
+        anchors.leftMargin: 6
         anchors.rightMargin: 2
         anchors.topMargin: 4
         anchors.bottomMargin: 0

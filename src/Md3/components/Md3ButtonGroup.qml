@@ -251,7 +251,11 @@ Item {
                             id: segRipple
                             rippleColor: seg.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
                                                       : Md3Theme.colorScheme.colorOnSurface
-                            clipRadius: (seg.isFirst || seg.isLast) ? root.outerRadius : 0
+                            clipRadius: 0
+                            topLeftRadius: seg.isFirst ? root.outerRadius : 0
+                            bottomLeftRadius: seg.isFirst ? root.outerRadius : 0
+                            topRightRadius: seg.isLast ? root.outerRadius : 0
+                            bottomRightRadius: seg.isLast ? root.outerRadius : 0
                         }
                         Md3StateOverlay {
                             overlayColor: seg.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer

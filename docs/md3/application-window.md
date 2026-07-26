@@ -112,17 +112,16 @@ On Windows, hovering the maximize button shows the native snap flyout. Title ide
 ```qml
 Md3ApplicationWindow {
     syncImmersiveDarkMode: true          // default — matches Md3Theme.dark
-    systemBackdrop: Md3WindowHelper.BackdropNone // or BackdropMica / Acrylic / Tabbed
+    systemBackdrop: 0                    // UNSUITABLE — leave None; API kept for research
     nativeBorderColor: ""                // "", "default", "none", or "#RRGGBB"
     // …
-    // Component.onCompleted: flashTaskbar()
 }
 ```
 
 | API | Role |
 |-----|------|
 | `syncImmersiveDarkMode` | `DWMWA_USE_IMMERSIVE_DARK_MODE` |
-| `systemBackdrop` | Win11 Mica / Acrylic / Tabbed (needs translucent chrome to show through) |
+| `systemBackdrop` | **UNSUITABLE** — Win11 Mica/Acrylic API retained but not recommended (Qt Quick hides DWM materials); keep `0` |
 | `nativeBorderColor` | `DWMWA_BORDER_COLOR` |
 | `flashTaskbar()` | Taskbar attention flash |
 | `setTaskbarProgress(v, state)` | `ITaskbarList3` progress (0..1) |

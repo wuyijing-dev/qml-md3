@@ -35,6 +35,12 @@ qt_add_qml_module(Md3
         src/Md3/window/md3windowhelper.cpp
         src/Md3/window/md3graphics.h
         src/Md3/window/md3graphics.cpp
+        src/Md3/charts/md3linechart.h
+        src/Md3/charts/md3linechart.cpp
+        src/Md3/progress/md3linearprogressnode.h
+        src/Md3/progress/md3linearprogressnode.cpp
+        src/Md3/progress/md3circularprogressnode.h
+        src/Md3/progress/md3circularprogressnode.cpp
     QML_FILES
         src/Md3/foundation/Md3Theme.qml
         src/Md3/foundation/Md3Motion.qml
@@ -63,7 +69,6 @@ qt_add_qml_module(Md3
         src/Md3/window/Md3WindowBody.qml
         src/Md3/window/Md3ApplicationWindow.qml
         src/Md3/window/Md3DialogWindow.qml
-        src/Md3/window/Md3TabWindow.qml
         src/Md3/layout/Md3AnimatedFlow.qml
         src/Md3/components/Md3Button.qml
         src/Md3/components/Md3IconButton.qml
@@ -121,7 +126,6 @@ qt_add_qml_module(Md3
         src/Md3/components/Md3Banner.qml
         src/Md3/components/Md3Carousel.qml
         src/Md3/components/Md3Form.qml
-        src/Md3/components/Md3LineChart.qml
         src/Md3/components/Md3Skeleton.qml
         src/Md3/components/Md3SkeletonPane.qml
     RESOURCES
@@ -133,7 +137,7 @@ qt_add_qml_module(Md3
 )
 
 target_link_libraries(Md3 PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::QuickEffects)
-target_include_directories(Md3 PRIVATE src/Md3/window)
+target_include_directories(Md3 PRIVATE src/Md3/window src/Md3/charts src/Md3/progress)
 
 # Exactly one platform native translation unit set — no cross-platform #else stubs.
 set(MD3_PLATFORM_SOURCES)

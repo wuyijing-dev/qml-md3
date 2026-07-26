@@ -27,11 +27,8 @@ Rectangle {
         const w = Window.window
         if (w && w.usesSystemBackdrop) {
             const t = w.backdropTitleTint !== undefined ? w.backdropTitleTint : 0.22
-            return Qt.alpha(Md3Theme.colorScheme.surfaceContainer, Math.max(0.12, Math.min(0.4, t + 0.05)))
+            return Qt.alpha(Md3Theme.colorScheme.surfaceContainer, Math.max(0.15, t + 0.05))
         }
-        // Avoid opaque fill when Window attachment is not ready yet (covers Mica).
-        if (!w)
-            return "transparent"
         return Md3Theme.colorScheme.surface
     }
     clip: true

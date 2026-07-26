@@ -37,6 +37,7 @@ Flickable {
     Md3WindowHelper { id: nativeHelper }
     property int _monitorIndex: 0
 
+    // UNSUITABLE — retained for native code paths; Gallery UI removed.
     function applyBackdrop(mode) {
         if (root.appWin && typeof root.appWin.setSystemBackdropMode === "function")
             root.appWin.setSystemBackdropMode(mode)
@@ -89,7 +90,7 @@ Flickable {
         Text {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            text: qsTr("文档标签：开启 documentTabsEnabled 即可。支持 + 新建、拖出撕离。接口：openTab / addTab / closeTab。")
+            text: qsTr("文档标签：标题栏下方开启 documentTabsEnabled。支持 + 新建 / 关闭 / 拖拽排序（不支持撕离为独立窗口）。")
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.bodySmall.size
             font.family: Md3Theme.typography.fontFamily
@@ -136,9 +137,16 @@ Flickable {
             variant: Md3ButtonGroup.Outlined
             buttonHeight: 32
             fontSize: 11
+            currentIndex: {
+                if (!root.appWin)
+                    return 0
+                const modes = ["fade", "fadeThrough", "slide", "slideUp", "scale", "none"]
+                const i = modes.indexOf(root.appWin.pageTransition)
+                return i >= 0 ? i : 0
+            }
             model: [
-                { text: qsTr("贯穿") },
                 { text: qsTr("淡入淡出") },
+                { text: qsTr("贯穿") },
                 { text: qsTr("滑动") },
                 { text: qsTr("上滑") },
                 { text: qsTr("缩放") },
@@ -147,7 +155,7 @@ Flickable {
             onClicked: function (index) {
                 if (!root.appWin)
                     return
-                const modes = ["fadeThrough", "fade", "slide", "slideUp", "scale", "none"]
+                const modes = ["fade", "fadeThrough", "slide", "slideUp", "scale", "none"]
                 root.appWin.pageTransition = modes[index]
             }
         }
@@ -210,7 +218,7 @@ Flickable {
                 Text {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    text: qsTr("Windows 10/11 客户区：云母/亚克力、DWM 边框、任务栏进度与角标、跳转列表、缩略图工具栏、托盘、Peek/捕获。")
+                    text: qsTr("Windows 10/11 客户区：DWM 边框、任务栏进度与角标、跳转列表、缩略图工具栏、托盘、Peek/捕获。（系统背景材质已标记为不适合使用，Gallery 不再展示。）")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.bodyMedium.size
                     font.family: Md3Theme.typography.fontFamily
@@ -220,8 +228,7 @@ Flickable {
                     visible: root.appWin && Md3WindowCapabilities.isWindows
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    text: qsTr("已绑定 — 背景=%1 边框=\"%2\"")
-                          .arg(root.appWin ? root.appWin.systemBackdrop : -1)
+                    text: qsTr("已绑定 — 边框=\"%1\"")
                           .arg(root.appWin ? root.appWin.nativeBorderColor : "")
                     color: Md3Theme.colorScheme.primary
                     font.pixelSize: Md3Theme.typography.bodySmall.size
@@ -241,46 +248,6 @@ Flickable {
                         color: Md3Theme.colorScheme.colorOnSurface
                         font.pixelSize: Md3Theme.typography.bodyMedium.size
                     }
-                }
-
-                RowLayout {
-                    visible: Md3WindowCapabilities.isWindows && root.appWin
-                    Layout.fillWidth: true
-                    spacing: 12
-                    Text { text: qsTr("色调"); color: Md3Theme.colorScheme.colorOnSurface }
-                    Md3Slider {
-                        id: winTintSlider
-                        Layout.fillWidth: true
-                        from: 0; to: 0.85
-                        value: root.appWin ? root.appWin.backdropTint : 0.08
-                        onMoved: function () {
-                            if (!root.appWin)
-                                return
-                            const v = winTintSlider.value
-                            root.appWin.backdropTint = v
-                            root.appWin.backdropContentTint = Math.min(0.9, v + 0.1)
-                            root.appWin.backdropTitleTint = Math.max(0, v * 0.6)
-                        }
-                    }
-                }
-
-                Text {
-                    text: qsTr("系统背景材质")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.labelLarge.size
-                }
-                Md3ButtonGroup {
-                    enabled: Md3WindowCapabilities.isWindows
-                    Layout.fillWidth: true
-                    layout: Md3ButtonGroup.Connected
-                    variant: Md3ButtonGroup.Outlined
-                    buttonHeight: 36
-                    currentIndex: root.appWin ? Math.max(0, Math.min(4, root.appWin.systemBackdrop)) : 0
-                    model: [
-                        { text: qsTr("无") }, { text: qsTr("自动") }, { text: qsTr("云母") },
-                        { text: qsTr("亚克力") }, { text: qsTr("标签页") }
-                    ]
-                    onClicked: function (index) { root.applyBackdrop(index) }
                 }
 
                 Text {
@@ -553,53 +520,6 @@ Flickable {
                 }
 
                 Text {
-                    text: qsTr("柔和背景")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.labelLarge.size
-                }
-                Text {
-                    Layout.fillWidth: true
-                    wrapMode: Text.WordWrap
-                    visible: Md3WindowCapabilities.isLinux
-                             && !(root.appWin && root.appWin.windowNative
-                                  ? root.appWin.windowNative.blurBehindAvailable()
-                                  : nativeHelper.blurBehindAvailable())
-                    text: qsTr("提示：未检测到模糊协议。Debian/Ubuntu 可装 libkf6windowsystem-dev 后重新 cmake；也可点下方按钮一键启用 KWin 模糊并打开设置。")
-                    color: Md3Theme.colorScheme.error
-                    font.pixelSize: Md3Theme.typography.bodySmall.size
-                }
-                Flow {
-                    Layout.fillWidth: true
-                    spacing: 8
-                    visible: Md3WindowCapabilities.isLinux
-                    Md3Button {
-                        text: qsTr("一键开启模糊设置")
-                        onClicked: {
-                            if (root.appWin)
-                                root.appWin.openBlurSettings()
-                            else
-                                nativeHelper.openBlurSettings()
-                        }
-                    }
-                }
-                Md3ButtonGroup {
-                    enabled: Md3WindowCapabilities.isLinux
-                    Layout.fillWidth: true
-                    layout: Md3ButtonGroup.Connected
-                    variant: Md3ButtonGroup.Outlined
-                    buttonHeight: 36
-                    currentIndex: root.appWin && root.appWin.systemBackdrop > 0 ? 1 : 0
-                    model: [
-                        { text: qsTr("关闭") },
-                        { text: (root.appWin && root.appWin.windowNative
-                                 ? root.appWin.windowNative.blurBehindAvailable()
-                                 : nativeHelper.blurBehindAvailable())
-                              ? qsTr("开启（合成器模糊）") : qsTr("开启（仅半透明）") }
-                    ]
-                    onClicked: function (index) { root.applyBackdrop(index === 0 ? 0 : 1) }
-                }
-
-                Text {
                     text: qsTr("窗口操作")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.labelLarge.size
@@ -818,22 +738,6 @@ Flickable {
                         color: Md3Theme.colorScheme.colorOnSurface
                         font.pixelSize: Md3Theme.typography.bodyMedium.size
                     }
-                }
-
-                Text {
-                    text: qsTr("柔和背景")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.labelLarge.size
-                }
-                Md3ButtonGroup {
-                    enabled: Md3WindowCapabilities.isMacOS
-                    Layout.fillWidth: true
-                    layout: Md3ButtonGroup.Connected
-                    variant: Md3ButtonGroup.Outlined
-                    buttonHeight: 36
-                    currentIndex: root.appWin && root.appWin.systemBackdrop > 0 ? 1 : 0
-                    model: [ { text: qsTr("关闭") }, { text: qsTr("开启") } ]
-                    onClicked: function (index) { root.applyBackdrop(index === 0 ? 0 : 1) }
                 }
 
                 Flow {

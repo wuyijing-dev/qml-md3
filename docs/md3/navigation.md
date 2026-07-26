@@ -35,10 +35,10 @@ Width 360; modal scrim; destination pill
 | `pageTransition` | Behavior |
 |------------------|----------|
 | `none` | Instant swap |
-| `fade` | Cross-fade |
-| `slide` | Horizontal shared-axis (direction follows index) |
+| `fade` | Cross-fade — **default** |
+| `slide` | Horizontal shared-axis (clipped to page pane, not over rail) |
 | `slideUp` | Subtle vertical enter |
-| `fadeThrough` | MD fade-through (exit then enter + scale) — default |
+| `fadeThrough` | MD fade-through (exit then enter + scale) |
 | `scale` | Soft scale + fade |
 
 `pageTransitionDuration` defaults to `Md3Motion.spatialDuration`.

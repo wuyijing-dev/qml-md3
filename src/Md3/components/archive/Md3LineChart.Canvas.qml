@@ -1,6 +1,8 @@
 import QtQuick
 
-/// MD3 / Flutter-style line chart: smooth curve, area fill, grid, optional dots.
+/// ARCHIVED — pure QML Canvas implementation.
+/// Kept for reference only. Production chart is C++ Scene Graph: src/Md3/charts/md3linechart.*
+/// Do not re-add this file to qt_add_qml_module.
 Item {
     id: root
 
@@ -28,6 +30,12 @@ Item {
     property real dotRadius: 3
     property string yUnit: ""
     property int valueDecimals: 0
+    /// Cap of vertices after downsampling (≈ 2–4× plot width). 0 = auto from width.
+    property int maxRenderPoints: 0
+    /// Skip smooth Bezier above this raw length (too costly / unstable).
+    property int smoothMaxPoints: 400
+    /// Never draw per-point dots above this rendered length.
+    property int dotsMaxPoints: 80
 
     implicitWidth: 280
     implicitHeight: 160
@@ -48,19 +56,72 @@ Item {
         return Number(v)
     }
 
+    /// Fast numeric extraction — avoids allocating intermediate objects for plain numbers.
     function _seriesNums(s) {
-        const out = []
-        if (!s)
+        if (!s || s.length === undefined)
+            return []
+        const n = s.length
+        if (n === 0)
+            return []
+        // Fast path: dense number array
+        if (typeof s[0] === "number") {
+            const out = new Array(n)
+            for (let i = 0; i < n; ++i)
+                out[i] = s[i]
             return out
-        for (let i = 0; i < s.length; ++i) {
-            const n = _asNumber(s[i])
-            if (!isNaN(n))
-                out.push(n)
+        }
+        const out = []
+        for (let i = 0; i < n; ++i) {
+            const v = _asNumber(s[i])
+            if (!isNaN(v))
+                out.push(v)
         }
         return out
     }
 
-    function _range() {
+    /// Min/max bucket downsample — preserves peaks for large n, O(n), ~2 pts/bucket.
+    function _downsample(nums, target) {
+        const n = nums.length
+        if (n <= target || target < 3)
+            return nums
+        const buckets = Math.max(1, Math.floor((target - 2) / 2))
+        const out = new Array(buckets * 2 + 2)
+        out[0] = nums[0]
+        let o = 1
+        for (let b = 0; b < buckets; ++b) {
+            const start = Math.floor(b * (n - 2) / buckets) + 1
+            const end = Math.floor((b + 1) * (n - 2) / buckets) + 1
+            let lo = nums[start]
+            let hi = nums[start]
+            let loI = start
+            let hiI = start
+            for (let i = start + 1; i < end; ++i) {
+                const v = nums[i]
+                if (v < lo) {
+                    lo = v
+                    loI = i
+                }
+                if (v > hi) {
+                    hi = v
+                    hiI = i
+                }
+            }
+            if (loI <= hiI) {
+                out[o++] = lo
+                if (hiI !== loI)
+                    out[o++] = hi
+            } else {
+                out[o++] = hi
+                if (loI !== hiI)
+                    out[o++] = lo
+            }
+        }
+        out[o++] = nums[n - 1]
+        out.length = o
+        return out
+    }
+
+    function _rangeFromSeries(all) {
         let lo = minY
         let hi = maxY
         if (!isNaN(lo) && !isNaN(hi) && hi > lo)
@@ -68,13 +129,25 @@ Item {
         let found = false
         lo = Infinity
         hi = -Infinity
-        const all = _flatSeries
         for (let s = 0; s < all.length; ++s) {
             const nums = _seriesNums(all[s])
-            for (let i = 0; i < nums.length; ++i) {
+            // For huge series, sample stride for axis range (full pass still used in downsample).
+            const step = nums.length > 200000 ? Math.floor(nums.length / 100000) : 1
+            for (let i = 0; i < nums.length; i += step) {
+                const v = nums[i]
+                if (isNaN(v))
+                    continue
                 found = true
-                lo = Math.min(lo, nums[i])
-                hi = Math.max(hi, nums[i])
+                if (v < lo)
+                    lo = v
+                if (v > hi)
+                    hi = v
+            }
+            // Always include endpoints
+            if (nums.length > 0) {
+                found = true
+                lo = Math.min(lo, nums[0], nums[nums.length - 1])
+                hi = Math.max(hi, nums[0], nums[nums.length - 1])
             }
         }
         if (!found)
@@ -128,6 +201,7 @@ Item {
     onHeightChanged: requestRedraw()
     onMinYChanged: requestRedraw()
     onMaxYChanged: requestRedraw()
+    onMaxRenderPointsChanged: requestRedraw()
 
     Connections {
         target: Md3Theme
@@ -159,17 +233,21 @@ Item {
             const bottom = height - pad - (root.showXLabels ? 16 : 0)
             const plotW = Math.max(1, right - left)
             const plotH = Math.max(1, bottom - top)
-            const range = root._range()
+            const all = root._flatSeries
+            const range = root._rangeFromSeries(all)
             const span = Math.max(1e-6, range.max - range.min)
+            const target = root.maxRenderPoints > 0
+                          ? root.maxRenderPoints
+                          : Math.max(64, Math.floor(plotW * 2.5))
 
             function yAt(v) {
                 return top + plotH * (1 - (v - range.min) / span)
             }
 
-            function buildPath(pts, closeToBaseline) {
+            function buildPath(pts, closeToBaseline, useSmooth) {
                 ctx.beginPath()
                 ctx.moveTo(pts[0].x, pts[0].y)
-                if (root.smooth && pts.length > 2) {
+                if (useSmooth && pts.length > 2) {
                     for (let i = 0; i < pts.length - 1; ++i) {
                         const p0 = pts[Math.max(0, i - 1)]
                         const p1 = pts[i]
@@ -220,35 +298,38 @@ Item {
                 }
             }
 
-            const all = root._flatSeries
             for (let s = 0; s < all.length; ++s) {
-                const nums = root._seriesNums(all[s])
-                if (nums.length < 1)
+                const raw = root._seriesNums(all[s])
+                if (raw.length < 1)
                     continue
+                const nums = root._downsample(raw, target)
                 const col = root._colorAt(s)
-                const pts = []
                 const n = nums.length
+                const pts = new Array(n)
                 for (let i = 0; i < n; ++i) {
                     const x = left + (n === 1 ? plotW / 2 : (plotW * i / (n - 1)))
-                    pts.push({ x: x, y: yAt(nums[i]) })
+                    pts[i] = { x: x, y: yAt(nums[i]) }
                 }
 
+                const useSmooth = root.smooth && raw.length <= root.smoothMaxPoints && n <= root.smoothMaxPoints
+                const useDots = root.showDots && n <= root.dotsMaxPoints
+
                 if (root.showArea) {
-                    buildPath(pts, true)
+                    buildPath(pts, true, useSmooth)
                     ctx.globalAlpha = s === 0 ? 0.22 : 0.12
                     ctx.fillStyle = col
                     ctx.fill()
                     ctx.globalAlpha = 1
                 }
 
-                buildPath(pts, false)
+                buildPath(pts, false, useSmooth)
                 ctx.strokeStyle = col
                 ctx.lineWidth = root.lineWidth
                 ctx.lineJoin = "round"
                 ctx.lineCap = "round"
                 ctx.stroke()
 
-                if (root.showDots) {
+                if (useDots) {
                     for (let i = 0; i < pts.length; ++i) {
                         ctx.beginPath()
                         ctx.fillStyle = col

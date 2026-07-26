@@ -8,6 +8,11 @@ Item {
     property color rippleColor: Md3Theme.colorScheme.colorOnSurface
     // -1 = match parent Rectangle.radius (FAB / Button container); >=0 = explicit
     property real clipRadius: -1
+    /// Per-corner override (Connected button ends). <0 falls back to resolvedClipRadius.
+    property real topLeftRadius: -1
+    property real topRightRadius: -1
+    property real bottomLeftRadius: -1
+    property real bottomRightRadius: -1
     property bool active: false
     property real originX: width / 2
     property real originY: height / 2
@@ -122,7 +127,11 @@ Item {
         Rectangle {
             anchors.fill: parent
             // Match container corner exactly (FAB is rounded-rect, not a circle).
-            radius: root.resolvedClipRadius
+            readonly property real base: root.resolvedClipRadius
+            topLeftRadius: root.topLeftRadius >= 0 ? root.topLeftRadius : base
+            topRightRadius: root.topRightRadius >= 0 ? root.topRightRadius : base
+            bottomLeftRadius: root.bottomLeftRadius >= 0 ? root.bottomLeftRadius : base
+            bottomRightRadius: root.bottomRightRadius >= 0 ? root.bottomRightRadius : base
             color: "#ffffff"
         }
     }

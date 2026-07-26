@@ -19,16 +19,17 @@ Window {
     property url windowIcon: ""
     /// Sync DWM immersive dark mode with Md3Theme.dark (Windows)
     property bool syncImmersiveDarkMode: true
-    /// Win11 system backdrop: 0=None 1=Auto 2=Mica 3=Acrylic 4=Tabbed
+    /// UNSUITABLE FOR PRODUCTION — kept for future research only.
+    /// Qt Quick composition typically hides DWM Mica/Acrylic; prefer 0 (solid MD3 surface).
+    /// 0=None 1=Auto 2=Mica 3=Acrylic 4=Tabbed
     property int systemBackdrop: 0
     /// DWM border color ("#RRGGBB", "none", "default", or "")
     property string nativeBorderColor: ""
     readonly property bool usesSystemBackdrop: systemBackdrop > 0
-    /// How much MD3 surface tints over Mica (0=pure wallpaper blur, 1=solid).
-    /// Keep low — Fluent apps are mostly material with light tint.
-    property real backdropTint: 0.06
-    property real backdropContentTint: 0.12
-    property real backdropTitleTint: 0.05
+    /// UNSUITABLE — wash over system backdrop; unused when systemBackdrop is 0.
+    property real backdropTint: 0.08
+    property real backdropContentTint: 0.18
+    property real backdropTitleTint: 0.06
     /// Title-bar pin (always-on-top). On by default.
     property bool showPinButton: true
     property bool pinned: false
@@ -60,29 +61,25 @@ Window {
     /// Resolve relative destination sources against this URL (Gallery: Qt.resolvedUrl("."))
     property url pageSourceBase: ""
     /// "none" | "fade" | "slide" | "slideUp" | "fadeThrough" | "scale"
-    property string pageTransition: "fadeThrough"
+    property string pageTransition: "fade"
     property int pageTransitionDuration: Md3Motion.spatialDuration
     /// Show Md3SkeletonPane while a destination loads
     property bool pageSkeleton: true
     property alias pageHost: windowBody.pageHost
 
-    // --- Document tabs (Explorer / browser style) ---
-    /// Show the Win11-style tab strip under the title bar.
+    // --- Document tabs (under title bar; no tear-off window) ---
+    /// Show Win11-style tab strip under the title bar.
     property bool documentTabsEnabled: false
-    /// Browser-like chrome: tab strip replaces the title bar (tabs + caption only).
-    property bool browserChrome: false
-    /// Auto-handle activate / close / add / reorder / tear-off + keep tabs in sync with
-    /// `currentIndex` / destinations. Turn off only if you want fully custom handlers.
+    /// Auto-handle activate / close / add / reorder + sync with currentIndex.
     property bool documentTabsManaged: true
-    /// Close this window when the last tab is closed (typical for torn-off windows).
     property bool documentTabsCloseWindowWhenEmpty: false
     property var documentTabs: []
     property int documentTabIndex: 0
     property bool documentTabsClosable: true
-    property bool documentTabsTearOff: true
+    /// Tear-off to a separate window is disabled (no Md3TabWindow).
+    property bool documentTabsTearOff: false
     property bool documentTabsShowAdd: true
     property alias documentTabBar: docTabBar
-    property alias documentTabActions: docTabBar.windowActions
     property bool _docTabSyncing: false
 
     signal documentTabActivated(int index)
@@ -102,7 +99,6 @@ Window {
             currentIndex = index
     }
 
-    /// Build a tab model entry from a destinations index.
     function documentTabMeta(pageIndex) {
         const d = destinations && destinations[pageIndex]
         return {
@@ -112,7 +108,6 @@ Window {
         }
     }
 
-    /// Open `pageIndex` in the current tab (`asNew=false`) or a new tab (`asNew=true`).
     function openTab(pageIndex, asNew) {
         if (!usesDestinations || pageIndex < 0 || pageIndex >= destinations.length)
             return
@@ -195,57 +190,10 @@ Window {
         _docTabSyncing = false
     }
 
+    /// Tear-off windows removed — signal only for apps that want custom handling.
     function tearOffTab(index, globalX, globalY) {
-        if (!documentTabs || documentTabs.length <= 1
-                || index < 0 || index >= documentTabs.length)
-            return
-        _docTabSyncing = true
-        const tabs = documentTabs.slice()
-        const torn = tabs.splice(index, 1)[0]
-        documentTabs = tabs
-        documentTabIndex = Math.max(0, Math.min(
-            documentTabIndex === index
-                ? (index > 0 ? index - 1 : 0)
-                : (documentTabIndex > index ? documentTabIndex - 1 : documentTabIndex),
-            tabs.length - 1))
-        const t = tabs[documentTabIndex]
-        if (t && t.pageIndex !== undefined)
-            navigateTo(t.pageIndex)
-        if (t && t.title)
-            title = t.title
-        _docTabSyncing = false
-
-        const url = Qt.resolvedUrl("Md3TabWindow.qml")
-        const comp = Qt.createComponent(url)
-        function spawn() {
-            const w = comp.createObject(null, {
-                catalog: root.destinations,
-                initialTabs: [torn],
-                x: Math.max(0, (globalX !== undefined ? globalX : root.x + 48) - 96),
-                y: Math.max(0, (globalY !== undefined ? globalY : root.y + 48) - 20),
-                width: Math.min(960, root.width),
-                height: Math.min(640, root.height),
-                windowIcon: root.windowIcon,
-                pageSourceBase: root.pageSourceBase,
-                systemBackdrop: root.systemBackdrop,
-                cornerRadius: root.cornerRadius,
-                browserChrome: true,
-                documentTabsCloseWindowWhenEmpty: true
-            })
-            if (!w)
-                console.warn("Md3ApplicationWindow: tear-off createObject failed")
-        }
-        if (comp.status === Component.Ready)
-            spawn()
-        else if (comp.status === Component.Error)
-            console.warn("Md3ApplicationWindow tear-off:", comp.errorString())
-        else
-            comp.statusChanged.connect(function () {
-                if (comp.status === Component.Ready)
-                    spawn()
-                else if (comp.status === Component.Error)
-                    console.warn("Md3ApplicationWindow tear-off:", comp.errorString())
-            })
+        documentTabTearOff(index, globalX !== undefined ? globalX : 0,
+                           globalY !== undefined ? globalY : 0)
     }
 
     function _managedSyncTabFromPage() {
@@ -277,14 +225,6 @@ Window {
         if (usesDestinations && windowBody.currentIndex !== currentIndex)
             windowBody.currentIndex = currentIndex
         _managedSyncTabFromPage()
-    }
-
-    onBrowserChromeChanged: {
-        if (browserChrome) {
-            documentTabsEnabled = true
-            if (documentTabsManaged)
-                Qt.callLater(_ensureManagedTabs)
-        }
     }
 
     onDocumentTabsEnabledChanged: {
@@ -321,11 +261,12 @@ Window {
     readonly property alias windowNative: windowHelper
 
     readonly property real chromeTop: {
-        if (root.browserChrome && docTabBar.visible)
-            return docTabBar.height
-        if (showTitleBar && customChrome && !root.browserChrome)
-            return titleBarLoader.height
-        return 0
+        let h = 0
+        if (showTitleBar && customChrome)
+            h += titleBarLoader.height
+        if (documentTabsEnabled && docTabBar.visible)
+            h += docTabBar.height
+        return h
     }
     readonly property real edge: 6
     readonly property bool canResize: customChrome && Md3WindowCapabilities.systemResize
@@ -465,24 +406,19 @@ Window {
         _syncWinNative()
     }
 
+    /// UNSUITABLE FOR PRODUCTION — API retained; Gallery no longer exposes it.
     function setSystemBackdropMode(mode) {
-        const turningOn = mode > 0 && systemBackdrop <= 0
         systemBackdrop = mode
-        if (mode > 0) {
-            // Linux：半透明要看得见模糊，遮罩略高
-            if (Md3WindowCapabilities.isLinux) {
-                backdropTint = 0.12
-                backdropContentTint = 0.28
-                backdropTitleTint = 0.08
-            } else if (Md3WindowCapabilities.isWindows && turningOn) {
-                // Fluent：刚打开材质时用低色调，避免内容层把云母/亚克力盖成实心
-                backdropTint = 0.06
-                backdropContentTint = 0.12
-                backdropTitleTint = 0.05
-            }
+        if (Md3WindowCapabilities.isLinux && mode > 0) {
+            backdropTint = 0.12
+            backdropContentTint = 0.28
+            backdropTitleTint = 0.08
+        } else if (Md3WindowCapabilities.isWindows && mode > 0) {
+            backdropTint = 0.08
+            backdropContentTint = 0.18
+            backdropTitleTint = 0.06
         }
-        // Let Window.color binding flip to transparent before DWM attributes.
-        Qt.callLater(function () { root._syncWinNative() })
+        _syncWinNative()
     }
 
     /// Flash the Windows taskbar button (attention).
@@ -652,7 +588,7 @@ Window {
                        ? Qt.alpha(Md3Theme.colorScheme.surface, root.backdropTint)
                        : (root.customChrome ? Qt.alpha(Md3Theme.colorScheme.surface, 0.98)
                                             : Md3Theme.colorScheme.surface)
-                // When backdrop is on, don't paint opaque over Mica in empty areas
+                // Full-window wash stacks with PageHost — keep it off unless tint > 0.
                 visible: !root.usesSystemBackdrop || root.backdropTint > 0.001
             }
 
@@ -671,7 +607,7 @@ Window {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                active: root.showTitleBar && root.customChrome && !root.browserChrome
+                active: root.showTitleBar && root.customChrome
                 height: active && item ? item.height : 0
                 z: 100
                 sourceComponent: root.titleBar !== null ? root.titleBar : defaultTitleBar
@@ -716,19 +652,15 @@ Window {
                 id: docTabBar
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.top: root.browserChrome ? parent.top : titleBarLoader.bottom
+                anchors.top: titleBarLoader.bottom
                 z: 90
-                visible: root.documentTabsEnabled || root.browserChrome
+                visible: root.documentTabsEnabled
                 height: visible ? implicitHeight : 0
                 model: root.documentTabs
                 currentIndex: root.documentTabIndex
                 closable: root.documentTabsClosable
                 tearOffEnabled: root.documentTabsTearOff
                 showAddButton: root.documentTabsShowAdd
-                showWindowControls: root.browserChrome && root.customChrome
-                targetWindow: root
-                windowHelper: windowHelper
-                cornerRadius: root.effectiveRadius
                 onCurrentIndexChanged: {
                     if (root.documentTabIndex !== currentIndex)
                         root.documentTabIndex = currentIndex
@@ -756,7 +688,8 @@ Window {
                 onTabTearOff: function (index, gx, gy) {
                     if (root.documentTabsManaged)
                         root.tearOffTab(index, gx, gy)
-                    root.documentTabTearOff(index, gx, gy)
+                    else
+                        root.documentTabTearOff(index, gx, gy)
                 }
             }
 

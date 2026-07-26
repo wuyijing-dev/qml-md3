@@ -12,6 +12,36 @@ Flickable {
     LayoutMirroring.enabled: rtlSwitch.checked
     LayoutMirroring.childrenInherit: true
 
+    // 20 Hz leading+trailing throttle for live seed drag
+    property real _seedHue: Md3Theme.seed.hslHue
+    property real _seedChroma: Math.max(0.15, Math.min(0.75, Md3Theme.seed.hslSaturation))
+    property bool _seedPending: false
+    readonly property int seedApplyIntervalMs: 50
+
+    Timer {
+        id: seedThrottle
+        interval: root.seedApplyIntervalMs
+        repeat: false
+        onTriggered: {
+            if (!root._seedPending)
+                return
+            root._seedPending = false
+            Md3Theme.applySeed(Qt.hsla(root._seedHue, root._seedChroma, 0.40, 1))
+            seedThrottle.start()
+        }
+    }
+
+    function scheduleSeed(h, c) {
+        _seedHue = h
+        _seedChroma = c
+        if (!seedThrottle.running) {
+            Md3Theme.applySeed(Qt.hsla(h, c, 0.40, 1))
+            seedThrottle.start()
+        } else {
+            _seedPending = true
+        }
+    }
+
     component Swatch: Rectangle {
         property string roleName: ""
         property color roleColor: "transparent"
@@ -102,7 +132,7 @@ Flickable {
                 value: Md3Theme.seed.hslHue
                 showStopIndicator: false
                 onMoved: function (v) {
-                    Md3Theme.applySeed(Qt.hsla(v, chromaSlider.value, 0.40, 1))
+                    root.scheduleSeed(v, chromaSlider.value)
                 }
             }
         }
@@ -123,7 +153,7 @@ Flickable {
                 value: Math.max(0.15, Math.min(0.75, Md3Theme.seed.hslSaturation))
                 showStopIndicator: false
                 onMoved: function (v) {
-                    Md3Theme.applySeed(Qt.hsla(hueSlider.value, v, 0.40, 1))
+                    root.scheduleSeed(hueSlider.value, v)
                 }
             }
         }

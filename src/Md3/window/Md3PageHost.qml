@@ -31,9 +31,11 @@ Item {
     property bool showSkeleton: true
     property string skeletonLayout: "page"
     /// "none" | "fade" | "slide" | "slideUp" | "fadeThrough" | "scale"
-    property string pageTransition: "fadeThrough"
+    property string pageTransition: "fade"
     property int pageTransitionDuration: Md3Motion.spatialDuration
     property url sourceBase: ""
+    /// Keep slide / fadeThrough transforms inside the page pane (never over the rail).
+    clip: true
 
     readonly property var currentItem: {
         const ldr = _loaderAt(displayedIndex)
@@ -503,12 +505,9 @@ Item {
         anchors.fill: parent
         color: {
             const w = Window.window
-            // Never fall back to opaque surface — that paints over DWM Mica/Acrylic.
-            if (!w)
-                return "transparent"
-            if (w.usesSystemBackdrop) {
-                const t = w.backdropContentTint !== undefined ? w.backdropContentTint : 0.12
-                return Qt.alpha(Md3Theme.colorScheme.surface, Math.min(0.55, Math.max(0, t)))
+            if (w && w.usesSystemBackdrop) {
+                const t = w.backdropContentTint !== undefined ? w.backdropContentTint : 0.18
+                return Qt.alpha(Md3Theme.colorScheme.surface, t)
             }
             return Md3Theme.colorScheme.surface
         }
@@ -666,12 +665,9 @@ Item {
         radius: Md3Theme.shape.large
         color: {
             const w = Window.window
-            if (!w)
-                return "transparent"
-            if (w.usesSystemBackdrop) {
-                const t = w.backdropContentTint !== undefined ? w.backdropContentTint : 0.12
-                // Skeleton may be denser, but must not go fully opaque over Mica.
-                return Qt.alpha(Md3Theme.colorScheme.surface, Math.min(0.72, Math.max(0.35, t + 0.25)))
+            if (w && w.usesSystemBackdrop) {
+                const t = w.backdropContentTint !== undefined ? w.backdropContentTint : 0.18
+                return Qt.alpha(Md3Theme.colorScheme.surface, Math.max(0.55, t))
             }
             return Md3Theme.colorScheme.surface
         }

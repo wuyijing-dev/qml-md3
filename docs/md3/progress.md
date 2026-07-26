@@ -3,6 +3,14 @@
 ## Sources
 - M3: https://m3.material.io/components/progress-indicators/specs
 - Expressive wavy: Android `LinearWavyProgressIndicator` / `CircularWavyProgressIndicator`
+- **Renderer:** Qt Quick Scene Graph (`QSGGeometry`) — same GPU path as charts
+
+## Architecture
+| Layer | Role |
+|-------|------|
+| `Md3LinearProgressNode` / `Md3CircularProgressNode` (C++) | Geometry + vsync tick (`frameSwapped`) |
+| `Md3LinearProgressIndicator.qml` / `…Circular…` / `Md3LoadingIndicator.qml` | Theme colors + public API |
+| `components/archive/*Progress*.Canvas.qml` | Archived QML Canvas (too slow) |
 
 ## Linear styles (`Md3LinearProgressIndicator.Style`)
 | Style | Look |
@@ -20,7 +28,6 @@
 | **Soft** | Wave count 4, amp 1.5 |
 | **Lively** | Wave count 8, amp 3.5 |
 
-## Motion / perf
-- Indeterminate travel/spin gated until one frame after visible (`motionReady`) to avoid first-open hitch
-- Canvas paints coalesced ~30fps
+## Motion
 - Tokens: `progressTravel` 1800, `progressSpin` 1600, `progressSweep` 1100, `progressWave` 2400
+- Animation advances on `QQuickWindow::frameSwapped` (GUI thread) → `update()` → Scene Graph upload

@@ -1,10 +1,6 @@
 import QtQuick
-import QtQuick.Window
 
-/*
-  Material 3 Loading indicator — indeterminate (or determinate) circular spinner
-  with optional caption. Built on the same paint path as circular progress.
-*/
+/// Material 3 loading indicator — Scene Graph spinner + optional caption.
 Item {
     id: root
 
@@ -31,43 +27,6 @@ Item {
         }
     }
 
-    property bool _treeShown: true
-    readonly property bool sceneActive: enabled && _treeShown
-    readonly property real radius: indicatorSize / 2 - strokeWidth
-
-    property real rotation: -Math.PI / 2
-    property real sweep: Math.PI * 0.65
-    property real sweepDir: 1
-    property real spinSpeed: Math.PI * 2 / (Md3Motion.progressSpin / 1000)
-
-    function _refreshTreeShown() {
-        let ok = visible && opacity > 0.01
-        let p = parent
-        while (ok && p) {
-            if (p.visible === false)
-                ok = false
-            else if (p.opacity !== undefined && p.opacity < 0.01)
-                ok = false
-            else
-                p = p.parent
-        }
-        const w = Window.window
-        if (!w || w.visibility === Window.Hidden || w.visibility === Window.Minimized)
-            ok = false
-        if (_treeShown !== ok)
-            _treeShown = ok
-    }
-
-    Timer {
-        interval: 200
-        running: root.enabled && root.indeterminate
-        repeat: true
-        onTriggered: root._refreshTreeShown()
-    }
-    Component.onCompleted: _refreshTreeShown()
-    onVisibleChanged: _refreshTreeShown()
-    onOpacityChanged: _refreshTreeShown()
-
     implicitWidth: Math.max(indicatorSize, labelItem.visible ? labelItem.implicitWidth : 0)
     implicitHeight: indicatorSize + (labelItem.visible ? labelItem.implicitHeight + 8 : 0)
     width: implicitWidth
@@ -77,44 +36,20 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: 8
 
-        Item {
+        Md3CircularProgressNode {
             width: root.indicatorSize
             height: root.indicatorSize
             anchors.horizontalCenter: parent.horizontalCenter
-
-            Canvas {
-                id: canvas
-                anchors.fill: parent
-                antialiasing: true
-                smooth: true
-                renderStrategy: Canvas.Cooperative
-
-                onPaint: {
-                    const ctx = getContext("2d")
-                    ctx.reset()
-                    ctx.clearRect(0, 0, width, height)
-                    const cx = width / 2
-                    const cy = height / 2
-                    const r = root.radius
-                    ctx.lineWidth = root.strokeWidth
-                    ctx.lineCap = "round"
-
-                    // Track ring
-                    ctx.beginPath()
-                    ctx.strokeStyle = root.trackColor
-                    ctx.arc(cx, cy, r, 0, Math.PI * 2)
-                    ctx.stroke()
-
-                    // Active arc
-                    let start = root.rotation
-                    let sweep = root.indeterminate ? root.sweep
-                                                   : Math.max(0.001, Math.min(1, root.value)) * Math.PI * 2
-                    ctx.beginPath()
-                    ctx.strokeStyle = root.indicatorColor
-                    ctx.arc(cx, cy, r, start, start + sweep)
-                    ctx.stroke()
-                }
-            }
+            value: root.value
+            indeterminate: root.indeterminate
+            style: Md3CircularProgressNode.Standard
+            strokeWidth: root.strokeWidth
+            amplitude: 0
+            indicatorSize: root.indicatorSize
+            trackColor: root.trackColor
+            indicatorColor: root.indicatorColor
+            progressSpinMs: Md3Motion.progressSpin
+            progressSweepMs: Md3Motion.progressSweep
         }
 
         Text {
@@ -128,27 +63,4 @@ Item {
             horizontalAlignment: Text.AlignHCenter
         }
     }
-
-    FrameAnimation {
-        running: root.sceneActive && root.indeterminate
-        onTriggered: {
-            const dt = frameTime
-            root.rotation += root.spinSpeed * dt
-            root.sweep += root.sweepDir * Math.PI * 1.1 * dt
-            if (root.sweep > Math.PI * 1.2) {
-                root.sweep = Math.PI * 1.2
-                root.sweepDir = -1
-            } else if (root.sweep < Math.PI * 0.3) {
-                root.sweep = Math.PI * 0.3
-                root.sweepDir = 1
-            }
-            canvas.requestPaint()
-        }
-    }
-
-    onValueChanged: if (!indeterminate) canvas.requestPaint()
-    onIndeterminateChanged: canvas.requestPaint()
-    onIndicatorColorChanged: canvas.requestPaint()
-    onVisibleChanged: if (visible) canvas.requestPaint()
-    Component.onCompleted: canvas.requestPaint()
 }

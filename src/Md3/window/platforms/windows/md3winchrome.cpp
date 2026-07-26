@@ -79,23 +79,30 @@ void Md3WindowHelper::setSystemBackdrop(QObject *window, int backdrop)
 
     md3EnsureWinChromeStyles(qw);
 
+    // Frameless CSD: DWMSBT_AUTO often paints nothing — map Auto → Mica (first-commit
+    // used AUTO as-is; Auto→Mica is the only intentional deviation).
     int type = DWMSBT_NONE;
     switch (backdrop) {
-    case BackdropAuto: type = DWMSBT_AUTO; break;
-    case BackdropMica: type = DWMSBT_MAINWINDOW; break;
-    case BackdropAcrylic: type = DWMSBT_TRANSIENTWINDOW; break;
-    case BackdropTabbed: type = DWMSBT_TABBEDWINDOW; break;
+    case BackdropAuto:
+    case BackdropMica:
+        type = DWMSBT_MAINWINDOW;
+        break;
+    case BackdropAcrylic:
+        type = DWMSBT_TRANSIENTWINDOW;
+        break;
+    case BackdropTabbed:
+        type = DWMSBT_TABBEDWINDOW;
+        break;
     case BackdropNone:
-    default: type = DWMSBT_NONE; break;
+    default:
+        type = DWMSBT_NONE;
+        break;
     }
 
     const BOOL alpha = TRUE;
     DwmSetWindowAttribute(hwnd, DWMWA_REDIRECTIONBITMAP_ALPHA, &alpha, sizeof(alpha));
 
     if (type != DWMSBT_NONE) {
-        // QML Window.color must be transparent; reinforce via QQuickWindow for DWM sampling.
-        if (auto *quick = qobject_cast<QQuickWindow *>(qw))
-            quick->setColor(QColor(Qt::transparent));
         const MARGINS margins{ -1, -1, -1, -1 };
         DwmExtendFrameIntoClientArea(hwnd, &margins);
         const COLORREF noColor = DWMWA_COLOR_NONE;

@@ -135,6 +135,8 @@ Item {
                 labelWidth: 28
                 contentPadding: 4
                 lineColor: Md3Theme.colorScheme.primary
+                gridColor: Md3Theme.colorScheme.outlineVariant
+                axisLabelColor: Md3Theme.colorScheme.colorOnSurfaceVariant
             }
 
             Md3LineChart {
@@ -154,6 +156,8 @@ Item {
                 contentPadding: 4
                 lineColor: Md3Theme.colorScheme.tertiary
                 seriesColors: [Md3Theme.colorScheme.tertiary]
+                gridColor: Md3Theme.colorScheme.outlineVariant
+                axisLabelColor: Md3Theme.colorScheme.colorOnSurfaceVariant
             }
         }
     }

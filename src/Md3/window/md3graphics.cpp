@@ -48,8 +48,44 @@ void Md3Graphics::applyEarly(int &argc, char **argv)
     }
 
     QSettings s(QStringLiteral("QML_MD3"), QStringLiteral("Md3"));
+#if defined(Q_OS_WIN)
+    // First-commit behavior: always enable alpha for Mica/Acrylic.
+    const bool alpha = true;
+    s.setValue(alphaKey(), true);
+    // Do not leave QT_QPA_DISABLE_REDIRECTION_SURFACE set — it was an experiment
+    // and is not part of the known-good first-commit path.
+    qunsetenv("QT_QPA_DISABLE_REDIRECTION_SURFACE");
+#else
     const bool alpha = s.value(alphaKey(), true).toBool();
+#endif
     QQuickWindow::setDefaultAlphaBuffer(alpha);
+
+    // Prefer Qt default RHI on Windows (first commit had no forced backend).
+    // Only honor an explicit CLI override; ignore stale registry "d3d11".
+#if defined(Q_OS_WIN)
+    bool cliBackend = false;
+    for (int i = 1; i < argc; ++i) {
+        const char *a = argv[i];
+        if (!a)
+            continue;
+        if (std::strncmp(a, "--rhi-backend=", 14) == 0
+                || std::strcmp(a, "--rhi-backend") == 0
+                || std::strncmp(a, "--md3-rhi=", 10) == 0) {
+            cliBackend = true;
+            break;
+        }
+    }
+    if (!cliBackend
+            && (qEnvironmentVariableIsSet("MD3_RHI_BACKEND")
+                || qEnvironmentVariableIsSet("QSG_RHI_BACKEND"))) {
+        cliBackend = true; // treat env as explicit
+    }
+    if (!cliBackend) {
+        // Leave Qt's default; drop stale preference that may fight DWM compositing.
+        s.remove(settingsKey());
+        backend.clear();
+    }
+#endif
 
     if (!backend.isEmpty() && backend.compare(QLatin1String("auto"), Qt::CaseInsensitive) != 0)
         applyNamedBackend(backend);

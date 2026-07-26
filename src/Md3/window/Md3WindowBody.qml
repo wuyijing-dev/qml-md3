@@ -20,7 +20,7 @@ Item {
     property bool showBusyIndicator: false
     property bool showSkeleton: true
     property string skeletonLayout: "page"
-    property string pageTransition: "fadeThrough"
+    property string pageTransition: "fade"
     property int pageTransitionDuration: Md3Motion.spatialDuration
     property alias pageHost: host
     property alias rail: rail
@@ -67,6 +67,7 @@ Item {
 
         Md3NavigationRail {
             id: rail
+            z: 2
             visible: root.railVisible && root.destinations && root.destinations.length > 0
             height: parent.height
             width: visible ? (root.railExpanded ? 256 : 80) : 0
@@ -83,6 +84,8 @@ Item {
 
         Md3PageHost {
             id: host
+            z: 1
+            clip: true
             width: parent.width - rail.width
             height: parent.height
             model: root.destinations

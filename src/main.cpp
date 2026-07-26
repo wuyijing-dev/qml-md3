@@ -132,7 +132,10 @@ int main(int argc, char *argv[])
     SetCurrentProcessExplicitAppUserModelID(L"QML_MD3.Md3Gallery");
 #endif
 
-    // RHI backend + alpha buffer — must run before QGuiApplication / first QQuickWindow.
+    // First-commit: alpha buffer before any QQuickWindow (Mica/Acrylic requirement).
+    QQuickWindow::setDefaultAlphaBuffer(true);
+
+    // RHI backend preference (optional) — must also run before QGuiApplication.
     Md3Graphics::applyEarly(argc, argv);
 
 #if defined(Q_OS_LINUX)
