@@ -22,9 +22,17 @@ Flickable {
         return null
     }
 
-    readonly property bool isWin: Md3WindowCapabilities.isWindows
-    readonly property bool isLinux: Md3WindowCapabilities.isLinux
-    readonly property bool isMac: Md3WindowCapabilities.isMacOS
+    readonly property int currentOsTab: {
+        if (Md3WindowCapabilities.isWindows)
+            return 0
+        if (Md3WindowCapabilities.isLinux)
+            return 1
+        if (Md3WindowCapabilities.isMacOS)
+            return 2
+        return 0
+    }
+
+    property int platformTab: currentOsTab
 
     Md3WindowHelper { id: nativeHelper }
     property int _monitorIndex: 0
@@ -63,31 +71,17 @@ Flickable {
         Text {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            text: {
-                if (root.isWin)
-                    return qsTr("Windows: Mica/Acrylic backdrop, DWM chrome, taskbar, tray, and Jump List. Tint≈0 keeps the material soft.")
-                if (root.isLinux)
-                    return qsTr("Linux / Wayland: client-side decoration, soft translucent backdrop + compositor blur hints, dock progress (Plasma), StatusNotifier tray, FreeDesktop notifications, accent from gsettings/KDE. Taskbar icon needs a matching .desktop (app_id).")
-                if (root.isMac)
-                    return qsTr("macOS: traffic-lights inset, soft translucent backdrop hook, system color scheme.")
-                return qsTr("Platform window chrome and shell affordances for the current OS.")
-            }
+            text: qsTr("Shared settings below; open the tab for your OS (or another) to try native shell controls. Running as %1%2.")
+                  .arg(Md3WindowCapabilities.platformId)
+                  .arg(nativeHelper.wayland ? " · Wayland" : (nativeHelper.xcb ? " · X11" : ""))
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.bodyMedium.size
             font.family: Md3Theme.typography.fontFamily
         }
 
+        // —— Shared ——
         Text {
-            Layout.fillWidth: true
-            wrapMode: Text.WordWrap
-            text: qsTr("Document tabs: documentTabsEnabled — Explorer-style strip with + / tear-off. Managed API: openTab / addTab / closeTab.")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.bodyMedium.size
-            font.family: Md3Theme.typography.fontFamily
-        }
-
-        Text {
-            text: qsTr("Graphics (RHI)")
+            text: qsTr("Shared")
             color: Md3Theme.colorScheme.colorOnSurface
             font.pixelSize: Md3Theme.typography.titleSmall.size
         }
@@ -95,7 +89,21 @@ Flickable {
         Text {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            text: qsTr("Platform=%1 · current=%2 · preferred=%3%4\nCLI: --rhi-backend=… · env MD3_RHI_BACKEND")
+            text: qsTr("Document tabs: documentTabsEnabled — strip with + / tear-off. API: openTab / addTab / closeTab.")
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.bodySmall.size
+            font.family: Md3Theme.typography.fontFamily
+        }
+
+        Text {
+            text: qsTr("Graphics (RHI)")
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.labelLarge.size
+        }
+        Text {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            text: qsTr("%1 · current=%2 · preferred=%3%4")
                   .arg(Md3Graphics.platformName)
                   .arg(Md3Graphics.currentBackend)
                   .arg(Md3Graphics.preferredBackend)
@@ -104,7 +112,6 @@ Flickable {
             font.pixelSize: Md3Theme.typography.bodySmall.size
             font.family: Md3Theme.typography.fontFamily
         }
-
         Flow {
             Layout.fillWidth: true
             spacing: 8
@@ -120,8 +127,8 @@ Flickable {
 
         Text {
             text: qsTr("Page transition")
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.labelLarge.size
         }
         Md3ButtonGroup {
             Layout.fillWidth: true
@@ -148,7 +155,6 @@ Flickable {
             spacing: 12
             Md3Switch {
                 checked: root.appWin ? root.appWin.pageSkeleton : true
-                accessibleName: qsTr("Page skeleton while loading")
                 onToggled: function (on) {
                     if (root.appWin)
                         root.appWin.pageSkeleton = on
@@ -162,528 +168,681 @@ Flickable {
             }
         }
 
-        RowLayout {
-            visible: root.isWin && root.appWin
-            Layout.fillWidth: true
-            spacing: 12
-            Text {
-                text: qsTr("Tint")
-                color: Md3Theme.colorScheme.colorOnSurface
-                font.family: Md3Theme.typography.fontFamily
-            }
-            Md3Slider {
-                Layout.fillWidth: true
-                from: 0
-                to: 0.85
-                value: root.appWin ? root.appWin.backdropTint : 0.08
-                onMoved: {
-                    if (root.appWin) {
-                        root.appWin.backdropTint = value
-                        root.appWin.backdropContentTint = Math.min(0.9, value + 0.1)
-                        root.appWin.backdropTitleTint = Math.max(0, value * 0.6)
-                    }
-                }
-            }
-            Text {
-                text: root.appWin ? root.appWin.backdropTint.toFixed(2) : "-"
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.family: Md3Theme.typography.fontFamily
-                font.pixelSize: 12
-            }
-        }
-
+        // —— Per-OS tabs ——
         Text {
-            visible: Md3WindowCapabilities.systemBackdrop || Md3WindowCapabilities.immersiveDarkMode
-            text: qsTr("Native window")
+            text: qsTr("Platform native")
             color: Md3Theme.colorScheme.colorOnSurface
             font.pixelSize: Md3Theme.typography.titleSmall.size
         }
 
+        Md3TabBar {
+            Layout.fillWidth: true
+            currentIndex: root.platformTab
+            model: [
+                { text: qsTr("Windows") },
+                { text: qsTr("Linux") },
+                { text: qsTr("macOS") }
+            ]
+            onCurrentIndexChangedByUser: function (index) {
+                root.platformTab = index
+            }
+        }
+
         Text {
-            visible: Md3WindowCapabilities.systemBackdrop || Md3WindowCapabilities.immersiveDarkMode
+            visible: root.platformTab !== root.currentOsTab
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            text: root.appWin
-                  ? qsTr("Bound — platform=%1 · wayland=%2 · backdrop=%3")
-                        .arg(Md3WindowCapabilities.platformId)
-                        .arg(nativeHelper.wayland ? "yes" : "no")
-                        .arg(root.appWin.systemBackdrop)
-                  : qsTr("Window not bound — controls disabled")
-            color: root.appWin ? Md3Theme.colorScheme.primary : Md3Theme.colorScheme.error
-            font.family: Md3Theme.typography.fontFamily
+            text: qsTr("Browsing another OS tab — live actions only work on this machine (%1).")
+                  .arg(Md3WindowCapabilities.platformId)
+            color: Md3Theme.colorScheme.tertiary
             font.pixelSize: Md3Theme.typography.bodySmall.size
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 12
-            visible: Md3WindowCapabilities.immersiveDarkMode && root.appWin
-            Md3Switch {
-                checked: root.appWin.syncImmersiveDarkMode
-                onToggled: function (isOn) {
-                    root.appWin.syncImmersiveDarkMode = isOn
-                }
-            }
-            Text {
-                Layout.fillWidth: true
-                wrapMode: Text.WordWrap
-                text: qsTr("Sync color scheme with theme (%1)")
-                      .arg(Md3Theme.dark ? "dark" : "light")
-                color: Md3Theme.colorScheme.colorOnSurface
-                font.family: Md3Theme.typography.fontFamily
-                font.pixelSize: Md3Theme.typography.bodyMedium.size
-            }
-        }
-
-        // --- Backdrop: Win11 materials vs Linux soft on/off ---
-        Text {
-            visible: Md3WindowCapabilities.systemBackdrop && root.isWin
-            text: qsTr("System backdrop (DWM)")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.labelLarge.size
-        }
-        Md3ButtonGroup {
-            visible: Md3WindowCapabilities.systemBackdrop && root.isWin
-            Layout.fillWidth: true
-            layout: Md3ButtonGroup.Connected
-            variant: Md3ButtonGroup.Outlined
-            buttonHeight: 36
-            currentIndex: root.appWin ? Math.max(0, Math.min(4, root.appWin.systemBackdrop)) : 0
-            model: [
-                { text: "None" },
-                { text: "Auto" },
-                { text: "Mica" },
-                { text: "Acrylic" },
-                { text: "Tabbed" }
-            ]
-            onClicked: function (index) { root.applyBackdrop(index) }
-        }
-
-        Text {
-            visible: Md3WindowCapabilities.systemBackdrop && !root.isWin
-            text: qsTr("Soft backdrop")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.labelLarge.size
-        }
-        Md3ButtonGroup {
-            visible: Md3WindowCapabilities.systemBackdrop && !root.isWin
-            Layout.fillWidth: true
-            layout: Md3ButtonGroup.Connected
-            variant: Md3ButtonGroup.Outlined
-            buttonHeight: 36
-            currentIndex: root.appWin && root.appWin.systemBackdrop > 0 ? 1 : 0
-            model: [
-                { text: qsTr("Off") },
-                { text: qsTr("On (blur hint)") }
-            ]
-            onClicked: function (index) { root.applyBackdrop(index === 0 ? 0 : 1) }
-        }
-
-        Text {
-            visible: root.isWin
-            text: qsTr("DWM border color")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.labelLarge.size
-        }
-        Flow {
-            visible: root.isWin
-            Layout.fillWidth: true
-            spacing: 8
-            Repeater {
-                model: [
-                    { label: qsTr("Default"), color: "" },
-                    { label: qsTr("None"), color: "none" },
-                    { label: qsTr("Primary"), color: "primary" },
-                    { label: qsTr("Error"), color: "error" },
-                    { label: qsTr("Outline"), color: "outline" }
-                ]
-                delegate: Md3Button {
-                    required property var modelData
-                    text: modelData.label
-                    variant: Md3Button.Outlined
-                    onClicked: {
-                        let c = modelData.color
-                        if (c === "primary")
-                            c = Md3Theme.colorScheme.primary
-                        else if (c === "error")
-                            c = Md3Theme.colorScheme.error
-                        else if (c === "outline")
-                            c = Md3Theme.colorScheme.outline
-                        root.applyBorder(c)
-                    }
-                }
-            }
-        }
-
-        Text {
-            visible: root.appWin
-            text: qsTr("Window actions")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.labelLarge.size
-        }
-        Flow {
-            visible: root.appWin
-            Layout.fillWidth: true
-            spacing: 8
-
-            Md3Button {
-                text: root.isWin ? qsTr("Flash taskbar") : qsTr("Request attention")
-                onClicked: root.appWin.flashTaskbar(true)
-            }
-            Md3Button {
-                text: qsTr("Stop")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.flashTaskbar(false)
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.systemMenu
-                text: qsTr("System menu…")
-                variant: Md3Button.Outlined
-                onClicked: {
-                    const g = mapToGlobal(width / 2, height)
-                    if (root.appWin.titleBarItem
-                            && typeof root.appWin.titleBarItem.openSystemMenu === "function")
-                        root.appWin.titleBarItem.openSystemMenu(g.x, g.y)
-                    else
-                        nativeHelper.showSystemMenu(root.appWin, g.x, g.y)
-                }
-            }
-            Md3Button {
-                text: qsTr("Raise / activate")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.raiseWindow()
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.alwaysOnTop
-                text: qsTr("Always on top")
-                onClicked: root.appWin.setAlwaysOnTop(true)
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.alwaysOnTop
-                text: qsTr("Clear topmost")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.setAlwaysOnTop(false)
-            }
-            Md3Button {
-                text: qsTr("Next monitor")
-                variant: Md3Button.Outlined
-                onClicked: {
-                    const n = root.appWin.monitorCount
-                    if (n <= 1)
-                        return
-                    root._monitorIndex = (root._monitorIndex + 1) % n
-                    root.appWin.moveToMonitor(root._monitorIndex)
-                }
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.preferredAppMode
-                text: qsTr("Prefer dark")
-                onClicked: root.appWin.setPreferredAppMode(true)
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.preferredAppMode
-                text: qsTr("Prefer light")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.setPreferredAppMode(false)
-            }
-            Md3Button {
-                visible: root.isLinux
-                text: qsTr("Idle inhibit")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.setIdleInhibit(true, qsTr("Md3 Gallery demo"))
-            }
-            Md3Button {
-                visible: root.isLinux
-                text: qsTr("Allow idle")
-                variant: Md3Button.Text
-                onClicked: root.appWin.setIdleInhibit(false)
-            }
-        }
-
-        Text {
-            visible: Md3WindowCapabilities.taskbarProgress
-            text: root.isWin ? qsTr("Taskbar progress") : qsTr("Dock progress")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.labelLarge.size
-        }
-        RowLayout {
-            visible: Md3WindowCapabilities.taskbarProgress && root.appWin
-            Layout.fillWidth: true
-            spacing: 12
-            Text {
-                text: qsTr("Progress")
-                color: Md3Theme.colorScheme.colorOnSurface
-                font.family: Md3Theme.typography.fontFamily
-            }
-            Md3Slider {
-                id: taskbarProgressSlider
-                Layout.fillWidth: true
-                from: 0
-                to: 1
-                value: 0.35
-                onMoved: {
-                    if (root.appWin)
-                        root.appWin.setTaskbarProgress(value, Md3WindowHelper.ProgressNormal)
-                }
-            }
-            Text {
-                text: Math.round(taskbarProgressSlider.value * 100) + "%"
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.family: Md3Theme.typography.fontFamily
-                font.pixelSize: 12
-            }
-        }
-        Flow {
-            visible: Md3WindowCapabilities.taskbarProgress && root.appWin
-            Layout.fillWidth: true
-            spacing: 8
-            Md3Button {
-                text: qsTr("Indeterminate")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.setTaskbarProgress(0, Md3WindowHelper.ProgressIndeterminate)
-            }
-            Md3Button {
-                text: qsTr("Error")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.setTaskbarProgress(taskbarProgressSlider.value,
-                                                          Md3WindowHelper.ProgressError)
-            }
-            Md3Button {
-                text: qsTr("Paused")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.setTaskbarProgress(taskbarProgressSlider.value,
-                                                          Md3WindowHelper.ProgressPaused)
-            }
-            Md3Button {
-                text: qsTr("Clear")
-                variant: Md3Button.Text
-                onClicked: root.appWin.clearTaskbarProgress()
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.taskbarOverlay
-                text: qsTr("Overlay icon")
-                onClicked: root.appWin.setTaskbarOverlayIcon("qrc:/md3/icons/app-icon-16.png",
-                                                             qsTr("Notification"))
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.taskbarOverlay
-                text: qsTr("Clear overlay")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.clearTaskbarOverlayIcon()
-            }
-            Md3Button {
-                visible: root.isLinux || root.isWin || root.isMac
-                text: qsTr("Dock badge 3")
-                onClicked: root.appWin.setDockBadge(3)
-            }
-            Md3Button {
-                visible: root.isLinux || root.isWin || root.isMac
-                text: qsTr("Clear badge")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.setDockBadge(0)
-            }
-        }
-
-        Text {
-            visible: Md3WindowCapabilities.peekControl || Md3WindowCapabilities.excludeFromCapture
-            text: qsTr("Peek / capture")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.labelLarge.size
-        }
-        ColumnLayout {
-            visible: (Md3WindowCapabilities.peekControl
-                      || Md3WindowCapabilities.excludeFromCapture) && root.appWin
-            Layout.fillWidth: true
-            spacing: 8
-            RowLayout {
-                visible: Md3WindowCapabilities.peekControl
-                Layout.fillWidth: true
-                spacing: 12
-                Md3Switch {
-                    onToggled: function (isOn) {
-                        if (root.appWin)
-                            root.appWin.setExcludedFromPeek(isOn)
-                    }
-                }
-                Text {
-                    Layout.fillWidth: true
-                    wrapMode: Text.WordWrap
-                    text: qsTr("Exclude from Aero Peek thumbnail")
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.bodyMedium.size
-                }
-            }
-            RowLayout {
-                visible: Md3WindowCapabilities.peekControl
-                Layout.fillWidth: true
-                spacing: 12
-                Md3Switch {
-                    onToggled: function (isOn) {
-                        if (root.appWin)
-                            root.appWin.setDisallowPeek(isOn)
-                    }
-                }
-                Text {
-                    Layout.fillWidth: true
-                    wrapMode: Text.WordWrap
-                    text: qsTr("Disallow peek (live preview)")
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.bodyMedium.size
-                }
-            }
-            RowLayout {
-                visible: Md3WindowCapabilities.excludeFromCapture
-                Layout.fillWidth: true
-                spacing: 12
-                Md3Switch {
-                    onToggled: function (isOn) {
-                        if (root.appWin)
-                            root.appWin.setExcludeFromCapture(isOn)
-                    }
-                }
-                Text {
-                    Layout.fillWidth: true
-                    wrapMode: Text.WordWrap
-                    text: qsTr("Exclude from screen capture")
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.bodyMedium.size
-                }
-            }
-        }
-
-        Text {
-            visible: Md3WindowCapabilities.jumpList || Md3WindowCapabilities.thumbBar
-                     || Md3WindowCapabilities.systemTray || Md3WindowCapabilities.iconicThumbnail
-                     || Md3WindowCapabilities.thumbnailClip || Md3WindowCapabilities.applicationRestart
-            text: qsTr("Shell extras")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.labelLarge.size
-        }
-        Flow {
-            visible: root.appWin && (Md3WindowCapabilities.jumpList || Md3WindowCapabilities.thumbBar
-                     || Md3WindowCapabilities.systemTray || Md3WindowCapabilities.iconicThumbnail
-                     || Md3WindowCapabilities.thumbnailClip || Md3WindowCapabilities.applicationRestart)
-            Layout.fillWidth: true
-            spacing: 8
-
-            Md3Button {
-                visible: Md3WindowCapabilities.jumpList
-                text: qsTr("Set Jump List")
-                onClicked: {
-                    root.appWin.setJumpListTasks([
-                        { title: qsTr("Open Gallery"), arguments: "", description: qsTr("Launch Md3 Gallery") },
-                        { title: qsTr("Window page"), arguments: "--page=window" }
-                    ])
-                }
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.jumpList
-                text: qsTr("Clear Jump List")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.clearJumpList()
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.thumbBar
-                text: qsTr("ThumbBar buttons")
-                onClicked: {
-                    root.appWin.setThumbBarButtons([
-                        { id: 1, icon: "qrc:/md3/icons/app-icon-16.png", tooltip: qsTr("Action A") },
-                        { id: 2, icon: "qrc:/md3/icons/app-icon-16.png", tooltip: qsTr("Action B") }
-                    ])
-                }
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.thumbBar
-                text: qsTr("Clear ThumbBar")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.clearThumbBarButtons()
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.iconicThumbnail
-                text: qsTr("Custom iconic thumb")
-                onClicked: root.appWin.setIconicThumbnail("qrc:/md3/icons/app-icon-256.png")
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.iconicThumbnail
-                text: qsTr("Clear iconic")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.clearIconicThumbnail()
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.systemTray
-                text: qsTr("Show tray icon")
-                onClicked: root.appWin.showSystemTrayIcon("qrc:/md3/icons/app-icon-16.png",
-                                                          qsTr("Md3 Gallery"))
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.systemTray
-                text: qsTr("Notify")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.showTrayNotification(qsTr("Md3 Gallery"),
-                                                            qsTr("Desktop notification"), 4000)
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.systemTray
-                text: qsTr("Hide tray")
-                variant: Md3Button.Text
-                onClicked: root.appWin.hideSystemTrayIcon()
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.thumbnailClip
-                text: qsTr("Thumb clip")
-                onClicked: root.appWin.setThumbnailClip(0, 0, root.appWin.width, 40)
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.thumbnailClip
-                text: qsTr("Clear thumb clip")
-                variant: Md3Button.Outlined
-                onClicked: {
-                    root.appWin.clearThumbnailClip()
-                    root.appWin.setThumbnailTooltip("")
-                }
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.applicationRestart
-                text: qsTr("Register restart")
-                variant: Md3Button.Outlined
-                onClicked: root.appWin.registerApplicationRestart("")
-            }
-            Md3Button {
-                visible: Md3WindowCapabilities.applicationRestart
-                text: qsTr("Unregister restart")
-                variant: Md3Button.Text
-                onClicked: root.appWin.unregisterApplicationRestart()
-            }
-        }
-
-        Text {
-            visible: Md3WindowCapabilities.systemTray || Md3WindowCapabilities.thumbBar
-            Layout.fillWidth: true
-            wrapMode: Text.WordWrap
-            text: qsTr("Last shell event: %1").arg(shellEventLabel.text)
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.family: Md3Theme.typography.fontFamily
-            font.pixelSize: Md3Theme.typography.bodySmall.size
         }
+
+        StackLayout {
+            Layout.fillWidth: true
+            currentIndex: root.platformTab
+
+            // ===== Windows =====
+            ColumnLayout {
+                spacing: 12
+
+                Text {
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    text: qsTr("Win10/11 client chrome: Mica/Acrylic, DWM border, taskbar progress/overlay, Jump List, ThumbBar, tray, peek/capture.")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: Md3Theme.typography.bodyMedium.size
+                    font.family: Md3Theme.typography.fontFamily
+                }
+
+                Text {
+                    visible: root.appWin && Md3WindowCapabilities.isWindows
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    text: qsTr("Bound — backdrop=%1 border=\"%2\"")
+                          .arg(root.appWin ? root.appWin.systemBackdrop : -1)
+                          .arg(root.appWin ? root.appWin.nativeBorderColor : "")
+                    color: Md3Theme.colorScheme.primary
+                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                }
+
+                RowLayout {
+                    visible: Md3WindowCapabilities.isWindows && root.appWin
+                    Layout.fillWidth: true
+                    spacing: 12
+                    Md3Switch {
+                        checked: root.appWin.syncImmersiveDarkMode
+                        onToggled: function (isOn) { root.appWin.syncImmersiveDarkMode = isOn }
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        text: qsTr("syncImmersiveDarkMode")
+                        color: Md3Theme.colorScheme.colorOnSurface
+                        font.pixelSize: Md3Theme.typography.bodyMedium.size
+                    }
+                }
+
+                RowLayout {
+                    visible: Md3WindowCapabilities.isWindows && root.appWin
+                    Layout.fillWidth: true
+                    spacing: 12
+                    Text { text: qsTr("Tint"); color: Md3Theme.colorScheme.colorOnSurface }
+                    Md3Slider {
+                        Layout.fillWidth: true
+                        from: 0; to: 0.85
+                        value: root.appWin ? root.appWin.backdropTint : 0.08
+                        onMoved: {
+                            root.appWin.backdropTint = value
+                            root.appWin.backdropContentTint = Math.min(0.9, value + 0.1)
+                            root.appWin.backdropTitleTint = Math.max(0, value * 0.6)
+                        }
+                    }
+                }
+
+                Text {
+                    text: qsTr("System backdrop")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                }
+                Md3ButtonGroup {
+                    enabled: Md3WindowCapabilities.isWindows
+                    Layout.fillWidth: true
+                    layout: Md3ButtonGroup.Connected
+                    variant: Md3ButtonGroup.Outlined
+                    buttonHeight: 36
+                    currentIndex: root.appWin ? Math.max(0, Math.min(4, root.appWin.systemBackdrop)) : 0
+                    model: [
+                        { text: "None" }, { text: "Auto" }, { text: "Mica" },
+                        { text: "Acrylic" }, { text: "Tabbed" }
+                    ]
+                    onClicked: function (index) { root.applyBackdrop(index) }
+                }
+
+                Text {
+                    text: qsTr("DWM border")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                }
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Repeater {
+                        model: [
+                            { label: qsTr("Default"), color: "" },
+                            { label: qsTr("None"), color: "none" },
+                            { label: qsTr("Primary"), color: "primary" },
+                            { label: qsTr("Error"), color: "error" },
+                            { label: qsTr("Outline"), color: "outline" }
+                        ]
+                        delegate: Md3Button {
+                            required property var modelData
+                            enabled: Md3WindowCapabilities.isWindows
+                            text: modelData.label
+                            variant: Md3Button.Outlined
+                            onClicked: {
+                                let c = modelData.color
+                                if (c === "primary") c = Md3Theme.colorScheme.primary
+                                else if (c === "error") c = Md3Theme.colorScheme.error
+                                else if (c === "outline") c = Md3Theme.colorScheme.outline
+                                root.applyBorder(c)
+                            }
+                        }
+                    }
+                }
+
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows
+                        text: qsTr("Flash taskbar")
+                        onClicked: if (root.appWin) root.appWin.flashTaskbar(true)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows
+                        text: qsTr("Stop flash")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.flashTaskbar(false)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows
+                        text: qsTr("System menu…")
+                        variant: Md3Button.Outlined
+                        onClicked: {
+                            if (!root.appWin) return
+                            const g = mapToGlobal(width / 2, height)
+                            if (root.appWin.titleBarItem
+                                    && typeof root.appWin.titleBarItem.openSystemMenu === "function")
+                                root.appWin.titleBarItem.openSystemMenu(g.x, g.y)
+                            else
+                                nativeHelper.showSystemMenu(root.appWin, g.x, g.y)
+                        }
+                    }
+                }
+
+                Text {
+                    text: qsTr("Taskbar progress / overlay")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                }
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 12
+                    enabled: Md3WindowCapabilities.isWindows
+                    Md3Slider {
+                        id: winProgress
+                        Layout.fillWidth: true
+                        from: 0; to: 1; value: 0.35
+                        onMoved: if (root.appWin) root.appWin.setTaskbarProgress(value)
+                    }
+                    Text {
+                        text: Math.round(winProgress.value * 100) + "%"
+                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                        font.pixelSize: 12
+                    }
+                }
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows
+                        text: qsTr("Indeterminate")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.setTaskbarProgress(0, Md3WindowHelper.ProgressIndeterminate)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows
+                        text: qsTr("Error")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.setTaskbarProgress(winProgress.value, Md3WindowHelper.ProgressError)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows
+                        text: qsTr("Clear")
+                        variant: Md3Button.Text
+                        onClicked: if (root.appWin) root.appWin.clearTaskbarProgress()
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows
+                        text: qsTr("Overlay")
+                        onClicked: if (root.appWin) root.appWin.setTaskbarOverlayIcon("qrc:/md3/icons/app-icon-16.png", qsTr("Badge"))
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows
+                        text: qsTr("Clear overlay")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.clearTaskbarOverlayIcon()
+                    }
+                }
+
+                Text {
+                    text: qsTr("Peek / capture / shell")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                }
+                ColumnLayout {
+                    spacing: 8
+                    enabled: Md3WindowCapabilities.isWindows
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 12
+                        Md3Switch {
+                            onToggled: function (on) { if (root.appWin) root.appWin.setExcludedFromPeek(on) }
+                        }
+                        Text {
+                            Layout.fillWidth: true
+                            wrapMode: Text.WordWrap
+                            text: qsTr("Exclude from Aero Peek")
+                            color: Md3Theme.colorScheme.colorOnSurface
+                            font.pixelSize: Md3Theme.typography.bodyMedium.size
+                        }
+                    }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 12
+                        Md3Switch {
+                            onToggled: function (on) { if (root.appWin) root.appWin.setDisallowPeek(on) }
+                        }
+                        Text {
+                            Layout.fillWidth: true
+                            text: qsTr("Disallow peek")
+                            color: Md3Theme.colorScheme.colorOnSurface
+                            font.pixelSize: Md3Theme.typography.bodyMedium.size
+                        }
+                    }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 12
+                        Md3Switch {
+                            onToggled: function (on) { if (root.appWin) root.appWin.setExcludeFromCapture(on) }
+                        }
+                        Text {
+                            Layout.fillWidth: true
+                            text: qsTr("Exclude from capture")
+                            color: Md3Theme.colorScheme.colorOnSurface
+                            font.pixelSize: Md3Theme.typography.bodyMedium.size
+                        }
+                    }
+                }
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows
+                        text: qsTr("Jump List")
+                        onClicked: if (root.appWin) root.appWin.setJumpListTasks([
+                            { title: qsTr("Gallery"), arguments: "" },
+                            { title: qsTr("Window"), arguments: "--page=window" }
+                        ])
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows
+                        text: qsTr("ThumbBar")
+                        onClicked: if (root.appWin) root.appWin.setThumbBarButtons([
+                            { id: 1, icon: "qrc:/md3/icons/app-icon-16.png", tooltip: "A" },
+                            { id: 2, icon: "qrc:/md3/icons/app-icon-16.png", tooltip: "B" }
+                        ])
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows
+                        text: qsTr("Tray")
+                        onClicked: if (root.appWin) root.appWin.showSystemTrayIcon("qrc:/md3/icons/app-icon-16.png", qsTr("Md3"))
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows
+                        text: qsTr("Balloon")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.showTrayNotification(qsTr("Md3"), qsTr("Tray notify"), 4000)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows
+                        text: qsTr("Always on top")
+                        onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(true)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows
+                        text: qsTr("Register restart")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.registerApplicationRestart("")
+                    }
+                }
+            }
+
+            // ===== Linux =====
+            ColumnLayout {
+                spacing: 12
+
+                Text {
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    text: qsTr("Wayland/X11: CSD, soft translucent backdrop + blur hints, dock progress (LauncherEntry), SNI tray, FDO notifications, accent (gsettings/KDE), idle inhibit. Taskbar icon needs matching .desktop app_id.")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: Md3Theme.typography.bodyMedium.size
+                    font.family: Md3Theme.typography.fontFamily
+                }
+
+                Text {
+                    visible: root.appWin && Md3WindowCapabilities.isLinux
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    text: qsTr("Bound — wayland=%1 backdrop=%2 accent=%3")
+                          .arg(nativeHelper.wayland ? "yes" : "no")
+                          .arg(root.appWin ? root.appWin.systemBackdrop : -1)
+                          .arg(nativeHelper.systemAccentColor())
+                    color: Md3Theme.colorScheme.primary
+                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                }
+
+                RowLayout {
+                    visible: Md3WindowCapabilities.isLinux && root.appWin
+                    Layout.fillWidth: true
+                    spacing: 12
+                    Md3Switch {
+                        checked: root.appWin.syncImmersiveDarkMode
+                        onToggled: function (isOn) { root.appWin.syncImmersiveDarkMode = isOn }
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        text: qsTr("Sync color scheme with theme")
+                        color: Md3Theme.colorScheme.colorOnSurface
+                        font.pixelSize: Md3Theme.typography.bodyMedium.size
+                    }
+                }
+
+                Text {
+                    text: qsTr("Soft backdrop")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                }
+                Md3ButtonGroup {
+                    enabled: Md3WindowCapabilities.isLinux
+                    Layout.fillWidth: true
+                    layout: Md3ButtonGroup.Connected
+                    variant: Md3ButtonGroup.Outlined
+                    buttonHeight: 36
+                    currentIndex: root.appWin && root.appWin.systemBackdrop > 0 ? 1 : 0
+                    model: [ { text: qsTr("Off") }, { text: qsTr("On (blur hint)") } ]
+                    onClicked: function (index) { root.applyBackdrop(index === 0 ? 0 : 1) }
+                }
+
+                Text {
+                    text: qsTr("Window actions")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                }
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("Request attention")
+                        onClicked: if (root.appWin) root.appWin.flashTaskbar(true)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("Stop")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.flashTaskbar(false)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("System menu…")
+                        variant: Md3Button.Outlined
+                        onClicked: {
+                            if (!root.appWin) return
+                            const g = mapToGlobal(width / 2, height)
+                            if (root.appWin.titleBarItem
+                                    && typeof root.appWin.titleBarItem.openSystemMenu === "function")
+                                root.appWin.titleBarItem.openSystemMenu(g.x, g.y)
+                            else
+                                nativeHelper.showSystemMenu(root.appWin, g.x, g.y)
+                        }
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("Raise")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.raiseWindow()
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("Always on top")
+                        onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(true)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("Clear topmost")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(false)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("Idle inhibit")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.setIdleInhibit(true, qsTr("Md3 demo"))
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("Allow idle")
+                        variant: Md3Button.Text
+                        onClicked: if (root.appWin) root.appWin.setIdleInhibit(false)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("Prefer dark")
+                        onClicked: if (root.appWin) root.appWin.setPreferredAppMode(true)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("Prefer light")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.setPreferredAppMode(false)
+                    }
+                }
+
+                Text {
+                    text: qsTr("Dock progress / badge")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                }
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 12
+                    enabled: Md3WindowCapabilities.isLinux
+                    Md3Slider {
+                        id: linuxProgress
+                        Layout.fillWidth: true
+                        from: 0; to: 1; value: 0.35
+                        onMoved: if (root.appWin) root.appWin.setTaskbarProgress(value)
+                    }
+                    Text {
+                        text: Math.round(linuxProgress.value * 100) + "%"
+                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                        font.pixelSize: 12
+                    }
+                }
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("Indeterminate")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.setTaskbarProgress(0, Md3WindowHelper.ProgressIndeterminate)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("Clear progress")
+                        variant: Md3Button.Text
+                        onClicked: if (root.appWin) root.appWin.clearTaskbarProgress()
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("Badge 3")
+                        onClicked: if (root.appWin) root.appWin.setDockBadge(3)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("Clear badge")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.setDockBadge(0)
+                    }
+                }
+
+                Text {
+                    text: qsTr("Tray / notify")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                }
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("Show tray")
+                        onClicked: if (root.appWin) root.appWin.showSystemTrayIcon("qrc:/md3/icons/app-icon-16.png", qsTr("Md3 Gallery"))
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("Notify")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.showTrayNotification(qsTr("Md3 Gallery"), qsTr("FreeDesktop notification"), 4000)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("Hide tray")
+                        variant: Md3Button.Text
+                        onClicked: if (root.appWin) root.appWin.hideSystemTrayIcon()
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isLinux
+                        text: qsTr("Next monitor")
+                        variant: Md3Button.Outlined
+                        onClicked: {
+                            if (!root.appWin) return
+                            const n = root.appWin.monitorCount
+                            if (n <= 1) return
+                            root._monitorIndex = (root._monitorIndex + 1) % n
+                            root.appWin.moveToMonitor(root._monitorIndex)
+                        }
+                    }
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    text: qsTr("Install resources/linux/appQML_MD3.desktop for a proper Wayland taskbar icon (setDesktopFileName).")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                    font.family: Md3Theme.typography.fontFamily
+                }
+            }
+
+            // ===== macOS =====
+            ColumnLayout {
+                spacing: 12
+
+                Text {
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    text: qsTr("macOS: leave traffic-lights inset, soft translucent hook, color scheme / accent. System caption buttons stay native.")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: Md3Theme.typography.bodyMedium.size
+                    font.family: Md3Theme.typography.fontFamily
+                }
+
+                Text {
+                    visible: root.appWin && Md3WindowCapabilities.isMacOS
+                    Layout.fillWidth: true
+                    text: qsTr("Bound — trafficLightsInset=%1")
+                          .arg(nativeHelper.trafficLightsInset)
+                    color: Md3Theme.colorScheme.primary
+                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                }
+
+                RowLayout {
+                    visible: Md3WindowCapabilities.isMacOS && root.appWin
+                    Layout.fillWidth: true
+                    spacing: 12
+                    Md3Switch {
+                        checked: root.appWin.syncImmersiveDarkMode
+                        onToggled: function (isOn) { root.appWin.syncImmersiveDarkMode = isOn }
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        text: qsTr("Sync color scheme with theme")
+                        color: Md3Theme.colorScheme.colorOnSurface
+                        font.pixelSize: Md3Theme.typography.bodyMedium.size
+                    }
+                }
+
+                Text {
+                    text: qsTr("Soft backdrop")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                }
+                Md3ButtonGroup {
+                    enabled: Md3WindowCapabilities.isMacOS
+                    Layout.fillWidth: true
+                    layout: Md3ButtonGroup.Connected
+                    variant: Md3ButtonGroup.Outlined
+                    buttonHeight: 36
+                    currentIndex: root.appWin && root.appWin.systemBackdrop > 0 ? 1 : 0
+                    model: [ { text: qsTr("Off") }, { text: qsTr("On") } ]
+                    onClicked: function (index) { root.applyBackdrop(index === 0 ? 0 : 1) }
+                }
+
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isMacOS
+                        text: qsTr("Request attention")
+                        onClicked: if (root.appWin) root.appWin.flashTaskbar(true)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isMacOS
+                        text: qsTr("Raise")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.raiseWindow()
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isMacOS
+                        text: qsTr("Always on top")
+                        onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(true)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isMacOS
+                        text: qsTr("Clear topmost")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(false)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isMacOS
+                        text: qsTr("Dock badge 3")
+                        onClicked: if (root.appWin) root.appWin.setDockBadge(3)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isMacOS
+                        text: qsTr("Clear badge")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.setDockBadge(0)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isMacOS
+                        text: qsTr("Prefer dark")
+                        onClicked: if (root.appWin) root.appWin.setPreferredAppMode(true)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isMacOS
+                        text: qsTr("Prefer light")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.setPreferredAppMode(false)
+                    }
+                }
+            }
+        }
+
         Text {
             id: shellEventLabel
-            visible: false
-            text: "-"
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            text: qsTr("Shell event: —")
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.bodySmall.size
+            font.family: Md3Theme.typography.fontFamily
         }
-
         Connections {
             target: root.appWin && root.appWin.windowNative ? root.appWin.windowNative : nativeHelper
             function onThumbBarButtonClicked(buttonId) {
-                shellEventLabel.text = qsTr("ThumbBar #%1").arg(buttonId)
+                shellEventLabel.text = qsTr("Shell event: ThumbBar #%1").arg(buttonId)
             }
             function onTrayActivated(reason) {
-                shellEventLabel.text = qsTr("Tray reason=%1").arg(reason)
+                shellEventLabel.text = qsTr("Shell event: tray reason=%1").arg(reason)
             }
             function onDpiChanged(dpr, dpi) {
-                shellEventLabel.text = qsTr("DPI dpr=%1 dpi=%2").arg(dpr).arg(dpi)
+                shellEventLabel.text = qsTr("Shell event: dpr=%1 dpi=%2").arg(dpr).arg(dpi)
             }
         }
 
@@ -693,15 +852,10 @@ Flickable {
             text: {
                 const dpr = root.appWin ? root.appWin.windowDpr : nativeHelper.devicePixelRatio(Window.window)
                 const dpi = root.appWin ? root.appWin.windowDpi : nativeHelper.windowDpi(Window.window)
-                const accent = Md3WindowCapabilities.systemAccent
-                        ? nativeHelper.systemAccentColor() : "-"
-                return "platform=" + Md3WindowCapabilities.platformId
-                      + "  wayland=" + (nativeHelper.wayland ? "1" : "0")
+                return "runtime=" + Md3WindowCapabilities.platformId
+                      + "  tab=" + ["windows", "linux", "macos"][root.platformTab]
                       + "  dpr=" + Number(dpr).toFixed(2)
                       + "  dpi=" + dpi
-                      + "  accent=" + accent
-                      + "  dockProgress=" + Md3WindowCapabilities.taskbarProgress
-                      + "  tray=" + Md3WindowCapabilities.systemTray
             }
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.family: Md3Theme.typography.fontFamily
