@@ -296,6 +296,15 @@ install(CODE "
 
 # Build-tree helper package (add_subdirectory remains a valid integration path)
 include(CMakePackageConfigHelpers)
+
+# Consumers of a static package must also link KF WindowSystem when we built with it
+set(MD3_PACKAGE_NEEDS_KWINDOWSYSTEM 0)
+if (UNIX AND NOT APPLE)
+    if (KF6WindowSystem_FOUND OR KF5WindowSystem_FOUND)
+        set(MD3_PACKAGE_NEEDS_KWINDOWSYSTEM 1)
+    endif()
+endif()
+
 configure_package_config_file(
     ${MD3_ROOT}/cmake/Md3Config.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/Md3Config.cmake

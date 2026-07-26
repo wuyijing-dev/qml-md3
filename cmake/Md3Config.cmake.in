@@ -6,6 +6,8 @@ if (UNIX AND NOT APPLE)
     find_dependency(Qt6 COMPONENTS Widgets DBus REQUIRED)
 endif()
 
+# Recorded at package time: static libMd3 may reference KWindowEffects / KX11Extras
+set(_MD3_NEEDS_KWINDOWSYSTEM @MD3_PACKAGE_NEEDS_KWINDOWSYSTEM@)
 set(_MD3_PREFIX "${PACKAGE_PREFIX_DIR}")
 set(_MD3_LIBDIR "${_MD3_PREFIX}/@CMAKE_INSTALL_LIBDIR@")
 set(_MD3_INCLUDEDIR "${_MD3_PREFIX}/@CMAKE_INSTALL_INCLUDEDIR@")
@@ -52,13 +54,43 @@ if (NOT TARGET Md3::Md3)
     if (UNIX AND NOT APPLE)
         set_property(TARGET Md3::Md3 APPEND PROPERTY
             INTERFACE_LINK_LIBRARIES Qt6::Widgets Qt6::DBus)
+        if (_MD3_NEEDS_KWINDOWSYSTEM)
+            find_package(KF6WindowSystem QUIET)
+            if (KF6WindowSystem_FOUND)
+                set_property(TARGET Md3::Md3 APPEND PROPERTY
+                    INTERFACE_LINK_LIBRARIES KF6::WindowSystem)
+            else()
+                find_package(KF5WindowSystem QUIET)
+                if (KF5WindowSystem_FOUND)
+                    set_property(TARGET Md3::Md3 APPEND PROPERTY
+                        INTERFACE_LINK_LIBRARIES KF5::WindowSystem)
+                else()
+                    message(FATAL_ERROR
+                        "This Md3 package was built with KDE WindowSystem, but "
+                        "KF6WindowSystem/KF5WindowSystem was not found. "
+                        "Install libkf6windowsystem-dev (or rebuild Md3 without KF).")
+                endif()
+            endif()
+        else()
+            # Best-effort: if KF is present, link it (harmless if unused)
+            find_package(KF6WindowSystem QUIET)
+            if (KF6WindowSystem_FOUND)
+                set_property(TARGET Md3::Md3 APPEND PROPERTY
+                    INTERFACE_LINK_LIBRARIES KF6::WindowSystem)
+            else()
+                find_package(KF5WindowSystem QUIET)
+                if (KF5WindowSystem_FOUND)
+                    set_property(TARGET Md3::Md3 APPEND PROPERTY
+                        INTERFACE_LINK_LIBRARIES KF5::WindowSystem)
+                endif()
+            endif()
+        endif()
     endif()
     if (WIN32)
         set_property(TARGET Md3::Md3 APPEND PROPERTY
             INTERFACE_LINK_LIBRARIES dwmapi shell32 shlwapi ole32 propsys advapi32)
     endif()
 endif()
-
 if (NOT TARGET Md3)
     add_library(Md3 ALIAS Md3::Md3)
 endif()
