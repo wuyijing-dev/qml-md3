@@ -100,20 +100,28 @@ bool Md3WindowHelper::name() const \
     return platformId() == QLatin1String("windows"); \
 }
 
+#define MD3_WIN_OR_LINUX_CAP(name) \
+bool Md3WindowHelper::name() const \
+{ \
+    const QString id = platformId(); \
+    return id == QLatin1String("windows") || id == QLatin1String("linux"); \
+}
+
 MD3_WIN_ONLY_CAP(snapLayoutsSupported)
-MD3_WIN_ONLY_CAP(systemMenuSupported)
-MD3_WIN_ONLY_CAP(taskbarProgressSupported)
-MD3_WIN_ONLY_CAP(taskbarOverlaySupported)
+MD3_WIN_OR_LINUX_CAP(systemMenuSupported)
+MD3_WIN_OR_LINUX_CAP(taskbarProgressSupported)
+MD3_WIN_OR_LINUX_CAP(taskbarOverlaySupported)
 MD3_WIN_ONLY_CAP(jumpListSupported)
 MD3_WIN_ONLY_CAP(thumbBarSupported)
 MD3_WIN_ONLY_CAP(iconicThumbnailSupported)
-MD3_WIN_ONLY_CAP(perMonitorDpiV2Supported)
+MD3_WIN_OR_LINUX_CAP(perMonitorDpiV2Supported)
 MD3_WIN_ONLY_CAP(thumbnailClipSupported)
-MD3_WIN_ONLY_CAP(applicationRestartSupported)
-MD3_WIN_ONLY_CAP(windowCloakSupported)
-MD3_WIN_ONLY_CAP(systemTraySupported)
+MD3_WIN_OR_LINUX_CAP(applicationRestartSupported)
+MD3_WIN_OR_LINUX_CAP(windowCloakSupported)
+MD3_WIN_OR_LINUX_CAP(systemTraySupported)
 
 #undef MD3_WIN_ONLY_CAP
+#undef MD3_WIN_OR_LINUX_CAP
 
 bool Md3WindowHelper::systemBackdropSupported() const
 {

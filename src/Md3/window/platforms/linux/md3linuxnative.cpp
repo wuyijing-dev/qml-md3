@@ -1,14 +1,17 @@
 #include "md3windowhelper.h"
+#include "md3linux_p.h"
 
 #include <QGuiApplication>
+#include <QHash>
 #include <QIcon>
+#include <QMenu>
 #include <QProcess>
 #include <QQuickWindow>
 #include <QScreen>
 #include <QStyleHints>
 #include <QWindow>
 
-// Linux / Wayland / X11 — compiled only via CMake on UNIX && !APPLE.
+// Linux / Wayland / X11 — CMake UNIX && !APPLE only.
 
 namespace {
 
@@ -24,12 +27,40 @@ QString readProcessTrimmed(const QString &program, const QStringList &args)
     return QString::fromUtf8(p.readAllStandardOutput()).trimmed();
 }
 
+Qt::WindowStates toggleMaximized(QWindow *qw)
+{
+    if (!qw)
+        return {};
+    if (qw->windowStates() & Qt::WindowMaximized)
+        qw->showNormal();
+    else
+        qw->showMaximized();
+    return qw->windowStates();
+}
+
 } // namespace
 
-void Md3WindowHelper::shutdownNative() {}
+void Md3WindowHelper::shutdownNative()
+{
+    hideSystemTrayIcon();
+}
 
-void Md3WindowHelper::bindWindow(QObject *) {}
+void Md3WindowHelper::bindWindow(QObject *window)
+{
+    auto *qw = qobject_cast<QWindow *>(window);
+    if (!qw)
+        return;
+    // Wayland app_id / XDG desktop file — groups taskbar entry with .desktop.
+    if (!QGuiApplication::desktopFileName().isEmpty())
+        Md3Linux::setDesktopFileId(QGuiApplication::desktopFileName());
+    else if (!QGuiApplication::applicationName().isEmpty())
+        Md3Linux::setDesktopFileId(QGuiApplication::applicationName());
+    applyCornerPreference(qw, true);
+    qw->requestActivate();
+}
+
 void Md3WindowHelper::unbindWindow(QObject *) {}
+
 void Md3WindowHelper::setMaximizeButtonRect(QObject *, qreal, qreal, qreal, qreal) {}
 void Md3WindowHelper::clearMaximizeButtonRect(QObject *) {}
 void Md3WindowHelper::setCaptionHitRect(QObject *, qreal, qreal, qreal, qreal) {}
@@ -42,7 +73,28 @@ void Md3WindowHelper::applyCornerPreference(QObject *window, bool rounded)
         qw->setProperty("_md3_cornerRounded", rounded);
 }
 
-void Md3WindowHelper::showSystemMenu(QObject *, qreal, qreal) {}
+void Md3WindowHelper::showSystemMenu(QObject *window, qreal globalX, qreal globalY)
+{
+    auto *qw = qobject_cast<QWindow *>(window);
+    if (!qw)
+        return;
+
+    QMenu menu;
+    menu.addAction(QObject::tr("Minimize"), qw, [qw] { qw->showMinimized(); });
+    const bool maximized = qw->windowStates() & Qt::WindowMaximized;
+    menu.addAction(maximized ? QObject::tr("Restore") : QObject::tr("Maximize"),
+                   qw, [qw] { toggleMaximized(qw); });
+    menu.addSeparator();
+    QAction *pin = menu.addAction(QObject::tr("Always on Top"));
+    pin->setCheckable(true);
+    pin->setChecked(qw->flags() & Qt::WindowStaysOnTopHint);
+    QObject::connect(pin, &QAction::toggled, qw, [qw](bool on) {
+        qw->setFlag(Qt::WindowStaysOnTopHint, on);
+    });
+    menu.addSeparator();
+    menu.addAction(QObject::tr("Close"), qw, [qw] { qw->close(); });
+    menu.exec(QPoint(qRound(globalX), qRound(globalY)));
+}
 
 void Md3WindowHelper::setImmersiveDarkMode(QObject *window, bool dark)
 {
@@ -57,17 +109,45 @@ void Md3WindowHelper::setSystemBackdrop(QObject *window, int backdrop)
     if (!qw)
         return;
     qw->setProperty("_md3_waylandBackdrop", backdrop);
-    if (backdrop > 0) {
-        if (auto *quick = qobject_cast<QQuickWindow *>(qw))
+    const bool soft = backdrop > 0;
+    Md3Linux::applyBlurHint(qw, soft);
+    if (auto *quick = qobject_cast<QQuickWindow *>(qw)) {
+        if (soft)
             quick->setColor(Qt::transparent);
     }
 }
 
-void Md3WindowHelper::setBorderColor(QObject *, const QString &) {}
-void Md3WindowHelper::setCaptionTextColor(QObject *, const QString &) {}
-void Md3WindowHelper::setExcludedFromPeek(QObject *, bool) {}
-void Md3WindowHelper::setDisallowPeek(QObject *, bool) {}
-void Md3WindowHelper::setExcludeFromCapture(QObject *, bool) {}
+void Md3WindowHelper::setBorderColor(QObject *window, const QString &cssColor)
+{
+    if (auto *qw = qobject_cast<QWindow *>(window))
+        qw->setProperty("_md3_borderColor", cssColor);
+}
+
+void Md3WindowHelper::setCaptionTextColor(QObject *window, const QString &cssColor)
+{
+    if (auto *qw = qobject_cast<QWindow *>(window))
+        qw->setProperty("_md3_captionTextColor", cssColor);
+}
+
+void Md3WindowHelper::setExcludedFromPeek(QObject *window, bool excluded)
+{
+    // No peek protocol on Wayland; stash for potential compositor-specific hooks.
+    if (auto *qw = qobject_cast<QWindow *>(window))
+        qw->setProperty("_md3_excludePeek", excluded);
+}
+
+void Md3WindowHelper::setDisallowPeek(QObject *window, bool disallow)
+{
+    if (auto *qw = qobject_cast<QWindow *>(window))
+        qw->setProperty("_md3_disallowPeek", disallow);
+}
+
+void Md3WindowHelper::setExcludeFromCapture(QObject *window, bool exclude)
+{
+    // Wayland has no portable exclude-from-capture; keep as hint for portals/extensions.
+    if (auto *qw = qobject_cast<QWindow *>(window))
+        qw->setProperty("_md3_excludeFromCapture", exclude);
+}
 
 void Md3WindowHelper::setAlwaysOnTop(QObject *window, bool onTop)
 {
@@ -75,7 +155,15 @@ void Md3WindowHelper::setAlwaysOnTop(QObject *window, bool onTop)
         qw->setFlag(Qt::WindowStaysOnTopHint, onTop);
 }
 
-void Md3WindowHelper::setWindowCloaked(QObject *, bool) {}
+void Md3WindowHelper::setWindowCloaked(QObject *window, bool cloaked)
+{
+    auto *qw = qobject_cast<QWindow *>(window);
+    if (!qw)
+        return;
+    // Opacity cloak keeps the surface mapped (closer to Win cloak than hide()).
+    qw->setOpacity(cloaked ? 0.0 : 1.0);
+    qw->setProperty("_md3_cloaked", cloaked);
+}
 
 void Md3WindowHelper::setPreferredAppMode(bool dark)
 {
@@ -94,6 +182,21 @@ QString Md3WindowHelper::systemAccentColor() const
     if (v.startsWith(QLatin1Char('#')) && v.size() >= 7)
         return v.left(7);
 
+    // GNOME 46+ may return named accents — map a few common ones.
+    static const QHash<QString, QString> named{
+        {QStringLiteral("blue"), QStringLiteral("#3584e4")},
+        {QStringLiteral("teal"), QStringLiteral("#2190a4")},
+        {QStringLiteral("green"), QStringLiteral("#3a944a")},
+        {QStringLiteral("yellow"), QStringLiteral("#c88800")},
+        {QStringLiteral("orange"), QStringLiteral("#ed5b00")},
+        {QStringLiteral("red"), QStringLiteral("#e62d42")},
+        {QStringLiteral("pink"), QStringLiteral("#d56199")},
+        {QStringLiteral("purple"), QStringLiteral("#9141ac")},
+        {QStringLiteral("slate"), QStringLiteral("#6f8396")},
+    };
+    if (named.contains(v))
+        return named.value(v);
+
     const QString kde = readProcessTrimmed(
         QStringLiteral("kreadconfig5"),
         {QStringLiteral("--file"), QStringLiteral("kdeglobals"),
@@ -101,6 +204,22 @@ QString Md3WindowHelper::systemAccentColor() const
          QStringLiteral("--key"), QStringLiteral("AccentColor")});
     if (kde.contains(QLatin1Char(','))) {
         const QStringList parts = kde.split(QLatin1Char(','));
+        if (parts.size() >= 3) {
+            return QStringLiteral("#%1%2%3")
+                .arg(parts[0].trimmed().toInt(), 2, 16, QLatin1Char('0'))
+                .arg(parts[1].trimmed().toInt(), 2, 16, QLatin1Char('0'))
+                .arg(parts[2].trimmed().toInt(), 2, 16, QLatin1Char('0'));
+        }
+    }
+
+    // Plasma 6
+    const QString kde6 = readProcessTrimmed(
+        QStringLiteral("kreadconfig6"),
+        {QStringLiteral("--file"), QStringLiteral("kdeglobals"),
+         QStringLiteral("--group"), QStringLiteral("General"),
+         QStringLiteral("--key"), QStringLiteral("AccentColor")});
+    if (kde6.contains(QLatin1Char(','))) {
+        const QStringList parts = kde6.split(QLatin1Char(','));
         if (parts.size() >= 3) {
             return QStringLiteral("#%1%2%3")
                 .arg(parts[0].trimmed().toInt(), 2, 16, QLatin1Char('0'))
@@ -130,6 +249,7 @@ bool Md3WindowHelper::moveToMonitor(QObject *window, int monitorIndex)
     QScreen *screen = screens.at(monitorIndex);
     const QRect ag = screen->availableGeometry();
     qw->setScreen(screen);
+    // Wayland compositors may ignore absolute positioning; still request it.
     qw->setPosition(ag.x() + (ag.width() - qw->width()) / 2,
                     ag.y() + (ag.height() - qw->height()) / 2);
     return true;
@@ -139,45 +259,21 @@ void Md3WindowHelper::flashTaskbar(QObject *window, bool flash)
 {
     if (auto *qw = qobject_cast<QWindow *>(window))
         qw->alert(flash ? 0 : -1);
+    QVariantMap props;
+    props.insert(QStringLiteral("urgent"), flash);
+    Md3Linux::emitLauncherUpdate(props);
 }
-
-bool Md3WindowHelper::setAppUserModelId(const QString &) { return false; }
-void Md3WindowHelper::setTaskbarProgress(QObject *, qreal, int) {}
-void Md3WindowHelper::clearTaskbarProgress(QObject *) {}
-bool Md3WindowHelper::setTaskbarOverlayIcon(QObject *, const QUrl &, const QString &) { return false; }
-void Md3WindowHelper::clearTaskbarOverlayIcon(QObject *) {}
-void Md3WindowHelper::setThumbnailClip(QObject *, qreal, qreal, qreal, qreal) {}
-void Md3WindowHelper::clearThumbnailClip(QObject *) {}
-void Md3WindowHelper::setThumbnailTooltip(QObject *, const QString &) {}
-bool Md3WindowHelper::registerApplicationRestart(const QString &) { return false; }
-void Md3WindowHelper::unregisterApplicationRestart() {}
-bool Md3WindowHelper::setJumpListTasks(const QVariantList &) { return false; }
-void Md3WindowHelper::clearJumpList() {}
-bool Md3WindowHelper::setThumbBarButtons(QObject *, const QVariantList &) { return false; }
-void Md3WindowHelper::clearThumbBarButtons(QObject *) {}
-void Md3WindowHelper::setForceIconicRepresentation(QObject *, bool) {}
-bool Md3WindowHelper::setIconicThumbnail(QObject *, const QUrl &) { return false; }
-void Md3WindowHelper::clearIconicThumbnail(QObject *) {}
 
 bool Md3WindowHelper::setWindowIcon(QObject *window, const QUrl &iconUrl)
 {
     auto *qw = qobject_cast<QWindow *>(window);
     if (!qw || !iconUrl.isValid())
         return false;
-    QString path = iconUrl.toLocalFile();
-    if (path.isEmpty()) {
-        if (iconUrl.scheme() == QLatin1String("qrc"))
-            path = QLatin1Char(':') + iconUrl.path();
-        else
-            path = iconUrl.toString();
-    }
+    const QString path = Md3Linux::resolveIconPath(iconUrl);
     const QIcon icon(path);
     if (icon.isNull())
         return false;
     qw->setIcon(icon);
+    QGuiApplication::setWindowIcon(icon);
     return true;
 }
-
-bool Md3WindowHelper::showSystemTrayIcon(QObject *, const QUrl &, const QString &) { return false; }
-void Md3WindowHelper::hideSystemTrayIcon() {}
-bool Md3WindowHelper::showTrayNotification(const QString &, const QString &, int) { return false; }

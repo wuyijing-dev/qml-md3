@@ -167,14 +167,16 @@ Capability: `Md3WindowCapabilities.snapLayouts` / `captionHitTest` / `systemMenu
 | `roundedCorners` | yes | yes | yes | no |
 | `systemMove` / resize | yes | yes | yes | no |
 | `snapLayouts` | **yes** | — | — | — |
-| `captionHitTest` | **yes** | — | — | — |
-| `systemMenu` | **yes** | — | — | — |
-| `immersiveDarkMode` | **yes** | — | — | — |
-| `systemBackdrop` | **yes** (opt-in) | — | — | — |
-| `taskbarProgress` / overlay | **yes** | — | — | — |
+| `captionHitTest` | **yes** | — | **yes** (CSD) | — |
+| `systemMenu` | **yes** | — | **yes** (QMenu) | — |
+| `immersiveDarkMode` | **yes** | **yes** | **yes** | — |
+| `systemBackdrop` | **yes** (opt-in) | soft | **yes** (blur hint) | — |
+| `taskbarProgress` / overlay | **yes** | — | **yes** (Unity/Plasma) | — |
 | `peekControl` / `excludeFromCapture` | **yes** | — | — | — |
-| `jumpList` / `thumbBar` / tray / iconic | **yes** | — | — | — |
-| `perMonitorDpiV2` | **yes** | — | — | — |
+| `jumpList` / `thumbBar` / iconic | **yes** | — | — | — |
+| `systemTray` | **yes** | — | **yes** (SNI) | — |
+| `alwaysOnTop` / cloak / accent | **yes** | partial | **yes** | — |
+| `perMonitorDpiV2` | **yes** | — | **yes** (fractional) | — |
 
 Radius is **0 while maximized/fullscreen**.
 

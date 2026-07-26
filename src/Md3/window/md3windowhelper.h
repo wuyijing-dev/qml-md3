@@ -189,5 +189,7 @@ private:
     void handleDpiChanged(QWindow *window);
     bool respondIconicThumbnail(void *hwnd, int width, int height);
     bool respondIconicLivePreview(void *hwnd);
+#elif defined(Q_OS_LINUX)
+    void *m_linuxTray = nullptr; // QSystemTrayIcon*
 #endif
 };

@@ -155,8 +155,15 @@ elseif (APPLE)
     )
 elseif (UNIX)
     list(APPEND MD3_PLATFORM_SOURCES
+        src/Md3/window/platforms/linux/md3linux_p.h
+        src/Md3/window/platforms/linux/md3linux_dbus.cpp
         src/Md3/window/platforms/linux/md3linuxnative.cpp
+        src/Md3/window/platforms/linux/md3linuxdock.cpp
+        src/Md3/window/platforms/linux/md3linuxtray.cpp
     )
+    target_include_directories(Md3 PRIVATE src/Md3/window/platforms/linux)
+    find_package(Qt6 REQUIRED COMPONENTS DBus Widgets)
+    target_link_libraries(Md3 PRIVATE Qt6::DBus Qt6::Widgets)
 else()
     list(APPEND MD3_PLATFORM_SOURCES
         src/Md3/window/platforms/mobile/md3mobilenative.cpp
@@ -239,6 +246,8 @@ target_include_directories(appQML_MD3 PRIVATE gallery src/Md3/window)
 target_link_libraries(appQML_MD3 PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::QuickEffects Md3)
 if (WIN32)
     target_link_libraries(appQML_MD3 PRIVATE shell32 psapi)
+elseif (UNIX AND NOT APPLE)
+    target_link_libraries(appQML_MD3 PRIVATE Qt6::Widgets Qt6::DBus)
 endif()
 
 include(GNUInstallDirs)

@@ -183,20 +183,20 @@ Flickable {
         }
 
         Text {
-            visible: Md3WindowCapabilities.isWindows
-            text: qsTr("Windows native (live)")
+            visible: Md3WindowCapabilities.systemBackdrop || Md3WindowCapabilities.immersiveDarkMode
+            text: qsTr("Native window (live)")
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.titleSmall.size
         }
 
         Text {
-            visible: Md3WindowCapabilities.isWindows
+            visible: Md3WindowCapabilities.systemBackdrop || Md3WindowCapabilities.immersiveDarkMode
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             text: root.appWin
-                  ? qsTr("Bound window OK — backdrop=%1 border=\"%2\"")
+                  ? qsTr("Bound window OK — platform=%1 backdrop=%2")
+                        .arg(Md3WindowCapabilities.platformId)
                         .arg(root.appWin.systemBackdrop)
-                        .arg(root.appWin.nativeBorderColor)
                   : qsTr("Window not bound — controls disabled")
             color: root.appWin ? Md3Theme.colorScheme.primary : Md3Theme.colorScheme.error
             font.family: Md3Theme.typography.fontFamily
@@ -206,7 +206,7 @@ Flickable {
         RowLayout {
             Layout.fillWidth: true
             spacing: 12
-            visible: Md3WindowCapabilities.isWindows && root.appWin
+            visible: Md3WindowCapabilities.immersiveDarkMode && root.appWin
 
             Md3Switch {
                 checked: root.appWin.syncImmersiveDarkMode
@@ -226,14 +226,16 @@ Flickable {
         }
 
         Text {
-            visible: Md3WindowCapabilities.isWindows
-            text: qsTr("System backdrop (Win11)")
+            visible: Md3WindowCapabilities.systemBackdrop
+            text: Md3WindowCapabilities.isWindows
+                  ? qsTr("System backdrop (Win11)")
+                  : qsTr("System backdrop (soft / blur hint)")
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.labelLarge.size
         }
 
         Md3ButtonGroup {
-            visible: Md3WindowCapabilities.isWindows
+            visible: Md3WindowCapabilities.systemBackdrop
             Layout.fillWidth: true
             layout: Md3ButtonGroup.Connected
             variant: Md3ButtonGroup.Outlined

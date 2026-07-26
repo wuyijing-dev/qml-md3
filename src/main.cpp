@@ -1,4 +1,10 @@
-#include <QGuiApplication>
+#include "md3graphics.h"
+
+#if defined(Q_OS_LINUX)
+#  include <QApplication>
+#else
+#  include <QGuiApplication>
+#endif
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
 #include <QQuickWindow>
@@ -8,8 +14,6 @@
 #include <QDir>
 #include <QTextStream>
 #include <QDebug>
-
-#include "md3graphics.h"
 
 #if defined(Q_OS_WIN)
 #  include <windows.h>
@@ -131,7 +135,13 @@ int main(int argc, char *argv[])
     // RHI backend + alpha buffer — must run before QGuiApplication / first QQuickWindow.
     Md3Graphics::applyEarly(argc, argv);
 
+#if defined(Q_OS_LINUX)
+    // QApplication required for QSystemTrayIcon / QMenu (Wayland SNI + CSD system menu).
+    QApplication app(argc, argv);
+    QGuiApplication::setDesktopFileName(QStringLiteral("appQML_MD3"));
+#else
     QGuiApplication app(argc, argv);
+#endif
     QCoreApplication::setOrganizationName(QStringLiteral("QML_MD3"));
     QCoreApplication::setApplicationName(QStringLiteral("Md3 Gallery"));
     QCoreApplication::setApplicationVersion(QStringLiteral("0.1.0"));
