@@ -106,6 +106,8 @@ target_link_libraries(appQML_MD3 PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::Qui
 if (TARGET Md3plugin)
     target_link_libraries(appQML_MD3 PRIVATE Md3plugin)
 endif()
+# Pull in static qml plugin + resource init objects (fonts, qmldir, …)
+qt_import_qml_plugins(appQML_MD3)
 if (WIN32)
     target_link_libraries(appQML_MD3 PRIVATE shell32 psapi)
 elseif (UNIX AND NOT APPLE)

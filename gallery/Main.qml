@@ -19,22 +19,7 @@ Md3ApplicationWindow {
     navigationRail: true
     railExpanded: false
     railHeader: qsTr("组件图库")
-    // Best combo: small L1 + big L2 + predict(L2) + leave snapshot + idle L2 warm
-    pageCacheMode: "arc"
-    pageCacheLimit: 2
-    pageIdleTrimMs: 12000
-    pagePrefetch: false
-    pagePredictPrefetch: true
-    pageL2Cache: true
-    pageL2CacheLimit: 24
-    pageL2Warm: true
-    pageLeaveSnapshot: true
-    pageWarmStart: false
-    pageAsync: true
     pagePadding: 20
-    pageSkeleton: false
-    pageTransition: "fade"
-    pageTransitionDuration: 280
 
     // Document tabs under the title bar (no browserChrome / no tear-off window)
     documentTabsEnabled: true

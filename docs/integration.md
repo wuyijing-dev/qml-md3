@@ -130,7 +130,7 @@ Md3Theme.textScale = 1.25
 
 ## Fonts
 
-Roboto + Material Icons ship in the Md3 module qrc. Prefer **`Md3::run` / `Md3::initialize`**. Manual path: `:/qt/qml/Md3/resources/fonts/`.
+HarmonyOS Sans SC + Material Icons ship in the Md3 module qrc. Prefer **`Md3::run` / `Md3::initialize`**. Manual path: `:/qt/qml/Md3/resources/fonts/`.
 
 ## Options
 

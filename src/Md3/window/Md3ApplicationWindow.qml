@@ -48,33 +48,24 @@ Window {
     property bool railExpanded: false
     property string railHeader: ""
     /// "none" | "one" | "lru" | "all" | "adaptive" | "arc"
-    /// Best combo default: arc + small L1 + L2 + predict(L2) + leave snapshot
+    /// Library default: arc + L1=1 + small L2 (snappy, low RSS). Override only if needed.
     property string pageCacheMode: "arc"
-    property int pageCacheLimit: 2
-    /// Idle time before adaptive/arc mode drops to a single resident page
-    property int pageIdleTrimMs: 12000
+    property int pageCacheLimit: 1
+    property int pageIdleTrimMs: 8000
     property real pagePadding: 20
-    /// Prefetch ±1 neighbors into L1 (Item) — off in best combo (use L2 instead)
     property bool pagePrefetch: false
-    /// Markov + rail-hover → L2 Component only
     property bool pagePredictPrefetch: true
-    /// Keep compiled QQmlComponent after Item teardown
     property bool pageL2Cache: true
-    property int pageL2CacheLimit: 24
-    /// After startup, compile all destination Components in the background
-    property bool pageL2Warm: true
-    /// Freeze leaving page while cold target loads
-    property bool pageLeaveSnapshot: true
+    property int pageL2CacheLimit: 6
+    /// Off: never precompile every destination Component
+    property bool pageL2Warm: false
+    property bool pageLeaveSnapshot: false
     property bool pageAsync: true
-    /// Background-warm all destinations as Items (off — high memory)
     property bool pageWarmStart: false
-    /// Resolve relative destination sources against this URL (Gallery: Qt.resolvedUrl("."))
     property url pageSourceBase: ""
-    /// "none" | "fade" | "slide" | "slideUp" | "fadeThrough" | "scale"
     property string pageTransition: "fade"
-    property int pageTransitionDuration: Md3Motion.spatialDuration
-    /// Show Md3SkeletonPane while a destination loads
-    property bool pageSkeleton: true
+    property int pageTransitionDuration: 120
+    property bool pageSkeleton: false
     property alias pageHost: windowBody.pageHost
 
     // --- Document tabs (under title bar; no tear-off window) ---

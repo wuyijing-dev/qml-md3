@@ -9,16 +9,34 @@ Text {
     // "filled" (default; reliable TTF ligatures) | "outlined"
     property string variant: "filled"
 
+    // Explicit qrc FontLoader — does not rely on loadFonts() timing.
+    FontLoader {
+        id: filledLoader
+        source: "qrc:/md3/fonts/resources/fonts/MaterialIcons-Regular.ttf"
+    }
+    FontLoader {
+        id: outlinedLoader
+        source: "qrc:/md3/fonts/resources/fonts/MaterialIconsOutlined-Regular.otf"
+    }
+
+    readonly property string resolvedFamily: {
+        if (variant === "outlined") {
+            if (outlinedLoader.status === FontLoader.Ready)
+                return outlinedLoader.name
+            return Md3Theme.typography.iconFontFamilyOutlined
+        }
+        if (filledLoader.status === FontLoader.Ready)
+            return filledLoader.name
+        return Md3Theme.typography.iconFontFamily
+    }
+
     text: ligatureFor(icon)
     color: iconColor
     font.pixelSize: size
-    // Prefer filled Material Icons (TTF ligatures are reliable in Qt);
-    // Outlined OTF is optional via variant: "outlined".
-    font.family: variant === "outlined"
-                 ? Md3Theme.typography.iconFontFamilyOutlined
-                 : Md3Theme.typography.iconFontFamily
+    font.family: resolvedFamily
     font.weight: Font.Normal
     font.hintingPreference: Font.PreferFullHinting
+    font.preferShaping: true
     renderType: Text.QtRendering
     horizontalAlignment: Text.AlignHCenter
     verticalAlignment: Text.AlignVCenter

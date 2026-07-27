@@ -17,15 +17,13 @@ Flickable {
         Text {
             text: "Design tokens"
             color: Md3Theme.colorScheme.colorOnSurface
-            font.family: Md3Theme.typography.fontFamily
-            font.pixelSize: Md3Theme.typography.headlineMedium.size
+            Component.onCompleted: Md3Theme.typography.applyTo(this, "headlineMedium")
         }
 
         Text {
             text: "Color roles"
             color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.titleMedium.size
-            font.weight: Font.Medium
+            Component.onCompleted: Md3Theme.typography.applyTo(this, "titleMedium")
         }
 
         Flow {
@@ -57,7 +55,7 @@ Flickable {
                         text: modelData.name
                         color: modelData.on
                         font.pixelSize: 11
-                        font.family: Md3Theme.typography.fontFamily
+                        Component.onCompleted: Md3Theme.typography.applyUiFont(this)
                     }
                 }
             }
@@ -66,8 +64,7 @@ Flickable {
         Text {
             text: "Typography"
             color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.titleMedium.size
-            font.weight: Font.Medium
+            Component.onCompleted: Md3Theme.typography.applyTo(this, "titleMedium")
         }
 
         Column {
@@ -84,8 +81,7 @@ Flickable {
                     required property var modelData
                     text: modelData.role + " — The quick brown fox"
                     color: Md3Theme.colorScheme.colorOnSurface
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: modelData.size
+                    Component.onCompleted: Md3Theme.typography.applyTo(this, modelData.role)
                 }
             }
         }
@@ -93,8 +89,7 @@ Flickable {
         Text {
             text: "Shape scale"
             color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.titleMedium.size
-            font.weight: Font.Medium
+            Component.onCompleted: Md3Theme.typography.applyTo(this, "titleMedium")
         }
 
         Row {
@@ -118,6 +113,7 @@ Flickable {
                         text: modelData.name
                         color: Md3Theme.colorScheme.colorOnPrimaryContainer
                         font.pixelSize: 12
+                        Component.onCompleted: Md3Theme.typography.applyUiFont(this)
                     }
                 }
             }

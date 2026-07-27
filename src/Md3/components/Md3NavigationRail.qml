@@ -103,8 +103,7 @@ Rectangle {
             Text {
                 text: qsTr("Menu")
                 opacity: root.expanded ? 1 : 0
-                visible: opacity > 0.02
-                width: root.expanded ? implicitWidth : 0
+                visible: root.expanded
                 color: Md3Theme.colorScheme.colorOnSurface
                 font.family: Md3Theme.typography.fontFamily
                 font.pixelSize: Md3Theme.typography.labelLarge.size
@@ -146,8 +145,7 @@ Rectangle {
 
             Text {
                 opacity: root.expanded && root.headerLabel.length > 0 ? 1 : 0
-                visible: opacity > 0.01
-                height: opacity > 0.01 ? implicitHeight : 0
+                visible: root.expanded && root.headerLabel.length > 0
                 width: parent.width
                 text: root.headerLabel
                 leftPadding: 16

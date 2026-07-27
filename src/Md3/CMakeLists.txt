@@ -24,9 +24,9 @@ endif()
 set(_md3_font_dir "${CMAKE_CURRENT_SOURCE_DIR}/resources/fonts")
 file(MAKE_DIRECTORY "${_md3_font_dir}")
 set(MD3_FONT_NAMES
-    Roboto-Regular.ttf
-    Roboto-Medium.ttf
-    Roboto-Bold.ttf
+    HarmonyOS_SansSC_Regular.ttf
+    HarmonyOS_SansSC_Medium.ttf
+    HarmonyOS_SansSC_Bold.ttf
     MaterialIcons-Regular.ttf
     MaterialIconsOutlined-Regular.otf
 )
@@ -48,6 +48,16 @@ else()
     qt_add_library(Md3 STATIC)
 endif()
 
+# Dedicated font qrc (not only via qt_add_qml_module). Static MSVC links can drop
+# qml-module resource inits; Q_INIT_RESOURCE(md3_fonts) in loadFonts() is reliable.
+# Paths: :/md3/fonts/resources/fonts/HarmonyOS_SansSC_Regular.ttf …
+# (Avoid BASE=: Qt Creator MSVC finalize resolves basenames under src/Md3/.)
+qt_add_resources(Md3 "md3_fonts"
+    PREFIX "/md3/fonts"
+    BIG_RESOURCES
+    FILES
+        ${MD3_FONT_FILES}
+)
 if (NOT TARGET Md3::Md3)
     add_library(Md3::Md3 ALIAS Md3)
 endif()

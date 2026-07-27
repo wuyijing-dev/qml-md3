@@ -9,24 +9,24 @@ Item {
     property bool railVisible: true
     property bool railExpanded: false
     property string railHeader: ""
-    property string cacheMode: "lru"
-    property int cacheLimit: 4
-    property int idleTrimMs: 45000
+    property string cacheMode: "arc"
+    property int cacheLimit: 1
+    property int idleTrimMs: 8000
     property real contentPadding: 20
     property url sourceBase: ""
     property bool asynchronous: true
     property bool prefetchNeighbors: false
     property bool predictPrefetch: true
     property bool l2Components: true
-    property int l2CacheLimit: 16
-    property bool l2WarmIdle: true
-    property bool leaveSnapshot: true
+    property int l2CacheLimit: 6
+    property bool l2WarmIdle: false
+    property bool leaveSnapshot: false
     property bool warmStart: false
     property bool showBusyIndicator: false
-    property bool showSkeleton: true
+    property bool showSkeleton: false
     property string skeletonLayout: "page"
     property string pageTransition: "fade"
-    property int pageTransitionDuration: Md3Motion.spatialDuration
+    property int pageTransitionDuration: 120
     property alias pageHost: host
     property alias rail: rail
 

@@ -10,6 +10,7 @@ import QtQuick.Window
     arc: ARC (recency+frequency+ghost) + cost-aware victim pick; optional idle trim
   - L2: keep compiled Component after Item teardown (cheap warm re-open)
   - Prefetch: ±1 neighbors, Markov next-hop, rail hover hint
+  Defaults tuned for snappy switch + low RSS (L1=1, no full L2 warm-all).
 */
 Item {
     id: root
@@ -17,36 +18,33 @@ Item {
     property var model: []
     property int currentIndex: 0
     property int displayedIndex: 0
-    property string cacheMode: "lru"
-    property int cacheLimit: 4
-    /// Adaptive / arc: milliseconds without navigation before trimming to one page
-    property int idleTrimMs: 45000
-    /// Adaptive / arc: minimum / starting resident pages while idle
+    property string cacheMode: "arc"
+    /// Resident Item pages — keep at 1 for low memory (current only after idle trim)
+    property int cacheLimit: 1
+    /// Adaptive / arc: ms without navigation before trimming to adaptiveCacheMin
+    property int idleTrimMs: 8000
     property int adaptiveCacheMin: 1
     property int _liveCacheLimit: 1
     property bool _adaptivePrefetch: false
     property real contentPadding: 20
     property bool asynchronous: true
     property bool prefetchNeighbors: false
-    /// Keep compiled Components after L1 eviction (re-instantiate without re-parse)
     property bool l2Components: true
-    /// Max L2 Component entries (metadata + bytecode; cheaper than Item trees)
-    property int l2CacheLimit: 16
-    /// Idle: compile all destination Components (no Item) after startup
-    property bool l2WarmIdle: true
-    /// Markov + hover: L2 always; L1 only if prefetchNeighbors
+    /// Few compiled Components — enough for back/forward, not every destination
+    property int l2CacheLimit: 6
+    /// If true, only warm L2 for current ±1 + Markov (never full destination list)
+    property bool l2WarmIdle: false
     property bool predictPrefetch: true
-    /// Freeze leaving page texture while cold target loads (cheap perceived speed)
-    property bool leaveSnapshot: true
+    /// Off by default: ShaderEffectSource holds a full-size GPU texture
+    property bool leaveSnapshot: false
     property bool warmStart: false
     property bool showBusyIndicator: false
-    property bool showSkeleton: true
+    property bool showSkeleton: false
     property string skeletonLayout: "page"
     /// "none" | "fade" | "slide" | "slideUp" | "fadeThrough" | "scale"
     property string pageTransition: "fade"
-    property int pageTransitionDuration: Md3Motion.spatialDuration
+    property int pageTransitionDuration: 120
     property url sourceBase: ""
-    /// Keep slide / fadeThrough transforms inside the page pane (never over the rail).
     clip: true
 
     readonly property var currentItem: {
@@ -92,7 +90,7 @@ Item {
     property int transitionTo: -1
     property int transitionDir: 1
     property real transitionProgress: 1
-    /// Defer enter transition after Loader.Ready so first layout doesn't hitch the anim.
+    /// Defer enter transition after Loader.Ready (unused; kept for API stability).
     property int _pendingShowIndex: -1
     property int _pendingShowPasses: 0
 
@@ -284,7 +282,7 @@ Item {
         _liveCacheLimit = Math.min(cacheLimit, Math.max(adaptiveCacheMin, _liveCacheLimit + 1))
         // Do not auto-inflate L1 neighbors — only explicit prefetchNeighbors.
         _adaptivePrefetch = false
-        idleTrimTimer.interval = Math.max(5000, idleTrimMs)
+        idleTrimTimer.interval = Math.max(2000, idleTrimMs)
         idleTrimTimer.restart()
         generation++
         _evict()
@@ -309,6 +307,10 @@ Item {
         if (!ldr || !ldr.item)
             return
         leaveSnapFade.stop()
+        // Half-res texture: enough for a brief hold, ~4× less GPU memory
+        leaveSnap.textureSize = Qt.size(
+                    Math.max(1, Math.floor(width / 2)),
+                    Math.max(1, Math.floor(height / 2)))
         leaveSnap.sourceItem = ldr
         leaveSnap.scheduleUpdate()
         leaveSnap.opacity = 1
@@ -587,9 +589,12 @@ Item {
                 if (liveUrls[url])
                     continue
                 _l2Order = _listRemove(_l2Order, url)
+                const doomed = _l2Map[url]
                 const next = Object.assign({}, _l2Map)
                 delete next[url]
                 _l2Map = next
+                if (doomed && typeof doomed.destroy === "function")
+                    doomed.destroy()
                 dropped = true
                 break
             }
@@ -624,7 +629,7 @@ Item {
             loader.source = url
     }
 
-    /// Soft-warm: L2 compile always; L1 only when predictive/neighbor prefetch is on.
+    /// Soft-warm: L2 only unless allowL1; never inflates beyond cacheLimit.
     function _warmPage(index, allowL1) {
         if (!model || index < 0 || index >= model.length)
             return
@@ -703,43 +708,13 @@ Item {
         pageAnim.start()
     }
 
-    function _flushPendingShow() {
-        const index = _pendingShowIndex
-        if (index < 0 || index !== currentIndex)
-            return
-        const ldr = _loaderAt(index)
-        if (!ldr || ldr.status !== Loader.Ready || !ldr.item)
-            return
-        if (displayedIndex === index) {
-            _pendingShowIndex = -1
-            return
-        }
-        // One extra frame lets bindings/layout from Ready settle before slide starts.
-        if (_pendingShowPasses < 1) {
-            _pendingShowPasses++
-            Qt.callLater(_flushPendingShow)
-            return
-        }
-        _pendingShowIndex = -1
-        _startTransition(displayedIndex, index)
-        _dismissLeaveSnapshot(false)
-    }
-
     function _tryShow(index) {
         const ldr = _loaderAt(index)
         if (!ldr)
             return false
         if (ldr.status === Loader.Ready && ldr.item) {
-            if (displayedIndex !== index) {
-                // Async: don't start slide in the same frame as instantiate/layout.
-                if (asynchronous && !transitioning) {
-                    _pendingShowIndex = index
-                    _pendingShowPasses = 0
-                    Qt.callLater(_flushPendingShow)
-                } else {
-                    _startTransition(displayedIndex, index)
-                }
-            }
+            if (displayedIndex !== index)
+                _startTransition(displayedIndex, index)
             return true
         }
         return false
@@ -758,7 +733,6 @@ Item {
         currentIndex = index
         _pendingShowIndex = -1
         _touchLru(index)
-        // Raise adaptive/arc budget first so ARC insert sees the new limit.
         noteActivity()
         if (_usesArc())
             _arcRequest(index)
@@ -767,7 +741,6 @@ Item {
             _evict()
         }
 
-        // Hot path: already Ready → transition (or instant)
         if (_tryShow(index)) {
             _dismissLeaveSnapshot(true)
             if (!transitioning)
@@ -776,7 +749,6 @@ Item {
             return
         }
 
-        // Cold path: freeze leave snapshot so eviction / skeleton still feel instant.
         _armLeaveSnapshot()
         if (pageAnim.running) {
             pageAnim.stop()
@@ -794,6 +766,7 @@ Item {
             _fillLoader(ldr, index)
         else if (ldr)
             _setKeep(index, true)
+        // Drop previous Item ASAP on cold path (keep only target + optional snapshot)
         _evict()
         Qt.callLater(_prefetchSmart, index)
     }
@@ -840,15 +813,15 @@ Item {
     }
 
     function _warmAllL2() {
+        // Never compile every destination — only nearby + Markov (bounded by l2CacheLimit).
         if (!l2Components || !model || cacheMode === "none")
             return
-        l2WarmTimer.cursor = 0
-        l2WarmTimer.start()
+        _prefetchSmart(currentIndex)
     }
 
     Timer {
         id: idleTrimTimer
-        interval: Math.max(5000, root.idleTrimMs)
+        interval: Math.max(2000, root.idleTrimMs)
         repeat: false
         onTriggered: root._trimForIdle()
     }
@@ -860,14 +833,13 @@ Item {
         onTriggered: {
             if (root._hoverHint < 0)
                 return
-            // Best combo: hover = L2 only (unless explicit neighbor prefetch).
             root._warmPage(root._hoverHint, root.prefetchNeighbors)
         }
     }
 
     Timer {
         id: l2WarmDelay
-        interval: 700
+        interval: 1200
         repeat: false
         onTriggered: root._warmAllL2()
     }
@@ -877,20 +849,8 @@ Item {
         property int cursor: 0
         interval: 28
         repeat: true
-        onTriggered: {
-            if (!root.model || !root.l2Components) {
-                stop()
-                return
-            }
-            if (cursor < root.model.length) {
-                root._ensureL2(cursor)
-                cursor++
-            }
-            if (cursor >= root.model.length) {
-                root._trimL2()
-                stop()
-            }
-        }
+        running: false
+        onTriggered: stop()
     }
 
     NumberAnimation {
@@ -1002,7 +962,7 @@ Item {
     }
     onCacheLimitChanged: _evict()
     onIdleTrimMsChanged: {
-        idleTrimTimer.interval = Math.max(5000, idleTrimMs)
+        idleTrimTimer.interval = Math.max(2000, idleTrimMs)
     }
 
     Rectangle {
@@ -1129,8 +1089,9 @@ Item {
                 if (active) {
                     root._fillLoader(pageLoader, index)
                 } else {
-                    // Drop Item tree; L2 Component map retains compiled type.
-                    root._ensureL2(index)
+                    // Prefer keeping a compiled Component for revisit; trim enforces l2CacheLimit.
+                    if (root.l2Components)
+                        root._ensureL2(index)
                     source = ""
                     sourceComponent = null
                     if (typeof setSource === "function")
@@ -1170,7 +1131,8 @@ Item {
         z: 7
         live: false
         hideSource: false
-        smooth: true
+        smooth: false
+        mipmap: false
         visible: opacity > 0.01
         opacity: 0
     }

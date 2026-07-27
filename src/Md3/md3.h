@@ -25,7 +25,7 @@ struct RunOptions {
 /// Call before QGuiApplication (alpha buffer + optional RHI). Also invoked by run().
 void applyEarly(int &argc, char **argv, const RunOptions &opts = {});
 
-/// Load Roboto / Material Icons from the Md3 module qrc and set app font.
+/// Load HarmonyOS Sans SC + Material Icons from the Md3 module qrc and set app font.
 int loadFonts();
 
 /// After QGuiApplication: style + fonts. Idempotent-ish (safe to call once).

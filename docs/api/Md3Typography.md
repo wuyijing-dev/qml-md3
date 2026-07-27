@@ -13,7 +13,7 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `fontFamily` | `string` | `"Roboto"` | readonly | `Md3Typography` | — |
+| `fontFamily` | `string` | `"HarmonyOS Sans SC"` | readonly | `Md3Typography` | — |
 | `fontFamilyFallback` | `string` | `"Segoe UI"` | readonly | `Md3Typography` | — |
 | `iconFontFamily` | `string` | `"Material Icons"` | readonly | `Md3Typography` | — |
 | `iconFontFamilyOutlined` | `string` | `"Material Icons Outlined"` | readonly | `Md3Typography` | — |
