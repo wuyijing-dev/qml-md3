@@ -2,25 +2,9 @@ import QtQuick
 import QtQuick.Layouts
 import Md3
 
-/// Progressive charts demo — first card sync, rest deferred so navigation stays snappy.
+/// Charts demo — hero chart sync; remaining cards via Md3DeferredSection (progressiveContent).
 Item {
     id: root
-
-    /// 0 = live only, 1 = multi+bar, 2 = big+sparse
-    property int deferStage: 0
-
-    Timer {
-        id: defer1
-        interval: 1
-        running: true
-        onTriggered: root.deferStage = Math.max(root.deferStage, 1)
-    }
-    Timer {
-        id: defer2
-        interval: 48
-        running: true
-        onTriggered: root.deferStage = Math.max(root.deferStage, 2)
-    }
 
     Flickable {
         id: flick
@@ -28,12 +12,19 @@ Item {
         contentWidth: width
         contentHeight: column.height
         clip: true
-        // Pull in remaining cards early when user scrolls
+        // Pull deferred sections in early when user scrolls
         onContentYChanged: {
-            if (contentY > 40)
-                root.deferStage = Math.max(root.deferStage, 1)
-            if (contentY > 180)
-                root.deferStage = Math.max(root.deferStage, 2)
+            if (contentY > 40) {
+                stage1.arm()
+                stage1b.arm()
+            }
+            if (contentY > 180) {
+                stage2a.arm()
+                stage2b.arm()
+                stage2c.arm()
+                stage2d.arm()
+                stage2e.arm()
+            }
         }
 
         ColumnLayout {
@@ -133,7 +124,7 @@ Item {
                             Md3LineChart {
                                 live: true
                                 paused: true
-                                livePointCount: 48
+                                livePointCount: 32
                                 showDots: false
                                 showArea: true
                                 showProbe: true
@@ -153,73 +144,47 @@ Item {
                 }
             }
 
-            Loader {
+            Md3DeferredSection {
+                id: stage1
                 Layout.fillWidth: true
-                Layout.preferredHeight: active && status === Loader.Ready ? 280 : (active ? 280 : 0)
-                active: root.deferStage >= 1
-                asynchronous: true
-                visible: status === Loader.Ready || active
-                opacity: status === Loader.Ready ? 1 : 0.35
+                preferredHeight: 280
+                delayMs: 1
                 sourceComponent: multiCard
             }
-
-            Loader {
-                Layout.fillWidth: true
-                Layout.preferredHeight: active && status === Loader.Ready ? 260 : (active ? 260 : 0)
-                active: root.deferStage >= 1
-                asynchronous: true
-                visible: status === Loader.Ready || active
-                opacity: status === Loader.Ready ? 1 : 0.35
+            Md3DeferredSection {
+                id: stage1b
+                preferredHeight: 260
+                delayMs: 1
                 sourceComponent: barCard
             }
-
-            Loader {
-                Layout.fillWidth: true
-                Layout.preferredHeight: active && status === Loader.Ready ? 240 : (active ? 240 : 0)
-                active: root.deferStage >= 2
-                asynchronous: true
-                visible: status === Loader.Ready || active
-                opacity: status === Loader.Ready ? 1 : 0.35
+            Md3DeferredSection {
+                id: stage2a
+                preferredHeight: 240
+                delayMs: 48
                 sourceComponent: bigCard
             }
-
-            Loader {
-                Layout.fillWidth: true
-                Layout.preferredHeight: active && status === Loader.Ready ? 200 : (active ? 200 : 0)
-                active: root.deferStage >= 2
-                asynchronous: true
-                visible: status === Loader.Ready || active
-                opacity: status === Loader.Ready ? 1 : 0.35
+            Md3DeferredSection {
+                id: stage2b
+                preferredHeight: 200
+                delayMs: 48
                 sourceComponent: sparseCard
             }
-
-            Loader {
-                Layout.fillWidth: true
-                Layout.preferredHeight: active && status === Loader.Ready ? 240 : (active ? 240 : 0)
-                active: root.deferStage >= 2
-                asynchronous: true
-                visible: status === Loader.Ready || active
-                opacity: status === Loader.Ready ? 1 : 0.35
+            Md3DeferredSection {
+                id: stage2c
+                preferredHeight: 240
+                delayMs: 64
                 sourceComponent: scatterCard
             }
-
-            Loader {
-                Layout.fillWidth: true
-                Layout.preferredHeight: active && status === Loader.Ready ? 240 : (active ? 240 : 0)
-                active: root.deferStage >= 2
-                asynchronous: true
-                visible: status === Loader.Ready || active
-                opacity: status === Loader.Ready ? 1 : 0.35
+            Md3DeferredSection {
+                id: stage2d
+                preferredHeight: 240
+                delayMs: 64
                 sourceComponent: pieCard
             }
-
-            Loader {
-                Layout.fillWidth: true
-                Layout.preferredHeight: active && status === Loader.Ready ? 320 : (active ? 320 : 0)
-                active: root.deferStage >= 2
-                asynchronous: true
-                visible: status === Loader.Ready || active
-                opacity: status === Loader.Ready ? 1 : 0.35
+            Md3DeferredSection {
+                id: stage2e
+                preferredHeight: 320
+                delayMs: 80
                 sourceComponent: codeCard
             }
         }

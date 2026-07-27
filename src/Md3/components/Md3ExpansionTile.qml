@@ -6,7 +6,7 @@ Column {
     property string title: ""
     property string subtitle: ""
     property bool expanded: false
-    property bool enabled: true
+    // Use Item.enabled (do not redeclare — triggers propertyCache override warning)
 
     width: parent ? parent.width : 320
     spacing: 0

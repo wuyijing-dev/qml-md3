@@ -126,7 +126,6 @@ Item {
         visible: false
         Rectangle {
             anchors.fill: parent
-            // Match container corner exactly (FAB is rounded-rect, not a circle).
             readonly property real base: root.resolvedClipRadius
             topLeftRadius: root.topLeftRadius >= 0 ? root.topLeftRadius : base
             topRightRadius: root.topRightRadius >= 0 ? root.topRightRadius : base

@@ -11,14 +11,14 @@ Item {
     property string railHeader: ""
     property string cacheMode: "arc"
     property int cacheLimit: 1
-    property int idleTrimMs: 8000
+    property int idleTrimMs: 4000
     property real contentPadding: 20
     property url sourceBase: ""
-    property bool asynchronous: true
+    property bool asynchronous: false
     property bool prefetchNeighbors: false
-    property bool predictPrefetch: true
+    property bool predictPrefetch: false
     property bool l2Components: true
-    property int l2CacheLimit: 6
+    property int l2CacheLimit: 1
     property bool l2WarmIdle: false
     property bool leaveSnapshot: false
     property bool warmStart: false
@@ -26,7 +26,7 @@ Item {
     property bool showSkeleton: false
     property string skeletonLayout: "page"
     property string pageTransition: "fade"
-    property int pageTransitionDuration: 120
+    property int pageTransitionDuration: 100
     property alias pageHost: host
     property alias rail: rail
 

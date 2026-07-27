@@ -14,6 +14,7 @@ struct RunOptions {
     QString applicationName = QStringLiteral("Md3 App");
     QString applicationVersion = QStringLiteral("0.1.0");
     QString style = QStringLiteral("Basic");
+    /// Load HarmonyOS Sans SC Regular (+ optional Medium/Bold if present) and icons.
     bool loadFonts = true;
     /// Windows: enable translucent frames (Mica/Acrylic). Safe default.
     bool alphaBuffer = true;

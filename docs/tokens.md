@@ -59,7 +59,7 @@ Drawn as `on*` color over the container:
 | labelMedium | 12 | Medium 500 | 0.5 | 16 |
 | labelSmall | 11 | Medium 500 | 0.5 | 16 |
 
-Font family: **HarmonyOS Sans SC** (bundled under `resources/fonts/`, fallback: system UI sans).
+Font family: **HarmonyOS Sans SC** (Regular bundled by default; Medium/Bold optional via `MD3_BUNDLE_EXTRA_UI_FONTS` or app `fonts/`). Fallback: system UI sans.
 
 Icon fonts (bundled locally):
 - **Material Icons Outlined** — default for `Md3Icon` (`variant: "outlined"`)

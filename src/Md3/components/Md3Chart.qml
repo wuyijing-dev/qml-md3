@@ -72,6 +72,7 @@ Item {
         return false
     }
     readonly property bool chartActive: !paused && !interactionBlocked && enabled
+                                        && visible && opacity > 0.01
 
     property int renderedPointCount: 0
 
@@ -320,7 +321,7 @@ Item {
         }
     }
     FrameAnimation {
-        running: root.interactive && !root.gestureActive
+        running: root.interactive && root.chartActive && !root.gestureActive
                  && Math.abs(root._panVelocity) > 1e-5
         onTriggered: {
             root.viewStart += root._panVelocity

@@ -19,17 +19,24 @@ if (NOT DEFINED MD3_VERSION)
 endif()
 
 # Fonts live at repo resources/ — mirror under this module as relative RESOURCES.
+# Default: Regular UI face only. Medium/Bold are optional (MD3_BUNDLE_EXTRA_UI_FONTS).
 # Avoid QT_RESOURCE_ALIAS: Qt Creator MSVC finalize resolves the alias under
 # CMAKE_CURRENT_SOURCE_DIR and fails (e.g. gallery/Roboto-Regular.ttf).
+option(MD3_BUNDLE_EXTRA_UI_FONTS
+    "Bundle HarmonyOS Sans SC Medium/Bold (apps can also drop faces into fonts/)" OFF)
 set(_md3_font_dir "${CMAKE_CURRENT_SOURCE_DIR}/resources/fonts")
 file(MAKE_DIRECTORY "${_md3_font_dir}")
 set(MD3_FONT_NAMES
     HarmonyOS_SansSC_Regular.ttf
-    HarmonyOS_SansSC_Medium.ttf
-    HarmonyOS_SansSC_Bold.ttf
     MaterialIcons-Regular.ttf
     MaterialIconsOutlined-Regular.otf
 )
+if (MD3_BUNDLE_EXTRA_UI_FONTS)
+    list(APPEND MD3_FONT_NAMES
+        HarmonyOS_SansSC_Medium.ttf
+        HarmonyOS_SansSC_Bold.ttf
+    )
+endif()
 set(MD3_FONT_FILES "")
 foreach (_md3_font_name IN LISTS MD3_FONT_NAMES)
     set(_src "${MD3_ROOT}/resources/fonts/${_md3_font_name}")
@@ -92,6 +99,10 @@ qt_add_qml_module(Md3
         window/md3graphics.cpp
         charts/md3chartdata.h
         charts/md3chartdata.cpp
+        diagnostics/md3performancemonitor.h
+        diagnostics/md3performancemonitor.cpp
+        diagnostics/md3inspector.h
+        diagnostics/md3inspector.cpp
     QML_FILES
         foundation/Md3Theme.qml
         foundation/Md3Motion.qml
@@ -186,6 +197,10 @@ qt_add_qml_module(Md3
         components/Md3CodeBlock.qml
         components/Md3Skeleton.qml
         components/Md3SkeletonPane.qml
+        components/Md3DeferredSection.qml
+        diagnostics/Md3Sparkline.qml
+        diagnostics/Md3ElementPicker.qml
+        diagnostics/Md3PerformancePanel.qml
     RESOURCES
         ${MD3_FONT_FILES}
 )
@@ -199,10 +214,12 @@ target_include_directories(Md3
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/window>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/charts>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/diagnostics>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Md3>
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/window
         ${CMAKE_CURRENT_SOURCE_DIR}/charts
+        ${CMAKE_CURRENT_SOURCE_DIR}/diagnostics
 )
 
 set(MD3_PLATFORM_SOURCES)
@@ -217,7 +234,7 @@ if (WIN32)
         window/platforms/windows/md3wintray.cpp
     )
     target_include_directories(Md3 PRIVATE window/platforms/windows)
-    target_link_libraries(Md3 PRIVATE dwmapi shell32 shlwapi ole32 propsys advapi32)
+    target_link_libraries(Md3 PRIVATE dwmapi shell32 shlwapi ole32 propsys advapi32 psapi)
 elseif (APPLE)
     list(APPEND MD3_PLATFORM_SOURCES
         window/platforms/macos/md3macosnative.cpp

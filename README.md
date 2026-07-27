@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
 | `gallery/` | Optional component browser (gated by `MD3_BUILD_GALLERY`) |
 | `cmake/` | `Md3Config.cmake` for `find_package` after install |
 | `docs/` | Architecture, tokens, per-component specs |
-| `resources/fonts/` | HarmonyOS Sans SC + Material Icons |
+| `resources/fonts/` | HarmonyOS Sans SC Regular (+ optional Medium/Bold) + Material Icons |
 
 ## CMake options
 

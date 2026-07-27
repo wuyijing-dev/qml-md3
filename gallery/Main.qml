@@ -25,13 +25,12 @@ Md3ApplicationWindow {
     documentTabsEnabled: true
     documentTabsTearOff: false
 
-    property bool showPerformancePanel: true
+    // Library performance overlay — open from title-bar speed button
+    showPerformanceButton: true
+    showPerformanceOverlay: false
+
     readonly property string pageRoot: "qrc:/qt/qml/Gallery/pages/"
     readonly property int windowPageIndex: 16
-    readonly property bool perfSampling: showPerformancePanel
-                                         && visible
-                                         && visibility !== Window.Minimized
-                                         && visibility !== Window.Hidden
 
     destinations: [
         { title: qsTr("令牌"), icon: "palette", source: pageRoot + "TokensPage.qml" },
@@ -56,23 +55,6 @@ Md3ApplicationWindow {
         { title: qsTr("场景：列表详情"), icon: "view_sidebar", source: pageRoot + "scenes/ListDetailScene.qml", cacheCost: 2.5 }
     ]
 
-    PerformanceMonitor {
-        id: perfMonitor
-        active: window.perfSampling
-    }
-
-    PerformancePanel {
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.rightMargin: 16
-        anchors.bottomMargin: 16
-        z: 100000
-        visible: window.showPerformancePanel
-        compact: true
-        expanded: true
-        monitor: perfMonitor
-    }
-
     titleBar: Component {
         Md3TitleBar {
             title: window.title
@@ -85,6 +67,9 @@ Md3ApplicationWindow {
             minTitleWidth: 100
             maxTitleWidth: 200
             showThemeToggle: true
+            showPerformanceToggle: window.showPerformanceButton
+            performanceChecked: window.showPerformanceOverlay
+            onPerformanceClicked: window.showPerformanceOverlay = !window.showPerformanceOverlay
 
             Md3ChipGroup {
                 selectionMode: Md3ChipGroup.Single
@@ -124,15 +109,6 @@ Md3ApplicationWindow {
                     iconSize: 14
                     accessibleName: qsTr("新建标签")
                     onClicked: window.addTab(window.currentIndex)
-                },
-                Md3TitleBarButton {
-                    icon: "speed"
-                    buttonWidth: 36
-                    buttonHeight: 28
-                    iconSize: 14
-                    checked: window.showPerformancePanel
-                    accessibleName: qsTr("Performance monitor")
-                    onClicked: window.showPerformancePanel = !window.showPerformancePanel
                 },
                 Md3TitleBarButton {
                     icon: "info"

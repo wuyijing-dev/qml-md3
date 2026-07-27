@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Shapes
 
-/// Circular progress — Standard: PathAngleArc; wavy: PathPolyline + RoundJoin (GPU, no seams).
+/// Circular progress — Standard animates PathAngleArc in-place; wavy uses sparse polyline.
 Item {
     id: root
 
@@ -50,6 +50,7 @@ Item {
     readonly property real radius: Math.min(width, height) / 2 - strokeWidth - (isWavy ? amplitude : 0)
 
     property real sweepDir: 1
+    property real _waveAccum: 0
 
     function _refreshTreeShown() {
         let ok = visible && opacity > 0.01
@@ -77,7 +78,8 @@ Item {
         const cx = width / 2
         const cy = height / 2
         const baseR = radius
-        const steps = Math.max(24, Math.ceil(Math.abs(sweepRad) * 28))
+        // Sparse — full circle was ~175 pts ×2 every frame.
+        const steps = Math.max(16, Math.ceil(Math.abs(sweepRad) * 10))
         const pts = []
         for (let i = 0; i <= steps; ++i) {
             const t = i / steps
@@ -90,35 +92,42 @@ Item {
         return pts
     }
 
-    function rebuild() {
-        if (width < 2 || height < 2)
+    function rebuildWavy() {
+        if (width < 2 || height < 2 || !isWavy)
             return
-        if (isWavy) {
-            trackPoly.path = _arcPoints(-Math.PI / 2, Math.PI * 2)
-            if (indeterminate)
-                indPoly.path = _arcPoints(rotation, sweep)
-            else
-                indPoly.path = _arcPoints(-Math.PI / 2, Math.PI * 2 * Math.max(0, Math.min(1, value)))
+        trackPoly.path = _arcPoints(-Math.PI / 2, Math.PI * 2)
+        if (indeterminate)
+            indPoly.path = _arcPoints(rotation, sweep)
+        else
+            indPoly.path = _arcPoints(-Math.PI / 2, Math.PI * 2 * Math.max(0, Math.min(1, value)))
+    }
+
+    function syncStandardArc() {
+        if (isWavy)
+            return
+        if (indeterminate) {
+            indArc.startAngle = radToDeg(rotation)
+            indArc.sweepAngle = -radToDeg(sweep)
         } else {
-            if (indeterminate) {
-                indArc.startAngle = radToDeg(rotation)
-                indArc.sweepAngle = -radToDeg(sweep)
-            } else {
-                indArc.startAngle = -90
-                indArc.sweepAngle = -360 * Math.max(0, Math.min(1, value))
-            }
+            indArc.startAngle = -90
+            indArc.sweepAngle = -360 * Math.max(0, Math.min(1, value))
         }
     }
 
     Timer {
-        interval: 200
+        interval: 400
         running: root.enabled && (root.indeterminate || root.isWavy)
         repeat: true
         onTriggered: root._refreshTreeShown()
     }
     Component.onCompleted: {
         _refreshTreeShown()
-        Qt.callLater(rebuild)
+        Qt.callLater(function () {
+            if (root.isWavy)
+                root.rebuildWavy()
+            else
+                root.syncStandardArc()
+        })
     }
     onVisibleChanged: _refreshTreeShown()
     onOpacityChanged: _refreshTreeShown()
@@ -166,7 +175,7 @@ Item {
     Shape {
         anchors.fill: parent
         visible: root.isWavy
-        preferredRendererType: Shape.CurveRenderer
+        preferredRendererType: Shape.GeometryRenderer
         asynchronous: false
 
         ShapePath {
@@ -204,12 +213,42 @@ Item {
                     root.sweepDir = 1
                 }
             }
-            root.rebuild()
+            if (root.isWavy) {
+                root._waveAccum += frameTime
+                if (root._waveAccum >= 1 / 45) {
+                    root._waveAccum = 0
+                    root.rebuildWavy()
+                }
+            } else {
+                root.syncStandardArc()
+            }
         }
     }
 
-    onValueChanged: if (!indeterminate) rebuild()
-    onStyleChanged: Qt.callLater(rebuild)
-    onWidthChanged: rebuild()
-    onHeightChanged: rebuild()
+    onValueChanged: {
+        if (indeterminate)
+            return
+        if (isWavy)
+            rebuildWavy()
+        else
+            syncStandardArc()
+    }
+    onStyleChanged: Qt.callLater(function () {
+        if (root.isWavy)
+            root.rebuildWavy()
+        else
+            root.syncStandardArc()
+    })
+    onWidthChanged: {
+        if (isWavy)
+            rebuildWavy()
+        else
+            syncStandardArc()
+    }
+    onHeightChanged: {
+        if (isWavy)
+            rebuildWavy()
+        else
+            syncStandardArc()
+    }
 }

@@ -130,7 +130,44 @@ Md3Theme.textScale = 1.25
 
 ## Fonts
 
-HarmonyOS Sans SC + Material Icons ship in the Md3 module qrc. Prefer **`Md3::run` / `Md3::initialize`**. Manual path: `:/qt/qml/Md3/resources/fonts/`.
+By default Md3 bundles **HarmonyOS Sans SC Regular** + Material Icons. Medium/Bold are optional:
+
+- CMake: `-DMD3_BUNDLE_EXTRA_UI_FONTS=ON` to pack Medium/Bold into the module qrc
+- Or drop `HarmonyOS_SansSC_Medium.ttf` / `HarmonyOS_SansSC_Bold.ttf` next to the app under `fonts/` — `Md3::loadFonts()` picks them up if present
+- Download: `scripts/download-fonts.ps1` (Regular only); add `-ExtraWeights` for Medium/Bold
+
+Prefer **`Md3::run` / `Md3::initialize`**. Manual qrc path: `:/md3/fonts/resources/fonts/`.
+
+## Progressive within-page content
+
+`Md3Theme.progressiveContent` / `Md3ApplicationWindow.progressiveContent` (default **true**) gates `Md3DeferredSection`: first paint shows placeholders, then delayed sections create. Set `false` to load all sections immediately.
+
+```qml
+Md3ApplicationWindow {
+    progressiveContent: true   // default
+}
+// or
+Md3Theme.progressiveContent = false
+```
+
+## Performance overlay
+
+Built into `Md3ApplicationWindow` (off by default — open from the title-bar speed button):
+
+```qml
+Md3ApplicationWindow {
+    showPerformanceButton: true      // title-bar toggle
+    showPerformanceOverlay: false    // floating panel + sampler
+    // performanceDetached: false    // optional separate non-modal window
+}
+```
+
+- Docked panel animates in/out (scale + fade + slide).
+- Panel button **open_in_new** pops it into an optional `Md3DialogWindow`; **close_fullscreen** docks it back.
+- Memory shows private bytes (closer to Task Manager); working set is listed separately.
+- Element picker skips MouseArea/handlers and prefers `Md3*` components.
+
+Types: `Md3PerformanceMonitor`, `Md3PerformancePanel`, `Md3ElementPicker`, `Md3Inspector`.
 
 ## Options
 
@@ -138,6 +175,7 @@ HarmonyOS Sans SC + Material Icons ship in the Md3 module qrc. Prefer **`Md3::ru
 |--------|---------|---------|
 | `MD3_BUILD_GALLERY` | OFF when used as subdirectory | Build Gallery executable |
 | `MD3_BUILD_SHARED` | OFF (CMake); packaging scripts default **ON** | Shared `Md3` instead of static |
+| `MD3_BUNDLE_EXTRA_UI_FONTS` | OFF | Bundle HarmonyOS Medium/Bold faces |
 
 ## Linux notes
 

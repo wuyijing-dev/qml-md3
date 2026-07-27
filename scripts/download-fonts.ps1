@@ -1,5 +1,8 @@
 # Downloads HarmonyOS Sans SC + Material Icons into resources/fonts for offline Md3 builds.
-# HarmonyOS Sans: Huawei official package (free for commercial use).
+# Default: Regular UI face only. Pass -ExtraWeights for Medium/Bold (optional for apps).
+param(
+    [switch]$ExtraWeights
+)
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $fonts = Join-Path $root "resources\fonts"
@@ -29,9 +32,12 @@ if (Test-Path $extract) { Remove-Item -Recurse -Force $extract }
 
 $scMap = @{
     "HarmonyOS_SansSC_Regular.ttf" = "HarmonyOS Sans\HarmonyOS_SansSC\HarmonyOS_SansSC_Regular.ttf"
-    "HarmonyOS_SansSC_Medium.ttf"  = "HarmonyOS Sans\HarmonyOS_SansSC\HarmonyOS_SansSC_Medium.ttf"
-    "HarmonyOS_SansSC_Bold.ttf"    = "HarmonyOS Sans\HarmonyOS_SansSC\HarmonyOS_SansSC_Bold.ttf"
 }
+if ($ExtraWeights) {
+    $scMap["HarmonyOS_SansSC_Medium.ttf"] = "HarmonyOS Sans\HarmonyOS_SansSC\HarmonyOS_SansSC_Medium.ttf"
+    $scMap["HarmonyOS_SansSC_Bold.ttf"] = "HarmonyOS Sans\HarmonyOS_SansSC\HarmonyOS_SansSC_Bold.ttf"
+}
+
 foreach ($destName in $scMap.Keys) {
     $src = Join-Path $extract $scMap[$destName]
     if (-not (Test-Path $src)) { throw "Missing in zip: $($scMap[$destName])" }
@@ -46,3 +52,6 @@ foreach ($old in @("Roboto-Regular.ttf", "Roboto-Medium.ttf", "Roboto-Bold.ttf")
 }
 
 Write-Host "Done. Fonts in $fonts"
+if (-not $ExtraWeights) {
+    Write-Host "Tip: re-run with -ExtraWeights to also fetch Medium/Bold (or cmake -DMD3_BUNDLE_EXTRA_UI_FONTS=ON)."
+}

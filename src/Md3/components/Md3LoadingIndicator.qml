@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Shapes
 
-/// Material 3 Loading indicator — Shape PathAngleArc (GPU), optional caption.
+/// Material 3 Loading indicator — PathAngleArc updated in-place (no per-frame Shape rebuild).
 Item {
     id: root
 
@@ -58,9 +58,7 @@ Item {
 
     function radToDeg(r) { return r * 180 / Math.PI }
 
-    function rebuild() {
-        trackArc.startAngle = -90
-        trackArc.sweepAngle = 360
+    function syncArc() {
         if (indeterminate) {
             indArc.startAngle = radToDeg(rotation)
             indArc.sweepAngle = -radToDeg(sweep)
@@ -71,19 +69,19 @@ Item {
     }
 
     Timer {
-        interval: 200
+        interval: 400
         running: root.enabled && root.indeterminate
         repeat: true
         onTriggered: root._refreshTreeShown()
     }
     Component.onCompleted: {
         _refreshTreeShown()
-        rebuild()
+        syncArc()
     }
     onVisibleChanged: {
         _refreshTreeShown()
         if (visible)
-            rebuild()
+            syncArc()
     }
     onOpacityChanged: _refreshTreeShown()
 
@@ -112,7 +110,6 @@ Item {
                     fillColor: "transparent"
                     capStyle: ShapePath.RoundCap
                     PathAngleArc {
-                        id: trackArc
                         centerX: root.indicatorSize / 2
                         centerY: root.indicatorSize / 2
                         radiusX: root.radius
@@ -164,11 +161,10 @@ Item {
                 root.sweep = Math.PI * 0.3
                 root.sweepDir = 1
             }
-            root.rebuild()
+            root.syncArc()
         }
     }
 
-    onValueChanged: if (!indeterminate) rebuild()
-    onIndeterminateChanged: rebuild()
-    onIndicatorColorChanged: rebuild()
+    onValueChanged: if (!indeterminate) syncArc()
+    onIndeterminateChanged: syncArc()
 }

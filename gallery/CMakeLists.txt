@@ -62,12 +62,8 @@ qt_add_qml_module(appQML_MD3
     URI Gallery
     VERSION 1.0
     ${MD3_QML_NO_CACHEGEN}
-    SOURCES
-        performancemonitor.h
-        performancemonitor.cpp
     QML_FILES
         Main.qml
-        PerformancePanel.qml
         pages/TokensPage.qml
         pages/ButtonsPage.qml
         pages/FabPage.qml
@@ -108,9 +104,7 @@ if (TARGET Md3plugin)
 endif()
 # Pull in static qml plugin + resource init objects (fonts, qmldir, …)
 qt_import_qml_plugins(appQML_MD3)
-if (WIN32)
-    target_link_libraries(appQML_MD3 PRIVATE shell32 psapi)
-elseif (UNIX AND NOT APPLE)
+if (UNIX AND NOT APPLE)
     target_link_libraries(appQML_MD3 PRIVATE Qt6::Widgets Qt6::DBus)
 endif()
 

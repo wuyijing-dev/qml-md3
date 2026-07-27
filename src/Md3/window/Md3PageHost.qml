@@ -22,19 +22,19 @@ Item {
     /// Resident Item pages — keep at 1 for low memory (current only after idle trim)
     property int cacheLimit: 1
     /// Adaptive / arc: ms without navigation before trimming to adaptiveCacheMin
-    property int idleTrimMs: 8000
+    property int idleTrimMs: 4000
     property int adaptiveCacheMin: 1
     property int _liveCacheLimit: 1
     property bool _adaptivePrefetch: false
     property real contentPadding: 20
-    property bool asynchronous: true
+    property bool asynchronous: false
     property bool prefetchNeighbors: false
     property bool l2Components: true
     /// Few compiled Components — enough for back/forward, not every destination
-    property int l2CacheLimit: 6
+    property int l2CacheLimit: 1
     /// If true, only warm L2 for current ±1 + Markov (never full destination list)
     property bool l2WarmIdle: false
-    property bool predictPrefetch: true
+    property bool predictPrefetch: false
     /// Off by default: ShaderEffectSource holds a full-size GPU texture
     property bool leaveSnapshot: false
     property bool warmStart: false
@@ -43,7 +43,7 @@ Item {
     property string skeletonLayout: "page"
     /// "none" | "fade" | "slide" | "slideUp" | "fadeThrough" | "scale"
     property string pageTransition: "fade"
-    property int pageTransitionDuration: 120
+    property int pageTransitionDuration: 100
     property url sourceBase: ""
     clip: true
 
@@ -166,6 +166,35 @@ Item {
         _ensureKeepArray()
         if (keepFlags[index] === on)
             return
+        // Avoid tearing down a page mid-incubation (async Loader) — wait until Ready/Error.
+        if (!on) {
+            const loader = pageRepeater.itemAt(index)
+            if (loader && loader.status === Loader.Loading) {
+                loader.pendingUnload = true
+                if (!loader.awaitUnload) {
+                    loader.awaitUnload = true
+                    const finish = function () {
+                        if (loader.status === Loader.Loading)
+                            return
+                        loader.statusChanged.disconnect(finish)
+                        loader.awaitUnload = false
+                        const wantUnload = !!loader.pendingUnload
+                        loader.pendingUnload = false
+                        if (!wantUnload)
+                            return
+                        if (index === root.currentIndex || index === root.displayedIndex)
+                            return
+                        root._setKeep(index, false)
+                    }
+                    loader.statusChanged.connect(finish)
+                }
+                return
+            }
+        } else {
+            const loader = pageRepeater.itemAt(index)
+            if (loader)
+                loader.pendingUnload = false
+        }
         const next = keepFlags.slice()
         next[index] = on
         keepFlags = next
@@ -571,7 +600,7 @@ Item {
     function _trimL2() {
         if (!l2Components)
             return
-        const limit = Math.max(2, l2CacheLimit)
+        const limit = Math.max(0, l2CacheLimit)
         const liveUrls = {}
         if (model) {
             for (let i = 0; i < model.length; ++i) {
@@ -984,6 +1013,8 @@ Item {
         delegate: Loader {
             id: pageLoader
             required property int index
+            property bool pendingUnload: false
+            property bool awaitUnload: false
 
             anchors.fill: parent
             anchors.margins: root.contentPadding
@@ -1086,22 +1117,38 @@ Item {
             visible: keep && (opacity > 0.01 || isDisplayed || isEntering || isLeaving)
 
             onActiveChanged: {
-                if (active) {
-                    root._fillLoader(pageLoader, index)
-                } else {
-                    // Prefer keeping a compiled Component for revisit; trim enforces l2CacheLimit.
-                    if (root.l2Components)
-                        root._ensureL2(index)
-                    source = ""
-                    sourceComponent = null
-                    if (typeof setSource === "function")
-                        setSource("")
-                }
+                // Defer side-effects so `keep` ↔ `active` does not form a binding loop
+                // (active change → fill/clear → generation/keepFlags → keep re-eval).
+                const on = active
+                const ldr = pageLoader
+                const idx = index
+                Qt.callLater(function () {
+                    if (!ldr)
+                        return
+                    if (on) {
+                        root._fillLoader(ldr, idx)
+                    } else {
+                        if (root.l2Components)
+                            root._ensureL2(idx)
+                        if (ldr.status === Loader.Loading)
+                            ldr.asynchronous = false
+                        ldr.source = ""
+                        ldr.sourceComponent = null
+                        if (typeof ldr.setSource === "function")
+                            ldr.setSource("")
+                    }
+                })
             }
 
             onKeepChanged: {
-                if (keep && active)
-                    root._fillLoader(pageLoader, index)
+                if (keep && active) {
+                    const ldr = pageLoader
+                    const idx = index
+                    Qt.callLater(function () {
+                        if (ldr && ldr.active)
+                            root._fillLoader(ldr, idx)
+                    })
+                }
             }
 
             onLoaded: {

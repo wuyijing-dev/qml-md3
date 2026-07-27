@@ -1,4 +1,4 @@
-#include "performancemonitor.h"
+#include "md3performancemonitor.h"
 
 #include <QElapsedTimer>
 #include <QQuickWindow>
@@ -8,11 +8,14 @@
 #if defined(Q_OS_WIN)
 #  include <windows.h>
 #  include <psapi.h>
+#elif defined(Q_OS_LINUX)
+#  include <QFile>
+#  include <QTextStream>
 #endif
 
 namespace {
 
-qint64 galleryNowNs()
+qint64 md3NowNs()
 {
     static QElapsedTimer t;
     static const bool started = [] {
@@ -34,30 +37,30 @@ QVariantList toVariantList(const QVector<qreal> &hist)
 
 } // namespace
 
-PerformanceMonitor::PerformanceMonitor(QObject *parent)
+Md3PerformanceMonitor::Md3PerformanceMonitor(QObject *parent)
     : QObject(parent)
 {
     m_sampleTimer = new QTimer(this);
-    m_sampleTimer->setTimerType(Qt::CoarseTimer);
-    connect(m_sampleTimer, &QTimer::timeout, this, &PerformanceMonitor::onSampleTick);
+    m_sampleTimer->setTimerType(Qt::VeryCoarseTimer);
+    connect(m_sampleTimer, &QTimer::timeout, this, &Md3PerformanceMonitor::onSampleTick);
     syncTimer();
 }
 
-PerformanceMonitor::~PerformanceMonitor()
+Md3PerformanceMonitor::~Md3PerformanceMonitor()
 {
     unbindWindow();
 }
 
-void PerformanceMonitor::syncTimer()
+void Md3PerformanceMonitor::syncTimer()
 {
-    m_sampleTimer->setInterval(qMax(200, m_sampleIntervalMs));
+    m_sampleTimer->setInterval(qMax(250, m_sampleIntervalMs));
     if (m_active && m_window)
         m_sampleTimer->start();
     else
         m_sampleTimer->stop();
 }
 
-void PerformanceMonitor::setActive(bool active)
+void Md3PerformanceMonitor::setActive(bool active)
 {
     if (m_active == active)
         return;
@@ -66,15 +69,14 @@ void PerformanceMonitor::setActive(bool active)
         m_framesSinceSample.store(0);
         m_lastSwapNs.store(0);
         m_lastDtNs.store(0);
-        m_sampleWindowStartNs = galleryNowNs();
+        m_sampleWindowStartNs = md3NowNs();
         if (m_window) {
-            connect(m_window, &QQuickWindow::frameSwapped, this, &PerformanceMonitor::onFrameSwapped,
+            connect(m_window, &QQuickWindow::frameSwapped, this, &Md3PerformanceMonitor::onFrameSwapped,
                     Qt::DirectConnection);
         }
     } else if (m_window) {
-        disconnect(m_window, &QQuickWindow::frameSwapped, this, &PerformanceMonitor::onFrameSwapped);
+        disconnect(m_window, &QQuickWindow::frameSwapped, this, &Md3PerformanceMonitor::onFrameSwapped);
         m_fpsHist.clear();
-        m_frameHist.clear();
         m_memHist.clear();
         rebuildHistoryVariants();
         emit metricsChanged();
@@ -83,16 +85,14 @@ void PerformanceMonitor::setActive(bool active)
     emit activeChanged();
 }
 
-void PerformanceMonitor::setHistorySize(int size)
+void Md3PerformanceMonitor::setHistorySize(int size)
 {
-    size = qBound(8, size, 240);
+    size = qBound(8, size, 120);
     if (m_historySize == size)
         return;
     m_historySize = size;
     while (m_fpsHist.size() > m_historySize)
         m_fpsHist.removeFirst();
-    while (m_frameHist.size() > m_historySize)
-        m_frameHist.removeFirst();
     while (m_memHist.size() > m_historySize)
         m_memHist.removeFirst();
     rebuildHistoryVariants();
@@ -100,9 +100,9 @@ void PerformanceMonitor::setHistorySize(int size)
     emit metricsChanged();
 }
 
-void PerformanceMonitor::setSampleIntervalMs(int ms)
+void Md3PerformanceMonitor::setSampleIntervalMs(int ms)
 {
-    ms = qBound(200, ms, 5000);
+    ms = qBound(250, ms, 5000);
     if (m_sampleIntervalMs == ms)
         return;
     m_sampleIntervalMs = ms;
@@ -110,7 +110,7 @@ void PerformanceMonitor::setSampleIntervalMs(int ms)
     emit sampleIntervalMsChanged();
 }
 
-void PerformanceMonitor::bindWindow(QObject *window)
+void Md3PerformanceMonitor::bindWindow(QObject *window)
 {
     unbindWindow();
     auto *qw = qobject_cast<QQuickWindow *>(window);
@@ -120,27 +120,26 @@ void PerformanceMonitor::bindWindow(QObject *window)
     m_framesSinceSample.store(0);
     m_lastSwapNs.store(0);
     m_lastDtNs.store(0);
-    m_sampleWindowStartNs = galleryNowNs();
+    m_sampleWindowStartNs = md3NowNs();
     if (m_active) {
-        connect(qw, &QQuickWindow::frameSwapped, this, &PerformanceMonitor::onFrameSwapped,
+        connect(qw, &QQuickWindow::frameSwapped, this, &Md3PerformanceMonitor::onFrameSwapped,
                 Qt::DirectConnection);
     }
     syncTimer();
 }
 
-void PerformanceMonitor::unbindWindow()
+void Md3PerformanceMonitor::unbindWindow()
 {
     if (m_window) {
-        disconnect(m_window, &QQuickWindow::frameSwapped, this, &PerformanceMonitor::onFrameSwapped);
+        disconnect(m_window, &QQuickWindow::frameSwapped, this, &Md3PerformanceMonitor::onFrameSwapped);
         m_window = nullptr;
     }
     syncTimer();
 }
 
-void PerformanceMonitor::reset()
+void Md3PerformanceMonitor::reset()
 {
     m_fpsHist.clear();
-    m_frameHist.clear();
     m_memHist.clear();
     rebuildHistoryVariants();
     m_fps = 0;
@@ -151,45 +150,43 @@ void PerformanceMonitor::reset()
     m_framesSinceSample.store(0);
     m_lastSwapNs.store(0);
     m_lastDtNs.store(0);
-    m_sampleWindowStartNs = galleryNowNs();
+    m_sampleWindowStartNs = md3NowNs();
     emit metricsChanged();
 }
 
-void PerformanceMonitor::pushHistory(QVector<qreal> &hist, qreal value)
+void Md3PerformanceMonitor::pushHistory(QVector<qreal> &hist, qreal value)
 {
     hist.append(value);
     while (hist.size() > m_historySize)
         hist.removeFirst();
 }
 
-void PerformanceMonitor::rebuildHistoryVariants()
+void Md3PerformanceMonitor::rebuildHistoryVariants()
 {
     m_fpsHistoryVar = toVariantList(m_fpsHist);
-    m_frameHistoryVar = toVariantList(m_frameHist);
     m_memHistoryVar = toVariantList(m_memHist);
 }
 
-void PerformanceMonitor::onFrameSwapped()
+void Md3PerformanceMonitor::onFrameSwapped()
 {
-    // May run on the scene graph / render thread — keep this lock-free and tiny.
     if (!m_active)
         return;
-    const qint64 now = galleryNowNs();
+    const qint64 now = md3NowNs();
     m_framesSinceSample.fetch_add(1, std::memory_order_relaxed);
     const qint64 prev = m_lastSwapNs.exchange(now, std::memory_order_relaxed);
     if (prev > 0) {
         const qint64 dt = now - prev;
-        if (dt > 100000 && dt < 1000000000) // 0.1ms .. 1s
+        if (dt > 100000 && dt < 1000000000)
             m_lastDtNs.store(dt, std::memory_order_relaxed);
     }
 }
 
-void PerformanceMonitor::onSampleTick()
+void Md3PerformanceMonitor::onSampleTick()
 {
     if (!m_active || !m_window)
         return;
 
-    const qint64 now = galleryNowNs();
+    const qint64 now = md3NowNs();
     const int frames = m_framesSinceSample.exchange(0, std::memory_order_relaxed);
     m_frameCount += frames;
 
@@ -218,13 +215,12 @@ void PerformanceMonitor::onSampleTick()
     sampleProcess();
 
     pushHistory(m_fpsHist, m_fps);
-    pushHistory(m_frameHist, m_frameTimeMs);
-    pushHistory(m_memHist, m_workingSetMb);
+    pushHistory(m_memHist, m_memoryMb);
     rebuildHistoryVariants();
     emit metricsChanged();
 }
 
-void PerformanceMonitor::sampleProcess()
+void Md3PerformanceMonitor::sampleProcess()
 {
 #if defined(Q_OS_WIN)
     PROCESS_MEMORY_COUNTERS_EX pmc{};
@@ -232,8 +228,11 @@ void PerformanceMonitor::sampleProcess()
     if (GetProcessMemoryInfo(GetCurrentProcess(),
                              reinterpret_cast<PROCESS_MEMORY_COUNTERS *>(&pmc),
                              sizeof(pmc))) {
+        // Working set = physical pages currently resident (includes shareable).
         m_workingSetMb = qreal(pmc.WorkingSetSize) / (1024.0 * 1024.0);
+        // PrivateUsage ≈ Task Manager "Memory" / private bytes (committed private).
         m_privateBytesMb = qreal(pmc.PrivateUsage) / (1024.0 * 1024.0);
+        m_memoryMb = m_privateBytesMb > 0.01 ? m_privateBytesMb : m_workingSetMb;
     }
 
     FILETIME creation{}, exitT{}, kernel{}, user{};
@@ -243,7 +242,7 @@ void PerformanceMonitor::sampleProcess()
         };
         const qint64 k = to100ns(kernel);
         const qint64 u = to100ns(user);
-        const qint64 wall = galleryNowNs();
+        const qint64 wall = md3NowNs();
         if (m_prevWallNs > 0) {
             const qint64 dCpu = (k - m_prevCpuKernel) + (u - m_prevCpuUser);
             const qint64 dWall100ns = (wall - m_prevWallNs) / 100;
@@ -251,12 +250,50 @@ void PerformanceMonitor::sampleProcess()
                 SYSTEM_INFO si{};
                 GetSystemInfo(&si);
                 const int cores = qMax(1, int(si.dwNumberOfProcessors));
+                // Process CPU % of one core * cores normalized → 0–100 of machine.
                 m_cpuPercent = qBound(0.0, (qreal(dCpu) / qreal(dWall100ns)) * 100.0 / cores, 100.0);
             }
         }
         m_prevCpuKernel = k;
         m_prevCpuUser = u;
         m_prevWallNs = wall;
+    }
+#elif defined(Q_OS_LINUX)
+    qreal rssMb = 0;
+    QFile status(QStringLiteral("/proc/self/status"));
+    if (status.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&status);
+        while (!in.atEnd()) {
+            const QString line = in.readLine();
+            if (line.startsWith(QLatin1String("VmRSS:"))) {
+                const QStringList parts = line.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+                if (parts.size() >= 2)
+                    rssMb = parts.at(1).toLongLong() / 1024.0;
+            }
+        }
+    }
+    m_workingSetMb = rssMb;
+
+    qint64 privateKb = 0;
+    QFile rollup(QStringLiteral("/proc/self/smaps_rollup"));
+    if (rollup.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&rollup);
+        while (!in.atEnd()) {
+            const QString line = in.readLine();
+            if (line.startsWith(QLatin1String("Private_Clean:"))
+                    || line.startsWith(QLatin1String("Private_Dirty:"))) {
+                const QStringList parts = line.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+                if (parts.size() >= 2)
+                    privateKb += parts.at(1).toLongLong();
+            }
+        }
+    }
+    if (privateKb > 0) {
+        m_privateBytesMb = qreal(privateKb) / 1024.0;
+        m_memoryMb = m_privateBytesMb;
+    } else {
+        m_privateBytesMb = rssMb;
+        m_memoryMb = rssMb;
     }
 #else
     Q_UNUSED(this);

@@ -12,7 +12,7 @@ Bootstrap helpers for fonts, Basic style, and early RHI/alpha setup.
 | `applicationName` | `QString` | `"Md3 App"` | Application name |
 | `applicationVersion` | `QString` | `"0.1.0"` | Application version |
 | `style` | `QString` | `"Basic"` | `QQuickStyle::setStyle` |
-| `loadFonts` | `bool` | `true` | Load HarmonyOS Sans SC + Material Icons from Md3 qrc |
+| `loadFonts` | `bool` | `true` | Load HarmonyOS Sans SC Regular (+ optional Medium/Bold if present) and Material Icons from Md3 qrc / app `fonts/` |
 | `alphaBuffer` | `bool` | `true` | `QQuickWindow::setDefaultAlphaBuffer` before app |
 | `appUserModelId` | `QString` | empty | Windows only: AppUserModelID |
 
@@ -21,7 +21,7 @@ Bootstrap helpers for fonts, Basic style, and early RHI/alpha setup.
 | API | Description |
 |-----|-------------|
 | `void applyEarly(int &argc, char **argv, const RunOptions &opts = {})` | Call **before** `QGuiApplication`. DPI (Win), alpha buffer, `Md3Graphics::applyEarly`. |
-| `int loadFonts()` | Register fonts from `:/md3/fonts/resources/fonts/` (and fallbacks). Returns count loaded. Sets app font to HarmonyOS Sans SC when available. |
+| `int loadFonts()` | Register Regular (required) and Medium/Bold (optional) from `:/md3/fonts/resources/fonts/` and fallbacks. Returns count loaded. Sets app font to HarmonyOS Sans SC when available. |
 | `void initialize(QCoreApplication &app, const RunOptions &opts = {})` | After app exists: org/name/version, style, fonts. |
 | `int run(int argc, char **argv, const QString &moduleUri, const QString &mainComponent = "Main", const RunOptions &opts = {})` | One-shot: `applyEarly` → app → `initialize` → `loadFromModule` → `exec()`. |
 

@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Shapes
 
-/// Linear progress — Standard uses Rectangles; wavy uses QtQuick.Shapes (GPU stroke, RoundJoin, no seams).
+/// Linear progress — Standard uses Rectangles; wavy uses sparse polylines + throttled rebuild.
 Item {
     id: root
 
@@ -46,6 +46,7 @@ Item {
     property bool _treeShown: true
     readonly property bool sceneActive: enabled && _treeShown
     property real travelX: -barWidth
+    property real _waveAccum: 0
 
     function _refreshTreeShown() {
         let ok = visible && opacity > 0.01
@@ -72,7 +73,9 @@ Item {
         const amp = amplitude
         const wl = Math.max(8, wavelength)
         const phase = wavePhase
-        const steps = Math.max(2, Math.ceil((toX - fromX) / 2))
+        // Sparse samples — was ~2px (too heavy for FrameAnimation).
+        const stepPx = 6
+        const steps = Math.max(2, Math.ceil((toX - fromX) / stepPx))
         const pts = []
         for (let i = 0; i <= steps; ++i) {
             const t = i / steps
@@ -97,7 +100,7 @@ Item {
     }
 
     Timer {
-        interval: 200
+        interval: 400
         running: root.enabled && (root.isWavy || root.indeterminate)
         repeat: true
         onTriggered: root._refreshTreeShown()
@@ -110,7 +113,6 @@ Item {
     onVisibleChanged: _refreshTreeShown()
     onOpacityChanged: _refreshTreeShown()
 
-    // --- Standard: cheap rectangles ---
     Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
@@ -140,12 +142,12 @@ Item {
         }
     }
 
-    // --- Wavy: GPU Shape stroke (RoundJoin → continuous ribbon, no segment gaps) ---
     Shape {
         id: waveShape
         anchors.fill: parent
         visible: root.isWavy
-        preferredRendererType: Shape.CurveRenderer
+        // GeometryRenderer is cheaper for frequently updated polylines than CurveRenderer.
+        preferredRendererType: Shape.GeometryRenderer
         asynchronous: false
 
         ShapePath {
@@ -187,7 +189,12 @@ Item {
                 if (root.travelX > root.width)
                     root.travelX = -root.barWidth
             }
-            root.rebuildWave()
+            // Cap wavy rebuilds ~45fps — full polyline rewrite every vsync was ~12fps.
+            root._waveAccum += frameTime
+            if (root._waveAccum >= 1 / 45) {
+                root._waveAccum = 0
+                root.rebuildWave()
+            }
         }
     }
 

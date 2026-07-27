@@ -48,25 +48,35 @@ Window {
     property bool railExpanded: false
     property string railHeader: ""
     /// "none" | "one" | "lru" | "all" | "adaptive" | "arc"
-    /// Library default: arc + L1=1 + small L2 (snappy, low RSS). Override only if needed.
+    /// Library default: arc + L1=1 + tiny L2 (snappy, low RSS). Override only if needed.
     property string pageCacheMode: "arc"
     property int pageCacheLimit: 1
-    property int pageIdleTrimMs: 8000
+    property int pageIdleTrimMs: 4000
     property real pagePadding: 20
     property bool pagePrefetch: false
-    property bool pagePredictPrefetch: true
+    property bool pagePredictPrefetch: false
     property bool pageL2Cache: true
-    property int pageL2CacheLimit: 6
+    property int pageL2CacheLimit: 1
     /// Off: never precompile every destination Component
     property bool pageL2Warm: false
     property bool pageLeaveSnapshot: false
-    property bool pageAsync: true
+    property bool pageAsync: false
     property bool pageWarmStart: false
     property url pageSourceBase: ""
     property string pageTransition: "fade"
-    property int pageTransitionDuration: 120
+    property int pageTransitionDuration: 100
     property bool pageSkeleton: false
     property alias pageHost: windowBody.pageHost
+    /// Within-page progressive sections (Md3DeferredSection). Default on.
+    property bool progressiveContent: true
+
+    /// Built-in performance overlay (title-bar speed button + floating panel).
+    property bool showPerformanceButton: true
+    property bool showPerformanceOverlay: false
+    /// Optional: pop the panel into its own non-modal window.
+    property bool performanceDetached: false
+    property alias performanceMonitor: perfMonitor
+    property alias performancePanel: perfPanel
 
     // --- Document tabs (under title bar; no tear-off window) ---
     /// Show Win11-style tab strip under the title bar.
@@ -329,6 +339,31 @@ Window {
         _applyWindowIcon()
         _syncWinNative()
         _ensureManagedTabs()
+        Md3Theme.progressiveContent = root.progressiveContent
+    }
+
+    onProgressiveContentChanged: Md3Theme.progressiveContent = progressiveContent
+
+    onShowPerformanceOverlayChanged: {
+        if (!showPerformanceOverlay) {
+            elementPicker.picking = false
+            if (performanceDetached) {
+                performanceDetached = false
+                if (perfDialog.visible)
+                    perfDialog.closeDialog()
+            }
+        } else if (performanceDetached && !perfDialog.visible) {
+            perfDialog.openDialog(root)
+        }
+    }
+
+    onPerformanceDetachedChanged: {
+        if (performanceDetached && showPerformanceOverlay) {
+            if (!perfDialog.visible)
+                perfDialog.openDialog(root)
+        } else if (!performanceDetached && perfDialog.visible) {
+            perfDialog.closeDialog()
+        }
     }
 
     onWindowIconChanged: _applyWindowIcon()
@@ -625,6 +660,11 @@ Window {
                             item.title = root.title
                         if (item.appIcon !== undefined && root.windowIcon.toString().length > 0)
                             item.appIcon = Qt.binding(function () { return root.windowIcon })
+                        // Custom title bars: only sync checked state if they already enable the toggle.
+                        if (item.performanceChecked !== undefined && item.showPerformanceToggle)
+                            item.performanceChecked = Qt.binding(function () {
+                                return root.showPerformanceOverlay
+                            })
                     }
                 }
             }
@@ -637,6 +677,8 @@ Window {
                     showAppIcon: true
                     showPin: root.showPinButton
                     pinned: root.pinned
+                    showPerformanceToggle: root.showPerformanceButton
+                    performanceChecked: root.showPerformanceOverlay
                     targetWindow: root
                     windowHelper: windowHelper
                     cornerRadius: root.effectiveRadius
@@ -646,6 +688,7 @@ Window {
                                   ? windowHelper.trafficLightsInset
                                   : Md3WindowCapabilities.trafficLightsInset
                     onPinToggled: function (onTop) { root.pinned = onTop }
+                    onPerformanceClicked: root.showPerformanceOverlay = !root.showPerformanceOverlay
                 }
             }
 
@@ -755,6 +798,166 @@ Window {
                 id: overlayHost
                 anchors.fill: parent
                 z: 1000
+            }
+
+            Md3PerformanceMonitor {
+                id: perfMonitor
+                active: root.showPerformanceOverlay
+                         && root.visible
+                         && root.visibility !== Window.Minimized
+                         && root.visibility !== Window.Hidden
+                historySize: 24
+                sampleIntervalMs: 1000
+                Component.onCompleted: bindWindow(root)
+            }
+
+            // Docked floating panel (animated pop-in)
+            Item {
+                id: perfDockHost
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.rightMargin: 16
+                anchors.bottomMargin: 8
+                width: perfPanel.width
+                height: perfPanel.height
+                z: 100000
+                visible: opacity > 0.01
+                opacity: 0
+                scale: 0.92
+                transformOrigin: Item.BottomRight
+
+                readonly property bool wantVisible: root.showPerformanceOverlay && !root.performanceDetached
+
+                states: State {
+                    name: "shown"
+                    when: perfDockHost.wantVisible
+                    PropertyChanges {
+                        target: perfDockHost
+                        opacity: 1
+                        scale: 1
+                        anchors.bottomMargin: 16
+                    }
+                }
+                transitions: [
+                    Transition {
+                        from: ""
+                        to: "shown"
+                        NumberAnimation {
+                            properties: "opacity,scale,anchors.bottomMargin"
+                            duration: Md3Motion.medium2
+                            easing.bezierCurve: Md3Motion.emphasizedDecelerate
+                        }
+                    },
+                    Transition {
+                        from: "shown"
+                        to: ""
+                        NumberAnimation {
+                            properties: "opacity,scale,anchors.bottomMargin"
+                            duration: Md3Motion.short4
+                            easing.bezierCurve: Md3Motion.emphasizedAccelerate
+                        }
+                    }
+                ]
+
+                Md3PerformancePanel {
+                    id: perfPanel
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    compact: true
+                    expanded: true
+                    detached: false
+                    monitor: perfMonitor
+                    picking: elementPicker.picking
+                    selectedInfo: elementPicker.selectedInfo
+                    onPickToggleRequested: elementPicker.picking = !elementPicker.picking
+                    onDetachRequested: {
+                        root.performanceDetached = true
+                        if (!perfDialog.visible)
+                            perfDialog.openDialog(root)
+                    }
+                }
+            }
+
+            // Optional independent non-modal window
+            Md3DialogWindow {
+                id: perfDialog
+                title: qsTr("Performance")
+                width: 360
+                height: 520
+                minimumWidth: 300
+                minimumHeight: 280
+                dialogModality: Qt.NonModal
+                showStandardButtons: false
+                showThemeToggle: false
+                showMinimizeButton: true
+                showMaximizeButton: false
+                owner: root
+                windowIcon: root.windowIcon
+
+                onClosed: {
+                    if (root.performanceDetached)
+                        root.performanceDetached = false
+                }
+
+                Md3PerformancePanel {
+                    id: perfDialogPanel
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    fillHeight: true
+                    compact: false
+                    expanded: true
+                    detached: true
+                    monitor: perfMonitor
+                    picking: elementPicker.picking
+                    selectedInfo: elementPicker.selectedInfo
+                    opacity: 0
+                    scale: 0.94
+                    transformOrigin: Item.Center
+
+                    Connections {
+                        target: perfDialog
+                        function onOpened() {
+                            perfDialogPanel.opacity = 1
+                            perfDialogPanel.scale = 1
+                        }
+                        function onClosed() {
+                            perfDialogPanel.opacity = 0
+                            perfDialogPanel.scale = 0.94
+                        }
+                    }
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Md3Motion.medium2
+                            easing.bezierCurve: Md3Motion.emphasizedDecelerate
+                        }
+                    }
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: Md3Motion.medium2
+                            easing.bezierCurve: Md3Motion.emphasizedDecelerate
+                        }
+                    }
+
+                    onPickToggleRequested: {
+                        root.raise()
+                        root.requestActivate()
+                        elementPicker.picking = !elementPicker.picking
+                    }
+                    onDockRequested: {
+                        root.performanceDetached = false
+                        if (perfDialog.visible)
+                            perfDialog.closeDialog()
+                    }
+                }
+            }
+
+            Md3ElementPicker {
+                id: elementPicker
+                anchors.fill: parent
+                z: 100001
+                // Only search page/content tree — never the picker / dock chrome themselves.
+                pickRoot: contentHost
+                excludeItem: null
             }
 
             // Old-theme snapshot: circular hole expands → new theme shows through

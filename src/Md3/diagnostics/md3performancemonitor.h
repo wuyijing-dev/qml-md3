@@ -10,8 +10,8 @@
 class QQuickWindow;
 class QTimer;
 
-/// Gallery-only: real FPS / CPU / memory with low GUI-thread overhead.
-class PerformanceMonitor : public QObject
+/// Process FPS / CPU / memory sampler for Md3PerformancePanel.
+class Md3PerformanceMonitor : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
@@ -25,15 +25,16 @@ class PerformanceMonitor : public QObject
     Q_PROPERTY(qreal fpsMax READ fpsMax NOTIFY metricsChanged)
     Q_PROPERTY(qreal workingSetMb READ workingSetMb NOTIFY metricsChanged)
     Q_PROPERTY(qreal privateBytesMb READ privateBytesMb NOTIFY metricsChanged)
+    /// Best Task Manager–like figure: private bytes (Win) / private RSS (Linux).
+    Q_PROPERTY(qreal memoryMb READ memoryMb NOTIFY metricsChanged)
     Q_PROPERTY(qreal cpuPercent READ cpuPercent NOTIFY metricsChanged)
     Q_PROPERTY(QVariantList fpsHistory READ fpsHistory NOTIFY metricsChanged)
-    Q_PROPERTY(QVariantList frameTimeHistory READ frameTimeHistory NOTIFY metricsChanged)
     Q_PROPERTY(QVariantList memoryHistory READ memoryHistory NOTIFY metricsChanged)
     Q_PROPERTY(int frameCount READ frameCount NOTIFY metricsChanged)
 
 public:
-    explicit PerformanceMonitor(QObject *parent = nullptr);
-    ~PerformanceMonitor() override;
+    explicit Md3PerformanceMonitor(QObject *parent = nullptr);
+    ~Md3PerformanceMonitor() override;
 
     bool active() const { return m_active; }
     void setActive(bool active);
@@ -50,9 +51,9 @@ public:
     qreal fpsMax() const { return m_fpsMax; }
     qreal workingSetMb() const { return m_workingSetMb; }
     qreal privateBytesMb() const { return m_privateBytesMb; }
+    qreal memoryMb() const { return m_memoryMb; }
     qreal cpuPercent() const { return m_cpuPercent; }
     QVariantList fpsHistory() const { return m_fpsHistoryVar; }
-    QVariantList frameTimeHistory() const { return m_frameHistoryVar; }
     QVariantList memoryHistory() const { return m_memHistoryVar; }
     int frameCount() const { return m_frameCount; }
 
@@ -76,9 +77,9 @@ private:
 
     QPointer<QQuickWindow> m_window;
     QTimer *m_sampleTimer = nullptr;
-    bool m_active = true;
-    int m_historySize = 48;
-    int m_sampleIntervalMs = 500;
+    bool m_active = false;
+    int m_historySize = 24;
+    int m_sampleIntervalMs = 1000;
 
     qreal m_fps = 0;
     qreal m_frameTimeMs = 0;
@@ -86,19 +87,17 @@ private:
     qreal m_fpsMax = 0;
     qreal m_workingSetMb = 0;
     qreal m_privateBytesMb = 0;
+    qreal m_memoryMb = 0;
     qreal m_cpuPercent = 0;
     int m_frameCount = 0;
 
     QVector<qreal> m_fpsHist;
-    QVector<qreal> m_frameHist;
     QVector<qreal> m_memHist;
     QVariantList m_fpsHistoryVar;
-    QVariantList m_frameHistoryVar;
     QVariantList m_memHistoryVar;
 
     qint64 m_sampleWindowStartNs = 0;
 
-    // Touch only from DirectConnection (render thread) + timer exchange (GUI).
     std::atomic<int> m_framesSinceSample{0};
     std::atomic<qint64> m_lastSwapNs{0};
     std::atomic<qint64> m_lastDtNs{0};

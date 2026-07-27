@@ -98,8 +98,11 @@ int loadFonts()
 
     ensureMd3FontResources();
 
-    static const QStringList uiFiles = {
+    // Required: Regular. Optional Medium/Bold if bundled or placed under app fonts/.
+    static const QStringList uiRequired = {
         QStringLiteral("HarmonyOS_SansSC_Regular.ttf"),
+    };
+    static const QStringList uiOptional = {
         QStringLiteral("HarmonyOS_SansSC_Medium.ttf"),
         QStringLiteral("HarmonyOS_SansSC_Bold.ttf"),
     };
@@ -126,8 +129,12 @@ int loadFonts()
     QSet<QString> got;
     int loaded = 0;
 
-    // UI faces first, then app font — before Material Icons (ligature Latin stubs).
-    for (const QString &file : uiFiles) {
+    // UI Regular first, then optional weights — before Material Icons.
+    for (const QString &file : uiRequired) {
+        if (loadOneFont(file, dirs, &got))
+            ++loaded;
+    }
+    for (const QString &file : uiOptional) {
         if (loadOneFont(file, dirs, &got))
             ++loaded;
     }

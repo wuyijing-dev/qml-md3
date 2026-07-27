@@ -8,6 +8,8 @@ QtObject {
     property color seed: "#6750A4"
     property real textScale: 1.0
     property bool highContrast: false
+    /// Within-page progressive load (Md3DeferredSection). Default on; set false to load everything immediately.
+    property bool progressiveContent: true
 
     property Md3ColorScheme colorScheme: Md3ColorScheme { }
     property Md3DynamicScheme dynamicScheme: Md3DynamicScheme { }

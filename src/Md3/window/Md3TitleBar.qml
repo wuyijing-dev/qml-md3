@@ -17,6 +17,9 @@ Rectangle {
     property bool showTitle: true
     property bool showAppIcon: true
     property bool showThemeToggle: true
+    /// Performance monitor toggle (right of trailing content, before theme)
+    property bool showPerformanceToggle: false
+    property bool performanceChecked: false
     /// Pin / always-on-top (shown by default)
     property bool showPin: true
     property bool pinned: false
@@ -54,6 +57,7 @@ Rectangle {
 
     signal leadingClicked()
     signal themeToggled()
+    signal performanceClicked()
     signal pinToggled(bool pinned)
 
     function setPinned(onTop) {
@@ -315,6 +319,18 @@ Rectangle {
                 id: trailingSlot
                 width: childrenRect.width
                 height: root.baseHeight
+            }
+
+            Md3TitleBarButton {
+                id: performanceBtn
+                visible: root.showPerformanceToggle
+                buttonHeight: root.baseHeight
+                buttonWidth: 40
+                iconSize: 14
+                icon: "speed"
+                checked: root.performanceChecked
+                accessibleName: qsTr("Performance monitor")
+                onClicked: root.performanceClicked()
             }
 
             Md3TitleBarButton {
