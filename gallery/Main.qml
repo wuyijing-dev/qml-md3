@@ -31,6 +31,8 @@ Md3ApplicationWindow {
 
     readonly property string pageRoot: "qrc:/qt/qml/Gallery/pages/"
     readonly property int windowPageIndex: 16
+    property string _launchDetailTitle: ""
+    property string _launchDetailBody: ""
 
     destinations: [
         { title: qsTr("令牌"), icon: "palette", source: pageRoot + "TokensPage.qml" },
@@ -52,7 +54,9 @@ Md3ApplicationWindow {
         { title: qsTr("窗口"), icon: "web_asset", source: pageRoot + "WindowPage.qml" },
         { title: qsTr("场景：登录"), icon: "login", source: pageRoot + "scenes/LoginScene.qml", cacheCost: 2.5 },
         { title: qsTr("场景：设置"), icon: "settings", source: pageRoot + "scenes/SettingsScene.qml", cacheCost: 2.5 },
-        { title: qsTr("场景：列表详情"), icon: "view_sidebar", source: pageRoot + "scenes/ListDetailScene.qml", cacheCost: 2.5 }
+        { title: qsTr("场景：列表详情"), icon: "view_sidebar", source: pageRoot + "scenes/ListDetailScene.qml", cacheCost: 2.5 },
+        { title: qsTr("场景：列表打开"), icon: "list_alt", source: pageRoot + "scenes/LaunchListScene.qml", cacheCost: 2.5 },
+        { title: qsTr("场景：列表详情页"), icon: "description", source: pageRoot + "scenes/LaunchDetailScene.qml", cacheCost: 2.5 }
     ]
 
     titleBar: Component {

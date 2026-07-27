@@ -34,8 +34,10 @@ import Md3
 | `showBusyIndicator` | `bool` | `false` | read/write | `Md3PageHost` | — |
 | `showSkeleton` | `bool` | `true` | read/write | `Md3PageHost` | — |
 | `skeletonLayout` | `string` | `"page"` | read/write | `Md3PageHost` | — |
-| `pageTransition` | `string` | `"fade"` | read/write | `Md3PageHost` | "none" \| "fade" \| "slide" \| "slideUp" \| "fadeThrough" \| "scale" |
+| `pageTransition` | `string` | `"fade"` | read/write | `Md3PageHost` | "none" \| "fade" \| "slide" \| "slideUp" \| "fadeThrough" \| "scale" \| "launch" |
 | `pageTransitionDuration` | `int` | `Md3Motion.spatialDuration` | read/write | `Md3PageHost` | — |
+| `launchTransitionDuration` | `int` | `Md3Motion.long2` | read/write | `Md3PageHost` | Duration for tap-origin launch transition. |
+| `launchRememberLastSource` | `bool` | `true` | read/write | `Md3PageHost` | Remember last source bounds for return animation fallback. |
 | `sourceBase` | `url` | `""` | read/write | `Md3PageHost` | — |
 | `currentItem` | `var` | `{…}` | readonly | `Md3PageHost` | — |
 | `loading` | `bool` | `{…}` | readonly | `Md3PageHost` | — |
@@ -74,7 +76,7 @@ _None._
 | `noteActivity()` | `Md3PageHost` | — |
 | `prefetchHint(index)` | `Md3PageHost` | — |
 | `clearPrefetchHint(index)` | `Md3PageHost` | — |
-| `navigateTo(index)` | `Md3PageHost` | — |
+| `navigateTo(index, opts)` | `Md3PageHost` | Route-level page navigation. `opts` supports `transitionMode`, `sourceRect`, `sourceRadius`, `returnToSource`, `rememberSource`. `transitionMode: "launch"` grows the destination page from the tapped bounds and blurs the previous background snapshot during the transition. |
 
 ## Example
 

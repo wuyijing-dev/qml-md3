@@ -103,9 +103,9 @@ Window {
 
     default property alias content: customContent.data
 
-    function navigateTo(index) {
+    function navigateTo(index, opts) {
         if (usesDestinations)
-            windowBody.navigateTo(index)
+            windowBody.navigateTo(index, opts)
         else
             currentIndex = index
     }

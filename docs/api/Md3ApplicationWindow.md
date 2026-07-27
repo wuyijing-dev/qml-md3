@@ -54,10 +54,10 @@ import Md3
 | `pageAsync` | `bool` | `true` | read/write | `Md3ApplicationWindow` | — |
 | `pageWarmStart` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Background-warm all destinations as Items (off — high memory) |
 | `pageSourceBase` | `url` | `""` | read/write | `Md3ApplicationWindow` | Resolve relative destination sources against this URL (Gallery: Qt.resolvedUrl(".")) |
-| `pageTransition` | `string` | `"fade"` | read/write | `Md3ApplicationWindow` | "none" \| "fade" \| "slide" \| "slideUp" \| "fadeThrough" \| "scale" |
+| `pageTransition` | `string` | `"fade"` | read/write | `Md3ApplicationWindow` | "none" \| "fade" \| "slide" \| "slideUp" \| "fadeThrough" \| "scale" \| "launch" |
 | `pageTransitionDuration` | `int` | `Md3Motion.spatialDuration` | read/write | `Md3ApplicationWindow` | — |
+| `pageHost` | `alias` | `windowBody.pageHost` | read/write | `Md3ApplicationWindow` | Exposes the route host for advanced `navigateTo(index, opts)` usage. |
 | `pageSkeleton` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Show Md3SkeletonPane while a destination loads |
-| `pageHost` | `alias` | `windowBody.pageHost` | read/write | `Md3ApplicationWindow` | — |
 | `documentTabsEnabled` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Show Win11-style tab strip under the title bar. |
 | `documentTabsManaged` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Auto-handle activate / close / add / reorder + sync with currentIndex. |
 | `documentTabsCloseWindowWhenEmpty` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
@@ -97,7 +97,7 @@ import Md3
 
 | Method | Defined in | Description |
 |--------|------------|-------------|
-| `navigateTo(index)` | `Md3ApplicationWindow` | — |
+| `navigateTo(index, opts)` | `Md3ApplicationWindow` | Route-level page navigation. `opts.transitionMode: "launch"` enables tap-origin whole-page animation with blurred previous background; `opts.sourceRect`, `opts.sourceRadius`, and `opts.returnToSource` control source-bounds enter/return behavior. |
 | `documentTabMeta(pageIndex)` | `Md3ApplicationWindow` | — |
 | `openTab(pageIndex, asNew)` | `Md3ApplicationWindow` | — |
 | `addTab(pageIndex)` | `Md3ApplicationWindow` | — |

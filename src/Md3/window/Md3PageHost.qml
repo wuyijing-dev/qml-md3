@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Window
 
 /*
@@ -41,9 +42,16 @@ Item {
     property bool showBusyIndicator: false
     property bool showSkeleton: false
     property string skeletonLayout: "page"
-    /// "none" | "fade" | "slide" | "slideUp" | "fadeThrough" | "scale"
+    /// "none" | "fade" | "slide" | "slideUp" | "fadeThrough" | "scale" | "launch"
     property string pageTransition: "fade"
     property int pageTransitionDuration: 100
+    /// Duration used by nonlinear tap-origin launch transition.
+    property int launchTransitionDuration: Md3Motion.long2
+    property bool launchRememberLastSource: true
+    property var lastLaunchSourceRect: Qt.rect(0, 0, 0, 0)
+    property real lastLaunchSourceRadius: 0
+    property int lastLaunchSourceIndex: -1
+    property int lastLaunchTargetIndex: -1
     property url sourceBase: ""
     clip: true
 
@@ -89,7 +97,16 @@ Item {
     property int transitionFrom: -1
     property int transitionTo: -1
     property int transitionDir: 1
+    property string transitionModeActive: pageTransition
     property real transitionProgress: 1
+    property var _pendingNavOpts: ({})
+    property bool launchReturning: false
+    property rect launchStartRect: Qt.rect(0, 0, 0, 0)
+    property rect launchEndRect: Qt.rect(0, 0, 0, 0)
+    property real launchStartRadius: 16
+    property real launchEndRadius: Md3Theme.shape.large
+    property var launchCurveX: [0.0, 0.0, 0.2, 1.0]
+    property var launchCurveY: Md3Motion.emphasizedDecelerate
     /// Defer enter transition after Loader.Ready (unused; kept for API stability).
     property int _pendingShowIndex: -1
     property int _pendingShowPasses: 0
@@ -121,6 +138,74 @@ Item {
 
     function _loaderAt(index) {
         return pageRepeater.itemAt(index)
+    }
+
+    function _contentRect() {
+        const w = Math.max(1, width - contentPadding * 2)
+        const h = Math.max(1, height - contentPadding * 2)
+        return Qt.rect(contentPadding, contentPadding, w, h)
+    }
+
+    function _clampRect(rect, fallback) {
+        const f = fallback || _contentRect()
+        if (!rect || rect.width <= 1 || rect.height <= 1)
+            return f
+        const x = Math.max(f.x, Math.min(rect.x, f.x + f.width - 1))
+        const y = Math.max(f.y, Math.min(rect.y, f.y + f.height - 1))
+        const rw = Math.max(1, Math.min(rect.width, f.width))
+        const rh = Math.max(1, Math.min(rect.height, f.height))
+        return Qt.rect(x, y, rw, rh)
+    }
+
+    function _bezierAt(t, curve) {
+        const c = curve || Md3Motion.emphasized
+        const p1x = Number(c[0]), p1y = Number(c[1]), p2x = Number(c[2]), p2y = Number(c[3])
+        const u = Math.max(0, Math.min(1, t))
+        // Use parametric cubic in time-space as a cheap, smooth approximation.
+        const inv = 1 - u
+        const y = 3 * inv * inv * u * p1y
+                + 3 * inv * u * u * p2y
+                + u * u * u
+        return Math.max(0, Math.min(1, y))
+    }
+
+    function _launchProgressX(t) {
+        return _bezierAt(t, launchCurveX)
+    }
+
+    function _launchProgressY(t) {
+        return _bezierAt(t, launchCurveY)
+    }
+
+    function _launchBlend(start, end, p) {
+        return start + (end - start) * p
+    }
+
+    function _launchPulse(t) {
+        const p = Math.max(0, Math.min(1, t))
+        if (p < 0.10)
+            return 1.0 - 0.05 * (p / 0.10)
+        if (p < 0.24)
+            return 0.95 + 0.10 * ((p - 0.10) / 0.14)
+        if (p < 0.40)
+            return 1.05 - 0.05 * ((p - 0.24) / 0.16)
+        return 1.0
+    }
+
+    function _launchBackdropOpacity() {
+        if (transitionModeActive !== "launch" || !transitioning)
+            return 0
+        return launchReturning
+                ? Math.max(0, 0.30 * (1 - transitionProgress))
+                : Math.max(0, 0.55 * (1 - transitionProgress))
+    }
+
+    function _launchBackdropBlur() {
+        if (transitionModeActive !== "launch" || !transitioning)
+            return 0
+        return launchReturning
+                ? Math.max(0, 0.18 * (1 - transitionProgress))
+                : Math.min(0.35, 0.08 + transitionProgress * 0.27)
     }
 
     function _usesArc() {
@@ -694,14 +779,66 @@ Item {
         transitioning = false
         transitionFrom = -1
         transitionTo = -1
+        transitionModeActive = pageTransition
         transitionProgress = 1
+        launchReturning = false
         generation++
         _dismissLeaveSnapshot(false)
         _evict()
         Qt.callLater(_prefetchSmart, displayedIndex)
     }
 
+    function _prepareLaunchTransition(fromIndex, toIndex, opts) {
+        const content = _contentRect()
+        let src = Qt.rect(content.x + content.width * 0.5 - 28,
+                          content.y + content.height * 0.5 - 28, 56, 56)
+        let srcRadius = Math.min(src.width, src.height) / 2
+        const wantReturn = !!(opts && opts.returnToSource)
+        if (wantReturn) {
+            launchReturning = true
+            const remembered = lastLaunchSourceRect && lastLaunchSourceRect.width > 1
+                             ? lastLaunchSourceRect
+                             : src
+            const r = opts && opts.sourceRect ? opts.sourceRect : remembered
+            src = _clampRect(r, content)
+            srcRadius = Number(opts && opts.sourceRadius !== undefined
+                               ? opts.sourceRadius
+                               : lastLaunchSourceRadius)
+            if (!(srcRadius > 0))
+                srcRadius = Math.min(src.width, src.height) / 2
+            launchStartRect = content
+            launchEndRect = src
+            launchStartRadius = Md3Theme.shape.large
+            launchEndRadius = srcRadius
+            return
+        }
+
+        launchReturning = false
+        if (opts && opts.sourceRect)
+            src = _clampRect(opts.sourceRect, content)
+        srcRadius = Number(opts && opts.sourceRadius !== undefined
+                           ? opts.sourceRadius
+                           : Math.min(src.width, src.height) / 2)
+        if (!(srcRadius >= 0))
+            srcRadius = Math.min(src.width, src.height) / 2
+        launchStartRect = src
+        launchEndRect = content
+        launchStartRadius = srcRadius
+        launchEndRadius = Md3Theme.shape.large
+        if ((opts && opts.rememberSource !== false) || (!opts && launchRememberLastSource)) {
+            lastLaunchSourceRect = src
+            lastLaunchSourceRadius = srcRadius
+            lastLaunchSourceIndex = fromIndex
+            lastLaunchTargetIndex = toIndex
+        }
+    }
+
     function _startTransition(fromIndex, toIndex) {
+        const opts = _pendingNavOpts || ({})
+        const mode = (opts && opts.transitionMode !== undefined && opts.transitionMode !== null
+                      && String(opts.transitionMode).length > 0)
+                ? String(opts.transitionMode)
+                : pageTransition
         // onLoaded + onStatusChanged both call _tryShow — ignore duplicate
         if (transitioning && transitionTo === toIndex)
             return
@@ -712,12 +849,14 @@ Item {
             transitioning = false
             transitionFrom = -1
             transitionTo = -1
+            transitionModeActive = pageTransition
             transitionProgress = 1
             fromIndex = displayedIndex
         }
-        if (pageTransition === "none" || fromIndex === toIndex) {
+        if (mode === "none" || fromIndex === toIndex) {
             displayedIndex = toIndex
             transitioning = false
+            transitionModeActive = pageTransition
             transitionProgress = 1
             _dismissLeaveSnapshot(true)
             _evict()
@@ -728,13 +867,17 @@ Item {
         transitionFrom = fromIndex
         transitionTo = toIndex
         transitionDir = (fromIndex < 0 || toIndex >= fromIndex) ? 1 : -1
+        transitionModeActive = mode
         transitioning = true
         transitionProgress = 0
+        if (mode === "launch")
+            _prepareLaunchTransition(fromIndex, toIndex, opts)
         if (fromIndex >= 0)
             _setKeep(fromIndex, true)
         _setKeep(toIndex, true)
         generation++
         pageAnim.start()
+        _pendingNavOpts = ({})
     }
 
     function _tryShow(index) {
@@ -749,11 +892,12 @@ Item {
         return false
     }
 
-    function navigateTo(index) {
+    function navigateTo(index, opts) {
         if (!model || index < 0 || index >= model.length)
             return
         if (transitioning && index === transitionTo)
             return
+        _pendingNavOpts = opts || ({})
 
         if (_navPrev >= 0 && _navPrev !== index)
             _recordMarkov(_navPrev, index)
@@ -770,8 +914,15 @@ Item {
             _evict()
         }
 
+        if ((_pendingNavOpts && _pendingNavOpts.transitionMode === "launch")
+                || pageTransition === "launch")
+            _armLeaveSnapshot()
+
         if (_tryShow(index)) {
-            _dismissLeaveSnapshot(true)
+            const keepLaunchSnapshot = (_pendingNavOpts && _pendingNavOpts.transitionMode === "launch")
+                    || pageTransition === "launch"
+            if (!keepLaunchSnapshot)
+                _dismissLeaveSnapshot(true)
             if (!transitioning)
                 _evict()
             Qt.callLater(_prefetchSmart, index)
@@ -786,7 +937,9 @@ Item {
             transitioning = false
             transitionFrom = -1
             transitionTo = -1
+            transitionModeActive = pageTransition
             transitionProgress = 1
+            launchReturning = false
         }
         generation++
 
@@ -899,11 +1052,15 @@ Item {
         property: "transitionProgress"
         from: 0
         to: 1
-        duration: root.pageTransitionDuration
+        duration: root.transitionModeActive === "launch"
+                  ? Math.max(root.pageTransitionDuration, root.launchTransitionDuration)
+                  : root.pageTransitionDuration
         easing.type: Easing.BezierSpline
-        easing.bezierCurve: root.pageTransition === "slide"
+        easing.bezierCurve: root.transitionModeActive === "launch"
+                            ? Md3Motion.standard
+                            : (root.transitionModeActive === "slide"
                             ? Md3Motion.emphasizedDecelerate
-                            : Md3Motion.emphasized
+                            : Md3Motion.emphasized)
         onFinished: root._finishTransition()
     }
 
@@ -1025,7 +1182,7 @@ Item {
             readonly property bool isLeaving: root.transitioning && index === root.transitionFrom
             readonly property bool isEntering: root.transitioning && index === root.transitionTo
             readonly property real t: root.transitionProgress
-            readonly property string mode: root.pageTransition
+            readonly property string mode: root.transitionModeActive
             readonly property int dir: root.transitionDir
 
             active: keep
@@ -1041,11 +1198,21 @@ Item {
                     return 0
                 }
                 if (isEntering) {
+                    if (mode === "launch") {
+                        if (root.launchReturning)
+                            return t < 0.42 ? 0 : (t - 0.42) / 0.58
+                        return t < 0.12 ? 0 : (t - 0.12) / 0.88
+                    }
                     if (mode === "fadeThrough")
                         return t < 0.35 ? 0 : (t - 0.35) / 0.65
                     return t
                 }
                 if (isLeaving) {
+                    if (mode === "launch") {
+                        if (root.launchReturning)
+                            return 1 - Math.max(0, (t - 0.28) / 0.72)
+                        return 1 - Math.max(0, (t - 0.72) / 0.28)
+                    }
                     if (mode === "fadeThrough")
                         return t < 0.35 ? (1 - t / 0.35) : 0
                     return 1 - t
@@ -1058,6 +1225,25 @@ Item {
             transform: [
                 Translate {
                     x: {
+                        if (mode === "launch") {
+                            const base = root._contentRect()
+                            const start = root.launchStartRect
+                            const end = root.launchEndRect
+                            const sx = root._launchProgressX(pageLoader.t)
+                            const ex = root._launchProgressX(pageLoader.t)
+                            const sCx = start.x + start.width / 2
+                            const eCx = end.x + end.width / 2
+                            const bCx = base.x + base.width / 2
+                            if (isEntering && !root.launchReturning) {
+                                const cx = root._launchBlend(sCx, eCx, sx)
+                                return cx - bCx
+                            }
+                            if (isLeaving && root.launchReturning) {
+                                const cx = root._launchBlend(eCx, sCx, ex)
+                                return cx - bCx
+                            }
+                            return 0
+                        }
                         if (mode !== "slide")
                             return 0
                         const w = pageLoader.width
@@ -1068,6 +1254,25 @@ Item {
                         return 0
                     }
                     y: {
+                        if (mode === "launch") {
+                            const base = root._contentRect()
+                            const start = root.launchStartRect
+                            const end = root.launchEndRect
+                            const sy = root._launchProgressY(pageLoader.t)
+                            const ey = root._launchProgressY(pageLoader.t)
+                            const sCy = start.y + start.height / 2
+                            const eCy = end.y + end.height / 2
+                            const bCy = base.y + base.height / 2
+                            if (isEntering && !root.launchReturning) {
+                                const cy = root._launchBlend(sCy, eCy, sy)
+                                return cy - bCy
+                            }
+                            if (isLeaving && root.launchReturning) {
+                                const cy = root._launchBlend(eCy, sCy, ey)
+                                return cy - bCy
+                            }
+                            return 0
+                        }
                         if (mode !== "slideUp")
                             return 0
                         const h = pageLoader.height
@@ -1082,6 +1287,24 @@ Item {
                     origin.x: pageLoader.width / 2
                     origin.y: pageLoader.height / 2
                     xScale: {
+                        if (mode === "launch") {
+                            const base = root._contentRect()
+                            const start = root.launchStartRect
+                            const end = root.launchEndRect
+                            const sx = root._launchProgressX(pageLoader.t)
+                            const sy = root._launchProgressY(pageLoader.t)
+                            if (isEntering && !root.launchReturning) {
+                                const from = Math.max(0.08, start.width / Math.max(1, base.width))
+                                const to = Math.max(0.08, end.width / Math.max(1, base.width))
+                                return root._launchBlend(from, to, sx) * root._launchPulse(pageLoader.t)
+                            }
+                            if (isLeaving && root.launchReturning) {
+                                const from = Math.max(0.08, end.width / Math.max(1, base.width))
+                                const to = Math.max(0.08, start.width / Math.max(1, base.width))
+                                return root._launchBlend(from, to, sx)
+                            }
+                            return 1
+                        }
                         if (mode !== "scale" && mode !== "fadeThrough")
                             return 1
                         if (isEntering) {
@@ -1097,6 +1320,23 @@ Item {
                         return 1
                     }
                     yScale: {
+                        if (mode === "launch") {
+                            const base = root._contentRect()
+                            const start = root.launchStartRect
+                            const end = root.launchEndRect
+                            const sy = root._launchProgressY(pageLoader.t)
+                            if (isEntering && !root.launchReturning) {
+                                const from = Math.max(0.08, start.height / Math.max(1, base.height))
+                                const to = Math.max(0.08, end.height / Math.max(1, base.height))
+                                return root._launchBlend(from, to, sy) * root._launchPulse(pageLoader.t)
+                            }
+                            if (isLeaving && root.launchReturning) {
+                                const from = Math.max(0.08, end.height / Math.max(1, base.height))
+                                const to = Math.max(0.08, start.height / Math.max(1, base.height))
+                                return root._launchBlend(from, to, sy)
+                            }
+                            return 1
+                        }
                         if (mode !== "scale" && mode !== "fadeThrough")
                             return 1
                         if (isEntering) {
@@ -1182,6 +1422,21 @@ Item {
         mipmap: false
         visible: opacity > 0.01
         opacity: 0
+    }
+
+    MultiEffect {
+        id: launchBlur
+        anchors.fill: leaveSnap
+        z: 7.5
+        visible: opacity > 0.01
+        source: leaveSnap
+        blurEnabled: true
+        blurMax: 48
+        blurMultiplier: 1.0
+        blur: root._launchBackdropBlur()
+        opacity: root._launchBackdropOpacity()
+        saturation: 0.92
+        brightness: -0.02
     }
 
     Rectangle {

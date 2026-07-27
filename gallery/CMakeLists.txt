@@ -84,6 +84,8 @@ qt_add_qml_module(appQML_MD3
         pages/scenes/LoginScene.qml
         pages/scenes/SettingsScene.qml
         pages/scenes/ListDetailScene.qml
+        pages/scenes/LaunchListScene.qml
+        pages/scenes/LaunchDetailScene.qml
 )
 
 set_target_properties(appQML_MD3 PROPERTIES

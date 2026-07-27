@@ -16,6 +16,7 @@ Item {
     property color containerColor: Md3Theme.colorScheme.primaryContainer
     property real morphPhase: 0
     property real spin: 0
+    property int _morphBucket: -1
 
     readonly property real box: {
         switch (sizePreset) {
@@ -112,9 +113,12 @@ Item {
         onTriggered: {
             root.spin = (root.spin + frameTime * 1.2) % (Math.PI * 2)
             root.morphPhase = (root.morphPhase + frameTime * 2.4) % (Math.PI * 2)
-            // Rebuild ~30fps — morph path is heavier than arc updates
-            if (!rebuildThrottle.running)
+            // Rebuild only when the phase bucket changes (~24fps worst-case).
+            const bucket = Math.floor(root.morphPhase * 24 / (Math.PI * 2))
+            if (bucket !== root._morphBucket && !rebuildThrottle.running) {
+                root._morphBucket = bucket
                 rebuildThrottle.start()
+            }
         }
     }
 

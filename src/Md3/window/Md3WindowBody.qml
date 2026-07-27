@@ -33,10 +33,10 @@ Item {
     signal destinationActivated(int index)
     signal railExpandRequested(bool expanded)
 
-    function navigateTo(index) {
+    function navigateTo(index, opts) {
         if (!destinations || index < 0 || index >= destinations.length)
             return
-        host.navigateTo(index)
+        host.navigateTo(index, opts)
         if (currentIndex !== host.currentIndex)
             currentIndex = host.currentIndex
         if (rail.currentIndex !== currentIndex)

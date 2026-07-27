@@ -80,7 +80,7 @@ Item {
         const wl = Math.max(8, wavelength)
         const phase = wavePhase
         // Sparse samples — was ~2px (too heavy for FrameAnimation).
-        const stepPx = 6
+        const stepPx = 7
         const steps = Math.max(2, Math.ceil((toX - fromX) / stepPx))
         const pts = []
         for (let i = 0; i <= steps; ++i) {
