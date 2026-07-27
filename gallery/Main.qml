@@ -73,11 +73,15 @@ Md3ApplicationWindow {
         }
     ]
 
+    function startTour() {
+        galleryTour.start(0)
+    }
+
     Component.onCompleted: {
         Md3AppSettings.organization = settingsOrganization
         Md3AppSettings.application = settingsApplication
         if (!Md3AppSettings.value("tour/completed", false))
-            Qt.callLater(function () { galleryTour.start() })
+            Qt.callLater(function () { window.startTour() })
     }
 
     destinations: [
@@ -212,6 +216,14 @@ Md3ApplicationWindow {
             }
 
             trailingContent: [
+                Md3TitleBarButton {
+                    icon: "tour"
+                    buttonWidth: 36
+                    buttonHeight: 28
+                    iconSize: 14
+                    accessibleName: qsTr("开始引导")
+                    onClicked: window.startTour()
+                },
                 Md3TitleBarButton {
                     icon: "tab"
                     buttonWidth: 36
