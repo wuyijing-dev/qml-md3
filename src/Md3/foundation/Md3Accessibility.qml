@@ -60,7 +60,8 @@ QtObject {
         Md3Theme.textScale = textScale
     }
 
-    Connections {
+    // QtObject has no default property — keep Connections as an explicit property.
+    readonly property Connections _themeSync: Connections {
         target: Md3Theme
         function onReduceMotionChanged() { root.reduceMotion = Md3Theme.reduceMotion }
         function onHighContrastChanged() { root.highContrast = Md3Theme.highContrast }
