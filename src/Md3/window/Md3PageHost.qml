@@ -16,6 +16,8 @@ import QtQuick.Window
 Item {
     id: root
     enum LaunchIntensity { Subtle, Normal, Premium }
+    /// Dim = scrim only (sharp text). Frosted = light blur + scrim. Blur = stronger Gaussian.
+    enum LaunchBackdrop { Dim, Frosted, Blur }
 
     property var model: []
     property int currentIndex: 0
@@ -39,6 +41,7 @@ Item {
     property bool predictPrefetch: false
     /// Off by default: ShaderEffectSource holds a full-size GPU texture
     property bool leaveSnapshot: false
+    property real leaveSnapOpacity: 0
     property bool warmStart: false
     property bool showBusyIndicator: false
     property bool showSkeleton: false
@@ -50,6 +53,8 @@ Item {
     property int launchTransitionDuration: Md3Motion.long2
     /// Subtle/Normal/Premium controls launch spring feel and visual strength.
     property int launchIntensity: Md3PageHost.Normal
+    /// Backdrop treatment while launch transition runs (Dim keeps leave text readable).
+    property int launchBackdropEffect: Md3PageHost.Dim
     /// Keep X/Y motion progression proportional to travel distance.
     property bool launchAxisProportional: true
     property bool launchRememberLastSource: true
@@ -334,22 +339,54 @@ Item {
         return 1 - _bezierAt(fadeOut, Md3Motion.standardAccelerate)
     }
 
-    function _launchBackdropOpacity() {
-        if (transitionModeActive !== "launch" || !transitioning || launchReturning)
+    function _launchBackdropStrength() {
+        if (launchIntensity === Md3PageHost.Premium)
+            return 1.0
+        if (launchIntensity === Md3PageHost.Subtle)
+            return 0.75
+        return 0.9
+    }
+
+    function _launchBackdropActive() {
+        return transitionModeActive === "launch" && transitioning && !launchReturning
+    }
+
+    function _launchBackdropFade() {
+        if (!_launchBackdropActive())
             return 0
-        const k = launchIntensity === Md3PageHost.Premium ? 1.0
-                : (launchIntensity === Md3PageHost.Subtle ? 0.75 : 0.9)
+        const k = _launchBackdropStrength()
         const t = transitionProgress
-        return Math.max(0, (1 - t * 0.72) * k)
+        return Math.max(0, (1 - t * 0.68) * k)
+    }
+
+    function _launchBackdropSnapshotOpacity() {
+        return _launchBackdropFade()
+    }
+
+    function _launchBackdropScrimOpacity() {
+        if (!_launchBackdropActive())
+            return 0
+        const fade = _launchBackdropFade()
+        const k = launchBackdropEffect === Md3PageHost.Blur ? 0.26
+                : (launchBackdropEffect === Md3PageHost.Frosted ? 0.44 : 0.56)
+        return fade * k
+    }
+
+    function _launchBackdropOpacity() {
+        return _launchBackdropSnapshotOpacity()
     }
 
     function _launchBackdropBlur() {
-        if (transitionModeActive !== "launch" || !transitioning || launchReturning)
+        if (!_launchBackdropActive() || launchBackdropEffect === Md3PageHost.Dim)
             return 0
-        const k = launchIntensity === Md3PageHost.Premium ? 1.0
-                : (launchIntensity === Md3PageHost.Subtle ? 0.82 : 0.94)
+        const k = _launchBackdropStrength()
         const t = transitionProgress
-        return Math.max(0.55 * k, k * (1 - _bezierAt(t, Md3Motion.emphasizedDecelerate) * 0.38))
+        if (launchBackdropEffect === Md3PageHost.Blur) {
+            return Math.max(0.38 * k,
+                            k * (1 - _bezierAt(t, Md3Motion.emphasizedDecelerate) * 0.42))
+        }
+        const peak = 0.16 * k
+        return Math.max(0.05 * k, peak * (1 - _bezierAt(t, Md3Motion.emphasizedDecelerate) * 0.55))
     }
 
     function _usesArc() {
@@ -571,18 +608,25 @@ Item {
                     Math.max(1, Math.floor(height / 2)))
         leaveSnap.sourceItem = ldr
         leaveSnap.scheduleUpdate()
-        leaveSnap.opacity = 1
+        root.leaveSnapOpacity = 1
+    }
+
+    function _leaveSnapShownOpacity() {
+        if (_launchBackdropActive())
+            return _launchBackdropSnapshotOpacity()
+        return leaveSnapOpacity
     }
 
     function _dismissLeaveSnapshot(immediate) {
-        if (!leaveSnap.sourceItem && leaveSnap.opacity < 0.01)
+        if (!leaveSnap.sourceItem && _leaveSnapShownOpacity() < 0.01)
             return
         if (immediate) {
             leaveSnapFade.stop()
-            leaveSnap.opacity = 0
+            root.leaveSnapOpacity = 0
             leaveSnap.sourceItem = null
             return
         }
+        root.leaveSnapOpacity = _leaveSnapShownOpacity()
         leaveSnapFade.start()
     }
 
@@ -1211,8 +1255,8 @@ Item {
 
     NumberAnimation {
         id: leaveSnapFade
-        target: leaveSnap
-        property: "opacity"
+        target: root
+        property: "leaveSnapOpacity"
         to: 0
         duration: Md3Motion.short3
         easing.type: Easing.BezierSpline
@@ -1337,7 +1381,7 @@ Item {
         }
     }
 
-    // Blurred leave snapshot — always below entering pages (z=1 vs page z=10).
+    // Leave snapshot + backdrop — z=1, below entering pages (z=10).
     Item {
         id: launchBackdropHost
         anchors.fill: parent
@@ -1351,22 +1395,30 @@ Item {
             hideSource: false
             smooth: false
             mipmap: false
-            visible: opacity > 0.01
-            opacity: 0
+            visible: root._leaveSnapShownOpacity() > 0.01
+            opacity: root._leaveSnapShownOpacity()
         }
 
         MultiEffect {
-            id: launchBlur
+            id: launchBackdropTreat
             anchors.fill: leaveSnap
-            visible: leaveSnap.opacity > 0.01 && root._launchBackdropBlur() > 0.01
+            visible: root._leaveSnapShownOpacity() > 0.01 && root._launchBackdropActive()
             source: leaveSnap
-            blurEnabled: true
-            blurMax: 128
-            blurMultiplier: 3.0
+            blurEnabled: root.launchBackdropEffect !== Md3PageHost.Dim
+                         && root._launchBackdropBlur() > 0.005
+            blurMax: root.launchBackdropEffect === Md3PageHost.Blur ? 96 : 24
+            blurMultiplier: root.launchBackdropEffect === Md3PageHost.Blur ? 2.0 : 0.85
             blur: root._launchBackdropBlur()
-            opacity: root._launchBackdropOpacity()
-            saturation: 0.78
-            brightness: -0.08
+            saturation: root.launchBackdropEffect === Md3PageHost.Dim ? 0.84 : 0.9
+            brightness: -0.03
+            contrast: root.launchBackdropEffect === Md3PageHost.Dim ? 0.98 : 1.0
+        }
+
+        Rectangle {
+            anchors.fill: leaveSnap
+            visible: root._launchBackdropScrimOpacity() > 0.01
+            color: Md3Theme.colorScheme.scrim
+            opacity: root._launchBackdropScrimOpacity()
         }
     }
 
@@ -1593,7 +1645,7 @@ Item {
         }
         // Prefer leave snapshot over skeleton when both would show.
         readonly property bool show: root.showSkeleton && root.awaitingTarget
-                                    && leaveSnap.opacity < 0.2
+                                    && root._leaveSnapShownOpacity() < 0.2
         visible: opacity > 0.01
         opacity: show ? 1 : 0
         scale: show ? 1 : 0.98
