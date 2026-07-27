@@ -25,8 +25,18 @@ param(
     [string]$CreateBundleDir = "",
     [switch]$NoZip,
     [switch]$SkipSystemInstall,
-    [bool]$Shared = $true
+    # Accept bool / 1 / 0 / "true" / "false" (QProcess -File always passes strings)
+    $Shared = $true
 )
+
+# Normalize Shared → bool (avoids "System.String → Boolean" when called via -File)
+if ($Shared -is [string]) {
+    $Shared = @("1", "true", "True", "TRUE", "yes", "Yes", "on", "On") -contains $Shared.Trim()
+} elseif ($Shared -is [int] -or $Shared -is [long]) {
+    $Shared = [bool]$Shared
+} else {
+    $Shared = [bool]$Shared
+}
 
 $ErrorActionPreference = "Stop"
 
