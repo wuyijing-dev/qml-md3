@@ -355,6 +355,7 @@ write_basic_package_version_file(
 install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/Md3Config.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/Md3ConfigVersion.cmake
+    ${MD3_ROOT}/cmake/Md3DeployShared.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Md3
 )
 

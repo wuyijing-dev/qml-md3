@@ -214,6 +214,42 @@ if (-not $libHit -and $Shared) {
 }
 if (-not $libHit) { Die "missing libMd3 under $Prefix\lib (or bin) for $SharedLabel build" }
 
+# Shared Release packages also ship a Debug runtime for Qt Creator Debug kits.
+if ($Shared -and $BuildType -eq "Release") {
+    $DebugBuildDir = Join-Path $Root "build-lib-debug"
+    Write-Info "Also building Debug shared Md3 (bin/debug + lib/qml-debug)"
+    if (Test-Path $DebugBuildDir) { Remove-Item -Recurse -Force $DebugBuildDir }
+    & cmake -S $Root -B $DebugBuildDir -G $Generator `
+        -DMD3_BUILD_GALLERY=OFF `
+        "-DMD3_BUILD_SHARED=ON" `
+        "-DCMAKE_BUILD_TYPE=Debug" `
+        "-DCMAKE_INSTALL_PREFIX=$Prefix" `
+        "-DCMAKE_PREFIX_PATH=$QtPrefix"
+    if ($LASTEXITCODE -ne 0) { Die "cmake configure (Debug) failed" }
+    & cmake --build $DebugBuildDir --parallel $Jobs
+    if ($LASTEXITCODE -ne 0) { Die "cmake build (Debug) failed" }
+    $DebugStage = Join-Path $env:TEMP "md3-debug-stage-$PID"
+    if (Test-Path $DebugStage) { Remove-Item -Recurse -Force $DebugStage }
+    & cmake --install $DebugBuildDir --prefix $DebugStage
+    if ($LASTEXITCODE -ne 0) { Die "cmake install (Debug) failed" }
+    $dbgDll = Join-Path $DebugStage "bin\Md3.dll"
+    $dbgQml = Join-Path $DebugStage "lib\qml"
+    if (Test-Path $dbgDll) {
+        $dbgBinDir = Join-Path $Prefix "bin\debug"
+        New-Item -ItemType Directory -Force -Path $dbgBinDir | Out-Null
+        Copy-Item -Force $dbgDll (Join-Path $dbgBinDir "Md3.dll")
+        if (Test-Path $dbgQml) {
+            $dbgQmlOut = Join-Path $Prefix "lib\qml-debug"
+            if (Test-Path $dbgQmlOut) { Remove-Item -Recurse -Force $dbgQmlOut }
+            Copy-Item -Recurse -Force $dbgQml $dbgQmlOut
+        }
+        Write-Info "Debug Md3 staged: bin/debug/Md3.dll + lib/qml-debug/"
+    } else {
+        Write-Info "Warning: Debug Md3.dll not found after Debug build — skip bin/debug"
+    }
+    if (Test-Path $DebugStage) { Remove-Item -Recurse -Force $DebugStage }
+}
+
 $readme = @"
 # Md3 packaged library (Windows, $SharedLabel)
 
@@ -224,6 +260,8 @@ Built by ``scripts/package-windows.ps1`` from QML_MD3.
 | Path | Content |
 |------|---------|
 | ``lib\`` / ``bin\`` | Core library ($SharedLabel) + plugin |
+| ``bin\debug\`` | Debug ``Md3.dll`` (shared Release packages only) |
+| ``lib\qml-debug\`` | Debug QML plugin tree (shared Release packages only) |
 | ``lib\Md3\stubs\`` | Static init sources (static builds) |
 | ``lib\qml\Md3\`` | qmldir / qmltypes |
 | ``lib\cmake\Md3\`` | find_package(Md3) |

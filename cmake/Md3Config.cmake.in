@@ -238,7 +238,7 @@ if (TARGET Md3plugin AND NOT TARGET Md3::QmlPlugin)
     add_library(Md3::QmlPlugin INTERFACE IMPORTED GLOBAL)
     if (_MD3_PACKAGE_SHARED)
         set_target_properties(Md3::QmlPlugin PROPERTIES
-            INTERFACE_LINK_LIBRARIES "Md3::Md3"
+            INTERFACE_LINK_LIBRARIES "Md3::Md3;Md3plugin"
         )
     else()
         set(_md3_qml_link "")
