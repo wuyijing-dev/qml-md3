@@ -312,6 +312,67 @@ Flickable {
             }
         }
 
+        Text {
+            text: qsTr("Accessibility")
+            color: Md3Theme.colorScheme.colorOnSurface
+            font.pixelSize: Md3Theme.typography.titleMedium.size
+            font.family: Md3Theme.typography.fontFamily
+            Layout.topMargin: 8
+        }
+
+        RowLayout {
+            spacing: 12
+            Layout.fillWidth: true
+            Text {
+                text: qsTr("减弱动效")
+                color: Md3Theme.colorScheme.colorOnSurface
+                Layout.fillWidth: true
+            }
+            Md3Switch {
+                checked: Md3Theme.reduceMotion
+                accessibleName: qsTr("减弱动效")
+                onToggled: function (on) {
+                    Md3Theme.reduceMotion = on
+                    Md3Accessibility.announce(on ? qsTr("已开启减弱动效") : qsTr("已关闭减弱动效"))
+                }
+            }
+        }
+
+        RowLayout {
+            spacing: 12
+            Layout.fillWidth: true
+            Text {
+                text: qsTr("高对比度")
+                color: Md3Theme.colorScheme.colorOnSurface
+                Layout.fillWidth: true
+            }
+            Md3Switch {
+                checked: Md3Theme.highContrast
+                accessibleName: qsTr("高对比度")
+                onToggled: function (on) {
+                    Md3Theme.highContrast = on
+                    Md3Accessibility.announce(on ? qsTr("已开启高对比度") : qsTr("已关闭高对比度"))
+                }
+            }
+        }
+
+        RowLayout {
+            spacing: 12
+            Layout.fillWidth: true
+            Text {
+                text: qsTr("始终显示焦点环")
+                color: Md3Theme.colorScheme.colorOnSurface
+                Layout.fillWidth: true
+            }
+            Md3Switch {
+                checked: Md3Accessibility.showFocusRings
+                accessibleName: qsTr("始终显示焦点环")
+                onToggled: function (on) {
+                    Md3Accessibility.showFocusRings = on
+                }
+            }
+        }
+
         RowLayout {
             spacing: 12
             Text {

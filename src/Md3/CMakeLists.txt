@@ -73,6 +73,7 @@ endif()
 set_source_files_properties(
     foundation/Md3Theme.qml
     foundation/Md3Motion.qml
+    foundation/Md3Accessibility.qml
     window/Md3WindowCapabilities.qml
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE
 )
@@ -111,6 +112,7 @@ qt_add_qml_module(Md3
     QML_FILES
         foundation/Md3Theme.qml
         foundation/Md3Motion.qml
+        foundation/Md3Accessibility.qml
         foundation/Md3ColorScheme.qml
         foundation/Md3DynamicScheme.qml
         foundation/Md3Typography.qml

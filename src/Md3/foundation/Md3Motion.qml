@@ -5,22 +5,27 @@ QtObject {
     id: root
 
     // Durations — Flutter material/motion.dart (original library pacing)
-    readonly property int short1: 50
-    readonly property int short2: 100
-    readonly property int short3: 150
-    readonly property int short4: 200
-    readonly property int medium1: 250
-    readonly property int medium2: 300
-    readonly property int medium3: 350
-    readonly property int medium4: 400
-    readonly property int long1: 450
-    readonly property int long2: 500
-    readonly property int long3: 550
-    readonly property int long4: 600
-    readonly property int extraLong1: 700
-    readonly property int extraLong2: 800
-    readonly property int extraLong3: 900
-    readonly property int extraLong4: 1000
+    // When Md3Theme.reduceMotion is on, tokens collapse to ~1ms.
+    readonly property int short1: _d(50)
+    readonly property int short2: _d(100)
+    readonly property int short3: _d(150)
+    readonly property int short4: _d(200)
+    readonly property int medium1: _d(250)
+    readonly property int medium2: _d(300)
+    readonly property int medium3: _d(350)
+    readonly property int medium4: _d(400)
+    readonly property int long1: _d(450)
+    readonly property int long2: _d(500)
+    readonly property int long3: _d(550)
+    readonly property int long4: _d(600)
+    readonly property int extraLong1: _d(700)
+    readonly property int extraLong2: _d(800)
+    readonly property int extraLong3: _d(900)
+    readonly property int extraLong4: _d(1000)
+
+    function _d(ms) {
+        return (Md3Theme && Md3Theme.reduceMotion) ? 1 : ms
+    }
 
     // Original M3 / Flutter easings
     readonly property var emphasized: [0.2, 0.0, 0.0, 1.0]
@@ -123,17 +128,20 @@ QtObject {
     }
 
     function durationFor(kind) {
-        switch (kind) {
-        case "ripple": return rippleDuration
-        case "state": return stateDuration
-        case "menu": return menuDuration
-        case "overlay": return overlayDuration
-        case "spatial": return spatialDuration
-        case "spatialSnap": return spatialSnapDuration
-        case "effects": return effectsDuration
-        case "enter": return medium4
-        case "exit": return short4
-        default: return uiDuration
-        }
+        const ms = (function () {
+            switch (kind) {
+            case "ripple": return 200
+            case "state": return 100
+            case "menu": return 150
+            case "overlay": return 100
+            case "spatial": return 400
+            case "spatialSnap": return 300
+            case "effects": return 200
+            case "enter": return 400
+            case "exit": return 200
+            default: return 300
+            }
+        })()
+        return _d(ms)
     }
 }

@@ -29,6 +29,10 @@ Item {
     property var suggestions: []
     property int suggestionLimit: 6
     property bool suggestionOpen: false
+    /// Keyboard highlight in the suggestion list (-1 = none).
+    property int suggestionIndex: -1
+    property string accessibleName: ""
+    property string accessibleDescription: ""
 
     signal trailingClicked()
     signal accepted()
@@ -41,6 +45,16 @@ Item {
     readonly property color activeColor: hasError ? Md3Theme.colorScheme.error
                                                   : Md3Theme.colorScheme.primary
     readonly property color fieldSurface: Md3Theme.colorScheme.surface
+
+    activeFocusOnTab: enabled
+    Accessible.name: accessibleName.length ? accessibleName : (label.length ? label : qsTr("Text field"))
+    Accessible.description: accessibleDescription.length ? accessibleDescription
+                            : (hasError && errorText.length ? errorText : supportingText)
+    Accessible.role: Accessible.EditableText
+    Accessible.editable: true
+    Accessible.readOnly: !enabled
+    Accessible.multiLine: multiline
+    Accessible.passwordEdit: password && !passwordVisible
 
     readonly property string effectiveTrailingIcon: {
         if (password)
@@ -83,29 +97,74 @@ Item {
     }
 
     function applySuggestion(s) {
+        if (s === undefined || s === null)
+            return
         input.text = _suggestionValue(s)
         suggestionOpen = false
+        suggestionIndex = -1
         suggestionChosen(s)
+        Md3Accessibility.announce(qsTr("已选择 %1").arg(_suggestionLabel(s)))
         input.forceActiveFocus()
     }
 
-    function _syncSuggestionPopup() {
-        suggestionOpen = autoComplete && enabled && !password && !multiline
-                && focused && filteredSuggestions.length > 0
+    function applyHighlightedSuggestion() {
+        if (!suggestionOpen || filteredSuggestions.length === 0)
+            return false
+        const i = suggestionIndex >= 0 ? suggestionIndex : 0
+        applySuggestion(filteredSuggestions[Math.min(i, filteredSuggestions.length - 1)])
+        return true
     }
 
-    onFilteredSuggestionsChanged: _syncSuggestionPopup()
+    function moveSuggestionHighlight(delta) {
+        if (!autoComplete || !enabled)
+            return
+        _syncSuggestionPopup()
+        if (!suggestionOpen || filteredSuggestions.length === 0)
+            return
+        const n = filteredSuggestions.length
+        if (suggestionIndex < 0)
+            suggestionIndex = delta > 0 ? 0 : n - 1
+        else
+            suggestionIndex = (suggestionIndex + delta + n) % n
+        filteredList.positionViewAtIndex(suggestionIndex, ListView.Contain)
+        Md3Accessibility.announce(_suggestionLabel(filteredSuggestions[suggestionIndex]))
+    }
+
+    function _syncSuggestionPopup() {
+        const open = autoComplete && enabled && !password && !multiline
+                && focused && filteredSuggestions.length > 0
+        suggestionOpen = open
+        if (!open)
+            suggestionIndex = -1
+        else if (suggestionIndex >= filteredSuggestions.length)
+            suggestionIndex = filteredSuggestions.length - 1
+    }
+
+    onFilteredSuggestionsChanged: {
+        if (suggestionIndex >= filteredSuggestions.length)
+            suggestionIndex = filteredSuggestions.length > 0 ? filteredSuggestions.length - 1 : -1
+        _syncSuggestionPopup()
+    }
     onFocusedChanged: {
         if (!focused)
             Qt.callLater(function () {
-                if (!focused)
+                if (!focused) {
                     suggestionOpen = false
+                    suggestionIndex = -1
+                }
             })
         else
             _syncSuggestionPopup()
     }
     onAutoCompleteChanged: _syncSuggestionPopup()
-    onTextChanged: if (autoComplete && focused) _syncSuggestionPopup()
+    onTextChanged: {
+        if (autoComplete && focused) {
+            // Typing resets highlight so Enter applies the top match unless arrows used
+            if (suggestionIndex >= 0)
+                suggestionIndex = -1
+            _syncSuggestionPopup()
+        }
+    }
 
     implicitWidth: 280
     implicitHeight: (multiline ? Math.max(56, input.contentHeight + 32) : 56)
@@ -259,13 +318,42 @@ Item {
                                                                        : TextInput.Normal
                     wrapMode: root.multiline ? TextInput.Wrap : TextInput.NoWrap
                     clip: true
-                    onAccepted: {
-                        if (root.suggestionOpen && root.filteredSuggestions.length > 0) {
-                            root.applySuggestion(root.filteredSuggestions[0])
+                    Keys.priority: Keys.BeforeItem
+                    Keys.onPressed: function (event) {
+                        if (!root.autoComplete)
                             return
+                        if (event.key === Qt.Key_Down) {
+                            root.moveSuggestionHighlight(1)
+                            event.accepted = true
+                        } else if (event.key === Qt.Key_Up) {
+                            root.moveSuggestionHighlight(-1)
+                            event.accepted = true
+                        } else if (event.key === Qt.Key_Escape) {
+                            if (root.suggestionOpen) {
+                                root.suggestionOpen = false
+                                root.suggestionIndex = -1
+                                event.accepted = true
+                            }
+                        } else if (event.key === Qt.Key_Tab && root.suggestionOpen
+                                   && root.suggestionIndex >= 0) {
+                            root.applyHighlightedSuggestion()
+                            event.accepted = true
                         }
+                    }
+                    onAccepted: {
+                        if (root.applyHighlightedSuggestion())
+                            return
                         root.accepted()
                     }
+                }
+
+                Md3FocusRing {
+                    anchors.fill: parent
+                    anchors.margins: -3
+                    radius: Md3Theme.shape.extraSmall
+                    focused: input.activeFocus
+                    controlEnabled: root.enabled
+                    visualFocus: Md3Accessibility.showFocusRings && input.activeFocus
                 }
 
                 Text {
@@ -426,18 +514,31 @@ Item {
             clip: true
             model: root.filteredSuggestions
             spacing: 0
+            currentIndex: root.suggestionIndex
+            keyNavigationEnabled: false
+            Accessible.role: Accessible.List
+            Accessible.name: qsTr("建议")
+
             delegate: Item {
                 required property var modelData
                 required property int index
                 width: filteredList.width
                 height: 40
 
+                readonly property bool highlighted: index === root.suggestionIndex
+                        || (root.suggestionIndex < 0 && index === 0 && rowMouse.containsMouse)
+                        || rowMouse.containsMouse
+
                 Rectangle {
                     anchors.fill: parent
                     radius: Md3Theme.shape.small
-                    color: rowMouse.containsMouse
-                           ? Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.colorOnSurface, 0.08)
-                           : "transparent"
+                    color: {
+                        if (index === root.suggestionIndex)
+                            return Md3Theme.colorScheme.secondaryContainer
+                        if (rowMouse.containsMouse)
+                            return Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.colorOnSurface, 0.08)
+                        return "transparent"
+                    }
                 }
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
@@ -447,7 +548,9 @@ Item {
                     anchors.rightMargin: 12
                     text: root._suggestionLabel(modelData)
                     elide: Text.ElideRight
-                    color: Md3Theme.colorScheme.colorOnSurface
+                    color: index === root.suggestionIndex
+                           ? Md3Theme.colorScheme.colorOnSecondaryContainer
+                           : Md3Theme.colorScheme.colorOnSurface
                     font.family: Md3Theme.typography.fontFamily
                     font.pixelSize: Md3Theme.typography.bodyLarge.size
                 }
@@ -456,8 +559,12 @@ Item {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
+                    onEntered: root.suggestionIndex = index
                     onClicked: root.applySuggestion(modelData)
                 }
+                Accessible.role: Accessible.ListItem
+                Accessible.name: root._suggestionLabel(modelData)
+                Accessible.onPressAction: root.applySuggestion(modelData)
             }
         }
     }

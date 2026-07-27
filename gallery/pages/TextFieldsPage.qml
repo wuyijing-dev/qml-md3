@@ -61,8 +61,10 @@ Flickable {
             Layout.maximumWidth: 360
             variant: Md3TextField.Outlined
             label: qsTr("城市（AutoComplete）")
-            supportingText: qsTr("输入以过滤建议")
+            supportingText: qsTr("↑↓ 选择 · Enter 确认 · Esc 关闭")
             autoComplete: true
+            accessibleName: qsTr("城市")
+            accessibleDescription: qsTr("带自动完成的城市输入")
             suggestions: [
                 "Beijing", "Shanghai", "Guangzhou", "Shenzhen",
                 "Hangzhou", "Chengdu", "Wuhan", "Nanjing",

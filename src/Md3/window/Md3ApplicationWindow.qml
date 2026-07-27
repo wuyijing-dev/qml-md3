@@ -445,6 +445,14 @@ Window {
             root._scheduleSessionSave()
         }
         function onSeedChanged() { root._scheduleSessionSave() }
+        function onReduceMotionChanged() { root._scheduleSessionSave() }
+        function onHighContrastChanged() { root._scheduleSessionSave() }
+        function onTextScaleChanged() { root._scheduleSessionSave() }
+    }
+
+    Connections {
+        target: Md3Accessibility
+        function onShowFocusRingsChanged() { root._scheduleSessionSave() }
     }
 
     function restoreSession() {
@@ -467,6 +475,10 @@ Window {
         Md3Theme.dark = !!dark
         if (seed !== undefined && String(seed).length > 0)
             Md3Theme.applySeed(seed)
+        Md3Theme.reduceMotion = !!Md3AppSettings.value("a11y/reduceMotion", Md3Theme.reduceMotion)
+        Md3Theme.highContrast = !!Md3AppSettings.value("a11y/highContrast", Md3Theme.highContrast)
+        Md3Theme.textScale = Number(Md3AppSettings.value("a11y/textScale", Md3Theme.textScale))
+        Md3Accessibility.showFocusRings = !!Md3AppSettings.value("a11y/showFocusRings", Md3Accessibility.showFocusRings)
         railExpanded = !!Md3AppSettings.value("shell/railExpanded", railExpanded)
         const page = Number(Md3AppSettings.value("shell/pageIndex", currentIndex))
         if (usesDestinations && page >= 0 && page < destinations.length)
@@ -485,6 +497,10 @@ Window {
         Md3AppSettings.setValue("window/height", height)
         Md3AppSettings.setValue("theme/dark", Md3Theme.dark)
         Md3AppSettings.setValue("theme/seed", String(Md3Theme.seed))
+        Md3AppSettings.setValue("a11y/reduceMotion", Md3Theme.reduceMotion)
+        Md3AppSettings.setValue("a11y/highContrast", Md3Theme.highContrast)
+        Md3AppSettings.setValue("a11y/textScale", Md3Theme.textScale)
+        Md3AppSettings.setValue("a11y/showFocusRings", Md3Accessibility.showFocusRings)
         Md3AppSettings.setValue("shell/railExpanded", railExpanded)
         Md3AppSettings.setValue("shell/pageIndex", currentIndex)
         Md3AppSettings.sync()
@@ -985,6 +1001,17 @@ Window {
                 id: overlayHost
                 anchors.fill: parent
                 z: 1000
+            }
+
+            // Screen-reader live region for Md3Accessibility.announce()
+            Text {
+                id: a11yLiveRegion
+                width: 1
+                height: 1
+                opacity: 0
+                Accessible.role: Accessible.StaticText
+                Accessible.name: Md3Accessibility.liveMessage
+                Accessible.ignored: Md3Accessibility.liveMessage.length === 0
             }
 
             Md3HotReload {

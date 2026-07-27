@@ -215,6 +215,12 @@ Rectangle {
                     root._selectDest(dest.destIndex)
                 }
             }
+
+            Accessible.name: modelData.label !== undefined ? modelData.label : qsTr("Destination")
+            Accessible.role: Accessible.PageTab
+            Accessible.checkable: true
+            Accessible.checked: dest.selected
+            Accessible.onPressAction: root._selectDest(dest.destIndex)
         }
     }
 

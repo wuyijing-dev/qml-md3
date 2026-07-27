@@ -357,6 +357,10 @@ Item {
         opacity: 1
         scale: 1
 
+        Accessible.role: Accessible.Dialog
+        Accessible.name: root.currentStep && root.currentStep.title ? root.currentStep.title : qsTr("引导")
+        Accessible.description: root.currentStep && root.currentStep.body ? root.currentStep.body : ""
+
         Md3Shadow {
             anchors.fill: parent
             elevation: 3
