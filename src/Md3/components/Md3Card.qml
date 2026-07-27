@@ -7,7 +7,7 @@ Item {
 
     property int variant: Md3Card.Elevated
     property bool clickable: false
-    property bool enabled: true
+    // Use Item.enabled (do not redeclare — Qt 6.11 warns on override)
     property real padding: 16
     default property alias content: contentHost.data
 

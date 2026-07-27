@@ -264,6 +264,8 @@ Window {
                         item.showMaximize = Qt.binding(function () { return root.showMaximizeButton })
                     if (item.showThemeToggle !== undefined)
                         item.showThemeToggle = Qt.binding(function () { return root.showThemeToggle })
+                    if (item.showAboutButton !== undefined)
+                        item.showAboutButton = false
                     if (item.showClose !== undefined)
                         item.showClose = Qt.binding(function () { return root.closable })
                     if (item.pinToggled) {
@@ -281,6 +283,7 @@ Window {
                     appIcon: root.windowIcon
                     showAppIcon: true
                     showThemeToggle: root.showThemeToggle
+                    showAboutButton: false
                     showPin: root.showPinButton
                     pinned: root.pinned
                     showMinimize: root.showMinimizeButton

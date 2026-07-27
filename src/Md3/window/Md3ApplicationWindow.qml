@@ -358,6 +358,35 @@ Window {
         toggleThemeAt(p.x, p.y)
     }
 
+    function _resolvedAboutName() {
+        if (aboutAppName.length > 0)
+            return aboutAppName
+        if (Qt.application.displayName && Qt.application.displayName.length > 0)
+            return Qt.application.displayName
+        if (Qt.application.name && Qt.application.name.length > 0)
+            return Qt.application.name
+        return root.title.length > 0 ? root.title : qsTr("Application")
+    }
+
+    function _resolvedAboutVersion() {
+        if (aboutVersion.length > 0)
+            return aboutVersion
+        return (Qt.application.version && Qt.application.version.length > 0)
+                ? Qt.application.version : ""
+    }
+
+    function _resolvedAboutOrganization() {
+        if (aboutOrganization.length > 0)
+            return aboutOrganization
+        return (Qt.application.organization && Qt.application.organization.length > 0)
+                ? Qt.application.organization : ""
+    }
+
+    /// Open modeless About dialog (also used by Md3TitleBar info button).
+    function openAbout() {
+        aboutDialog.openDialog(root)
+    }
+
     property real themeRevealCx: 0
     property real themeRevealCy: 0
     property real themeRevealRadius: 0
@@ -923,6 +952,104 @@ Window {
             }
 
             // Optional independent non-modal window
+            Md3DialogWindow {
+                id: aboutDialog
+                title: qsTr("关于")
+                width: 420
+                height: 320
+                minimumWidth: 320
+                minimumHeight: 240
+                dialogModality: Qt.NonModal
+                showStandardButtons: true
+                showDismiss: false
+                confirmText: qsTr("关闭")
+                showThemeToggle: false
+                showMinimizeButton: false
+                showMaximizeButton: false
+                showPinButton: true
+                owner: root
+                windowIcon: root.aboutIcon.toString().length > 0 ? root.aboutIcon : root.windowIcon
+                onConfirmed: aboutDialog.closeDialog()
+
+                Column {
+                    anchors.fill: parent
+                    spacing: 14
+
+                    Row {
+                        spacing: 14
+                        width: parent.width
+
+                        Item {
+                            width: 56
+                            height: 56
+                            visible: (root.aboutIcon.toString().length > 0
+                                      || root.windowIcon.toString().length > 0)
+                            Image {
+                                anchors.fill: parent
+                                source: root.aboutIcon.toString().length > 0
+                                        ? root.aboutIcon : root.windowIcon
+                                fillMode: Image.PreserveAspectFit
+                                smooth: true
+                                mipmap: true
+                            }
+                        }
+
+                        Column {
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 4
+                            width: parent.width - ((root.aboutIcon.toString().length > 0
+                                                   || root.windowIcon.toString().length > 0) ? 70 : 0)
+
+                            Text {
+                                width: parent.width
+                                text: root._resolvedAboutName()
+                                color: Md3Theme.colorScheme.colorOnSurface
+                                font.family: Md3Theme.typography.fontFamily
+                                font.pixelSize: Md3Theme.typography.titleMedium.size
+                                font.weight: Font.Medium
+                                wrapMode: Text.Wrap
+                            }
+                            Text {
+                                visible: root._resolvedAboutVersion().length > 0
+                                text: qsTr("版本 %1").arg(root._resolvedAboutVersion())
+                                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                                font.family: Md3Theme.typography.fontFamily
+                                font.pixelSize: Md3Theme.typography.bodyMedium.size
+                            }
+                            Text {
+                                visible: root._resolvedAboutOrganization().length > 0
+                                text: root._resolvedAboutOrganization()
+                                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                                font.family: Md3Theme.typography.fontFamily
+                                font.pixelSize: Md3Theme.typography.bodySmall.size
+                            }
+                        }
+                    }
+
+                    Md3Divider {
+                        width: parent.width
+                    }
+
+                    Loader {
+                        width: parent.width
+                        active: root.aboutContent !== null
+                        sourceComponent: root.aboutContent
+                    }
+
+                    Text {
+                        visible: root.aboutContent === null
+                        width: parent.width
+                        wrapMode: Text.Wrap
+                        text: root.aboutText.length > 0
+                              ? root.aboutText
+                              : qsTr("基于 Md3（Material Design 3）组件库构建。")
+                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                        font.family: Md3Theme.typography.fontFamily
+                        font.pixelSize: Md3Theme.typography.bodyMedium.size
+                    }
+                }
+            }
+
             Md3DialogWindow {
                 id: perfDialog
                 title: qsTr("Performance")

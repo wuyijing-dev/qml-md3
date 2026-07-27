@@ -73,9 +73,9 @@ import Md3
 
 | Method | Defined in | Description |
 |--------|------------|-------------|
+| `openAbout()` | `Md3TitleBar` | Delegates to `targetWindow.openAbout()` when available |
 | `setPinned(onTop)` | `Md3TitleBar` | — |
 | `togglePinned()` | `Md3TitleBar` | — |
-| `openAbout()` | `Md3TitleBar` | Open modeless About `Md3DialogWindow` |
 | `reportNativeHits()` | `Md3TitleBar` | — |
 | `openSystemMenu(globalX, globalY)` | `Md3TitleBar` | — |
 

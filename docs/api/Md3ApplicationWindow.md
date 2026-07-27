@@ -114,6 +114,7 @@ import Md3
 | `tearOffTab(index, globalX, globalY)` | `Md3ApplicationWindow` | Tear-off windows removed — signal only for apps that want custom handling. |
 | `toggleThemeAt(x, y)` | `Md3ApplicationWindow` | Toggle theme with circular reveal from a point in chrome / contentItem coords. |
 | `toggleThemeFrom(item)` | `Md3ApplicationWindow` | Toggle theme revealing from the center of `item` (mapped into the window chrome). |
+| `openAbout()` | `Md3ApplicationWindow` | Open modeless About dialog (title-bar info button) |
 | `toCssColor(c)` | `Md3ApplicationWindow` | Hex helper for Gallery / apps (accepts color or string). |
 | `setNativeBorderColor(c)` | `Md3ApplicationWindow` | — |
 | `setSystemBackdropMode(mode)` | `Md3ApplicationWindow` | UNSUITABLE FOR PRODUCTION — API retained; Gallery no longer exposes it. |
