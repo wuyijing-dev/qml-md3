@@ -165,6 +165,11 @@ qt_add_qml_module(Md3
         components/Md3Dialog.qml
         components/Md3FullscreenDialog.qml
         components/Md3BottomSheet.qml
+        components/Md3SideSheet.qml
+        components/Md3SplitView.qml
+        components/Md3Breadcrumb.qml
+        components/Md3CommandPalette.qml
+        components/Md3SnackbarHost.qml
         components/Md3Badge.qml
         components/Md3Badged.qml
         components/Md3LinearProgressIndicator.qml

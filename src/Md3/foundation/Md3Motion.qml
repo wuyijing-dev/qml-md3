@@ -4,24 +4,24 @@ import QtQuick
 QtObject {
     id: root
 
-    // Durations — Flutter material/motion.dart (original library pacing)
+    // Durations — M3 pacing, slowed ~1.5× for clearer motion (was Flutter-default snap).
     // When Md3Theme.reduceMotion is on, tokens collapse to ~1ms.
-    readonly property int short1: _d(50)
-    readonly property int short2: _d(100)
-    readonly property int short3: _d(150)
-    readonly property int short4: _d(200)
-    readonly property int medium1: _d(250)
-    readonly property int medium2: _d(300)
-    readonly property int medium3: _d(350)
-    readonly property int medium4: _d(400)
-    readonly property int long1: _d(450)
-    readonly property int long2: _d(500)
-    readonly property int long3: _d(550)
-    readonly property int long4: _d(600)
-    readonly property int extraLong1: _d(700)
-    readonly property int extraLong2: _d(800)
-    readonly property int extraLong3: _d(900)
-    readonly property int extraLong4: _d(1000)
+    readonly property int short1: _d(80)
+    readonly property int short2: _d(150)
+    readonly property int short3: _d(220)
+    readonly property int short4: _d(300)
+    readonly property int medium1: _d(380)
+    readonly property int medium2: _d(450)
+    readonly property int medium3: _d(520)
+    readonly property int medium4: _d(600)
+    readonly property int long1: _d(680)
+    readonly property int long2: _d(750)
+    readonly property int long3: _d(820)
+    readonly property int long4: _d(900)
+    readonly property int extraLong1: _d(1050)
+    readonly property int extraLong2: _d(1200)
+    readonly property int extraLong3: _d(1350)
+    readonly property int extraLong4: _d(1500)
 
     function _d(ms) {
         return (Md3Theme && Md3Theme.reduceMotion) ? 1 : ms
@@ -64,35 +64,36 @@ QtObject {
     readonly property int rippleDuration: medium2
     readonly property int stateDuration: short2
 
-    readonly property real springSnap: 5.0
-    readonly property real dampingSnap: 0.55
+    readonly property real springSnap: 4.2
+    readonly property real dampingSnap: 0.58
     readonly property real massSnap: 1.0
     readonly property real epsilonSnap: 0.1
 
-    readonly property real springSoft: 3.5
-    readonly property real dampingSoft: 0.5
+    readonly property real springSoft: 3.0
+    readonly property real dampingSoft: 0.52
     readonly property real massSoft: 1.0
     readonly property real epsilonSoft: 0.35
 
-    readonly property real springMenu: 4.5
-    readonly property real dampingMenu: 0.55
+    readonly property real springMenu: 3.8
+    readonly property real dampingMenu: 0.58
+    readonly property real massMenu: 1.0
     readonly property real epsilonMenu: 0.02
 
-    // Smoothed velocities tuned to ≈ original 200–400ms feel (still Sync-interruptible)
-    readonly property real smoothSnapVelocity: 110
-    readonly property real smoothPanelVelocity: 520
-    readonly property real smoothOpacityVelocity: 3.0
-    readonly property real smoothOpacityFastVelocity: 5.0
-    readonly property real smoothScaleVelocity: 1.8
-    readonly property int smoothSnapEasing: 140
-    readonly property int smoothPanelEasing: 160
-    readonly property int smoothMaxEasing: 180
+    // Smoothed velocities — slower settle to match longer duration tokens
+    readonly property real smoothSnapVelocity: 75
+    readonly property real smoothPanelVelocity: 360
+    readonly property real smoothOpacityVelocity: 2.2
+    readonly property real smoothOpacityFastVelocity: 3.5
+    readonly property real smoothScaleVelocity: 1.3
+    readonly property int smoothSnapEasing: 200
+    readonly property int smoothPanelEasing: 240
+    readonly property int smoothMaxEasing: 280
 
-    // Indeterminate progress — continuous loops (snappier than earlier leisurely set)
-    readonly property int progressTravel: 1800
-    readonly property int progressSpin: 1600
-    readonly property int progressSweep: 1100
-    readonly property int progressWave: 2400
+    // Indeterminate progress — continuous loops
+    readonly property int progressTravel: 2200
+    readonly property int progressSpin: 2000
+    readonly property int progressSweep: 1400
+    readonly property int progressWave: 2800
 
     function curve(token) {
         const p = root[token]
@@ -130,16 +131,16 @@ QtObject {
     function durationFor(kind) {
         const ms = (function () {
             switch (kind) {
-            case "ripple": return 200
-            case "state": return 100
-            case "menu": return 150
-            case "overlay": return 100
-            case "spatial": return 400
-            case "spatialSnap": return 300
-            case "effects": return 200
-            case "enter": return 400
-            case "exit": return 200
-            default: return 300
+            case "ripple": return 300
+            case "state": return 150
+            case "menu": return 220
+            case "overlay": return 150
+            case "spatial": return 600
+            case "spatialSnap": return 450
+            case "effects": return 300
+            case "enter": return 600
+            case "exit": return 300
+            default: return 450
             }
         })()
         return _d(ms)

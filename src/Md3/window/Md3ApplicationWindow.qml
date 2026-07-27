@@ -14,6 +14,7 @@ Window {
     property alias titleBarItem: titleBarLoader.item
     property alias overlay: overlayHost.data
     property alias overlayItem: overlayHost
+    property alias snackbarHostItem: snackbarHost
     property Component titleBar: null
     /// App icon for title bar + taskbar / Alt-Tab (qrc or file URL)
     property url windowIcon: ""
@@ -416,6 +417,11 @@ Window {
     /// Open modeless About dialog (also used by Md3TitleBar info button).
     function openAbout() {
         aboutDialog.openDialog(root)
+    }
+
+    /// Enqueue a snackbar on the window host. options: { actionText, dualLine, durationMs, id }
+    function showSnackbar(message, options) {
+        return snackbarHost.show(message, options)
     }
 
     property real themeRevealCx: 0
@@ -1019,6 +1025,15 @@ Window {
                 id: overlayHost
                 anchors.fill: parent
                 z: 1000
+            }
+
+            Md3SnackbarHost {
+                id: snackbarHost
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                dodgeBottom: perfDockHost.wantVisible ? (perfPanel.height + 28) : 0
+                z: 1200
             }
 
             // Screen-reader live region for Md3Accessibility.announce()

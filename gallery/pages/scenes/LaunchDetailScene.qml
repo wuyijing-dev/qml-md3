@@ -29,12 +29,37 @@ Item {
         return qsTr("Whole-page route opened from source bounds.")
     }
 
+    readonly property var crumbModel: {
+        const items = [{ title: qsTr("列表打开"), icon: "list_alt" }]
+        const depth = navDepth
+        for (let i = 0; i < depth; ++i) {
+            if (i === depth - 1)
+                items.push({ title: detailTitle, icon: "description" })
+            else
+                items.push({ title: qsTr("层级 %1").arg(i + 1), icon: "folder" })
+        }
+        if (depth === 0)
+            items.push({ title: detailTitle, icon: "description" })
+        return items
+    }
+
     function _back() {
         const win = Window.window
         if (!win)
             return
-        if (!win.goBack())
+        win.goBack()
+    }
+
+    function _goCrumb(index) {
+        const win = Window.window
+        if (!win)
             return
+        // index 0 = list root → pop entire stack
+        const pops = Math.max(0, crumbModel.length - 1 - index)
+        for (let i = 0; i < pops; ++i) {
+            if (!win.goBack())
+                break
+        }
     }
 
     function _openLevel2() {
@@ -63,6 +88,15 @@ Item {
             leadingIcon: "arrow_back"
             size: Md3TopAppBar.Small
             onLeadingClicked: root._back()
+        }
+
+        Md3Breadcrumb {
+            Layout.fillWidth: true
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            Layout.topMargin: 8
+            model: root.crumbModel
+            onCrumbClicked: function (index) { root._goCrumb(index) }
         }
 
         Rectangle {

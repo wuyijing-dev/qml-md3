@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Window
 import Md3
 
 Item {
@@ -157,12 +158,30 @@ Item {
 
             Md3Button {
                 text: "Show snackbar"
-                onClicked: snack.show("Message sent")
+                onClicked: {
+                    const win = Window.window
+                    if (win && typeof win.showSnackbar === "function")
+                        win.showSnackbar(qsTr("Message sent"), { actionText: qsTr("Undo") })
+                    else
+                        snack.show(qsTr("Message sent"))
+                }
+            }
+            Md3Button {
+                text: qsTr("Queue 3 snackbars")
+                variant: Md3Button.Outlined
+                onClicked: {
+                    const win = Window.window
+                    if (!win || typeof win.showSnackbar !== "function")
+                        return
+                    win.showSnackbar(qsTr("First notice"))
+                    win.showSnackbar(qsTr("Second notice"), { actionText: qsTr("View") })
+                    win.showSnackbar(qsTr("Third notice — stacked / queued via Md3SnackbarHost"))
+                }
             }
         }
     }
 
-    // Viewport overlay (not Flickable contentItem) so snackbar sits at screen bottom
+    // Fallback when not hosted in Md3ApplicationWindow
     Md3Snackbar {
         id: snack
         anchors.left: parent.left

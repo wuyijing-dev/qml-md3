@@ -58,7 +58,7 @@ Md3ApplicationWindow {
                 {
                     target: window.titleBarItem,
                     title: qsTr("标题栏"),
-                    body: qsTr("可切换明暗主题、打开性能面板，并使用标签浏览多个页面。"),
+                    body: qsTr("可切换明暗主题、打开性能面板；Ctrl+K 打开命令面板。"),
                     placement: "bottom"
                 },
                 {
@@ -70,8 +70,67 @@ Md3ApplicationWindow {
             ]
             onFinished: Md3AppSettings.setValue("tour/completed", true)
             onSkipped: Md3AppSettings.setValue("tour/completed", true)
+        },
+        Md3CommandPalette {
+            id: commandPalette
+            anchors.fill: parent
+            placeholder: qsTr("跳转到页面、Tour、主题…")
+            model: window._commandItems
+            onActivated: function (item) {
+                if (!item || !item.action)
+                    return
+                item.action()
+            }
         }
     ]
+
+    Shortcut {
+        sequence: "Ctrl+K"
+        context: Qt.ApplicationShortcut
+        onActivated: commandPalette.open = !commandPalette.open
+    }
+
+    readonly property var _commandItems: {
+        const items = []
+        const dest = destinations || []
+        for (let i = 0; i < dest.length; ++i) {
+            const d = dest[i]
+            const idx = i
+            items.push({
+                title: d.title,
+                subtitle: qsTr("打开页面"),
+                icon: d.icon || "chevron_right",
+                action: function () { window.openTab(idx, false) }
+            })
+        }
+        items.push({
+            title: qsTr("开始引导 Tour"),
+            subtitle: qsTr("重放产品引导"),
+            icon: "tour",
+            action: function () { window.startTour() }
+        })
+        items.push({
+            title: qsTr("切换明暗主题"),
+            subtitle: qsTr("带圆形揭示"),
+            icon: "contrast",
+            action: function () { window.toggleThemeFrom(window.titleBarItem) }
+        })
+        items.push({
+            title: qsTr("性能面板"),
+            subtitle: window.showPerformanceOverlay ? qsTr("隐藏") : qsTr("显示"),
+            icon: "speed",
+            action: function () { window.showPerformanceOverlay = !window.showPerformanceOverlay }
+        })
+        items.push({
+            title: qsTr("显示 Snackbar"),
+            subtitle: qsTr("测试通知队列"),
+            icon: "notifications",
+            action: function () {
+                window.showSnackbar(qsTr("来自命令面板"), { actionText: qsTr("好的") })
+            }
+        })
+        return items
+    }
 
     function startTour() {
         galleryTour.start(0)

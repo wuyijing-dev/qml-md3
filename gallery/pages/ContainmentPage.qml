@@ -50,6 +50,7 @@ Item {
             }
             Md3Button { text: "Open dialog"; onClicked: dlg.open = true }
             Md3Button { text: "Open bottom sheet"; variant: Md3Button.Outlined; onClicked: sheet.open = true }
+            Md3Button { text: qsTr("Open side sheet"); variant: Md3Button.FilledTonal; onClicked: sideSheet.open = true }
             Md3Button {
                 text: "Open dialog window"
                 variant: Md3Button.FilledTonal
@@ -83,6 +84,30 @@ Item {
             text: "Bottom sheet content"
             color: Md3Theme.colorScheme.colorOnSurface
             padding: 8
+        }
+    }
+
+    Md3SideSheet {
+        id: sideSheet
+        anchors.fill: parent
+        title: qsTr("Side sheet")
+        edge: Md3SideSheet.End
+        Column {
+            anchors.fill: parent
+            anchors.margins: 24
+            spacing: 12
+            Text {
+                width: parent.width
+                wrapMode: Text.Wrap
+                text: qsTr("Use side sheets for secondary detail without leaving the page.")
+                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                font.family: Md3Theme.typography.fontFamily
+                font.pixelSize: Md3Theme.typography.bodyMedium.size
+            }
+            Md3Button {
+                text: qsTr("Done")
+                onClicked: sideSheet.dismiss()
+            }
         }
     }
 
