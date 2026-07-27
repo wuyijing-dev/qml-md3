@@ -355,34 +355,63 @@ Item {
     }
 
     // AutoComplete popup — reparented to window contentItem so it escapes clip.
+    // Position synced explicitly: mapToItem bindings do not track Flickable scroll.
+    property real _suggestionX: 0
+    property real _suggestionY: 0
+
+    function _suggestionHost() {
+        const w = root.Window.window
+        return (w && w.contentItem) ? w.contentItem : root
+    }
+
+    function _syncSuggestionGeometry() {
+        const host = _suggestionHost()
+        suggestionPanel.parent = host
+        suggestionPanel.width = Math.max(fieldBox.width, 160)
+        if (host === root) {
+            _suggestionX = 0
+            _suggestionY = fieldBox.height + 4
+            return
+        }
+        // Global round-trip is reliable across Flickable / custom chrome.
+        const g = fieldBox.mapToGlobal(0, fieldBox.height + 4)
+        const p = host.mapFromGlobal(g.x, g.y)
+        let y = p.y
+        const h = suggestionPanel.height
+        if (host.height > 0 && y + h + 8 > host.height) {
+            const gAbove = fieldBox.mapToGlobal(0, -h - 4)
+            const above = host.mapFromGlobal(gAbove.x, gAbove.y)
+            if (above.y >= 8)
+                y = above.y
+        }
+        _suggestionX = p.x
+        _suggestionY = y
+    }
+
+    onSuggestionOpenChanged: {
+        if (suggestionOpen)
+            Qt.callLater(_syncSuggestionGeometry)
+    }
+
+    Timer {
+        running: root.suggestionOpen
+        interval: 16
+        repeat: true
+        onTriggered: root._syncSuggestionGeometry()
+    }
+
     Rectangle {
         id: suggestionPanel
         visible: root.suggestionOpen && filteredList.count > 0
         width: Math.max(fieldBox.width, 160)
-        height: Math.min(240, filteredList.contentHeight + 8)
+        height: Math.min(240, Math.max(48, filteredList.contentHeight + 8))
+        x: root._suggestionX
+        y: root._suggestionY
         radius: Md3Theme.shape.medium
         color: Md3Theme.colorScheme.surfaceContainerHigh
         border.width: 1
         border.color: Md3Theme.colorScheme.outlineVariant
         z: 10000
-
-        parent: {
-            const w = root.Window.window
-            return (w && w.contentItem) ? w.contentItem : root
-        }
-
-        x: {
-            if (parent === root)
-                return 0
-            const p = fieldBox.mapToItem(parent, 0, fieldBox.height + 4)
-            return p.x
-        }
-        y: {
-            if (parent === root)
-                return fieldBox.height + 4
-            const p = fieldBox.mapToItem(parent, 0, fieldBox.height + 4)
-            return p.y
-        }
 
         Md3Shadow {
             anchors.fill: parent
