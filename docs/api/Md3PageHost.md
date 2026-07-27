@@ -38,7 +38,7 @@ import Md3
 | `pageTransitionDuration` | `int` | `Md3Motion.spatialDuration` | read/write | `Md3PageHost` | — |
 | `launchTransitionDuration` | `int` | `Md3Motion.long2` | read/write | `Md3PageHost` | Duration for tap-origin launch transition. |
 | `launchIntensity` | `int` | `Md3PageHost.Normal` | read/write | `Md3PageHost` | Launch strength preset: `Subtle`, `Normal`, `Premium`. |
-| `launchBackdropEffect` | `int` | `Md3PageHost.Dim` | read/write | `Md3PageHost` | Leave-page backdrop: `Dim` (scrim, sharp text), `Frosted` (light blur + scrim), `Blur` (stronger Gaussian). |
+| `launchBackdropEffect` | `int` | `Md3PageHost.Frosted` | read/write | `Md3PageHost` | Leave-page backdrop: `Frosted` (default 毛玻璃 — light blur + surface tint), `Dim` (dark scrim, sharp text), `Blur` (stronger blur). |
 | `launchAxisProportional` | `bool` | `true` | read/write | `Md3PageHost` | When true, X position follows Android's dedicated launch X path while Y/width/height use emphasized easing. |
 | `launchRememberLastSource` | `bool` | `true` | read/write | `Md3PageHost` | Remember last source bounds for return animation fallback. |
 | `sourceBase` | `url` | `""` | read/write | `Md3PageHost` | — |
@@ -79,7 +79,7 @@ _None._
 | `noteActivity()` | `Md3PageHost` | — |
 | `prefetchHint(index)` | `Md3PageHost` | — |
 | `clearPrefetchHint(index)` | `Md3PageHost` | — |
-| `navigateTo(index, opts)` | `Md3PageHost` | Route-level page navigation. `opts` supports `transitionMode`, `sourcePoint` (preferred), `sourceRect`, `sourceRadius`, `returnToSource`, `rememberSource`. `transitionMode: "launch"` morph-reveals the destination through a rounded-rect mask from the tap point; the leave snapshot uses `launchBackdropEffect` (`Dim` / `Frosted` / `Blur`) under the entering page (z=10). `returnToSource: true` uses a normal transition (`slide` when `pageTransition` is `launch`). |
+| `navigateTo(index, opts)` | `Md3PageHost` | Route-level page navigation. `opts` supports `transitionMode`, `sourcePoint` (preferred), `sourceRect`, `sourceRadius`, `returnToSource`, `rememberSource`. `transitionMode: "launch"` morph-reveals the destination through a rounded-rect mask from the tap point; the leave snapshot uses frosted-glass backdrop (`launchBackdropEffect`, default `Frosted`) under the entering page (z=10). `returnToSource: true` uses a normal transition (`slide` when `pageTransition` is `launch`). |
 
 ## Example
 

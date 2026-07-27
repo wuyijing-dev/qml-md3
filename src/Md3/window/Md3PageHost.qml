@@ -16,7 +16,7 @@ import QtQuick.Window
 Item {
     id: root
     enum LaunchIntensity { Subtle, Normal, Premium }
-    /// Dim = scrim only (sharp text). Frosted = light blur + scrim. Blur = stronger Gaussian.
+    /// Dim = dark scrim. Frosted = 毛玻璃 (light blur + surface tint). Blur = stronger blur.
     enum LaunchBackdrop { Dim, Frosted, Blur }
 
     property var model: []
@@ -53,8 +53,8 @@ Item {
     property int launchTransitionDuration: Md3Motion.long2
     /// Subtle/Normal/Premium controls launch spring feel and visual strength.
     property int launchIntensity: Md3PageHost.Normal
-    /// Backdrop treatment while launch transition runs (Dim keeps leave text readable).
-    property int launchBackdropEffect: Md3PageHost.Dim
+    /// Backdrop while launch runs — default 毛玻璃 (Frosted).
+    property int launchBackdropEffect: Md3PageHost.Frosted
     /// Keep X/Y motion progression proportional to travel distance.
     property bool launchAxisProportional: true
     property bool launchRememberLastSource: true
@@ -363,13 +363,15 @@ Item {
         return _launchBackdropFade()
     }
 
-    function _launchBackdropScrimOpacity() {
+    function _launchGlassOverlayOpacity() {
         if (!_launchBackdropActive())
             return 0
         const fade = _launchBackdropFade()
-        const k = launchBackdropEffect === Md3PageHost.Blur ? 0.26
-                : (launchBackdropEffect === Md3PageHost.Frosted ? 0.44 : 0.56)
-        return fade * k
+        if (launchBackdropEffect === Md3PageHost.Dim)
+            return fade * 0.54
+        if (launchBackdropEffect === Md3PageHost.Blur)
+            return fade * 0.24
+        return fade * 0.62
     }
 
     function _launchBackdropOpacity() {
@@ -381,12 +383,9 @@ Item {
             return 0
         const k = _launchBackdropStrength()
         const t = transitionProgress
-        if (launchBackdropEffect === Md3PageHost.Blur) {
-            return Math.max(0.38 * k,
-                            k * (1 - _bezierAt(t, Md3Motion.emphasizedDecelerate) * 0.42))
-        }
-        const peak = 0.16 * k
-        return Math.max(0.05 * k, peak * (1 - _bezierAt(t, Md3Motion.emphasizedDecelerate) * 0.55))
+        const peak = launchBackdropEffect === Md3PageHost.Frosted ? 0.30
+                : 0.46
+        return Math.max(0.10 * k, peak * k * (1 - _bezierAt(t, Md3Motion.emphasizedDecelerate) * 0.42))
     }
 
     function _usesArc() {
@@ -1406,19 +1405,23 @@ Item {
             source: leaveSnap
             blurEnabled: root.launchBackdropEffect !== Md3PageHost.Dim
                          && root._launchBackdropBlur() > 0.005
-            blurMax: root.launchBackdropEffect === Md3PageHost.Blur ? 96 : 24
-            blurMultiplier: root.launchBackdropEffect === Md3PageHost.Blur ? 2.0 : 0.85
+            blurMax: root.launchBackdropEffect === Md3PageHost.Frosted ? 48 : 80
+            blurMultiplier: root.launchBackdropEffect === Md3PageHost.Frosted ? 1.35 : 2.0
             blur: root._launchBackdropBlur()
-            saturation: root.launchBackdropEffect === Md3PageHost.Dim ? 0.84 : 0.9
-            brightness: -0.03
-            contrast: root.launchBackdropEffect === Md3PageHost.Dim ? 0.98 : 1.0
+            saturation: root.launchBackdropEffect === Md3PageHost.Dim ? 0.86
+                        : (root.launchBackdropEffect === Md3PageHost.Frosted ? 1.18 : 0.92)
+            brightness: root.launchBackdropEffect === Md3PageHost.Dim ? -0.04
+                        : (root.launchBackdropEffect === Md3PageHost.Frosted ? 0.10 : -0.02)
         }
 
         Rectangle {
             anchors.fill: leaveSnap
-            visible: root._launchBackdropScrimOpacity() > 0.01
-            color: Md3Theme.colorScheme.scrim
-            opacity: root._launchBackdropScrimOpacity()
+            visible: root._launchGlassOverlayOpacity() > 0.01
+            radius: Md3Theme.shape.large
+            color: root.launchBackdropEffect === Md3PageHost.Dim
+                   ? Md3Theme.colorScheme.scrim
+                   : Qt.alpha(Md3Theme.colorScheme.surfaceContainerHigh, 0.88)
+            opacity: root._launchGlassOverlayOpacity()
         }
     }
 
