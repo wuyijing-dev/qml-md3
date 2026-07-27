@@ -214,6 +214,39 @@ else
     fi
 fi
 
+# Keep shared packaging behavior aligned with Windows:
+# when staging a Release shared package, also stage Debug runtime bits for Debug kits.
+if [[ "$SHARED_ON" == "ON" && "$BUILD_TYPE" == "Release" ]]; then
+    DEBUG_BUILD_DIR="${ROOT}/build-lib-debug"
+    DEBUG_STAGE="/tmp/md3-debug-stage-$$"
+    info "Also building Debug shared Md3 (lib/debug + lib/qml-debug)"
+    rm -rf "$DEBUG_BUILD_DIR" "$DEBUG_STAGE"
+    cmake -S "$ROOT" -B "$DEBUG_BUILD_DIR" -G "$GENERATOR" \
+        -DMD3_BUILD_GALLERY=OFF \
+        -DMD3_BUILD_SHARED=ON \
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_INSTALL_PREFIX="$DEBUG_STAGE" \
+        -DCMAKE_PREFIX_PATH="$QT_PREFIX"
+    cmake --build "$DEBUG_BUILD_DIR" --parallel "$JOBS"
+    cmake --install "$DEBUG_BUILD_DIR" --prefix "$DEBUG_STAGE"
+
+    mkdir -p "$PREFIX/lib/debug"
+    if [[ -f "$DEBUG_STAGE/lib/libMd3.so" ]]; then
+        cp -f "$DEBUG_STAGE/lib/libMd3.so" "$PREFIX/lib/debug/libMd3.so"
+    else
+        for cand in "$DEBUG_STAGE"/lib/libMd3.so.*; do
+            [[ -e "$cand" ]] || continue
+            cp -f "$cand" "$PREFIX/lib/debug/" || true
+        done
+    fi
+    if [[ -d "$DEBUG_STAGE/lib/qml" ]]; then
+        rm -rf "$PREFIX/lib/qml-debug"
+        cp -a "$DEBUG_STAGE/lib/qml" "$PREFIX/lib/qml-debug"
+    fi
+    info "Debug Md3 staged: lib/debug + lib/qml-debug"
+    rm -rf "$DEBUG_STAGE"
+fi
+
 cat > "$PREFIX/README.md" <<EOF
 # Md3 packaged library ($SHARED_LABEL)
 
@@ -225,6 +258,8 @@ Built by \`scripts/package-linux.sh\` from QML_MD3.
 |------|---------|
 | \`lib/libMd3.*\` | Core library ($SHARED_LABEL) |
 | \`lib/libMd3plugin.*\` | QML plugin |
+| \`lib/debug/\` | Debug \`libMd3.so*\` (shared Release packages) |
+| \`lib/qml-debug/\` | Debug QML plugin tree (shared Release packages) |
 | \`lib/Md3/stubs/\` | Static plugin init sources (static builds) |
 | \`lib/qml/Md3/\` | qmldir / qmltypes |
 | \`lib/cmake/Md3/\` | \`find_package(Md3)\` |
