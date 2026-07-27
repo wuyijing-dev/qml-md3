@@ -25,9 +25,9 @@ Md3ApplicationWindow {
     documentTabsEnabled: true
     documentTabsTearOff: false
 
-    // Library performance overlay — open from title-bar speed button
+    // Library performance overlay — title-bar speed button; open by default in gallery
     showPerformanceButton: true
-    showPerformanceOverlay: false
+    showPerformanceOverlay: true
 
     readonly property string pageRoot: "qrc:/qt/qml/Gallery/pages/"
     readonly property int windowPageIndex: 16

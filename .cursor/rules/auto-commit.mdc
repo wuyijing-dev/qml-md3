@@ -1,0 +1,16 @@
+---
+description: After finishing code work, always create a git commit (and push when remote is available).
+alwaysApply: true
+---
+
+# Auto-commit after code changes
+
+When a coding task is finished and there are meaningful file changes:
+
+1. **Always create a git commit** without waiting for the user to ask. This overrides the default “only commit when requested” habit for this project.
+2. Follow the normal git safety protocol: never update git config; never force-push; never amend unless the usual amend conditions are met; never commit secrets (`.env`, credentials, etc.).
+3. Use a concise commit message focused on **why** (1–2 sentences). On Windows PowerShell, prefer:
+   `git commit -m @" ... "@`
+4. After a successful commit, **try `git push`** to `origin` when the branch tracks a remote. If the network fails, report that the commit is local and push can be retried later—do not block on push.
+5. Skip empty commits when there is nothing to commit. If the only change is the rule/docs the user did not ask to commit as part of the task, still include related project fixes from that same turn.
+6. Do not push `--force` to main/master.
