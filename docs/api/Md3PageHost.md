@@ -38,7 +38,7 @@ import Md3
 | `pageTransitionDuration` | `int` | `Md3Motion.spatialDuration` | read/write | `Md3PageHost` | — |
 | `launchTransitionDuration` | `int` | `Md3Motion.long2` | read/write | `Md3PageHost` | Duration for tap-origin launch transition. |
 | `launchIntensity` | `int` | `Md3PageHost.Normal` | read/write | `Md3PageHost` | Launch strength preset: `Subtle`, `Normal`, `Premium`. |
-| `launchAxisProportional` | `bool` | `true` | read/write | `Md3PageHost` | Keeps X/Y motion progression proportional to travel distance. |
+| `launchAxisProportional` | `bool` | `true` | read/write | `Md3PageHost` | When true, X position follows Android's dedicated launch X path while Y/width/height use emphasized easing. |
 | `launchRememberLastSource` | `bool` | `true` | read/write | `Md3PageHost` | Remember last source bounds for return animation fallback. |
 | `sourceBase` | `url` | `""` | read/write | `Md3PageHost` | — |
 | `currentItem` | `var` | `{…}` | readonly | `Md3PageHost` | — |

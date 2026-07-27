@@ -176,37 +176,111 @@ Item {
         return Math.max(0, Math.min(1, y))
     }
 
-    function _launchProgressX(t) {
-        const base = _bezierAt(t, launchCurveX)
-        if (!launchAxisProportional)
-            return base
-        const ratio = 0.72 + 0.56 * launchWeightX
-        return Math.pow(base, 1 / Math.max(0.35, ratio))
+    function _cubicAt(t, a, b, c, d) {
+        const u = 1 - t
+        return u * u * u * a + 3 * u * u * t * b + 3 * u * t * t * c + t * t * t * d
     }
 
-    function _launchProgressY(t) {
-        const base = _bezierAt(t, launchCurveY)
-        if (!launchAxisProportional)
-            return base
-        const ratio = 0.72 + 0.56 * launchWeightY
-        return Math.pow(base, 1 / Math.max(0.35, ratio))
+    function _bezierPoint(t, seg) {
+        return {
+            x: _cubicAt(t, seg.x0, seg.x1, seg.x2, seg.x3),
+            y: _cubicAt(t, seg.y0, seg.y1, seg.y2, seg.y3)
+        }
+    }
+
+    // Android ActivityLaunchAnimator.createPositionXInterpolator() path.
+    function _launchPositionXProgress(linearT) {
+        const x = Math.max(0, Math.min(1, linearT))
+        if (x <= 0)
+            return 0
+        if (x >= 1)
+            return 1
+        const segments = [
+            { x0: 0, y0: 0, x1: 0.1217, y1: 0.0462, x2: 0.15, y2: 0.4686, x3: 0.1667, y3: 0.66 },
+            { x0: 0.1667, y0: 0.66, x1: 0.1834, y1: 0.8878, x2: 0.1667, y2: 1.0, x3: 1.0, y3: 1.0 }
+        ]
+        function invert(seg, targetX) {
+            let lo = 0
+            let hi = 1
+            for (let i = 0; i < 24; ++i) {
+                const mid = (lo + hi) * 0.5
+                if (_bezierPoint(mid, seg).x < targetX)
+                    lo = mid
+                else
+                    hi = mid
+            }
+            return (lo + hi) * 0.5
+        }
+        const seg = x <= 0.1667 ? segments[0] : segments[1]
+        const param = invert(seg, x)
+        return _bezierPoint(param, seg).y
+    }
+
+    function _launchTotalDuration() {
+        if (launchIntensity === Md3PageHost.Premium)
+            return 550
+        if (launchIntensity === Md3PageHost.Subtle)
+            return 400
+        return 500
+    }
+
+    function _launchSubProgress(linearT, delayMs, durationMs) {
+        const total = Math.max(1, _launchTotalDuration())
+        return Math.max(0, Math.min(1, (linearT * total - delayMs) / Math.max(1, durationMs)))
+    }
+
+    // Y/width/height use emphasized; time itself stays linear (Android LaunchAnimator).
+    function _launchPositionProgress(linearT) {
+        const curve = launchCurveY || Md3Motion.emphasized
+        return _bezierAt(linearT, curve)
     }
 
     function _launchBlend(start, end, p) {
         return start + (end - start) * p
     }
 
-    function _launchPulse(t) {
-        const p = Math.max(0, Math.min(1, t))
-        const amp = launchIntensity === Md3PageHost.Premium ? 1
-                  : (launchIntensity === Md3PageHost.Subtle ? 0.45 : 0.7)
-        if (p < 0.10)
-            return 1.0 - 0.05 * amp * (p / 0.10)
-        if (p < 0.24)
-            return 1.0 - 0.05 * amp + 0.10 * amp * ((p - 0.10) / 0.14)
-        if (p < 0.40)
-            return 1.0 + 0.05 * amp - 0.05 * amp * ((p - 0.24) / 0.16)
-        return 1.0
+    function _launchBoundsAt(linearT, fromRect, toRect) {
+        const p = _launchPositionProgress(linearT)
+        const xp = launchAxisProportional
+                ? _launchPositionXProgress(linearT)
+                : p
+        const sCx = fromRect.x + fromRect.width / 2
+        const eCx = toRect.x + toRect.width / 2
+        const cx = _launchBlend(sCx, eCx, xp)
+        const halfW = _launchBlend(fromRect.width, toRect.width, p) / 2
+        const top = _launchBlend(fromRect.y, toRect.y, p)
+        const height = _launchBlend(fromRect.height, toRect.height, p)
+        return {
+            left: cx - halfW,
+            top: top,
+            width: halfW * 2,
+            height: height,
+            cx: cx,
+            cy: top + height / 2
+        }
+    }
+
+    function _launchPageTransform(linearT, fromRect, toRect) {
+        const base = _contentRect()
+        const bounds = _launchBoundsAt(linearT, fromRect, toRect)
+        return {
+            dx: bounds.cx - (base.x + base.width / 2),
+            dy: bounds.cy - (base.y + base.height / 2),
+            scaleX: bounds.width / Math.max(1, base.width),
+            scaleY: bounds.height / Math.max(1, base.height)
+        }
+    }
+
+    function _launchLeaveFadeOpacity(linearT, returning) {
+        const total = _launchTotalDuration()
+        if (returning) {
+            const fadeStart = 0.55
+            if (linearT <= fadeStart)
+                return 1
+            return Math.max(0, 1 - (linearT - fadeStart) / (1 - fadeStart))
+        }
+        const fadeOut = _launchSubProgress(linearT, 0, Math.round(total * 0.30))
+        return 1 - _bezierAt(fadeOut, Md3Motion.standardAccelerate)
     }
 
     function _launchBackdropOpacity() {
@@ -214,9 +288,18 @@ Item {
             return 0
         const k = launchIntensity === Md3PageHost.Premium ? 1.0
                 : (launchIntensity === Md3PageHost.Subtle ? 0.62 : 0.8)
-        return launchReturning
-                ? Math.max(0, 0.30 * k * (1 - transitionProgress))
-                : Math.max(0, 0.55 * k * (1 - transitionProgress))
+        const total = _launchTotalDuration()
+        const t = transitionProgress
+        if (launchReturning) {
+            const fadeIn = _launchSubProgress(t, total - 266, 266)
+            return Math.max(0, 0.28 * k * _bezierAt(fadeIn, Md3Motion.standardDecelerate))
+        }
+        const cover = _launchSubProgress(t, 0, Math.round(total * 0.30))
+        const reveal = _launchSubProgress(t, Math.round(total * 0.30), Math.round(total * 0.366))
+        const alpha = cover < 1
+                ? 0.42 * k * _bezierAt(cover, Md3Motion.standardAccelerate)
+                : 0.42 * k * (1 - _bezierAt(reveal, [0.0, 0.0, 0.6, 1.0]))
+        return Math.max(0, alpha)
     }
 
     function _launchBackdropBlur() {
@@ -224,9 +307,15 @@ Item {
             return 0
         const k = launchIntensity === Md3PageHost.Premium ? 1.0
                 : (launchIntensity === Md3PageHost.Subtle ? 0.62 : 0.8)
-        return launchReturning
-                ? Math.max(0, 0.18 * k * (1 - transitionProgress))
-                : Math.min(0.35 * k, 0.08 * k + transitionProgress * 0.27 * k)
+        const total = _launchTotalDuration()
+        const t = transitionProgress
+        if (launchReturning)
+            return Math.max(0, 0.16 * k * (1 - t))
+        const cover = _launchSubProgress(t, 0, Math.round(total * 0.30))
+        const reveal = _launchSubProgress(t, Math.round(total * 0.30), Math.round(total * 0.366))
+        if (cover < 1)
+            return 0.10 * k + cover * 0.22 * k
+        return Math.max(0, 0.32 * k * (1 - _bezierAt(reveal, [0.0, 0.0, 0.6, 1.0])))
     }
 
     function _usesArc() {
@@ -809,6 +898,22 @@ Item {
         Qt.callLater(_prefetchSmart, displayedIndex)
     }
 
+    function _applyLaunchIntensityProfile() {
+        if (launchIntensity === Md3PageHost.Premium) {
+            launchCurveX = [0.0, 0.0, 0.18, 1.0]
+            launchCurveY = Md3Motion.emphasized
+            launchTransitionDuration = 550
+        } else if (launchIntensity === Md3PageHost.Subtle) {
+            launchCurveX = Md3Motion.standard
+            launchCurveY = Md3Motion.standardDecelerate
+            launchTransitionDuration = 400
+        } else {
+            launchCurveX = [0.0, 0.0, 0.2, 1.0]
+            launchCurveY = Md3Motion.emphasized
+            launchTransitionDuration = 500
+        }
+    }
+
     function _prepareLaunchTransition(fromIndex, toIndex, opts) {
         const content = _contentRect()
         const seed = launchIntensity === Md3PageHost.Premium ? 10
@@ -833,6 +938,7 @@ Item {
             launchEndRect = src
             launchStartRadius = Md3Theme.shape.large
             launchEndRadius = srcRadius
+            _applyLaunchIntensityProfile()
             return
         }
 
@@ -852,25 +958,7 @@ Item {
         launchEndRect = content
         launchStartRadius = srcRadius
         launchEndRadius = Md3Theme.shape.large
-        const sx = src.x + src.width / 2
-        const sy = src.y + src.height / 2
-        const ex = content.x + content.width / 2
-        const ey = content.y + content.height / 2
-        const dx = Math.abs(ex - sx) + Math.abs(content.width - src.width) * 0.35
-        const dy = Math.abs(ey - sy) + Math.abs(content.height - src.height) * 0.35
-        const sum = Math.max(1, dx + dy)
-        launchWeightX = dx / sum
-        launchWeightY = dy / sum
-        if (launchIntensity === Md3PageHost.Premium) {
-            launchCurveX = [0.0, 0.0, 0.18, 1.0]
-            launchCurveY = Md3Motion.emphasizedDecelerate
-        } else if (launchIntensity === Md3PageHost.Subtle) {
-            launchCurveX = Md3Motion.standard
-            launchCurveY = Md3Motion.standardDecelerate
-        } else {
-            launchCurveX = [0.0, 0.0, 0.2, 1.0]
-            launchCurveY = Md3Motion.emphasizedDecelerate
-        }
+        _applyLaunchIntensityProfile()
         if ((opts && opts.rememberSource !== false) || (!opts && launchRememberLastSource)) {
             lastLaunchSourceRect = src
             lastLaunchSourceRadius = srcRadius
@@ -1103,7 +1191,7 @@ Item {
                   : root.pageTransitionDuration
         easing.type: Easing.BezierSpline
         easing.bezierCurve: root.transitionModeActive === "launch"
-                            ? Md3Motion.standard
+                            ? [0.0, 0.0, 1.0, 1.0]
                             : (root.transitionModeActive === "slide"
                             ? Md3Motion.emphasizedDecelerate
                             : Md3Motion.emphasized)
@@ -1253,9 +1341,7 @@ Item {
                 }
                 if (isLeaving) {
                     if (mode === "launch") {
-                        if (root.launchReturning)
-                            return 1 - Math.max(0, (t - 0.28) / 0.72)
-                        return 1 - Math.max(0, (t - 0.72) / 0.28)
+                        return root._launchLeaveFadeOpacity(t, root.launchReturning)
                     }
                     if (mode === "fadeThrough")
                         return t < 0.35 ? (1 - t / 0.35) : 0
@@ -1270,21 +1356,15 @@ Item {
                 Translate {
                     x: {
                         if (mode === "launch") {
-                            const base = root._contentRect()
-                            const start = root.launchStartRect
-                            const end = root.launchEndRect
-                            const sx = root._launchProgressX(pageLoader.t)
-                            const ex = root._launchProgressX(pageLoader.t)
-                            const sCx = start.x + start.width / 2
-                            const eCx = end.x + end.width / 2
-                            const bCx = base.x + base.width / 2
                             if (isEntering && !root.launchReturning) {
-                                const cx = root._launchBlend(sCx, eCx, sx)
-                                return cx - bCx
+                                const tr = root._launchPageTransform(
+                                    pageLoader.t, root.launchStartRect, root.launchEndRect)
+                                return tr.dx
                             }
                             if (isLeaving && root.launchReturning) {
-                                const cx = root._launchBlend(eCx, sCx, ex)
-                                return cx - bCx
+                                const tr = root._launchPageTransform(
+                                    pageLoader.t, root.launchStartRect, root.launchEndRect)
+                                return tr.dx
                             }
                             return 0
                         }
@@ -1299,21 +1379,15 @@ Item {
                     }
                     y: {
                         if (mode === "launch") {
-                            const base = root._contentRect()
-                            const start = root.launchStartRect
-                            const end = root.launchEndRect
-                            const sy = root._launchProgressY(pageLoader.t)
-                            const ey = root._launchProgressY(pageLoader.t)
-                            const sCy = start.y + start.height / 2
-                            const eCy = end.y + end.height / 2
-                            const bCy = base.y + base.height / 2
                             if (isEntering && !root.launchReturning) {
-                                const cy = root._launchBlend(sCy, eCy, sy)
-                                return cy - bCy
+                                const tr = root._launchPageTransform(
+                                    pageLoader.t, root.launchStartRect, root.launchEndRect)
+                                return tr.dy
                             }
                             if (isLeaving && root.launchReturning) {
-                                const cy = root._launchBlend(eCy, sCy, ey)
-                                return cy - bCy
+                                const tr = root._launchPageTransform(
+                                    pageLoader.t, root.launchStartRect, root.launchEndRect)
+                                return tr.dy
                             }
                             return 0
                         }
@@ -1332,20 +1406,15 @@ Item {
                     origin.y: pageLoader.height / 2
                     xScale: {
                         if (mode === "launch") {
-                            const base = root._contentRect()
-                            const start = root.launchStartRect
-                            const end = root.launchEndRect
-                            const sx = root._launchProgressX(pageLoader.t)
-                            const sy = root._launchProgressY(pageLoader.t)
                             if (isEntering && !root.launchReturning) {
-                                const from = Math.max(0.018, start.width / Math.max(1, base.width))
-                                const to = Math.max(0.08, end.width / Math.max(1, base.width))
-                                return root._launchBlend(from, to, sx) * root._launchPulse(pageLoader.t)
+                                const tr = root._launchPageTransform(
+                                    pageLoader.t, root.launchStartRect, root.launchEndRect)
+                                return tr.scaleX
                             }
                             if (isLeaving && root.launchReturning) {
-                                const from = Math.max(0.08, end.width / Math.max(1, base.width))
-                                const to = Math.max(0.08, start.width / Math.max(1, base.width))
-                                return root._launchBlend(from, to, sx)
+                                const tr = root._launchPageTransform(
+                                    pageLoader.t, root.launchStartRect, root.launchEndRect)
+                                return tr.scaleX
                             }
                             return 1
                         }
@@ -1365,19 +1434,15 @@ Item {
                     }
                     yScale: {
                         if (mode === "launch") {
-                            const base = root._contentRect()
-                            const start = root.launchStartRect
-                            const end = root.launchEndRect
-                            const sy = root._launchProgressY(pageLoader.t)
                             if (isEntering && !root.launchReturning) {
-                                const from = Math.max(0.018, start.height / Math.max(1, base.height))
-                                const to = Math.max(0.08, end.height / Math.max(1, base.height))
-                                return root._launchBlend(from, to, sy) * root._launchPulse(pageLoader.t)
+                                const tr = root._launchPageTransform(
+                                    pageLoader.t, root.launchStartRect, root.launchEndRect)
+                                return tr.scaleY
                             }
                             if (isLeaving && root.launchReturning) {
-                                const from = Math.max(0.08, end.height / Math.max(1, base.height))
-                                const to = Math.max(0.08, start.height / Math.max(1, base.height))
-                                return root._launchBlend(from, to, sy)
+                                const tr = root._launchPageTransform(
+                                    pageLoader.t, root.launchStartRect, root.launchEndRect)
+                                return tr.scaleY
                             }
                             return 1
                         }
