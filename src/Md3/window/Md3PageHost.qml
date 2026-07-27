@@ -42,6 +42,8 @@ Item {
     /// Off by default: ShaderEffectSource holds a full-size GPU texture
     property bool leaveSnapshot: false
     property real leaveSnapOpacity: 0
+    /// Full-res leave snapshot during launch (avoids chroma fringing on blurred text).
+    property bool leaveSnapHiRes: false
     property bool warmStart: false
     property bool showBusyIndicator: false
     property bool showSkeleton: false
@@ -371,7 +373,7 @@ Item {
             return fade * 0.54
         if (launchBackdropEffect === Md3PageHost.Blur)
             return fade * 0.24
-        return fade * 0.62
+        return fade * 0.78
     }
 
     function _launchBackdropOpacity() {
@@ -383,9 +385,17 @@ Item {
             return 0
         const k = _launchBackdropStrength()
         const t = transitionProgress
-        const peak = launchBackdropEffect === Md3PageHost.Frosted ? 0.30
-                : 0.46
-        return Math.max(0.10 * k, peak * k * (1 - _bezierAt(t, Md3Motion.emphasizedDecelerate) * 0.42))
+        const peak = launchBackdropEffect === Md3PageHost.Frosted ? 0.16
+                : 0.40
+        return Math.max(0.06 * k, peak * k * (1 - _bezierAt(t, Md3Motion.emphasizedDecelerate) * 0.45))
+    }
+
+    function _launchGlassOverlayColor() {
+        if (launchBackdropEffect === Md3PageHost.Dim)
+            return Md3Theme.colorScheme.scrim
+        if (launchBackdropEffect === Md3PageHost.Frosted)
+            return Qt.alpha(Md3Theme.colorScheme.surface, 0.94)
+        return Qt.alpha(Md3Theme.colorScheme.surfaceContainerHigh, 0.88)
     }
 
     function _usesArc() {
@@ -601,10 +611,16 @@ Item {
         if (!ldr || !ldr.item)
             return
         leaveSnapFade.stop()
-        // Half-res texture: enough for a brief hold, ~4× less GPU memory
-        leaveSnap.textureSize = Qt.size(
-                    Math.max(1, Math.floor(width / 2)),
-                    Math.max(1, Math.floor(height / 2)))
+        root.leaveSnapHiRes = !!forLaunch
+        const cw = Math.max(1, Math.floor(width - contentPadding * 2))
+        const ch = Math.max(1, Math.floor(height - contentPadding * 2))
+        if (forLaunch) {
+            leaveSnap.textureSize = Qt.size(cw, ch)
+        } else {
+            leaveSnap.textureSize = Qt.size(
+                        Math.max(1, Math.floor(cw / 2)),
+                        Math.max(1, Math.floor(ch / 2)))
+        }
         leaveSnap.sourceItem = ldr
         leaveSnap.scheduleUpdate()
         root.leaveSnapOpacity = 1
@@ -622,6 +638,7 @@ Item {
         if (immediate) {
             leaveSnapFade.stop()
             root.leaveSnapOpacity = 0
+            root.leaveSnapHiRes = false
             leaveSnap.sourceItem = null
             return
         }
@@ -1260,7 +1277,10 @@ Item {
         duration: Md3Motion.short3
         easing.type: Easing.BezierSpline
         easing.bezierCurve: Md3Motion.standard
-        onFinished: leaveSnap.sourceItem = null
+        onFinished: {
+            root.leaveSnapHiRes = false
+            leaveSnap.sourceItem = null
+        }
     }
 
     NumberAnimation {
@@ -1392,7 +1412,7 @@ Item {
             anchors.margins: root.contentPadding
             live: false
             hideSource: false
-            smooth: false
+            smooth: root.leaveSnapHiRes
             mipmap: false
             visible: root._leaveSnapShownOpacity() > 0.01
             opacity: root._leaveSnapShownOpacity()
@@ -1405,22 +1425,20 @@ Item {
             source: leaveSnap
             blurEnabled: root.launchBackdropEffect !== Md3PageHost.Dim
                          && root._launchBackdropBlur() > 0.005
-            blurMax: root.launchBackdropEffect === Md3PageHost.Frosted ? 48 : 80
-            blurMultiplier: root.launchBackdropEffect === Md3PageHost.Frosted ? 1.35 : 2.0
+            blurMax: root.launchBackdropEffect === Md3PageHost.Frosted ? 24 : 72
+            blurMultiplier: root.launchBackdropEffect === Md3PageHost.Frosted ? 0.75 : 1.8
             blur: root._launchBackdropBlur()
-            saturation: root.launchBackdropEffect === Md3PageHost.Dim ? 0.86
-                        : (root.launchBackdropEffect === Md3PageHost.Frosted ? 1.18 : 0.92)
-            brightness: root.launchBackdropEffect === Md3PageHost.Dim ? -0.04
-                        : (root.launchBackdropEffect === Md3PageHost.Frosted ? 0.10 : -0.02)
+            saturation: root.launchBackdropEffect === Md3PageHost.Dim ? 0.88
+                        : (root.launchBackdropEffect === Md3PageHost.Frosted ? 0.72 : 0.9)
+            brightness: root.launchBackdropEffect === Md3PageHost.Dim ? -0.05
+                        : (root.launchBackdropEffect === Md3PageHost.Frosted ? 0.06 : -0.02)
         }
 
         Rectangle {
             anchors.fill: leaveSnap
             visible: root._launchGlassOverlayOpacity() > 0.01
             radius: Md3Theme.shape.large
-            color: root.launchBackdropEffect === Md3PageHost.Dim
-                   ? Md3Theme.colorScheme.scrim
-                   : Qt.alpha(Md3Theme.colorScheme.surfaceContainerHigh, 0.88)
+            color: root._launchGlassOverlayColor()
             opacity: root._launchGlassOverlayOpacity()
         }
     }
