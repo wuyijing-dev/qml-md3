@@ -13,7 +13,8 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `short1` | `int` | `50` | readonly | `Md3Motion` | — |
+| `durationScale` | `real` | `2.2` | read/write | `Md3Motion` | Global multiplier for all duration tokens (1 = Material base; higher = slower). Ripples use `rippleDuration`. |
+| `short1` | `int` | `50` | readonly | `Md3Motion` | Base ms × `durationScale` |
 | `short2` | `int` | `100` | readonly | `Md3Motion` | — |
 | `short3` | `int` | `150` | readonly | `Md3Motion` | — |
 | `short4` | `int` | `200` | readonly | `Md3Motion` | — |
