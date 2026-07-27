@@ -6,6 +6,16 @@
 class QCoreApplication;
 class QQmlApplicationEngine;
 
+#ifndef MD3_API
+#  if defined(MD3_BUILD_SHARED)
+#    define MD3_API Q_DECL_EXPORT
+#  elif defined(MD3_SHARED)
+#    define MD3_API Q_DECL_IMPORT
+#  else
+#    define MD3_API
+#  endif
+#endif
+
 /// One-call bootstrap for Md3 apps (fonts, Basic style, RHI early setup).
 namespace Md3 {
 
@@ -26,13 +36,13 @@ struct RunOptions {
 };
 
 /// Call before QGuiApplication (alpha buffer + optional RHI). Also invoked by run().
-void applyEarly(int &argc, char **argv, const RunOptions &opts = {});
+MD3_API void applyEarly(int &argc, char **argv, const RunOptions &opts = {});
 
 /// Load HarmonyOS Sans SC + Material Icons from the Md3 module qrc and set app font.
-int loadFonts();
+MD3_API int loadFonts();
 
 /// After QGuiApplication: style + fonts. Idempotent-ish (safe to call once).
-void initialize(QCoreApplication &app, const RunOptions &opts = {});
+MD3_API void initialize(QCoreApplication &app, const RunOptions &opts = {});
 
 /**
  * Full startup in one call:
@@ -42,7 +52,7 @@ void initialize(QCoreApplication &app, const RunOptions &opts = {});
  * }
  * @endcode
  */
-int run(int argc, char **argv,
+MD3_API int run(int argc, char **argv,
         const QString &moduleUri,
         const QString &mainComponent = QStringLiteral("Main"),
         const RunOptions &opts = {});

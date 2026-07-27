@@ -33,6 +33,64 @@ $ErrorActionPreference = "Stop"
 function Write-Info([string]$msg) { Write-Host "==> $msg" }
 function Die([string]$msg) { Write-Error $msg; exit 1 }
 
+function Test-MsvcCompiler {
+    return $null -ne (Get-Command cl -ErrorAction SilentlyContinue)
+}
+
+function Test-MsvcQtKit([string]$QtPrefix) {
+    return ($QtPrefix -match 'msvc\d+')
+}
+
+function Find-VcVars64 {
+    $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+    if (Test-Path $vswhere) {
+        $install = & $vswhere -latest -products * `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+            -property installationPath 2>$null
+        if ($install) {
+            $vcvars = Join-Path $install.Trim() "VC\Auxiliary\Build\vcvars64.bat"
+            if (Test-Path $vcvars) { return $vcvars }
+        }
+    }
+    foreach ($root in @(
+            "D:\vsproduct",
+            "C:\Program Files\Microsoft Visual Studio\2022\Community",
+            "C:\Program Files\Microsoft Visual Studio\2022\Professional",
+            "C:\Program Files\Microsoft Visual Studio\2022\Enterprise",
+            "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools"
+        )) {
+        $vcvars = Join-Path $root "VC\Auxiliary\Build\vcvars64.bat"
+        if (Test-Path $vcvars) { return $vcvars }
+    }
+    return $null
+}
+
+function Import-MsvcDevEnvironment([string]$VcVars64) {
+    Write-Info "Loading MSVC environment: $VcVars64"
+    cmd /c "`"$VcVars64`" >nul 2>&1 && set" | ForEach-Object {
+        if ($_ -match '^(.*?)=(.*)$') {
+            Set-Item -Path "env:$($matches[1])" -Value $matches[2]
+        }
+    }
+    if (-not (Test-MsvcCompiler)) {
+        Die "Failed to load MSVC (cl.exe still not found after vcvars64)."
+    }
+}
+
+function Ensure-MsvcForQt([string]$QtPrefix) {
+    if (-not (Test-MsvcQtKit $QtPrefix) -or (Test-MsvcCompiler)) {
+        return
+    }
+    $vcvars = Find-VcVars64
+    if (-not $vcvars) {
+        Die @"
+Qt kit is MSVC ($QtPrefix) but cl.exe is not in PATH and Visual Studio C++ tools were not found.
+Install 'Desktop development with C++' (VS 2022 or Build Tools), or pass -CmakePrefixPath to a MinGW Qt kit.
+"@
+    }
+    Import-MsvcDevEnvironment $vcvars
+}
+
 $Root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $StagePrefix = Join-Path $Root "dist\Md3"
 if (-not $Prefix) { $Prefix = $StagePrefix }
@@ -108,6 +166,8 @@ Write-Info "InstallPrefix  = $InstallPrefix"
 Write-Info "SHARED         = $SharedOn ($SharedLabel)"
 Write-Info "Qt             = $QtPrefix"
 Write-Info "Generator      = $Generator ($Jobs jobs, $BuildType)"
+
+Ensure-MsvcForQt $QtPrefix
 
 Write-Info "Clean build dir"
 if (Test-Path $BuildDir) { Remove-Item -Recurse -Force $BuildDir }

@@ -16,6 +16,7 @@ set(_MD3_LIBDIR "${_MD3_PREFIX}/@CMAKE_INSTALL_LIBDIR@")
 set(_MD3_BINDIR "${_MD3_PREFIX}/@CMAKE_INSTALL_BINDIR@")
 set(_MD3_INCLUDEDIR "${_MD3_PREFIX}/@CMAKE_INSTALL_INCLUDEDIR@")
 set(_MD3_QMLDIR "${_MD3_LIBDIR}/qml")
+set(_MD3_QML_MODULE_DIR "${_MD3_QMLDIR}/Md3")
 set(_MD3_STUBDIR "${_MD3_LIBDIR}/Md3/stubs")
 
 # Prefer shared or static names depending on how the package was built
@@ -83,6 +84,18 @@ if (_MD3_PACKAGE_SHARED)
             break()
         endif()
     endforeach()
+    # Qt installs the QML plugin import lib beside qmldir (lib/qml/Md3/)
+    if (_MD3_PLUGIN_IMPLIB STREQUAL "")
+        foreach (_n IN ITEMS Md3plugin.lib libMd3plugin.dll.a libMd3plugin.lib)
+            if (EXISTS "${_MD3_QML_MODULE_DIR}/${_n}")
+                set(_MD3_PLUGIN_IMPLIB "${_MD3_QML_MODULE_DIR}/${_n}")
+                break()
+            endif()
+        endforeach()
+    endif()
+    if (EXISTS "${_MD3_QML_MODULE_DIR}/Md3plugin.dll")
+        set(_MD3_PLUGIN_LIB "${_MD3_QML_MODULE_DIR}/Md3plugin.dll")
+    endif()
 else()
     foreach (_n IN ITEMS libMd3plugin.a libMd3plugin.lib Md3plugin.lib libMd3plugin.dll.a)
         if (EXISTS "${_MD3_LIBDIR}/${_n}")
@@ -100,6 +113,21 @@ if (_MD3_CORE_LIB STREQUAL "")
     return()
 endif()
 
+# Windows: MSVC import libs (.lib) and MinGW import libs (.dll.a) are not interchangeable.
+if (WIN32 AND _MD3_PACKAGE_SHARED AND _MD3_CORE_IMPLIB)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND _MD3_CORE_IMPLIB MATCHES "\\.lib$")
+        message(FATAL_ERROR
+            "Md3 package was built with MSVC (${_MD3_CORE_IMPLIB}) but you are using MinGW.\n"
+            "Rebuild Md3 for MinGW, then replace Md3/ beside your project:\n"
+            "  scripts/package-windows.ps1 -CmakePrefixPath \"D:/Qt/<ver>/mingw_64\"")
+    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND _MD3_CORE_IMPLIB MATCHES "\\.dll\\.a$")
+        message(FATAL_ERROR
+            "Md3 package was built with MinGW (${_MD3_CORE_IMPLIB}) but you are using MSVC.\n"
+            "Rebuild Md3 for MSVC, then replace Md3/ beside your project:\n"
+            "  scripts/package-windows.ps1 -CmakePrefixPath \"D:/Qt/<ver>/msvc2022_64\"")
+    endif()
+endif()
+
 if (NOT TARGET Md3::Md3)
     if (_MD3_PACKAGE_SHARED)
         add_library(Md3::Md3 SHARED IMPORTED GLOBAL)
@@ -110,6 +138,15 @@ if (NOT TARGET Md3::Md3)
         )
         if (_MD3_CORE_IMPLIB)
             set_target_properties(Md3::Md3 PROPERTIES IMPORTED_IMPLIB "${_MD3_CORE_IMPLIB}")
+        endif()
+        set_property(TARGET Md3::Md3 APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS MD3_SHARED)
+        if (WIN32 AND _MD3_CORE_IMPLIB)
+            foreach (_cfg IN ITEMS DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
+                set_target_properties(Md3::Md3 PROPERTIES
+                    "IMPORTED_LOCATION_${_cfg}" "${_MD3_CORE_LIB}"
+                    "IMPORTED_IMPLIB_${_cfg}" "${_MD3_CORE_IMPLIB}"
+                )
+            endforeach()
         endif()
     else()
         add_library(Md3::Md3 STATIC IMPORTED GLOBAL)
@@ -166,9 +203,20 @@ endif()
 if (_MD3_PLUGIN_LIB AND NOT TARGET Md3plugin)
     if (_MD3_PACKAGE_SHARED)
         add_library(Md3plugin SHARED IMPORTED GLOBAL)
-        set_target_properties(Md3plugin PROPERTIES IMPORTED_LOCATION "${_MD3_PLUGIN_LIB}")
+        set_target_properties(Md3plugin PROPERTIES
+            IMPORTED_LOCATION "${_MD3_PLUGIN_LIB}"
+        )
         if (_MD3_PLUGIN_IMPLIB)
             set_target_properties(Md3plugin PROPERTIES IMPORTED_IMPLIB "${_MD3_PLUGIN_IMPLIB}")
+        endif()
+        if (WIN32 AND _MD3_PLUGIN_IMPLIB)
+            # Qt Creator / MSVC multi-config (Debug) needs per-config implib paths.
+            foreach (_cfg IN ITEMS DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
+                set_target_properties(Md3plugin PROPERTIES
+                    "IMPORTED_LOCATION_${_cfg}" "${_MD3_PLUGIN_LIB}"
+                    "IMPORTED_IMPLIB_${_cfg}" "${_MD3_PLUGIN_IMPLIB}"
+                )
+            endforeach()
         endif()
     else()
         add_library(Md3plugin STATIC IMPORTED GLOBAL)
@@ -190,7 +238,7 @@ if (TARGET Md3plugin AND NOT TARGET Md3::QmlPlugin)
     add_library(Md3::QmlPlugin INTERFACE IMPORTED GLOBAL)
     if (_MD3_PACKAGE_SHARED)
         set_target_properties(Md3::QmlPlugin PROPERTIES
-            INTERFACE_LINK_LIBRARIES "Md3plugin;Md3::Md3"
+            INTERFACE_LINK_LIBRARIES "Md3::Md3"
         )
     else()
         set(_md3_qml_link "")
