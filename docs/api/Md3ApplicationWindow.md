@@ -98,6 +98,8 @@ import Md3
 | Method | Defined in | Description |
 |--------|------------|-------------|
 | `navigateTo(index, opts)` | `Md3ApplicationWindow` | Route-level page navigation. `opts.transitionMode: "launch"` enables tap-origin whole-page animation with blurred previous background; `opts.sourcePoint` (preferred) or `opts.sourceRect`, plus `opts.sourceRadius` and `opts.returnToSource`, control enter/return behavior. |
+
+`launch` transition can be tuned through `pageHost.launchIntensity` (`Subtle` / `Normal` / `Premium`) and `pageHost.launchAxisProportional`.
 | `documentTabMeta(pageIndex)` | `Md3ApplicationWindow` | — |
 | `openTab(pageIndex, asNew)` | `Md3ApplicationWindow` | — |
 | `addTab(pageIndex)` | `Md3ApplicationWindow` | — |

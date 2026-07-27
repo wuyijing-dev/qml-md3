@@ -15,6 +15,7 @@ import QtQuick.Window
 */
 Item {
     id: root
+    enum LaunchIntensity { Subtle, Normal, Premium }
 
     property var model: []
     property int currentIndex: 0
@@ -47,6 +48,10 @@ Item {
     property int pageTransitionDuration: 100
     /// Duration used by nonlinear tap-origin launch transition.
     property int launchTransitionDuration: Md3Motion.long2
+    /// Subtle/Normal/Premium controls launch spring feel and visual strength.
+    property int launchIntensity: Md3PageHost.Normal
+    /// Keep X/Y motion progression proportional to travel distance.
+    property bool launchAxisProportional: true
     property bool launchRememberLastSource: true
     property var lastLaunchSourceRect: Qt.rect(0, 0, 0, 0)
     property real lastLaunchSourceRadius: 0
@@ -107,6 +112,8 @@ Item {
     property real launchEndRadius: Md3Theme.shape.large
     property var launchCurveX: [0.0, 0.0, 0.2, 1.0]
     property var launchCurveY: Md3Motion.emphasizedDecelerate
+    property real launchWeightX: 0.5
+    property real launchWeightY: 0.5
     /// Defer enter transition after Loader.Ready (unused; kept for API stability).
     property int _pendingShowIndex: -1
     property int _pendingShowPasses: 0
@@ -170,11 +177,19 @@ Item {
     }
 
     function _launchProgressX(t) {
-        return _bezierAt(t, launchCurveX)
+        const base = _bezierAt(t, launchCurveX)
+        if (!launchAxisProportional)
+            return base
+        const ratio = 0.72 + 0.56 * launchWeightX
+        return Math.pow(base, 1 / Math.max(0.35, ratio))
     }
 
     function _launchProgressY(t) {
-        return _bezierAt(t, launchCurveY)
+        const base = _bezierAt(t, launchCurveY)
+        if (!launchAxisProportional)
+            return base
+        const ratio = 0.72 + 0.56 * launchWeightY
+        return Math.pow(base, 1 / Math.max(0.35, ratio))
     }
 
     function _launchBlend(start, end, p) {
@@ -183,29 +198,35 @@ Item {
 
     function _launchPulse(t) {
         const p = Math.max(0, Math.min(1, t))
+        const amp = launchIntensity === Md3PageHost.Premium ? 1
+                  : (launchIntensity === Md3PageHost.Subtle ? 0.45 : 0.7)
         if (p < 0.10)
-            return 1.0 - 0.05 * (p / 0.10)
+            return 1.0 - 0.05 * amp * (p / 0.10)
         if (p < 0.24)
-            return 0.95 + 0.10 * ((p - 0.10) / 0.14)
+            return 1.0 - 0.05 * amp + 0.10 * amp * ((p - 0.10) / 0.14)
         if (p < 0.40)
-            return 1.05 - 0.05 * ((p - 0.24) / 0.16)
+            return 1.0 + 0.05 * amp - 0.05 * amp * ((p - 0.24) / 0.16)
         return 1.0
     }
 
     function _launchBackdropOpacity() {
         if (transitionModeActive !== "launch" || !transitioning)
             return 0
+        const k = launchIntensity === Md3PageHost.Premium ? 1.0
+                : (launchIntensity === Md3PageHost.Subtle ? 0.62 : 0.8)
         return launchReturning
-                ? Math.max(0, 0.30 * (1 - transitionProgress))
-                : Math.max(0, 0.55 * (1 - transitionProgress))
+                ? Math.max(0, 0.30 * k * (1 - transitionProgress))
+                : Math.max(0, 0.55 * k * (1 - transitionProgress))
     }
 
     function _launchBackdropBlur() {
         if (transitionModeActive !== "launch" || !transitioning)
             return 0
+        const k = launchIntensity === Md3PageHost.Premium ? 1.0
+                : (launchIntensity === Md3PageHost.Subtle ? 0.62 : 0.8)
         return launchReturning
-                ? Math.max(0, 0.18 * (1 - transitionProgress))
-                : Math.min(0.35, 0.08 + transitionProgress * 0.27)
+                ? Math.max(0, 0.18 * k * (1 - transitionProgress))
+                : Math.min(0.35 * k, 0.08 * k + transitionProgress * 0.27 * k)
     }
 
     function _usesArc() {
@@ -790,8 +811,10 @@ Item {
 
     function _prepareLaunchTransition(fromIndex, toIndex, opts) {
         const content = _contentRect()
-        let src = Qt.rect(content.x + content.width * 0.5 - 7,
-                          content.y + content.height * 0.5 - 7, 14, 14)
+        const seed = launchIntensity === Md3PageHost.Premium ? 10
+                   : (launchIntensity === Md3PageHost.Subtle ? 20 : 14)
+        let src = Qt.rect(content.x + content.width * 0.5 - seed / 2,
+                          content.y + content.height * 0.5 - seed / 2, seed, seed)
         let srcRadius = Math.min(src.width, src.height) / 2
         const wantReturn = !!(opts && opts.returnToSource)
         if (wantReturn) {
@@ -817,7 +840,7 @@ Item {
         if (opts && opts.sourcePoint && opts.sourcePoint.x !== undefined && opts.sourcePoint.y !== undefined) {
             const px = Number(opts.sourcePoint.x)
             const py = Number(opts.sourcePoint.y)
-            src = _clampRect(Qt.rect(px - 7, py - 7, 14, 14), content)
+            src = _clampRect(Qt.rect(px - seed / 2, py - seed / 2, seed, seed), content)
         } else if (opts && opts.sourceRect)
             src = _clampRect(opts.sourceRect, content)
         srcRadius = Number(opts && opts.sourceRadius !== undefined
@@ -829,6 +852,25 @@ Item {
         launchEndRect = content
         launchStartRadius = srcRadius
         launchEndRadius = Md3Theme.shape.large
+        const sx = src.x + src.width / 2
+        const sy = src.y + src.height / 2
+        const ex = content.x + content.width / 2
+        const ey = content.y + content.height / 2
+        const dx = Math.abs(ex - sx) + Math.abs(content.width - src.width) * 0.35
+        const dy = Math.abs(ey - sy) + Math.abs(content.height - src.height) * 0.35
+        const sum = Math.max(1, dx + dy)
+        launchWeightX = dx / sum
+        launchWeightY = dy / sum
+        if (launchIntensity === Md3PageHost.Premium) {
+            launchCurveX = [0.0, 0.0, 0.18, 1.0]
+            launchCurveY = Md3Motion.emphasizedDecelerate
+        } else if (launchIntensity === Md3PageHost.Subtle) {
+            launchCurveX = Md3Motion.standard
+            launchCurveY = Md3Motion.standardDecelerate
+        } else {
+            launchCurveX = [0.0, 0.0, 0.2, 1.0]
+            launchCurveY = Md3Motion.emphasizedDecelerate
+        }
         if ((opts && opts.rememberSource !== false) || (!opts && launchRememberLastSource)) {
             lastLaunchSourceRect = src
             lastLaunchSourceRadius = srcRadius
