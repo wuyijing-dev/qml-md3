@@ -29,6 +29,8 @@ Rectangle {
     /// Performance monitor toggle (right of trailing content, before theme)
     property bool showPerformanceToggle: false
     property bool performanceChecked: false
+    /// Product tour / onboarding guide (before About / performance / theme)
+    property bool showTourButton: false
     /// Pin / always-on-top (shown by default)
     property bool showPin: true
     property bool pinned: false
@@ -67,6 +69,7 @@ Rectangle {
     signal leadingClicked()
     signal themeToggled()
     signal performanceClicked()
+    signal tourClicked()
     signal pinToggled(bool pinned)
     signal aboutClicked()
 
@@ -365,6 +368,17 @@ Rectangle {
                 id: trailingSlot
                 width: childrenRect.width
                 height: root.baseHeight
+            }
+
+            Md3TitleBarButton {
+                id: tourBtn
+                visible: root.showTourButton
+                buttonHeight: root.baseHeight
+                buttonWidth: 40
+                iconSize: 14
+                icon: "tour"
+                accessibleName: qsTr("Start tour")
+                onClicked: root.tourClicked()
             }
 
             Md3TitleBarButton {

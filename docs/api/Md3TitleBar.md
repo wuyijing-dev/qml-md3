@@ -23,6 +23,7 @@ import Md3
 | `showAppIcon` | `bool` | `true` | read/write | `Md3TitleBar` | — |
 | `showThemeToggle` | `bool` | `true` | read/write | `Md3TitleBar` | — |
 | `showAboutButton` | `bool` | `true` | read/write | `Md3TitleBar` | Info button opens a modeless About dialog |
+| `showTourButton` | `bool` | `false` | read/write | `Md3TitleBar` | Tour / onboarding guide button (before About) |
 | `aboutAppName` | `string` | `""` | read/write | `Md3TitleBar` | Empty → Qt.application.displayName / name / title |
 | `aboutVersion` | `string` | `""` | read/write | `Md3TitleBar` | Empty → Qt.application.version |
 | `aboutOrganization` | `string` | `""` | read/write | `Md3TitleBar` | Empty → Qt.application.organization |
@@ -66,6 +67,7 @@ import Md3
 | `leadingClicked()` | `Md3TitleBar` | — |
 | `themeToggled()` | `Md3TitleBar` | — |
 | `performanceClicked()` | `Md3TitleBar` | — |
+| `tourClicked()` | `Md3TitleBar` | Emitted when the tour button is clicked |
 | `pinToggled(bool pinned)` | `Md3TitleBar` | — |
 | `aboutClicked()` | `Md3TitleBar` | Emitted when About dialog is opened |
 

@@ -181,9 +181,12 @@ Md3ApplicationWindow {
             minTitleWidth: 100
             maxTitleWidth: 200
             showThemeToggle: true
+            showTourButton: true
+            showAboutButton: window.showAboutButton
             showPerformanceToggle: window.showPerformanceButton
             performanceChecked: window.showPerformanceOverlay
             onPerformanceClicked: window.showPerformanceOverlay = !window.showPerformanceOverlay
+            onTourClicked: window.startTour()
 
             Md3ChipGroup {
                 selectionMode: Md3ChipGroup.Single
@@ -215,15 +218,10 @@ Md3ApplicationWindow {
                 }
             }
 
-            trailingContent: [
-                Md3TitleBarButton {
-                    icon: "tour"
-                    buttonWidth: 36
-                    buttonHeight: 28
-                    iconSize: 14
-                    accessibleName: qsTr("开始引导")
-                    onClicked: window.startTour()
-                },
+            // Wrap in a Row — assigning a bare object list to trailingSlot.data often stays empty.
+            trailingContent: Row {
+                height: 28
+                spacing: 0
                 Md3TitleBarButton {
                     icon: "tab"
                     buttonWidth: 36
@@ -231,16 +229,16 @@ Md3ApplicationWindow {
                     iconSize: 14
                     accessibleName: qsTr("新建标签")
                     onClicked: window.addTab(window.currentIndex)
-                },
+                }
                 Md3TitleBarButton {
-                    icon: "info"
+                    icon: "web_asset"
                     buttonWidth: 36
                     buttonHeight: 28
                     iconSize: 14
                     accessibleName: qsTr("窗口页面")
                     onClicked: window.openTab(window.windowPageIndex, false)
                 }
-            ]
+            }
         }
     }
 }
