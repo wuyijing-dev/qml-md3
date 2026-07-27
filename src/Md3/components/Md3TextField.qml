@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Window
 
 Item {
     id: root
@@ -22,8 +23,16 @@ Item {
     // When true (default for trailing "close"), clears text on trailing tap.
     property bool clearOnTrailing: true
 
+    /// Enable typeahead popup from `suggestions`.
+    property bool autoComplete: false
+    /// string[] or [{ label, value }]
+    property var suggestions: []
+    property int suggestionLimit: 6
+    property bool suggestionOpen: false
+
     signal trailingClicked()
     signal accepted()
+    signal suggestionChosen(var suggestion)
 
     readonly property bool focused: input.activeFocus
     readonly property bool floated: focused || text.length > 0
@@ -38,6 +47,65 @@ Item {
             return passwordVisible ? "visibility_off" : "visibility"
         return trailingIcon
     }
+
+    readonly property var filteredSuggestions: {
+        if (!autoComplete || !suggestions || suggestions.length === 0)
+            return []
+        const q = String(text || "").trim().toLowerCase()
+        const out = []
+        for (let i = 0; i < suggestions.length; ++i) {
+            const s = suggestions[i]
+            const label = (s && s.label !== undefined) ? String(s.label)
+                          : (s && s.value !== undefined) ? String(s.value)
+                          : String(s)
+            if (q.length === 0 || label.toLowerCase().indexOf(q) >= 0)
+                out.push(s)
+            if (out.length >= suggestionLimit)
+                break
+        }
+        return out
+    }
+
+    function _suggestionLabel(s) {
+        if (s && s.label !== undefined)
+            return String(s.label)
+        if (s && s.value !== undefined)
+            return String(s.value)
+        return String(s)
+    }
+
+    function _suggestionValue(s) {
+        if (s && s.value !== undefined)
+            return String(s.value)
+        if (s && s.label !== undefined)
+            return String(s.label)
+        return String(s)
+    }
+
+    function applySuggestion(s) {
+        input.text = _suggestionValue(s)
+        suggestionOpen = false
+        suggestionChosen(s)
+        input.forceActiveFocus()
+    }
+
+    function _syncSuggestionPopup() {
+        suggestionOpen = autoComplete && enabled && !password && !multiline
+                && focused && filteredSuggestions.length > 0
+    }
+
+    onFilteredSuggestionsChanged: _syncSuggestionPopup()
+    onFocusedChanged: {
+        if (!focused)
+            Qt.callLater(function () {
+                if (!focused)
+                    suggestionOpen = false
+            })
+        else
+            _syncSuggestionPopup()
+    }
+    onAutoCompleteChanged: _syncSuggestionPopup()
+    onTextChanged: if (autoComplete && focused) _syncSuggestionPopup()
 
     implicitWidth: 280
     implicitHeight: (multiline ? Math.max(56, input.contentHeight + 32) : 56)
@@ -191,7 +259,13 @@ Item {
                                                                        : TextInput.Normal
                     wrapMode: root.multiline ? TextInput.Wrap : TextInput.NoWrap
                     clip: true
-                    onAccepted: root.accepted()
+                    onAccepted: {
+                        if (root.suggestionOpen && root.filteredSuggestions.length > 0) {
+                            root.applySuggestion(root.filteredSuggestions[0])
+                            return
+                        }
+                        root.accepted()
+                    }
                 }
 
                 Text {
@@ -277,6 +351,85 @@ Item {
             font.family: Md3Theme.typography.fontFamily
             font.pixelSize: Md3Theme.scaled(Md3Theme.typography.bodySmall.size)
             wrapMode: Text.Wrap
+        }
+    }
+
+    // AutoComplete popup — reparented to window contentItem so it escapes clip.
+    Rectangle {
+        id: suggestionPanel
+        visible: root.suggestionOpen && filteredList.count > 0
+        width: Math.max(fieldBox.width, 160)
+        height: Math.min(240, filteredList.contentHeight + 8)
+        radius: Md3Theme.shape.medium
+        color: Md3Theme.colorScheme.surfaceContainerHigh
+        border.width: 1
+        border.color: Md3Theme.colorScheme.outlineVariant
+        z: 10000
+
+        parent: {
+            const w = root.Window.window
+            return (w && w.contentItem) ? w.contentItem : root
+        }
+
+        x: {
+            if (parent === root)
+                return 0
+            const p = fieldBox.mapToItem(parent, 0, fieldBox.height + 4)
+            return p.x
+        }
+        y: {
+            if (parent === root)
+                return fieldBox.height + 4
+            const p = fieldBox.mapToItem(parent, 0, fieldBox.height + 4)
+            return p.y
+        }
+
+        Md3Shadow {
+            anchors.fill: parent
+            elevation: 2
+            cornerRadius: parent.radius
+        }
+
+        ListView {
+            id: filteredList
+            anchors.fill: parent
+            anchors.margins: 4
+            clip: true
+            model: root.filteredSuggestions
+            spacing: 0
+            delegate: Item {
+                required property var modelData
+                required property int index
+                width: filteredList.width
+                height: 40
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: Md3Theme.shape.small
+                    color: rowMouse.containsMouse
+                           ? Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.colorOnSurface, 0.08)
+                           : "transparent"
+                }
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.leftMargin: 12
+                    anchors.right: parent.right
+                    anchors.rightMargin: 12
+                    text: root._suggestionLabel(modelData)
+                    elide: Text.ElideRight
+                    color: Md3Theme.colorScheme.colorOnSurface
+                    font.family: Md3Theme.typography.fontFamily
+                    font.pixelSize: Md3Theme.typography.bodyLarge.size
+                }
+                MouseArea {
+                    id: rowMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.applySuggestion(modelData)
+                }
+            }
         }
     }
 }

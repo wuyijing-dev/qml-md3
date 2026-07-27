@@ -43,12 +43,12 @@ Item {
                 Md3Badged {
                     badgeText: "128"
                     badgeMax: 99
-                    badgeSizePreset: Md3Badge.Large
+                    badgeSizePreset: Md3Badge.Medium
                     Md3IconButton { icon: "notifications" }
                 }
                 Md3Badged {
                     badgeText: "9"
-                    badgeSizePreset: Md3Badge.Small
+                    badgeSizePreset: Md3Badge.Medium
                     badgeColor: Md3Theme.colorScheme.tertiary
                     badgeLabelColor: Md3Theme.colorScheme.colorOnTertiary
                     Md3Button { text: qsTr("Inbox") }

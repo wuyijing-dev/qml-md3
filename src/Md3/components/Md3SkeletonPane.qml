@@ -1,17 +1,66 @@
 import QtQuick
 
 /// Full-pane skeleton used by Md3PageHost while a destination loads.
+/// Prefer `bones` (per-page outline); otherwise fall back to `layout` presets.
 Item {
     id: root
 
     property bool active: true
     /// "page" | "list" | "cards"
     property string layout: "page"
+    /// Optional outline: [{ variant, width, height, radius? }, ...]
+    /// variant: "text"|"circular"|"rounded"|"rectangular" or Md3Skeleton enum int
+    property var bones: []
+
+    readonly property bool useBones: bones && bones.length > 0
+
+    function _variantOf(b) {
+        if (!b)
+            return Md3Skeleton.Rounded
+        if (typeof b.variant === "number")
+            return b.variant
+        const v = String(b.variant || "rounded").toLowerCase()
+        if (v === "text")
+            return Md3Skeleton.Text
+        if (v === "circular" || v === "circle")
+            return Md3Skeleton.Circular
+        if (v === "rectangular" || v === "rect")
+            return Md3Skeleton.Rectangular
+        return Md3Skeleton.Rounded
+    }
+
+    function _widthOf(b, fallback) {
+        if (!b || b.width === undefined || b.width === null)
+            return fallback
+        const w = Number(b.width)
+        if (w > 0 && w <= 1)
+            return parent.width * w
+        return w > 0 ? w : fallback
+    }
+
+    Column {
+        anchors.fill: parent
+        anchors.margins: 4
+        spacing: 12
+        visible: root.useBones
+
+        Repeater {
+            model: root.useBones ? root.bones : []
+            delegate: Md3Skeleton {
+                required property var modelData
+                variant: root._variantOf(modelData)
+                width: root._widthOf(modelData, parent.width)
+                height: modelData.height !== undefined ? Number(modelData.height) : implicitHeight
+                active: root.active
+            }
+        }
+    }
 
     Column {
         anchors.fill: parent
         anchors.margins: 4
         spacing: 16
+        visible: !root.useBones
 
         Row {
             spacing: 12

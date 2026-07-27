@@ -11,45 +11,37 @@ import Md3
 
 ## Properties
 
-| Name | Type | Default | Access | Defined in | Description |
-|------|------|---------|--------|------------|-------------|
-| `model` | `var` | `[]` | read/write | `Md3NavigationRail` | — |
-| `currentIndex` | `int` | `0` | read/write | `Md3NavigationRail` | — |
-| `expanded` | `bool` | `false` | read/write | `Md3NavigationRail` | — |
-| `headerLabel` | `string` | `""` | read/write | `Md3NavigationRail` | — |
-| `showExpandToggle` | `bool` | `true` | read/write | `Md3NavigationRail` | Built-in control to expand/collapse and show full labels |
-| `destinationHeight` | `real` | `56` | readonly | `Md3NavigationRail` | — |
-| `destinationSpacing` | `real` | `4` | readonly | `Md3NavigationRail` | — |
-| `indicatorInset` | `real` | `12` | readonly | `Md3NavigationRail` | — |
-| `collapsedIndicatorWidth` | `real` | `56` | readonly | `Md3NavigationRail` | — |
-| `collapsedIndicatorHeight` | `real` | `32` | readonly | `Md3NavigationRail` | — |
-| `expandDuration` | `int` | `Md3Motion.spatialDuration` | readonly | `Md3NavigationRail` | — |
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `model` | `var` | `[]` | Scrollable destinations: `{ icon, label, destIndex? }` |
+| `footerModel` | `var` | `[]` | Bottom-pinned destinations (same shape) |
+| `currentIndex` | `int` | `0` | Selected **destIndex** (not visual row) |
+| `expanded` | `bool` | `false` | Expanded rail width / labels |
+| `headerLabel` | `string` | `""` | Optional header when expanded |
+| `showExpandToggle` | `bool` | `true` | Menu expand control |
+
+In `Md3ApplicationWindow` destinations, set `pin: "bottom"` (or `footer: true`) to place an entry in `footerModel`.
 
 ## Signals
 
-| Signal | Defined in | Description |
-|--------|------------|-------------|
-| `currentIndexChangedByUser(int index)` | `Md3NavigationRail` | — |
-| `destinationHovered(int index)` | `Md3NavigationRail` | Hover intent for PageHost predictive prefetch (L2 / soft L1). |
-| `destinationUnhovered(int index)` | `Md3NavigationRail` | — |
-| `expandToggleClicked()` | `Md3NavigationRail` | — |
-
-## Methods
-
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `destinationY(index)` | `Md3NavigationRail` | — |
+| Signal | Description |
+|--------|-------------|
+| `currentIndexChangedByUser(int index)` | User selected a destination (`destIndex`) |
+| `destinationHovered(int index)` | Prefetch hint |
+| `destinationUnhovered(int index)` | — |
+| `expandToggleClicked()` | Expand / collapse |
 
 ## Example
 
 ```qml
-import Md3
-
 Md3NavigationRail {
-    model: []
+    model: [
+        { icon: "home", label: "Home", destIndex: 0 },
+        { icon: "mail", label: "Inbox", destIndex: 1 }
+    ]
+    footerModel: [
+        { icon: "settings", label: "Settings", destIndex: 5 }
+    ]
     currentIndex: 0
-    expanded: false
-    headerLabel: ""
-    showExpandToggle: true
 }
 ```

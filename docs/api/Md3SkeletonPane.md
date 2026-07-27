@@ -1,38 +1,14 @@
 # Md3SkeletonPane
 
-Full-pane skeleton used by Md3PageHost while a destination loads.
-
 - **Source:** `src/Md3/components/Md3SkeletonPane.qml`
-- **Extends:** `Item`
-
-## Import
-
-```qml
-import Md3
-```
+- **Related:** `Md3Skeleton`, `Md3PageHost`
 
 ## Properties
 
-| Name | Type | Default | Access | Defined in | Description |
-|------|------|---------|--------|------------|-------------|
-| `active` | `bool` | `true` | read/write | `Md3SkeletonPane` | — |
-| `layout` | `string` | `"page"` | read/write | `Md3SkeletonPane` | "page" \| "list" \| "cards" |
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `active` | `bool` | `true` | Pulse animation |
+| `layout` | `string` | `"page"` | Fallback: `page` / `list` / `cards` |
+| `bones` | `var` | `[]` | Preferred outline: `[{ variant, width, height }]` |
 
-## Signals
-
-_None._
-
-## Methods
-
-_None._
-
-## Example
-
-```qml
-import Md3
-
-Md3SkeletonPane {
-    active: true
-    layout: "page"
-}
-```
+`width` may be a fraction `0–1` of the pane width. Destination entries may set `skeletonBones` or `skeletonLayout`; PageHost picks them while `awaitingTarget`.

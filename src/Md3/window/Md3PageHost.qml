@@ -48,6 +48,8 @@ Item {
     property bool showBusyIndicator: false
     property bool showSkeleton: false
     property string skeletonLayout: "page"
+    /// Optional override bones; when empty, uses destination.skeletonBones / skeletonLayout
+    property var skeletonBones: []
     /// "none" | "fade" | "slide" | "slideUp" | "fadeThrough" | "scale" | "launch"
     property string pageTransition: "fade"
     property int pageTransitionDuration: 100
@@ -85,6 +87,24 @@ Item {
         return !ldr || ldr.status !== Loader.Ready || !ldr.item
     }
 
+    readonly property var activeDestination: entryAt(currentIndex)
+
+    readonly property var effectiveSkeletonBones: {
+        if (skeletonBones && skeletonBones.length > 0)
+            return skeletonBones
+        const d = activeDestination
+        if (d && d.skeletonBones && d.skeletonBones.length > 0)
+            return d.skeletonBones
+        return []
+    }
+
+    readonly property string effectiveSkeletonLayout: {
+        const d = activeDestination
+        if (d && d.skeletonLayout !== undefined && String(d.skeletonLayout).length > 0)
+            return String(d.skeletonLayout)
+        return skeletonLayout
+    }
+
     property var keepFlags: []
     property var lruOrder: []
     property int generation: 0
@@ -104,6 +124,75 @@ Item {
     property var _markov: ({})
     property int _navPrev: -1
     property int _hoverHint: -1
+
+    // --- Multi-level navigation (back stack) ---
+    property var navStack: []
+    property var routeParams: ({})
+    property int sectionRootIndex: -1
+    property var _lastNavOpts: ({})
+
+    readonly property bool canGoBack: navStack.length > 0
+    readonly property int navDepth: navStack.length
+
+    function _clonePlainObject(obj) {
+        if (!obj || typeof obj !== "object")
+            return ({})
+        const out = ({})
+        for (const k in obj)
+            out[k] = obj[k]
+        return out
+    }
+
+    function resetNavStack() {
+        navStack = []
+        sectionRootIndex = -1
+        routeParams = ({})
+    }
+
+    function pushRoute(index, params, opts) {
+        if (!model || index < 0 || index >= model.length)
+            return false
+        const entry = {
+            index: currentIndex,
+            params: _clonePlainObject(routeParams),
+            forwardOpts: _clonePlainObject(opts),
+            sectionRoot: sectionRootIndex >= 0 ? sectionRootIndex : currentIndex
+        }
+        navStack = navStack.concat([entry])
+        if (sectionRootIndex < 0)
+            sectionRootIndex = currentIndex
+        routeParams = _clonePlainObject(params)
+        const navOpts = Object.assign({}, opts || ({}), { _stackOp: true })
+        navigateTo(index, navOpts)
+        return true
+    }
+
+    function replaceRoute(index, params, opts) {
+        if (!model || index < 0 || index >= model.length)
+            return false
+        routeParams = _clonePlainObject(params)
+        const navOpts = Object.assign({}, opts || ({}), { _stackOp: true })
+        navigateTo(index, navOpts)
+        return true
+    }
+
+    function goBack(opts) {
+        if (navStack.length === 0)
+            return false
+        const prev = navStack[navStack.length - 1]
+        navStack = navStack.slice(0, navStack.length - 1)
+        sectionRootIndex = navStack.length > 0 ? prev.sectionRoot : -1
+        routeParams = _clonePlainObject(prev.params)
+        const backOpts = Object.assign({}, opts || ({}), { _stackOp: true })
+        if (backOpts.transitionMode === undefined && backOpts.returnToSource === undefined) {
+            if (_isLaunchNav(prev.forwardOpts)) {
+                backOpts.transitionMode = "launch"
+                backOpts.returnToSource = true
+            }
+        }
+        navigateTo(prev.index, backOpts)
+        return true
+    }
 
     property bool transitioning: false
     property int transitionFrom: -1
@@ -132,6 +221,46 @@ Item {
         if (!model || index < 0 || index >= model.length)
             return null
         return model[index]
+    }
+
+    /// Clear current page Loader and reopen (used by hot reload).
+    function reloadCurrent() {
+        const idx = currentIndex
+        if (idx < 0 || !model || idx >= model.length)
+            return
+        const ldr = _loaderAt(idx)
+        if (!ldr)
+            return
+        const e = entryAt(idx) || {}
+        const url = resolveSource(e.source)
+        if (url && _l2Map[String(url)]) {
+            const m = Object.assign({}, _l2Map)
+            delete m[String(url)]
+            _l2Map = m
+            const order = (_l2Order || []).slice()
+            const oi = order.indexOf(String(url))
+            if (oi >= 0) {
+                order.splice(oi, 1)
+                _l2Order = order
+            }
+        }
+        const prevDisplayed = displayedIndex
+        ldr.sourceComponent = undefined
+        ldr.source = ""
+        if (Array.isArray(keepFlags)) {
+            const kf = keepFlags.slice()
+            while (kf.length <= idx)
+                kf.push(false)
+            kf[idx] = false
+            keepFlags = kf
+        }
+        generation++
+        displayedIndex = -1
+        Qt.callLater(function () {
+            root.navigateTo(idx)
+            if (prevDisplayed === idx)
+                displayedIndex = idx
+        })
     }
 
     function resolveSource(src) {
@@ -1131,7 +1260,14 @@ Item {
             return
         if (transitioning && index === transitionTo)
             return
-        _pendingNavOpts = opts || ({})
+        opts = opts || ({})
+        if (!opts._stackOp) {
+            resetNavStack()
+            if (opts.params !== undefined)
+                routeParams = _clonePlainObject(opts.params)
+        }
+        _lastNavOpts = opts
+        _pendingNavOpts = opts
 
         if (_navPrev >= 0 && _navPrev !== index)
             _recordMarkov(_navPrev, index)
@@ -1689,7 +1825,8 @@ Item {
 
         Md3SkeletonPane {
             anchors.fill: parent
-            layout: root.skeletonLayout
+            layout: root.effectiveSkeletonLayout
+            bones: root.effectiveSkeletonBones
             active: skeletonHost.show
         }
     }

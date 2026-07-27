@@ -4,15 +4,18 @@ import QtQuick.Window
 Rectangle {
     id: root
 
+    /// Main (scrollable) destinations. Each entry: { icon, label, destIndex? }
+    /// destIndex defaults to array index when omitted (legacy).
     property var model: []
+    /// Bottom-pinned destinations (same entry shape). Use real destIndex for PageHost.
+    property var footerModel: []
+    /// Selected destination index (maps to destIndex, not visual row).
     property int currentIndex: 0
     property bool expanded: false
     property string headerLabel: ""
-    /// Built-in control to expand/collapse and show full labels
     property bool showExpandToggle: true
 
     signal currentIndexChangedByUser(int index)
-    /// Hover intent for PageHost predictive prefetch (L2 / soft L1).
     signal destinationHovered(int index)
     signal destinationUnhovered(int index)
     signal expandToggleClicked()
@@ -44,11 +47,211 @@ Rectangle {
         }
     }
 
+    function destIndexOf(entry, fallback) {
+        if (entry && entry.destIndex !== undefined && entry.destIndex !== null)
+            return Number(entry.destIndex)
+        return fallback
+    }
+
     function destinationY(index) {
         return index * (destinationHeight + destinationSpacing)
     }
 
-    // Expand / collapse — shows full destination labels when open
+    function _selectDest(destIndex) {
+        if (destIndex !== root.currentIndex)
+            root.currentIndexChangedByUser(destIndex)
+        root.currentIndex = destIndex
+    }
+
+    Component {
+        id: destDelegate
+        Item {
+            id: dest
+            property int destIndex: 0
+            property var modelData: ({})
+            property Item indicatorHost: null
+
+            width: parent ? parent.width : 80
+            height: root.destinationHeight
+
+            readonly property bool selected: root.currentIndex === destIndex
+
+            Item {
+                id: hit
+                anchors.left: parent.left
+                anchors.leftMargin: root.indicatorInset
+                anchors.verticalCenter: parent.verticalCenter
+                width: root.expanded
+                       ? Math.max(root.collapsedIndicatorWidth, parent.width - root.indicatorInset * 2)
+                       : root.collapsedIndicatorWidth
+                height: root.expanded ? root.destinationHeight : root.collapsedIndicatorHeight
+
+                Behavior on width {
+                    NumberAnimation {
+                        duration: root.expandDuration
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Md3Motion.emphasized
+                    }
+                }
+                Behavior on height {
+                    NumberAnimation {
+                        duration: root.expandDuration
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Md3Motion.emphasized
+                    }
+                }
+
+                // Active pill lives on the selected row (works in scroll + footer).
+                Rectangle {
+                    id: activePill
+                    anchors.fill: parent
+                    radius: Md3Theme.shape.full
+                    color: Md3Theme.colorScheme.secondaryContainer
+                    visible: dest.selected
+                    opacity: destinationsShared._indicatorReveal
+                    transform: Scale {
+                        origin.x: activePill.width / 2
+                        origin.y: activePill.height / 2
+                        xScale: Math.max(0.001, destinationsShared._indicatorReveal)
+                        yScale: 1
+                    }
+                    z: 0
+                }
+
+                Md3Ripple {
+                    id: ripple
+                    z: 1
+                    rippleColor: dest.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
+                                               : Md3Theme.colorScheme.colorOnSurfaceVariant
+                    clipRadius: Md3Theme.shape.full
+                }
+                Md3StateOverlay {
+                    z: 1
+                    overlayColor: dest.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
+                                                : Md3Theme.colorScheme.colorOnSurfaceVariant
+                    hovered: mouse.containsMouse
+                    pressed: mouse.pressed
+                    focused: false
+                    controlEnabled: true
+                    radius: Md3Theme.shape.full
+                }
+            }
+
+            Row {
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left
+                anchors.leftMargin: root.expanded
+                                    ? root.indicatorInset + 16
+                                    : root.indicatorInset + (root.collapsedIndicatorWidth - 24) / 2
+                spacing: 12
+                z: 2
+
+                Behavior on anchors.leftMargin {
+                    NumberAnimation {
+                        duration: root.expandDuration
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Md3Motion.emphasized
+                    }
+                }
+
+                Md3Icon {
+                    icon: modelData.icon !== undefined ? modelData.icon : "circle"
+                    size: 24
+                    iconColor: dest.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
+                                             : Md3Theme.colorScheme.colorOnSurfaceVariant
+                    anchors.verticalCenter: parent.verticalCenter
+                    Behavior on iconColor {
+                        ColorAnimation {
+                            duration: Md3Motion.short4
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Md3Motion.standard
+                        }
+                    }
+                }
+                Text {
+                    opacity: root.expanded ? 1 : 0
+                    visible: opacity > 0.02
+                    width: root.expanded ? implicitWidth : 0
+                    clip: true
+                    text: modelData.label !== undefined ? modelData.label : ""
+                    color: dest.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
+                                         : Md3Theme.colorScheme.colorOnSurface
+                    font.family: Md3Theme.typography.fontFamily
+                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                    anchors.verticalCenter: parent.verticalCenter
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Md3Motion.short3
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Md3Motion.standard
+                        }
+                    }
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: root.expandDuration
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Md3Motion.emphasized
+                        }
+                    }
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: Md3Motion.short4
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Md3Motion.standard
+                        }
+                    }
+                }
+            }
+
+            MouseArea {
+                id: mouse
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: root.destinationHovered(dest.destIndex)
+                onExited: root.destinationUnhovered(dest.destIndex)
+                onClicked: function (mouse) {
+                    const local = mapToItem(hit, mouse.x, mouse.y)
+                    ripple.pulse(local.x, local.y)
+                    root._selectDest(dest.destIndex)
+                }
+            }
+        }
+    }
+
+    // Shared indicator reveal state across main + footer rows
+    QtObject {
+        id: destinationsShared
+        property real _indicatorReveal: 1
+        property int _lastIndicatorIndex: -1
+    }
+
+    Connections {
+        target: root
+        function onCurrentIndexChanged() {
+            if (destinationsShared._lastIndicatorIndex < 0) {
+                destinationsShared._lastIndicatorIndex = root.currentIndex
+                destinationsShared._indicatorReveal = 1
+                return
+            }
+            if (destinationsShared._lastIndicatorIndex === root.currentIndex)
+                return
+            destinationsShared._lastIndicatorIndex = root.currentIndex
+            destinationsShared._indicatorReveal = 0
+            indicatorRevealAnim.restart()
+        }
+    }
+
+    NumberAnimation {
+        id: indicatorRevealAnim
+        target: destinationsShared
+        property: "_indicatorReveal"
+        from: 0
+        to: 1
+        duration: Md3Motion.short4
+        easing.type: Easing.BezierSpline
+        easing.bezierCurve: Md3Motion.emphasizedDecelerate
+    }
+
     Item {
         id: expandToggle
         anchors.left: parent.left
@@ -127,19 +330,30 @@ Rectangle {
         }
     }
 
+    readonly property real _footerBlockHeight: {
+        const n = root.footerModel ? root.footerModel.length : 0
+        if (n <= 0)
+            return 0
+        return n * (root.destinationHeight + root.destinationSpacing)
+                - root.destinationSpacing + 12
+    }
+
     Flickable {
         id: flick
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
         anchors.topMargin: root.showExpandToggle ? 52 : 12
-        anchors.bottomMargin: 8
+        anchors.bottom: footerColumn.top
+        anchors.bottomMargin: 4
         clip: true
         boundsBehavior: Flickable.StopAtBounds
         contentWidth: width
-        contentHeight: column.height
+        contentHeight: mainColumn.height
         flickableDirection: Flickable.VerticalFlick
 
         Column {
-            id: column
+            id: mainColumn
             width: flick.width
             spacing: 4
 
@@ -161,230 +375,74 @@ Rectangle {
                 }
             }
 
-            Item {
-                id: destinations
-                width: parent.width
-                height: Math.max(0, root.model.length) * (root.destinationHeight + root.destinationSpacing)
-                       - (root.model.length > 0 ? root.destinationSpacing : 0)
-
-            // Active indicator: jumps to the clicked row instantly, then grows
-            // horizontally from center → edges (not a slide from the previous item).
-            property real _indicatorReveal: 1
-            property int _lastIndicatorIndex: -1
-
-            Connections {
-                target: root
-                function onCurrentIndexChanged() {
-                    if (destinations._lastIndicatorIndex < 0) {
-                        destinations._lastIndicatorIndex = root.currentIndex
-                        destinations._indicatorReveal = 1
-                        return
-                    }
-                    if (destinations._lastIndicatorIndex === root.currentIndex)
-                        return
-                    destinations._lastIndicatorIndex = root.currentIndex
-                    destinations._indicatorReveal = 0
-                    indicatorRevealAnim.restart()
-                }
-            }
-
-            NumberAnimation {
-                id: indicatorRevealAnim
-                target: destinations
-                property: "_indicatorReveal"
-                from: 0
-                to: 1
-                duration: Md3Motion.short4
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Md3Motion.emphasizedDecelerate
-            }
-
-            Rectangle {
-                id: activeIndicator
-                x: root.indicatorInset
-                width: root.expanded
-                       ? Math.max(root.collapsedIndicatorWidth, destinations.width - root.indicatorInset * 2)
-                       : root.collapsedIndicatorWidth
-                height: root.expanded ? root.destinationHeight : root.collapsedIndicatorHeight
-                // Instant Y — no travel from previous destination
-                y: root.destinationY(root.currentIndex)
-                   + (root.destinationHeight - (root.expanded ? root.destinationHeight
-                                                              : root.collapsedIndicatorHeight)) / 2
-                radius: Md3Theme.shape.full
-                color: Md3Theme.colorScheme.secondaryContainer
-                visible: root.model.length > 0
-                z: 0
-                transform: Scale {
-                    origin.x: activeIndicator.width / 2
-                    origin.y: activeIndicator.height / 2
-                    xScale: Math.max(0.001, destinations._indicatorReveal)
-                    yScale: 1
-                }
-
-                Behavior on x {
-                    NumberAnimation {
-                        duration: root.expandDuration
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Md3Motion.emphasized
-                    }
-                }
-                Behavior on width {
-                    enabled: !indicatorRevealAnim.running
-                    NumberAnimation {
-                        duration: root.expandDuration
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Md3Motion.emphasized
-                    }
-                }
-                Behavior on height {
-                    NumberAnimation {
-                        duration: root.expandDuration
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Md3Motion.emphasized
-                    }
-                }
-            }
-
             Repeater {
                 model: root.model
-                delegate: Item {
-                    id: dest
+                delegate: Loader {
                     required property int index
                     required property var modelData
-
-                    width: destinations.width
+                    width: mainColumn.width
                     height: root.destinationHeight
-                    y: root.destinationY(index)
-                    z: 1
-
-                    readonly property bool selected: root.currentIndex === index
-
-                    Item {
-                        id: hit
-                        anchors.left: parent.left
-                        anchors.leftMargin: root.indicatorInset
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: root.expanded
-                               ? Math.max(root.collapsedIndicatorWidth, parent.width - root.indicatorInset * 2)
-                               : root.collapsedIndicatorWidth
-                        height: root.expanded ? root.destinationHeight : root.collapsedIndicatorHeight
-
-                        Behavior on width {
-                            NumberAnimation {
-                                duration: root.expandDuration
-                                easing.type: Easing.BezierSpline
-                                easing.bezierCurve: Md3Motion.emphasized
-                            }
-                        }
-                        Behavior on height {
-                            NumberAnimation {
-                                duration: root.expandDuration
-                                easing.type: Easing.BezierSpline
-                                easing.bezierCurve: Md3Motion.emphasized
-                            }
-                        }
-
-                        Md3Ripple {
-                            id: ripple
-                            rippleColor: dest.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
-                                                       : Md3Theme.colorScheme.colorOnSurfaceVariant
-                            clipRadius: Md3Theme.shape.full
-                        }
-                        Md3StateOverlay {
-                            overlayColor: dest.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
-                                                        : Md3Theme.colorScheme.colorOnSurfaceVariant
-                            hovered: mouse.containsMouse
-                            pressed: mouse.pressed
-                            focused: false
-                            controlEnabled: true
-                            radius: Md3Theme.shape.full
-                        }
+                    sourceComponent: destDelegate
+                    onLoaded: {
+                        item.destIndex = root.destIndexOf(modelData, index)
+                        item.modelData = modelData
                     }
-
-                    Row {
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        anchors.leftMargin: root.expanded
-                                            ? root.indicatorInset + 16
-                                            : root.indicatorInset + (root.collapsedIndicatorWidth - 24) / 2
-                        spacing: 12
-                        z: 2
-
-                        Behavior on anchors.leftMargin {
-                            NumberAnimation {
-                                duration: root.expandDuration
-                                easing.type: Easing.BezierSpline
-                                easing.bezierCurve: Md3Motion.emphasized
-                            }
-                        }
-
-                        Md3Icon {
-                            icon: modelData.icon !== undefined ? modelData.icon : "circle"
-                            size: 24
-                            iconColor: dest.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
-                                                     : Md3Theme.colorScheme.colorOnSurfaceVariant
-                            anchors.verticalCenter: parent.verticalCenter
-                            Behavior on iconColor {
-                                ColorAnimation {
-                                    duration: Md3Motion.short4
-                                    easing.type: Easing.BezierSpline
-                                    easing.bezierCurve: Md3Motion.standard
-                                }
-                            }
-                        }
-                        Text {
-                            opacity: root.expanded ? 1 : 0
-                            visible: opacity > 0.02
-                            width: root.expanded ? implicitWidth : 0
-                            clip: true
-                            text: modelData.label !== undefined ? modelData.label : ""
-                            color: dest.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
-                                                 : Md3Theme.colorScheme.colorOnSurface
-                            font.family: Md3Theme.typography.fontFamily
-                            font.pixelSize: Md3Theme.typography.labelLarge.size
-                            anchors.verticalCenter: parent.verticalCenter
-                            Behavior on opacity {
-                                NumberAnimation {
-                                    duration: Md3Motion.short3
-                                    easing.type: Easing.BezierSpline
-                                    easing.bezierCurve: Md3Motion.standard
-                                }
-                            }
-                            Behavior on width {
-                                NumberAnimation {
-                                    duration: root.expandDuration
-                                    easing.type: Easing.BezierSpline
-                                    easing.bezierCurve: Md3Motion.emphasized
-                                }
-                            }
-                            Behavior on color {
-                                ColorAnimation {
-                                    duration: Md3Motion.short4
-                                    easing.type: Easing.BezierSpline
-                                    easing.bezierCurve: Md3Motion.standard
-                                }
-                            }
-                        }
+                    Binding {
+                        target: item
+                        property: "destIndex"
+                        value: root.destIndexOf(modelData, index)
+                        when: item !== null
                     }
-
-                    MouseArea {
-                        id: mouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onEntered: root.destinationHovered(dest.index)
-                        onExited: root.destinationUnhovered(dest.index)
-                        onClicked: function (mouse) {
-                            const local = mapToItem(hit, mouse.x, mouse.y)
-                            ripple.pulse(local.x, local.y)
-                            // Page switch first (parent navigateTo), then indicator morph.
-                            if (dest.index !== root.currentIndex)
-                                root.currentIndexChangedByUser(dest.index)
-                            root.currentIndex = dest.index
-                        }
+                    Binding {
+                        target: item
+                        property: "modelData"
+                        value: modelData
+                        when: item !== null
                     }
                 }
             }
         }
+    }
+
+    Column {
+        id: footerColumn
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 8
+        spacing: root.destinationSpacing
+        visible: root.footerModel && root.footerModel.length > 0
+
+        Rectangle {
+            width: parent.width - root.indicatorInset * 2
+            anchors.horizontalCenter: parent.horizontalCenter
+            height: 1
+            color: Md3Theme.colorScheme.outlineVariant
+            opacity: 0.6
+            visible: parent.visible
+        }
+
+        Repeater {
+            model: root.footerModel
+            delegate: Loader {
+                required property int index
+                required property var modelData
+                width: footerColumn.width
+                height: root.destinationHeight
+                sourceComponent: destDelegate
+                Binding {
+                    target: item
+                    property: "destIndex"
+                    value: root.destIndexOf(modelData, index)
+                    when: item !== null
+                }
+                Binding {
+                    target: item
+                    property: "modelData"
+                    value: modelData
+                    when: item !== null
+                }
+            }
         }
     }
 }

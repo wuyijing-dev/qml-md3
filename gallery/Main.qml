@@ -20,6 +20,11 @@ Md3ApplicationWindow {
     railExpanded: false
     railHeader: qsTr("组件图库")
     pagePadding: 20
+    pageSkeleton: true
+    persistSession: true
+    settingsOrganization: "QML_MD3"
+    settingsApplication: "Gallery"
+    hotReload: true
 
     // Document tabs under the title bar (no browserChrome / no tear-off window)
     documentTabsEnabled: true
@@ -34,32 +39,130 @@ Md3ApplicationWindow {
     aboutText: qsTr("Material Design 3 组件图库 — 演示窗口、导航与控件。")
     aboutIcon: windowIcon
 
-    property string pageRoot: "qrc:/qt/qml/Gallery/pages/"
-    property int windowPageIndex: 16
+    property string pageRoot: hotReload
+            ? "file:///D:/QML_MD3/QML_MD3/gallery/pages/"
+            : "qrc:/qt/qml/Gallery/pages/"
+    property int windowPageIndex: 21
+
+    overlay: [
+        Md3Tour {
+            id: galleryTour
+            anchors.fill: parent
+            steps: [
+                {
+                    target: window.shellRail,
+                    title: qsTr("导航栏"),
+                    body: qsTr("在左侧切换组件页面；底部固定了设置与窗口入口。"),
+                    placement: "right"
+                },
+                {
+                    target: window.titleBarItem,
+                    title: qsTr("标题栏"),
+                    body: qsTr("可切换明暗主题、打开性能面板，并使用标签浏览多个页面。"),
+                    placement: "bottom"
+                },
+                {
+                    target: window.pageHost,
+                    title: qsTr("内容区"),
+                    body: qsTr("页面按需加载；开启骨架屏时可看到目标页轮廓。保存窗口位置与主题到本地配置。"),
+                    placement: "top"
+                }
+            ]
+            onFinished: Md3AppSettings.setValue("tour/completed", true)
+            onSkipped: Md3AppSettings.setValue("tour/completed", true)
+        }
+    ]
+
+    Component.onCompleted: {
+        Md3AppSettings.organization = settingsOrganization
+        Md3AppSettings.application = settingsApplication
+        if (!Md3AppSettings.value("tour/completed", false))
+            Qt.callLater(function () { galleryTour.start() })
+    }
 
     destinations: [
-        { title: qsTr("令牌"), icon: "palette", source: pageRoot + "TokensPage.qml" },
-        { title: qsTr("按钮"), icon: "smart_button", source: pageRoot + "ButtonsPage.qml" },
-        { title: qsTr("FAB"), icon: "add_circle", source: pageRoot + "FabPage.qml" },
-        { title: qsTr("选择"), icon: "check_box", source: pageRoot + "SelectionPage.qml" },
-        { title: qsTr("文本框"), icon: "edit", source: pageRoot + "TextFieldsPage.qml" },
-        { title: qsTr("芯片"), icon: "label", source: pageRoot + "ChipsPage.qml" },
-        { title: qsTr("容器"), icon: "dashboard", source: pageRoot + "ContainmentPage.qml" },
-        { title: qsTr("反馈"), icon: "chat", source: pageRoot + "CommunicationPage.qml" },
-        { title: qsTr("导航"), icon: "menu", source: pageRoot + "NavigationPage.qml" },
-        { title: qsTr("菜单"), icon: "more_vert", source: pageRoot + "MenusPage.qml" },
-        { title: qsTr("选择器"), icon: "calendar_month", source: pageRoot + "PickersPage.qml" },
-        { title: qsTr("搜索"), icon: "search", source: pageRoot + "SearchPage.qml" },
-        { title: qsTr("扩展"), icon: "extension", source: pageRoot + "ExtrasPage.qml" },
-        { title: qsTr("动效"), icon: "animation", source: pageRoot + "MotionPage.qml" },
-        { title: qsTr("主题"), icon: "contrast", source: pageRoot + "ThemePage.qml" },
-        { title: qsTr("图表"), icon: "show_chart", source: pageRoot + "ChartsPage.qml", cacheCost: 3 },
-        { title: qsTr("窗口"), icon: "web_asset", source: pageRoot + "WindowPage.qml" },
-        { title: qsTr("场景：登录"), icon: "login", source: pageRoot + "scenes/LoginScene.qml", cacheCost: 2.5 },
-        { title: qsTr("场景：设置"), icon: "settings", source: pageRoot + "scenes/SettingsScene.qml", cacheCost: 2.5 },
-        { title: qsTr("场景：列表详情"), icon: "view_sidebar", source: pageRoot + "scenes/ListDetailScene.qml", cacheCost: 2.5 },
-        { title: qsTr("场景：列表打开"), icon: "list_alt", source: pageRoot + "scenes/LaunchListScene.qml", cacheCost: 2.5 },
-        { title: qsTr("场景：列表详情页"), icon: "description", source: pageRoot + "scenes/LaunchDetailScene.qml", cacheCost: 2.5 }
+        { title: qsTr("令牌"), icon: "palette", source: pageRoot + "TokensPage.qml",
+          skeletonLayout: "page" },
+        { title: qsTr("按钮"), icon: "smart_button", source: pageRoot + "ButtonsPage.qml",
+          skeletonBones: [
+              { variant: "text", width: 0.35, height: 22 },
+              { variant: "rounded", width: 1, height: 48 },
+              { variant: "rounded", width: 0.55, height: 40 },
+              { variant: "rounded", width: 0.4, height: 40 },
+              { variant: "rounded", width: 0.7, height: 56 }
+          ] },
+        { title: qsTr("FAB"), icon: "add_circle", source: pageRoot + "FabPage.qml",
+          skeletonBones: [
+              { variant: "text", width: 0.3, height: 20 },
+              { variant: "circular", width: 56, height: 56 },
+              { variant: "rounded", width: 0.45, height: 56 }
+          ] },
+        { title: qsTr("选择"), icon: "check_box", source: pageRoot + "SelectionPage.qml",
+          skeletonLayout: "list" },
+        { title: qsTr("文本框"), icon: "edit", source: pageRoot + "TextFieldsPage.qml",
+          skeletonBones: [
+              { variant: "text", width: 0.28, height: 20 },
+              { variant: "rounded", width: 0.7, height: 56 },
+              { variant: "rounded", width: 0.7, height: 56 },
+              { variant: "rounded", width: 0.7, height: 56 }
+          ] },
+        { title: qsTr("芯片"), icon: "label", source: pageRoot + "ChipsPage.qml",
+          skeletonBones: [
+              { variant: "text", width: 0.25, height: 18 },
+              { variant: "rounded", width: 0.22, height: 32 },
+              { variant: "rounded", width: 0.28, height: 32 },
+              { variant: "rounded", width: 0.2, height: 32 }
+          ] },
+        { title: qsTr("容器"), icon: "dashboard", source: pageRoot + "ContainmentPage.qml",
+          skeletonLayout: "cards" },
+        { title: qsTr("反馈"), icon: "chat", source: pageRoot + "CommunicationPage.qml",
+          skeletonLayout: "page" },
+        { title: qsTr("导航"), icon: "menu", source: pageRoot + "NavigationPage.qml",
+          skeletonLayout: "list" },
+        { title: qsTr("菜单"), icon: "more_vert", source: pageRoot + "MenusPage.qml",
+          skeletonLayout: "list" },
+        { title: qsTr("选择器"), icon: "calendar_month", source: pageRoot + "PickersPage.qml",
+          skeletonBones: [
+              { variant: "text", width: 0.3, height: 20 },
+              { variant: "rounded", width: 0.55, height: 280 }
+          ] },
+        { title: qsTr("搜索"), icon: "search", source: pageRoot + "SearchPage.qml",
+          skeletonBones: [
+              { variant: "rounded", width: 1, height: 56 },
+              { variant: "text", width: 0.8, height: 14 },
+              { variant: "text", width: 0.65, height: 14 },
+              { variant: "text", width: 0.7, height: 14 }
+          ] },
+        { title: qsTr("扩展"), icon: "extension", source: pageRoot + "ExtrasPage.qml",
+          skeletonLayout: "page" },
+        { title: qsTr("动效"), icon: "animation", source: pageRoot + "MotionPage.qml",
+          skeletonLayout: "cards" },
+        { title: qsTr("主题"), icon: "contrast", source: pageRoot + "ThemePage.qml",
+          skeletonLayout: "page" },
+        { title: qsTr("图表"), icon: "show_chart", source: pageRoot + "ChartsPage.qml", cacheCost: 3,
+          skeletonBones: [
+              { variant: "text", width: 0.3, height: 22 },
+              { variant: "rounded", width: 1, height: 200 },
+              { variant: "rounded", width: 1, height: 160 }
+          ] },
+        { title: qsTr("场景：登录"), icon: "login", source: pageRoot + "scenes/LoginScene.qml", cacheCost: 2.5,
+          skeletonBones: [
+              { variant: "circular", width: 64, height: 64 },
+              { variant: "rounded", width: 0.7, height: 56 },
+              { variant: "rounded", width: 0.7, height: 56 },
+              { variant: "rounded", width: 0.45, height: 48 }
+          ] },
+        { title: qsTr("场景：列表详情"), icon: "view_sidebar", source: pageRoot + "scenes/ListDetailScene.qml", cacheCost: 2.5,
+          skeletonLayout: "list" },
+        { title: qsTr("场景：列表打开"), icon: "list_alt", source: pageRoot + "scenes/LaunchListScene.qml", cacheCost: 2.5,
+          skeletonLayout: "list" },
+        { title: qsTr("场景：列表详情页"), icon: "description", source: pageRoot + "scenes/LaunchDetailScene.qml", cacheCost: 2.5,
+          skeletonLayout: "page" },
+        // Pinned to rail footer
+        { title: qsTr("场景：设置"), icon: "settings", source: pageRoot + "scenes/SettingsScene.qml", cacheCost: 2.5, pin: "bottom",
+          skeletonLayout: "list" },
+        { title: qsTr("窗口"), icon: "web_asset", source: pageRoot + "WindowPage.qml", pin: "bottom",
+          skeletonLayout: "page" }
     ]
 
     titleBar: Component {

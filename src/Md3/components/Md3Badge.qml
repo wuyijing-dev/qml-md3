@@ -27,28 +27,36 @@ Item {
 
     readonly property real padX: {
         switch (sizePreset) {
-        case Md3Badge.Small: return 4
-        case Md3Badge.Large: return 10
-        default: return 6
+        case Md3Badge.Small: return 3
+        case Md3Badge.Large: return 6
+        default: return 4
         }
     }
-    readonly property real minSide: {
+    /// Fixed height per preset (label badges); dots use a smaller side.
+    readonly property real fixedHeight: {
+        switch (sizePreset) {
+        case Md3Badge.Small: return 14
+        case Md3Badge.Large: return 18
+        default: return 16
+        }
+    }
+    readonly property real dotSide: {
         switch (sizePreset) {
         case Md3Badge.Small: return 6
-        case Md3Badge.Large: return 20
-        default: return large ? 16 : 6
+        case Md3Badge.Large: return 10
+        default: return 8
         }
     }
     readonly property real fontPx: {
         switch (sizePreset) {
-        case Md3Badge.Small: return 9
-        case Md3Badge.Large: return 13
+        case Md3Badge.Small: return 10
+        case Md3Badge.Large: return 12
         default: return Md3Theme.typography.labelSmall.size
         }
     }
 
-    implicitWidth: large ? Math.max(minSide, label.implicitWidth + padX * 2) : minSide
-    implicitHeight: large ? Math.max(minSide, label.implicitHeight + 2) : minSide
+    implicitWidth: large ? Math.max(fixedHeight, label.implicitWidth + padX * 2) : dotSide
+    implicitHeight: large ? fixedHeight : dotSide
     width: implicitWidth
     height: implicitHeight
 

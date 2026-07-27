@@ -17,54 +17,40 @@ import Md3
 
 ## Properties
 
-| Name | Type | Default | Access | Defined in | Description |
-|------|------|---------|--------|------------|-------------|
-| `variant` | `int` | `Md3TextField.Filled` | read/write | `Md3TextField` | — |
-| `text` | `alias` | `input.text` | read/write | `Md3TextField` | — |
-| `label` | `string` | `""` | read/write | `Md3TextField` | — |
-| `placeholderText` | `string` | `""` | read/write | `Md3TextField` | — |
-| `supportingText` | `string` | `""` | read/write | `Md3TextField` | — |
-| `errorText` | `string` | `""` | read/write | `Md3TextField` | — |
-| `error` | `bool` | `false` | read/write | `Md3TextField` | — |
-| `enabled` | `bool` | `true` | read/write | `Md3TextField` | — |
-| `multiline` | `bool` | `false` | read/write | `Md3TextField` | — |
-| `maximumLineCount` | `int` | `multiline ? 4 : 1` | read/write | `Md3TextField` | — |
-| `leadingIcon` | `string` | `""` | read/write | `Md3TextField` | — |
-| `trailingIcon` | `string` | `""` | read/write | `Md3TextField` | — |
-| `password` | `bool` | `false` | read/write | `Md3TextField` | — |
-| `passwordVisible` | `bool` | `false` | read/write | `Md3TextField` | — |
-| `clearOnTrailing` | `bool` | `true` | read/write | `Md3TextField` | — |
-| `focused` | `bool` | `input.activeFocus` | readonly | `Md3TextField` | — |
-| `floated` | `bool` | `focused \|\| text.length > 0` | readonly | `Md3TextField` | — |
-| `hasError` | `bool` | `error \|\| errorText.length > 0` | readonly | `Md3TextField` | — |
-| `helper` | `string` | `hasError ? (errorText.length ? errorText : supportingText) : supportingText` | readonly | `Md3TextField` | — |
-| `activeColor` | `color` | `hasError ? Md3Theme.colorScheme.error` | readonly | `Md3TextField` | — |
-| `fieldSurface` | `color` | `Md3Theme.colorScheme.surface` | readonly | `Md3TextField` | — |
-| `effectiveTrailingIcon` | `string` | `{…}` | readonly | `Md3TextField` | — |
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `int` | `Filled` | Filled / Outlined |
+| `text` | `string` | `""` | Field text |
+| `label` | `string` | `""` | Floating label |
+| `placeholderText` | `string` | `""` | Placeholder |
+| `supportingText` | `string` | `""` | Helper text |
+| `errorText` | `string` | `""` | Error helper |
+| `error` | `bool` | `false` | Error state |
+| `enabled` | `bool` | `true` | Enabled |
+| `multiline` | `bool` | `false` | Multi-line |
+| `leadingIcon` / `trailingIcon` | `string` | `""` | Icons |
+| `password` | `bool` | `false` | Password mode |
+| `clearOnTrailing` | `bool` | `true` | Clear on trailing close |
+| `autoComplete` | `bool` | `false` | Suggestion popup |
+| `suggestions` | `var` | `[]` | `string` or `{ label, value }` |
+| `suggestionLimit` | `int` | `6` | Max rows |
+| `suggestionOpen` | `bool` | — | Popup visibility |
+| `filteredSuggestions` | `var` | readonly | Filtered list |
 
 ## Signals
 
-| Signal | Defined in | Description |
-|--------|------------|-------------|
-| `trailingClicked()` | `Md3TextField` | — |
-| `accepted()` | `Md3TextField` | — |
-
-## Methods
-
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `handleTrailing()` | `Md3TextField` | — |
+| Signal | Description |
+|--------|-------------|
+| `trailingClicked()` | Trailing action |
+| `accepted()` | Enter (or first suggestion applied) |
+| `suggestionChosen(var)` | User picked a suggestion |
 
 ## Example
 
 ```qml
-import Md3
-
 Md3TextField {
-    variant: Md3TextField.Filled
-    text: input.text
-    label: ""
-    placeholderText: ""
-    supportingText: ""
+    label: qsTr("城市")
+    autoComplete: true
+    suggestions: ["Beijing", "Shanghai", { label: "Hong Kong", value: "Hong Kong" }]
 }
 ```

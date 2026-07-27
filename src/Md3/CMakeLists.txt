@@ -104,6 +104,10 @@ qt_add_qml_module(Md3
         diagnostics/md3performancemonitor.cpp
         diagnostics/md3inspector.h
         diagnostics/md3inspector.cpp
+        diagnostics/md3appsettings.h
+        diagnostics/md3appsettings.cpp
+        diagnostics/md3hotreload.h
+        diagnostics/md3hotreload.cpp
     QML_FILES
         foundation/Md3Theme.qml
         foundation/Md3Motion.qml
@@ -201,6 +205,7 @@ qt_add_qml_module(Md3
         components/Md3Skeleton.qml
         components/Md3SkeletonPane.qml
         components/Md3DeferredSection.qml
+        components/Md3Tour.qml
         diagnostics/Md3Sparkline.qml
         diagnostics/Md3ElementPicker.qml
         diagnostics/Md3PerformancePanel.qml

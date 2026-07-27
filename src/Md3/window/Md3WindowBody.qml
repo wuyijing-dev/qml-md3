@@ -30,6 +30,12 @@ Item {
     property alias pageHost: host
     property alias rail: rail
 
+    readonly property bool canGoBack: host.canGoBack
+    readonly property int navDepth: host.navDepth
+    readonly property var routeParams: host.routeParams
+    readonly property int railHighlightIndex: host.sectionRootIndex >= 0
+            ? host.sectionRootIndex : host.currentIndex
+
     signal destinationActivated(int index)
     signal railExpandRequested(bool expanded)
 
@@ -39,16 +45,72 @@ Item {
         host.navigateTo(index, opts)
         if (currentIndex !== host.currentIndex)
             currentIndex = host.currentIndex
-        if (rail.currentIndex !== currentIndex)
-            rail.currentIndex = currentIndex
+        _syncRailHighlight()
         destinationActivated(currentIndex)
+    }
+
+    function pushRoute(index, params, opts) {
+        if (!destinations || index < 0 || index >= destinations.length)
+            return false
+        const ok = host.pushRoute(index, params, opts)
+        if (currentIndex !== host.currentIndex)
+            currentIndex = host.currentIndex
+        _syncRailHighlight()
+        destinationActivated(currentIndex)
+        return ok
+    }
+
+    function goBack(opts) {
+        const ok = host.goBack(opts)
+        if (!ok)
+            return false
+        if (currentIndex !== host.currentIndex)
+            currentIndex = host.currentIndex
+        _syncRailHighlight()
+        destinationActivated(currentIndex)
+        return true
+    }
+
+    function replaceRoute(index, params, opts) {
+        if (!destinations || index < 0 || index >= destinations.length)
+            return false
+        const ok = host.replaceRoute(index, params, opts)
+        if (currentIndex !== host.currentIndex)
+            currentIndex = host.currentIndex
+        _syncRailHighlight()
+        destinationActivated(currentIndex)
+        return ok
+    }
+
+    function _syncRailHighlight() {
+        const hi = railHighlightIndex
+        if (rail.currentIndex !== hi)
+            rail.currentIndex = hi
     }
 
     onCurrentIndexChanged: {
         if (host.currentIndex !== currentIndex)
             host.navigateTo(currentIndex)
-        if (rail.currentIndex !== currentIndex)
-            rail.currentIndex = currentIndex
+        _syncRailHighlight()
+    }
+
+    function _railEntry(e, destIndex) {
+        return {
+            icon: e.icon !== undefined && e.icon !== "" ? e.icon : "circle",
+            label: e.label !== undefined && e.label !== ""
+                   ? e.label
+                   : (e.title !== undefined ? e.title : ""),
+            destIndex: destIndex
+        }
+    }
+
+    function _isPinnedBottom(e) {
+        if (!e)
+            return false
+        if (e.footer === true)
+            return true
+        const pin = e.pin !== undefined ? String(e.pin).toLowerCase() : ""
+        return pin === "bottom" || pin === "footer"
     }
 
     readonly property var railModel: {
@@ -56,12 +118,21 @@ Item {
         const out = []
         for (let i = 0; i < src.length; ++i) {
             const e = src[i] || {}
-            out.push({
-                icon: e.icon !== undefined && e.icon !== "" ? e.icon : "circle",
-                label: e.label !== undefined && e.label !== ""
-                       ? e.label
-                       : (e.title !== undefined ? e.title : "")
-            })
+            if (_isPinnedBottom(e))
+                continue
+            out.push(_railEntry(e, i))
+        }
+        return out
+    }
+
+    readonly property var railFooterModel: {
+        const src = destinations || []
+        const out = []
+        for (let i = 0; i < src.length; ++i) {
+            const e = src[i] || {}
+            if (!_isPinnedBottom(e))
+                continue
+            out.push(_railEntry(e, i))
         }
         return out
     }
@@ -79,7 +150,8 @@ Item {
             expanded: root.railExpanded
             headerLabel: root.railHeader
             model: root.railModel
-            currentIndex: root.currentIndex
+            footerModel: root.railFooterModel
+            currentIndex: root.railHighlightIndex
             showExpandToggle: true
             onCurrentIndexChangedByUser: function (index) {
                 root.navigateTo(index)

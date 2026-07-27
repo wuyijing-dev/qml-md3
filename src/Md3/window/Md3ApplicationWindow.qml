@@ -75,8 +75,20 @@ Window {
     property int pageTransitionDuration: 100
     property bool pageSkeleton: false
     property alias pageHost: windowBody.pageHost
+    property alias shellRail: windowBody.rail
     /// Within-page progressive sections (Md3DeferredSection). Default on.
     property bool progressiveContent: true
+
+    /// Persist geometry / theme / shell via Md3AppSettings (QSettings).
+    property bool persistSession: false
+    property string settingsOrganization: "QML_MD3"
+    property string settingsApplication: "Md3"
+    property bool _sessionRestored: false
+    property bool _sessionSaveScheduled: false
+
+    /// Dev hot-reload of QML sources (file watcher + clearComponentCache).
+    property bool hotReload: false
+    property alias hotReloadAgent: hotReloadInst
 
     /// Built-in performance overlay (title-bar speed button + floating panel).
     property bool showPerformanceButton: true
@@ -398,9 +410,116 @@ Window {
         _syncWinNative()
         _ensureManagedTabs()
         Md3Theme.progressiveContent = root.progressiveContent
+        Md3AppSettings.organization = root.settingsOrganization
+        Md3AppSettings.application = root.settingsApplication
+        if (root.persistSession)
+            root.restoreSession()
+        root._configureHotReload()
+    }
+
+    onClosing: function (close) {
+        if (root.persistSession)
+            root.saveSession()
     }
 
     onProgressiveContentChanged: Md3Theme.progressiveContent = progressiveContent
+    onPersistSessionChanged: {
+        if (persistSession && !_sessionRestored)
+            restoreSession()
+    }
+    onHotReloadChanged: _configureHotReload()
+    onSettingsOrganizationChanged: Md3AppSettings.organization = settingsOrganization
+    onSettingsApplicationChanged: Md3AppSettings.application = settingsApplication
+
+    onXChanged: _scheduleSessionSave()
+    onYChanged: _scheduleSessionSave()
+    onWidthChanged: _scheduleSessionSave()
+    onHeightChanged: _scheduleSessionSave()
+    onRailExpandedChanged: _scheduleSessionSave()
+    onCurrentIndexChanged: _scheduleSessionSave()
+
+    Connections {
+        target: Md3Theme
+        function onDarkChanged() {
+            root._syncWinNative()
+            root._scheduleSessionSave()
+        }
+        function onSeedChanged() { root._scheduleSessionSave() }
+    }
+
+    function restoreSession() {
+        Md3AppSettings.organization = settingsOrganization
+        Md3AppSettings.application = settingsApplication
+        const gx = Number(Md3AppSettings.value("window/x", x))
+        const gy = Number(Md3AppSettings.value("window/y", y))
+        const gw = Number(Md3AppSettings.value("window/width", width))
+        const gh = Number(Md3AppSettings.value("window/height", height))
+        if (gw >= minimumWidth && gh >= minimumHeight) {
+            width = gw
+            height = gh
+        }
+        if (isFinite(gx) && isFinite(gy)) {
+            x = gx
+            y = gy
+        }
+        const dark = Md3AppSettings.value("theme/dark", Md3Theme.dark)
+        const seed = Md3AppSettings.value("theme/seed", Md3Theme.seed)
+        Md3Theme.dark = !!dark
+        if (seed !== undefined && String(seed).length > 0)
+            Md3Theme.applySeed(seed)
+        railExpanded = !!Md3AppSettings.value("shell/railExpanded", railExpanded)
+        const page = Number(Md3AppSettings.value("shell/pageIndex", currentIndex))
+        if (usesDestinations && page >= 0 && page < destinations.length)
+            currentIndex = page
+        _sessionRestored = true
+    }
+
+    function saveSession() {
+        if (!persistSession)
+            return
+        Md3AppSettings.organization = settingsOrganization
+        Md3AppSettings.application = settingsApplication
+        Md3AppSettings.setValue("window/x", x)
+        Md3AppSettings.setValue("window/y", y)
+        Md3AppSettings.setValue("window/width", width)
+        Md3AppSettings.setValue("window/height", height)
+        Md3AppSettings.setValue("theme/dark", Md3Theme.dark)
+        Md3AppSettings.setValue("theme/seed", String(Md3Theme.seed))
+        Md3AppSettings.setValue("shell/railExpanded", railExpanded)
+        Md3AppSettings.setValue("shell/pageIndex", currentIndex)
+        Md3AppSettings.sync()
+    }
+
+    function _scheduleSessionSave() {
+        if (!persistSession || !_sessionRestored)
+            return
+        if (_sessionSaveScheduled)
+            return
+        _sessionSaveScheduled = true
+        Qt.callLater(function () {
+            root._sessionSaveScheduled = false
+            root.saveSession()
+        })
+    }
+
+    function _configureHotReload() {
+        hotReloadInst.enabled = !!hotReload
+        if (!hotReloadInst.enabled) {
+            for (let i = 0; i < Qt.application.arguments.length; ++i) {
+                const a = Qt.application.arguments[i]
+                if (a === "--hot-reload" || a === "-hot-reload") {
+                    hotReloadInst.enabled = true
+                    break
+                }
+            }
+        }
+        hotReloadInst.rediscoverSourceTrees()
+    }
+
+    function reloadCurrentPage() {
+        if (pageHost && pageHost.reloadCurrent)
+            pageHost.reloadCurrent()
+    }
 
     onShowPerformanceOverlayChanged: {
         if (!showPerformanceOverlay) {
@@ -448,11 +567,6 @@ Window {
     onSystemBackdropChanged: _syncWinNative()
     onNativeBorderColorChanged: _syncWinNative()
     onSyncImmersiveDarkModeChanged: _syncWinNative()
-
-    Connections {
-        target: Md3Theme
-        function onDarkChanged() { root._syncWinNative() }
-    }
 
     function _applyWindowIcon() {
         if (!windowIcon || windowIcon.toString().length === 0)
@@ -871,6 +985,14 @@ Window {
                 id: overlayHost
                 anchors.fill: parent
                 z: 1000
+            }
+
+            Md3HotReload {
+                id: hotReloadInst
+                onReloadRequested: function (path) {
+                    hotReloadInst.clearComponentCache(root)
+                    root.reloadCurrentPage()
+                }
             }
 
             Md3PerformanceMonitor {

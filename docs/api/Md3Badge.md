@@ -23,6 +23,10 @@ import Md3
 | `displayText` | `string` | readonly | Text after `max` formatting. |
 | `large` | `bool` | readonly | Whether a label is shown. |
 
+## Sizing
+
+Label badges use a **fixed height** per preset (Small 14 / Medium 16 / Large 18); width grows with text only. Dots use 6 / 8 / 10. Prefer `Medium` on icon buttons and larger hosts for consistent visual weight.
+
 ## Example
 
 ```qml
@@ -38,6 +42,6 @@ Md3Badge {
     anchors.right: parent.right
     anchors.top: parent.top
     text: "3"
-    sizePreset: Md3Badge.Large
+    sizePreset: Md3Badge.Medium
 }
 ```

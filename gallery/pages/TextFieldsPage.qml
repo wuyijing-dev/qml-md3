@@ -55,5 +55,20 @@ Flickable {
             label: "Password"
             password: true
         }
+
+        Md3TextField {
+            Layout.fillWidth: true
+            Layout.maximumWidth: 360
+            variant: Md3TextField.Outlined
+            label: qsTr("城市（AutoComplete）")
+            supportingText: qsTr("输入以过滤建议")
+            autoComplete: true
+            suggestions: [
+                "Beijing", "Shanghai", "Guangzhou", "Shenzhen",
+                "Hangzhou", "Chengdu", "Wuhan", "Nanjing",
+                { label: "Hong Kong", value: "Hong Kong" },
+                { label: "Taipei", value: "Taipei" }
+            ]
+        }
     }
 }
