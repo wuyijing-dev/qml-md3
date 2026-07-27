@@ -43,16 +43,7 @@ Item {
         return checked ? Md3Theme.colorScheme.colorOnPrimary
                        : Md3Theme.colorScheme.outline
     }
-    /// 0 = off, 1 = on — single driver so position/size stay in sync (avoids snappy dual Behaviors)
-    property real thumbProgress: checked ? 1 : 0
-    Behavior on thumbProgress {
-        NumberAnimation {
-            duration: Md3Motion.medium2
-            easing.type: Easing.BezierSpline
-            easing.bezierCurve: Md3Motion.emphasized
-        }
-    }
-    readonly property real thumbSize: 16 + thumbProgress * 8
+    readonly property real thumbSize: checked ? 24 : 16
 
     Rectangle {
         id: track
@@ -67,14 +58,7 @@ Item {
 
         Behavior on color {
             ColorAnimation {
-                duration: Md3Motion.medium2
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Md3Motion.standard
-            }
-        }
-        Behavior on border.width {
-            NumberAnimation {
-                duration: Md3Motion.medium1
+                duration: Md3Motion.short4
                 easing.type: Easing.BezierSpline
                 easing.bezierCurve: Md3Motion.standard
             }
@@ -97,11 +81,32 @@ Item {
             radius: width / 2
             color: root.thumbColor
             anchors.verticalCenter: parent.verticalCenter
-            x: 4 + root.thumbProgress * (parent.width - width - 8)
+            x: root.checked ? parent.width - width - 4 : 4
 
+            Behavior on x {
+                NumberAnimation {
+                    duration: Md3Motion.short4
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Md3Motion.emphasized
+                }
+            }
+            Behavior on width {
+                NumberAnimation {
+                    duration: Md3Motion.short3
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Md3Motion.standard
+                }
+            }
+            Behavior on height {
+                NumberAnimation {
+                    duration: Md3Motion.short3
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Md3Motion.standard
+                }
+            }
             Behavior on color {
                 ColorAnimation {
-                    duration: Md3Motion.medium2
+                    duration: Md3Motion.short4
                     easing.type: Easing.BezierSpline
                     easing.bezierCurve: Md3Motion.standard
                 }
