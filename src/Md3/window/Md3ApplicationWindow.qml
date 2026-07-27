@@ -48,6 +48,23 @@ Window {
     property int themeRevealDuration: Md3Motion.long2
     property var themeRevealEasing: Md3Motion.emphasized
 
+    /// QSettings often returns REG_SZ "true"/"false" — never use !! on strings ("false" is truthy).
+    function _settingsBool(key, fallback) {
+        const v = Md3AppSettings.value(key, fallback)
+        if (v === undefined || v === null)
+            return !!fallback
+        if (typeof v === "boolean")
+            return v
+        if (typeof v === "number")
+            return v !== 0
+        const s = String(v).trim().toLowerCase()
+        if (s === "true" || s === "1" || s === "yes" || s === "on")
+            return true
+        if (s === "false" || s === "0" || s === "no" || s === "off" || s === "")
+            return false
+        return !!fallback
+    }
+
     // --- Built-in destinations shell (rail + lazy pages) ---
     /// When non-empty, window hosts left rail + on-demand pages (no manual layout needed).
     property var destinations: []
@@ -336,7 +353,8 @@ Window {
 
     /// Toggle theme with circular reveal from a point in chrome / contentItem coords.
     function toggleThemeAt(x, y) {
-        if (!themeRevealEnabled || themeRevealBusy || chrome.width < 1 || chrome.height < 1) {
+        if (!themeRevealEnabled || themeRevealBusy || Md3Theme.reduceMotion
+                || chrome.width < 1 || chrome.height < 1) {
             Md3Theme.toggleDark()
             return
         }
@@ -470,16 +488,16 @@ Window {
             x = gx
             y = gy
         }
-        const dark = Md3AppSettings.value("theme/dark", Md3Theme.dark)
+        const dark = _settingsBool("theme/dark", Md3Theme.dark)
         const seed = Md3AppSettings.value("theme/seed", Md3Theme.seed)
-        Md3Theme.dark = !!dark
+        Md3Theme.dark = dark
         if (seed !== undefined && String(seed).length > 0)
             Md3Theme.applySeed(seed)
-        Md3Theme.reduceMotion = !!Md3AppSettings.value("a11y/reduceMotion", Md3Theme.reduceMotion)
-        Md3Theme.highContrast = !!Md3AppSettings.value("a11y/highContrast", Md3Theme.highContrast)
+        Md3Theme.reduceMotion = _settingsBool("a11y/reduceMotion", Md3Theme.reduceMotion)
+        Md3Theme.highContrast = _settingsBool("a11y/highContrast", Md3Theme.highContrast)
         Md3Theme.textScale = Number(Md3AppSettings.value("a11y/textScale", Md3Theme.textScale))
-        Md3Accessibility.showFocusRings = !!Md3AppSettings.value("a11y/showFocusRings", Md3Accessibility.showFocusRings)
-        railExpanded = !!Md3AppSettings.value("shell/railExpanded", railExpanded)
+        Md3Accessibility.showFocusRings = _settingsBool("a11y/showFocusRings", Md3Accessibility.showFocusRings)
+        railExpanded = _settingsBool("shell/railExpanded", railExpanded)
         const page = Number(Md3AppSettings.value("shell/pageIndex", currentIndex))
         if (usesDestinations && page >= 0 && page < destinations.length)
             currentIndex = page
