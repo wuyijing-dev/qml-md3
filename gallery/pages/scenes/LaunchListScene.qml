@@ -27,9 +27,9 @@ Item {
         const detailIndex = _destinationIndexBySuffix("LaunchDetailScene.qml")
         if (detailIndex < 0)
             return
-        const p = sourceItem.mapToItem(win.pageHost,
-                                       localX !== undefined ? localX : sourceItem.width / 2,
-                                       localY !== undefined ? localY : sourceItem.height / 2)
+        const gp = sourceItem.mapToGlobal(localX !== undefined ? localX : sourceItem.width / 2,
+                                         localY !== undefined ? localY : sourceItem.height / 2)
+        const p = win.pageHost.mapFromGlobal(gp.x, gp.y)
         win._launchDetailTitle = title
         win._launchDetailBody = body
         win.navigateTo(detailIndex, {
@@ -95,7 +95,7 @@ Item {
                     id: rowFeedback
                     width: parent.width
                     title: qsTr("Feedback")
-                    subtitle: qsTr("Return also goes back into source")
+                    subtitle: qsTr("Back uses a normal slide transition")
                     MouseArea {
                         anchors.fill: parent
                         acceptedButtons: Qt.LeftButton

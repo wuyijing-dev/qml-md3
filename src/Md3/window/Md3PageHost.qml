@@ -114,6 +114,9 @@ Item {
     property var launchCurveY: Md3Motion.emphasizedDecelerate
     property real launchWeightX: 0.5
     property real launchWeightY: 0.5
+    /// Tap origin in page-loader local coordinates (for scale pivot).
+    property real launchPivotX: 0
+    property real launchPivotY: 0
     /// Defer enter transition after Loader.Ready (unused; kept for API stability).
     property int _pendingShowIndex: -1
     property int _pendingShowPasses: 0
@@ -263,12 +266,42 @@ Item {
     function _launchPageTransform(linearT, fromRect, toRect) {
         const base = _contentRect()
         const bounds = _launchBoundsAt(linearT, fromRect, toRect)
+        const ox = launchPivotX
+        const oy = launchPivotY
+        const sx = bounds.width / Math.max(1, base.width)
+        const sy = bounds.height / Math.max(1, base.height)
+        const leftLocal = bounds.left - base.x
+        const topLocal = bounds.top - base.y
         return {
-            dx: bounds.cx - (base.x + base.width / 2),
-            dy: bounds.cy - (base.y + base.height / 2),
-            scaleX: bounds.width / Math.max(1, base.width),
-            scaleY: bounds.height / Math.max(1, base.height)
+            ox: ox,
+            oy: oy,
+            dx: leftLocal - ox * (1 - sx),
+            dy: topLocal - oy * (1 - sy),
+            scaleX: sx,
+            scaleY: sy
         }
+    }
+
+    function _resolveNavMode(opts) {
+        const o = opts || ({})
+        if (o.returnToSource) {
+            if (o.transitionMode !== undefined && o.transitionMode !== null
+                    && String(o.transitionMode).length > 0
+                    && String(o.transitionMode) !== "launch")
+                return String(o.transitionMode)
+            return pageTransition === "launch" ? "slide" : pageTransition
+        }
+        if (o.transitionMode !== undefined && o.transitionMode !== null
+                && String(o.transitionMode).length > 0)
+            return String(o.transitionMode)
+        return pageTransition
+    }
+
+    function _isLaunchNav(opts) {
+        const o = opts || ({})
+        if (o.returnToSource)
+            return false
+        return o.transitionMode === "launch" || pageTransition === "launch"
     }
 
     function _launchLeaveFadeOpacity(linearT, returning) {
@@ -284,38 +317,22 @@ Item {
     }
 
     function _launchBackdropOpacity() {
-        if (transitionModeActive !== "launch" || !transitioning)
+        if (transitionModeActive !== "launch" || !transitioning || launchReturning)
             return 0
         const k = launchIntensity === Md3PageHost.Premium ? 1.0
                 : (launchIntensity === Md3PageHost.Subtle ? 0.62 : 0.8)
-        const total = _launchTotalDuration()
         const t = transitionProgress
-        if (launchReturning) {
-            const fadeIn = _launchSubProgress(t, total - 266, 266)
-            return Math.max(0, 0.28 * k * _bezierAt(fadeIn, Md3Motion.standardDecelerate))
-        }
-        const cover = _launchSubProgress(t, 0, Math.round(total * 0.30))
-        const reveal = _launchSubProgress(t, Math.round(total * 0.30), Math.round(total * 0.366))
-        const alpha = cover < 1
-                ? 0.42 * k * _bezierAt(cover, Md3Motion.standardAccelerate)
-                : 0.42 * k * (1 - _bezierAt(reveal, [0.0, 0.0, 0.6, 1.0]))
-        return Math.max(0, alpha)
+        return Math.max(0, (1 - t * 0.85) * 0.92 * k)
     }
 
     function _launchBackdropBlur() {
-        if (transitionModeActive !== "launch" || !transitioning)
+        if (transitionModeActive !== "launch" || !transitioning || launchReturning)
             return 0
         const k = launchIntensity === Md3PageHost.Premium ? 1.0
                 : (launchIntensity === Md3PageHost.Subtle ? 0.62 : 0.8)
-        const total = _launchTotalDuration()
         const t = transitionProgress
-        if (launchReturning)
-            return Math.max(0, 0.16 * k * (1 - t))
-        const cover = _launchSubProgress(t, 0, Math.round(total * 0.30))
-        const reveal = _launchSubProgress(t, Math.round(total * 0.30), Math.round(total * 0.366))
-        if (cover < 1)
-            return 0.10 * k + cover * 0.22 * k
-        return Math.max(0, 0.32 * k * (1 - _bezierAt(reveal, [0.0, 0.0, 0.6, 1.0])))
+        const peak = launchIntensity === Md3PageHost.Premium ? 0.92 : 0.78
+        return Math.max(0.08 * k, peak * k * (1 - _bezierAt(t, Md3Motion.emphasizedDecelerate)))
     }
 
     function _usesArc() {
@@ -524,8 +541,8 @@ Item {
         _dismissLeaveSnapshot(true)
     }
 
-    function _armLeaveSnapshot() {
-        if (!leaveSnapshot)
+    function _armLeaveSnapshot(forLaunch) {
+        if (!leaveSnapshot && !forLaunch)
             return
         const ldr = _loaderAt(displayedIndex)
         if (!ldr || !ldr.item)
@@ -943,12 +960,21 @@ Item {
         }
 
         launchReturning = false
+        let pivotX = content.x + content.width / 2
+        let pivotY = content.y + content.height / 2
         if (opts && opts.sourcePoint && opts.sourcePoint.x !== undefined && opts.sourcePoint.y !== undefined) {
             const px = Number(opts.sourcePoint.x)
             const py = Number(opts.sourcePoint.y)
+            pivotX = px
+            pivotY = py
             src = _clampRect(Qt.rect(px - seed / 2, py - seed / 2, seed, seed), content)
-        } else if (opts && opts.sourceRect)
+        } else if (opts && opts.sourceRect) {
             src = _clampRect(opts.sourceRect, content)
+            pivotX = src.x + src.width / 2
+            pivotY = src.y + src.height / 2
+        }
+        launchPivotX = Math.max(0, Math.min(content.width, pivotX - content.x))
+        launchPivotY = Math.max(0, Math.min(content.height, pivotY - content.y))
         srcRadius = Number(opts && opts.sourceRadius !== undefined
                            ? opts.sourceRadius
                            : Math.min(src.width, src.height) / 2)
@@ -969,10 +995,7 @@ Item {
 
     function _startTransition(fromIndex, toIndex) {
         const opts = _pendingNavOpts || ({})
-        const mode = (opts && opts.transitionMode !== undefined && opts.transitionMode !== null
-                      && String(opts.transitionMode).length > 0)
-                ? String(opts.transitionMode)
-                : pageTransition
+        const mode = _resolveNavMode(opts)
         // onLoaded + onStatusChanged both call _tryShow — ignore duplicate
         if (transitioning && transitionTo === toIndex)
             return
@@ -1048,13 +1071,13 @@ Item {
             _evict()
         }
 
-        if ((_pendingNavOpts && _pendingNavOpts.transitionMode === "launch")
-                || pageTransition === "launch")
-            _armLeaveSnapshot()
+        if ((_pendingNavOpts && _isLaunchNav(_pendingNavOpts))
+                || (pageTransition === "launch" && !(_pendingNavOpts && _pendingNavOpts.returnToSource)))
+            _armLeaveSnapshot(true)
 
         if (_tryShow(index)) {
-            const keepLaunchSnapshot = (_pendingNavOpts && _pendingNavOpts.transitionMode === "launch")
-                    || pageTransition === "launch"
+            const keepLaunchSnapshot = _isLaunchNav(_pendingNavOpts)
+                    || (pageTransition === "launch" && !(_pendingNavOpts && _pendingNavOpts.returnToSource))
             if (!keepLaunchSnapshot)
                 _dismissLeaveSnapshot(true)
             if (!transitioning)
@@ -1063,7 +1086,7 @@ Item {
             return
         }
 
-        _armLeaveSnapshot()
+        _armLeaveSnapshot(_isLaunchNav(_pendingNavOpts))
         if (pageAnim.running) {
             pageAnim.stop()
             if (transitionTo >= 0 && transitionTo !== index)
@@ -1402,8 +1425,22 @@ Item {
                     }
                 },
                 Scale {
-                    origin.x: pageLoader.width / 2
-                    origin.y: pageLoader.height / 2
+                    origin.x: {
+                        if (mode === "launch" && isEntering && !root.launchReturning) {
+                            const tr = root._launchPageTransform(
+                                        pageLoader.t, root.launchStartRect, root.launchEndRect)
+                            return tr.ox
+                        }
+                        return pageLoader.width / 2
+                    }
+                    origin.y: {
+                        if (mode === "launch" && isEntering && !root.launchReturning) {
+                            const tr = root._launchPageTransform(
+                                        pageLoader.t, root.launchStartRect, root.launchEndRect)
+                            return tr.oy
+                        }
+                        return pageLoader.height / 2
+                    }
                     xScale: {
                         if (mode === "launch") {
                             if (isEntering && !root.launchReturning) {
@@ -1524,7 +1561,7 @@ Item {
         id: leaveSnap
         anchors.fill: parent
         anchors.margins: root.contentPadding
-        z: 7
+        z: 2
         live: false
         hideSource: false
         smooth: false
@@ -1536,16 +1573,16 @@ Item {
     MultiEffect {
         id: launchBlur
         anchors.fill: leaveSnap
-        z: 7.5
-        visible: opacity > 0.01
+        z: 2.5
+        visible: leaveSnap.opacity > 0.01 && root._launchBackdropBlur() > 0.01
         source: leaveSnap
         blurEnabled: true
-        blurMax: 48
-        blurMultiplier: 1.0
+        blurMax: 64
+        blurMultiplier: 1.15
         blur: root._launchBackdropBlur()
         opacity: root._launchBackdropOpacity()
-        saturation: 0.92
-        brightness: -0.02
+        saturation: 0.88
+        brightness: -0.04
     }
 
     Rectangle {

@@ -27,10 +27,7 @@ Item {
         const listIndex = _destinationIndexBySuffix("LaunchListScene.qml")
         if (listIndex < 0)
             return
-        win.navigateTo(listIndex, {
-            transitionMode: "launch",
-            returnToSource: true
-        })
+        win.navigateTo(listIndex)
     }
 
     readonly property string detailTitle: {

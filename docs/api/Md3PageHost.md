@@ -78,7 +78,7 @@ _None._
 | `noteActivity()` | `Md3PageHost` | — |
 | `prefetchHint(index)` | `Md3PageHost` | — |
 | `clearPrefetchHint(index)` | `Md3PageHost` | — |
-| `navigateTo(index, opts)` | `Md3PageHost` | Route-level page navigation. `opts` supports `transitionMode`, `sourcePoint` (preferred), `sourceRect`, `sourceRadius`, `returnToSource`, `rememberSource`. `transitionMode: "launch"` grows the destination page from the tapped origin and blurs the previous background snapshot during the transition. |
+| `navigateTo(index, opts)` | `Md3PageHost` | Route-level page navigation. `opts` supports `transitionMode`, `sourcePoint` (preferred), `sourceRect`, `sourceRadius`, `returnToSource`, `rememberSource`. `transitionMode: "launch"` grows the destination from the tap point (scale pivot) and blurs the leaving page snapshot at animation start. `returnToSource: true` uses a normal transition (`slide` when `pageTransition` is `launch`). |
 
 ## Example
 
