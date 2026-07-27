@@ -146,8 +146,13 @@ Item {
         return Qt.resolvedUrl(s).toString()
     }
 
-    function _loaderAt(index) {
+    function _pageSlotAt(index) {
         return pageRepeater.itemAt(index)
+    }
+
+    function _loaderAt(index) {
+        const slot = _pageSlotAt(index)
+        return slot ? slot.pageLoader : null
     }
 
     function _contentRect() {
@@ -263,6 +268,19 @@ Item {
         }
     }
 
+    function _launchMaskRect(linearT) {
+        const base = _contentRect()
+        const bounds = _launchBoundsAt(linearT, launchStartRect, launchEndRect)
+        const shapeP = Math.min(1, _launchPositionProgress(linearT) / 0.75)
+        return {
+            x: bounds.left - base.x,
+            y: bounds.top - base.y,
+            width: Math.max(1, bounds.width),
+            height: Math.max(1, bounds.height),
+            radius: Math.max(0, _launchBlend(launchStartRadius, launchEndRadius, shapeP))
+        }
+    }
+
     function _launchPageTransform(linearT, fromRect, toRect) {
         const base = _contentRect()
         const bounds = _launchBoundsAt(linearT, fromRect, toRect)
@@ -320,19 +338,18 @@ Item {
         if (transitionModeActive !== "launch" || !transitioning || launchReturning)
             return 0
         const k = launchIntensity === Md3PageHost.Premium ? 1.0
-                : (launchIntensity === Md3PageHost.Subtle ? 0.62 : 0.8)
+                : (launchIntensity === Md3PageHost.Subtle ? 0.75 : 0.9)
         const t = transitionProgress
-        return Math.max(0, (1 - t * 0.85) * 0.92 * k)
+        return Math.max(0, (1 - t * 0.72) * k)
     }
 
     function _launchBackdropBlur() {
         if (transitionModeActive !== "launch" || !transitioning || launchReturning)
             return 0
         const k = launchIntensity === Md3PageHost.Premium ? 1.0
-                : (launchIntensity === Md3PageHost.Subtle ? 0.62 : 0.8)
+                : (launchIntensity === Md3PageHost.Subtle ? 0.82 : 0.94)
         const t = transitionProgress
-        const peak = launchIntensity === Md3PageHost.Premium ? 0.92 : 0.78
-        return Math.max(0.08 * k, peak * k * (1 - _bezierAt(t, Md3Motion.emphasizedDecelerate)))
+        return Math.max(0.55 * k, k * (1 - _bezierAt(t, Md3Motion.emphasizedDecelerate) * 0.38))
     }
 
     function _usesArc() {
@@ -380,7 +397,7 @@ Item {
             return
         // Avoid tearing down a page mid-incubation (async Loader) — wait until Ready/Error.
         if (!on) {
-            const loader = pageRepeater.itemAt(index)
+            const loader = _loaderAt(index)
             if (loader && loader.status === Loader.Loading) {
                 loader.pendingUnload = true
                 if (!loader.awaitUnload) {
@@ -403,7 +420,7 @@ Item {
                 return
             }
         } else {
-            const loader = pageRepeater.itemAt(index)
+            const loader = _loaderAt(index)
             if (loader)
                 loader.pendingUnload = false
         }
@@ -1320,15 +1337,47 @@ Item {
         }
     }
 
+    // Blurred leave snapshot — always below entering pages (z=1 vs page z=10).
+    Item {
+        id: launchBackdropHost
+        anchors.fill: parent
+        z: 1
+
+        ShaderEffectSource {
+            id: leaveSnap
+            anchors.fill: parent
+            anchors.margins: root.contentPadding
+            live: false
+            hideSource: false
+            smooth: false
+            mipmap: false
+            visible: opacity > 0.01
+            opacity: 0
+        }
+
+        MultiEffect {
+            id: launchBlur
+            anchors.fill: leaveSnap
+            visible: leaveSnap.opacity > 0.01 && root._launchBackdropBlur() > 0.01
+            source: leaveSnap
+            blurEnabled: true
+            blurMax: 128
+            blurMultiplier: 3.0
+            blur: root._launchBackdropBlur()
+            opacity: root._launchBackdropOpacity()
+            saturation: 0.78
+            brightness: -0.08
+        }
+    }
+
     Repeater {
         id: pageRepeater
         model: root.model ? root.model.length : 0
 
-        delegate: Loader {
-            id: pageLoader
+        delegate: Item {
+            id: pageSlot
             required property int index
-            property bool pendingUnload: false
-            property bool awaitUnload: false
+            property alias pageLoader: pageLoader
 
             anchors.fill: parent
             anchors.margins: root.contentPadding
@@ -1341,31 +1390,60 @@ Item {
             readonly property real t: root.transitionProgress
             readonly property string mode: root.transitionModeActive
             readonly property int dir: root.transitionDir
+            readonly property bool launchClipActive: mode === "launch" && isEntering && !root.launchReturning
+            readonly property var launchMask: launchClipActive
+                    ? root._launchMaskRect(t)
+                    : ({
+                           x: 0,
+                           y: 0,
+                           width: pageSlot.width,
+                           height: pageSlot.height,
+                           radius: Md3Theme.shape.large
+                       })
 
-            active: keep
-            enabled: (isDisplayed && !root.transitioning) || isEntering
-            asynchronous: root.asynchronous
-            z: isEntering ? 3 : (isLeaving ? 2 : (isDisplayed ? 1 : 0))
+            z: isEntering ? 10 : (isLeaving ? 2 : (isDisplayed ? 1 : 0))
+
+            layer.enabled: launchClipActive
+            layer.smooth: true
+            layer.effect: MultiEffect {
+                maskEnabled: pageSlot.launchClipActive
+                maskSource: morphMaskHost
+            }
+
+            Item {
+                id: morphMaskHost
+                width: pageSlot.width
+                height: pageSlot.height
+                layer.enabled: true
+                visible: false
+
+                Rectangle {
+                    x: pageSlot.launchMask.x
+                    y: pageSlot.launchMask.y
+                    width: pageSlot.launchMask.width
+                    height: pageSlot.launchMask.height
+                    radius: Math.min(pageSlot.launchMask.radius,
+                                     Math.min(width, height) / 2)
+                    color: "#ffffff"
+                }
+            }
 
             opacity: {
-                // WinUI SlideNavigationTransition keeps both pages opaque while sliding.
                 if (mode === "slide") {
                     if (isEntering || isLeaving || (isDisplayed && !root.transitioning))
                         return 1
                     return 0
                 }
                 if (isEntering) {
-                    if (mode === "launch") {
+                    if (mode === "launch")
                         return 1
-                    }
                     if (mode === "fadeThrough")
                         return t < 0.35 ? 0 : (t - 0.35) / 0.65
                     return t
                 }
                 if (isLeaving) {
-                    if (mode === "launch") {
+                    if (mode === "launch")
                         return root._launchLeaveFadeOpacity(t, root.launchReturning)
-                    }
                     if (mode === "fadeThrough")
                         return t < 0.35 ? (1 - t / 0.35) : 0
                     return 1 - t
@@ -1375,159 +1453,119 @@ Item {
                 return 0
             }
 
-            transform: [
-                Translate {
-                    x: {
-                        if (mode === "launch") {
-                            if (isEntering && !root.launchReturning) {
-                                const tr = root._launchPageTransform(
-                                    pageLoader.t, root.launchStartRect, root.launchEndRect)
-                                return tr.dx
-                            }
-                            if (isLeaving && root.launchReturning) {
-                                const tr = root._launchPageTransform(
-                                    pageLoader.t, root.launchStartRect, root.launchEndRect)
-                                return tr.dx
-                            }
-                            return 0
-                        }
-                        if (mode !== "slide")
-                            return 0
-                        const w = pageLoader.width
-                        if (isEntering)
-                            return (1 - pageLoader.t) * w * pageLoader.dir
-                        if (isLeaving)
-                            return pageLoader.t * w * (-pageLoader.dir)
-                        return 0
-                    }
-                    y: {
-                        if (mode === "launch") {
-                            if (isEntering && !root.launchReturning) {
-                                const tr = root._launchPageTransform(
-                                    pageLoader.t, root.launchStartRect, root.launchEndRect)
-                                return tr.dy
-                            }
-                            if (isLeaving && root.launchReturning) {
-                                const tr = root._launchPageTransform(
-                                    pageLoader.t, root.launchStartRect, root.launchEndRect)
-                                return tr.dy
-                            }
-                            return 0
-                        }
-                        if (mode !== "slideUp")
-                            return 0
-                        const h = pageLoader.height
-                        if (isEntering)
-                            return (1 - pageLoader.t) * h * 0.08
-                        if (isLeaving)
-                            return pageLoader.t * h * (-0.04)
-                        return 0
-                    }
-                },
-                Scale {
-                    origin.x: {
-                        if (mode === "launch" && isEntering && !root.launchReturning) {
-                            const tr = root._launchPageTransform(
-                                        pageLoader.t, root.launchStartRect, root.launchEndRect)
-                            return tr.ox
-                        }
-                        return pageLoader.width / 2
-                    }
-                    origin.y: {
-                        if (mode === "launch" && isEntering && !root.launchReturning) {
-                            const tr = root._launchPageTransform(
-                                        pageLoader.t, root.launchStartRect, root.launchEndRect)
-                            return tr.oy
-                        }
-                        return pageLoader.height / 2
-                    }
-                    xScale: {
-                        if (mode === "launch") {
-                            if (isEntering && !root.launchReturning) {
-                                const tr = root._launchPageTransform(
-                                    pageLoader.t, root.launchStartRect, root.launchEndRect)
-                                return tr.scaleX
-                            }
-                            if (isLeaving && root.launchReturning) {
-                                const tr = root._launchPageTransform(
-                                    pageLoader.t, root.launchStartRect, root.launchEndRect)
-                                return tr.scaleX
-                            }
-                            return 1
-                        }
-                        if (mode !== "scale" && mode !== "fadeThrough")
-                            return 1
-                        if (isEntering) {
-                            if (mode === "fadeThrough")
-                                return 0.92 + 0.08 * pageLoader.t
-                            return 0.94 + 0.06 * pageLoader.t
-                        }
-                        if (isLeaving) {
-                            if (mode === "fadeThrough")
-                                return 1 - 0.04 * pageLoader.t
-                            return 1 - 0.06 * pageLoader.t
-                        }
-                        return 1
-                    }
-                    yScale: {
-                        if (mode === "launch") {
-                            if (isEntering && !root.launchReturning) {
-                                const tr = root._launchPageTransform(
-                                    pageLoader.t, root.launchStartRect, root.launchEndRect)
-                                return tr.scaleY
-                            }
-                            if (isLeaving && root.launchReturning) {
-                                const tr = root._launchPageTransform(
-                                    pageLoader.t, root.launchStartRect, root.launchEndRect)
-                                return tr.scaleY
-                            }
-                            return 1
-                        }
-                        if (mode !== "scale" && mode !== "fadeThrough")
-                            return 1
-                        if (isEntering) {
-                            if (mode === "fadeThrough")
-                                return 0.92 + 0.08 * pageLoader.t
-                            return 0.94 + 0.06 * pageLoader.t
-                        }
-                        if (isLeaving) {
-                            if (mode === "fadeThrough")
-                                return 1 - 0.04 * pageLoader.t
-                            return 1 - 0.06 * pageLoader.t
-                        }
-                        return 1
-                    }
-                }
-            ]
-
             visible: keep && (opacity > 0.01 || isDisplayed || isEntering || isLeaving)
 
-            onActiveChanged: {
-                // Defer side-effects so `keep` ↔ `active` does not form a binding loop
-                // (active change → fill/clear → generation/keepFlags → keep re-eval).
-                const on = active
-                const ldr = pageLoader
-                const idx = index
-                Qt.callLater(function () {
-                    if (!ldr)
-                        return
-                    if (on) {
-                        root._fillLoader(ldr, idx)
-                    } else {
-                        if (root.l2Components)
-                            root._ensureL2(idx)
-                        if (ldr.status === Loader.Loading)
-                            ldr.asynchronous = false
-                        ldr.source = ""
-                        ldr.sourceComponent = null
-                        if (typeof ldr.setSource === "function")
-                            ldr.setSource("")
+            Loader {
+                id: pageLoader
+                property bool pendingUnload: false
+                property bool awaitUnload: false
+
+                anchors.fill: parent
+
+                active: pageSlot.keep
+                enabled: (pageSlot.isDisplayed && !root.transitioning) || pageSlot.isEntering
+                asynchronous: root.asynchronous
+
+                transform: [
+                    Translate {
+                        x: {
+                            if (mode !== "slide")
+                                return 0
+                            const w = pageLoader.width
+                            if (isEntering)
+                                return (1 - pageSlot.t) * w * pageSlot.dir
+                            if (isLeaving)
+                                return pageSlot.t * w * (-pageSlot.dir)
+                            return 0
+                        }
+                        y: {
+                            if (mode !== "slideUp")
+                                return 0
+                            const h = pageLoader.height
+                            if (isEntering)
+                                return (1 - pageSlot.t) * h * 0.08
+                            if (isLeaving)
+                                return pageSlot.t * h * (-0.04)
+                            return 0
+                        }
+                    },
+                    Scale {
+                        origin.x: pageLoader.width / 2
+                        origin.y: pageLoader.height / 2
+                        xScale: {
+                            if (mode !== "scale" && mode !== "fadeThrough")
+                                return 1
+                            if (isEntering) {
+                                if (mode === "fadeThrough")
+                                    return 0.92 + 0.08 * pageSlot.t
+                                return 0.94 + 0.06 * pageSlot.t
+                            }
+                            if (isLeaving) {
+                                if (mode === "fadeThrough")
+                                    return 1 - 0.04 * pageSlot.t
+                                return 1 - 0.06 * pageSlot.t
+                            }
+                            return 1
+                        }
+                        yScale: {
+                            if (mode !== "scale" && mode !== "fadeThrough")
+                                return 1
+                            if (isEntering) {
+                                if (mode === "fadeThrough")
+                                    return 0.92 + 0.08 * pageSlot.t
+                                return 0.94 + 0.06 * pageSlot.t
+                            }
+                            if (isLeaving) {
+                                if (mode === "fadeThrough")
+                                    return 1 - 0.04 * pageSlot.t
+                                return 1 - 0.06 * pageSlot.t
+                            }
+                            return 1
+                        }
                     }
-                })
+                ]
+
+                onActiveChanged: {
+                    const on = active
+                    const ldr = pageLoader
+                    const idx = index
+                    Qt.callLater(function () {
+                        if (!ldr)
+                            return
+                        if (on) {
+                            root._fillLoader(ldr, idx)
+                        } else {
+                            if (root.l2Components)
+                                root._ensureL2(idx)
+                            if (ldr.status === Loader.Loading)
+                                ldr.asynchronous = false
+                            ldr.source = ""
+                            ldr.sourceComponent = null
+                            if (typeof ldr.setSource === "function")
+                                ldr.setSource("")
+                        }
+                    })
+                }
+
+                onLoaded: {
+                    if (item) {
+                        item.width = Qt.binding(function () { return pageLoader.width })
+                        item.height = Qt.binding(function () { return pageLoader.height })
+                    }
+                    if (index === root.currentIndex)
+                        root._tryShow(index)
+                }
+
+                onStatusChanged: {
+                    if (status === Loader.Ready && index === root.currentIndex)
+                        root._tryShow(index)
+                    if (status === Loader.Error)
+                        console.warn("Md3PageHost: failed to load", source)
+                }
             }
 
             onKeepChanged: {
-                if (keep && active) {
+                if (keep && pageLoader.active) {
                     const ldr = pageLoader
                     const idx = index
                     Qt.callLater(function () {
@@ -1536,53 +1574,7 @@ Item {
                     })
                 }
             }
-
-            onLoaded: {
-                if (item) {
-                    item.width = Qt.binding(function () { return pageLoader.width })
-                    item.height = Qt.binding(function () { return pageLoader.height })
-                }
-                if (index === root.currentIndex)
-                    root._tryShow(index)
-            }
-
-            onStatusChanged: {
-                if (status === Loader.Ready && index === root.currentIndex)
-                    root._tryShow(index)
-                if (status === Loader.Error)
-                    console.warn("Md3PageHost: failed to load", source)
-            }
         }
-    }
-
-    // Incoming-page placeholder: stacked above the still-visible previous page
-    // Leave snapshot: frozen texture while cold target loads (survives L1 eviction)
-    ShaderEffectSource {
-        id: leaveSnap
-        anchors.fill: parent
-        anchors.margins: root.contentPadding
-        z: 2
-        live: false
-        hideSource: false
-        smooth: false
-        mipmap: false
-        visible: opacity > 0.01
-        opacity: 0
-    }
-
-    MultiEffect {
-        id: launchBlur
-        anchors.fill: leaveSnap
-        z: 2.5
-        visible: leaveSnap.opacity > 0.01 && root._launchBackdropBlur() > 0.01
-        source: leaveSnap
-        blurEnabled: true
-        blurMax: 64
-        blurMultiplier: 1.15
-        blur: root._launchBackdropBlur()
-        opacity: root._launchBackdropOpacity()
-        saturation: 0.88
-        brightness: -0.04
     }
 
     Rectangle {
