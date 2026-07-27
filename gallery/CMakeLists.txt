@@ -10,10 +10,9 @@ if (UNIX AND NOT APPLE)
     find_package(Qt6 REQUIRED COMPONENTS Widgets DBus)
 endif()
 
-set(MD3_QML_NO_CACHEGEN)
-if (WIN32)
-    set(MD3_QML_NO_CACHEGEN NO_CACHEGEN)
-endif()
+set(MD3_QML_NO_CACHEGEN NO_CACHEGEN)
+# Gallery QML changes often; cachegen can leave stale modules in build/ after git pull
+# until a full rebuild — especially noticeable when switching between Windows and Linux.
 
 get_filename_component(MD3_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
 

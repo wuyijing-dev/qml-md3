@@ -185,6 +185,21 @@ Types: `Md3PerformanceMonitor`, `Md3PerformancePanel`, `Md3ElementPicker`, `Md3I
 - Package built with KF6 WindowSystem needs `libkf6windowsystem-dev` at **link** time of the app.
 - System Qt may warn about missing `Qt6::qtquick2plugin` link targets; install `qml6-module-qtquick*` packages if QML fails at runtime for Qt modules.
 
+### Gallery: keep Linux in sync with Windows
+
+Gallery QML **is in git** (`gallery/Main.qml`, `gallery/pages/**`, including `LaunchListScene.qml`).  
+`gallery/md3/icons/` is **not** committed (see `.gitignore`); CMake copies icons from `resources/icons/` at configure time — that is normal.
+
+If the Linux app looks older than Windows after `git pull`:
+
+1. Confirm commit: `git fetch origin && git rev-parse HEAD origin/main` (should match).
+2. **Clean rebuild** (incremental builds can keep stale QML):  
+   `rm -rf build && cmake -S . -B build -DMD3_BUILD_GALLERY=ON && cmake --build build -j$(nproc)`
+3. Run the Gallery binary at **`./build/gallery/appQML_MD3`** (not `./build/appQML_MD3`).
+4. Optional check: `bash scripts/verify-gallery-sync.sh`
+
+`Authorization required, but no authorization protocol specified` means the process has no X11/Wayland display (SSH without `-X`, wrong `DISPLAY`, etc.). Run from a desktop session or `export DISPLAY=:0` / use `ssh -X`.
+
 ## Versioning
 
 Semantic versioning. See [CHANGELOG.md](../CHANGELOG.md). See [docs/api](api/README.md) for the full control surface.
