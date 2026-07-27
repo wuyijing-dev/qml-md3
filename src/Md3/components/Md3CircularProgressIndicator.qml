@@ -85,7 +85,7 @@ Item {
         const cy = height / 2
         const baseR = radius
         // Sparse — full circle was ~175 pts ×2 every frame.
-        const steps = Math.max(14, Math.ceil(Math.abs(sweepRad) * 8))
+        const steps = Math.max(18, Math.ceil(Math.abs(sweepRad) * 10))
         const pts = []
         for (let i = 0; i <= steps; ++i) {
             const t = i / steps

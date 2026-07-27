@@ -20,20 +20,22 @@ Item {
         return -1
     }
 
-    function _openDetailFrom(sourceItem, title, body) {
+    function _openDetailFrom(sourceItem, title, body, localX, localY) {
         const win = Window.window
         if (!win || !win.pageHost)
             return
         const detailIndex = _destinationIndexBySuffix("LaunchDetailScene.qml")
         if (detailIndex < 0)
             return
-        const p = sourceItem.mapToItem(win.pageHost, 0, 0)
+        const p = sourceItem.mapToItem(win.pageHost,
+                                       localX !== undefined ? localX : sourceItem.width / 2,
+                                       localY !== undefined ? localY : sourceItem.height / 2)
         win._launchDetailTitle = title
         win._launchDetailBody = body
         win.navigateTo(detailIndex, {
             transitionMode: "launch",
-            sourceRect: Qt.rect(p.x, p.y, sourceItem.width, sourceItem.height),
-            sourceRadius: 14
+            sourcePoint: Qt.point(p.x, p.y),
+            sourceRadius: 7
         })
     }
 
@@ -61,8 +63,16 @@ Item {
                     title: qsTr("Welcome")
                     subtitle: qsTr("Open details with launch transition")
                     showDivider: true
-                    onClicked: root._openDetailFrom(rowWelcome, title,
-                                                    qsTr("This page is opened as a whole-route transition from the tapped row bounds."))
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.LeftButton
+                        onClicked: function (mouse) {
+                            mouse.accepted = false
+                            root._openDetailFrom(rowWelcome, rowWelcome.title,
+                                                 qsTr("This page is opened as a whole-route transition from the tapped position."),
+                                                 mouse.x, mouse.y)
+                        }
+                    }
                 }
                 Md3ListTile {
                     id: rowNotes
@@ -70,16 +80,32 @@ Item {
                     title: qsTr("Release notes")
                     subtitle: qsTr("Route-level container transform")
                     showDivider: true
-                    onClicked: root._openDetailFrom(rowNotes, title,
-                                                    qsTr("The animation uses source bounds, nonlinear curves, and staged content fade."))
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.LeftButton
+                        onClicked: function (mouse) {
+                            mouse.accepted = false
+                            root._openDetailFrom(rowNotes, rowNotes.title,
+                                                 qsTr("The animation uses source-position launch, nonlinear curves, and spring-like pulse."),
+                                                 mouse.x, mouse.y)
+                        }
+                    }
                 }
                 Md3ListTile {
                     id: rowFeedback
                     width: parent.width
                     title: qsTr("Feedback")
                     subtitle: qsTr("Return also goes back into source")
-                    onClicked: root._openDetailFrom(rowFeedback, title,
-                                                    qsTr("Use the back button on detail page to return into this row."))
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.LeftButton
+                        onClicked: function (mouse) {
+                            mouse.accepted = false
+                            root._openDetailFrom(rowFeedback, rowFeedback.title,
+                                                 qsTr("Use the back button on detail page to return into this row."),
+                                                 mouse.x, mouse.y)
+                        }
+                    }
                 }
             }
         }

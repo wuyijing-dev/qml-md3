@@ -790,8 +790,8 @@ Item {
 
     function _prepareLaunchTransition(fromIndex, toIndex, opts) {
         const content = _contentRect()
-        let src = Qt.rect(content.x + content.width * 0.5 - 28,
-                          content.y + content.height * 0.5 - 28, 56, 56)
+        let src = Qt.rect(content.x + content.width * 0.5 - 7,
+                          content.y + content.height * 0.5 - 7, 14, 14)
         let srcRadius = Math.min(src.width, src.height) / 2
         const wantReturn = !!(opts && opts.returnToSource)
         if (wantReturn) {
@@ -814,7 +814,11 @@ Item {
         }
 
         launchReturning = false
-        if (opts && opts.sourceRect)
+        if (opts && opts.sourcePoint && opts.sourcePoint.x !== undefined && opts.sourcePoint.y !== undefined) {
+            const px = Number(opts.sourcePoint.x)
+            const py = Number(opts.sourcePoint.y)
+            src = _clampRect(Qt.rect(px - 7, py - 7, 14, 14), content)
+        } else if (opts && opts.sourceRect)
             src = _clampRect(opts.sourceRect, content)
         srcRadius = Number(opts && opts.sourceRadius !== undefined
                            ? opts.sourceRadius
@@ -1199,9 +1203,7 @@ Item {
                 }
                 if (isEntering) {
                     if (mode === "launch") {
-                        if (root.launchReturning)
-                            return t < 0.42 ? 0 : (t - 0.42) / 0.58
-                        return t < 0.12 ? 0 : (t - 0.12) / 0.88
+                        return 1
                     }
                     if (mode === "fadeThrough")
                         return t < 0.35 ? 0 : (t - 0.35) / 0.65
@@ -1294,7 +1296,7 @@ Item {
                             const sx = root._launchProgressX(pageLoader.t)
                             const sy = root._launchProgressY(pageLoader.t)
                             if (isEntering && !root.launchReturning) {
-                                const from = Math.max(0.08, start.width / Math.max(1, base.width))
+                                const from = Math.max(0.018, start.width / Math.max(1, base.width))
                                 const to = Math.max(0.08, end.width / Math.max(1, base.width))
                                 return root._launchBlend(from, to, sx) * root._launchPulse(pageLoader.t)
                             }
@@ -1326,7 +1328,7 @@ Item {
                             const end = root.launchEndRect
                             const sy = root._launchProgressY(pageLoader.t)
                             if (isEntering && !root.launchReturning) {
-                                const from = Math.max(0.08, start.height / Math.max(1, base.height))
+                                const from = Math.max(0.018, start.height / Math.max(1, base.height))
                                 const to = Math.max(0.08, end.height / Math.max(1, base.height))
                                 return root._launchBlend(from, to, sy) * root._launchPulse(pageLoader.t)
                             }
