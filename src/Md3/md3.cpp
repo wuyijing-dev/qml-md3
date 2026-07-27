@@ -13,6 +13,7 @@
 #include <QFont>
 #include <QFontInfo>
 #include <QFile>
+#include <QUrl>
 #include <QDebug>
 #include <QSet>
 #include <QCoreApplication>
@@ -119,12 +120,14 @@ int loadFonts()
         QStringLiteral(":/md3/fonts/"),
     };
 
-    const QString appDir = QCoreApplication::applicationDirPath();
-    dirs << appDir + QStringLiteral("/fonts/")
-         << appDir + QStringLiteral("/../resources/fonts/")
-         << appDir + QStringLiteral("/../../resources/fonts/")
-         << appDir + QStringLiteral("/../src/Md3/resources/fonts/")
-         << appDir + QStringLiteral("/../../src/Md3/resources/fonts/");
+    if (QCoreApplication::instance()) {
+        const QString appDir = QCoreApplication::applicationDirPath();
+        dirs << appDir + QStringLiteral("/fonts/")
+             << appDir + QStringLiteral("/../resources/fonts/")
+             << appDir + QStringLiteral("/../../resources/fonts/")
+             << appDir + QStringLiteral("/../src/Md3/resources/fonts/")
+             << appDir + QStringLiteral("/../../src/Md3/resources/fonts/");
+    }
 
     QSet<QString> got;
     int loaded = 0;
@@ -260,6 +263,9 @@ int run(int argc, char **argv,
     initialize(app, opts);
 
     QQmlApplicationEngine engine;
+    if (QCoreApplication::instance()) {
+        engine.addImportPath(QCoreApplication::applicationDirPath() + QStringLiteral("/qml"));
+    }
     // Re-run after the engine exists so late-registered qml-module qrcs are seen.
     if (opts.loadFonts)
         loadFonts();
@@ -271,7 +277,19 @@ int run(int argc, char **argv,
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
 
-    engine.loadFromModule(moduleUri, mainComponent);
+    const QString diskMain = QCoreApplication::instance()
+            ? QCoreApplication::applicationDirPath()
+              + QLatin1Char('/')
+              + moduleUri
+              + QLatin1Char('/')
+              + mainComponent
+              + QStringLiteral(".qml")
+            : QString();
+    if (QFile::exists(diskMain)) {
+        engine.load(QUrl::fromLocalFile(diskMain));
+    } else {
+        engine.loadFromModule(moduleUri, mainComponent);
+    }
     return app.exec();
 }
 
