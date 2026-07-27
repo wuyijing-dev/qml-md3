@@ -28,11 +28,14 @@ Md3ApplicationWindow {
     // Library performance overlay — title-bar speed button; open by default in gallery
     showPerformanceButton: true
     showPerformanceOverlay: true
+    showAboutButton: true
+    aboutVersion: "0.1.0"
+    aboutOrganization: "Md3"
+    aboutText: qsTr("Material Design 3 组件图库 — 演示窗口、导航与控件。")
+    aboutIcon: windowIcon
 
-    readonly property string pageRoot: "qrc:/qt/qml/Gallery/pages/"
-    readonly property int windowPageIndex: 16
-    property string _launchDetailTitle: ""
-    property string _launchDetailBody: ""
+    property string pageRoot: "qrc:/qt/qml/Gallery/pages/"
+    property int windowPageIndex: 16
 
     destinations: [
         { title: qsTr("令牌"), icon: "palette", source: pageRoot + "TokensPage.qml" },

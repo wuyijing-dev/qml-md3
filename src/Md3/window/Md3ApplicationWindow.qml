@@ -33,6 +33,14 @@ Window {
     /// Title-bar pin (always-on-top). On by default.
     property bool showPinButton: true
     property bool pinned: false
+    /// Title-bar About (info) button → modeless About dialog
+    property bool showAboutButton: true
+    property string aboutAppName: ""
+    property string aboutVersion: ""
+    property string aboutOrganization: ""
+    property string aboutText: ""
+    property url aboutIcon: ""
+    property Component aboutContent: null
 
     /// Circular reveal when toggling light/dark (Material-style wipe from click)
     property bool themeRevealEnabled: true
@@ -100,6 +108,9 @@ Window {
     signal documentTabTearOff(int index, real globalX, real globalY)
 
     readonly property bool usesDestinations: destinations && destinations.length > 0
+    readonly property bool canGoBack: usesDestinations && windowBody.canGoBack
+    readonly property int navDepth: usesDestinations ? windowBody.navDepth : 0
+    readonly property var routeParams: usesDestinations ? windowBody.routeParams : ({})
 
     default property alias content: customContent.data
 
@@ -108,6 +119,24 @@ Window {
             windowBody.navigateTo(index, opts)
         else
             currentIndex = index
+    }
+
+    function pushRoute(index, params, opts) {
+        if (!usesDestinations)
+            return false
+        return windowBody.pushRoute(index, params, opts)
+    }
+
+    function goBack(opts) {
+        if (!usesDestinations)
+            return false
+        return windowBody.goBack(opts)
+    }
+
+    function replaceRoute(index, params, opts) {
+        if (!usesDestinations)
+            return false
+        return windowBody.replaceRoute(index, params, opts)
     }
 
     function documentTabMeta(pageIndex) {
@@ -679,6 +708,13 @@ Window {
                     pinned: root.pinned
                     showPerformanceToggle: root.showPerformanceButton
                     performanceChecked: root.showPerformanceOverlay
+                    showAboutButton: root.showAboutButton
+                    aboutAppName: root.aboutAppName
+                    aboutVersion: root.aboutVersion
+                    aboutOrganization: root.aboutOrganization
+                    aboutText: root.aboutText
+                    aboutIcon: root.aboutIcon
+                    aboutContent: root.aboutContent
                     targetWindow: root
                     windowHelper: windowHelper
                     cornerRadius: root.effectiveRadius
@@ -745,6 +781,14 @@ Window {
                 anchors.bottom: parent.bottom
                 clip: true
                 z: 0
+                focus: true
+
+                Keys.onBackPressed: function (event) {
+                    if (root.canGoBack) {
+                        root.goBack()
+                        event.accepted = true
+                    }
+                }
 
                 Md3WindowBody {
                     id: windowBody

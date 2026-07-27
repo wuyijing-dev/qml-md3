@@ -32,6 +32,13 @@ import Md3
 | `backdropTitleTint` | `real` | `0.06` | read/write | `Md3ApplicationWindow` | — |
 | `showPinButton` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Title-bar pin (always-on-top). On by default. |
 | `pinned` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
+| `showAboutButton` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Title-bar About (info) → modeless dialog |
+| `aboutAppName` | `string` | `""` | read/write | `Md3ApplicationWindow` | — |
+| `aboutVersion` | `string` | `""` | read/write | `Md3ApplicationWindow` | — |
+| `aboutOrganization` | `string` | `""` | read/write | `Md3ApplicationWindow` | — |
+| `aboutText` | `string` | `""` | read/write | `Md3ApplicationWindow` | — |
+| `aboutIcon` | `url` | `""` | read/write | `Md3ApplicationWindow` | — |
+| `aboutContent` | `Component` | `null` | read/write | `Md3ApplicationWindow` | Custom About body |
 | `themeRevealEnabled` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Circular reveal when toggling light/dark (Material-style wipe from click) |
 | `themeRevealBusy` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
 | `themeRevealDuration` | `int` | `Md3Motion.long2` | read/write | `Md3ApplicationWindow` | — |

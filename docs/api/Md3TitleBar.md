@@ -22,6 +22,13 @@ import Md3
 | `showTitle` | `bool` | `true` | read/write | `Md3TitleBar` | — |
 | `showAppIcon` | `bool` | `true` | read/write | `Md3TitleBar` | — |
 | `showThemeToggle` | `bool` | `true` | read/write | `Md3TitleBar` | — |
+| `showAboutButton` | `bool` | `true` | read/write | `Md3TitleBar` | Info button opens a modeless About dialog |
+| `aboutAppName` | `string` | `""` | read/write | `Md3TitleBar` | Empty → Qt.application.displayName / name / title |
+| `aboutVersion` | `string` | `""` | read/write | `Md3TitleBar` | Empty → Qt.application.version |
+| `aboutOrganization` | `string` | `""` | read/write | `Md3TitleBar` | Empty → Qt.application.organization |
+| `aboutText` | `string` | `""` | read/write | `Md3TitleBar` | Body text when `aboutContent` is null |
+| `aboutIcon` | `url` | `""` | read/write | `Md3TitleBar` | Empty → `appIcon` |
+| `aboutContent` | `Component` | `null` | read/write | `Md3TitleBar` | Custom About body |
 | `showPin` | `bool` | `true` | read/write | `Md3TitleBar` | Pin / always-on-top (shown by default) |
 | `pinned` | `bool` | `false` | read/write | `Md3TitleBar` | — |
 | `showMinimize` | `bool` | `true` | read/write | `Md3TitleBar` | — |
@@ -58,7 +65,9 @@ import Md3
 |--------|------------|-------------|
 | `leadingClicked()` | `Md3TitleBar` | — |
 | `themeToggled()` | `Md3TitleBar` | — |
+| `performanceClicked()` | `Md3TitleBar` | — |
 | `pinToggled(bool pinned)` | `Md3TitleBar` | — |
+| `aboutClicked()` | `Md3TitleBar` | Emitted when About dialog is opened |
 
 ## Methods
 
@@ -66,6 +75,7 @@ import Md3
 |--------|------------|-------------|
 | `setPinned(onTop)` | `Md3TitleBar` | — |
 | `togglePinned()` | `Md3TitleBar` | — |
+| `openAbout()` | `Md3TitleBar` | Open modeless About `Md3DialogWindow` |
 | `reportNativeHits()` | `Md3TitleBar` | — |
 | `openSystemMenu(globalX, globalY)` | `Md3TitleBar` | — |
 

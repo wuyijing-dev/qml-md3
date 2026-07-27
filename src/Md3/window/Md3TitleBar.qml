@@ -17,6 +17,15 @@ Rectangle {
     property bool showTitle: true
     property bool showAppIcon: true
     property bool showThemeToggle: true
+    /// Info button opens a modeless About dialog
+    property bool showAboutButton: true
+    property string aboutAppName: ""
+    property string aboutVersion: ""
+    property string aboutOrganization: ""
+    property string aboutText: ""
+    property url aboutIcon: ""
+    /// Optional custom body for the About dialog (replaces default text block)
+    property Component aboutContent: null
     /// Performance monitor toggle (right of trailing content, before theme)
     property bool showPerformanceToggle: false
     property bool performanceChecked: false
@@ -59,6 +68,42 @@ Rectangle {
     signal themeToggled()
     signal performanceClicked()
     signal pinToggled(bool pinned)
+    signal aboutClicked()
+
+    function resolvedAboutName() {
+        if (aboutAppName.length > 0)
+            return aboutAppName
+        if (Qt.application.displayName && Qt.application.displayName.length > 0)
+            return Qt.application.displayName
+        if (Qt.application.name && Qt.application.name.length > 0)
+            return Qt.application.name
+        return root.title.length > 0 ? root.title : qsTr("Application")
+    }
+
+    function resolvedAboutVersion() {
+        if (aboutVersion.length > 0)
+            return aboutVersion
+        return (Qt.application.version && Qt.application.version.length > 0)
+                ? Qt.application.version : ""
+    }
+
+    function resolvedAboutOrganization() {
+        if (aboutOrganization.length > 0)
+            return aboutOrganization
+        return (Qt.application.organization && Qt.application.organization.length > 0)
+                ? Qt.application.organization : ""
+    }
+
+    function resolvedAboutIcon() {
+        if (aboutIcon.toString().length > 0)
+            return aboutIcon
+        return root.appIcon
+    }
+
+    function openAbout() {
+        aboutDialog.openDialog(root.targetWindow)
+        root.aboutClicked()
+    }
 
     function setPinned(onTop) {
         root.pinned = !!onTop
@@ -322,6 +367,17 @@ Rectangle {
             }
 
             Md3TitleBarButton {
+                id: aboutBtn
+                visible: root.showAboutButton
+                buttonHeight: root.baseHeight
+                buttonWidth: 40
+                iconSize: 14
+                icon: "info"
+                accessibleName: qsTr("About")
+                onClicked: root.openAbout()
+            }
+
+            Md3TitleBarButton {
                 id: performanceBtn
                 visible: root.showPerformanceToggle
                 buttonHeight: root.baseHeight
@@ -401,6 +457,101 @@ Rectangle {
             animate: true
             moveDuration: Md3Motion.spatialDuration
             moveEasing: Md3Motion.spatialDefault
+        }
+    }
+
+    Md3DialogWindow {
+        id: aboutDialog
+        title: qsTr("关于")
+        width: 420
+        height: 320
+        minimumWidth: 320
+        minimumHeight: 240
+        dialogModality: Qt.NonModal
+        showStandardButtons: true
+        showDismiss: false
+        confirmText: qsTr("关闭")
+        showThemeToggle: false
+        showMinimizeButton: false
+        showMaximizeButton: false
+        showPinButton: true
+        owner: root.targetWindow
+        onConfirmed: aboutDialog.closeDialog()
+        windowIcon: root.aboutIcon.toString().length > 0 ? root.aboutIcon : root.appIcon
+
+        Column {
+            anchors.fill: parent
+            spacing: 14
+
+            Row {
+                spacing: 14
+                width: parent.width
+
+                Item {
+                    width: 56
+                    height: 56
+                    visible: root.aboutIcon.toString().length > 0 || root.appIcon.toString().length > 0
+                    Image {
+                        anchors.fill: parent
+                        source: root.aboutIcon.toString().length > 0 ? root.aboutIcon : root.appIcon
+                        fillMode: Image.PreserveAspectFit
+                        smooth: true
+                        mipmap: true
+                    }
+                }
+
+                Column {
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 4
+                    width: parent.width - ((root.aboutIcon.toString().length > 0 || root.appIcon.toString().length > 0) ? 70 : 0)
+
+                    Text {
+                        width: parent.width
+                        text: root.resolvedAboutName()
+                        color: Md3Theme.colorScheme.colorOnSurface
+                        font.family: Md3Theme.typography.fontFamily
+                        font.pixelSize: Md3Theme.typography.titleMedium.size
+                        font.weight: Font.Medium
+                        wrapMode: Text.Wrap
+                    }
+                    Text {
+                        visible: root.resolvedAboutVersion().length > 0
+                        text: qsTr("版本 %1").arg(root.resolvedAboutVersion())
+                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                        font.family: Md3Theme.typography.fontFamily
+                        font.pixelSize: Md3Theme.typography.bodyMedium.size
+                    }
+                    Text {
+                        visible: root.resolvedAboutOrganization().length > 0
+                        text: root.resolvedAboutOrganization()
+                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                        font.family: Md3Theme.typography.fontFamily
+                        font.pixelSize: Md3Theme.typography.bodySmall.size
+                    }
+                }
+            }
+
+            Md3Divider {
+                width: parent.width
+            }
+
+            Loader {
+                width: parent.width
+                active: root.aboutContent !== null
+                sourceComponent: root.aboutContent
+            }
+
+            Text {
+                visible: root.aboutContent === null
+                width: parent.width
+                wrapMode: Text.Wrap
+                text: root.aboutText.length > 0
+                      ? root.aboutText
+                      : qsTr("基于 Md3（Material Design 3）组件库构建。")
+                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                font.family: Md3Theme.typography.fontFamily
+                font.pixelSize: Md3Theme.typography.bodyMedium.size
+            }
         }
     }
 }
