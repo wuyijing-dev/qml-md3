@@ -27,7 +27,10 @@ import Md3
 | `style` | `int` | `Md3LinearProgressIndicator.Standard` | read/write | `Md3LinearProgressIndicator` | — |
 | `wavelength` | `real` | `style === Md3LinearProgressIndicator.Lively ? 28` | read/write | `Md3LinearProgressIndicator` | — |
 | `amplitude` | `real` | `{…}` | read/write | `Md3LinearProgressIndicator` | — |
-| `trackThickness` | `real` | `{…}` | read/write | `Md3LinearProgressIndicator` | — |
+| `trackThickness` | `real` | `{…}` | read/write | Indicator thickness (active segment). |
+| `contained` | `bool` | `true` | Thin track + thicker active segment. |
+| `trackLineThickness` | `real` | readonly | Drawn track height when `contained`. |
+| `indicatorThickness` | `real` | readonly | Drawn active segment thickness. |
 | `wavePhase` | `real` | `0` | read/write | `Md3LinearProgressIndicator` | — |
 | `showStopIndicator` | `bool` | `true` | read/write | `Md3LinearProgressIndicator` | — |
 | `waveSpeed` | `real` | `Math.PI * 2 / 1.8` | read/write | `Md3LinearProgressIndicator` | — |

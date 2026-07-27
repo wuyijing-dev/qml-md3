@@ -18,6 +18,8 @@ struct RunOptions {
     bool loadFonts = true;
     /// Windows: enable translucent frames (Mica/Acrylic). Safe default.
     bool alphaBuffer = true;
+    /// XDG desktop id / Unity LauncherEntry path element (no spaces). Empty → derive from applicationName.
+    QString desktopFileName;
 #if defined(Q_OS_WIN)
     QString appUserModelId;
 #endif

@@ -159,9 +159,11 @@ qt_add_qml_module(Md3
         components/Md3FullscreenDialog.qml
         components/Md3BottomSheet.qml
         components/Md3Badge.qml
+        components/Md3Badged.qml
         components/Md3LinearProgressIndicator.qml
         components/Md3CircularProgressIndicator.qml
         components/Md3LoadingIndicator.qml
+        components/Md3MorphLoadingIndicator.qml
         components/Md3Snackbar.qml
         components/Md3TopAppBar.qml
         components/Md3BottomAppBar.qml

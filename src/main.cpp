@@ -9,5 +9,9 @@ int main(int argc, char *argv[])
 #if defined(Q_OS_WIN)
     opts.appUserModelId = QStringLiteral("QML_MD3.Md3Gallery");
 #endif
+#if defined(Q_OS_LINUX)
+    // XDG / Unity LauncherEntry object paths cannot contain spaces.
+    opts.desktopFileName = QStringLiteral("Md3_Gallery");
+#endif
     return Md3::run(argc, argv, QStringLiteral("Gallery"), QStringLiteral("Main"), opts);
 }

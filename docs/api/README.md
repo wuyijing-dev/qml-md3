@@ -121,9 +121,12 @@
 
 ## Progress
 
-- [Md3CircularProgressIndicator](Md3CircularProgressIndicator.md) — Circular progress — Standard: PathAngleArc; wavy: PathPolyline + RoundJoin (GPU, no seams).
-- [Md3LinearProgressIndicator](Md3LinearProgressIndicator.md) — Linear progress — Standard uses Rectangles; wavy uses QtQuick.Shapes (GPU stroke, RoundJoin, no seams).
+- [Md3CircularProgressIndicator](Md3CircularProgressIndicator.md) — Circular progress — Standard: PathAngleArc; wavy: PathPolyline + RoundJoin (GPU, no seams). Thin track + thicker active arc when `contained` (default).
+- [Md3LinearProgressIndicator](Md3LinearProgressIndicator.md) — Linear progress — Standard uses Rectangles; wavy uses QtQuick.Shapes (GPU stroke, RoundJoin, no seams). Thin track + thicker indicator when `contained` (default).
 - [Md3LoadingIndicator](Md3LoadingIndicator.md) — Material 3 Loading indicator — Shape PathAngleArc (GPU), optional caption.
+- [Md3MorphLoadingIndicator](Md3MorphLoadingIndicator.md) — Expressive 8-lobe clover/star morph loader (bare or contained).
+- [Md3Badge](Md3Badge.md) — Numeric / dot badge.
+- [Md3Badged](Md3Badged.md) — Wraps content and pins an `Md3Badge` at the top-end corner.
 
 ## Window
 

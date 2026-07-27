@@ -102,6 +102,8 @@ int main(int argc, char *argv[]) {
 
 Fonts, Basic style, DPI, and RHI early setup are handled inside `Md3::run`.
 
+On Linux, if your app integrates with launcher/taskbar progress over D-Bus, set `Md3::RunOptions::desktopFileName` to a stable desktop id without spaces so Unity-style object paths remain valid.
+
 Manual split:
 
 ```cpp

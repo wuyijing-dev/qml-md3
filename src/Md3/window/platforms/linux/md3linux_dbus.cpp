@@ -10,6 +10,7 @@
 #include <QDBusObjectPath>
 #include <QDBusReply>
 #include <QVariantMap>
+#include <QDebug>
 
 namespace Md3Linux {
 namespace {
@@ -29,14 +30,20 @@ QString sanitizeDbusPathElement(QString id)
     QString out;
     out.reserve(id.size());
     for (QChar c : id) {
-        if (c.isLetterOrNumber() || c == QLatin1Char('_') || c == QLatin1Char('-') || c == QLatin1Char('.'))
-            out.append(c == QLatin1Char('-') || c == QLatin1Char('.') ? QLatin1Char('_') : c);
-        else if (c.isSpace())
+        // Strict: only ASCII letters/digits → keep; everything else → '_'
+        // (spaces in "Md3 Gallery" must never reach the object path).
+        const ushort u = c.unicode();
+        if ((u >= 'A' && u <= 'Z') || (u >= 'a' && u <= 'z') || (u >= '0' && u <= '9'))
+            out.append(c);
+        else
             out.append(QLatin1Char('_'));
     }
-    out.remove(QLatin1Char('.'));
     while (out.contains(QLatin1String("__")))
         out.replace(QLatin1String("__"), QLatin1String("_"));
+    while (out.startsWith(QLatin1Char('_')))
+        out.remove(0, 1);
+    while (out.endsWith(QLatin1Char('_')))
+        out.chop(1);
     if (out.isEmpty() || !out.at(0).isLetter())
         out.prepend(QStringLiteral("app_"));
     return out;
@@ -64,9 +71,25 @@ void emitLauncherUpdate(const QVariantMap &properties)
     if (!QDBusConnection::sessionBus().isConnected())
         return;
 
-    const QString id = sanitizeDbusPathElement(desktopFileId());
+    // Prefer stored id; also sanitize applicationName fallbacks so "Md3 Gallery" never lands in the path.
+    QString raw = desktopFileId();
+    if (raw.isEmpty())
+        raw = QGuiApplication::desktopFileName();
+    if (raw.isEmpty())
+        raw = QGuiApplication::applicationName();
+    const QString id = sanitizeDbusPathElement(raw);
+    if (id.isEmpty())
+        return;
+    // Keep storage + XDG id clean for subsequent calls.
+    if (desktopIdStorage() != id)
+        desktopIdStorage() = id;
+
     const QString appUri = QStringLiteral("application://%1.desktop").arg(id);
     const QString path = QStringLiteral("/com/canonical/unity/launcherentry/%1").arg(id);
+    if (!QDBusObjectPath(path).isValid()) {
+        qWarning("Md3: invalid Unity LauncherEntry path '%s' (skipped)", qPrintable(path));
+        return;
+    }
     QDBusMessage signal = QDBusMessage::createSignal(
         path,
         QStringLiteral("com.canonical.Unity.LauncherEntry"),

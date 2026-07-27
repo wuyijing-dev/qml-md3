@@ -30,12 +30,18 @@ Item {
         default: return 4
         }
     }
+    /// Expressive look: thin track + thicker active segment (matches M3 specs).
+    property bool contained: true
+    readonly property real trackLineThickness: contained
+            ? Math.max(2, trackThickness * 0.38)
+            : trackThickness
+    readonly property real indicatorThickness: trackThickness
     property real wavePhase: 0
     property bool showStopIndicator: true
     property real waveSpeed: Math.PI * 2 / 1.8
 
     implicitWidth: 200
-    implicitHeight: Math.max(trackThickness, amplitude * 2 + trackThickness)
+    implicitHeight: Math.max(indicatorThickness, amplitude * 2 + indicatorThickness)
     height: implicitHeight
     width: implicitWidth
     clip: true
@@ -89,7 +95,7 @@ Item {
     function rebuildWave() {
         if (!isWavy || width < 2)
             return
-        const thick = trackThickness
+        const thick = indicatorThickness
         trackPoly.path = _wavePoints(thick / 2, width - thick / 2)
         if (indeterminate)
             indPoly.path = _wavePoints(travelX, travelX + barWidth)
@@ -117,17 +123,18 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         anchors.right: parent.right
-        height: root.trackThickness
+        height: root.contained ? root.trackLineThickness : root.trackThickness
         radius: height / 2
         color: Md3Theme.colorScheme.surfaceContainerHighest
         visible: !root.isWavy
-        clip: true
+        clip: false
 
         Rectangle {
-            height: parent.height
-            radius: parent.radius
+            anchors.verticalCenter: parent.verticalCenter
+            height: root.contained ? root.indicatorThickness : parent.height
+            radius: height / 2
             color: Md3Theme.colorScheme.primary
-            width: root.indeterminate ? root.barWidth : Math.min(root.barWidth, parent.width)
+            width: root.indeterminate ? root.barWidth : Math.min(root.barWidth, root.width)
             x: root.indeterminate ? root.travelX : 0
         }
 
@@ -135,8 +142,8 @@ Item {
             visible: !root.indeterminate && root.showStopIndicator && root.progress < 0.999
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
-            width: parent.height
-            height: parent.height
+            width: root.contained ? root.indicatorThickness : parent.height
+            height: width
             radius: width / 2
             color: Md3Theme.colorScheme.primary
         }
@@ -146,12 +153,11 @@ Item {
         id: waveShape
         anchors.fill: parent
         visible: root.isWavy
-        // GeometryRenderer is cheaper for frequently updated polylines than CurveRenderer.
         preferredRendererType: Shape.GeometryRenderer
         asynchronous: false
 
         ShapePath {
-            strokeWidth: root.trackThickness
+            strokeWidth: root.trackLineThickness
             strokeColor: Md3Theme.colorScheme.surfaceContainerHighest
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
@@ -159,7 +165,7 @@ Item {
             PathPolyline { id: trackPoly }
         }
         ShapePath {
-            strokeWidth: root.trackThickness
+            strokeWidth: root.indicatorThickness
             strokeColor: Md3Theme.colorScheme.primary
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
@@ -172,8 +178,8 @@ Item {
         visible: root.isWavy && !root.indeterminate && root.showStopIndicator && root.progress < 0.999
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
-        width: root.trackThickness
-        height: root.trackThickness
+        width: root.indicatorThickness
+        height: root.indicatorThickness
         radius: width / 2
         color: Md3Theme.colorScheme.primary
     }

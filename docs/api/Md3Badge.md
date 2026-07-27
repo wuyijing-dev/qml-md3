@@ -2,6 +2,7 @@
 
 - **Source:** `src/Md3/components/Md3Badge.qml`
 - **Extends:** `Item`
+- **Related:** `Md3Badged` wraps content and positions a badge at the top-end corner.
 
 ## Import
 
@@ -11,31 +12,32 @@ import Md3
 
 ## Properties
 
-| Name | Type | Default | Access | Defined in | Description |
-|------|------|---------|--------|------------|-------------|
-| `text` | `string` | `""` | read/write | `Md3Badge` | — |
-| `dot` | `bool` | `false` | read/write | `Md3Badge` | — |
-| `badgeColor` | `color` | `Md3Theme.colorScheme.error` | read/write | `Md3Badge` | — |
-| `labelColor` | `color` | `Md3Theme.colorScheme.colorOnError` | read/write | `Md3Badge` | — |
-| `large` | `bool` | `!dot && text.length > 0` | readonly | `Md3Badge` | — |
-
-## Signals
-
-_None._
-
-## Methods
-
-_None._
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `text` | `string` | `""` | Badge label (numeric or short text). |
+| `dot` | `bool` | `false` | Small dot with no label. |
+| `max` | `int` | `999` | Cap numeric display (e.g. `99` → `"99+"`). |
+| `sizePreset` | `enum` | `Medium` | `Small`, `Medium`, `Large`. |
+| `badgeColor` | `color` | `error` | Fill color. |
+| `labelColor` | `color` | `onError` | Label color. |
+| `displayText` | `string` | readonly | Text after `max` formatting. |
+| `large` | `bool` | readonly | Whether a label is shown. |
 
 ## Example
 
 ```qml
 import Md3
 
+Md3Badged {
+    badgeText: "128"
+    badgeMax: 99
+    Md3IconButton { icon: "notifications" }
+}
+
 Md3Badge {
-    text: ""
-    dot: false
-    badgeColor: Md3Theme.colorScheme.error
-    labelColor: Md3Theme.colorScheme.colorOnError
+    anchors.right: parent.right
+    anchors.top: parent.top
+    text: "3"
+    sizePreset: Md3Badge.Large
 }
 ```

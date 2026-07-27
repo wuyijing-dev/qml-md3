@@ -41,13 +41,19 @@ Item {
     property real sweep: Math.PI * 0.55
     property real waveSpeed: Math.PI * 2 / 1.8
     property real spinSpeed: Math.PI * 2 / (Md3Motion.progressSpin / 1000)
+    /// Thin track + thicker active arc (M3 expressive).
+    property bool contained: true
+    readonly property real trackLineWidth: contained
+            ? Math.max(2, strokeWidth * 0.4)
+            : strokeWidth
+    readonly property real indicatorLineWidth: strokeWidth
 
     readonly property real sweepMin: Math.PI * 0.28
     readonly property real sweepMax: Math.PI * 1.15
     readonly property bool isWavy: style !== Md3CircularProgressIndicator.Standard
     property bool _treeShown: true
     readonly property bool sceneActive: enabled && _treeShown
-    readonly property real radius: Math.min(width, height) / 2 - strokeWidth - (isWavy ? amplitude : 0)
+    readonly property real radius: Math.min(width, height) / 2 - indicatorLineWidth - (isWavy ? amplitude : 0)
 
     property real sweepDir: 1
     property real _waveAccum: 0
@@ -142,7 +148,7 @@ Item {
         asynchronous: false
 
         ShapePath {
-            strokeWidth: root.strokeWidth
+            strokeWidth: root.contained ? root.trackLineWidth : root.strokeWidth
             strokeColor: Md3Theme.colorScheme.surfaceContainerHighest
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
@@ -156,7 +162,7 @@ Item {
             }
         }
         ShapePath {
-            strokeWidth: root.strokeWidth
+            strokeWidth: root.contained ? root.indicatorLineWidth : root.strokeWidth
             strokeColor: Md3Theme.colorScheme.primary
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
@@ -179,7 +185,7 @@ Item {
         asynchronous: false
 
         ShapePath {
-            strokeWidth: root.strokeWidth
+            strokeWidth: root.trackLineWidth
             strokeColor: Md3Theme.colorScheme.surfaceContainerHighest
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
@@ -187,7 +193,7 @@ Item {
             PathPolyline { id: trackPoly }
         }
         ShapePath {
-            strokeWidth: root.strokeWidth
+            strokeWidth: root.indicatorLineWidth
             strokeColor: Md3Theme.colorScheme.primary
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap

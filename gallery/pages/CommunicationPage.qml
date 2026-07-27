@@ -24,17 +24,34 @@ Item {
                 font.pixelSize: Md3Theme.typography.headlineMedium.size
                 font.family: Md3Theme.typography.fontFamily
             }
+
+            Text {
+                text: qsTr("Badges")
+                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                font.pixelSize: Md3Theme.typography.labelMedium.size
+            }
             Row {
-                spacing: 16
-                Item {
-                    width: 48; height: 48
+                spacing: 20
+                Md3Badged {
+                    badgeText: "3"
                     Md3IconButton { icon: "home" }
-                    Md3Badge { anchors.right: parent.right; anchors.top: parent.top; text: "3" }
                 }
-                Item {
-                    width: 48; height: 48
+                Md3Badged {
+                    badgeDot: true
                     Md3IconButton { icon: "favorite" }
-                    Md3Badge { anchors.right: parent.right; anchors.top: parent.top; dot: true }
+                }
+                Md3Badged {
+                    badgeText: "128"
+                    badgeMax: 99
+                    badgeSizePreset: Md3Badge.Large
+                    Md3IconButton { icon: "notifications" }
+                }
+                Md3Badged {
+                    badgeText: "9"
+                    badgeSizePreset: Md3Badge.Small
+                    badgeColor: Md3Theme.colorScheme.tertiary
+                    badgeLabelColor: Md3Theme.colorScheme.colorOnTertiary
+                    Md3Button { text: qsTr("Inbox") }
                 }
             }
 
@@ -60,6 +77,27 @@ Item {
                     indeterminate: false
                     value: 0.65
                     label: qsTr("65%")
+                }
+            }
+
+            Text {
+                text: qsTr("Morph loading (expressive)")
+                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                font.pixelSize: Md3Theme.typography.labelMedium.size
+            }
+            RowLayout {
+                spacing: 28
+                Md3MorphLoadingIndicator { sizePreset: Md3MorphLoadingIndicator.Small }
+                Md3MorphLoadingIndicator { }
+                Md3MorphLoadingIndicator { sizePreset: Md3MorphLoadingIndicator.Large }
+                Md3MorphLoadingIndicator {
+                    variant: Md3MorphLoadingIndicator.Contained
+                    sizePreset: Md3MorphLoadingIndicator.Small
+                }
+                Md3MorphLoadingIndicator { variant: Md3MorphLoadingIndicator.Contained }
+                Md3MorphLoadingIndicator {
+                    variant: Md3MorphLoadingIndicator.Contained
+                    sizePreset: Md3MorphLoadingIndicator.Large
                 }
             }
 

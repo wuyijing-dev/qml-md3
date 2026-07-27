@@ -214,6 +214,32 @@ void initialize(QCoreApplication &app, const RunOptions &opts)
     if (!opts.style.isEmpty())
         QQuickStyle::setStyle(opts.style);
 
+#if defined(Q_OS_LINUX)
+    {
+        QString desk = opts.desktopFileName;
+        if (desk.isEmpty())
+            desk = opts.applicationName;
+        // Sanitize: D-Bus object paths reject spaces (e.g. "Md3 Gallery").
+        QString safe;
+        for (QChar c : desk.trimmed()) {
+            const ushort u = c.unicode();
+            if ((u >= 'A' && u <= 'Z') || (u >= 'a' && u <= 'z') || (u >= '0' && u <= '9'))
+                safe.append(c);
+            else
+                safe.append(QLatin1Char('_'));
+        }
+        while (safe.contains(QLatin1String("__")))
+            safe.replace(QLatin1String("__"), QLatin1String("_"));
+        while (safe.startsWith(QLatin1Char('_')))
+            safe.remove(0, 1);
+        while (safe.endsWith(QLatin1Char('_')))
+            safe.chop(1);
+        if (safe.isEmpty())
+            safe = QStringLiteral("Md3_App");
+        QGuiApplication::setDesktopFileName(safe);
+    }
+#endif
+
     if (opts.loadFonts)
         loadFonts();
 }
