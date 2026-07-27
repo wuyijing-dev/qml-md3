@@ -4,8 +4,8 @@ import QtQuick
 Item {
     id: root
 
-    property alias content: host.data
-    default property alias data: host.data
+    // Forward children into host without shadowing Item.data
+    default property alias content: host.data
 
     property real spacing: 8
     property real rowSpacing: 8

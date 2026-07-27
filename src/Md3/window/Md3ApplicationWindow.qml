@@ -277,6 +277,7 @@ Window {
         if (usesDestinations && windowBody.currentIndex !== currentIndex)
             windowBody.currentIndex = currentIndex
         _managedSyncTabFromPage()
+        _scheduleSessionSave()
     }
 
     onDocumentTabsEnabledChanged: {
@@ -436,7 +437,6 @@ Window {
     onWidthChanged: _scheduleSessionSave()
     onHeightChanged: _scheduleSessionSave()
     onRailExpandedChanged: _scheduleSessionSave()
-    onCurrentIndexChanged: _scheduleSessionSave()
 
     Connections {
         target: Md3Theme
