@@ -217,28 +217,6 @@ Md3ApplicationWindow {
                         window.toggleThemeFrom(this)
                 }
             }
-
-            // Wrap in a Row — assigning a bare object list to trailingSlot.data often stays empty.
-            trailingContent: Row {
-                height: 28
-                spacing: 0
-                Md3TitleBarButton {
-                    icon: "tab"
-                    buttonWidth: 36
-                    buttonHeight: 28
-                    iconSize: 14
-                    accessibleName: qsTr("新建标签")
-                    onClicked: window.addTab(window.currentIndex)
-                }
-                Md3TitleBarButton {
-                    icon: "web_asset"
-                    buttonWidth: 36
-                    buttonHeight: 28
-                    iconSize: 14
-                    accessibleName: qsTr("窗口页面")
-                    onClicked: window.openTab(window.windowPageIndex, false)
-                }
-            }
         }
     }
 }
