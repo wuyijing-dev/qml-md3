@@ -49,6 +49,26 @@ QString sanitizeDbusPathElement(QString id)
     return out;
 }
 
+bool isValidDbusObjectPath(const QString &path)
+{
+    if (path.isEmpty() || path == QLatin1String("/"))
+        return false;
+    if (!path.startsWith(QLatin1Char('/')))
+        return false;
+    if (path.endsWith(QLatin1Char('/')))
+        return false;
+    if (path.contains(QLatin1String("//")))
+        return false;
+    for (qsizetype i = 1; i < path.size(); ++i) {
+        const ushort u = path.at(i).unicode();
+        const bool ok = (u >= 'A' && u <= 'Z') || (u >= 'a' && u <= 'z')
+                     || (u >= '0' && u <= '9') || u == '_' || u == '/';
+        if (!ok)
+            return false;
+    }
+    return true;
+}
+
 } // namespace
 
 QString desktopFileId()
@@ -86,7 +106,7 @@ void emitLauncherUpdate(const QVariantMap &properties)
 
     const QString appUri = QStringLiteral("application://%1.desktop").arg(id);
     const QString path = QStringLiteral("/com/canonical/unity/launcherentry/%1").arg(id);
-    if (!QDBusObjectPath(path).isValid()) {
+    if (!isValidDbusObjectPath(path)) {
         qWarning("Md3: invalid Unity LauncherEntry path '%s' (skipped)", qPrintable(path));
         return;
     }
