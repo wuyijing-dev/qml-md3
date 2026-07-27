@@ -30,9 +30,10 @@ Item {
         const gp = sourceItem.mapToGlobal(localX !== undefined ? localX : sourceItem.width / 2,
                                          localY !== undefined ? localY : sourceItem.height / 2)
         const p = win.pageHost.mapFromGlobal(gp.x, gp.y)
-        win._launchDetailTitle = title
-        win._launchDetailBody = body
-        win.navigateTo(detailIndex, {
+        win.pushRoute(detailIndex, {
+            title: title,
+            body: body
+        }, {
             transitionMode: "launch",
             sourcePoint: Qt.point(p.x, p.y),
             sourceRadius: 7
@@ -61,7 +62,7 @@ Item {
                     id: rowWelcome
                     width: parent.width
                     title: qsTr("Welcome")
-                    subtitle: qsTr("Open details with launch transition")
+                    subtitle: qsTr("Push route with launch transition")
                     showDivider: true
                     MouseArea {
                         anchors.fill: parent
@@ -69,7 +70,7 @@ Item {
                         onClicked: function (mouse) {
                             mouse.accepted = false
                             root._openDetailFrom(rowWelcome, rowWelcome.title,
-                                                 qsTr("This page is opened as a whole-route transition from the tapped position."),
+                                                 qsTr("Level 1 — tap opens detail via pushRoute."),
                                                  mouse.x, mouse.y)
                         }
                     }
@@ -78,7 +79,7 @@ Item {
                     id: rowNotes
                     width: parent.width
                     title: qsTr("Release notes")
-                    subtitle: qsTr("Route-level container transform")
+                    subtitle: qsTr("Multi-level nav stack + launch morph")
                     showDivider: true
                     MouseArea {
                         anchors.fill: parent
@@ -86,7 +87,7 @@ Item {
                         onClicked: function (mouse) {
                             mouse.accepted = false
                             root._openDetailFrom(rowNotes, rowNotes.title,
-                                                 qsTr("The animation uses source-position launch, nonlinear curves, and spring-like pulse."),
+                                                 qsTr("goBack() pops the stack; rail stays on section root."),
                                                  mouse.x, mouse.y)
                         }
                     }
@@ -95,14 +96,14 @@ Item {
                     id: rowFeedback
                     width: parent.width
                     title: qsTr("Feedback")
-                    subtitle: qsTr("Back uses a normal slide transition")
+                    subtitle: qsTr("Detail can push another level")
                     MouseArea {
                         anchors.fill: parent
                         acceptedButtons: Qt.LeftButton
                         onClicked: function (mouse) {
                             mouse.accepted = false
                             root._openDetailFrom(rowFeedback, rowFeedback.title,
-                                                 qsTr("Use the back button on detail page to return into this row."),
+                                                 qsTr("Open detail, then use “Open level 2” for nested push."),
                                                  mouse.x, mouse.y)
                         }
                     }

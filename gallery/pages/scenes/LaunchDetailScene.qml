@@ -7,43 +7,50 @@ Item {
     id: root
     anchors.fill: parent
 
-    function _destinationIndexBySuffix(suffix) {
+    readonly property var route: {
         const win = Window.window
-        if (!win || !win.destinations)
-            return -1
-        for (let i = 0; i < win.destinations.length; ++i) {
-            const d = win.destinations[i]
-            const src = d && d.source ? String(d.source) : ""
-            if (src.indexOf(suffix) >= 0)
-                return i
-        }
-        return -1
+        return win && win.routeParams ? win.routeParams : ({})
     }
 
-    function _backToList() {
+    readonly property int navDepth: {
         const win = Window.window
-        if (!win)
-            return
-        const listIndex = _destinationIndexBySuffix("LaunchListScene.qml")
-        if (listIndex < 0)
-            return
-        win.navigateTo(listIndex)
+        return win && win.navDepth !== undefined ? win.navDepth : 0
     }
 
     readonly property string detailTitle: {
-        const win = Window.window
-        if (win && win._launchDetailTitle !== undefined && win._launchDetailTitle !== null
-                && String(win._launchDetailTitle).length > 0)
-            return String(win._launchDetailTitle)
+        if (route.title !== undefined && String(route.title).length > 0)
+            return String(route.title)
         return qsTr("Detail")
     }
 
     readonly property string detailBody: {
-        const win = Window.window
-        if (win && win._launchDetailBody !== undefined && win._launchDetailBody !== null
-                && String(win._launchDetailBody).length > 0)
-            return String(win._launchDetailBody)
+        if (route.body !== undefined && String(route.body).length > 0)
+            return String(route.body)
         return qsTr("Whole-page route opened from source bounds.")
+    }
+
+    function _back() {
+        const win = Window.window
+        if (!win)
+            return
+        if (!win.goBack())
+            return
+    }
+
+    function _openLevel2() {
+        const win = Window.window
+        if (!win || !win.pageHost)
+            return
+        const gp = mapToGlobal(width / 2, height / 2)
+        const p = win.pageHost.mapFromGlobal(gp.x, gp.y)
+        win.pushRoute(win.currentIndex, {
+            title: qsTr("Level %1").arg(navDepth + 2),
+            body: qsTr("Nested pushRoute on the same detail page. goBack() returns to the previous level.")
+        }, {
+            transitionMode: "launch",
+            sourcePoint: Qt.point(p.x, p.y),
+            sourceRadius: 8
+        })
     }
 
     ColumnLayout {
@@ -55,7 +62,7 @@ Item {
             title: root.detailTitle
             leadingIcon: "arrow_back"
             size: Md3TopAppBar.Small
-            onLeadingClicked: root._backToList()
+            onLeadingClicked: root._back()
         }
 
         Rectangle {
@@ -68,6 +75,12 @@ Item {
                 anchors.margins: 24
                 spacing: 14
 
+                Text {
+                    text: qsTr("Depth: %1").arg(root.navDepth + 1)
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.family: Md3Theme.typography.fontFamily
+                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                }
                 Text {
                     text: root.detailTitle
                     color: Md3Theme.colorScheme.colorOnSurface
@@ -82,9 +95,16 @@ Item {
                     font.family: Md3Theme.typography.fontFamily
                     font.pixelSize: Md3Theme.typography.bodyLarge.size
                 }
-                Md3Button {
-                    text: qsTr("Back to list")
-                    onClicked: root._backToList()
+                Row {
+                    spacing: 12
+                    Md3Button {
+                        text: qsTr("Back")
+                        onClicked: root._back()
+                    }
+                    Md3Button {
+                        text: qsTr("Open level 2")
+                        onClicked: root._openLevel2()
+                    }
                 }
             }
         }
