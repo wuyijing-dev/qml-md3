@@ -5,30 +5,32 @@ QtObject {
     id: root
 
     /// Global duration multiplier. 1 = Material/Flutter base; higher = slower.
-    /// Affects every token below (ripple, switch, sheets, theme reveal, …).
     property real durationScale: 2.2
 
-    // Base durations — Flutter material/motion.dart (scaled by durationScale in _d).
-    // When Md3Theme.reduceMotion is on, tokens collapse to ~1ms.
-    readonly property int short1: _d(50)
-    readonly property int short2: _d(100)
-    readonly property int short3: _d(150)
-    readonly property int short4: _d(200)
-    readonly property int medium1: _d(250)
-    readonly property int medium2: _d(300)
-    readonly property int medium3: _d(350)
-    readonly property int medium4: _d(400)
-    readonly property int long1: _d(450)
-    readonly property int long2: _d(500)
-    readonly property int long3: _d(550)
-    readonly property int long4: _d(600)
-    readonly property int extraLong1: _d(700)
-    readonly property int extraLong2: _d(800)
-    readonly property int extraLong3: _d(900)
-    readonly property int extraLong4: _d(1000)
+    /// Explicit binding — do not hide Md3Theme.reduceMotion only inside _d()
+    /// (some QML engines won't re-eval token props when the flag flips).
+    readonly property bool reduced: Md3Theme ? Md3Theme.reduceMotion : false
 
-    function _d(ms) {
-        if (Md3Theme && Md3Theme.reduceMotion)
+    // Base durations × durationScale (or 1ms when reduced).
+    readonly property int short1: _scaled(50)
+    readonly property int short2: _scaled(100)
+    readonly property int short3: _scaled(150)
+    readonly property int short4: _scaled(200)
+    readonly property int medium1: _scaled(250)
+    readonly property int medium2: _scaled(300)
+    readonly property int medium3: _scaled(350)
+    readonly property int medium4: _scaled(400)
+    readonly property int long1: _scaled(450)
+    readonly property int long2: _scaled(500)
+    readonly property int long3: _scaled(550)
+    readonly property int long4: _scaled(600)
+    readonly property int extraLong1: _scaled(700)
+    readonly property int extraLong2: _scaled(800)
+    readonly property int extraLong3: _scaled(900)
+    readonly property int extraLong4: _scaled(1000)
+
+    function _scaled(ms) {
+        if (root.reduced)
             return 1
         const s = durationScale > 0.05 ? durationScale : 1
         return Math.max(1, Math.round(ms * s))
@@ -67,7 +69,6 @@ QtObject {
     readonly property int effectsDuration: short4
     readonly property int menuDuration: short3
     readonly property int overlayDuration: short2
-    /// Button / chip ink — uses medium2 × durationScale (≈660ms at 2.2)
     readonly property int rippleDuration: medium2
     readonly property int stateDuration: short2
 
@@ -86,20 +87,19 @@ QtObject {
     readonly property real massMenu: 1.0
     readonly property real epsilonMenu: 0.02
 
-    // Smoothed velocities — slower with higher durationScale
     readonly property real smoothSnapVelocity: 110 / Math.max(0.5, durationScale)
     readonly property real smoothPanelVelocity: 520 / Math.max(0.5, durationScale)
     readonly property real smoothOpacityVelocity: 3.0 / Math.max(0.5, durationScale)
     readonly property real smoothOpacityFastVelocity: 5.0 / Math.max(0.5, durationScale)
     readonly property real smoothScaleVelocity: 1.8 / Math.max(0.5, durationScale)
-    readonly property int smoothSnapEasing: _d(140)
-    readonly property int smoothPanelEasing: _d(160)
-    readonly property int smoothMaxEasing: _d(180)
+    readonly property int smoothSnapEasing: _scaled(140)
+    readonly property int smoothPanelEasing: _scaled(160)
+    readonly property int smoothMaxEasing: _scaled(180)
 
-    readonly property int progressTravel: _d(1800)
-    readonly property int progressSpin: _d(1600)
-    readonly property int progressSweep: _d(1100)
-    readonly property int progressWave: _d(2400)
+    readonly property int progressTravel: _scaled(1800)
+    readonly property int progressSpin: _scaled(1600)
+    readonly property int progressSweep: _scaled(1100)
+    readonly property int progressWave: _scaled(2400)
 
     function curve(token) {
         const p = root[token]
@@ -149,6 +149,6 @@ QtObject {
             default: return 300
             }
         })()
-        return _d(ms)
+        return _scaled(ms)
     }
 }

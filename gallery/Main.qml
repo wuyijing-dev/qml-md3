@@ -139,6 +139,16 @@ Md3ApplicationWindow {
     Component.onCompleted: {
         Md3AppSettings.organization = settingsOrganization
         Md3AppSettings.application = settingsApplication
+        // Session restore can leave a11y/reduceMotion=true, which collapses every
+        // Md3Motion token to ~1ms (ripples/switch/page transitions look instant).
+        Qt.callLater(function () {
+            if (Md3Theme.reduceMotion) {
+                console.warn("Md3 Gallery: clearing stuck reduceMotion (was collapsing all motion to ~1ms)")
+                Md3Theme.reduceMotion = false
+            }
+            Md3AppSettings.setValue("a11y/reduceMotion", false)
+            Md3AppSettings.sync()
+        })
         if (!Md3AppSettings.value("tour/completed", false))
             Qt.callLater(function () { window.startTour() })
     }

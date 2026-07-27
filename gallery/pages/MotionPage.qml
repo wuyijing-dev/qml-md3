@@ -15,16 +15,50 @@ Flickable {
         spacing: 28
 
         Text {
-            text: "Motion — original pacing"
+            text: qsTr("动效")
             color: Md3Theme.colorScheme.colorOnSurface
             font.pixelSize: Md3Theme.typography.headlineMedium.size
             font.family: Md3Theme.typography.fontFamily
         }
 
+        Rectangle {
+            Layout.fillWidth: true
+            visible: Md3Theme.reduceMotion
+            height: visible ? warnCol.implicitHeight + 24 : 0
+            radius: Md3Theme.shape.medium
+            color: Md3Theme.colorScheme.errorContainer
+
+            Column {
+                id: warnCol
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: 12
+                spacing: 8
+                Text {
+                    width: parent.width
+                    wrapMode: Text.Wrap
+                    text: qsTr("「减弱动效」已开启：所有时长≈1ms，演示会瞬移并可能残影。请到「主题」页关闭。")
+                    color: Md3Theme.colorScheme.colorOnErrorContainer
+                    font.family: Md3Theme.typography.fontFamily
+                    font.pixelSize: Md3Theme.typography.bodyMedium.size
+                }
+                Md3Button {
+                    text: qsTr("关闭减弱动效")
+                    onClicked: Md3Theme.reduceMotion = false
+                }
+            }
+        }
+
         Text {
             Layout.fillWidth: true
             wrapMode: Text.Wrap
-            text: "Durations follow Flutter material/motion.dart (short*/medium*). Curves use M3 emphasized / standard. Behavior still retargets if interrupted mid-flight."
+            text: qsTr("实际 token：medium4=%1ms，short4=%2ms，ripple=%3ms，scale=%4×%5")
+                    .arg(Md3Motion.medium4)
+                    .arg(Md3Motion.short4)
+                    .arg(Md3Motion.rippleDuration)
+                    .arg(Md3Motion.durationScale.toFixed(1))
+                    .arg(Md3Motion.reduced ? qsTr("（已减弱）") : "")
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.bodyMedium.size
             font.family: Md3Theme.typography.fontFamily
@@ -49,8 +83,12 @@ Flickable {
                 color: Md3Theme.colorScheme.primary
                 y: 8
                 x: 0
+
+                // Restart when durations / reduceMotion change so we don't keep a 1ms loop.
                 SequentialAnimation on x {
+                    id: boxAnim
                     loops: Animation.Infinite
+                    running: root.visible && !Md3Theme.reduceMotion
                     NumberAnimation {
                         to: Math.max(0, root.width - 80)
                         duration: Md3Motion.medium4
@@ -66,6 +104,17 @@ Flickable {
                     }
                     PauseAnimation { duration: Md3Motion.short4 }
                 }
+
+                Connections {
+                    target: Md3Theme
+                    function onReduceMotionChanged() {
+                        box.x = 0
+                        if (!Md3Theme.reduceMotion)
+                            boxAnim.restart()
+                        else
+                            boxAnim.stop()
+                    }
+                }
             }
         }
 
@@ -73,8 +122,8 @@ Flickable {
             spacing: 24
             Md3Switch { checked: true }
             Md3Switch { }
-            Md3Button { text: "Button ripple" }
-            Md3Button { text: "Outlined"; variant: Md3Button.Outlined }
+            Md3Button { text: qsTr("Button ripple") }
+            Md3Button { text: qsTr("Outlined"); variant: Md3Button.Outlined }
         }
 
         GridLayout {
@@ -84,9 +133,14 @@ Flickable {
             Layout.fillWidth: true
             Repeater {
                 model: [
-                    "short2=100", "short3=150", "short4=200",
-                    "medium2=300", "medium3=350", "medium4=400",
-                    "ripple=300", "state=100"
+                    "short2=" + Md3Motion.short2,
+                    "short3=" + Md3Motion.short3,
+                    "short4=" + Md3Motion.short4,
+                    "medium2=" + Md3Motion.medium2,
+                    "medium3=" + Md3Motion.medium3,
+                    "medium4=" + Md3Motion.medium4,
+                    "ripple=" + Md3Motion.rippleDuration,
+                    "state=" + Md3Motion.stateDuration
                 ]
                 delegate: Rectangle {
                     required property string modelData
