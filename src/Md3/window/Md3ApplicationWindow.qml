@@ -503,6 +503,10 @@ Window {
         Md3Theme.highContrast = _settingsBool("a11y/highContrast", Md3Theme.highContrast)
         Md3Theme.textScale = Number(Md3AppSettings.value("a11y/textScale", Md3Theme.textScale))
         Md3Accessibility.showFocusRings = _settingsBool("a11y/showFocusRings", Md3Accessibility.showFocusRings)
+        if (Md3Theme.reduceMotion) {
+            console.warn("Md3: reduceMotion is ON — Md3Motion durations collapse to ~1ms "
+                         + "(Theme page → 减弱动效, or clear a11y/reduceMotion in settings)")
+        }
         railExpanded = _settingsBool("shell/railExpanded", railExpanded)
         const page = Number(Md3AppSettings.value("shell/pageIndex", currentIndex))
         if (usesDestinations && page >= 0 && page < destinations.length)

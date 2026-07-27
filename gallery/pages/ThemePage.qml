@@ -323,10 +323,23 @@ Flickable {
         RowLayout {
             spacing: 12
             Layout.fillWidth: true
-            Text {
-                text: qsTr("减弱动效")
-                color: Md3Theme.colorScheme.colorOnSurface
+            Column {
                 Layout.fillWidth: true
+                spacing: 2
+                Text {
+                    text: qsTr("减弱动效")
+                    color: Md3Theme.colorScheme.colorOnSurface
+                    font.family: Md3Theme.typography.fontFamily
+                    font.pixelSize: Md3Theme.typography.bodyLarge.size
+                }
+                Text {
+                    width: parent.width
+                    wrapMode: Text.Wrap
+                    text: qsTr("开启后所有 Md3Motion 时长≈1ms（涟漪/切换/页面过渡都会瞬间完成）")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.family: Md3Theme.typography.fontFamily
+                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                }
             }
             Md3Switch {
                 checked: Md3Theme.reduceMotion
@@ -335,6 +348,36 @@ Flickable {
                     Md3Theme.reduceMotion = on
                     Md3Accessibility.announce(on ? qsTr("已开启减弱动效") : qsTr("已关闭减弱动效"))
                 }
+            }
+        }
+
+        RowLayout {
+            spacing: 12
+            Layout.fillWidth: true
+            Column {
+                Layout.fillWidth: true
+                spacing: 2
+                Text {
+                    text: qsTr("动效倍速")
+                    color: Md3Theme.colorScheme.colorOnSurface
+                    font.family: Md3Theme.typography.fontFamily
+                    font.pixelSize: Md3Theme.typography.bodyLarge.size
+                }
+                Text {
+                    text: qsTr("当前 %1×（越大越慢；减弱动效开启时无效）")
+                            .arg(Md3Motion.durationScale.toFixed(1))
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.family: Md3Theme.typography.fontFamily
+                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                }
+            }
+            Md3Slider {
+                Layout.preferredWidth: 160
+                from: 1
+                to: 3
+                value: Md3Motion.durationScale
+                enabled: !Md3Theme.reduceMotion
+                onMoved: function (v) { Md3Motion.durationScale = v }
             }
         }
 
