@@ -4,10 +4,10 @@ import QtQuick
 QtObject {
     id: root
 
-    /// Global duration multiplier. 1 = Material/Flutter base; higher = slower.
-    property real durationScale: 2.2
+    /// Global duration multiplier. 1 = Material/Flutter original pacing.
+    property real durationScale: 1.0
 
-    /// Explicit binding — do not hide Md3Theme.reduceMotion only inside _d()
+    /// Explicit binding — do not hide Md3Theme.reduceMotion only inside _scaled()
     /// (some QML engines won't re-eval token props when the flag flips).
     readonly property bool reduced: Md3Theme ? Md3Theme.reduceMotion : false
 
@@ -72,21 +72,22 @@ QtObject {
     readonly property int rippleDuration: medium2
     readonly property int stateDuration: short2
 
-    readonly property real springSnap: 3.2
-    readonly property real dampingSnap: 0.62
-    readonly property real massSnap: 1.05
+    readonly property real springSnap: 5.0
+    readonly property real dampingSnap: 0.55
+    readonly property real massSnap: 1.0
     readonly property real epsilonSnap: 0.1
 
-    readonly property real springSoft: 2.4
-    readonly property real dampingSoft: 0.55
-    readonly property real massSoft: 1.05
+    readonly property real springSoft: 3.5
+    readonly property real dampingSoft: 0.5
+    readonly property real massSoft: 1.0
     readonly property real epsilonSoft: 0.35
 
-    readonly property real springMenu: 3.0
-    readonly property real dampingMenu: 0.6
+    readonly property real springMenu: 4.5
+    readonly property real dampingMenu: 0.55
     readonly property real massMenu: 1.0
     readonly property real epsilonMenu: 0.02
 
+    // Smoothed velocities — original 200–400ms feel
     readonly property real smoothSnapVelocity: 110 / Math.max(0.5, durationScale)
     readonly property real smoothPanelVelocity: 520 / Math.max(0.5, durationScale)
     readonly property real smoothOpacityVelocity: 3.0 / Math.max(0.5, durationScale)
