@@ -43,6 +43,48 @@ Md3ApplicationWindow {
     property bool galleryTableLoading: false
     property string galleryTreeSelection: ""
 
+    toolBar: Rectangle {
+        height: 44
+        color: Md3Theme.colorScheme.surfaceContainerLow
+
+        Md3Divider {
+            anchors.bottom: parent.bottom
+            width: parent.width
+        }
+
+        Row {
+            anchors.fill: parent
+            anchors.leftMargin: 12
+            anchors.rightMargin: 12
+            spacing: 8
+
+            Md3Button {
+                anchors.verticalCenter: parent.verticalCenter
+                text: qsTr("Back")
+                variant: Md3Button.Text
+                enabled: window.canGoBack
+                onClicked: window.goBack()
+            }
+            Md3Button {
+                anchors.verticalCenter: parent.verticalCenter
+                text: qsTr("Reload")
+                variant: Md3Button.Text
+                onClicked: window.reloadCurrentPage()
+            }
+            Md3TextField {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 320
+                label: qsTr("Quick path")
+                placeholderText: qsTr("Jump to desktop patterns")
+                onAccepted: {
+                    const t = text.trim().toLowerCase()
+                    if (t.indexOf("desktop") >= 0)
+                        window.openTab(12, false)
+                }
+            }
+        }
+    }
+
     statusBar: Md3StatusBar {
         id: appStatusBar
         text: {

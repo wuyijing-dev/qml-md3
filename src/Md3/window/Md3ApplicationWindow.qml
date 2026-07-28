@@ -132,6 +132,11 @@ Window {
     property alias documentTabBar: docTabBar
     property bool _docTabSyncing: false
 
+    /// App-top tool strip between tabs/titlebar and content.
+    property alias toolBar: toolBarSlot.data
+    property alias toolBarItem: toolBarSlot
+    readonly property real toolBarHeight: toolBarSlot.visible ? toolBarSlot.height : 0
+
     /// App-bottom status strip (e.g. Md3StatusBar). Spans full content width.
     property alias statusBar: statusBarSlot.data
     property alias statusBarItem: statusBarSlot
@@ -987,6 +992,16 @@ Window {
                 z: 0
                 focus: true
 
+                Column {
+                    id: toolBarSlot
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    width: parent.width
+                    z: 3
+                    visible: height > 0
+                }
+
                 Keys.onBackPressed: function (event) {
                     if (root.canGoBack) {
                         root.goBack()
@@ -998,7 +1013,7 @@ Window {
                     id: windowBody
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    anchors.top: parent.top
+                    anchors.top: toolBarSlot.bottom
                     anchors.bottom: statusBarSlot.top
                     visible: root.usesDestinations
                     enabled: visible
@@ -1041,7 +1056,7 @@ Window {
                     id: customContent
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    anchors.top: parent.top
+                    anchors.top: toolBarSlot.bottom
                     anchors.bottom: statusBarSlot.top
                     visible: !root.usesDestinations
                     enabled: visible

@@ -87,6 +87,9 @@ import Md3
 | `documentTabsTearOff` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Tear-off to a separate window is disabled (no Md3TabWindow). |
 | `documentTabsShowAdd` | `bool` | `true` | read/write | `Md3ApplicationWindow` | — |
 | `documentTabBar` | `alias` | `docTabBar` | read/write | `Md3ApplicationWindow` | Alias → `docTabBar` |
+| `toolBar` | `alias` | `toolBarSlot.data` | read/write | `Md3ApplicationWindow` | App-top tool strip between tabs/titlebar and content. |
+| `toolBarItem` | `alias` | `toolBarSlot` | read/write | `Md3ApplicationWindow` | Alias → `toolBarSlot` |
+| `toolBarHeight` | `real` | `toolBarSlot.visible ? toolBarSlot.height : 0` | readonly | `Md3ApplicationWindow` | — |
 | `statusBar` | `alias` | `statusBarSlot.data` | read/write | `Md3ApplicationWindow` | App-bottom status strip (e.g. Md3StatusBar). Spans full content width. |
 | `statusBarItem` | `alias` | `statusBarSlot` | read/write | `Md3ApplicationWindow` | Alias → `statusBarSlot` |
 | `statusBarHeight` | `real` | `statusBarSlot.visible ? statusBarSlot.height : 0` | readonly | `Md3ApplicationWindow` | — |
