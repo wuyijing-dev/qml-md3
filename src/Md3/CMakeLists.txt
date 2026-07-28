@@ -233,6 +233,15 @@ target_link_libraries(Md3
     PUBLIC Qt6::Quick
     PRIVATE Qt6::QuickControls2 Qt6::QuickEffects Qt6::QuickShapesPrivate
 )
+
+# Prebuilt Liquid Glass shaders (qsb). Avoids requiring fxc.exe / ShaderTools at build time.
+qt_add_resources(Md3 "md3_liquid_glass_shaders"
+    PREFIX "/qt/qml/Md3"
+    FILES
+        shaders/md3liquidglass.vert.qsb
+        shaders/md3liquidglass.frag.qsb
+)
+
 target_include_directories(Md3
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>

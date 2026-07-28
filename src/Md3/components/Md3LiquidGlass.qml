@@ -1,35 +1,46 @@
 import QtQuick
 import QtQuick.Effects
 
-/// Draggable Liquid Glass card — backdrop blur, adaptive tint, edge lensing, specular highlight.
+/// Draggable Liquid Glass card — refraction + frost + specular (iOS 26–inspired).
 Item {
     id: root
 
-    /// Scene content sampled behind this card (typically a sibling under the same parent).
+    /// Scene content sampled behind this card (sibling under the same parent).
     property Item sourceItem: null
-    property real radius: Md3Theme.shape.extraLarge
-    property real elevation: 3
+    property real radius: 28
+    property real elevation: 2
     property bool draggable: true
-    property real blurAmount: 0.62
-    property real blurMax: 56
-    property real tintOpacity: Md3Theme.colorScheme.dark ? 0.32 : 0.48
-    property color tintColor: Md3Theme.colorScheme.surface
-    property real specularStrength: 0.58
-    property real edgeStrength: 0.55
-    /// Keep the card inside its parent while dragging.
     property bool boundToParent: true
+
+    /// Frost amount 0..1 (shader taps + MultiEffect fallback).
+    property real blurAmount: 0.28
+    property real blurMax: 48
+    /// Keep low for clear glass (≈0.06–0.15). Higher = frosted plate.
+    property real tintOpacity: 0.10
+    property color tintColor: "#FFFFFF"
+    property real specularStrength: 0.72
+    property real edgeStrength: 0.85
+    /// Edge lens bend (0 = frost only).
+    property real refraction: 1.15
+    /// RGB fringe at the rim (0..1).
+    property real chromaticAberration: 0.45
+    property real samplePadding: 28
 
     default property alias contentData: contentHost.data
 
-    readonly property bool dragging: drag.active
+    readonly property bool dragging: dragArea.drag.active || dragArea.pressed
 
     implicitWidth: 280
     implicitHeight: 168
-    clip: false
-    z: dragging ? 10 : 1
+    z: dragging ? 20 : 1
 
-    readonly property bool _blurReady: sourceItem !== null && width > 0 && height > 0
-    property real _specNX: 0.28
+    readonly property bool _blurReady: sourceItem !== null && width > 1 && height > 1
+    readonly property real _minSide: Math.min(width, height)
+    readonly property real _radiusNorm: Math.max(0.02, Math.min(0.49, radius / Math.max(1, _minSide)))
+    readonly property real _aspect: width / Math.max(1, height)
+    readonly property bool _useLens: _blurReady && refraction > 0.02
+
+    property real _specNX: 0.30
     property real _specNY: 0.22
     property real _pressScale: 1
 
@@ -58,6 +69,20 @@ Item {
         }
     }
 
+    function _sourceRect(pad) {
+        if (!sourceItem)
+            return Qt.rect(0, 0, width, height)
+        void x; void y; void width; void height; void refraction
+        // Slight zoom with refraction → convex-lens feel even without the shader.
+        const zoom = Math.max(0.72, 1.0 - refraction * 0.045)
+        const rw = (width + pad * 2) * zoom
+        const rh = (height + pad * 2) * zoom
+        const ox = (width + pad * 2 - rw) * 0.5 - pad
+        const oy = (height + pad * 2 - rh) * 0.5 - pad
+        const p = mapToItem(sourceItem, ox, oy)
+        return Qt.rect(p.x, p.y, rw, rh)
+    }
+
     Md3Shadow {
         anchors.fill: parent
         elevation: root.elevation
@@ -76,80 +101,101 @@ Item {
             autoPaddingEnabled: false
         }
 
-        Item {
-            id: blurHost
+        // Card-sized live sample (frost fallback + always available).
+        ShaderEffectSource {
+            id: cardSample
+            anchors.fill: parent
+            visible: false
+            live: true
+            hideSource: false
+            smooth: true
+            sourceItem: root.sourceItem
+            sourceRect: root._sourceRect(0)
+        }
+
+        // Padded sample for lens shader (needs outer pixels).
+        ShaderEffectSource {
+            id: paddedSample
+            width: root.width + root.samplePadding * 2
+            height: root.height + root.samplePadding * 2
+            x: -root.samplePadding
+            y: -root.samplePadding
+            visible: false
+            live: true
+            hideSource: false
+            smooth: true
+            sourceItem: root.sourceItem
+            sourceRect: root._sourceRect(root.samplePadding)
+        }
+
+        // Always-on frosted backdrop (works without custom shaders / HLSL).
+        MultiEffect {
             anchors.fill: parent
             visible: root._blurReady
+            source: cardSample
+            blurEnabled: true
+            blur: Math.max(0.08, root.blurAmount)
+            blurMax: root.blurMax
+            blurMultiplier: 1.35
+            saturation: 1.2
+            brightness: 0.07
+            contrast: 0.03
+        }
 
-            ShaderEffectSource {
-                id: backdropSample
-                anchors.fill: parent
-                live: true
-                hideSource: false
-                smooth: true
-                sourceItem: root.sourceItem
-                sourceRect: {
-                    if (!root.sourceItem)
-                        return Qt.rect(0, 0, root.width, root.height)
-                    void root.x
-                    void root.y
-                    void root.width
-                    void root.height
-                    const p = root.mapToItem(root.sourceItem, 0, 0)
-                    return Qt.rect(p.x, p.y, root.width, root.height)
-                }
-            }
-
-            MultiEffect {
-                anchors.fill: parent
-                source: backdropSample
-                blurEnabled: true
-                blur: root.blurAmount
-                blurMax: root.blurMax
-                blurMultiplier: 1.15
-                saturation: 1.08
-                brightness: Md3Theme.colorScheme.dark ? -0.04 : 0.06
-                contrast: 0.04
-            }
+        // Refraction + chromatic aberration. When the QSB lacks a D3D variant,
+        // this layer may no-op and the MultiEffect frost above still shows through.
+        ShaderEffect {
+            id: lens
+            anchors.fill: parent
+            visible: root._useLens
+            property variant source: paddedSample
+            property real bend: root.refraction
+            property real frost: root.blurAmount * 0.022
+            property real chroma: root.chromaticAberration
+            property real radiusNorm: root._radiusNorm
+            property real aspect: root._aspect
+            property real padU: root.samplePadding / Math.max(1, paddedSample.width)
+            property real padV: root.samplePadding / Math.max(1, paddedSample.height)
+            vertexShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.vert.qsb"
+            fragmentShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.frag.qsb"
         }
 
         Rectangle {
             anchors.fill: parent
+            visible: !root._blurReady
             color: root.tintColor
-            opacity: root._blurReady ? root.tintOpacity * 0.72 : root.tintOpacity
+            opacity: Math.max(0.22, root.tintOpacity)
+        }
+
+        // Clear glass tint — keep low so backdrop reads through.
+        Rectangle {
+            anchors.fill: parent
+            visible: root._blurReady
+            color: root.tintColor
+            opacity: root.tintOpacity
         }
 
         Rectangle {
             anchors.fill: parent
+            opacity: root.edgeStrength * 0.5
             gradient: Gradient {
-                GradientStop {
-                    position: 0.0
-                    color: Qt.rgba(0.66, 0.83, 1.0, Md3Theme.colorScheme.dark ? 0.14 : 0.18)
-                }
-                GradientStop {
-                    position: 0.45
-                    color: "transparent"
-                }
-                GradientStop {
-                    position: 1.0
-                    color: Qt.rgba(1.0, 0.83, 0.66, Md3Theme.colorScheme.dark ? 0.08 : 0.10)
-                }
+                GradientStop { position: 0.0; color: Qt.rgba(0.75, 0.88, 1.0, 0.20) }
+                GradientStop { position: 0.45; color: Qt.rgba(1, 1, 1, 0.03) }
+                GradientStop { position: 1.0; color: Qt.rgba(1.0, 0.86, 0.72, 0.12) }
             }
-            opacity: root.edgeStrength
         }
 
         Rectangle {
-            id: specular
-            width: root.width * 0.72
-            height: root.height * 0.55
+            width: root.width * 0.78
+            height: root.height * 0.52
             x: root.width * root._specNX - width * 0.5
             y: root.height * root._specNY - height * 0.5
             radius: Math.min(width, height) * 0.5
-            rotation: -18
-            opacity: root.specularStrength * (drag.active ? 0.95 : 0.7)
+            rotation: -16
+            opacity: root.specularStrength * (root.dragging ? 1.0 : 0.72)
             gradient: Gradient {
-                GradientStop { position: 0.0; color: Qt.rgba(1, 1, 1, 0.55) }
-                GradientStop { position: 0.35; color: Qt.rgba(1, 1, 1, 0.12) }
+                GradientStop { position: 0.0; color: Qt.rgba(1, 1, 1, 0.58) }
+                GradientStop { position: 0.4; color: Qt.rgba(1, 1, 1, 0.10) }
                 GradientStop { position: 1.0; color: "transparent" }
             }
         }
@@ -159,29 +205,38 @@ Item {
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.margins: 1
-            height: Math.max(1.5, root.height * 0.035)
-            opacity: Md3Theme.colorScheme.dark ? 0.35 : 0.55
+            height: Math.max(2, root.height * 0.04)
+            opacity: root.edgeStrength
             gradient: Gradient {
                 orientation: Gradient.Horizontal
                 GradientStop { position: 0.0; color: "transparent" }
-                GradientStop { position: 0.2; color: Qt.rgba(1, 1, 1, 0.65) }
-                GradientStop { position: 0.8; color: Qt.rgba(1, 1, 1, 0.35) }
+                GradientStop { position: 0.18; color: Qt.rgba(1, 1, 1, 0.78) }
+                GradientStop { position: 0.82; color: Qt.rgba(1, 1, 1, 0.38) }
                 GradientStop { position: 1.0; color: "transparent" }
             }
         }
 
         Rectangle {
             anchors.fill: parent
+            anchors.margins: 1
+            radius: Math.max(0, root.radius - 1)
             color: "transparent"
             border.width: 1
-            border.color: Qt.rgba(1, 1, 1, Md3Theme.colorScheme.dark ? 0.22 : 0.45)
+            border.color: Qt.rgba(1, 1, 1, 0.28 * root.edgeStrength)
+        }
+        Rectangle {
+            anchors.fill: parent
             radius: root.radius
+            color: "transparent"
+            border.width: 1
+            border.color: Qt.rgba(1, 1, 1, 0.45 * root.edgeStrength)
         }
 
         Item {
             id: contentHost
             anchors.fill: parent
             anchors.margins: 20
+            z: 2
         }
     }
 
@@ -199,36 +254,40 @@ Item {
         }
     }
 
-    DragHandler {
-        id: drag
+    // Flickable steals DragHandler — MouseArea + preventStealing is required.
+    MouseArea {
+        id: dragArea
+        anchors.fill: parent
+        z: 100
         enabled: root.draggable
-        target: root
-        cursorShape: Qt.OpenHandCursor
-        xAxis.minimum: root.boundToParent && parent ? 0 : -100000
-        xAxis.maximum: root.boundToParent && parent ? Math.max(0, parent.width - root.width) : 100000
-        yAxis.minimum: root.boundToParent && parent ? 0 : -100000
-        yAxis.maximum: root.boundToParent && parent ? Math.max(0, parent.height - root.height) : 100000
+        hoverEnabled: true
+        cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+        preventStealing: true
+        propagateComposedEvents: false
+        drag.target: root
+        drag.axis: Drag.XAndYAxis
+        drag.threshold: 1
+        drag.minimumX: root.boundToParent && parent ? 0 : -100000
+        drag.maximumX: root.boundToParent && parent ? Math.max(0, parent.width - root.width) : 100000
+        drag.minimumY: root.boundToParent && parent ? 0 : -100000
+        drag.maximumY: root.boundToParent && parent ? Math.max(0, parent.height - root.height) : 100000
 
-        onActiveChanged: {
-            root._pressScale = active ? 1.035 : 1
-            if (!active) {
-                root._specNX = 0.28
-                root._specNY = 0.22
-            }
+        onPressed: root._pressScale = 1.04
+        onReleased: {
+            root._pressScale = 1
+            root._specNX = 0.30
+            root._specNY = 0.22
         }
-
-        onCentroidChanged: {
-            if (!active || root.width <= 0 || root.height <= 0)
+        onCanceled: {
+            root._pressScale = 1
+            root._specNX = 0.30
+            root._specNY = 0.22
+        }
+        onPositionChanged: {
+            if (!pressed)
                 return
-            const lx = centroid.position.x / Math.max(1, root.width)
-            const ly = centroid.position.y / Math.max(1, root.height)
-            root._specNX = Math.max(0.12, Math.min(0.88, lx))
-            root._specNY = Math.max(0.1, Math.min(0.75, ly))
+            root._specNX = Math.max(0.12, Math.min(0.88, mouseX / Math.max(1, width)))
+            root._specNY = Math.max(0.1, Math.min(0.75, mouseY / Math.max(1, height)))
         }
-    }
-
-    HoverHandler {
-        enabled: root.draggable
-        cursorShape: drag.active ? Qt.ClosedHandCursor : Qt.OpenHandCursor
     }
 }

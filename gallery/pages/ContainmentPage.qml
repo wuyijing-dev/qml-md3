@@ -12,6 +12,7 @@ Item {
         contentHeight: column.height
         clip: true
         interactive: !liquidCard.dragging
+        boundsBehavior: Flickable.StopAtBounds
         ColumnLayout {
             id: column
             width: root.width
@@ -50,7 +51,7 @@ Item {
             }
             Text {
                 Layout.fillWidth: true
-                text: qsTr("Drag the glass card — backdrop blur, edge highlight, and specular follow the pointer.")
+                text: qsTr("Drag the card. Sliders tune refraction / frost / tint (iOS-style liquid glass layers).")
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: Md3Theme.typography.bodySmall.size
                 wrapMode: Text.Wrap
@@ -58,7 +59,7 @@ Item {
             Item {
                 id: glassPlayground
                 Layout.fillWidth: true
-                Layout.preferredHeight: 320
+                Layout.preferredHeight: 340
                 clip: true
 
                 Rectangle {
@@ -67,43 +68,62 @@ Item {
                     radius: Md3Theme.shape.large
                     gradient: Gradient {
                         orientation: Gradient.Horizontal
-                        GradientStop { position: 0.0; color: "#5B8DEF" }
-                        GradientStop { position: 0.35; color: "#C084FC" }
-                        GradientStop { position: 0.65; color: "#FB7185" }
-                        GradientStop { position: 1.0; color: "#FBBF24" }
+                        GradientStop { position: 0.0; color: "#3B82F6" }
+                        GradientStop { position: 0.3; color: "#A855F7" }
+                        GradientStop { position: 0.6; color: "#F43F5E" }
+                        GradientStop { position: 1.0; color: "#F59E0B" }
                     }
 
-                    // Decorative shapes so refraction/blur reads clearly while dragging.
                     Repeater {
-                        model: 8
-                        delegate: Rectangle {
-                            required property int index
-                            width: 70 + (index % 3) * 28
-                            height: width
-                            radius: width / 2
-                            x: 24 + (index * 97) % Math.max(40, glassBackdrop.width - 100)
-                            y: 20 + (index * 53) % Math.max(40, glassBackdrop.height - 100)
-                            color: Qt.rgba(1, 1, 1, 0.18 + (index % 4) * 0.05)
+                        model: [
+                            { t: "Aa", x: 0.08, y: 0.18, s: 42 },
+                            { t: "MD3", x: 0.42, y: 0.12, s: 36 },
+                            { t: "液态", x: 0.70, y: 0.28, s: 34 },
+                            { t: "Glass", x: 0.18, y: 0.58, s: 40 },
+                            { t: "2026", x: 0.55, y: 0.62, s: 38 }
+                        ]
+                        delegate: Text {
+                            required property var modelData
+                            x: modelData.x * glassBackdrop.width
+                            y: modelData.y * glassBackdrop.height
+                            text: modelData.t
+                            color: Qt.rgba(1, 1, 1, 0.92)
+                            font.pixelSize: modelData.s
+                            font.bold: true
                         }
                     }
 
-                    Text {
-                        anchors.left: parent.left
-                        anchors.bottom: parent.bottom
-                        anchors.margins: 16
-                        text: qsTr("Backdrop")
-                        color: Qt.rgba(1, 1, 1, 0.7)
-                        font.pixelSize: Md3Theme.typography.labelLarge.size
+                    Repeater {
+                        model: 6
+                        delegate: Rectangle {
+                            required property int index
+                            width: 56 + (index % 3) * 24
+                            height: width
+                            radius: width / 2
+                            x: 30 + (index * 110) % Math.max(40, glassBackdrop.width - 90)
+                            y: 30 + (index * 61) % Math.max(40, glassBackdrop.height - 90)
+                            color: Qt.rgba(1, 1, 1, 0.16 + (index % 3) * 0.06)
+                            border.width: 2
+                            border.color: Qt.rgba(1, 1, 1, 0.35)
+                        }
                     }
                 }
 
                 Md3LiquidGlass {
                     id: liquidCard
                     sourceItem: glassBackdrop
-                    x: 36
-                    y: 56
-                    width: 260
-                    height: 150
+                    x: 40
+                    y: 70
+                    width: 270
+                    height: 158
+                    radius: radiusSlider.value
+                    blurAmount: blurSlider.value
+                    tintOpacity: tintSlider.value
+                    refraction: refractionSlider.value
+                    chromaticAberration: chromaSlider.value
+                    specularStrength: specularSlider.value
+                    edgeStrength: edgeSlider.value
+                    elevation: elevSlider.value
 
                     Column {
                         anchors.verticalCenter: parent.verticalCenter
@@ -111,22 +131,97 @@ Item {
                         spacing: 6
                         Text {
                             text: qsTr("Liquid Glass")
-                            color: Md3Theme.colorScheme.colorOnSurface
+                            color: "#FFFFFF"
+                            style: Text.Outline
+                            styleColor: Qt.rgba(0, 0, 0, 0.25)
                             font.family: Md3Theme.typography.fontFamily
                             font.pixelSize: Md3Theme.typography.titleMedium.size
-                            font.weight: Font.Medium
+                            font.weight: Font.DemiBold
                         }
                         Text {
                             width: parent.width
                             wrapMode: Text.Wrap
-                            text: qsTr("Drag me across the colors")
-                            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                            text: qsTr("Drag me — watch the lens bend")
+                            color: Qt.rgba(1, 1, 1, 0.88)
                             font.family: Md3Theme.typography.fontFamily
                             font.pixelSize: Md3Theme.typography.bodyMedium.size
                         }
                     }
                 }
             }
+
+            component GlassParamRow: ColumnLayout {
+                property alias label: lab.text
+                property alias from: slider.from
+                property alias to: slider.to
+                property alias value: slider.value
+                property alias slider: slider
+                Layout.fillWidth: true
+                spacing: 0
+                RowLayout {
+                    Layout.fillWidth: true
+                    Text {
+                        id: lab
+                        Layout.fillWidth: true
+                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                        font.pixelSize: Md3Theme.typography.labelLarge.size
+                    }
+                    Text {
+                        text: slider.value.toFixed(2)
+                        color: Md3Theme.colorScheme.colorOnSurface
+                        font.pixelSize: Md3Theme.typography.labelLarge.size
+                    }
+                }
+                Md3Slider {
+                    id: slider
+                    Layout.fillWidth: true
+                    from: 0
+                    to: 1
+                    value: 0.5
+                }
+            }
+
+            GlassParamRow {
+                id: refractionSlider
+                label: qsTr("Refraction (lens bend)")
+                from: 0; to: 2.2; value: 1.15
+            }
+            GlassParamRow {
+                id: chromaSlider
+                label: qsTr("Chromatic aberration")
+                from: 0; to: 1; value: 0.45
+            }
+            GlassParamRow {
+                id: blurSlider
+                label: qsTr("Frost / blur")
+                from: 0; to: 1; value: 0.28
+            }
+            GlassParamRow {
+                id: tintSlider
+                label: qsTr("Tint opacity")
+                from: 0; to: 0.55; value: 0.10
+            }
+            GlassParamRow {
+                id: specularSlider
+                label: qsTr("Specular")
+                from: 0; to: 1; value: 0.72
+            }
+            GlassParamRow {
+                id: edgeSlider
+                label: qsTr("Edge / rim")
+                from: 0; to: 1; value: 0.85
+            }
+            GlassParamRow {
+                id: radiusSlider
+                label: qsTr("Corner radius")
+                from: 8; to: 48; value: 28
+            }
+            GlassParamRow {
+                id: elevSlider
+                label: qsTr("Elevation")
+                from: 0; to: 5; value: 2
+            }
+
             Column {
                 Layout.fillWidth: true
                 width: root.width
