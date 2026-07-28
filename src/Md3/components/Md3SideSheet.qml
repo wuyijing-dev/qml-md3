@@ -89,11 +89,12 @@ Item {
         topRightRadius: root.fromEnd ? 0 : Md3Theme.shape.large
         bottomRightRadius: root.fromEnd ? 0 : Md3Theme.shape.large
 
+        // Resize the owner window changes `sheet.x` (because `sheet.x` depends on `parent.width`).
+        // We only want to animate when `open` toggles; resize should update x instantly.
         Behavior on x {
+            enabled: root._transitioning
             NumberAnimation {
                 id: sheetSlide
-                // Only animate while open/close transition is active.
-                enabled: root._transitioning
                 duration: Md3Motion.spatialDuration
                 easing.type: Easing.BezierSpline
                 easing.bezierCurve: Md3Motion.emphasized
