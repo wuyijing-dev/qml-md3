@@ -13,7 +13,7 @@ Item {
         contentWidth: width
         contentHeight: column.height
         clip: true
-        interactive: !liquidCard.dragging
+        interactive: glassPlayground.dragCount === 0
         boundsBehavior: Flickable.StopAtBounds
         ColumnLayout {
             id: column
@@ -53,7 +53,7 @@ Item {
             }
             Text {
                 Layout.fillWidth: true
-                text: qsTr("Drag the card. Switch image/video behind it — media scales to fill the panel so the whole frame is visible.")
+                text: qsTr("Drag the cards. Add more blocks, switch image/video behind them.")
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: Md3Theme.typography.bodySmall.size
                 wrapMode: Text.Wrap
@@ -89,17 +89,71 @@ Item {
                 }
                 Md3Button {
                     text: qsTr("Video…")
+                    variant: Md3Button.Outlined
                     onClicked: backdropVideoDialog.open()
                 }
                 Item { Layout.fillWidth: true }
+                Md3Button {
+                    text: qsTr("Add block")
+                    onClicked: glassPlayground.addBlock()
+                }
+                Md3Button {
+                    text: qsTr("Remove")
+                    variant: Md3Button.Outlined
+                    enabled: glassBlocks.count > 0
+                    onClicked: glassPlayground.removeBlock()
+                }
+                Text {
+                    text: qsTr("%1").arg(glassBlocks.count)
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                }
             }
 
             Item {
                 id: glassPlayground
                 Layout.fillWidth: true
-                // Grow/shrink with media aspect so the whole frame fits without cropping.
                 Layout.preferredHeight: glassBackdrop.fittedHeight
                 clip: true
+
+                property int dragCount: 0
+                property int _seed: 0
+
+                ListModel {
+                    id: glassBlocks
+                }
+
+                function addBlock() {
+                    const i = glassBlocks.count
+                    const sizes = [
+                        { w: 240, h: 140 },
+                        { w: 180, h: 100 },
+                        { w: 200, h: 160 },
+                        { w: 160, h: 160 },
+                        { w: 280, h: 120 }
+                    ]
+                    const s = sizes[i % sizes.length]
+                    const maxX = Math.max(8, width - s.w - 8)
+                    const maxY = Math.max(8, height - s.h - 8)
+                    glassBlocks.append({
+                        "bx": 24 + (i * 36) % Math.max(24, maxX),
+                        "by": 36 + (i * 44) % Math.max(24, maxY),
+                        "bw": s.w,
+                        "bh": s.h,
+                        "label": qsTr("Glass %1").arg(i + 1)
+                    })
+                    _seed++
+                }
+
+                function removeBlock() {
+                    if (glassBlocks.count > 0)
+                        glassBlocks.remove(glassBlocks.count - 1)
+                }
+
+                Component.onCompleted: Qt.callLater(function () {
+                    if (glassBlocks.count === 0)
+                        addBlock()
+                })
 
                 Item {
                     id: glassBackdrop
@@ -107,7 +161,6 @@ Item {
 
                     property url backgroundImage: ""
                     property url backgroundVideo: ""
-                    /// width / height of current media (or 16:9 for gradient).
                     property real contentAspect: 16 / 9
                     readonly property bool hasImage: backgroundImage.toString().length > 0
                     readonly property bool hasVideo: backgroundVideo.toString().length > 0
@@ -169,7 +222,6 @@ Item {
                         anchors.fill: parent
                         visible: glassBackdrop.hasImage
                         source: glassBackdrop.backgroundImage
-                        // Stretch to panel size — entire image is shown.
                         fillMode: Image.Stretch
                         asynchronous: true
                         cache: true
@@ -198,7 +250,6 @@ Item {
                         id: backdropVideoOut
                         anchors.fill: parent
                         visible: glassBackdrop.hasVideo
-                        // Stretch to panel — whole frame visible, matched to backdrop size.
                         fillMode: VideoOutput.Stretch
                     }
 
@@ -246,44 +297,64 @@ Item {
                     }
                 }
 
-                Md3LiquidGlass {
-                    id: liquidCard
-                    sourceItem: glassBackdrop
-                    x: 40
-                    y: 70
-                    width: Math.min(270, parent.width - 48)
-                    height: 158
-                    radius: radiusSlider.value
-                    blurAmount: blurSlider.value
-                    tintOpacity: tintSlider.value
-                    refraction: refractionSlider.value
-                    chromaticAberration: chromaSlider.value
-                    edgeStrength: edgeSlider.value
-                    elevation: elevSlider.value
-                    adaptiveTint: adaptiveSlider.value
-                    liquidDeform: deformSlider.value
-                    squircleN: squircleSlider.value
+                Repeater {
+                    model: glassBlocks
+                    delegate: Md3LiquidGlass {
+                        id: glassBlock
+                        required property int index
+                        required property real bx
+                        required property real by
+                        required property real bw
+                        required property real bh
+                        required property string label
 
-                    Column {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width
-                        spacing: 6
-                        Text {
-                            text: qsTr("Liquid Glass")
-                            color: "#FFFFFF"
-                            style: Text.Outline
-                            styleColor: Qt.rgba(0, 0, 0, 0.25)
-                            font.family: Md3Theme.typography.fontFamily
-                            font.pixelSize: Md3Theme.typography.titleMedium.size
-                            font.weight: Font.DemiBold
+                        sourceItem: glassBackdrop
+                        width: bw
+                        height: bh
+                        radius: radiusSlider.value
+                        blurAmount: blurSlider.value
+                        tintOpacity: tintSlider.value
+                        refraction: refractionSlider.value
+                        chromaticAberration: chromaSlider.value
+                        edgeStrength: edgeSlider.value
+                        elevation: elevSlider.value
+                        adaptiveTint: adaptiveSlider.value
+                        liquidDeform: deformSlider.value
+                        squircleN: squircleSlider.value
+
+                        Component.onCompleted: {
+                            x = bx
+                            y = by
                         }
-                        Text {
+
+                        onDraggingChanged: {
+                            if (dragging)
+                                glassPlayground.dragCount++
+                            else
+                                glassPlayground.dragCount = Math.max(0, glassPlayground.dragCount - 1)
+                        }
+
+                        Column {
+                            anchors.verticalCenter: parent.verticalCenter
                             width: parent.width
-                            wrapMode: Text.Wrap
-                            text: qsTr("Drag me — watch the lens bend")
-                            color: Qt.rgba(1, 1, 1, 0.88)
-                            font.family: Md3Theme.typography.fontFamily
-                            font.pixelSize: Md3Theme.typography.bodyMedium.size
+                            spacing: 4
+                            Text {
+                                text: glassBlock.label
+                                color: "#FFFFFF"
+                                style: Text.Outline
+                                styleColor: Qt.rgba(0, 0, 0, 0.25)
+                                font.family: Md3Theme.typography.fontFamily
+                                font.pixelSize: Md3Theme.typography.titleMedium.size
+                                font.weight: Font.DemiBold
+                            }
+                            Text {
+                                width: parent.width
+                                wrapMode: Text.Wrap
+                                text: qsTr("Drag me")
+                                color: Qt.rgba(1, 1, 1, 0.88)
+                                font.family: Md3Theme.typography.fontFamily
+                                font.pixelSize: Md3Theme.typography.bodyMedium.size
+                            }
                         }
                     }
                 }
