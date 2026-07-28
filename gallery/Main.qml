@@ -30,9 +30,9 @@ Md3ApplicationWindow {
     documentTabsEnabled: true
     documentTabsTearOff: false
 
-    // Library performance overlay — title-bar speed button; open by default in gallery
+    // Library performance overlay — title-bar speed button; off by default (saves sampling RSS)
     showPerformanceButton: true
-    showPerformanceOverlay: true
+    showPerformanceOverlay: false
     showAboutButton: true
     aboutVersion: "0.1.0"
     aboutOrganization: "Md3"

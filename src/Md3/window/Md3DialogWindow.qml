@@ -401,7 +401,7 @@ Window {
             id: chromeMask
             width: chrome.width
             height: chrome.height
-            layer.enabled: true
+            layer.enabled: chrome.layer.enabled
             visible: false
             Rectangle {
                 anchors.fill: parent

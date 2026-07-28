@@ -17,6 +17,13 @@ Item {
     property real originX: width / 2
     property real originY: height / 2
 
+    /// Keep offscreen FBOs only while ink is visible / animating.
+    property bool _layersArmed: false
+    readonly property bool layersNeeded: _layersArmed
+            || ripple.running
+            || interruptFade.running
+            || circle.opacity > 0.01
+
     readonly property real resolvedClipRadius: {
         if (clipRadius >= 0)
             return clipRadius
@@ -28,6 +35,7 @@ Item {
     function pulse(x, y) {
         originX = x
         originY = y
+        _layersArmed = true
         // Interrupt in-flight ink: fade from current opacity, then expand again.
         if (ripple.running || interruptFade.running) {
             ripple.stop()
@@ -40,11 +48,17 @@ Item {
         ripple.start()
     }
 
+    function _releaseLayers() {
+        circle.width = 0
+        circle.opacity = 0
+        _layersArmed = false
+    }
+
     // Clip expanding ink to rounded container (Qt clip is rectangular only).
     Item {
         id: inkHost
         anchors.fill: parent
-        layer.enabled: true
+        layer.enabled: root.layersNeeded
         layer.smooth: true
         layer.effect: MultiEffect {
             maskEnabled: true
@@ -92,7 +106,7 @@ Item {
                     easing.type: Easing.BezierSpline
                     easing.bezierCurve: Md3Motion.standard
                 }
-                ScriptAction { script: circle.width = 0 }
+                ScriptAction { script: root._releaseLayers() }
             }
 
             SequentialAnimation {
@@ -121,7 +135,7 @@ Item {
         id: maskItem
         width: root.width
         height: root.height
-        layer.enabled: true
+        layer.enabled: root.layersNeeded
         layer.smooth: true
         visible: false
         Rectangle {

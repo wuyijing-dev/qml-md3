@@ -1333,7 +1333,7 @@ Window {
                 width: chrome.width
                 height: chrome.height
                 visible: false
-                layer.enabled: true
+                layer.enabled: themeRevealLayer.visible || root.themeRevealBusy
                 layer.smooth: true
                 Rectangle {
                     width: Math.max(0.01, root.themeRevealRadius * 2)
@@ -1378,7 +1378,8 @@ Window {
             id: chromeMask
             width: chrome.width
             height: chrome.height
-            layer.enabled: true
+            // Match chrome offscreen layer — no full-window mask FBO when radius is 0.
+            layer.enabled: chrome.layer.enabled
             visible: false
             Rectangle {
                 anchors.fill: parent

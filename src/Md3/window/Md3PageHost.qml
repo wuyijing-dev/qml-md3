@@ -1623,7 +1623,8 @@ Item {
                 id: morphMaskHost
                 width: pageSlot.width
                 height: pageSlot.height
-                layer.enabled: true
+                // Full-size FBO only during launch morph (N destinations × always-on was costly).
+                layer.enabled: pageSlot.launchClipActive
                 visible: false
 
                 Rectangle {

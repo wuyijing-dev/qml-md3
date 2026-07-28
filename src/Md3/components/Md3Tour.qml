@@ -209,7 +209,7 @@ Item {
             anchors.fill: parent
             color: Qt.rgba(0, 0, 0, 0.58)
             visible: false
-            layer.enabled: true
+            layer.enabled: root.active
             layer.smooth: true
         }
 
@@ -218,7 +218,7 @@ Item {
             id: holeMask
             anchors.fill: parent
             visible: false
-            layer.enabled: true
+            layer.enabled: root.active
             layer.smooth: true
 
             Rectangle {
