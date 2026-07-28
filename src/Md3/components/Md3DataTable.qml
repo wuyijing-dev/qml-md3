@@ -676,6 +676,7 @@ Item {
                                 Repeater {
                                     model: root.loading ? 0 : root.pageEntries
                                     delegate: Item {
+                                        id: frozenRowItem
                                         required property int index
                                         required property var modelData
                                         width: frozenRows.width
@@ -689,9 +690,9 @@ Item {
                                                 height: parent.height
                                                 Md3Checkbox {
                                                     anchors.centerIn: parent
-                                                    checked: root._isSelected(modelData.sourceIndex)
+                                                    checked: root._isSelected(frozenRowItem.modelData.sourceIndex)
                                                     onToggled: function (state) {
-                                                        root._setSelected(modelData.sourceIndex, state === Qt.Checked)
+                                                        root._setSelected(frozenRowItem.modelData.sourceIndex, state === Qt.Checked)
                                                     }
                                                 }
                                             }
@@ -701,10 +702,10 @@ Item {
                                                     required property int index
                                                     width: root.effectiveWidths[index] || 120
                                                     height: parent.height
-                                                    rowData: modelData.row
+                                                    rowData: frozenRowItem.modelData.row
                                                     columnDef: root.columns[index]
                                                     columnIndex: index
-                                                    sourceIndex: modelData.sourceIndex
+                                                    sourceIndex: frozenRowItem.modelData.sourceIndex
                                                 }
                                             }
                                         }
@@ -803,6 +804,7 @@ Item {
                                     Repeater {
                                         model: root.loading ? 0 : root.pageEntries
                                         delegate: Item {
+                                            id: scrollRowItem
                                             required property int index
                                             required property var modelData
                                             width: rowsCol.width
@@ -822,10 +824,10 @@ Item {
                                                         required property var modelData
                                                         width: root.effectiveWidths[modelData] || 120
                                                         height: parent.height
-                                                        rowData: parent.parent.modelData.row
+                                                        rowData: scrollRowItem.modelData.row
                                                         columnDef: root.columns[modelData]
                                                         columnIndex: modelData
-                                                        sourceIndex: parent.parent.modelData.sourceIndex
+                                                        sourceIndex: scrollRowItem.modelData.sourceIndex
                                                     }
                                                 }
                                                 Item {
@@ -836,7 +838,7 @@ Item {
                                                         id: scrollMoreBtn
                                                         anchors.centerIn: parent
                                                         icon: "more_vert"
-                                                        onClicked: root.openRowMenu(parent.parent.modelData.sourceIndex, scrollMoreBtn)
+                                                        onClicked: root.openRowMenu(scrollRowItem.modelData.sourceIndex, scrollMoreBtn)
                                                     }
                                                 }
                                             }
@@ -845,14 +847,14 @@ Item {
                                                 anchors.rightMargin: root.actionsColWidth
                                                 z: -1
                                                 onClicked: {
-                                                    root.focusedPageRow = index
-                                                    root.selectedRow = modelData.sourceIndex
-                                                    root.rowClicked(modelData.sourceIndex)
+                                                    root.focusedPageRow = scrollRowItem.index
+                                                    root.selectedRow = scrollRowItem.modelData.sourceIndex
+                                                    root.rowClicked(scrollRowItem.modelData.sourceIndex)
                                                     tableFocus.forceActiveFocus()
                                                 }
                                                 onDoubleClicked: {
-                                                    root.rowDoubleClicked(modelData.sourceIndex)
-                                                    root.rowActivated(modelData.sourceIndex)
+                                                    root.rowDoubleClicked(scrollRowItem.modelData.sourceIndex)
+                                                    root.rowActivated(scrollRowItem.modelData.sourceIndex)
                                                 }
                                             }
                                             Rectangle {
