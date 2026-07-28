@@ -17,9 +17,11 @@ Item {
     readonly property real contentImplicitHeight: contentHost.implicitHeight
 
     implicitWidth: Math.max(1, contentImplicitWidth + padding * 2)
+    // Keep Scroll mode intrinsic height constant to avoid
+    // parent-height <-> implicitHeight feedback loops.
     implicitHeight: layoutMode === Md3ContainerBody.Fit
                     ? contentImplicitHeight + padding * 2
-                    : (height > 0 ? height : 320)
+                    : 320
 
     Flickable {
         id: flick
