@@ -150,5 +150,30 @@ Flickable {
                 { label: "Taipei", value: "Taipei" }
             ]
         }
+
+        Text {
+            text: qsTr("Key sequence")
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.labelLarge.size
+        }
+        Md3KeySequenceField {
+            Layout.fillWidth: true
+            Layout.maximumWidth: 360
+            label: qsTr("Command palette")
+            placeholderText: qsTr("Press shortcut")
+            supportingText: qsTr("Esc/Backspace clears. Function keys can be used alone.")
+            reservedShortcuts: ["Ctrl+K", "Ctrl+P", "Shift+Enter"]
+            sequence: "Ctrl+K"
+        }
+        Md3KeySequenceField {
+            Layout.fillWidth: true
+            Layout.maximumWidth: 360
+            label: qsTr("Refresh project")
+            supportingText: qsTr("Requires modifier or F-key.")
+            allowSingleKeyFunctionKeys: true
+            allowSingleKeyNavigation: false
+            allowSingleKeyLetters: false
+            sequence: "F5"
+        }
     }
 }

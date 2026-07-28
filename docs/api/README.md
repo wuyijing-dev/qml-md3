@@ -15,7 +15,7 @@
 - [Md3AppSettings](Md3AppSettings.md) — QSettings facade
 - [Md3HotReload](Md3HotReload.md) — QML hot reload watcher
 
-**QML types:** 113
+**QML types:** 114
 
 ## Actions & selection
 
@@ -51,6 +51,7 @@
 ## Components
 
 - [Md3DeferredSection](Md3DeferredSection.md) — Within-page progressive load: placeholder first, then create `sourceComponent`. Honors Md3Theme.progressiveContent (default on). Set forceImmediate to always load now.
+- [Md3KeySequenceField](Md3KeySequenceField.md) — Desktop shortcut capture field: captures a single chord like Ctrl+K / Shift+Enter.
 - [Md3LiquidGlass](Md3LiquidGlass.md) — Draggable Liquid Glass — regional backdrop sample (not full-scene blur).
 - [Md3NumberField](Md3NumberField.md) — Numeric spin field: TextField chrome + step buttons (form-friendly SpinBox).
 - [Md3Pagination](Md3Pagination.md) — Compact pagination bar for tables / lists.

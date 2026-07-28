@@ -244,6 +244,7 @@ qt_add_qml_module(Md3
         components/Md3StatusBar.qml
         components/Md3TreeView.qml
         components/Md3PathField.qml
+        components/Md3KeySequenceField.qml
         components/Md3Pagination.qml
         components/Md3Stepper.qml
         components/Md3Banner.qml
