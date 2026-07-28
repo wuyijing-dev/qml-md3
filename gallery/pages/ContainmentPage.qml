@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Window
 import QtQuick.Dialogs
+import QtMultimedia
 import Md3
 
 Item {
@@ -52,7 +53,7 @@ Item {
             }
             Text {
                 Layout.fillWidth: true
-                text: qsTr("Drag the card. Switch the backdrop image below — glass samples whatever is behind it.")
+                text: qsTr("Drag the card. Switch image/video behind it — media scales to fill the panel so the whole frame is visible.")
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: Md3Theme.typography.bodySmall.size
                 wrapMode: Text.Wrap
@@ -64,26 +65,31 @@ Item {
                 Md3Button {
                     text: qsTr("Gradient")
                     variant: Md3Button.Outlined
-                    onClicked: glassBackdrop.backgroundImage = ""
+                    onClicked: glassBackdrop.clearBackdrop()
                 }
                 Md3Button {
                     text: qsTr("Photo A")
                     variant: Md3Button.Outlined
-                    onClicked: glassBackdrop.backgroundImage = "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200&q=80"
+                    onClicked: glassBackdrop.setImage("https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200&q=80")
                 }
                 Md3Button {
                     text: qsTr("Photo B")
                     variant: Md3Button.Outlined
-                    onClicked: glassBackdrop.backgroundImage = "https://images.unsplash.com/photo-1557683316-973635b79489?w=1200&q=80"
+                    onClicked: glassBackdrop.setImage("https://images.unsplash.com/photo-1557683316-973635b79489?w=1200&q=80")
                 }
                 Md3Button {
-                    text: qsTr("Photo C")
+                    text: qsTr("Sample video")
                     variant: Md3Button.Outlined
-                    onClicked: glassBackdrop.backgroundImage = "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=1200&q=80"
+                    onClicked: glassBackdrop.setVideo("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4")
                 }
                 Md3Button {
-                    text: qsTr("Browse…")
-                    onClicked: backdropFileDialog.open()
+                    text: qsTr("Image…")
+                    variant: Md3Button.Outlined
+                    onClicked: backdropImageDialog.open()
+                }
+                Md3Button {
+                    text: qsTr("Video…")
+                    onClicked: backdropVideoDialog.open()
                 }
                 Item { Layout.fillWidth: true }
             }
@@ -91,22 +97,64 @@ Item {
             Item {
                 id: glassPlayground
                 Layout.fillWidth: true
-                Layout.preferredHeight: 340
+                // Grow/shrink with media aspect so the whole frame fits without cropping.
+                Layout.preferredHeight: glassBackdrop.fittedHeight
                 clip: true
 
                 Item {
                     id: glassBackdrop
                     anchors.fill: parent
-                    /// Empty = gradient demo; set a url/file path to use a photo.
+
                     property url backgroundImage: ""
+                    property url backgroundVideo: ""
+                    /// width / height of current media (or 16:9 for gradient).
+                    property real contentAspect: 16 / 9
+                    readonly property bool hasImage: backgroundImage.toString().length > 0
+                    readonly property bool hasVideo: backgroundVideo.toString().length > 0
+                    readonly property bool hasMedia: hasImage || hasVideo
+                    readonly property int fittedHeight: {
+                        const w = glassPlayground.width > 1 ? glassPlayground.width : 640
+                        const h = Math.round(w / Math.max(0.4, contentAspect))
+                        return Math.min(560, Math.max(220, h))
+                    }
+
+                    function clearBackdrop() {
+                        backgroundImage = ""
+                        backgroundVideo = ""
+                        contentAspect = 16 / 9
+                        backdropPlayer.stop()
+                        backdropPlayer.source = ""
+                    }
+                    function setImage(url) {
+                        backgroundVideo = ""
+                        backdropPlayer.stop()
+                        backdropPlayer.source = ""
+                        backgroundImage = url
+                    }
+                    function setVideo(url) {
+                        backgroundImage = ""
+                        backgroundVideo = url
+                        backdropPlayer.source = url
+                        backdropPlayer.play()
+                    }
+                    function _applySize(w, h) {
+                        if (w > 0 && h > 0)
+                            contentAspect = w / h
+                    }
 
                     layer.enabled: true
                     layer.smooth: true
 
                     Rectangle {
                         anchors.fill: parent
+                        color: "#111827"
                         radius: Md3Theme.shape.large
-                        visible: glassBackdrop.backgroundImage.toString().length === 0
+                    }
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: Md3Theme.shape.large
+                        visible: !glassBackdrop.hasMedia
                         gradient: Gradient {
                             orientation: Gradient.Horizontal
                             GradientStop { position: 0.0; color: "#3B82F6" }
@@ -117,26 +165,54 @@ Item {
                     }
 
                     Image {
+                        id: backdropImageItem
                         anchors.fill: parent
-                        visible: glassBackdrop.backgroundImage.toString().length > 0
+                        visible: glassBackdrop.hasImage
                         source: glassBackdrop.backgroundImage
-                        fillMode: Image.PreserveAspectCrop
+                        // Stretch to panel size — entire image is shown.
+                        fillMode: Image.Stretch
                         asynchronous: true
                         cache: true
+                        onStatusChanged: {
+                            if (status === Image.Ready && sourceSize.width > 0 && sourceSize.height > 0)
+                                glassBackdrop._applySize(sourceSize.width, sourceSize.height)
+                        }
                     }
 
-                    // Soft scrim so overlay labels stay readable on photos.
+                    MediaPlayer {
+                        id: backdropPlayer
+                        videoOutput: backdropVideoOut
+                        audioOutput: AudioOutput { muted: true }
+                        loops: MediaPlayer.Infinite
+                        onMetaDataChanged: {
+                            const res = metaData.value(MediaMetaData.Resolution)
+                            if (res && res.width > 0 && res.height > 0)
+                                glassBackdrop._applySize(res.width, res.height)
+                        }
+                        onErrorOccurred: function(err, msg) {
+                            console.warn("LiquidGlass backdrop video:", err, msg)
+                        }
+                    }
+
+                    VideoOutput {
+                        id: backdropVideoOut
+                        anchors.fill: parent
+                        visible: glassBackdrop.hasVideo
+                        // Stretch to panel — whole frame visible, matched to backdrop size.
+                        fillMode: VideoOutput.Stretch
+                    }
+
                     Rectangle {
                         anchors.fill: parent
-                        visible: glassBackdrop.backgroundImage.toString().length > 0
+                        visible: glassBackdrop.hasMedia
                         gradient: Gradient {
-                            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.15) }
-                            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.35) }
+                            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.12) }
+                            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.28) }
                         }
                     }
 
                     Repeater {
-                        model: glassBackdrop.backgroundImage.toString().length === 0 ? [
+                        model: !glassBackdrop.hasMedia ? [
                             { t: "Aa", x: 0.08, y: 0.18, s: 42 },
                             { t: "MD3", x: 0.42, y: 0.12, s: 36 },
                             { t: "液态", x: 0.70, y: 0.28, s: 34 },
@@ -155,7 +231,7 @@ Item {
                     }
 
                     Repeater {
-                        model: glassBackdrop.backgroundImage.toString().length === 0 ? 6 : 0
+                        model: !glassBackdrop.hasMedia ? 6 : 0
                         delegate: Rectangle {
                             required property int index
                             width: 56 + (index % 3) * 24
@@ -175,7 +251,7 @@ Item {
                     sourceItem: glassBackdrop
                     x: 40
                     y: 70
-                    width: 270
+                    width: Math.min(270, parent.width - 48)
                     height: 158
                     radius: radiusSlider.value
                     blurAmount: blurSlider.value
@@ -211,10 +287,19 @@ Item {
             }
 
             FileDialog {
-                id: backdropFileDialog
+                id: backdropImageDialog
                 title: qsTr("Choose backdrop image")
-                nameFilters: [ qsTr("Images (*.png *.jpg *.jpeg *.bmp *.webp)"), qsTr("All files (*)") ]
-                onAccepted: glassBackdrop.backgroundImage = selectedFile
+                nameFilters: [ qsTr("Images (*.png *.jpg *.jpeg *.bmp *.webp *.gif)"), qsTr("All files (*)") ]
+                onAccepted: glassBackdrop.setImage(selectedFile)
+            }
+            FileDialog {
+                id: backdropVideoDialog
+                title: qsTr("Choose backdrop video")
+                nameFilters: [
+                    qsTr("Videos (*.mp4 *.webm *.mkv *.mov *.avi *.wmv)"),
+                    qsTr("All files (*)")
+                ]
+                onAccepted: glassBackdrop.setVideo(selectedFile)
             }
 
             component GlassParamRow: ColumnLayout {

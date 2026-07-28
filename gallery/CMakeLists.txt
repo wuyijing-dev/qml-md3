@@ -4,7 +4,7 @@ if (NOT TARGET Md3)
     message(FATAL_ERROR "Gallery requires Md3 library target — add_subdirectory(src/Md3) first")
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 QuickEffects)
+find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 QuickEffects Multimedia)
 if (UNIX AND NOT APPLE)
     # PerformanceMonitor / Linux chrome helpers need Widgets + DBus
     find_package(Qt6 REQUIRED COMPONENTS Widgets DBus)
@@ -98,7 +98,7 @@ target_include_directories(appQML_MD3 PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${MD3_ROOT}/src/Md3/window
 )
-target_link_libraries(appQML_MD3 PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::QuickEffects Md3)
+target_link_libraries(appQML_MD3 PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::QuickEffects Qt6::Multimedia Md3)
 # Static QML module registration
 if (TARGET Md3plugin)
     target_link_libraries(appQML_MD3 PRIVATE Md3plugin)
