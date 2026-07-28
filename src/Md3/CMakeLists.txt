@@ -174,6 +174,11 @@ qt_add_qml_module(Md3
         window/Md3ApplicationWindow.qml
         window/Md3DialogWindow.qml
         layout/Md3AnimatedFlow.qml
+        layout/Md3VStack.qml
+        layout/Md3HStack.qml
+        layout/Md3FlowLayout.qml
+        layout/Md3GridLayout.qml
+        layout/Md3Spacer.qml
         components/Md3Button.qml
         components/Md3IconButton.qml
         components/Md3ToggleIconButton.qml

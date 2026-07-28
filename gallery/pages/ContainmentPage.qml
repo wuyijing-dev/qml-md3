@@ -31,6 +31,57 @@ Item {
                 tone: Md3Text.OnSurfaceVariant
                 wrapMode: Text.WordWrap
             }
+            Md3Card {
+                Layout.fillWidth: true
+                variant: Md3Card.Outlined
+                Md3VStack {
+                    width: parent.width
+                    padding: 16
+                    spacing: 12
+                    Md3Text {
+                        text: qsTr("布局组件（VStack / HStack / Flow / Grid）")
+                        role: Md3Text.TitleMedium
+                    }
+                    Md3HStack {
+                        spacing: 8
+                        Md3Button { text: qsTr("确认") }
+                        Md3Button { text: qsTr("取消"); variant: Md3Button.Outlined }
+                        Md3Spacer { spacerWidth: 8 }
+                        Md3Text {
+                            text: qsTr("HStack")
+                            tone: Md3Text.OnSurfaceVariant
+                        }
+                    }
+                    Md3FlowLayout {
+                        width: parent.width
+                        spacing: 8
+                        rowSpacing: 8
+                        Repeater {
+                            model: 6
+                            delegate: Md3SuggestionChip {
+                                text: qsTr("Flow %1").arg(index + 1)
+                            }
+                        }
+                    }
+                    Md3GridLayout {
+                        width: parent.width
+                        minCellWidth: 140
+                        spacing: 8
+                        rowSpacing: 8
+                        Repeater {
+                            model: 4
+                            delegate: Md3Card {
+                                implicitHeight: 72
+                                variant: Md3Card.Filled
+                                Md3Text {
+                                    anchors.centerIn: parent
+                                    text: qsTr("Grid %1").arg(index + 1)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             RowLayout {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 240
@@ -82,24 +133,26 @@ Item {
                     }
                 }
             }
-            RowLayout {
+            Md3AnimatedFlow {
+                Layout.fillWidth: true
                 spacing: 12
+                rowSpacing: 12
                 Md3Card {
                     variant: Md3Card.Elevated
-                    Layout.preferredWidth: 180
-                    Layout.preferredHeight: 100
+                    width: 180
+                    height: 100
                     Text { text: "Elevated"; color: Md3Theme.colorScheme.colorOnSurface }
                 }
                 Md3Card {
                     variant: Md3Card.Filled
-                    Layout.preferredWidth: 180
-                    Layout.preferredHeight: 100
+                    width: 180
+                    height: 100
                     Text { text: "Filled"; color: Md3Theme.colorScheme.colorOnSurface }
                 }
                 Md3Card {
                     variant: Md3Card.Outlined
-                    Layout.preferredWidth: 180
-                    Layout.preferredHeight: 100
+                    width: 180
+                    height: 100
                     Text { text: "Outlined"; color: Md3Theme.colorScheme.colorOnSurface }
                 }
             }
@@ -117,9 +170,10 @@ Item {
                 wrapMode: Text.Wrap
             }
 
-            RowLayout {
+            Md3AnimatedFlow {
                 Layout.fillWidth: true
                 spacing: 8
+                rowSpacing: 8
                 Md3Button {
                     text: qsTr("Gradient")
                     variant: Md3Button.Outlined
@@ -150,7 +204,6 @@ Item {
                     variant: Md3Button.Outlined
                     onClicked: backdropVideoDialog.open()
                 }
-                Item { Layout.fillWidth: true }
                 Md3Button {
                     text: qsTr("Add block")
                     onClicked: glassPlayground.addBlock()

@@ -15,7 +15,7 @@
 - [Md3AppSettings](Md3AppSettings.md) — QSettings facade
 - [Md3HotReload](Md3HotReload.md) — QML hot reload watcher
 
-**QML types:** 117
+**QML types:** 122
 
 ## Actions & selection
 
@@ -124,6 +124,11 @@
 ## Layout
 
 - [Md3AnimatedFlow](Md3AnimatedFlow.md)
+- [Md3FlowLayout](Md3FlowLayout.md)
+- [Md3GridLayout](Md3GridLayout.md)
+- [Md3HStack](Md3HStack.md)
+- [Md3Spacer](Md3Spacer.md)
+- [Md3VStack](Md3VStack.md)
 
 ## Navigation
 
