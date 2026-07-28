@@ -1,6 +1,6 @@
 # Md3StatusBar
 
-Desktop status bar: message on the left, optional progress, trailing status items.
+Desktop status bar: message on the left, progress + trailing items on the right.
 
 - **Source:** `src/Md3/components/Md3StatusBar.qml`
 - **Extends:** `Rectangle`
@@ -20,7 +20,7 @@ import Md3
 | `progress` | `real` | `-1` | read/write | `Md3StatusBar` | — |
 | `indeterminateProgress` | `bool` | `false` | read/write | `Md3StatusBar` | — |
 | `showProgress` | `bool` | `progress >= 0 \|\| indeterminateProgress` | read/write | `Md3StatusBar` | — |
-| `content` | `alias` | `trail.data` | default read/write | `Md3StatusBar` | Trailing widgets (Text / Icon / custom). |
+| `content` | `alias` | `trailExtras.data` | default read/write | `Md3StatusBar` | Trailing widgets (Text / Icon / custom) — shown after progress on the right. |
 
 ## Signals
 

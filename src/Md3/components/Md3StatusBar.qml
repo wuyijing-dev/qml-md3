@@ -1,22 +1,22 @@
 import QtQuick
 
-/// Desktop status bar: message on the left, optional progress, trailing status items.
+/// Desktop status bar: message on the left, progress + trailing items on the right.
 Rectangle {
     id: root
 
     property string text: ""
     property string leadingIcon: ""
-    property real progress: -1 // <0 hidden; 0–1 determinate; NaN-safe
+    property real progress: -1 // <0 hidden; 0–1 determinate
     property bool indeterminateProgress: false
     property bool showProgress: progress >= 0 || indeterminateProgress
-    /// Trailing widgets (Text / Icon / custom).
-    default property alias content: trail.data
+    /// Trailing widgets (Text / Icon / custom) — shown after progress on the right.
+    default property alias content: trailExtras.data
 
     signal messageClicked()
 
     implicitWidth: parent ? parent.width : 480
     implicitHeight: 28
-    width: implicitWidth
+    width: parent ? parent.width : implicitWidth
     height: implicitHeight
     color: Md3Theme.colorScheme.surfaceContainer
     clip: true
@@ -47,9 +47,7 @@ Rectangle {
         Text {
             id: msg
             anchors.verticalCenter: parent.verticalCenter
-            width: Math.max(0, leftRow.width
-                            - (root.leadingIcon.length > 0 ? 24 : 0)
-                            - (root.showProgress ? 108 : 0))
+            width: Math.max(0, leftRow.width - (root.leadingIcon.length > 0 ? 24 : 0))
             text: root.text
             elide: Text.ElideRight
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
@@ -62,10 +60,19 @@ Rectangle {
                 onClicked: root.messageClicked()
             }
         }
+    }
+
+    Row {
+        id: trail
+        anchors.right: parent.right
+        anchors.rightMargin: 12
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: 10
+        height: parent.height
 
         Item {
             visible: root.showProgress
-            width: 100
+            width: 88
             height: parent.height
             Md3LinearProgressIndicator {
                 anchors.verticalCenter: parent.verticalCenter
@@ -75,14 +82,19 @@ Rectangle {
                 value: root.indeterminateProgress ? 0 : Math.max(0, Math.min(1, root.progress))
             }
         }
-    }
 
-    Row {
-        id: trail
-        anchors.right: parent.right
-        anchors.rightMargin: 8
-        anchors.verticalCenter: parent.verticalCenter
-        spacing: 12
-        height: parent.height
+        Text {
+            visible: root.showProgress && trailExtras.children.length > 0
+            anchors.verticalCenter: parent.verticalCenter
+            text: "·"
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.labelSmall.size
+        }
+
+        Row {
+            id: trailExtras
+            spacing: 12
+            height: parent.height
+        }
     }
 }

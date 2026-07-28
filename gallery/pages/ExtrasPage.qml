@@ -172,38 +172,6 @@ Item {
             }
 
             Text {
-                text: qsTr("Status bar")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelLarge.size
-            }
-            Md3Card {
-                variant: Md3Card.Outlined
-                Layout.fillWidth: true
-                Layout.preferredHeight: 36
-                clip: true
-                Md3StatusBar {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    text: qsTr("Ready — 12 files indexed")
-                    leadingIcon: "info"
-                    progress: 0.42
-                    Text {
-                        text: qsTr("Ln 42, Col 8")
-                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                        font.pixelSize: Md3Theme.typography.labelSmall.size
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-                    Text {
-                        text: "UTF-8"
-                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                        font.pixelSize: Md3Theme.typography.labelSmall.size
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-                }
-            }
-
-            Text {
                 text: qsTr("Data table")
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: Md3Theme.typography.labelLarge.size

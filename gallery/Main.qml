@@ -39,6 +39,27 @@ Md3ApplicationWindow {
     aboutText: qsTr("Material Design 3 组件图库 — 演示窗口、导航与控件。")
     aboutIcon: windowIcon
 
+    statusBar: Md3StatusBar {
+        text: {
+            const d = window.destinations && window.destinations[window.currentIndex]
+            return d && d.title ? qsTr("Page: %1").arg(d.title) : qsTr("Ready")
+        }
+        leadingIcon: "info"
+        progress: -1
+        Text {
+            text: qsTr("Ln 42, Col 8")
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.family: Md3Theme.typography.fontFamily
+            font.pixelSize: Md3Theme.typography.labelSmall.size
+        }
+        Text {
+            text: "UTF-8"
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.family: Md3Theme.typography.fontFamily
+            font.pixelSize: Md3Theme.typography.labelSmall.size
+        }
+    }
+
     // Dev: prefer Md3HotReload-discovered gallery/pages (cross-platform).
     // Else resolve next to Main.qml; if Main is from qrc, use bundled pages.
     property string pageRoot: {

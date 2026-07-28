@@ -132,6 +132,11 @@ Window {
     property alias documentTabBar: docTabBar
     property bool _docTabSyncing: false
 
+    /// App-bottom status strip (e.g. Md3StatusBar). Spans full content width.
+    property alias statusBar: statusBarSlot.data
+    property alias statusBarItem: statusBarSlot
+    readonly property real statusBarHeight: statusBarSlot.visible ? statusBarSlot.height : 0
+
     signal documentTabActivated(int index)
     signal documentTabCloseRequested(int index)
     signal documentTabAddRequested()
@@ -980,7 +985,10 @@ Window {
 
                 Md3WindowBody {
                     id: windowBody
-                    anchors.fill: parent
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.bottom: statusBarSlot.top
                     visible: root.usesDestinations
                     enabled: visible
                     destinations: root.destinations
@@ -1020,9 +1028,22 @@ Window {
 
                 Item {
                     id: customContent
-                    anchors.fill: parent
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.bottom: statusBarSlot.top
                     visible: !root.usesDestinations
                     enabled: visible
+                }
+
+                Column {
+                    id: statusBarSlot
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    width: parent.width
+                    z: 3
+                    visible: height > 0
                 }
             }
 
@@ -1037,7 +1058,8 @@ Window {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                dodgeBottom: perfDockHost.wantVisible ? (perfPanel.height + 28) : 0
+                dodgeBottom: root.statusBarHeight
+                             + (perfDockHost.wantVisible ? (perfPanel.height + 28) : 0)
                 z: 1200
             }
 
@@ -1077,7 +1099,7 @@ Window {
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 anchors.rightMargin: 16
-                anchors.bottomMargin: 8
+                anchors.bottomMargin: 8 + root.statusBarHeight
                 width: perfPanel.width
                 height: perfPanel.height
                 z: 100000
@@ -1095,7 +1117,7 @@ Window {
                         target: perfDockHost
                         opacity: 1
                         scale: 1
-                        anchors.bottomMargin: 16
+                        anchors.bottomMargin: 16 + root.statusBarHeight
                     }
                 }
                 transitions: [
