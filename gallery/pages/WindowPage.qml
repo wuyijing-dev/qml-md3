@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Window
+import QtCore
 import Md3
 
 Flickable {
@@ -202,6 +203,12 @@ Flickable {
                 enabled: releaseUpdater.downloadUrl.length > 0
                 onClicked: Qt.openUrlExternally(releaseUpdater.downloadUrl)
             }
+            Md3Button {
+                text: releaseUpdater.downloading ? qsTr("Downloading…") : qsTr("Download ZIP")
+                variant: Md3Button.Text
+                enabled: !releaseUpdater.downloading && releaseUpdater.downloadUrl.length > 0
+                onClicked: releaseUpdater.downloadTo(StandardPaths.writableLocation(StandardPaths.DownloadLocation))
+            }
         }
         Text {
             Layout.fillWidth: true
@@ -217,6 +224,17 @@ Flickable {
             color: releaseUpdater.errorString.length
                    ? Md3Theme.colorScheme.error
                    : Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.bodySmall.size
+            font.family: Md3Theme.typography.fontFamily
+        }
+        Text {
+            visible: releaseUpdater.downloading || releaseUpdater.downloadedFilePath.length > 0
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            text: releaseUpdater.downloading
+                  ? qsTr("Download %1%").arg(Math.round(releaseUpdater.downloadProgress * 100))
+                  : qsTr("Downloaded: %1").arg(releaseUpdater.downloadedFilePath)
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.bodySmall.size
             font.family: Md3Theme.typography.fontFamily
         }

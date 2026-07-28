@@ -5,7 +5,7 @@ project(QML_MD3 VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 QuickEffects QuickShapesPrivate QuickDialogs2)
+find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 QuickEffects QuickShapesPrivate QuickDialogs2 Network)
 qt_standard_project_setup(REQUIRES 6.8)
 
 # Top-level repo build → Gallery ON by default.

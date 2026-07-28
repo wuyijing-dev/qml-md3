@@ -57,7 +57,7 @@
 - [Md3NumberField](Md3NumberField.md) — Numeric spin field: TextField chrome + step buttons (form-friendly SpinBox).
 - [Md3Pagination](Md3Pagination.md) — Compact pagination bar for tables / lists.
 - [Md3PathField](Md3PathField.md) — Path field — open/save file, multi-file, or folder; recent paths, validation, drop, breadcrumb.
-- [Md3ReleaseUpdater](Md3ReleaseUpdater.md) — GitHub Release update checker. Fetches latest release metadata and exposes a download URL.
+- [Md3ReleaseUpdater](Md3ReleaseUpdater.md) — GitHub Release update client: metadata check, ZIP download, and archive extract.
 - [Md3StatusBar](Md3StatusBar.md) — Desktop status bar — left / center / right zones, transient messages.
 - [Md3TreeView](Md3TreeView.md) — Hierarchical tree: `{ title, icon?, children?, expanded?, checked?, data? }`.
 

@@ -3,7 +3,7 @@
 # Or: cmake -DMD3_BUILD_GALLERY=OFF and install / find_package(Md3)
 
 if (NOT TARGET Qt6::Quick)
-    find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 QuickEffects QuickShapesPrivate QuickDialogs2)
+    find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 QuickEffects QuickShapesPrivate QuickDialogs2 Network)
 endif()
 
 include(GNUInstallDirs)
@@ -130,6 +130,8 @@ qt_add_qml_module(Md3
         window/md3windowhelper.cpp
         window/md3graphics.h
         window/md3graphics.cpp
+        window/md3releaseupdaternative.h
+        window/md3releaseupdaternative.cpp
         charts/md3chartdata.h
         charts/md3chartdata.cpp
         diagnostics/md3performancemonitor.h
@@ -274,7 +276,7 @@ qt_add_qml_module(Md3
 
 target_link_libraries(Md3
     PUBLIC Qt6::Quick
-    PRIVATE Qt6::QuickControls2 Qt6::QuickEffects Qt6::QuickShapesPrivate Qt6::QuickDialogs2
+    PRIVATE Qt6::QuickControls2 Qt6::QuickEffects Qt6::QuickShapesPrivate Qt6::QuickDialogs2 Qt6::Network
 )
 
 # Prebuilt Liquid Glass shaders (qsb). Avoids requiring fxc.exe / ShaderTools at build time.
