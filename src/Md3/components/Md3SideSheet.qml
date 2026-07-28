@@ -18,16 +18,31 @@ Item {
 
     readonly property bool fromEnd: edge === Md3SideSheet.End
     readonly property real panelWidth: Math.min(sheetWidth, Math.max(240, width * 0.92))
-    readonly property bool animating: scrimFade.running || sheetSlide.running
+    // Resizing the owner window changes `sheet.x` (because `sheet.x` depends on `parent.width`).
+    // Without guarding, `Behavior on x` would animate during resize even when open=false,
+    // which makes the sheet briefly become visible.
+    property bool _transitioning: false
 
     anchors.fill: parent
-    visible: open || animating
+    visible: open || _transitioning
     z: 960
     clip: true
 
     function dismiss() {
         open = false
         dismissed()
+    }
+
+    onOpenChanged: {
+        _transitioning = true
+        transitionTimer.restart()
+    }
+
+    Timer {
+        id: transitionTimer
+        interval: Md3Motion.spatialDuration + 80
+        repeat: false
+        onTriggered: root._transitioning = false
     }
 
     Rectangle {
@@ -77,6 +92,8 @@ Item {
         Behavior on x {
             NumberAnimation {
                 id: sheetSlide
+                // Only animate while open/close transition is active.
+                enabled: root._transitioning
                 duration: Md3Motion.spatialDuration
                 easing.type: Easing.BezierSpline
                 easing.bezierCurve: Md3Motion.emphasized
