@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Window
+import QtQuick.Dialogs
 import Md3
 
 Item {
@@ -51,37 +52,97 @@ Item {
             }
             Text {
                 Layout.fillWidth: true
-                text: qsTr("Drag the card — background should slide under the glass (Aero/Acrylic offset blur). Sliders tune lens params.")
+                text: qsTr("Drag the card. Switch the backdrop image below — glass samples whatever is behind it.")
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: Md3Theme.typography.bodySmall.size
                 wrapMode: Text.Wrap
             }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+                Md3Button {
+                    text: qsTr("Gradient")
+                    variant: Md3Button.Outlined
+                    onClicked: glassBackdrop.backgroundImage = ""
+                }
+                Md3Button {
+                    text: qsTr("Photo A")
+                    variant: Md3Button.Outlined
+                    onClicked: glassBackdrop.backgroundImage = "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200&q=80"
+                }
+                Md3Button {
+                    text: qsTr("Photo B")
+                    variant: Md3Button.Outlined
+                    onClicked: glassBackdrop.backgroundImage = "https://images.unsplash.com/photo-1557683316-973635b79489?w=1200&q=80"
+                }
+                Md3Button {
+                    text: qsTr("Photo C")
+                    variant: Md3Button.Outlined
+                    onClicked: glassBackdrop.backgroundImage = "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=1200&q=80"
+                }
+                Md3Button {
+                    text: qsTr("Browse…")
+                    onClicked: backdropFileDialog.open()
+                }
+                Item { Layout.fillWidth: true }
+            }
+
             Item {
                 id: glassPlayground
                 Layout.fillWidth: true
                 Layout.preferredHeight: 340
                 clip: true
 
-                Rectangle {
+                Item {
                     id: glassBackdrop
                     anchors.fill: parent
-                    radius: Md3Theme.shape.large
-                    gradient: Gradient {
-                        orientation: Gradient.Horizontal
-                        GradientStop { position: 0.0; color: "#3B82F6" }
-                        GradientStop { position: 0.3; color: "#A855F7" }
-                        GradientStop { position: 0.6; color: "#F43F5E" }
-                        GradientStop { position: 1.0; color: "#F59E0B" }
+                    /// Empty = gradient demo; set a url/file path to use a photo.
+                    property url backgroundImage: ""
+
+                    layer.enabled: true
+                    layer.smooth: true
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: Md3Theme.shape.large
+                        visible: glassBackdrop.backgroundImage.toString().length === 0
+                        gradient: Gradient {
+                            orientation: Gradient.Horizontal
+                            GradientStop { position: 0.0; color: "#3B82F6" }
+                            GradientStop { position: 0.3; color: "#A855F7" }
+                            GradientStop { position: 0.6; color: "#F43F5E" }
+                            GradientStop { position: 1.0; color: "#F59E0B" }
+                        }
+                    }
+
+                    Image {
+                        anchors.fill: parent
+                        visible: glassBackdrop.backgroundImage.toString().length > 0
+                        source: glassBackdrop.backgroundImage
+                        fillMode: Image.PreserveAspectCrop
+                        asynchronous: true
+                        cache: true
+                    }
+
+                    // Soft scrim so overlay labels stay readable on photos.
+                    Rectangle {
+                        anchors.fill: parent
+                        visible: glassBackdrop.backgroundImage.toString().length > 0
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.15) }
+                            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.35) }
+                        }
                     }
 
                     Repeater {
-                        model: [
+                        model: glassBackdrop.backgroundImage.toString().length === 0 ? [
                             { t: "Aa", x: 0.08, y: 0.18, s: 42 },
                             { t: "MD3", x: 0.42, y: 0.12, s: 36 },
                             { t: "液态", x: 0.70, y: 0.28, s: 34 },
                             { t: "Glass", x: 0.18, y: 0.58, s: 40 },
                             { t: "2026", x: 0.55, y: 0.62, s: 38 }
-                        ]
+                        ] : []
                         delegate: Text {
                             required property var modelData
                             x: modelData.x * glassBackdrop.width
@@ -94,7 +155,7 @@ Item {
                     }
 
                     Repeater {
-                        model: 6
+                        model: glassBackdrop.backgroundImage.toString().length === 0 ? 6 : 0
                         delegate: Rectangle {
                             required property int index
                             width: 56 + (index % 3) * 24
@@ -121,7 +182,6 @@ Item {
                     tintOpacity: tintSlider.value
                     refraction: refractionSlider.value
                     chromaticAberration: chromaSlider.value
-                    specularStrength: specularSlider.value
                     edgeStrength: edgeSlider.value
                     elevation: elevSlider.value
 
@@ -148,6 +208,13 @@ Item {
                         }
                     }
                 }
+            }
+
+            FileDialog {
+                id: backdropFileDialog
+                title: qsTr("Choose backdrop image")
+                nameFilters: [ qsTr("Images (*.png *.jpg *.jpeg *.bmp *.webp)"), qsTr("All files (*)") ]
+                onAccepted: glassBackdrop.backgroundImage = selectedFile
             }
 
             component GlassParamRow: ColumnLayout {
@@ -200,11 +267,6 @@ Item {
                 id: tintSlider
                 label: qsTr("Tint opacity")
                 from: 0; to: 0.55; value: 0.08
-            }
-            GlassParamRow {
-                id: specularSlider
-                label: qsTr("Specular")
-                from: 0; to: 1; value: 0.72
             }
             GlassParamRow {
                 id: edgeSlider

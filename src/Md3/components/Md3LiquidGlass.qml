@@ -20,7 +20,6 @@ Item {
     property real blurMax: 64
     property real tintOpacity: 0.08
     property color tintColor: "#FFFFFF"
-    property real specularStrength: 0.75
     property real edgeStrength: 0.9
     property real refraction: 1.2
     property real chromaticAberration: 0.5
@@ -36,8 +35,6 @@ Item {
     readonly property real _radiusNorm: Math.max(0.02, Math.min(0.49, radius / Math.max(1, _minSide)))
     readonly property real _aspect: width / Math.max(1, height)
 
-    property real _specNX: 0.30
-    property real _specNY: 0.22
     property real _pressScale: 1
     property real _grabOffX: 0
     property real _grabOffY: 0
@@ -56,14 +53,12 @@ Item {
                         Math.max(0, Math.min(maxY, ny)))
     }
 
-    // Shadow stays on the outer item (not scaled).
     Md3Shadow {
         anchors.fill: parent
         elevation: root.elevation
         cornerRadius: root.radius
     }
 
-    // Visual stack — scale here so drag x/y on root stay stable.
     Item {
         id: visual
         anchors.fill: parent
@@ -90,9 +85,6 @@ Item {
                 autoPaddingEnabled: false
             }
 
-            // --- Fluid reflection: full backdrop blur, reverse-offset ---
-            // blur.x = mapFromItem(source, 0, 0).x  ⇒  as the card moves, the
-            // blurred world slides underneath (same idea as Aero / Acrylic demos).
             MultiEffect {
                 id: fluidBg
                 visible: root._blurReady
@@ -122,7 +114,6 @@ Item {
                 contrast: 0.04
             }
 
-            // Live card-sized sample for edge refraction (displacement).
             ShaderEffectSource {
                 id: lensSample
                 anchors.fill: parent
@@ -145,7 +136,6 @@ Item {
                 }
             }
 
-            // Edge lens / chromatic fringe (Apple Liquid Glass “lensing”).
             ShaderEffect {
                 id: lens
                 anchors.fill: parent
@@ -159,7 +149,6 @@ Item {
                 property real aspect: root._aspect
                 property real padU: 0
                 property real padV: 0
-                // sourceRect already includes samplePadding; UV 0..1 is the padded capture.
                 vertexShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.vert.qsb"
                 fragmentShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.frag.qsb"
             }
@@ -180,40 +169,11 @@ Item {
 
             Rectangle {
                 anchors.fill: parent
-                opacity: root.edgeStrength * 0.45
+                opacity: root.edgeStrength * 0.35
                 gradient: Gradient {
-                    GradientStop { position: 0.0; color: Qt.rgba(0.75, 0.9, 1.0, 0.22) }
-                    GradientStop { position: 0.4; color: Qt.rgba(1, 1, 1, 0.02) }
-                    GradientStop { position: 1.0; color: Qt.rgba(1.0, 0.85, 0.7, 0.14) }
-                }
-            }
-
-            Rectangle {
-                width: root.width * 0.8
-                height: root.height * 0.5
-                x: root.width * root._specNX - width * 0.5
-                y: root.height * root._specNY - height * 0.5
-                radius: Math.min(width, height) * 0.5
-                rotation: -16
-                opacity: root.specularStrength * (root.dragging ? 1.0 : 0.7)
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: Qt.rgba(1, 1, 1, 0.6) }
-                    GradientStop { position: 0.35; color: Qt.rgba(1, 1, 1, 0.1) }
-                    GradientStop { position: 1.0; color: "transparent" }
-                }
-                Behavior on x {
-                    NumberAnimation {
-                        duration: Md3Motion.medium2
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Md3Motion.standard
-                    }
-                }
-                Behavior on y {
-                    NumberAnimation {
-                        duration: Md3Motion.medium2
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Md3Motion.standard
-                    }
+                    GradientStop { position: 0.0; color: Qt.rgba(0.75, 0.9, 1.0, 0.18) }
+                    GradientStop { position: 0.45; color: "transparent" }
+                    GradientStop { position: 1.0; color: Qt.rgba(1.0, 0.85, 0.7, 0.1) }
                 }
             }
 
@@ -222,13 +182,13 @@ Item {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.margins: 1
-                height: Math.max(2, root.height * 0.04)
-                opacity: root.edgeStrength
+                height: Math.max(2, root.height * 0.035)
+                opacity: root.edgeStrength * 0.85
                 gradient: Gradient {
                     orientation: Gradient.Horizontal
                     GradientStop { position: 0.0; color: "transparent" }
-                    GradientStop { position: 0.2; color: Qt.rgba(1, 1, 1, 0.8) }
-                    GradientStop { position: 0.8; color: Qt.rgba(1, 1, 1, 0.35) }
+                    GradientStop { position: 0.2; color: Qt.rgba(1, 1, 1, 0.55) }
+                    GradientStop { position: 0.8; color: Qt.rgba(1, 1, 1, 0.25) }
                     GradientStop { position: 1.0; color: "transparent" }
                 }
             }
@@ -238,7 +198,7 @@ Item {
                 radius: root.radius
                 color: "transparent"
                 border.width: 1.5
-                border.color: Qt.rgba(1, 1, 1, 0.5 * root.edgeStrength)
+                border.color: Qt.rgba(1, 1, 1, 0.45 * root.edgeStrength)
             }
 
             Item {
@@ -264,7 +224,6 @@ Item {
         }
     }
 
-    // Manual drag — drag.target + scale on the same item jumps to (0,0).
     MouseArea {
         id: dragArea
         anchors.fill: parent
@@ -288,18 +247,8 @@ Item {
             const next = root._clampPos(p.x - root._grabOffX, p.y - root._grabOffY)
             root.x = next.x
             root.y = next.y
-            root._specNX = Math.max(0.12, Math.min(0.88, mouse.x / Math.max(1, width)))
-            root._specNY = Math.max(0.1, Math.min(0.75, mouse.y / Math.max(1, height)))
         }
-        onReleased: {
-            root._pressScale = 1
-            root._specNX = 0.30
-            root._specNY = 0.22
-        }
-        onCanceled: {
-            root._pressScale = 1
-            root._specNX = 0.30
-            root._specNY = 0.22
-        }
+        onReleased: root._pressScale = 1
+        onCanceled: root._pressScale = 1
     }
 }
