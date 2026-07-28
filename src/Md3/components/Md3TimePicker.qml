@@ -306,8 +306,11 @@ Item {
                     border.color: Md3Theme.colorScheme.outline
                     clip: true
 
+                    readonly property real corner: Md3Theme.shape.small
+
                     Column {
                         anchors.fill: parent
+                        anchors.margins: 1 // keep fill inside outline
                         spacing: 0
 
                         Rectangle {
@@ -315,6 +318,10 @@ Item {
                             height: (parent.height - 1) / 2
                             color: !root.isPm ? Md3Theme.colorScheme.primaryContainer
                                               : "transparent"
+                            topLeftRadius: periodSel.corner
+                            topRightRadius: periodSel.corner
+                            bottomLeftRadius: 0
+                            bottomRightRadius: 0
                             Text {
                                 anchors.centerIn: parent
                                 text: qsTr("AM")
@@ -339,6 +346,10 @@ Item {
                             height: (parent.height - 1) / 2
                             color: root.isPm ? Md3Theme.colorScheme.primaryContainer
                                              : "transparent"
+                            topLeftRadius: 0
+                            topRightRadius: 0
+                            bottomLeftRadius: periodSel.corner
+                            bottomRightRadius: periodSel.corner
                             Text {
                                 anchors.centerIn: parent
                                 text: qsTr("PM")
