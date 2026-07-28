@@ -18,10 +18,10 @@ Item {
 
     readonly property bool fromEnd: edge === Md3SideSheet.End
     readonly property real panelWidth: Math.min(sheetWidth, Math.max(240, width * 0.92))
+    readonly property bool animating: scrimFade.running || sheetSlide.running
 
     anchors.fill: parent
-    visible: open || sheet.opacity > 0.01 || scrim.opacity > 0.01
-            || (fromEnd ? sheet.x < width - 0.5 : sheet.x > -panelWidth + 0.5)
+    visible: open || animating
     z: 960
     clip: true
 
@@ -38,6 +38,7 @@ Item {
         opacity: root.open ? 0.32 : 0
         Behavior on opacity {
             NumberAnimation {
+                id: scrimFade
                 duration: Md3Motion.overlayDuration
                 easing.type: Easing.BezierSpline
                 easing.bezierCurve: Md3Motion.standard
@@ -75,6 +76,7 @@ Item {
 
         Behavior on x {
             NumberAnimation {
+                id: sheetSlide
                 duration: Md3Motion.spatialDuration
                 easing.type: Easing.BezierSpline
                 easing.bezierCurve: Md3Motion.emphasized
