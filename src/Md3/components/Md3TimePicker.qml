@@ -191,20 +191,26 @@ Item {
             padding: 24
             spacing: 16
 
-            // Header + mode toggle
+            readonly property real contentWidth: width - leftPadding - rightPadding
+
+            // Header + mode toggle (width must exclude Column padding or the icon hangs outside)
             Item {
-                width: parent.width
-                height: 40
+                width: col.contentWidth
+                height: 48
                 Text {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: modeToggle.left
+                    anchors.rightMargin: 8
                     text: root.title
+                    elide: Text.ElideRight
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.family: Md3Theme.typography.fontFamily
                     font.pixelSize: Md3Theme.typography.labelMedium.size
                     font.weight: Font.Medium
                 }
                 Md3IconButton {
+                    id: modeToggle
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
                     visible: root.showModeToggle
@@ -217,9 +223,12 @@ Item {
             // Time selectors + period
             Row {
                 spacing: 12
-                anchors.horizontalCenter: parent.horizontalCenter
+                width: col.contentWidth
+
+                Item { width: Math.max(0, (parent.width - timeRow.width - (periodSel.visible ? periodSel.width + 12 : 0)) / 2); height: 1 }
 
                 Row {
+                    id: timeRow
                     spacing: 4
 
                     // Hour chip
@@ -285,28 +294,33 @@ Item {
                     }
                 }
 
-                // AM/PM period selector
+                // AM/PM period selector — selected uses primaryContainer (same family as hour/minute chips)
                 Rectangle {
+                    id: periodSel
                     visible: !root.use24Hour
                     width: 52
                     height: 80
                     radius: Md3Theme.shape.small
-                    color: "transparent"
+                    color: Md3Theme.colorScheme.surfaceContainerHighest
                     border.width: 1
                     border.color: Md3Theme.colorScheme.outline
+                    clip: true
 
                     Column {
                         anchors.fill: parent
+                        spacing: 0
+
                         Rectangle {
                             width: parent.width
-                            height: parent.height / 2
-                            radius: Md3Theme.shape.small
-                            color: !root.isPm ? Md3Theme.colorScheme.tertiaryContainer : "transparent"
+                            height: (parent.height - 1) / 2
+                            color: !root.isPm ? Md3Theme.colorScheme.primaryContainer
+                                              : "transparent"
                             Text {
                                 anchors.centerIn: parent
                                 text: qsTr("AM")
-                                color: !root.isPm ? Md3Theme.colorScheme.colorOnTertiaryContainer
-                                                  : Md3Theme.colorScheme.colorOnSurface
+                                color: !root.isPm ? Md3Theme.colorScheme.colorOnPrimaryContainer
+                                                  : Md3Theme.colorScheme.colorOnSurfaceVariant
+                                font.family: Md3Theme.typography.fontFamily
                                 font.pixelSize: Md3Theme.typography.titleMedium.size
                                 font.weight: Font.Medium
                             }
@@ -322,14 +336,15 @@ Item {
                         }
                         Rectangle {
                             width: parent.width
-                            height: parent.height / 2 - 1
-                            radius: Md3Theme.shape.small
-                            color: root.isPm ? Md3Theme.colorScheme.tertiaryContainer : "transparent"
+                            height: (parent.height - 1) / 2
+                            color: root.isPm ? Md3Theme.colorScheme.primaryContainer
+                                             : "transparent"
                             Text {
                                 anchors.centerIn: parent
                                 text: qsTr("PM")
-                                color: root.isPm ? Md3Theme.colorScheme.colorOnTertiaryContainer
-                                                 : Md3Theme.colorScheme.colorOnSurface
+                                color: root.isPm ? Md3Theme.colorScheme.colorOnPrimaryContainer
+                                                 : Md3Theme.colorScheme.colorOnSurfaceVariant
+                                font.family: Md3Theme.typography.fontFamily
                                 font.pixelSize: Md3Theme.typography.titleMedium.size
                                 font.weight: Font.Medium
                             }
