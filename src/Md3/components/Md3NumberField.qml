@@ -163,10 +163,62 @@ Item {
                 }
             }
 
+            // Steppers fill the full field height so they stay vertically centered
+            // even when the value row is offset for a floating label.
+            Column {
+                id: steppers
+                anchors.right: parent.right
+                anchors.rightMargin: 2
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 0
+                width: 40
+                height: 40
+
+                Item {
+                    width: 40
+                    height: 20
+                    Md3Icon {
+                        anchors.centerIn: parent
+                        icon: "arrow_drop_up"
+                        size: 20
+                        iconColor: root.enabled && !root.atMax
+                                   ? Md3Theme.colorScheme.colorOnSurfaceVariant
+                                   : Md3Theme.colorScheme.disabledContent()
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        enabled: root.enabled && !root.atMax
+                        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                        onClicked: root.stepBy(1)
+                    }
+                }
+                Item {
+                    width: 40
+                    height: 20
+                    Md3Icon {
+                        anchors.centerIn: parent
+                        icon: "arrow_drop_down"
+                        size: 20
+                        iconColor: root.enabled && !root.atMin
+                                   ? Md3Theme.colorScheme.colorOnSurfaceVariant
+                                   : Md3Theme.colorScheme.disabledContent()
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        enabled: root.enabled && !root.atMin
+                        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                        onClicked: root.stepBy(-1)
+                    }
+                }
+            }
+
             Row {
-                anchors.fill: parent
+                anchors.left: parent.left
+                anchors.right: steppers.left
                 anchors.leftMargin: 16
                 anchors.rightMargin: 4
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
                 anchors.topMargin: root.label.length > 0 ? 18 : 0
                 spacing: 4
 
@@ -182,8 +234,9 @@ Item {
                 TextInput {
                     id: input
                     anchors.verticalCenter: parent.verticalCenter
-                    width: parent.width - (root.prefix.length > 0 ? 24 : 0)
-                           - (root.suffix.length > 0 ? 24 : 0) - 44
+                    width: Math.max(24, parent.width
+                                    - (root.prefix.length > 0 ? 28 : 0)
+                                    - (root.suffix.length > 0 ? 28 : 0))
                     height: parent.height
                     verticalAlignment: TextInput.AlignVCenter
                     color: root.enabled ? Md3Theme.colorScheme.colorOnSurface
@@ -211,49 +264,6 @@ Item {
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.family: Md3Theme.typography.fontFamily
                     font.pixelSize: Md3Theme.typography.bodyLarge.size
-                }
-
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: 0
-                    width: 40
-
-                    Item {
-                        width: 40
-                        height: 24
-                        Md3Icon {
-                            anchors.centerIn: parent
-                            icon: "arrow_drop_up"
-                            size: 22
-                            iconColor: root.enabled && !root.atMax
-                                       ? Md3Theme.colorScheme.colorOnSurfaceVariant
-                                       : Md3Theme.colorScheme.disabledContent()
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            enabled: root.enabled && !root.atMax
-                            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                            onClicked: root.stepBy(1)
-                        }
-                    }
-                    Item {
-                        width: 40
-                        height: 24
-                        Md3Icon {
-                            anchors.centerIn: parent
-                            icon: "arrow_drop_down"
-                            size: 22
-                            iconColor: root.enabled && !root.atMin
-                                       ? Md3Theme.colorScheme.colorOnSurfaceVariant
-                                       : Md3Theme.colorScheme.disabledContent()
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            enabled: root.enabled && !root.atMin
-                            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                            onClicked: root.stepBy(-1)
-                        }
-                    }
                 }
             }
         }

@@ -66,7 +66,8 @@ Item {
     }
 
     function _keyName(event) {
-        // Prefer event.text for letters/digits; map special keys.
+        // Map by key code first — with Ctrl/Alt, event.text is often a
+        // non-printable control character (shows as tofu / □).
         if (event.key === Qt.Key_Escape)
             return "Esc"
         if (event.key === Qt.Key_Backspace)
@@ -77,25 +78,47 @@ Item {
             return "Enter"
         if (event.key === Qt.Key_Space)
             return "Space"
+        if (event.key === Qt.Key_Delete)
+            return "Delete"
+        if (event.key === Qt.Key_Insert)
+            return "Insert"
+        if (event.key === Qt.Key_Home)
+            return "Home"
+        if (event.key === Qt.Key_End)
+            return "End"
+        if (event.key === Qt.Key_PageUp)
+            return "PageUp"
+        if (event.key === Qt.Key_PageDown)
+            return "PageDown"
+        if (event.key === Qt.Key_Left)
+            return "Left"
+        if (event.key === Qt.Key_Right)
+            return "Right"
+        if (event.key === Qt.Key_Up)
+            return "Up"
+        if (event.key === Qt.Key_Down)
+            return "Down"
         if (event.key >= Qt.Key_F1 && event.key <= Qt.Key_F35)
             return "F" + String(event.key - Qt.Key_F1 + 1)
+        if (event.key >= Qt.Key_A && event.key <= Qt.Key_Z)
+            return String.fromCharCode(65 + (event.key - Qt.Key_A))
+        if (event.key >= Qt.Key_0 && event.key <= Qt.Key_9)
+            return String.fromCharCode(48 + (event.key - Qt.Key_0))
 
         const t = event.text !== undefined ? String(event.text) : ""
         if (t.length === 1) {
-            if (/[a-zA-Z]/.test(t))
-                return t.toUpperCase()
-            return t
+            const code = t.charCodeAt(0)
+            // Only printable characters (skip Ctrl-generated C0 controls → tofu).
+            if (code >= 32 && code !== 127) {
+                if (/[a-zA-Z]/.test(t))
+                    return t.toUpperCase()
+                if (/^\d$/.test(t))
+                    return t
+                if (/^[\S]$/.test(t))
+                    return t
+            }
         }
-
-        switch (event.key) {
-        case Qt.Key_Left: return "Left"
-        case Qt.Key_Right: return "Right"
-        case Qt.Key_Up: return "Up"
-        case Qt.Key_Down: return "Down"
-        default:
-            break
-        }
-        return t.length ? t : ""
+        return ""
     }
 
     function _buildSequence(modifiers, baseKey) {
