@@ -15,7 +15,7 @@
 - [Md3AppSettings](Md3AppSettings.md) — QSettings facade
 - [Md3HotReload](Md3HotReload.md) — QML hot reload watcher
 
-**QML types:** 114
+**QML types:** 117
 
 ## Actions & selection
 
@@ -51,11 +51,13 @@
 ## Components
 
 - [Md3DeferredSection](Md3DeferredSection.md) — Within-page progressive load: placeholder first, then create `sourceComponent`. Honors Md3Theme.progressiveContent (default on). Set forceImmediate to always load now.
+- [Md3FileDropZone](Md3FileDropZone.md) — Desktop file drop target with preview, extension filtering, and structured results.
 - [Md3KeySequenceField](Md3KeySequenceField.md) — Desktop shortcut capture field: captures a single chord like Ctrl+K / Shift+Enter.
 - [Md3LiquidGlass](Md3LiquidGlass.md) — Draggable Liquid Glass — regional backdrop sample (not full-scene blur).
 - [Md3NumberField](Md3NumberField.md) — Numeric spin field: TextField chrome + step buttons (form-friendly SpinBox).
 - [Md3Pagination](Md3Pagination.md) — Compact pagination bar for tables / lists.
 - [Md3PathField](Md3PathField.md) — Path field — open/save file, multi-file, or folder; recent paths, validation, drop, breadcrumb.
+- [Md3ReleaseUpdater](Md3ReleaseUpdater.md) — GitHub Release update checker. Fetches latest release metadata and exposes a download URL.
 - [Md3StatusBar](Md3StatusBar.md) — Desktop status bar — left / center / right zones, transient messages.
 - [Md3TreeView](Md3TreeView.md) — Hierarchical tree: `{ title, icon?, children?, expanded?, checked?, data? }`.
 
@@ -136,6 +138,7 @@
 - [Md3Scaffold](Md3Scaffold.md)
 - [Md3TabBar](Md3TabBar.md)
 - [Md3TopAppBar](Md3TopAppBar.md)
+- [Md3VirtualList](Md3VirtualList.md) — Thin virtualized list wrapper for large models with jump/scroll helpers.
 
 ## Primitives
 

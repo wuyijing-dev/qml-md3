@@ -35,6 +35,13 @@ Flickable {
     property int platformTab: currentOsTab
 
     Md3WindowHelper { id: nativeHelper }
+    Md3ReleaseUpdater {
+        id: releaseUpdater
+        owner: "wuyijing-dev"
+        repo: "QML_MD3"
+        currentVersion: "0.1.0"
+        assetNameContains: ".zip"
+    }
     property int _monitorIndex: 0
 
     // UNSUITABLE — retained for native code paths; Gallery UI removed.
@@ -174,6 +181,44 @@ Flickable {
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: 12
             }
+        }
+
+        Text {
+            text: qsTr("Release 更新")
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.labelLarge.size
+        }
+        Row {
+            spacing: 12
+            Md3Button {
+                text: releaseUpdater.checking ? qsTr("Checking…") : qsTr("Check GitHub Release")
+                variant: Md3Button.Outlined
+                enabled: !releaseUpdater.checking
+                onClicked: releaseUpdater.check()
+            }
+            Md3Button {
+                text: qsTr("Open Download")
+                variant: Md3Button.Text
+                enabled: releaseUpdater.downloadUrl.length > 0
+                onClicked: Qt.openUrlExternally(releaseUpdater.downloadUrl)
+            }
+        }
+        Text {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            text: releaseUpdater.errorString.length
+                  ? releaseUpdater.errorString
+                  : (releaseUpdater.latestVersion.length
+                     ? qsTr("Current %1 · Latest %2 · %3")
+                           .arg(releaseUpdater.currentVersion)
+                           .arg(releaseUpdater.latestVersion)
+                           .arg(releaseUpdater.hasUpdate ? qsTr("Update available") : qsTr("Up to date"))
+                     : qsTr("Checks GitHub Release metadata and exposes a ZIP download URL."))
+            color: releaseUpdater.errorString.length
+                   ? Md3Theme.colorScheme.error
+                   : Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.bodySmall.size
+            font.family: Md3Theme.typography.fontFamily
         }
 
         // —— Per-OS tabs ——

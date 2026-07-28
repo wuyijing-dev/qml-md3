@@ -245,6 +245,9 @@ qt_add_qml_module(Md3
         components/Md3TreeView.qml
         components/Md3PathField.qml
         components/Md3KeySequenceField.qml
+        components/Md3FileDropZone.qml
+        components/Md3ReleaseUpdater.qml
+        components/Md3VirtualList.qml
         components/Md3Pagination.qml
         components/Md3Stepper.qml
         components/Md3Banner.qml

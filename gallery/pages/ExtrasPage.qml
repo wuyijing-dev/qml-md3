@@ -220,6 +220,48 @@ Item {
             }
 
             Text {
+                text: qsTr("File drop zone")
+                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                font.pixelSize: Md3Theme.typography.labelLarge.size
+            }
+            Md3FileDropZone {
+                id: dropDemo
+                Layout.fillWidth: true
+                Layout.preferredHeight: 180
+                acceptedExtensions: [".qml", ".json", ".md"]
+                onFilesDropped: function (items) {
+                    const w = _galleryWindow()
+                    if (w)
+                        w.showStatusMessage(qsTr("Dropped %1 item(s)").arg(items.length))
+                }
+            }
+
+            Text {
+                text: qsTr("Virtual list")
+                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                font.pixelSize: Md3Theme.typography.labelLarge.size
+            }
+            Md3Card {
+                variant: Md3Card.Outlined
+                Layout.fillWidth: true
+                Layout.preferredHeight: 260
+                Md3VirtualList {
+                    id: virtualDemo
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    itemHeight: 40
+                    model: Array.from({ length: 5000 }, function (_, i) {
+                        return { title: qsTr("Log row %1").arg(i + 1) }
+                    })
+                    onCurrentIndexChangedByUser: function (index, item) {
+                        const w = _galleryWindow()
+                        if (w)
+                            w.showStatusMessage(qsTr("Focused item %1").arg(index + 1))
+                    }
+                }
+            }
+
+            Text {
                 text: qsTr("Data table")
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: Md3Theme.typography.labelLarge.size
