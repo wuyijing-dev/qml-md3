@@ -51,7 +51,7 @@ Item {
             }
             Text {
                 Layout.fillWidth: true
-                text: qsTr("Drag the card. Sliders tune refraction / frost / tint (iOS-style liquid glass layers).")
+                text: qsTr("Drag the card — background should slide under the glass (Aero/Acrylic offset blur). Sliders tune lens params.")
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: Md3Theme.typography.bodySmall.size
                 wrapMode: Text.Wrap
@@ -184,22 +184,22 @@ Item {
             GlassParamRow {
                 id: refractionSlider
                 label: qsTr("Refraction (lens bend)")
-                from: 0; to: 2.2; value: 1.15
+                from: 0; to: 2.2; value: 1.2
             }
             GlassParamRow {
                 id: chromaSlider
                 label: qsTr("Chromatic aberration")
-                from: 0; to: 1; value: 0.45
+                from: 0; to: 1; value: 0.5
             }
             GlassParamRow {
                 id: blurSlider
                 label: qsTr("Frost / blur")
-                from: 0; to: 1; value: 0.28
+                from: 0; to: 1; value: 0.45
             }
             GlassParamRow {
                 id: tintSlider
                 label: qsTr("Tint opacity")
-                from: 0; to: 0.55; value: 0.10
+                from: 0; to: 0.55; value: 0.08
             }
             GlassParamRow {
                 id: specularSlider
