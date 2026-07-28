@@ -24,6 +24,63 @@ Item {
                 color: Md3Theme.colorScheme.colorOnSurface
                 font.pixelSize: Md3Theme.typography.headlineMedium.size
             }
+            Md3Text {
+                Layout.fillWidth: true
+                text: qsTr("新增 `Md3Text` 和 `Md3AdaptiveContainer`：文本自动跟随主题，容器可选自适应高度或滚动模式。")
+                role: Md3Text.BodyMedium
+                tone: Md3Text.OnSurfaceVariant
+                wrapMode: Text.WordWrap
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 240
+                spacing: 12
+                Md3Card {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    variant: Md3Card.Outlined
+                    Md3AdaptiveContainer {
+                        anchors.fill: parent
+                        padding: 16
+                        layoutMode: Md3AdaptiveContainer.Fit
+                        Md3Text { text: qsTr("Fit 模式"); role: Md3Text.TitleMedium }
+                        Md3Text {
+                            text: qsTr("容器高度跟随内容增长，适合卡片说明、设置面板和轻量表单。")
+                            tone: Md3Text.OnSurfaceVariant
+                            wrapMode: Text.WordWrap
+                        }
+                        Md3AnimatedFlow {
+                            width: parent.width
+                            Repeater {
+                                model: 6
+                                delegate: Md3SuggestionChip {
+                                    text: qsTr("标签 %1").arg(index + 1)
+                                }
+                            }
+                        }
+                    }
+                }
+                Md3Card {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    variant: Md3Card.Outlined
+                    Md3AdaptiveContainer {
+                        anchors.fill: parent
+                        padding: 16
+                        layoutMode: Md3AdaptiveContainer.Scroll
+                        Md3Text { text: qsTr("Scroll 模式"); role: Md3Text.TitleMedium }
+                        Repeater {
+                            model: 10
+                            delegate: Md3Text {
+                                width: parent ? parent.width : 240
+                                text: qsTr("第 %1 段内容：当容器高度固定时，内容超出区域会在容器内部滚动，而不是把外层页面撑大。").arg(index + 1)
+                                tone: Md3Text.OnSurfaceVariant
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+                    }
+                }
+            }
             RowLayout {
                 spacing: 12
                 Md3Card {
