@@ -1,37 +1,26 @@
 # Md3Spacer
 
+Fixed gap or expanding filler for `Md3HStack` / `Md3VStack`.
+
 - **Source:** `src/Md3/layout/Md3Spacer.qml`
-- **Extends:** `Item`
-
-## Import
-
-```qml
-import Md3
-```
 
 ## Properties
 
-| Name | Type | Default | Access | Defined in | Description |
-|------|------|---------|--------|------------|-------------|
-| `spacerWidth` | `real` | `0` | read/write | `Md3Spacer` | Implicit width |
-| `spacerHeight` | `real` | `0` | read/write | `Md3Spacer` | Implicit height |
-
-## Signals
-
-_None._
-
-## Methods
-
-_None._
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `size` | real | `0` | Sets both spacerWidth and spacerHeight |
+| `spacerWidth` | real | `size` | Fixed width when not expanding |
+| `spacerHeight` | real | `size` | Fixed height when not expanding |
+| `expand` | bool | `false` | Fill leftover space in parent stack |
 
 ## Example
 
 ```qml
-import Md3
-
 Md3HStack {
     Md3Button { text: "Left" }
-    Md3Spacer { spacerWidth: 24 }
+    Md3Spacer { size: 24 }
+    Md3Button { text: "Mid" }
+    Md3Spacer { expand: true }
     Md3Button { text: "Right" }
 }
 ```

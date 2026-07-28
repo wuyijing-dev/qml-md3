@@ -1,18 +1,30 @@
 import QtQuick
 
-// Flow layout: children (chips, ChipGroup, ButtonGroup, …) reflow with spatial easing.
+/// Flow layout: children reflow with spatial easing.
+/// Sizes use max(explicit, implicit) so callers need not mirror width/height into implicit*.
 Item {
     id: root
 
-    // Forward children into host without shadowing Item.data
+    enum Alignment {
+        Start,
+        Center,
+        End
+    }
+
     default property alias content: host.data
 
     property real spacing: 8
     property real rowSpacing: 8
+    property real padding: 0
+    property real leftPadding: padding
+    property real rightPadding: padding
+    property real topPadding: padding
+    property real bottomPadding: padding
     property bool animate: true
     property int moveDuration: Md3Motion.spatialDuration
     property var moveEasing: Md3Motion.spatialDefault
     property bool fillWidth: true
+    property int alignment: Md3AnimatedFlow.Start
 
     readonly property int rowCount: _rowCount
     readonly property bool wrapped: _rowCount > 1
@@ -22,20 +34,22 @@ Item {
     property bool _firstLayout: true
     property real _contentWidth: 0
     property real _contentHeight: 0
-    /// Per-child last size { w, h } keyed by child index — no dynamic props on Items
     property var _sizeCache: ({})
     property var _animCache: ({})
+    property var _rowRuns: []
 
-    implicitWidth: fillWidth && parent ? parent.width : _contentWidth
-    implicitHeight: Math.max(_contentHeight, 0)
+    implicitWidth: fillWidth && parent ? parent.width : (_contentWidth + leftPadding + rightPadding)
+    implicitHeight: Math.max(_contentHeight + topPadding + bottomPadding, 0)
     width: fillWidth && parent ? parent.width : implicitWidth
     height: implicitHeight
 
     Item {
         id: host
         anchors.left: parent.left
+        anchors.leftMargin: root.leftPadding
         anchors.top: parent.top
-        width: root.width
+        anchors.topMargin: root.topPadding
+        width: Math.max(0, root.width - root.leftPadding - root.rightPadding)
         height: root._contentHeight
     }
 
@@ -49,8 +63,18 @@ Item {
     }
 
     function _itemSize(item) {
-        const w = item.implicitWidth > 0 ? item.implicitWidth : item.width
-        const h = item.implicitHeight > 0 ? item.implicitHeight : item.height
+        // Prefer the larger of explicit and intrinsic sizes so fixed-size cards
+        // (width/height set, implicit still 0) still measure correctly.
+        let w = Math.max(item.width || 0, item.implicitWidth || 0)
+        let h = Math.max(item.height || 0, item.implicitHeight || 0)
+        if (item.Layout !== undefined) {
+            const pw = item.Layout.preferredWidth
+            const ph = item.Layout.preferredHeight
+            if (pw > 0)
+                w = Math.max(w, pw)
+            if (ph > 0)
+                h = Math.max(h, ph)
+        }
         return Qt.size(Math.max(0, w), Math.max(0, h))
     }
 
@@ -88,15 +112,44 @@ Item {
         anim.start()
     }
 
+    function _rowOffset(rowWidth, maxW) {
+        if (root.alignment === Md3AnimatedFlow.Center)
+            return Math.max(0, (maxW - rowWidth) * 0.5)
+        if (root.alignment === Md3AnimatedFlow.End)
+            return Math.max(0, maxW - rowWidth)
+        return 0
+    }
+
     function relayout() {
         const kids = host.children
-        const maxW = Math.max(0, root.width)
+        const maxW = Math.max(0, host.width)
         let x = 0
         let y = 0
         let rowH = 0
         let rows = 1
         let maxRowW = 0
         const sizes = ({})
+        const placements = []
+        let rowItems = []
+
+        function flushRow(atEnd) {
+            if (rowItems.length === 0)
+                return
+            const rowW = x > 0 ? x - root.spacing : 0
+            const ox = root._rowOffset(rowW, maxW)
+            for (let r = 0; r < rowItems.length; ++r) {
+                const p = rowItems[r]
+                placements.push({ item: p.item, index: p.index, x: p.x + ox, y: p.y })
+            }
+            maxRowW = Math.max(maxRowW, rowW)
+            rowItems = []
+            if (!atEnd) {
+                x = 0
+                y += rowH + root.rowSpacing
+                rowH = 0
+                rows++
+            }
+        }
 
         for (let i = 0; i < kids.length; ++i) {
             const c = kids[i]
@@ -107,22 +160,20 @@ Item {
             if (sz.width <= 0 && sz.height <= 0)
                 continue
 
-            if (x > 0 && maxW > 0 && x + sz.width > maxW) {
-                maxRowW = Math.max(maxRowW, x - root.spacing)
-                x = 0
-                y += rowH + root.rowSpacing
-                rowH = 0
-                rows++
-            }
+            if (x > 0 && maxW > 0 && x + sz.width > maxW)
+                flushRow(false)
 
-            _moveTo(c, i, "x", x)
-            _moveTo(c, i, "y", y)
+            rowItems.push({ item: c, index: i, x: x, y: y })
             x += sz.width + root.spacing
             rowH = Math.max(rowH, sz.height)
         }
+        flushRow(true)
 
-        if (x > 0)
-            maxRowW = Math.max(maxRowW, x - root.spacing)
+        for (let p = 0; p < placements.length; ++p) {
+            const pl = placements[p]
+            _moveTo(pl.item, pl.index, "x", pl.x)
+            _moveTo(pl.item, pl.index, "y", pl.y)
+        }
 
         root._sizeCache = sizes
         _rowCount = Math.max(1, rows)
@@ -149,6 +200,12 @@ Item {
     onWidthChanged: Qt.callLater(relayout)
     onSpacingChanged: Qt.callLater(relayout)
     onRowSpacingChanged: Qt.callLater(relayout)
+    onPaddingChanged: Qt.callLater(relayout)
+    onLeftPaddingChanged: Qt.callLater(relayout)
+    onRightPaddingChanged: Qt.callLater(relayout)
+    onTopPaddingChanged: Qt.callLater(relayout)
+    onBottomPaddingChanged: Qt.callLater(relayout)
+    onAlignmentChanged: Qt.callLater(relayout)
     Component.onCompleted: Qt.callLater(relayout)
 
     Connections {

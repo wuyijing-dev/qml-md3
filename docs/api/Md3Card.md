@@ -13,37 +13,34 @@ import Md3
 
 ### `Md3Card.Variant`
 
-`Md3Card.Elevated`, `Md3Card.Filled`, `Md3Card.Outlined`
+`Elevated`, `Filled`, `Outlined`
 
 ## Properties
 
-| Name | Type | Default | Access | Defined in | Description |
-|------|------|---------|--------|------------|-------------|
-| `variant` | `int` | `Md3Card.Elevated` | read/write | `Md3Card` | — |
-| `clickable` | `bool` | `false` | read/write | `Md3Card` | — |
-| `padding` | `real` | `16` | read/write | `Md3Card` | — |
-| `content` | `alias` | `contentHost.data` | default read/write | `Md3Card` | Default property → `contentHost.data` |
-| `elev` | `real` | `variant === Md3Card.Elevated ? 1 : 0` | readonly | `Md3Card` | — |
-| `containerColor` | `color` | `{…}` | readonly | `Md3Card` | — |
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | int | `Elevated` | Surface style |
+| `clickable` | bool | `false` | Emits `clicked` |
+| `padding` | real | `16` | Content inset |
+| `layoutMode` | int | `Md3ContainerBody.Fit` | Fit or Scroll body |
+| `title` | string | `""` | Optional header (no nested Text needed) |
+| `subtitle` | string | `""` | Optional supporting header |
+| `content` | alias | default | Body children under the header |
+| `elev` / `containerColor` | readonly | — | Resolved chrome |
 
 ## Signals
 
-| Signal | Defined in | Description |
-|--------|------------|-------------|
-| `clicked()` | `Md3Card` | — |
-
-## Methods
-
-_None._
+| Signal | Description |
+|--------|-------------|
+| `clicked()` | When `clickable` |
 
 ## Example
 
 ```qml
-import Md3
-
 Md3Card {
-    variant: Md3Card.Elevated
-    clickable: false
-    padding: 16
+    title: qsTr("Storage")
+    subtitle: qsTr("Local cache settings")
+    layoutMode: Md3ContainerBody.Scroll
+    Md3Switch { /* ... */ }
 }
 ```

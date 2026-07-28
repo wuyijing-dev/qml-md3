@@ -31,55 +31,46 @@ Item {
                 tone: Md3Text.OnSurfaceVariant
                 wrapMode: Text.WordWrap
             }
-            Md3Card {
+            Md3PageSection {
                 Layout.fillWidth: true
-                variant: Md3Card.Outlined
-                Md3VStack {
+                title: qsTr("布局组件（VStack / HStack / Flow / Grid）")
+                subtitle: qsTr("对齐、padding、expand spacer、Card.title 等 API 减少样板代码。")
+
+                Md3Card {
                     width: parent.width
-                    padding: 16
-                    spacing: 12
-                    Md3Text {
-                        text: qsTr("布局组件（VStack / HStack / Flow / Grid）")
-                        role: Md3Text.TitleMedium
-                    }
-                    Md3HStack {
-                        spacing: 8
-                        Md3Button { text: qsTr("确认") }
-                        Md3Button { text: qsTr("取消"); variant: Md3Button.Outlined }
-                        Md3Spacer { spacerWidth: 8 }
-                        Md3Text {
-                            text: qsTr("HStack")
-                            tone: Md3Text.OnSurfaceVariant
-                        }
-                    }
-                    Md3FlowLayout {
+                    variant: Md3Card.Outlined
+                    Md3VStack {
                         width: parent.width
-                        spacing: 8
-                        rowSpacing: 8
-                        Repeater {
-                            model: 6
-                            delegate: Md3SuggestionChip {
-                                text: qsTr("Flow %1").arg(index + 1)
+                        spacing: 12
+                        Md3HStack {
+                            spacing: 8
+                            Md3Button { text: qsTr("确认") }
+                            Md3Button { text: qsTr("取消"); variant: Md3Button.Outlined }
+                            Md3Spacer { expand: true }
+                            Md3Text {
+                                text: qsTr("HStack + expand")
+                                tone: Md3Text.OnSurfaceVariant
                             }
                         }
-                    }
-                    Md3GridLayout {
-                        width: parent.width
-                        minCellWidth: 140
-                        spacing: 8
-                        rowSpacing: 8
-                        Repeater {
-                            model: 4
-                            delegate: Md3Card {
-                                implicitWidth: 140
-                                implicitHeight: 84
-                                variant: Md3Card.Filled
-                                layoutMode: Md3ContainerBody.Fit
-                                Md3Text {
-                                    anchors.centerIn: parent
-                                    text: qsTr("Grid %1").arg(index + 1)
-                                    role: Md3Text.TitleSmall
-                                    tone: Md3Text.OnSurface
+                        Md3FlowLayout {
+                            spacing: 8
+                            rowSpacing: 8
+                            Repeater {
+                                model: 6
+                                delegate: Md3SuggestionChip {
+                                    text: qsTr("Flow %1").arg(index + 1)
+                                }
+                            }
+                        }
+                        Md3GridLayout {
+                            minCellWidth: 140
+                            minCellHeight: 84
+                            spacing: 8
+                            Repeater {
+                                model: 4
+                                delegate: Md3Card {
+                                    title: qsTr("Grid %1").arg(index + 1)
+                                    variant: Md3Card.Filled
                                 }
                             }
                         }
@@ -95,23 +86,14 @@ Item {
                     Layout.fillHeight: true
                     variant: Md3Card.Outlined
                     layoutMode: Md3ContainerBody.Fit
-                    Column {
+                    title: qsTr("Fit 模式")
+                    subtitle: qsTr("容器高度跟随内容增长，适合卡片说明、设置面板和轻量表单。")
+                    Md3AnimatedFlow {
                         width: parent.width
-                        spacing: 12
-                        Md3Text { text: qsTr("Fit 模式"); role: Md3Text.TitleMedium }
-                        Md3Text {
-                            width: parent.width
-                            text: qsTr("容器高度跟随内容增长，适合卡片说明、设置面板和轻量表单。")
-                            tone: Md3Text.OnSurfaceVariant
-                            wrapMode: Text.WordWrap
-                        }
-                        Md3AnimatedFlow {
-                            width: parent.width
-                            Repeater {
-                                model: 6
-                                delegate: Md3SuggestionChip {
-                                    text: qsTr("标签 %1").arg(index + 1)
-                                }
+                        Repeater {
+                            model: 6
+                            delegate: Md3SuggestionChip {
+                                text: qsTr("标签 %1").arg(index + 1)
                             }
                         }
                     }
@@ -121,10 +103,10 @@ Item {
                     Layout.fillHeight: true
                     variant: Md3Card.Outlined
                     layoutMode: Md3ContainerBody.Scroll
+                    title: qsTr("Scroll 模式")
                     Column {
                         width: parent.width
                         spacing: 12
-                        Md3Text { text: qsTr("Scroll 模式"); role: Md3Text.TitleMedium }
                         Repeater {
                             model: 10
                             delegate: Md3Text {
@@ -142,28 +124,22 @@ Item {
                 spacing: 12
                 rowSpacing: 12
                 Md3Card {
+                    title: "Elevated"
                     variant: Md3Card.Elevated
                     width: 180
                     height: 100
-                    implicitWidth: width
-                    implicitHeight: height
-                    Text { text: "Elevated"; color: Md3Theme.colorScheme.colorOnSurface }
                 }
                 Md3Card {
+                    title: "Filled"
                     variant: Md3Card.Filled
                     width: 180
                     height: 100
-                    implicitWidth: width
-                    implicitHeight: height
-                    Text { text: "Filled"; color: Md3Theme.colorScheme.colorOnSurface }
                 }
                 Md3Card {
+                    title: "Outlined"
                     variant: Md3Card.Outlined
                     width: 180
                     height: 100
-                    implicitWidth: width
-                    implicitHeight: height
-                    Text { text: "Outlined"; color: Md3Theme.colorScheme.colorOnSurface }
                 }
             }
 

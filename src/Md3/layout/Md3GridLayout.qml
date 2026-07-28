@@ -4,13 +4,26 @@ import QtQuick
 Item {
     id: root
 
+    enum Alignment {
+        Start,
+        Center,
+        End
+    }
+
     /// Fixed columns; <= 0 means auto by minCellWidth.
     property int columns: 0
     property real minCellWidth: 160
+    property real minCellHeight: 0
     property real spacing: 12
     property real rowSpacing: spacing
     property real padding: 0
+    property real leftPadding: padding
+    property real rightPadding: padding
+    property real topPadding: padding
+    property real bottomPadding: padding
     property bool stretchCells: true
+    property bool equalRowHeight: true
+    property int cellAlignment: Md3GridLayout.Center
     default property alias content: host.data
 
     readonly property int effectiveColumns: _effectiveColumns
@@ -19,17 +32,26 @@ Item {
     property real _cellWidth: 0
     property real _contentHeight: 0
 
-    implicitWidth: Math.max(1, host.implicitWidth + padding * 2)
-    implicitHeight: _contentHeight + padding * 2
+    implicitWidth: Math.max(1, host.implicitWidth + leftPadding + rightPadding)
+    implicitHeight: _contentHeight + topPadding + bottomPadding
+    width: parent ? parent.width : implicitWidth
 
     Item {
         id: host
-        x: root.padding
-        y: root.padding
-        width: Math.max(0, root.width - root.padding * 2)
+        x: root.leftPadding
+        y: root.topPadding
+        width: Math.max(0, root.width - root.leftPadding - root.rightPadding)
         height: root._contentHeight
         implicitWidth: childrenRect.width
         implicitHeight: childrenRect.height
+    }
+
+    function _itemSize(item) {
+        let w = Math.max(item.width || 0, item.implicitWidth || 0)
+        let h = Math.max(item.height || 0, item.implicitHeight || 0)
+        if (root.minCellHeight > 0)
+            h = Math.max(h, root.minCellHeight)
+        return Qt.size(Math.max(1, w), Math.max(1, h))
     }
 
     function relayout() {
@@ -49,7 +71,9 @@ Item {
         }
 
         const avail = Math.max(1, host.width)
-        let cols = root.columns > 0 ? root.columns : Math.floor((avail + root.spacing) / Math.max(1, root.minCellWidth + root.spacing))
+        let cols = root.columns > 0
+                 ? root.columns
+                 : Math.floor((avail + root.spacing) / Math.max(1, root.minCellWidth + root.spacing))
         cols = Math.max(1, cols)
         _effectiveColumns = cols
 
@@ -61,8 +85,16 @@ Item {
         for (let i = 0; i < visibleKids.length; ++i) {
             const child = visibleKids[i]
             const row = Math.floor(i / cols)
-            const h = child.implicitHeight > 0 ? child.implicitHeight : child.height
-            rowHeights[row] = Math.max(rowHeights[row] || 0, Math.max(1, h))
+            const sz = _itemSize(child)
+            rowHeights[row] = Math.max(rowHeights[row] || 0, sz.height)
+        }
+
+        if (root.equalRowHeight && rowHeights.length > 0) {
+            let maxH = 0
+            for (let r = 0; r < rowHeights.length; ++r)
+                maxH = Math.max(maxH, rowHeights[r])
+            for (let r = 0; r < rowHeights.length; ++r)
+                rowHeights[r] = maxH
         }
 
         let contentH = 0
@@ -80,12 +112,24 @@ Item {
                 if (index >= visibleKids.length)
                     break
                 const child = visibleKids[index]
+                const sz = _itemSize(child)
                 child.x = c * (cellW + root.spacing)
-                child.y = y
-                if (root.stretchCells)
+                if (root.stretchCells) {
                     child.width = cellW
-                if (child.height <= 0 && child.implicitHeight > 0)
-                    child.height = child.implicitHeight
+                    child.height = rowH
+                    child.y = y
+                } else {
+                    if (child.width <= 0)
+                        child.width = sz.width
+                    if (child.height <= 0)
+                        child.height = sz.height
+                    if (root.cellAlignment === Md3GridLayout.Center)
+                        child.y = y + Math.max(0, (rowH - child.height) * 0.5)
+                    else if (root.cellAlignment === Md3GridLayout.End)
+                        child.y = y + Math.max(0, rowH - child.height)
+                    else
+                        child.y = y
+                }
             }
             y += rowH + root.rowSpacing
         }
@@ -94,9 +138,17 @@ Item {
     onWidthChanged: Qt.callLater(relayout)
     onColumnsChanged: Qt.callLater(relayout)
     onMinCellWidthChanged: Qt.callLater(relayout)
+    onMinCellHeightChanged: Qt.callLater(relayout)
     onSpacingChanged: Qt.callLater(relayout)
     onRowSpacingChanged: Qt.callLater(relayout)
     onPaddingChanged: Qt.callLater(relayout)
+    onLeftPaddingChanged: Qt.callLater(relayout)
+    onRightPaddingChanged: Qt.callLater(relayout)
+    onTopPaddingChanged: Qt.callLater(relayout)
+    onBottomPaddingChanged: Qt.callLater(relayout)
+    onStretchCellsChanged: Qt.callLater(relayout)
+    onEqualRowHeightChanged: Qt.callLater(relayout)
+    onCellAlignmentChanged: Qt.callLater(relayout)
 
     Component.onCompleted: Qt.callLater(relayout)
 
@@ -105,5 +157,12 @@ Item {
         function onChildrenChanged() {
             Qt.callLater(root.relayout)
         }
+    }
+
+    Timer {
+        interval: 48
+        running: root.visible && host.children.length > 0
+        repeat: true
+        onTriggered: root.relayout()
     }
 }

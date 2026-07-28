@@ -1,52 +1,39 @@
 # Md3GridLayout
 
+Responsive uniform grid. Cell size uses `max(explicit, implicit)` and optional `minCellHeight`.
+
 - **Source:** `src/Md3/layout/Md3GridLayout.qml`
-- **Extends:** `Item`
-
-## Import
-
-```qml
-import Md3
-```
 
 ## Properties
 
-| Name | Type | Default | Access | Defined in | Description |
-|------|------|---------|--------|------------|-------------|
-| `content` | `alias` | `host.data` | default read/write | `Md3GridLayout` | Default property -> `host.data` |
-| `columns` | `int` | `0` | read/write | `Md3GridLayout` | Fixed columns (`<=0` uses auto columns) |
-| `minCellWidth` | `real` | `160` | read/write | `Md3GridLayout` | Target minimum width per cell in auto mode |
-| `spacing` | `real` | `12` | read/write | `Md3GridLayout` | Horizontal spacing |
-| `rowSpacing` | `real` | `spacing` | read/write | `Md3GridLayout` | Vertical spacing |
-| `padding` | `real` | `0` | read/write | `Md3GridLayout` | Inner padding |
-| `stretchCells` | `bool` | `true` | read/write | `Md3GridLayout` | Force each child width to computed cell width |
-| `effectiveColumns` | `int` | `_effectiveColumns` | readonly | `Md3GridLayout` | Computed columns |
-| `cellWidth` | `real` | `_cellWidth` | readonly | `Md3GridLayout` | Computed cell width |
-
-## Signals
-
-_None._
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `content` | alias | default | Children |
+| `columns` | int | `0` | Fixed columns; `<=0` = auto from `minCellWidth` |
+| `minCellWidth` | real | `160` | Auto-column target |
+| `minCellHeight` | real | `0` | Floor for row height |
+| `spacing` / `rowSpacing` | real | `12` / `spacing` | Gaps |
+| `padding` (+ edge paddings) | real | `0` | — |
+| `stretchCells` | bool | `true` | Force each cell to grid cell size |
+| `equalRowHeight` | bool | `true` | All rows share max row height |
+| `cellAlignment` | int | `Center` | When not stretching: Start/Center/End |
+| `effectiveColumns` / `cellWidth` | readonly | — | Metrics |
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `relayout()` | `Md3GridLayout` | Recompute child placement |
+| Method | Description |
+|--------|-------------|
+| `relayout()` | Recompute placement |
 
 ## Example
 
 ```qml
-import Md3
-
 Md3GridLayout {
-    minCellWidth: 180
-    spacing: 12
+    minCellWidth: 140
+    minCellHeight: 84
     Repeater {
-        model: 6
-        delegate: Md3Card {
-            implicitHeight: 88
-            Text { text: "Card " + (index + 1) }
-        }
+        model: 4
+        delegate: Md3Card { title: "Grid " + (index + 1); variant: Md3Card.Filled }
     }
 }
 ```

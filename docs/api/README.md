@@ -4,7 +4,7 @@
 
 由 `scripts/gen_api_docs.py` 从 QML 源码生成；改完控件后请重跑该脚本。
 
-集成与 C++ 启动：[../integration.md](../integration.md) · 主题令牌：[../tokens.md](../tokens.md)
+集成与 C++ 启动：[../integration.md](../integration.md) · 主题令牌：[../tokens.md](../tokens.md) · 布局少写胶水：[../layout.md](../layout.md)
 
 ## C++ / native
 
@@ -15,7 +15,7 @@
 - [Md3AppSettings](Md3AppSettings.md) — QSettings facade
 - [Md3HotReload](Md3HotReload.md) — QML hot reload watcher
 
-**QML types:** 122
+**QML types:** 126
 
 ## Actions & selection
 
@@ -63,14 +63,16 @@
 
 ## Containment & feedback
 
+- [Md3AdaptiveContainer](Md3AdaptiveContainer.md) — Standalone Fit/Scroll column host.
 - [Md3Avatar](Md3Avatar.md) — Circular avatar: image, initials, or icon fallback.
 - [Md3AvatarGroup](Md3AvatarGroup.md) — Overlapping row of avatars. model: [{ source?, initials?, icon?, color? }, ...] or strings (initials).
 - [Md3Badge](Md3Badge.md) — Material Badge — numeric / dot / max-count, attach to any item via anchors.
 - [Md3Badged](Md3Badged.md) — Wraps content and positions an Md3Badge (top-end by default).
 - [Md3Banner](Md3Banner.md)
 - [Md3BottomSheet](Md3BottomSheet.md)
-- [Md3Card](Md3Card.md)
+- [Md3Card](Md3Card.md) — Surface card with optional `title`/`subtitle` and Fit/Scroll `layoutMode`.
 - [Md3Carousel](Md3Carousel.md)
+- [Md3ContainerBody](Md3ContainerBody.md) — Fit/Scroll host embedded by containers.
 - [Md3ContextMenuArea](Md3ContextMenuArea.md) — Transparent right-click host over a page / region. Left-clicks pass through; right-click opens `contextMenu` at the cursor.  ```qml Md3ContextMenuArea { anchors.fill: parent contextMenu: pageMenu } Md3Menu { id: pageMenu Md3MenuItem { text: "Refresh" } } ```
 - [Md3Dialog](Md3Dialog.md)
 - [Md3Divider](Md3Divider.md)
@@ -118,17 +120,21 @@
 - [Md3SearchBar](Md3SearchBar.md)
 - [Md3SearchView](Md3SearchView.md)
 - [Md3Select](Md3Select.md) — Field-style select (ComboBox): label, helper/error, menu — aligned with Md3TextField. Supports searchable filtering and multi-select.
+- [Md3Text](Md3Text.md) — Themed text with MD3 role/tone tokens.
 - [Md3TextField](Md3TextField.md)
 - [Md3TimePicker](Md3TimePicker.md) — Material 3 time picker — dial / keyboard input, hour↔minute, AM/PM, 12h/24h, modal.
 
 ## Layout
 
-- [Md3AnimatedFlow](Md3AnimatedFlow.md)
-- [Md3FlowLayout](Md3FlowLayout.md)
-- [Md3GridLayout](Md3GridLayout.md)
-- [Md3HStack](Md3HStack.md)
-- [Md3Spacer](Md3Spacer.md)
-- [Md3VStack](Md3VStack.md)
+- [Md3AnimatedFlow](Md3AnimatedFlow.md) — Animated wrap flow; sizes use max(explicit, implicit).
+- [Md3FlowLayout](Md3FlowLayout.md) — Non-animated wrap flow (same API as AnimatedFlow).
+- [Md3GridLayout](Md3GridLayout.md) — Responsive grid with minCellHeight / equal rows.
+- [Md3HStack](Md3HStack.md) — Horizontal stack + expanding spacers.
+- [Md3PageSection](Md3PageSection.md) — Title/subtitle/content section (less page glue).
+- [Md3Spacer](Md3Spacer.md) — Fixed `size` or `expand: true`.
+- [Md3VStack](Md3VStack.md) — Vertical stack + stretch/align.
+
+Guide: [../layout.md](../layout.md)
 
 ## Navigation
 

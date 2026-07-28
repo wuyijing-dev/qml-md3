@@ -4,6 +4,8 @@ Md3 is a **standalone QML library** (`URI Md3`). The Gallery demo is optional an
 
 For **prebuilt folder + same-directory layout**, see **[packaging.md](packaging.md)** first.
 
+For **writing less layout glue** (stacks, flow, grid, Card.title, layoutMode), see **[layout.md](layout.md)**.
+
 ## CMake — subdirectory (dev / from sources)
 
 ```cmake

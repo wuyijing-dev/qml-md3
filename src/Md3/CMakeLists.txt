@@ -179,6 +179,7 @@ qt_add_qml_module(Md3
         layout/Md3FlowLayout.qml
         layout/Md3GridLayout.qml
         layout/Md3Spacer.qml
+        layout/Md3PageSection.qml
         components/Md3Button.qml
         components/Md3IconButton.qml
         components/Md3ToggleIconButton.qml

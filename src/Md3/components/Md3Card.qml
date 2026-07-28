@@ -10,7 +10,10 @@ Item {
     // Use Item.enabled (do not redeclare — Qt 6.11 warns on override)
     property real padding: 16
     property int layoutMode: Md3ContainerBody.Fit
-    default property alias content: contentHost.content
+    /// Optional header — when set, users need not nest title Text manually.
+    property string title: ""
+    property string subtitle: ""
+    default property alias content: bodySlot.data
 
     signal clicked()
 
@@ -66,10 +69,38 @@ Item {
             anchors.top: parent.top
             anchors.margins: root.padding
             layoutMode: root.layoutMode
-            // Explicit card height (Layouts) → fill; otherwise size to children only.
             height: root.height >= root.padding * 2 + 1
                     ? root.height - root.padding * 2
                     : implicitHeight
+
+            Md3VStack {
+                width: parent.width
+                spacing: 8
+                fillWidth: true
+
+                Md3Text {
+                    visible: root.title.length > 0
+                    width: parent.width
+                    text: root.title
+                    role: Md3Text.TitleMedium
+                    wrapMode: Text.WordWrap
+                }
+                Md3Text {
+                    visible: root.subtitle.length > 0
+                    width: parent.width
+                    text: root.subtitle
+                    role: Md3Text.BodyMedium
+                    tone: Md3Text.OnSurfaceVariant
+                    wrapMode: Text.WordWrap
+                }
+                Item {
+                    id: bodySlot
+                    width: parent.width
+                    height: childrenRect.height
+                    implicitHeight: childrenRect.height
+                    implicitWidth: childrenRect.width
+                }
+            }
         }
     }
 
