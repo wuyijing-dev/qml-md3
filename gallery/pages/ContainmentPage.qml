@@ -11,6 +11,7 @@ Item {
         contentWidth: width
         contentHeight: column.height
         clip: true
+        interactive: !liquidCard.dragging
         ColumnLayout {
             id: column
             width: root.width
@@ -39,6 +40,91 @@ Item {
                     Layout.preferredWidth: 180
                     Layout.preferredHeight: 100
                     Text { text: "Outlined"; color: Md3Theme.colorScheme.colorOnSurface }
+                }
+            }
+
+            Text {
+                text: qsTr("Liquid Glass")
+                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                font.pixelSize: Md3Theme.typography.labelLarge.size
+            }
+            Text {
+                Layout.fillWidth: true
+                text: qsTr("Drag the glass card — backdrop blur, edge highlight, and specular follow the pointer.")
+                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                font.pixelSize: Md3Theme.typography.bodySmall.size
+                wrapMode: Text.Wrap
+            }
+            Item {
+                id: glassPlayground
+                Layout.fillWidth: true
+                Layout.preferredHeight: 320
+                clip: true
+
+                Rectangle {
+                    id: glassBackdrop
+                    anchors.fill: parent
+                    radius: Md3Theme.shape.large
+                    gradient: Gradient {
+                        orientation: Gradient.Horizontal
+                        GradientStop { position: 0.0; color: "#5B8DEF" }
+                        GradientStop { position: 0.35; color: "#C084FC" }
+                        GradientStop { position: 0.65; color: "#FB7185" }
+                        GradientStop { position: 1.0; color: "#FBBF24" }
+                    }
+
+                    // Decorative shapes so refraction/blur reads clearly while dragging.
+                    Repeater {
+                        model: 8
+                        delegate: Rectangle {
+                            required property int index
+                            width: 70 + (index % 3) * 28
+                            height: width
+                            radius: width / 2
+                            x: 24 + (index * 97) % Math.max(40, glassBackdrop.width - 100)
+                            y: 20 + (index * 53) % Math.max(40, glassBackdrop.height - 100)
+                            color: Qt.rgba(1, 1, 1, 0.18 + (index % 4) * 0.05)
+                        }
+                    }
+
+                    Text {
+                        anchors.left: parent.left
+                        anchors.bottom: parent.bottom
+                        anchors.margins: 16
+                        text: qsTr("Backdrop")
+                        color: Qt.rgba(1, 1, 1, 0.7)
+                        font.pixelSize: Md3Theme.typography.labelLarge.size
+                    }
+                }
+
+                Md3LiquidGlass {
+                    id: liquidCard
+                    sourceItem: glassBackdrop
+                    x: 36
+                    y: 56
+                    width: 260
+                    height: 150
+
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width
+                        spacing: 6
+                        Text {
+                            text: qsTr("Liquid Glass")
+                            color: Md3Theme.colorScheme.colorOnSurface
+                            font.family: Md3Theme.typography.fontFamily
+                            font.pixelSize: Md3Theme.typography.titleMedium.size
+                            font.weight: Font.Medium
+                        }
+                        Text {
+                            width: parent.width
+                            wrapMode: Text.Wrap
+                            text: qsTr("Drag me across the colors")
+                            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                            font.family: Md3Theme.typography.fontFamily
+                            font.pixelSize: Md3Theme.typography.bodyMedium.size
+                        }
+                    }
                 }
             }
             Column {
