@@ -230,13 +230,7 @@ Item {
             }
         }
 
-        Rectangle {
-            anchors.fill: parent
-            radius: root.radius
-            color: "transparent"
-            border.width: 1 + 0.5 * root._thickness
-            border.color: Qt.rgba(1, 1, 1, 0.4 * root._effEdge)
-        }
+        // No Rectangle border — rounded-rect stroke reads as a square frame under squircle clip.
 
         Item {
             id: contentHost
@@ -246,19 +240,22 @@ Item {
         }
     }
 
-    // Squircle mask (white interior) for MultiEffect.
-    ShaderEffect {
+    // Same mask pattern as Md3Button: layered Item, coverage in alpha.
+    Item {
         id: squircleMask
         width: root.width
         height: root.height
         visible: false
-        property real aspect: root._aspect
-        property real squircleN: root.squircleN
-        property real soft: 0.012
         layer.enabled: true
         layer.smooth: true
-        vertexShader: "qrc:/qt/qml/Md3/shaders/md3squircle_mask.vert.qsb"
-        fragmentShader: "qrc:/qt/qml/Md3/shaders/md3squircle_mask.frag.qsb"
+        ShaderEffect {
+            anchors.fill: parent
+            property real aspect: root._aspect
+            property real squircleN: root.squircleN
+            property real soft: 0.018
+            vertexShader: "qrc:/qt/qml/Md3/shaders/md3squircle_mask.vert.qsb"
+            fragmentShader: "qrc:/qt/qml/Md3/shaders/md3squircle_mask.frag.qsb"
+        }
     }
 
     MouseArea {
