@@ -62,32 +62,31 @@ Flickable {
 
         RowLayout {
             spacing: 8
-            Md3Checkbox { checked: true }
-            Md3Checkbox { }
-            Md3Checkbox { tristate: true; checkState: Qt.PartiallyChecked }
-            Md3Checkbox { enabled: false; checked: true }
+            Md3Checkbox { text: qsTr("Checked"); checked: true }
+            Md3Checkbox { text: qsTr("Unchecked") }
+            Md3Checkbox { text: qsTr("Partial"); tristate: true; checkState: Qt.PartiallyChecked }
+            Md3Checkbox { text: qsTr("Disabled"); enabled: false; checked: true }
         }
 
         RowLayout {
             spacing: 8
-            Md3Radio { value: "a"; group: radioGroup; checked: true; accessibleName: "Option A" }
-            Md3Radio { value: "b"; group: radioGroup; accessibleName: "Option B" }
-            Md3Radio { value: "c"; group: radioGroup; enabled: false; accessibleName: "Option C" }
+            Md3Radio { text: qsTr("Option A"); value: "a"; group: radioGroup; checked: true }
+            Md3Radio { text: qsTr("Option B"); value: "b"; group: radioGroup }
+            Md3Radio { text: qsTr("Option C"); value: "c"; group: radioGroup; enabled: false }
         }
 
         RowLayout {
             spacing: 16
-            Md3Switch { }
-            Md3Switch { checked: true }
-            Md3Switch { checked: true; showIcon: true }
-            Md3Switch { enabled: false; checked: true }
+            Md3Switch { text: qsTr("Off") }
+            Md3Switch { text: qsTr("On"); checked: true }
+            Md3Switch { text: qsTr("Icons"); checked: true; showIcon: true }
+            Md3Switch { text: qsTr("Disabled"); enabled: false; checked: true }
         }
 
-        Text {
+        Md3Text {
             text: qsTr("Sliders (Material 3 capsule)")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.titleSmall.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
         VolumeRow {
@@ -113,6 +112,8 @@ Flickable {
 
         Md3Slider {
             Layout.fillWidth: true
+            label: qsTr("Discrete with bubble")
+            showValue: true
             from: 0
             to: 100
             value: 35

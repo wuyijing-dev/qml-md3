@@ -98,3 +98,5 @@ Md3Card {
 - [Md3Text](api/Md3Text.md)
 - [Md3ContainerBody](api/Md3ContainerBody.md)
 - [Md3AdaptiveContainer](api/Md3AdaptiveContainer.md)
+
+Also see [glue-less-api.md](glue-less-api.md) for Switch/Slider/ListTile/Sheet shortcuts.

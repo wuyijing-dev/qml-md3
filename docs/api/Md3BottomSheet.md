@@ -1,39 +1,27 @@
 # Md3BottomSheet
 
 - **Source:** `src/Md3/components/Md3BottomSheet.qml`
-- **Extends:** `Item`
-
-## Import
-
-```qml
-import Md3
-```
 
 ## Properties
 
-| Name | Type | Default | Access | Defined in | Description |
-|------|------|---------|--------|------------|-------------|
-| `open` | `bool` | `false` | read/write | `Md3BottomSheet` | — |
-| `modal` | `bool` | `true` | read/write | `Md3BottomSheet` | — |
-| `content` | `alias` | `sheetContent.data` | default read/write | `Md3BottomSheet` | Default property → `sheetContent.data` |
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `open` / `modal` | bool | `false` / `true` | — |
+| `layoutMode` | int | `Fit` | Fit / Scroll body |
+| `title` / `text` | string | `""` | Optional header copy |
+| `confirmText` / `dismissText` | string | `""` | Action buttons (hidden when empty) |
+| `content` | alias | default | Custom body |
 
 ## Signals
 
-| Signal | Defined in | Description |
-|--------|------------|-------------|
-| `dismissed()` | `Md3BottomSheet` | — |
-
-## Methods
-
-_None._
+`dismissed()`, `confirmed()`
 
 ## Example
 
 ```qml
-import Md3
-
 Md3BottomSheet {
-    open: false
-    modal: true
+    title: qsTr("Options")
+    text: qsTr("Choose an action")
+    confirmText: qsTr("Done")
 }
 ```

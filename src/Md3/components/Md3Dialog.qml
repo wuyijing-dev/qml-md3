@@ -9,6 +9,8 @@ Item {
     property string confirmText: "OK"
     property string dismissText: "Cancel"
     property bool showDismiss: true
+    /// Custom body between text and action buttons.
+    default property alias content: bodySlot.data
 
     signal confirmed()
     signal dismissed()
@@ -94,6 +96,13 @@ Item {
                 font.family: Md3Theme.typography.fontFamily
                 font.pixelSize: Md3Theme.typography.bodyMedium.size
                 wrapMode: Text.Wrap
+            }
+
+            Item {
+                id: bodySlot
+                width: parent.width
+                height: childrenRect.height
+                visible: children.length > 0
             }
 
             Row {

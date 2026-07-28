@@ -11,8 +11,9 @@ Item {
     property int edge: Md3SideSheet.End
     property real sheetWidth: 360
     property string title: ""
+    property string text: ""
     property int layoutMode: Md3ContainerBody.Fit
-    default property alias content: sheetBody.content
+    default property alias content: customSlot.data
 
     signal dismissed()
 
@@ -140,6 +141,28 @@ Item {
                 width: parent.width
                 height: parent.height - (root.title.length > 0 ? 64 : 12)
                 layoutMode: root.layoutMode
+                padding: 24
+
+                Md3VStack {
+                    width: parent.width
+                    spacing: 12
+                    fillWidth: true
+
+                    Md3Text {
+                        visible: root.text.length > 0
+                        width: parent.width
+                        text: root.text
+                        role: Md3Text.BodyMedium
+                        tone: Md3Text.OnSurfaceVariant
+                        wrapMode: Text.WordWrap
+                    }
+                    Item {
+                        id: customSlot
+                        width: parent.width
+                        height: childrenRect.height
+                        implicitHeight: childrenRect.height
+                    }
+                }
             }
         }
     }

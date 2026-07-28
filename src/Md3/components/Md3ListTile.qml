@@ -11,8 +11,12 @@ Item {
     /// Degrees applied to trailing icon (e.g. ExpansionTile chevron).
     property real trailingRotation: 0
     property bool selected: false
-    property bool enabled: true
+    // Use Item.enabled (do not redeclare)
     property bool showDivider: false
+    /// Stretch to parent width (default) — removes `width: parent.width` glue.
+    property bool fillWidth: true
+    /// Optional trailing control slot (e.g. Md3Switch) — prefer over inventing a Row.
+    property alias trailing: trailingSlot.data
 
     signal clicked()
     signal trailingClicked()
@@ -25,11 +29,12 @@ Item {
         return 1
     }
     readonly property real minH: lines === 1 ? 56 : (lines === 2 ? 72 : 88)
+    readonly property bool hasTrailingSlot: trailingSlot.children.length > 0
 
     implicitHeight: Math.max(minH, col.implicitHeight + 16)
     implicitWidth: 320
     height: implicitHeight
-    width: implicitWidth
+    width: fillWidth && parent ? parent.width : implicitWidth
     activeFocusOnTab: enabled
     Accessible.name: title
     Accessible.role: Accessible.ListItem
@@ -71,6 +76,8 @@ Item {
                     w -= 24 + 16
                 if (root.trailingIcon.length > 0)
                     w -= 24 + 16
+                if (root.hasTrailingSlot)
+                    w -= trailingSlot.width + 16
                 return Math.max(0, w)
             }
             spacing: 2
@@ -108,8 +115,16 @@ Item {
             }
         }
 
+        Item {
+            id: trailingSlot
+            visible: root.hasTrailingSlot
+            width: childrenRect.width
+            height: Math.max(childrenRect.height, 24)
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
         Md3Icon {
-            visible: root.trailingIcon.length > 0
+            visible: root.trailingIcon.length > 0 && !root.hasTrailingSlot
             icon: root.trailingIcon
             size: 24
             iconColor: Md3Theme.colorScheme.colorOnSurfaceVariant

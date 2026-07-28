@@ -476,35 +476,12 @@ Item {
                 onAccepted: glassBackdrop.setVideo(selectedFile)
             }
 
-            component GlassParamRow: ColumnLayout {
-                property alias label: lab.text
-                property alias from: slider.from
-                property alias to: slider.to
-                property alias value: slider.value
-                property alias slider: slider
+            component GlassParamRow: Md3Slider {
                 Layout.fillWidth: true
-                spacing: 0
-                RowLayout {
-                    Layout.fillWidth: true
-                    Text {
-                        id: lab
-                        Layout.fillWidth: true
-                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                        font.pixelSize: Md3Theme.typography.labelLarge.size
-                    }
-                    Text {
-                        text: slider.value.toFixed(2)
-                        color: Md3Theme.colorScheme.colorOnSurface
-                        font.pixelSize: Md3Theme.typography.labelLarge.size
-                    }
-                }
-                Md3Slider {
-                    id: slider
-                    Layout.fillWidth: true
-                    from: 0
-                    to: 1
-                    value: 0.5
-                }
+                showValue: true
+                from: 0
+                to: 1
+                value: 0.5
             }
 
             GlassParamRow {
@@ -566,9 +543,15 @@ Item {
             Column {
                 Layout.fillWidth: true
                 width: root.width
-                Md3ListTile { width: parent.width; title: "One line"; leadingIcon: "person"; trailingIcon: "chevron_right"; showDivider: true }
-                Md3ListTile { width: parent.width; title: "Two line"; subtitle: "Supporting"; leadingIcon: "settings"; showDivider: true }
-                Md3ListTile { width: parent.width; title: "Three line"; subtitle: "Subtitle"; supportingText: "Extra supporting text."; leadingIcon: "info" }
+                Md3ListTile { title: "One line"; leadingIcon: "person"; trailingIcon: "chevron_right"; showDivider: true }
+                Md3ListTile { title: "Two line"; subtitle: "Supporting"; leadingIcon: "settings"; showDivider: true }
+                Md3ListTile { title: "Three line"; subtitle: "Subtitle"; supportingText: "Extra supporting text."; leadingIcon: "info" }
+                Md3ListTile {
+                    title: qsTr("Dark theme")
+                    leadingIcon: "dark_mode"
+                    showDivider: true
+                    trailing: Md3Switch { checked: Md3Theme.dark }
+                }
             }
             Md3Button { text: "Open dialog"; onClicked: dlg.open = true }
             Md3Button { text: "Open bottom sheet"; variant: Md3Button.Outlined; onClicked: sheet.open = true }
@@ -598,38 +581,25 @@ Item {
         anchors.fill: parent
         title: "Dialog"
         text: "This is a Material 3 dialog."
+        Md3Checkbox { text: qsTr("Don't show again") }
     }
     Md3BottomSheet {
         id: sheet
         anchors.fill: parent
-        Text {
-            text: "Bottom sheet content"
-            color: Md3Theme.colorScheme.colorOnSurface
-            padding: 8
-        }
+        title: qsTr("Options")
+        text: qsTr("Bottom sheet content")
+        confirmText: qsTr("Done")
     }
 
     Md3SideSheet {
         id: sideSheet
         anchors.fill: parent
         title: qsTr("Side sheet")
+        text: qsTr("Use side sheets for secondary detail without leaving the page.")
         edge: Md3SideSheet.End
-        Column {
-            anchors.fill: parent
-            anchors.margins: 24
-            spacing: 12
-            Text {
-                width: parent.width
-                wrapMode: Text.Wrap
-                text: qsTr("Use side sheets for secondary detail without leaving the page.")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.family: Md3Theme.typography.fontFamily
-                font.pixelSize: Md3Theme.typography.bodyMedium.size
-            }
-            Md3Button {
-                text: qsTr("Done")
-                onClicked: sideSheet.dismiss()
-            }
+        Md3Button {
+            text: qsTr("Done")
+            onClicked: sideSheet.dismiss()
         }
     }
 
@@ -651,22 +621,15 @@ Item {
                 label: "Display name"
                 text: "QML MD3"
             }
-            Row {
-                spacing: 12
-                Md3Switch {
-                    id: notifySwitch
-                    checked: true
-                    accessibleName: "Enable notifications"
-                }
-                Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "Enable notifications"
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.pixelSize: Md3Theme.typography.bodyMedium.size
-                }
+            Md3Switch {
+                id: notifySwitch
+                text: qsTr("Enable notifications")
+                checked: true
             }
             Md3Slider {
                 width: parent.width
+                label: qsTr("Volume")
+                showValue: true
                 from: 0
                 to: 100
                 value: 42

@@ -12,8 +12,13 @@ Item {
     property real to: 1
     property real value: 0.5
     property real stepSize: 0
-    property bool enabled: true
+    // Use Item.enabled (do not redeclare)
     property bool showLabel: false
+    /// Field label above the track (replaces Column { Text; Slider } glue).
+    property string label: ""
+    /// Show current value to the right of `label`.
+    property bool showValue: false
+    property int valueDecimals: 2
     /// Thick capsule height (MD3 expressive ~16–20)
     property real trackHeight: 16
     /// Handle thickness (along track). Keep slim.
@@ -26,11 +31,15 @@ Item {
     /// Force tick dots; default = stepSize > 0
     property bool discrete: stepSize > 0
     property int maxTickCount: 24
-    property string accessibleName: "Slider"
+    property string accessibleName: label.length ? label : "Slider"
 
     signal moved(real value)
 
-    height: Math.max(48, handleHeight + 16)
+    readonly property real _headerH: (label.length > 0 || showValue) ? 24 : 0
+    readonly property real _bodyH: Math.max(48, handleHeight + 16)
+
+    height: _headerH > 0 ? _headerH + 4 + _bodyH : _bodyH
+    implicitHeight: height
     implicitWidth: 200
     width: implicitWidth
     activeFocusOnTab: enabled
@@ -80,6 +89,41 @@ Item {
     Keys.onRightPressed: nudge(1)
     Keys.onDownPressed: nudge(-1)
     Keys.onUpPressed: nudge(1)
+
+    Row {
+        id: headerRow
+        visible: root.label.length > 0 || root.showValue
+        width: parent.width
+        height: root._headerH
+        spacing: 8
+
+        Md3Text {
+            width: Math.max(0, parent.width - valueLabel.implicitWidth - parent.spacing)
+            text: root.label
+            role: Md3Text.BodyMedium
+            tone: Md3Text.OnSurfaceVariant
+            elide: Text.ElideRight
+            anchors.verticalCenter: parent.verticalCenter
+        }
+        Md3Text {
+            id: valueLabel
+            visible: root.showValue
+            text: {
+                const d = root.stepSize > 0 && root.stepSize >= 1 ? 0 : root.valueDecimals
+                return Number(root.value).toFixed(d)
+            }
+            role: Md3Text.LabelLarge
+            tone: Md3Text.OnSurface
+            anchors.verticalCenter: parent.verticalCenter
+        }
+    }
+
+    Item {
+        id: sliderBody
+        anchors.left: parent.left
+        anchors.right: parent.right
+        y: headerRow.visible ? headerRow.height + 4 : 0
+        height: root._bodyH
 
     Item {
         id: track
@@ -182,6 +226,7 @@ Item {
     }
 
     Rectangle {
+        parent: sliderBody
         visible: root.showLabel && (mouse.pressed || root.activeFocus)
         anchors.horizontalCenter: track.left
         anchors.horizontalCenterOffset: track.handleX + root.handleWidth / 2
@@ -202,6 +247,7 @@ Item {
     }
 
     Md3FocusRing {
+        parent: sliderBody
         anchors.centerIn: track
         anchors.horizontalCenterOffset: track.handleX + root.handleWidth / 2 - track.width / 2
         width: 32
@@ -213,6 +259,7 @@ Item {
 
     MouseArea {
         id: mouse
+        parent: sliderBody
         anchors.fill: parent
         hoverEnabled: true
         enabled: root.enabled
@@ -226,4 +273,5 @@ Item {
                 root.setValue(root.valueAt(mouse.x))
         }
     }
+    } // sliderBody
 }
