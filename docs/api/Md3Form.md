@@ -1,42 +1,37 @@
 # Md3Form
 
+Container that syncs `values` / `errors` onto named fields (`name` on TextField / Select / NumberField).
+
 - **Source:** `src/Md3/components/Md3Form.qml`
-- **Extends:** `Item`
-
-## Import
-
-```qml
-import Md3
-```
 
 ## Properties
 
-| Name | Type | Default | Access | Defined in | Description |
-|------|------|---------|--------|------------|-------------|
-| `errors` | `var` | `{…}` | read/write | `Md3Form` | — |
-| `values` | `var` | `{…}` | read/write | `Md3Form` | — |
-| `content` | `alias` | `host.data` | default read/write | `Md3Form` | Default property → `host.data` |
-
-## Signals
-
-_None._
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `errors` | var | `{}` | name → message |
+| `values` | var | `{}` | name → value (from syncValues) |
+| `requiredFields` | var | `[]` | Default list for validate() |
+| `layoutMode` | int | `Fit` | — |
+| `content` | alias | default | Fields |
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `setError(name, message)` | `Md3Form` | — |
-| `clearErrors()` | `Md3Form` | — |
-| `validate(requiredFields)` | `Md3Form` | — |
-| `errorFor(name)` | `Md3Form` | — |
+| Method | Description |
+|--------|-------------|
+| `setError(name, message)` | Set one error and apply to fields |
+| `clearErrors()` | Clear all |
+| `errorFor(name)` | Lookup |
+| `syncValues()` | Read named fields into `values` |
+| `collectFields()` | List items with `name` |
+| `validate(required?)` | Required check + auto `errorText` |
 
 ## Example
 
 ```qml
-import Md3
-
 Md3Form {
-    errors: /* … */
-    values: /* … */
+    id: form
+    requiredFields: ["email"]
+    Md3TextField { name: "email"; label: qsTr("Email") }
+    Md3Button { text: qsTr("OK"); onClicked: form.validate() }
 }
 ```

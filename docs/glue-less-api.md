@@ -75,6 +75,40 @@ Md3Dialog {
 }
 ```
 
-## Text
+## Menu model
 
-Prefer `Md3Text { role:; tone: }` over raw `Text { color: Md3Theme…; font… }`.
+```qml
+Md3Menu {
+    model: [
+        { text: "Cut", icon: "content_cut" },
+        { divider: true },
+        { text: "Create", icon: "add", items: [
+            { text: "Document", icon: "description" },
+            { text: "Folder", icon: "folder" }
+        ]}
+    ]
+    onItemClicked: (path) => console.log(path)
+}
+```
+
+## Form field names
+
+```qml
+Md3Form {
+    id: form
+    requiredFields: ["email"]
+    Md3TextField { name: "email"; label: qsTr("Email") }
+    Md3Button {
+        text: qsTr("Save")
+        onClicked: form.validate()  // sets errorText on named fields
+    }
+}
+```
+
+## Snackbar (no Window.host glue)
+
+```qml
+Md3Notify.snackbar(qsTr("Saved"), { actionText: qsTr("Undo") })
+```
+
+Requires `Md3ApplicationWindow` or any `Md3SnackbarHost` in the tree (auto-registers).

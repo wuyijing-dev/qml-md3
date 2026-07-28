@@ -122,61 +122,45 @@ Item {
         Item { Layout.fillHeight: true }
     }
 
-    // Sibling menus (not nested as property children) — more reliable cascade ownership
-    Md3Menu {
-        id: createMoreSub
-        menuWidth: 180
-        modal: false
-        Md3MenuItem { text: "From template" }
-        Md3MenuItem { text: "From clipboard" }
-    }
-
-    Md3Menu {
-        id: createSub
-        menuWidth: 200
-        modal: false
-        Md3MenuItem { text: "Document"; icon: "description" }
-        Md3MenuItem { text: "Folder"; icon: "folder" }
-        Md3MenuItem {
-            text: "More"
-            submenu: createMoreSub
-        }
-    }
-
-    Md3Menu {
-        id: shareSub
-        menuWidth: 200
-        modal: false
-        Md3MenuItem { text: "Copy link"; icon: "link" }
-        Md3MenuItem { text: "Email"; icon: "mail" }
-        Md3MenuItem { text: "QR code"; icon: "qr_code" }
-    }
-
+    // Model-driven context menu (less glue than hand-written MenuItems)
     Md3Menu {
         id: ctx
         menuWidth: 280
-
-        Md3MenuItem { text: "Cut"; icon: "content_cut" }
-        Md3MenuItem { text: "Copy"; icon: "content_copy" }
-        Md3MenuItem { text: "Paste"; icon: "content_paste" }
-        Md3MenuDivider {}
-        Md3MenuItem {
-            text: "Create"
-            icon: "add"
-            submenu: createSub
-        }
-        Md3MenuItem {
-            text: "Share"
-            icon: "share"
-            submenu: shareSub
-        }
-        Md3MenuItem { text: "Download"; icon: "download" }
-        Md3MenuDivider {}
-        Md3MenuItem {
-            text: "Offline mode"
-            selected: true
-            showCheck: true
-            leadingCheck: true
+        model: [
+            { text: "Cut", icon: "content_cut" },
+            { text: "Copy", icon: "content_copy" },
+            { text: "Paste", icon: "content_paste" },
+            { divider: true },
+            {
+                text: "Create",
+                icon: "add",
+                items: [
+                    { text: "Document", icon: "description" },
+                    { text: "Folder", icon: "folder" },
+                    {
+                        text: "More",
+                        items: [
+                            { text: "From template" },
+                            { text: "From clipboard" }
+                        ]
+                    }
+                ]
+            },
+            {
+                text: "Share",
+                icon: "share",
+                items: [
+                    { text: "Copy link", icon: "link" },
+                    { text: "Email", icon: "mail" },
+                    { text: "QR code", icon: "qr_code" }
+                ]
+            },
+            { text: "Download", icon: "download" },
+            { divider: true },
+            { text: "Offline mode", selected: true, showCheck: true }
+        ]
+        onItemClicked: function (path) {
+            console.log("menu:", path)
         }
     }
 }

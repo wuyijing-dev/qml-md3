@@ -105,6 +105,7 @@ set_source_files_properties(
     foundation/Md3Accessibility.qml
     foundation/Md3IconFonts.qml
     foundation/Md3AppIcons.qml
+    foundation/Md3Notify.qml
     window/Md3WindowCapabilities.qml
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE
 )
@@ -148,6 +149,7 @@ qt_add_qml_module(Md3
         foundation/Md3Accessibility.qml
         foundation/Md3IconFonts.qml
         foundation/Md3AppIcons.qml
+        foundation/Md3Notify.qml
         foundation/Md3ColorScheme.qml
         foundation/Md3DynamicScheme.qml
         foundation/Md3Typography.qml

@@ -19,12 +19,103 @@ Item {
     property var childMenu: null
     property int layoutMode: Md3ContainerBody.Fit
     property real maxMenuHeight: 480
+    /// Declarative menu from data: [{ text, icon?, divider?, items?, destructive?, enabled?, selected?, showCheck? }, ...]
+    /// When non-empty, rebuilds children (replaces hand-written Md3MenuItem trees).
+    property var model: []
     readonly property bool isSubMenu: parentMenu !== null
     default property alias content: column.data
     readonly property alias itemColumn: column
 
     readonly property real containerRadius: Md3Theme.shape.large
     readonly property var __md3Menu: root
+
+    signal itemClicked(string path)
+
+    Component {
+        id: itemComp
+        Md3MenuItem {}
+    }
+    Component {
+        id: dividerComp
+        Md3MenuDivider {}
+    }
+    Component {
+        id: menuComp
+        Md3Menu {
+            menuWidth: 200
+            modal: false
+        }
+    }
+
+    onModelChanged: {
+        if (model && model.length > 0)
+            Qt.callLater(rebuildFromModel)
+    }
+    Component.onCompleted: {
+        if (model && model.length > 0)
+            Qt.callLater(rebuildFromModel)
+    }
+
+    function rebuildFromModel() {
+        if (!model || model.length === 0)
+            return
+        clearItems()
+        _buildEntries(root, model, "")
+    }
+
+    function _kidsOf(entry) {
+        if (!entry)
+            return []
+        if (entry.items && entry.items.length)
+            return entry.items
+        if (entry.items === undefined && entry.children && entry.children.length
+                && typeof entry.children.length === "number"
+                && !(entry.children[0] instanceof Item))
+            return entry.children
+        return []
+    }
+
+    function _buildEntries(menu, entries, pathPrefix) {
+        if (!menu || !entries)
+            return
+        for (let i = 0; i < entries.length; ++i) {
+            const e = entries[i] || {}
+            if (e.divider === true || e.type === "divider") {
+                menu.addItemObject(dividerComp, {})
+                continue
+            }
+            const label = e.text !== undefined ? String(e.text) : String(e)
+            const path = pathPrefix.length ? (pathPrefix + "/" + label) : label
+            const kids = _kidsOf(e)
+            const item = menu.addItemObject(itemComp, {
+                text: label,
+                icon: e.icon !== undefined ? String(e.icon) : "",
+                trailingIcon: e.trailingIcon !== undefined ? String(e.trailingIcon) : "",
+                enabled: e.enabled !== undefined ? !!e.enabled : true,
+                destructive: !!e.destructive,
+                selected: !!e.selected,
+                showCheck: !!e.showCheck,
+                leadingCheck: e.leadingCheck !== undefined ? !!e.leadingCheck : true
+            })
+            if (!item)
+                continue
+            if (kids.length > 0) {
+                const sub = menuComp.createObject(menu)
+                item.submenu = sub
+                _buildEntries(sub, kids, path)
+            } else {
+                item.clicked.connect(function () {
+                    menu.itemClicked(path)
+                    // Bubble to root-most menu that owns the model interaction
+                    let m = menu
+                    while (m && m.parentMenu)
+                        m = m.parentMenu
+                    if (m && m !== menu)
+                        m.itemClicked(path)
+                })
+            }
+        }
+    }
 
     function clearItems() {
         // Destroy any items wrongly parented to the 0×0 controller (legacy createObject(menu))

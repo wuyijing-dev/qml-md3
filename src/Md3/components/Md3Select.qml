@@ -18,7 +18,9 @@ Item {
     property string supportingText: ""
     property string errorText: ""
     property bool error: false
-    property bool enabled: true
+    /// Form field key for Md3Form.validate / error auto-wiring.
+    property string name: ""
+    // Use Item.enabled (do not redeclare)
     property string leadingIcon: ""
     property string accessibleName: ""
     property bool searchable: false

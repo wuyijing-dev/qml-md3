@@ -114,4 +114,7 @@ Item {
             }
         }
     }
+
+    Component.onCompleted: Md3Notify.registerHost(root)
+    Component.onDestruction: Md3Notify.unregisterHost(root)
 }

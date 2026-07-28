@@ -158,36 +158,17 @@ Item {
 
             Md3Button {
                 text: "Show snackbar"
-                onClicked: {
-                    const win = Window.window
-                    if (win && typeof win.showSnackbar === "function")
-                        win.showSnackbar(qsTr("Message sent"), { actionText: qsTr("Undo") })
-                    else
-                        snack.show(qsTr("Message sent"))
-                }
+                onClicked: Md3Notify.snackbar(qsTr("Message sent"), { actionText: qsTr("Undo") })
             }
             Md3Button {
                 text: qsTr("Queue 3 snackbars")
                 variant: Md3Button.Outlined
                 onClicked: {
-                    const win = Window.window
-                    if (!win || typeof win.showSnackbar !== "function")
-                        return
-                    win.showSnackbar(qsTr("First notice"))
-                    win.showSnackbar(qsTr("Second notice"), { actionText: qsTr("View") })
-                    win.showSnackbar(qsTr("Third notice — stacked / queued via Md3SnackbarHost"))
+                    Md3Notify.snackbar(qsTr("First notice"))
+                    Md3Notify.snackbar(qsTr("Second notice"), { actionText: qsTr("View") })
+                    Md3Notify.snackbar(qsTr("Third notice — stacked / queued via Md3SnackbarHost"))
                 }
             }
         }
-    }
-
-    // Fallback when not hosted in Md3ApplicationWindow
-    Md3Snackbar {
-        id: snack
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.margins: 16
-        actionText: "Undo"
     }
 }
