@@ -1,9 +1,31 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Window
 import Md3
 
 Item {
     id: page
+
+    function _galleryWindow() {
+        const w = Window.window
+        return (w && w.galleryTableSelection !== undefined) ? w : null
+    }
+
+    function _syncGalleryStatus() {
+        const w = _galleryWindow()
+        if (!w)
+            return
+        w.galleryTableSelection = tableDemo.selectedIndices.length
+        w.galleryTableLoading = tableDemo.loading
+        if (treeDemo.selectedIndex >= 0 && treeDemo.flatRows[treeDemo.selectedIndex]) {
+            const n = treeDemo.flatRows[treeDemo.selectedIndex].node
+            w.galleryTreeSelection = n && n.title ? qsTr("Tree: %1").arg(n.title) : ""
+        } else {
+            w.galleryTreeSelection = ""
+        }
+    }
+
+    Component.onCompleted: _syncGalleryStatus()
 
     Flickable {
         id: flick
@@ -97,6 +119,13 @@ Item {
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 8
+                Md3TextField {
+                    Layout.fillWidth: true
+                    label: qsTr("Filter tree")
+                    placeholderText: qsTr("Type to search nodes")
+                    text: treeDemo.filterText
+                    onTextChanged: treeDemo.filterText = text
+                }
                 Md3Button {
                     text: qsTr("Expand all")
                     variant: Md3Button.Text
@@ -107,15 +136,6 @@ Item {
                     variant: Md3Button.Text
                     onClicked: treeDemo.collapseAll()
                 }
-                Text {
-                    Layout.fillWidth: true
-                    text: treeDemo.selectedIndex >= 0
-                          ? qsTr("Selected: %1").arg(treeDemo.flatRows[treeDemo.selectedIndex].node.title)
-                          : qsTr("Click a node")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.bodySmall.size
-                    elide: Text.ElideRight
-                }
             }
             Md3Card {
                 variant: Md3Card.Outlined
@@ -125,6 +145,15 @@ Item {
                     id: treeDemo
                     anchors.fill: parent
                     anchors.margins: 8
+                    showConnectors: true
+                    checkEnabled: true
+                    onActivated: function (idx, node) {
+                        _syncGalleryStatus()
+                        const w = _galleryWindow()
+                        if (w)
+                            w.showStatusMessage(qsTr("Activated %1").arg(node.title))
+                    }
+                    onCheckedChanged: _syncGalleryStatus()
                     model: [
                         {
                             title: qsTr("Workspace"),
@@ -158,16 +187,35 @@ Item {
                 font.pixelSize: Md3Theme.typography.labelLarge.size
             }
             Md3PathField {
+                id: pathOpenDemo
                 Layout.fillWidth: true
                 label: qsTr("Open file")
                 mode: Md3PathField.OpenFile
+                showBreadcrumb: true
+                allowedExtensions: [".qml", ".json", ".md"]
+                recentPaths: [
+                    "D:/QML_MD3/QML_MD3/gallery/Main.qml",
+                    "D:/QML_MD3/QML_MD3/src/Md3/components/Md3DataTable.qml"
+                ]
                 nameFilters: ["QML files (*.qml)", "All files (*)"]
                 dialogTitle: qsTr("Choose a file")
+                onAccepted: function (p) {
+                    const w = _galleryWindow()
+                    if (w)
+                        w.showStatusMessage(qsTr("Path: %1").arg(p))
+                }
+            }
+            Md3PathField {
+                Layout.fillWidth: true
+                label: qsTr("Open multiple files")
+                mode: Md3PathField.OpenFiles
+                dialogTitle: qsTr("Choose files")
             }
             Md3PathField {
                 Layout.fillWidth: true
                 label: qsTr("Output folder")
                 mode: Md3PathField.Folder
+                showBreadcrumb: true
                 dialogTitle: qsTr("Choose a folder")
             }
 
@@ -182,7 +230,16 @@ Item {
                 Md3Button {
                     text: tableDemo.loading ? qsTr("Stop loading") : qsTr("Loading")
                     variant: Md3Button.Outlined
-                    onClicked: tableDemo.loading = !tableDemo.loading
+                    onClicked: {
+                        tableDemo.loading = !tableDemo.loading
+                        _syncGalleryStatus()
+                    }
+                }
+                Md3Button {
+                    text: tableDemo.density === Md3DataTable.Compact ? qsTr("Comfortable") : qsTr("Compact")
+                    variant: Md3Button.Text
+                    onClicked: tableDemo.density = tableDemo.density === Md3DataTable.Compact
+                            ? Md3DataTable.Comfortable : Md3DataTable.Compact
                 }
                 Md3Button {
                     text: qsTr("Clear selection")
@@ -192,9 +249,7 @@ Item {
                 }
                 Text {
                     Layout.fillWidth: true
-                    text: tableDemo.selectedIndices.length
-                          ? qsTr("%1 selected").arg(tableDemo.selectedIndices.length)
-                          : qsTr("Drag column edges to resize · row ⋮ for actions")
+                    text: qsTr("Frozen col · filter · ↑↓ Enter · double-click row")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.bodySmall.size
                     elide: Text.ElideRight
@@ -203,12 +258,16 @@ Item {
             Md3DataTable {
                 id: tableDemo
                 Layout.fillWidth: true
-                Layout.preferredHeight: 420
+                Layout.preferredHeight: 460
                 selectionEnabled: true
                 pagination: true
                 pageSize: 5
-                bodyHeight: 260
+                bodyHeight: 300
                 columnResizeEnabled: true
+                frozenColumnCount: 1
+                showFilterBar: true
+                keyboardNavigationEnabled: true
+                columnFilters: ({ status: statusFilter.text })
                 columns: [
                     { title: "Name", role: "name", width: 140 },
                     { title: "Role", role: "role", width: 120 },
@@ -217,6 +276,31 @@ Item {
                     { title: "Team", role: "team", width: 120 },
                     { title: "Notes", role: "notes", width: 160 }
                 ]
+                cellDelegate: Component {
+                    Item {
+                        property var rowData
+                        property var columnDef
+                        property int columnIndex
+                        property string displayText
+                        property int sourceIndex
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            leftPadding: 8
+                            visible: !columnDef || columnDef.role !== "status"
+                            text: displayText
+                            color: Md3Theme.colorScheme.colorOnSurface
+                            font.pixelSize: Md3Theme.typography.bodyMedium.size
+                            elide: Text.ElideRight
+                        }
+                        Md3AssistChip {
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.leftMargin: 8
+                            visible: columnDef && columnDef.role === "status"
+                            text: displayText
+                            icon: displayText === "Active" ? "check_circle" : "schedule"
+                        }
+                    }
+                }
                 rows: [
                     { name: "Ada", role: "Admin", status: "Active", score: 98, team: "Platform", notes: "Core owner" },
                     { name: "Alan", role: "Editor", status: "Away", score: 72, team: "Docs", notes: "Review queue" },
@@ -240,9 +324,22 @@ Item {
                 emptyBody: qsTr("Add a row to get started.")
                 emptyActionText: qsTr("Reload sample")
                 onEmptyActionClicked: console.log("reload")
+                onSelectionChanged: _syncGalleryStatus()
+                onRowDoubleClicked: function (sourceIndex) {
+                    const w = _galleryWindow()
+                    if (w)
+                        w.showStatusMessage(qsTr("Opened row %1").arg(sourceIndex))
+                }
                 onRowActionTriggered: function (sourceIndex, action) {
                     console.log("row action", sourceIndex, action.id || action.text)
                 }
+            }
+            Md3TextField {
+                id: statusFilter
+                Layout.fillWidth: true
+                label: qsTr("Status column filter")
+                placeholderText: qsTr("e.g. Active")
+                onTextChanged: tableDemo.columnFilters = ({ status: text })
             }
 
             Text {

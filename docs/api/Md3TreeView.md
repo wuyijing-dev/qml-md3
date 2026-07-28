@@ -1,6 +1,6 @@
 # Md3TreeView
 
-Hierarchical tree: model nodes `{ title, icon?, children?, expanded?, data? }`.
+Hierarchical tree: `{ title, icon?, children?, expanded?, checked?, data? }`.
 
 - **Source:** `src/Md3/components/Md3TreeView.qml`
 - **Extends:** `Item`
@@ -20,6 +20,10 @@ import Md3
 | `rowHeight` | `real` | `40` | read/write | `Md3TreeView` | — |
 | `indent` | `real` | `20` | read/write | `Md3TreeView` | — |
 | `showConnectors` | `bool` | `false` | read/write | `Md3TreeView` | — |
+| `checkEnabled` | `bool` | `false` | read/write | `Md3TreeView` | — |
+| `filterText` | `string` | `""` | read/write | `Md3TreeView` | — |
+| `lazyLoad` | `bool` | `false` | read/write | `Md3TreeView` | — |
+| `contextMenu` | `var` | `null` | read/write | `Md3TreeView` | — |
 | `flatRows` | `var` | `{…}` | readonly | `Md3TreeView` | — |
 
 ## Signals
@@ -28,11 +32,17 @@ import Md3
 |--------|------------|-------------|
 | `activated(int flatIndex, var node)` | `Md3TreeView` | — |
 | `expandedChanged(int flatIndex, var node, bool expanded)` | `Md3TreeView` | — |
+| `checkedChanged()` | `Md3TreeView` | — |
+| `fetchChildren(var node, var path)` | `Md3TreeView` | — |
+| `contextMenuRequested(int flatIndex, var node, real globalX, real globalY)` | `Md3TreeView` | — |
 
 ## Methods
 
 | Method | Defined in | Description |
 |--------|------------|-------------|
+| `isChecked(path)` | `Md3TreeView` | — |
+| `setChecked(path, on)` | `Md3TreeView` | — |
+| `toggleCheckAt(flatIndex)` | `Md3TreeView` | — |
 | `toggleAt(flatIndex)` | `Md3TreeView` | — |
 | `expandAll()` | `Md3TreeView` | — |
 | `collapseAll()` | `Md3TreeView` | — |

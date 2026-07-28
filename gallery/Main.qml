@@ -39,15 +39,25 @@ Md3ApplicationWindow {
     aboutText: qsTr("Material Design 3 组件图库 — 演示窗口、导航与控件。")
     aboutIcon: windowIcon
 
+    property int galleryTableSelection: 0
+    property bool galleryTableLoading: false
+    property string galleryTreeSelection: ""
+
     statusBar: Md3StatusBar {
+        id: appStatusBar
         text: {
             const d = window.destinations && window.destinations[window.currentIndex]
             return d && d.title ? qsTr("Page: %1").arg(d.title) : qsTr("Ready")
         }
-        leadingIcon: "info"
+        centerText: window.galleryTableLoading
+                      ? qsTr("Loading table…")
+                      : (window.galleryTableSelection > 0
+                         ? qsTr("%1 selected in table").arg(window.galleryTableSelection) : "")
+        leadingIcon: window.galleryTableLoading ? "hourglass_empty" : "info"
         progress: -1
         Text {
-            text: qsTr("Ln 42, Col 8")
+            visible: window.galleryTreeSelection.length > 0
+            text: window.galleryTreeSelection
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.family: Md3Theme.typography.fontFamily
             font.pixelSize: Md3Theme.typography.labelSmall.size

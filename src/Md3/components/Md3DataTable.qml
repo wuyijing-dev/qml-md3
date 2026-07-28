@@ -1,20 +1,23 @@
 import QtQuick
 import QtQuick.Window
 
-/// Data table: sort, multi-select, sticky header, empty/loading, pagination,
-/// column resize, horizontal scroll, row action menu.
+/// Enterprise data table: sort, filter, multi-select, pagination, frozen columns,
+/// column resize, custom cell delegate, keyboard nav, row reorder, server paging.
 Item {
     id: root
 
-    property var columns: [] // [{ title, role, width, minWidth?, sortable? }]
+    enum Density { Comfortable, Compact }
+
+    property var columns: [] // [{ title, role, width, minWidth?, sortable?, filterable? }]
     property var rows: []
     property int selectedRow: -1
     property bool selectionEnabled: false
     property var selectedIndices: []
     property int sortColumn: -1
     property int sortOrder: Qt.AscendingOrder
-    property real rowHeight: 52
-    property real headerHeight: 56
+    property int density: Md3DataTable.Comfortable
+    property real rowHeight: density === Md3DataTable.Compact ? 40 : 52
+    property real headerHeight: density === Md3DataTable.Compact ? 44 : 56
     property real bodyHeight: 280
     property bool loading: false
     property string emptyIcon: "inbox"
@@ -26,20 +29,36 @@ Item {
     property int currentPage: 0
     property bool columnResizeEnabled: true
     property real minColumnWidth: 64
-    /// [{ text, icon?, id? }] — trailing ⋮ menu per row
+    property int frozenColumnCount: 0
+    property string filterText: ""
+    property var columnFilters: ({})
+    property bool showFilterBar: false
+    property string filterPlaceholder: qsTr("Search table…")
+    property bool serverSidePagination: false
+    property int serverTotalCount: 0
+    property bool keyboardNavigationEnabled: true
+    property bool rowReorderEnabled: false
     property var rowActions: []
+    /// Optional cell renderer: set `rowData`, `columnDef`, `columnIndex`, `displayText`, `sourceIndex`.
+    property Component cellDelegate: null
 
     signal rowClicked(int sourceIndex)
+    signal rowDoubleClicked(int sourceIndex)
+    signal rowActivated(int sourceIndex)
     signal selectionChanged()
     signal sortChanged(int column, int order)
+    signal filterChanged()
     signal emptyActionClicked()
     signal pageChanged(int page)
+    signal pageRequested(int page, int sortColumn, int sortOrder)
     signal rowActionTriggered(int sourceIndex, var action)
+    signal rowOrderChanged(int fromSourceIndex, int toSourceIndex)
 
     property var columnWidths: []
     property int rowMenuSourceIndex: -1
+    property int focusedPageRow: -1
 
-    readonly property int totalCount: rows ? rows.length : 0
+    readonly property int frozenCount: Math.max(0, Math.min(frozenColumnCount, columns ? columns.length : 0))
     readonly property real selectionColWidth: selectionEnabled ? 48 : 0
     readonly property real actionsColWidth: (rowActions && rowActions.length) ? 48 : 0
     readonly property var effectiveWidths: {
@@ -54,25 +73,46 @@ Item {
         }
         return out
     }
-    readonly property real tableContentWidth: {
-        let w = selectionColWidth + actionsColWidth + 16
+    readonly property real frozenStripWidth: {
+        let w = selectionColWidth
         const widths = effectiveWidths
-        for (let i = 0; i < widths.length; ++i)
+        for (let i = 0; i < frozenCount && i < widths.length; ++i)
             w += widths[i]
-        return Math.max(w, width)
+        return w + 8
+    }
+    readonly property real scrollColsWidth: {
+        let w = 0
+        const widths = effectiveWidths
+        for (let i = frozenCount; i < widths.length; ++i)
+            w += widths[i]
+        return w + actionsColWidth + 8
+    }
+    readonly property real tableContentWidth: Math.max(width, frozenStripWidth + scrollColsWidth)
+    readonly property var filteredEntries: {
+        if (serverSidePagination) {
+            const list = []
+            const src = rows || []
+            for (let i = 0; i < src.length; ++i)
+                list.push({ row: src[i], sourceIndex: i })
+            return list
+        }
+        const list = []
+        const src = rows || []
+        for (let i = 0; i < src.length; ++i) {
+            if (_rowMatchesFilter(src[i]))
+                list.push({ row: src[i], sourceIndex: i })
+        }
+        return list
     }
     readonly property var sortedEntries: {
-        const list = []
-        const src = root.rows || []
-        for (let i = 0; i < src.length; ++i)
-            list.push({ row: src[i], sourceIndex: i })
-        if (root.sortColumn < 0 || !root.columns || root.sortColumn >= root.columns.length)
+        const list = filteredEntries.slice()
+        if (sortColumn < 0 || !columns || sortColumn >= columns.length)
             return list
-        const col = root.columns[root.sortColumn]
+        const col = columns[sortColumn]
         const role = col && col.role !== undefined ? col.role : ""
         if (!role.length)
             return list
-        const asc = root.sortOrder === Qt.AscendingOrder
+        const asc = sortOrder === Qt.AscendingOrder
         list.sort(function (a, b) {
             const va = a.row && a.row[role] !== undefined ? a.row[role] : ""
             const vb = b.row && b.row[role] !== undefined ? b.row[role] : ""
@@ -85,14 +125,17 @@ Item {
         })
         return list
     }
+    readonly property int totalCount: serverSidePagination
+            ? Math.max(0, serverTotalCount)
+            : (filteredEntries ? filteredEntries.length : 0)
     readonly property int pageCount: {
         if (!pagination || pageSize <= 0)
             return 1
-        return Math.max(1, Math.ceil(sortedEntries.length / pageSize))
+        return Math.max(1, Math.ceil(totalCount / pageSize))
     }
     readonly property var pageEntries: {
         const all = sortedEntries
-        if (!pagination || pageSize <= 0)
+        if (!pagination || pageSize <= 0 || serverSidePagination)
             return all
         const start = Math.max(0, currentPage) * pageSize
         return all.slice(start, start + pageSize)
@@ -113,9 +156,20 @@ Item {
     }
 
     implicitWidth: 480
-    implicitHeight: headerHeight + bodyHeight + (pagination ? 48 : 0)
+    implicitHeight: (showFilterBar ? 56 : 0) + headerHeight + bodyHeight + (pagination ? 48 : 0)
     width: parent ? parent.width : implicitWidth
     height: implicitHeight
+
+    onDensityChanged: {
+        rowHeight = density === Md3DataTable.Compact ? 40 : 52
+        headerHeight = density === Md3DataTable.Compact ? 44 : 56
+    }
+    onFilterTextChanged: filterChanged()
+    onColumnFiltersChanged: filterChanged()
+    onCurrentPageChanged: {
+        if (serverSidePagination)
+            pageRequested(currentPage, sortColumn, sortOrder)
+    }
 
     function _syncWidthsFromColumns() {
         const cols = columns || []
@@ -133,6 +187,48 @@ Item {
         const arr = effectiveWidths.slice()
         arr[index] = Math.max(minW, w)
         columnWidths = arr
+    }
+
+    function cellText(rowData, colDef) {
+        const role = colDef && colDef.role
+        return rowData && role !== undefined && rowData[role] !== undefined
+                ? String(rowData[role]) : ""
+    }
+
+    function _rowMatchesFilter(row) {
+        if (!row)
+            return false
+        const ft = String(filterText || "").trim().toLowerCase()
+        if (ft.length) {
+            let hit = false
+            const cols = columns || []
+            for (let c = 0; c < cols.length; ++c) {
+                const role = cols[c].role
+                if (role === undefined)
+                    continue
+                const v = row[role]
+                if (v !== undefined && String(v).toLowerCase().indexOf(ft) >= 0) {
+                    hit = true
+                    break
+                }
+            }
+            if (!hit)
+                return false
+        }
+        const cf = columnFilters || {}
+        const cols = columns || []
+        for (let c = 0; c < cols.length; ++c) {
+            const role = cols[c].role
+            if (!role || cf[role] === undefined)
+                continue
+            const fv = String(cf[role] || "").trim().toLowerCase()
+            if (!fv.length)
+                continue
+            const v = row[role]
+            if (String(v !== undefined ? v : "").toLowerCase().indexOf(fv) < 0)
+                return false
+        }
+        return true
     }
 
     function _isSelected(sourceIndex) {
@@ -155,6 +251,13 @@ Item {
         selectionChanged()
     }
 
+    function clearFilters() {
+        filterText = ""
+        columnFilters = {}
+        currentPage = 0
+        filterChanged()
+    }
+
     function toggleSort(columnIndex) {
         if (!columns || columnIndex < 0 || columnIndex >= columns.length)
             return
@@ -171,6 +274,8 @@ Item {
         }
         currentPage = 0
         sortChanged(sortColumn, sortOrder)
+        if (serverSidePagination)
+            pageRequested(currentPage, sortColumn, sortOrder)
     }
 
     function selectPage(on) {
@@ -199,6 +304,32 @@ Item {
         rowMenu.popup(p.x, p.y)
     }
 
+    function focusTable() {
+        tableFocus.forceActiveFocus()
+    }
+
+    function _moveFocus(delta) {
+        const n = pageEntries.length
+        if (n === 0) {
+            focusedPageRow = -1
+            return
+        }
+        let next = focusedPageRow < 0 ? 0 : focusedPageRow + delta
+        next = Math.max(0, Math.min(n - 1, next))
+        focusedPageRow = next
+        const entry = pageEntries[next]
+        if (entry)
+            selectedRow = entry.sourceIndex
+    }
+
+    function _activateFocusedRow() {
+        if (focusedPageRow < 0 || focusedPageRow >= pageEntries.length)
+            return
+        const idx = pageEntries[focusedPageRow].sourceIndex
+        rowActivated(idx)
+        rowClicked(idx)
+    }
+
     onColumnsChanged: _syncWidthsFromColumns()
     Component.onCompleted: _syncWidthsFromColumns()
     onRowsChanged: {
@@ -206,294 +337,670 @@ Item {
             currentPage = Math.max(0, pageCount - 1)
     }
     onPageSizeChanged: currentPage = 0
+    onPageEntriesChanged: {
+        if (focusedPageRow >= pageEntries.length)
+            focusedPageRow = pageEntries.length ? 0 : -1
+    }
 
-    Column {
-        id: chrome
-        width: parent.width
-        spacing: 0
+    component HeaderCell: Item {
+        id: hcell
+        property int columnIndex: 0
+        property var columnDef: ({})
+        property bool showResize: true
+        readonly property bool sortable: columnDef.sortable !== false
+        readonly property bool activeSort: root.sortColumn === columnIndex
 
-        Item {
-            id: tableStack
+        Text {
+            anchors.left: parent.left
+            anchors.leftMargin: 8
+            anchors.right: parent.right
+            anchors.rightMargin: hcell.activeSort ? 28 : 12
+            anchors.verticalCenter: parent.verticalCenter
+            text: hcell.columnDef.title !== undefined ? hcell.columnDef.title : ""
+            color: Md3Theme.colorScheme.colorOnSurface
+            font.family: Md3Theme.typography.fontFamily
+            font.pixelSize: Md3Theme.typography.labelLarge.size
+            font.weight: Font.Medium
+            elide: Text.ElideRight
+        }
+        Md3Icon {
+            visible: hcell.activeSort
+            anchors.right: parent.right
+            anchors.rightMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
+            icon: root.sortOrder === Qt.AscendingOrder ? "arrow_upward" : "arrow_downward"
+            size: 16
+            iconColor: Md3Theme.colorScheme.primary
+        }
+        MouseArea {
+            anchors.fill: parent
+            anchors.rightMargin: 6
+            enabled: hcell.sortable
+            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+            onClicked: root.toggleSort(hcell.columnIndex)
+        }
+        MouseArea {
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            width: 6
+            visible: root.columnResizeEnabled && hcell.showResize
+            cursorShape: Qt.SplitHCursor
+            preventStealing: true
+            property real startX: 0
+            property real startW: 0
+            onPressed: function (mouse) {
+                startX = mapToItem(root, mouse.x, 0).x
+                startW = hcell.width
+            }
+            onPositionChanged: function (mouse) {
+                if (!pressed)
+                    return
+                const x = mapToItem(root, mouse.x, 0).x
+                root.setColumnWidth(hcell.columnIndex, startW + (x - startX))
+            }
+        }
+    }
+
+    component DataCell: Item {
+        id: cellHost
+        property var rowData
+        property var columnDef
+        property int columnIndex: 0
+        property int sourceIndex: -1
+        property string displayText: root.cellText(rowData, columnDef)
+
+        Loader {
+            anchors.fill: parent
+            active: root.cellDelegate !== null
+            sourceComponent: root.cellDelegate
+            onLoaded: {
+                if (!item)
+                    return
+                item.rowData = cellHost.rowData
+                item.columnDef = cellHost.columnDef
+                item.columnIndex = cellHost.columnIndex
+                item.displayText = cellHost.displayText
+                item.sourceIndex = cellHost.sourceIndex
+            }
+        }
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
             width: parent.width
-            height: root.headerHeight + root.bodyHeight
-            clip: true
+            leftPadding: 8
+            visible: root.cellDelegate === null
+            text: cellHost.displayText
+            color: Md3Theme.colorScheme.colorOnSurface
+            font.family: Md3Theme.typography.fontFamily
+            font.pixelSize: Md3Theme.typography.bodyMedium.size
+            elide: Text.ElideRight
+        }
+    }
 
+    component BodyRow: Rectangle {
+        id: bodyRow
+        property int pageRowIndex: 0
+        property var entry
+        readonly property int sourceIndex: entry ? entry.sourceIndex : -1
+        readonly property var rowData: entry ? entry.row : null
+        readonly property bool checked: root._isSelected(sourceIndex)
+        readonly property bool highlighted: root.selectedRow === sourceIndex || checked
+        readonly property bool keyboardFocused: root.focusedPageRow === pageRowIndex
+
+        width: parent ? parent.width : 0
+        height: root.rowHeight
+        color: keyboardFocused ? Md3Theme.colorScheme.primaryContainer
+              : (highlighted ? Md3Theme.colorScheme.secondaryContainer : "transparent")
+
+        property int dragFromIndex: -1
+
+        Row {
+            anchors.fill: parent
+            anchors.leftMargin: 8
+            anchors.rightMargin: 8
+            spacing: 0
+
+            Item {
+                visible: root.selectionEnabled
+                width: 48
+                height: parent.height
+                Md3Checkbox {
+                    anchors.centerIn: parent
+                    checked: bodyRow.checked
+                    onToggled: function (state) {
+                        root._setSelected(bodyRow.sourceIndex, state === Qt.Checked)
+                    }
+                }
+            }
+
+            Repeater {
+                model: root.columns
+                delegate: DataCell {
+                    required property int index
+                    required property var modelData
+                    width: root.effectiveWidths[index] || 120
+                    height: bodyRow.height
+                    visible: index >= 0
+                    rowData: bodyRow.rowData
+                    columnDef: modelData
+                    columnIndex: index
+                    sourceIndex: bodyRow.sourceIndex
+                }
+            }
+
+            Item {
+                visible: root.actionsColWidth > 0
+                width: 48
+                height: parent.height
+                Md3IconButton {
+                    id: moreBtn
+                    anchors.centerIn: parent
+                    icon: "more_vert"
+                    accessibleName: qsTr("Row actions")
+                    onClicked: root.openRowMenu(bodyRow.sourceIndex, moreBtn)
+                }
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            anchors.leftMargin: root.selectionEnabled ? 48 : 0
+            anchors.rightMargin: root.actionsColWidth
+            z: -1
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked: function (mouse) {
+                root.focusedPageRow = bodyRow.pageRowIndex
+                root.selectedRow = bodyRow.sourceIndex
+                root.rowClicked(bodyRow.sourceIndex)
+                tableFocus.forceActiveFocus()
+            }
+            onDoubleClicked: {
+                root.rowDoubleClicked(bodyRow.sourceIndex)
+                root.rowActivated(bodyRow.sourceIndex)
+            }
+        }
+
+        DragHandler {
+            enabled: root.rowReorderEnabled
+            target: null
+            onActiveChanged: {
+                if (active)
+                    bodyRow.dragFromIndex = bodyRow.sourceIndex
+            }
+            onTranslationChanged: {
+                if (!active || bodyRow.dragFromIndex < 0)
+                    return
+                const y = bodyRow.mapToItem(rowsCol, 0, translation.y).y
+                const idx = Math.max(0, Math.min(root.pageEntries.length - 1, Math.floor(y / root.rowHeight)))
+                const target = root.pageEntries[idx]
+                if (target && target.sourceIndex !== bodyRow.dragFromIndex)
+                    root.rowOrderChanged(bodyRow.dragFromIndex, target.sourceIndex)
+            }
+        }
+
+        Md3Divider {
+            anchors.bottom: parent.bottom
+            width: parent.width
+        }
+    }
+
+    FocusScope {
+        id: tableFocus
+        anchors.fill: parent
+        focus: root.keyboardNavigationEnabled
+
+        Keys.onPressed: function (event) {
+            if (!root.keyboardNavigationEnabled)
+                return
+            switch (event.key) {
+            case Qt.Key_Up:
+                root._moveFocus(-1)
+                event.accepted = true
+                break
+            case Qt.Key_Down:
+                root._moveFocus(1)
+                event.accepted = true
+                break
+            case Qt.Key_Return:
+            case Qt.Key_Enter:
+                root._activateFocusedRow()
+                event.accepted = true
+                break
+            case Qt.Key_Space:
+                if (root.selectionEnabled && root.focusedPageRow >= 0) {
+                    const e = root.pageEntries[root.focusedPageRow]
+                    if (e)
+                        root._setSelected(e.sourceIndex, !root._isSelected(e.sourceIndex))
+                }
+                event.accepted = true
+                break
+            case Qt.Key_Home:
+                root.focusedPageRow = root.pageEntries.length ? 0 : -1
+                event.accepted = true
+                break
+            case Qt.Key_End:
+                root.focusedPageRow = root.pageEntries.length ? root.pageEntries.length - 1 : -1
+                event.accepted = true
+                break
+            }
+        }
+
+        Column {
+            id: chrome
+            width: parent.width
+            spacing: 0
+
+            Item {
+                visible: root.showFilterBar
+                width: parent.width
+                height: visible ? 56 : 0
+                Md3SearchBar {
+                    anchors.fill: parent
+                    anchors.margins: 4
+                    text: root.filterText
+                    placeholderText: root.filterPlaceholder
+                    onTextChanged: root.filterText = text
+                }
+            }
+
+            Item {
+                id: tableStack
+                width: parent.width
+                height: root.headerHeight + root.bodyHeight
+                clip: true
+
+                Row {
+                    anchors.fill: parent
+                    spacing: 0
+                    visible: root.frozenCount > 0
+
+                    // Frozen strip
+                    Column {
+                        id: frozenPane
+                        visible: root.frozenCount > 0
+                        width: visible ? root.frozenStripWidth : 0
+                        height: parent.height
+                        z: 2
+                        clip: true
+
+                        Rectangle {
+                            width: parent.width
+                            height: root.headerHeight
+                            color: Md3Theme.colorScheme.surfaceContainerLow
+                            Row {
+                                anchors.fill: parent
+                                anchors.leftMargin: 8
+                                spacing: 0
+                                Item {
+                                    visible: root.selectionEnabled
+                                    width: 48
+                                    height: parent.height
+                                    Md3Checkbox {
+                                        anchors.centerIn: parent
+                                        tristate: true
+                                        checkState: root.headerCheckState
+                                    }
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        z: 1
+                                        onClicked: root.selectPage(root.headerCheckState !== Qt.Checked)
+                                    }
+                                }
+                                Repeater {
+                                    model: root.frozenCount
+                                    delegate: HeaderCell {
+                                        required property int index
+                                        columnIndex: index
+                                        columnDef: root.columns[index]
+                                        width: root.effectiveWidths[index] || 120
+                                        height: root.headerHeight
+                                    }
+                                }
+                            }
+                            Md3Divider { anchors.bottom: parent.bottom; width: parent.width }
+                        }
+
+                        Flickable {
+                            id: bodyFrozen
+                            width: parent.width
+                            height: root.bodyHeight
+                            clip: true
+                            contentHeight: frozenRows.height
+                            boundsBehavior: Flickable.StopAtBounds
+                            flickableDirection: Flickable.VerticalFlick
+                            interactive: !root.loading && root.pageEntries.length > 0
+
+                            Column {
+                                id: frozenRows
+                                width: parent.width
+                                Repeater {
+                                    model: root.loading ? 0 : root.pageEntries
+                                    delegate: Item {
+                                        required property int index
+                                        required property var modelData
+                                        width: frozenRows.width
+                                        height: root.rowHeight
+                                        Row {
+                                            anchors.fill: parent
+                                            anchors.leftMargin: 8
+                                            Item {
+                                                visible: root.selectionEnabled
+                                                width: 48
+                                                height: parent.height
+                                                Md3Checkbox {
+                                                    anchors.centerIn: parent
+                                                    checked: root._isSelected(modelData.sourceIndex)
+                                                    onToggled: function (state) {
+                                                        root._setSelected(modelData.sourceIndex, state === Qt.Checked)
+                                                    }
+                                                }
+                                            }
+                                            Repeater {
+                                                model: root.frozenCount
+                                                delegate: DataCell {
+                                                    required property int index
+                                                    width: root.effectiveWidths[index] || 120
+                                                    height: parent.height
+                                                    rowData: modelData.row
+                                                    columnDef: root.columns[index]
+                                                    columnIndex: index
+                                                    sourceIndex: modelData.sourceIndex
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            anchors.right: parent.right
+                            width: 4
+                            height: parent.height
+                            visible: hFlick.contentX > 0.5
+                            gradient: Gradient {
+                                orientation: Gradient.Horizontal
+                                GradientStop { position: 0; color: "transparent" }
+                                GradientStop { position: 1; color: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.shadow, 0.15) }
+                            }
+                        }
+                    }
+
+                    // Scrollable region
+                    Flickable {
+                        id: hFlick
+                        width: parent.width - frozenPane.width
+                        height: parent.height
+                        contentWidth: Math.max(width, root.scrollColsWidth)
+                        clip: true
+                        flickableDirection: Flickable.HorizontalFlick
+                        boundsBehavior: Flickable.StopAtBounds
+                        interactive: contentWidth > width + 1
+
+                        Column {
+                            width: Math.max(hFlick.width, root.scrollColsWidth)
+
+                            Rectangle {
+                                id: headerBar
+                                width: parent.width
+                                height: root.headerHeight
+                                color: Md3Theme.colorScheme.surfaceContainerLow
+                                Row {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 8
+                                    anchors.rightMargin: 8
+                                    spacing: 0
+                                    Repeater {
+                                        model: {
+                                            const out = []
+                                            for (let i = root.frozenCount; i < (root.columns || []).length; ++i)
+                                                out.push(i)
+                                            return out
+                                        }
+                                        delegate: HeaderCell {
+                                            required property var modelData
+                                            columnIndex: modelData
+                                            columnDef: root.columns[modelData]
+                                            width: root.effectiveWidths[modelData] || 120
+                                            height: headerBar.height
+                                        }
+                                    }
+                                    Item {
+                                        visible: root.actionsColWidth > 0
+                                        width: 48
+                                        height: parent.height
+                                    }
+                                }
+                                Md3Divider { anchors.bottom: parent.bottom; width: parent.width }
+                            }
+
+                            Flickable {
+                                id: bodyFlick
+                                width: parent.width
+                                height: root.bodyHeight
+                                clip: true
+                                contentWidth: width
+                                contentHeight: rowsCol.height
+                                boundsBehavior: Flickable.StopAtBounds
+                                interactive: !root.loading && root.pageEntries.length > 0
+                                flickableDirection: Flickable.VerticalFlick
+                                onContentYChanged: {
+                                    if (bodyFrozen.contentY !== contentY)
+                                        bodyFrozen.contentY = contentY
+                                }
+
+                                Connections {
+                                    target: bodyFrozen
+                                    function onContentYChanged() {
+                                        if (bodyFlick.contentY !== bodyFrozen.contentY)
+                                            bodyFlick.contentY = bodyFrozen.contentY
+                                    }
+                                }
+
+                                Column {
+                                    id: rowsCol
+                                    width: bodyFlick.width
+                                    Repeater {
+                                        model: root.loading ? 0 : root.pageEntries
+                                        delegate: Item {
+                                            required property int index
+                                            required property var modelData
+                                            width: rowsCol.width
+                                            height: root.rowHeight
+                                            Row {
+                                                anchors.fill: parent
+                                                anchors.leftMargin: 8
+                                                anchors.rightMargin: 8
+                                                Repeater {
+                                                    model: {
+                                                        const out = []
+                                                        for (let i = root.frozenCount; i < (root.columns || []).length; ++i)
+                                                            out.push(i)
+                                                        return out
+                                                    }
+                                                    delegate: DataCell {
+                                                        required property var modelData
+                                                        width: root.effectiveWidths[modelData] || 120
+                                                        height: parent.height
+                                                        rowData: parent.parent.modelData.row
+                                                        columnDef: root.columns[modelData]
+                                                        columnIndex: modelData
+                                                        sourceIndex: parent.parent.modelData.sourceIndex
+                                                    }
+                                                }
+                                                Item {
+                                                    visible: root.actionsColWidth > 0
+                                                    width: 48
+                                                    height: parent.height
+                                                    Md3IconButton {
+                                                        id: scrollMoreBtn
+                                                        anchors.centerIn: parent
+                                                        icon: "more_vert"
+                                                        onClicked: root.openRowMenu(parent.parent.modelData.sourceIndex, scrollMoreBtn)
+                                                    }
+                                                }
+                                            }
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                anchors.rightMargin: root.actionsColWidth
+                                                z: -1
+                                                onClicked: {
+                                                    root.focusedPageRow = index
+                                                    root.selectedRow = modelData.sourceIndex
+                                                    root.rowClicked(modelData.sourceIndex)
+                                                    tableFocus.forceActiveFocus()
+                                                }
+                                                onDoubleClicked: {
+                                                    root.rowDoubleClicked(modelData.sourceIndex)
+                                                    root.rowActivated(modelData.sourceIndex)
+                                                }
+                                            }
+                                            Rectangle {
+                                                anchors.bottom: parent.bottom
+                                                width: parent.width
+                                                height: 1
+                                                color: "transparent"
+                                                Md3Divider { anchors.fill: parent }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Full-width rows when no frozen columns (simpler path)
+                Loader {
+                    anchors.fill: parent
+                    active: root.frozenCount === 0
+                    sourceComponent: freeTableComponent
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.topMargin: root.headerHeight
+                    visible: root.loading
+                    z: 4
+                    color: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.surface, 0.72)
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: 12
+                        Md3CircularProgressIndicator { anchors.horizontalCenter: parent.horizontalCenter; indeterminate: true; size: 40 }
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: qsTr("Loading…")
+                            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                        }
+                    }
+                }
+
+                Md3EmptyState {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.top
+                    anchors.topMargin: root.headerHeight
+                    width: Math.min(parent.width - 24, 360)
+                    height: root.bodyHeight
+                    z: 4
+                    visible: !root.loading && root.totalCount === 0
+                    icon: root.emptyIcon
+                    title: root.emptyTitle
+                    body: root.emptyBody
+                    actionText: root.emptyActionText
+                    onActionClicked: root.emptyActionClicked()
+                }
+            }
+
+            Md3Divider { width: parent.width; visible: root.pagination }
+
+            Md3Pagination {
+                width: parent.width
+                visible: root.pagination
+                pageCount: root.pageCount
+                currentPage: root.currentPage
+                pageSize: root.pageSize
+                totalCount: root.totalCount
+                enabled: !root.loading && root.totalCount > 0
+                onPageRequested: function (page) {
+                    root.currentPage = page
+                    root.pageChanged(page)
+                    if (root.serverSidePagination)
+                        root.pageRequested(page, root.sortColumn, root.sortOrder)
+                }
+            }
+        }
+    }
+
+    Component {
+        id: freeTableComponent
+        Item {
             Flickable {
-                id: hFlick
+                id: freeHFlick
                 anchors.fill: parent
                 contentWidth: Math.max(width, root.tableContentWidth)
-                contentHeight: height
                 clip: true
                 flickableDirection: Flickable.HorizontalFlick
                 boundsBehavior: Flickable.StopAtBounds
                 interactive: contentWidth > width + 1
-
                 Column {
-                    width: Math.max(hFlick.width, root.tableContentWidth)
-
+                    width: Math.max(freeHFlick.width, root.tableContentWidth)
                     Rectangle {
-                        id: headerBar
                         width: parent.width
                         height: root.headerHeight
                         color: Md3Theme.colorScheme.surfaceContainerLow
-
                         Row {
                             anchors.fill: parent
                             anchors.leftMargin: 8
                             anchors.rightMargin: 8
-                            spacing: 0
-
                             Item {
                                 visible: root.selectionEnabled
                                 width: 48
                                 height: parent.height
-                                Md3Checkbox {
-                                    anchors.centerIn: parent
-                                    tristate: true
-                                    checkState: root.headerCheckState
-                                }
+                                Md3Checkbox { anchors.centerIn: parent; tristate: true; checkState: root.headerCheckState }
                                 MouseArea {
                                     anchors.fill: parent
                                     z: 1
                                     onClicked: root.selectPage(root.headerCheckState !== Qt.Checked)
                                 }
                             }
-
                             Repeater {
                                 model: root.columns
-                                delegate: Item {
-                                    id: hcell
+                                delegate: HeaderCell {
                                     required property int index
                                     required property var modelData
+                                    columnIndex: index
+                                    columnDef: modelData
                                     width: root.effectiveWidths[index] || 120
-                                    height: headerBar.height
-
-                                    readonly property bool sortable: modelData.sortable !== false
-                                    readonly property bool activeSort: root.sortColumn === index
-
-                                    Text {
-                                        anchors.left: parent.left
-                                        anchors.leftMargin: 8
-                                        anchors.right: parent.right
-                                        anchors.rightMargin: hcell.activeSort ? 28 : 12
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        text: modelData.title !== undefined ? modelData.title : ""
-                                        color: Md3Theme.colorScheme.colorOnSurface
-                                        font.family: Md3Theme.typography.fontFamily
-                                        font.pixelSize: Md3Theme.typography.labelLarge.size
-                                        font.weight: Font.Medium
-                                        elide: Text.ElideRight
-                                    }
-                                    Md3Icon {
-                                        visible: hcell.activeSort
-                                        anchors.right: parent.right
-                                        anchors.rightMargin: 10
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        icon: root.sortOrder === Qt.AscendingOrder ? "arrow_upward" : "arrow_downward"
-                                        size: 16
-                                        iconColor: Md3Theme.colorScheme.primary
-                                    }
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        anchors.rightMargin: 6
-                                        enabled: hcell.sortable
-                                        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                                        onClicked: root.toggleSort(index)
-                                    }
-                                    MouseArea {
-                                        anchors.right: parent.right
-                                        anchors.top: parent.top
-                                        anchors.bottom: parent.bottom
-                                        width: 6
-                                        visible: root.columnResizeEnabled
-                                        cursorShape: Qt.SplitHCursor
-                                        preventStealing: true
-                                        property real startX: 0
-                                        property real startW: 0
-                                        onPressed: function (mouse) {
-                                            startX = mapToItem(headerBar, mouse.x, 0).x
-                                            startW = hcell.width
-                                        }
-                                        onPositionChanged: function (mouse) {
-                                            if (!pressed)
-                                                return
-                                            const x = mapToItem(headerBar, mouse.x, 0).x
-                                            root.setColumnWidth(index, startW + (x - startX))
-                                        }
-                                    }
+                                    height: root.headerHeight
                                 }
                             }
-
-                            Item {
-                                visible: root.actionsColWidth > 0
-                                width: 48
-                                height: parent.height
-                            }
+                            Item { visible: root.actionsColWidth > 0; width: 48; height: parent.height }
                         }
-
-                        Md3Divider {
-                            anchors.bottom: parent.bottom
-                            width: parent.width
-                        }
+                        Md3Divider { anchors.bottom: parent.bottom; width: parent.width }
                     }
-
                     Flickable {
-                        id: bodyFlick
+                        id: freeBody
                         width: parent.width
                         height: root.bodyHeight
                         clip: true
-                        contentWidth: width
-                        contentHeight: rowsCol.height
-                        boundsBehavior: Flickable.StopAtBounds
-                        interactive: !root.loading && root.pageEntries.length > 0
+                        contentHeight: freeRows.height
                         flickableDirection: Flickable.VerticalFlick
-
                         Column {
-                            id: rowsCol
-                            width: bodyFlick.width
-
+                            id: freeRows
+                            width: freeBody.width
                             Repeater {
                                 model: root.loading ? 0 : root.pageEntries
-                                delegate: Rectangle {
-                                    id: rowItem
+                                delegate: BodyRow {
                                     required property int index
                                     required property var modelData
-                                    readonly property int sourceIndex: modelData.sourceIndex
-                                    readonly property var rowData: modelData.row
-                                    readonly property bool checked: root._isSelected(sourceIndex)
-                                    readonly property bool highlighted: root.selectedRow === sourceIndex || checked
-
-                                    width: rowsCol.width
-                                    height: root.rowHeight
-                                    color: highlighted ? Md3Theme.colorScheme.secondaryContainer : "transparent"
-
-                                    Row {
-                                        anchors.fill: parent
-                                        anchors.leftMargin: 8
-                                        anchors.rightMargin: 8
-
-                                        Item {
-                                            visible: root.selectionEnabled
-                                            width: 48
-                                            height: parent.height
-                                            Md3Checkbox {
-                                                anchors.centerIn: parent
-                                                checked: rowItem.checked
-                                                onToggled: function (state) {
-                                                    root._setSelected(rowItem.sourceIndex, state === Qt.Checked)
-                                                }
-                                            }
-                                        }
-
-                                        Repeater {
-                                            model: root.columns
-                                            delegate: Text {
-                                                required property int index
-                                                required property var modelData
-                                                width: root.effectiveWidths[index] || 120
-                                                anchors.verticalCenter: parent.verticalCenter
-                                                leftPadding: 8
-                                                text: {
-                                                    const role = modelData.role
-                                                    const row = rowItem.rowData
-                                                    return row && role !== undefined && row[role] !== undefined
-                                                           ? String(row[role]) : ""
-                                                }
-                                                color: Md3Theme.colorScheme.colorOnSurface
-                                                font.family: Md3Theme.typography.fontFamily
-                                                font.pixelSize: Md3Theme.typography.bodyMedium.size
-                                                elide: Text.ElideRight
-                                            }
-                                        }
-
-                                        Item {
-                                            visible: root.actionsColWidth > 0
-                                            width: 48
-                                            height: parent.height
-                                            Md3IconButton {
-                                                id: moreBtn
-                                                anchors.centerIn: parent
-                                                icon: "more_vert"
-                                                accessibleName: qsTr("Row actions")
-                                                onClicked: root.openRowMenu(rowItem.sourceIndex, moreBtn)
-                                            }
-                                        }
-                                    }
-
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        anchors.leftMargin: root.selectionEnabled ? 48 : 0
-                                        anchors.rightMargin: root.actionsColWidth
-                                        z: -1
-                                        onClicked: {
-                                            root.selectedRow = rowItem.sourceIndex
-                                            root.rowClicked(rowItem.sourceIndex)
-                                        }
-                                    }
-
-                                    Md3Divider {
-                                        anchors.bottom: parent.bottom
-                                        width: parent.width
-                                    }
+                                    width: freeRows.width
+                                    pageRowIndex: index
+                                    entry: modelData
                                 }
                             }
                         }
                     }
                 }
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                anchors.topMargin: root.headerHeight
-                visible: root.loading
-                z: 4
-                color: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.surface, 0.72)
-                Column {
-                    anchors.centerIn: parent
-                    spacing: 12
-                    Md3CircularProgressIndicator {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        indeterminate: true
-                        size: 40
-                    }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: qsTr("Loading…")
-                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                        font.pixelSize: Md3Theme.typography.bodyMedium.size
-                    }
-                }
-            }
-
-            Md3EmptyState {
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-                anchors.topMargin: root.headerHeight
-                width: Math.min(parent.width - 24, 360)
-                height: root.bodyHeight
-                z: 4
-                visible: !root.loading && root.totalCount === 0
-                icon: root.emptyIcon
-                title: root.emptyTitle
-                body: root.emptyBody
-                actionText: root.emptyActionText
-                onActionClicked: root.emptyActionClicked()
-            }
-        }
-
-        Md3Divider { width: parent.width; visible: root.pagination }
-
-        Md3Pagination {
-            width: parent.width
-            visible: root.pagination
-            pageCount: root.pageCount
-            currentPage: root.currentPage
-            pageSize: root.pageSize
-            totalCount: root.totalCount
-            enabled: !root.loading && root.totalCount > 0
-            onPageRequested: function (page) {
-                root.currentPage = page
-                root.pageChanged(page)
             }
         }
     }

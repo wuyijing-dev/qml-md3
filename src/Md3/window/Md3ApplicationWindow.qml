@@ -175,6 +175,17 @@ Window {
         return windowBody.replaceRoute(index, params, opts)
     }
 
+    function showStatusMessage(message, timeout) {
+        const kids = statusBarSlot.children
+        for (let i = 0; i < kids.length; ++i) {
+            const c = kids[i]
+            if (c && typeof c.showMessage === "function") {
+                c.showMessage(message, timeout)
+                return
+            }
+        }
+    }
+
     function documentTabMeta(pageIndex) {
         const d = destinations && destinations[pageIndex]
         return {

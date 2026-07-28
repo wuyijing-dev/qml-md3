@@ -127,6 +127,7 @@ import Md3
 | `pushRoute(index, params, opts)` | `Md3ApplicationWindow` | — |
 | `goBack(opts)` | `Md3ApplicationWindow` | — |
 | `replaceRoute(index, params, opts)` | `Md3ApplicationWindow` | — |
+| `showStatusMessage(message, timeout)` | `Md3ApplicationWindow` | — |
 | `documentTabMeta(pageIndex)` | `Md3ApplicationWindow` | — |
 | `openTab(pageIndex, asNew)` | `Md3ApplicationWindow` | — |
 | `addTab(pageIndex)` | `Md3ApplicationWindow` | — |
