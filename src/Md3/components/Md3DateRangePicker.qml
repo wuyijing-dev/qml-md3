@@ -262,12 +262,17 @@ Item {
             padding: 12
             spacing: 4
 
-            Row {
-                width: parent.width - 8
-                leftPadding: 12
-                spacing: 8
+            Item {
+                width: parent.width
+                height: Math.max(headerCol.implicitHeight, 48)
+
                 Column {
-                    width: parent.width - (root.showModeToggle ? 56 : 16)
+                    id: headerCol
+                    anchors.left: parent.left
+                    anchors.leftMargin: 24
+                    anchors.right: modeToggle.left
+                    anchors.rightMargin: 8
+                    anchors.verticalCenter: parent.verticalCenter
                     spacing: 2
                     Text {
                         text: root.title
@@ -298,9 +303,15 @@ Item {
                         font.pixelSize: Md3Theme.typography.labelLarge.size
                     }
                 }
+
                 Md3IconButton {
+                    id: modeToggle
                     visible: root.showModeToggle
+                    anchors.right: parent.right
+                    anchors.rightMargin: 12
+                    anchors.verticalCenter: parent.verticalCenter
                     icon: root.displayMode === Md3DateRangePicker.Calendar ? "edit" : "calendar_today"
+                    accessibleName: qsTr("Toggle input mode")
                     onClicked: root.toggleDisplayMode()
                 }
             }

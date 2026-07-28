@@ -76,7 +76,19 @@ Item {
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: Md3Theme.typography.labelLarge.size
             }
-            Md3TimePicker { }
+            Md3TimePicker {
+                id: timePicker
+                Layout.alignment: Qt.AlignLeft
+                hour: 10
+                minute: 30
+                onAccepted: function (h, m) { console.log("time", h, m) }
+            }
+
+            Md3Button {
+                text: qsTr("Open modal time picker")
+                variant: Md3Button.Outlined
+                onClicked: modalTime.open = true
+            }
 
             Item { Layout.preferredHeight: 48; Layout.fillWidth: true }
         }
@@ -90,5 +102,15 @@ Item {
         title: qsTr("Select date")
         z: 2000
         onAccepted: function (d) { console.log("modal", d) }
+    }
+
+    Md3TimePicker {
+        id: modalTime
+        anchors.fill: parent
+        modal: true
+        open: false
+        title: qsTr("Select time")
+        z: 2001
+        onAccepted: function (h, m) { console.log("modal time", h, m) }
     }
 }
