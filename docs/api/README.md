@@ -15,7 +15,7 @@
 - [Md3AppSettings](Md3AppSettings.md) — QSettings facade
 - [Md3HotReload](Md3HotReload.md) — QML hot reload watcher
 
-**QML types:** 109
+**QML types:** 110
 
 ## Actions & selection
 
@@ -105,8 +105,9 @@
 
 - [Md3ColorPicker](Md3ColorPicker.md) — Compact HSL color picker for theme seed / design tools.
 - [Md3CommandPalette](Md3CommandPalette.md) — Spotlight-style command palette (Ctrl+K). model: [{ title, subtitle?, icon?, id? }]
-- [Md3DatePicker](Md3DatePicker.md)
-- [Md3DateRangePicker](Md3DateRangePicker.md) — Dual-bound date range calendar (start → end). Same chrome as Md3DatePicker.
+- [Md3DateField](Md3DateField.md) — Docked MD3 date field: text field + calendar popup (Material docked date picker).
+- [Md3DatePicker](Md3DatePicker.md) — Material 3 date picker — calendar / input, year grid, min/max, today, week start. Inline by default. Set `modal: true` and `open` with anchors.fill on a host for dialog overlay.
+- [Md3DateRangePicker](Md3DateRangePicker.md) — Material 3 date range picker — shared chrome with Md3DatePicker (calendar/input/year/min-max).
 - [Md3Form](Md3Form.md)
 - [Md3SearchBar](Md3SearchBar.md)
 - [Md3SearchView](Md3SearchView.md)
