@@ -255,6 +255,8 @@ Md3ApplicationWindow {
               { variant: "text", width: 0.65, height: 14 },
               { variant: "text", width: 0.7, height: 14 }
           ] },
+        { title: qsTr("桌面模式"), icon: "folder_managed", source: pageRoot + "DesktopPatternsPage.qml",
+          skeletonLayout: "page" },
         { title: qsTr("扩展"), icon: "extension", source: pageRoot + "ExtrasPage.qml",
           skeletonLayout: "page" },
         { title: qsTr("动效"), icon: "animation", source: pageRoot + "MotionPage.qml",

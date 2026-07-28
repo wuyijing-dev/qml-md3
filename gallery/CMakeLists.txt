@@ -48,6 +48,7 @@ qt_add_qml_module(appQML_MD3
         pages/MenusPage.qml
         pages/PickersPage.qml
         pages/SearchPage.qml
+        pages/DesktopPatternsPage.qml
         pages/ExtrasPage.qml
         pages/MotionPage.qml
         pages/ThemePage.qml

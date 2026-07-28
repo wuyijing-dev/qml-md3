@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Dialogs
+import Md3
 
 /// Path field — open/save file, multi-file, or folder; recent paths, validation, drop, breadcrumb.
 Item {
@@ -23,9 +24,14 @@ Item {
     property var recentPaths: []
     property int maxRecent: 8
     property bool rememberRecent: true
+    property string recentStoreKey: "" // e.g. "desktop/recentPaths"
     property bool validateExtension: true
+    property bool validateExists: false
+    property bool validateWritable: false
     property var allowedExtensions: [] // e.g. [".qml", ".json"]
     property var pathValidator: null // function(path) -> { valid: bool, message: string }
+    property var existsProbe: null // function(path)->bool
+    property var writableProbe: null // function(path)->bool
     property bool showBreadcrumb: false
     property bool acceptDrops: true
 
@@ -79,6 +85,26 @@ Item {
         while (list.length > maxRecent)
             list.pop()
         recentPaths = list
+        _persistRecent()
+    }
+
+    function _persistRecent() {
+        if (!rememberRecent || !recentStoreKey.length)
+            return
+        Md3AppSettings.setValue(recentStoreKey, JSON.stringify(recentPaths || []))
+    }
+
+    function _restoreRecent() {
+        if (!rememberRecent || !recentStoreKey.length)
+            return
+        const raw = Md3AppSettings.value(recentStoreKey, "[]")
+        try {
+            const list = JSON.parse(String(raw))
+            if (Array.isArray(list))
+                recentPaths = list
+        } catch (e) {
+            // ignore malformed persisted value
+        }
     }
 
     function validatePath(p) {
@@ -110,6 +136,14 @@ Item {
             }
             if (!ok)
                 return qsTr("Extension not allowed")
+        }
+        if (validateExists && existsProbe) {
+            if (!existsProbe(p))
+                return qsTr("Path does not exist")
+        }
+        if (validateWritable && writableProbe) {
+            if (!writableProbe(p))
+                return qsTr("Path is not writable")
         }
         return ""
     }
@@ -202,6 +236,7 @@ Item {
             _runValidation()
     }
     Component.onCompleted: {
+        _restoreRecent()
         field.text = multiMode ? paths.join("; ") : path
         _runValidation()
     }

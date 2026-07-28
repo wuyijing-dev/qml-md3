@@ -120,12 +120,11 @@ Rectangle {
             anchors.centerIn: parent
             spacing: 8
             height: parent.height
-            width: Math.min(implicitWidth, centerSlot.width)
 
             Text {
                 visible: root.centerText.length > 0
                 anchors.verticalCenter: parent.verticalCenter
-                width: Math.min(implicitWidth, centerSlot.width)
+                width: centerSlot.width
                 text: root.centerText
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.family: Md3Theme.typography.fontFamily

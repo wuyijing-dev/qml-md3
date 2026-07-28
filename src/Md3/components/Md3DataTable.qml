@@ -38,6 +38,8 @@ Item {
     property int serverTotalCount: 0
     property bool keyboardNavigationEnabled: true
     property bool rowReorderEnabled: false
+    property bool autoReorderRows: true
+    property bool showColumnFilterIcons: false
     property var rowActions: []
     /// Optional cell renderer: set `rowData`, `columnDef`, `columnIndex`, `displayText`, `sourceIndex`.
     property Component cellDelegate: null
@@ -57,6 +59,8 @@ Item {
     property var columnWidths: []
     property int rowMenuSourceIndex: -1
     property int focusedPageRow: -1
+    property int filterMenuColumnIndex: -1
+    property string filterMenuSearchText: ""
 
     readonly property int frozenCount: Math.max(0, Math.min(frozenColumnCount, columns ? columns.length : 0))
     readonly property real selectionColWidth: selectionEnabled ? 48 : 0
@@ -304,6 +308,73 @@ Item {
         rowMenu.popup(p.x, p.y)
     }
 
+    function _columnUniqueValues(columnIndex) {
+        const out = []
+        if (!columns || columnIndex < 0 || columnIndex >= columns.length)
+            return out
+        const role = columns[columnIndex].role
+        if (!role)
+            return out
+        const seen = {}
+        const src = rows || []
+        for (let i = 0; i < src.length; ++i) {
+            const v = src[i] && src[i][role] !== undefined ? String(src[i][role]) : ""
+            if (!seen[v]) {
+                seen[v] = true
+                out.push(v)
+            }
+        }
+        out.sort(function (a, b) { return a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }) })
+        return out
+    }
+
+    function _columnFilterValues() {
+        const values = _columnUniqueValues(filterMenuColumnIndex)
+        const q = String(filterMenuSearchText || "").trim().toLowerCase()
+        if (!q.length)
+            return values
+        return values.filter(function (v) { return String(v).toLowerCase().indexOf(q) >= 0 })
+    }
+
+    function openColumnFilter(columnIndex, anchorItem) {
+        if (!showColumnFilterIcons || !anchorItem)
+            return
+        filterMenuColumnIndex = columnIndex
+        filterMenuSearchText = ""
+        columnFilterMenu.popupAtItem(anchorItem, 0, anchorItem.height)
+    }
+
+    function setColumnFilterValue(columnIndex, value) {
+        if (!columns || columnIndex < 0 || columnIndex >= columns.length)
+            return
+        const role = columns[columnIndex].role
+        if (!role)
+            return
+        const next = Object.assign({}, columnFilters || {})
+        if (value === undefined || value === null || String(value).length === 0)
+            delete next[role]
+        else
+            next[role] = String(value)
+        columnFilters = next
+        currentPage = 0
+        filterChanged()
+    }
+
+    function moveRow(fromSourceIndex, toSourceIndex) {
+        if (serverSidePagination)
+            return
+        const src = rows || []
+        if (fromSourceIndex < 0 || fromSourceIndex >= src.length
+                || toSourceIndex < 0 || toSourceIndex >= src.length
+                || fromSourceIndex === toSourceIndex)
+            return
+        const next = src.slice()
+        const moved = next.splice(fromSourceIndex, 1)[0]
+        next.splice(toSourceIndex, 0, moved)
+        rows = next
+        rowOrderChanged(fromSourceIndex, toSourceIndex)
+    }
+
     function focusTable() {
         tableFocus.forceActiveFocus()
     }
@@ -354,7 +425,7 @@ Item {
             anchors.left: parent.left
             anchors.leftMargin: 8
             anchors.right: parent.right
-            anchors.rightMargin: hcell.activeSort ? 28 : 12
+            anchors.rightMargin: (hcell.activeSort || (root.showColumnFilterIcons && hcell.columnDef.filterable !== false)) ? 42 : 12
             anchors.verticalCenter: parent.verticalCenter
             text: hcell.columnDef.title !== undefined ? hcell.columnDef.title : ""
             color: Md3Theme.colorScheme.colorOnSurface
@@ -366,11 +437,20 @@ Item {
         Md3Icon {
             visible: hcell.activeSort
             anchors.right: parent.right
-            anchors.rightMargin: 10
+            anchors.rightMargin: root.showColumnFilterIcons && hcell.columnDef.filterable !== false ? 26 : 10
             anchors.verticalCenter: parent.verticalCenter
             icon: root.sortOrder === Qt.AscendingOrder ? "arrow_upward" : "arrow_downward"
             size: 16
             iconColor: Md3Theme.colorScheme.primary
+        }
+        Md3IconButton {
+            id: filterBtn
+            visible: root.showColumnFilterIcons && hcell.columnDef.filterable !== false
+            anchors.right: parent.right
+            anchors.rightMargin: 2
+            anchors.verticalCenter: parent.verticalCenter
+            icon: "filter_list"
+            onClicked: root.openColumnFilter(hcell.columnIndex, filterBtn)
         }
         MouseArea {
             anchors.fill: parent
@@ -453,6 +533,7 @@ Item {
               : (highlighted ? Md3Theme.colorScheme.secondaryContainer : "transparent")
 
         property int dragFromIndex: -1
+        property int dragTargetIndex: -1
 
         Row {
             anchors.fill: parent
@@ -524,8 +605,16 @@ Item {
             enabled: root.rowReorderEnabled
             target: null
             onActiveChanged: {
-                if (active)
+                if (active) {
                     bodyRow.dragFromIndex = bodyRow.sourceIndex
+                    bodyRow.dragTargetIndex = bodyRow.sourceIndex
+                } else if (bodyRow.dragFromIndex >= 0 && bodyRow.dragTargetIndex >= 0
+                           && bodyRow.dragFromIndex !== bodyRow.dragTargetIndex) {
+                    if (root.autoReorderRows)
+                        root.moveRow(bodyRow.dragFromIndex, bodyRow.dragTargetIndex)
+                    else
+                        root.rowOrderChanged(bodyRow.dragFromIndex, bodyRow.dragTargetIndex)
+                }
             }
             onTranslationChanged: {
                 if (!active || bodyRow.dragFromIndex < 0)
@@ -533,8 +622,8 @@ Item {
                 const y = bodyRow.mapToItem(rowsCol, 0, translation.y).y
                 const idx = Math.max(0, Math.min(root.pageEntries.length - 1, Math.floor(y / root.rowHeight)))
                 const target = root.pageEntries[idx]
-                if (target && target.sourceIndex !== bodyRow.dragFromIndex)
-                    root.rowOrderChanged(bodyRow.dragFromIndex, target.sourceIndex)
+                if (target)
+                    bodyRow.dragTargetIndex = target.sourceIndex
             }
         }
 
@@ -1019,6 +1108,45 @@ Item {
                 onClicked: {
                     root.rowActionTriggered(root.rowMenuSourceIndex, modelData)
                     rowMenu.dismiss()
+                }
+            }
+        }
+    }
+
+    Md3Menu {
+        id: columnFilterMenu
+        modal: true
+        menuWidth: 260
+
+        Item {
+            width: parent.width
+            height: 52
+            Md3TextField {
+                anchors.fill: parent
+                anchors.margins: 8
+                variant: Md3TextField.Outlined
+                label: qsTr("Filter")
+                text: root.filterMenuSearchText
+                onTextChanged: root.filterMenuSearchText = text
+            }
+        }
+        Md3MenuItem {
+            text: qsTr("Clear filter")
+            icon: "filter_alt_off"
+            onClicked: {
+                root.setColumnFilterValue(root.filterMenuColumnIndex, "")
+                columnFilterMenu.dismiss()
+            }
+        }
+        Md3MenuDivider {}
+        Repeater {
+            model: root._columnFilterValues()
+            Md3MenuItem {
+                required property var modelData
+                text: String(modelData)
+                onClicked: {
+                    root.setColumnFilterValue(root.filterMenuColumnIndex, modelData)
+                    columnFilterMenu.dismiss()
                 }
             }
         }

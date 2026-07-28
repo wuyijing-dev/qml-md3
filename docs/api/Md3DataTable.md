@@ -51,11 +51,15 @@ import Md3
 | `serverTotalCount` | `int` | `0` | read/write | `Md3DataTable` | — |
 | `keyboardNavigationEnabled` | `bool` | `true` | read/write | `Md3DataTable` | — |
 | `rowReorderEnabled` | `bool` | `false` | read/write | `Md3DataTable` | — |
+| `autoReorderRows` | `bool` | `true` | read/write | `Md3DataTable` | — |
+| `showColumnFilterIcons` | `bool` | `false` | read/write | `Md3DataTable` | — |
 | `rowActions` | `var` | `[]` | read/write | `Md3DataTable` | — |
 | `cellDelegate` | `Component` | `null` | read/write | `Md3DataTable` | Optional cell renderer: set `rowData`, `columnDef`, `columnIndex`, `displayText`, `sourceIndex`. |
 | `columnWidths` | `var` | `[]` | read/write | `Md3DataTable` | — |
 | `rowMenuSourceIndex` | `int` | `-1` | read/write | `Md3DataTable` | — |
 | `focusedPageRow` | `int` | `-1` | read/write | `Md3DataTable` | — |
+| `filterMenuColumnIndex` | `int` | `-1` | read/write | `Md3DataTable` | — |
+| `filterMenuSearchText` | `string` | `""` | read/write | `Md3DataTable` | — |
 | `frozenCount` | `int` | `Math.max(0, Math.min(frozenColumnCount, columns ? columns.length : 0))` | readonly | `Md3DataTable` | — |
 | `selectionColWidth` | `real` | `selectionEnabled ? 48 : 0` | readonly | `Md3DataTable` | — |
 | `actionsColWidth` | `real` | `(rowActions && rowActions.length) ? 48 : 0` | readonly | `Md3DataTable` | — |
@@ -97,6 +101,9 @@ import Md3
 | `toggleSort(columnIndex)` | `Md3DataTable` | — |
 | `selectPage(on)` | `Md3DataTable` | — |
 | `openRowMenu(sourceIndex, anchorItem)` | `Md3DataTable` | — |
+| `openColumnFilter(columnIndex, anchorItem)` | `Md3DataTable` | — |
+| `setColumnFilterValue(columnIndex, value)` | `Md3DataTable` | — |
+| `moveRow(fromSourceIndex, toSourceIndex)` | `Md3DataTable` | — |
 | `focusTable()` | `Md3DataTable` | — |
 
 ## Example

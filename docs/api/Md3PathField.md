@@ -37,9 +37,14 @@ import Md3
 | `recentPaths` | `var` | `[]` | read/write | `Md3PathField` | — |
 | `maxRecent` | `int` | `8` | read/write | `Md3PathField` | — |
 | `rememberRecent` | `bool` | `true` | read/write | `Md3PathField` | — |
+| `recentStoreKey` | `string` | `""` | read/write | `Md3PathField` | — |
 | `validateExtension` | `bool` | `true` | read/write | `Md3PathField` | — |
+| `validateExists` | `bool` | `false` | read/write | `Md3PathField` | — |
+| `validateWritable` | `bool` | `false` | read/write | `Md3PathField` | — |
 | `allowedExtensions` | `var` | `[]` | read/write | `Md3PathField` | — |
 | `pathValidator` | `var` | `null` | read/write | `Md3PathField` | — |
+| `existsProbe` | `var` | `null` | read/write | `Md3PathField` | — |
+| `writableProbe` | `var` | `null` | read/write | `Md3PathField` | — |
 | `showBreadcrumb` | `bool` | `false` | read/write | `Md3PathField` | — |
 | `acceptDrops` | `bool` | `true` | read/write | `Md3PathField` | — |
 | `multiMode` | `bool` | `mode === Md3PathField.OpenFiles` | readonly | `Md3PathField` | — |

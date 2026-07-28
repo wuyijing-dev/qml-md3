@@ -11,6 +11,7 @@ Item {
     property real indent: 20
     property bool showConnectors: false
     property bool checkEnabled: false
+    property bool triStateCheck: true
     property string filterText: ""
     property bool lazyLoad: false
   property var contextMenu: null
@@ -95,7 +96,16 @@ Item {
 
     function isChecked(path) {
         const n = _nodeAtPath(path)
-        return !!(n && n.checked === true)
+        return !!(n && (n.checkState === Qt.Checked || n.checked === true))
+    }
+
+    function checkStateAt(path) {
+        const n = _nodeAtPath(path)
+        if (!n)
+            return Qt.Unchecked
+        if (n.checkState !== undefined)
+            return n.checkState
+        return n.checked ? Qt.Checked : Qt.Unchecked
     }
 
     function _nodeAtPath(path) {
@@ -110,16 +120,76 @@ Item {
         return node
     }
 
+    function _applyCheckStateDown(node, state) {
+        if (!node)
+            return
+        node.checkState = state
+        node.checked = state === Qt.Checked
+        if (!node.children)
+            return
+        for (let i = 0; i < node.children.length; ++i)
+            _applyCheckStateDown(node.children[i], state)
+    }
+
+    function _syncCheckStateUp(nodes) {
+        if (!nodes)
+            return Qt.Unchecked
+        for (let i = 0; i < nodes.length; ++i) {
+            const n = nodes[i]
+            if (!n)
+                continue
+            if (n.children && n.children.length) {
+                _syncCheckStateUp(n.children)
+                let checked = 0
+                let partial = 0
+                for (let j = 0; j < n.children.length; ++j) {
+                    const cs = n.children[j].checkState !== undefined
+                            ? n.children[j].checkState
+                            : (n.children[j].checked ? Qt.Checked : Qt.Unchecked)
+                    if (cs === Qt.Checked)
+                        ++checked
+                    else if (cs === Qt.PartiallyChecked)
+                        ++partial
+                }
+                if (checked === n.children.length)
+                    n.checkState = Qt.Checked
+                else if (checked === 0 && partial === 0)
+                    n.checkState = Qt.Unchecked
+                else
+                    n.checkState = Qt.PartiallyChecked
+                n.checked = n.checkState === Qt.Checked
+            } else {
+                n.checkState = n.checkState !== undefined ? n.checkState
+                                                          : (n.checked ? Qt.Checked : Qt.Unchecked)
+                n.checked = n.checkState === Qt.Checked
+            }
+        }
+    }
+
     function setChecked(path, on) {
+        setCheckState(path, on ? Qt.Checked : Qt.Unchecked)
+    }
+
+    function setCheckState(path, state) {
         const copy = JSON.parse(JSON.stringify(model))
         let cur = copy
         for (let i = 0; i < path.length; ++i) {
             const idx = path[i]
-            if (i === path.length - 1)
-                cur[idx].checked = on
-            else
+            if (i === path.length - 1) {
+                const node = cur[idx]
+                if (triStateCheck) {
+                    const target = (state === Qt.PartiallyChecked) ? Qt.Checked : state
+                    _applyCheckStateDown(node, target)
+                } else {
+                    node.checkState = state === Qt.Checked ? Qt.Checked : Qt.Unchecked
+                    node.checked = node.checkState === Qt.Checked
+                }
+            } else {
                 cur = cur[idx].children
+            }
         }
+        if (triStateCheck)
+            _syncCheckStateUp(copy)
         model = copy
         checkedChanged()
     }
@@ -128,7 +198,9 @@ Item {
         const row = flatRows[flatIndex]
         if (!row)
             return
-        setChecked(row.path, !isChecked(row.path))
+        const cs = checkStateAt(row.path)
+        const next = cs === Qt.Checked ? Qt.Unchecked : Qt.Checked
+        setCheckState(row.path, next)
     }
 
     function toggleAt(flatIndex) {
@@ -319,9 +391,12 @@ Item {
                         Md3Checkbox {
                             visible: root.checkEnabled
                             anchors.verticalCenter: parent.verticalCenter
-                            checked: row.node.checked === true
+                            tristate: root.triStateCheck
+                            checkState: row.node.checkState !== undefined
+                                        ? row.node.checkState
+                                        : (row.node.checked ? Qt.Checked : Qt.Unchecked)
                             onToggled: function (state) {
-                                root.setChecked(row.path, state === Qt.Checked)
+                                root.setCheckState(row.path, state)
                             }
                         }
 

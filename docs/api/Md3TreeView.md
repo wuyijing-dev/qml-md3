@@ -21,6 +21,7 @@ import Md3
 | `indent` | `real` | `20` | read/write | `Md3TreeView` | — |
 | `showConnectors` | `bool` | `false` | read/write | `Md3TreeView` | — |
 | `checkEnabled` | `bool` | `false` | read/write | `Md3TreeView` | — |
+| `triStateCheck` | `bool` | `true` | read/write | `Md3TreeView` | — |
 | `filterText` | `string` | `""` | read/write | `Md3TreeView` | — |
 | `lazyLoad` | `bool` | `false` | read/write | `Md3TreeView` | — |
 | `contextMenu` | `var` | `null` | read/write | `Md3TreeView` | — |
@@ -41,7 +42,9 @@ import Md3
 | Method | Defined in | Description |
 |--------|------------|-------------|
 | `isChecked(path)` | `Md3TreeView` | — |
+| `checkStateAt(path)` | `Md3TreeView` | — |
 | `setChecked(path, on)` | `Md3TreeView` | — |
+| `setCheckState(path, state)` | `Md3TreeView` | — |
 | `toggleCheckAt(flatIndex)` | `Md3TreeView` | — |
 | `toggleAt(flatIndex)` | `Md3TreeView` | — |
 | `expandAll()` | `Md3TreeView` | — |
