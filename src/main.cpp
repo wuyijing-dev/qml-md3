@@ -5,7 +5,7 @@ int main(int argc, char *argv[])
     Md3::RunOptions opts;
     opts.organization = QStringLiteral("QML_MD3");
     opts.applicationName = QStringLiteral("Md3 Gallery");
-    opts.applicationVersion = QStringLiteral("0.1.0");
+    opts.applicationVersion = QStringLiteral("1.0.0");
 #if defined(Q_OS_WIN)
     opts.appUserModelId = QStringLiteral("QML_MD3.Md3Gallery");
 #endif

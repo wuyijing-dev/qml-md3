@@ -32,7 +32,7 @@ Md3SplitView {
             Md3ListTile {
                 width: parent.width
                 title: qsTr("Release notes")
-                subtitle: qsTr("0.1.0 foundations")
+                subtitle: qsTr("1.0.0 stable release")
                 showDivider: true
                 onClicked: root.detailText = qsTr("Wave 0–7 initial surface is available in Gallery.")
             }

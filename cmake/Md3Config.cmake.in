@@ -33,7 +33,7 @@ if (_MD3_PACKAGE_SHARED)
             break()
         endif()
     endforeach()
-    # SONAME variants: libMd3.so.0.1.0
+    # SONAME variants: libMd3.so.1.0.0
     if (_MD3_CORE_LIB STREQUAL "")
         file(GLOB _md3_so_cands "${_MD3_LIBDIR}/libMd3.so*")
         if (_md3_so_cands)

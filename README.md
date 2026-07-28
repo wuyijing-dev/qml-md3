@@ -170,4 +170,4 @@ python scripts/gen_api_docs.py
 
 ## Version
 
-`0.1.0` — full component surface (controls remain **experimental** until visual regression audit).
+`1.0.0` — first stable desktop-focused Md3 component library release.

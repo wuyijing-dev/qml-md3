@@ -10,7 +10,7 @@ Bootstrap helpers for fonts, Basic style, and early RHI/alpha setup.
 |-------|------|---------|-------------|
 | `organization` | `QString` | `"Md3"` | `QCoreApplication::setOrganizationName` |
 | `applicationName` | `QString` | `"Md3 App"` | Application name |
-| `applicationVersion` | `QString` | `"0.1.0"` | Application version |
+| `applicationVersion` | `QString` | `"1.0.0"` | Application version |
 | `style` | `QString` | `"Basic"` | `QQuickStyle::setStyle` |
 | `loadFonts` | `bool` | `true` | Load HarmonyOS Sans SC Regular (+ optional Medium/Bold if present) and Material Icons from Md3 qrc / app `fonts/` |
 | `alphaBuffer` | `bool` | `true` | `QQuickWindow::setDefaultAlphaBuffer` before app |
