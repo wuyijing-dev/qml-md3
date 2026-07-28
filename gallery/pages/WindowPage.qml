@@ -360,7 +360,7 @@ Flickable {
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
                         text: qsTr("叠加图标")
-                        onClicked: if (root.appWin) root.appWin.setTaskbarOverlayIcon("qrc:/md3/icons/app-icon-16.png", qsTr("角标"))
+                        onClicked: if (root.appWin) root.appWin.setTaskbarOverlayIcon(Md3AppIcons.app16, qsTr("角标"))
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
@@ -434,14 +434,14 @@ Flickable {
                         enabled: Md3WindowCapabilities.isWindows
                         text: qsTr("缩略图栏")
                         onClicked: if (root.appWin) root.appWin.setThumbBarButtons([
-                            { id: 1, icon: "qrc:/md3/icons/app-icon-16.png", tooltip: qsTr("操作 A") },
-                            { id: 2, icon: "qrc:/md3/icons/app-icon-16.png", tooltip: qsTr("操作 B") }
+                            { id: 1, icon: Md3AppIcons.app16, tooltip: qsTr("操作 A") },
+                            { id: 2, icon: Md3AppIcons.app16, tooltip: qsTr("操作 B") }
                         ])
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
                         text: qsTr("显示托盘")
-                        onClicked: if (root.appWin) root.appWin.showSystemTrayIcon("qrc:/md3/icons/app-icon-16.png", qsTr("Md3 图库"))
+                        onClicked: if (root.appWin) root.appWin.showSystemTrayIcon(Md3AppIcons.app16, qsTr("Md3 图库"))
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
@@ -664,7 +664,7 @@ Flickable {
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
                         text: qsTr("显示托盘")
-                        onClicked: if (root.appWin) root.appWin.showSystemTrayIcon("qrc:/md3/icons/app-icon-16.png", qsTr("Md3 图库"))
+                        onClicked: if (root.appWin) root.appWin.showSystemTrayIcon(Md3AppIcons.app16, qsTr("Md3 图库"))
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux

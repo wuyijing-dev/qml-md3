@@ -23,7 +23,7 @@ import Md3
 | `titleBarItem` | `alias` | `titleBarLoader.item` | read/write | `Md3DialogWindow` | Alias → `titleBarLoader.item` |
 | `overlay` | `alias` | `overlayHost.data` | read/write | `Md3DialogWindow` | Alias → `overlayHost.data` |
 | `titleBar` | `Component` | `null` | read/write | `Md3DialogWindow` | — |
-| `windowIcon` | `url` | `""` | read/write | `Md3DialogWindow` | — |
+| `windowIcon` | `url` | `Md3AppIcons.window` | read/write | `Md3DialogWindow` | — |
 | `syncImmersiveDarkMode` | `bool` | `true` | read/write | `Md3DialogWindow` | — |
 | `systemBackdrop` | `int` | `0` | read/write | `Md3DialogWindow` | — |
 | `nativeBorderColor` | `string` | `""` | read/write | `Md3DialogWindow` | — |

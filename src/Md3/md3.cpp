@@ -27,11 +27,16 @@ SetCurrentProcessExplicitAppUserModelID(PCWSTR appId);
 #  endif
 #endif
 
-// From qt_add_resources(Md3 "md3_fonts" …) — forces registration even if the
-// static qml-module resource object was not pulled into the link.
+// From qt_add_resources(Md3 "md3_fonts" / "md3_icons" …) — forces registration
+// even if the static qml-module resource object was not pulled into the link.
 static void ensureMd3FontResources()
 {
     Q_INIT_RESOURCE(md3_fonts);
+}
+
+static void ensureMd3IconResources()
+{
+    Q_INIT_RESOURCE(md3_icons);
 }
 
 namespace Md3 {
@@ -98,6 +103,7 @@ int loadFonts()
         return cached;
 
     ensureMd3FontResources();
+    ensureMd3IconResources();
 
     // Required: Regular. Optional Medium/Bold if bundled or placed under app fonts/.
     static const QStringList uiRequired = {
@@ -245,6 +251,8 @@ void initialize(QCoreApplication &app, const RunOptions &opts)
 
     if (opts.loadFonts)
         loadFonts();
+    else
+        ensureMd3IconResources();
 }
 
 int run(int argc, char **argv,

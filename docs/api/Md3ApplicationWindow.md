@@ -23,7 +23,7 @@ import Md3
 | `overlayItem` | `alias` | `overlayHost` | read/write | `Md3ApplicationWindow` | Alias → `overlayHost` |
 | `snackbarHostItem` | `alias` | `snackbarHost` | read/write | `Md3ApplicationWindow` | Alias → `snackbarHost` |
 | `titleBar` | `Component` | `null` | read/write | `Md3ApplicationWindow` | — |
-| `windowIcon` | `url` | `""` | read/write | `Md3ApplicationWindow` | App icon for title bar + taskbar / Alt-Tab (qrc or file URL) |
+| `windowIcon` | `url` | `Md3AppIcons.window` | read/write | `Md3ApplicationWindow` | App icon for title bar + taskbar / Alt-Tab (qrc or file URL). Default: Md3 bundled icon (resources/icons → qrc:/md3/icons/…). |
 | `syncImmersiveDarkMode` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Sync DWM immersive dark mode with Md3Theme.dark (Windows) |
 | `systemBackdrop` | `int` | `0` | read/write | `Md3ApplicationWindow` | UNSUITABLE FOR PRODUCTION — kept for future research only. Qt Quick composition typically hides DWM Mica/Acrylic; prefer 0 (solid MD3 surface). 0=None 1=Auto 2=Mica 3=Acrylic 4=Tabbed |
 | `nativeBorderColor` | `string` | `""` | read/write | `Md3ApplicationWindow` | DWM border color ("#RRGGBB", "none", "default", or "") |

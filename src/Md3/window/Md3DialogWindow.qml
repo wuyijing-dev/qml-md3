@@ -14,7 +14,7 @@ Window {
     property alias titleBarItem: titleBarLoader.item
     property alias overlay: overlayHost.data
     property Component titleBar: null
-    property url windowIcon: ""
+    property url windowIcon: Md3AppIcons.window
     property bool syncImmersiveDarkMode: true
     property int systemBackdrop: 0
     property string nativeBorderColor: ""

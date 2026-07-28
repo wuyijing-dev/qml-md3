@@ -48,6 +48,28 @@ foreach (_md3_font_name IN LISTS MD3_FONT_NAMES)
     list(APPEND MD3_FONT_FILES "resources/fonts/${_md3_font_name}")
 endforeach()
 
+# App icons (title bar / taskbar / tray). Canonical: repo resources/icons/.
+# Staged under src/Md3/icons/ → qrc:/md3/icons/app-icon.png (same path Gallery used).
+set(_md3_icon_dir "${CMAKE_CURRENT_SOURCE_DIR}/icons")
+file(MAKE_DIRECTORY "${_md3_icon_dir}")
+set(MD3_ICON_NAMES
+    app-icon.png
+    app-icon-16.png
+    app-icon-32.png
+    app-icon-48.png
+    app-icon-256.png
+)
+set(MD3_ICON_FILES "")
+foreach (_md3_icon_name IN LISTS MD3_ICON_NAMES)
+    set(_src "${MD3_ROOT}/resources/icons/${_md3_icon_name}")
+    set(_dst "${_md3_icon_dir}/${_md3_icon_name}")
+    if (NOT EXISTS "${_src}")
+        message(FATAL_ERROR "Missing icon: ${_src}")
+    endif()
+    configure_file("${_src}" "${_dst}" COPYONLY)
+    list(APPEND MD3_ICON_FILES "icons/${_md3_icon_name}")
+endforeach()
+
 option(MD3_BUILD_SHARED "Build Md3 as a shared library" OFF)
 if (MD3_BUILD_SHARED)
     qt_add_library(Md3 SHARED)
@@ -66,6 +88,13 @@ qt_add_resources(Md3 "md3_fonts"
     FILES
         ${MD3_FONT_FILES}
 )
+
+# Paths: :/md3/icons/app-icon.png …
+qt_add_resources(Md3 "md3_icons"
+    PREFIX "/md3"
+    FILES
+        ${MD3_ICON_FILES}
+)
 if (NOT TARGET Md3::Md3)
     add_library(Md3::Md3 ALIAS Md3)
 endif()
@@ -75,6 +104,7 @@ set_source_files_properties(
     foundation/Md3Motion.qml
     foundation/Md3Accessibility.qml
     foundation/Md3IconFonts.qml
+    foundation/Md3AppIcons.qml
     window/Md3WindowCapabilities.qml
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE
 )
@@ -115,6 +145,7 @@ qt_add_qml_module(Md3
         foundation/Md3Motion.qml
         foundation/Md3Accessibility.qml
         foundation/Md3IconFonts.qml
+        foundation/Md3AppIcons.qml
         foundation/Md3ColorScheme.qml
         foundation/Md3DynamicScheme.qml
         foundation/Md3Typography.qml
@@ -230,6 +261,7 @@ qt_add_qml_module(Md3
         diagnostics/Md3PerformancePanel.qml
     RESOURCES
         ${MD3_FONT_FILES}
+        ${MD3_ICON_FILES}
 )
 
 target_link_libraries(Md3

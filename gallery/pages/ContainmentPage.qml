@@ -542,7 +542,7 @@ Item {
         width: 520
         height: 380
         dialogText: "Separate top-level window with custom chrome, pin (always-on-top), and standard actions."
-        windowIcon: "qrc:/md3/icons/app-icon.png"
+        windowIcon: Md3AppIcons.window
         onConfirmed: console.log("dialog window accepted")
         onDismissed: console.log("dialog window dismissed")
 

@@ -188,7 +188,9 @@ Types: `Md3PerformanceMonitor`, `Md3PerformancePanel`, `Md3ElementPicker`, `Md3I
 ### Gallery: keep Linux in sync with Windows
 
 Gallery QML **is in git** (`gallery/Main.qml`, `gallery/pages/**`, including `LaunchListScene.qml`).  
-`gallery/md3/icons/` is **not** committed (see `.gitignore`); CMake copies icons from `resources/icons/` at configure time — that is normal.
+Default app icons ship **inside the Md3 module** (`qrc:/md3/icons/…`, singleton `Md3AppIcons`).  
+Canonical PNGs live in `resources/icons/`; CMake stages copies under `src/Md3/icons/` (gitignored).  
+`Md3ApplicationWindow.windowIcon` defaults to `Md3AppIcons.window` — apps need not set an icon unless they want a custom one.
 
 If the Linux app looks older than Windows after `git pull`:
 

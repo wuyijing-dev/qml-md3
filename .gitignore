@@ -43,6 +43,7 @@ ui_*.h
 
 # CMake-staged copies (canonical assets stay in /resources/)
 /src/Md3/resources/
+/src/Md3/icons/
 /gallery/md3/
 
 # Compiler / linker leftovers

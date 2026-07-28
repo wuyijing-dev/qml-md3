@@ -15,7 +15,7 @@
 - [Md3AppSettings](Md3AppSettings.md) — QSettings facade
 - [Md3HotReload](Md3HotReload.md) — QML hot reload watcher
 
-**QML types:** 108
+**QML types:** 109
 
 ## Actions & selection
 
@@ -90,6 +90,7 @@
 ## Foundation
 
 - [Md3Accessibility](Md3Accessibility.md) _(singleton)_ — Library-wide accessibility preferences and helpers.
+- [Md3AppIcons](Md3AppIcons.md) _(singleton)_ — Default app / window icons shipped inside the Md3 module (resources/icons). Paths: qrc:/md3/icons/app-icon.png … — used when windowIcon is left empty.
 - [Md3ColorScheme](Md3ColorScheme.md)
 - [Md3DynamicScheme](Md3DynamicScheme.md)
 - [Md3Elevation](Md3Elevation.md)

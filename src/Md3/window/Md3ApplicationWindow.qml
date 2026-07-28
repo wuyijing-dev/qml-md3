@@ -16,8 +16,9 @@ Window {
     property alias overlayItem: overlayHost
     property alias snackbarHostItem: snackbarHost
     property Component titleBar: null
-    /// App icon for title bar + taskbar / Alt-Tab (qrc or file URL)
-    property url windowIcon: ""
+    /// App icon for title bar + taskbar / Alt-Tab (qrc or file URL).
+    /// Default: Md3 bundled icon (resources/icons → qrc:/md3/icons/…).
+    property url windowIcon: Md3AppIcons.window
     /// Sync DWM immersive dark mode with Md3Theme.dark (Windows)
     property bool syncImmersiveDarkMode: true
     /// UNSUITABLE FOR PRODUCTION — kept for future research only.

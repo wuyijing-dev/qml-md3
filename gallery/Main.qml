@@ -7,7 +7,7 @@ Md3ApplicationWindow {
     width: 1180
     height: 760
     title: qsTr("Md3 图库")
-    windowIcon: "qrc:/md3/icons/app-icon.png"
+    // windowIcon defaults to Md3AppIcons.window (bundled in the Md3 module)
     roundedCorners: true
     cornerRadius: Md3WindowCapabilities.windowCornerRadius
     syncImmersiveDarkMode: true

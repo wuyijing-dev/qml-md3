@@ -25,37 +25,10 @@ elseif (WIN32)
     target_sources(appQML_MD3 PRIVATE ${MD3_ROOT}/resources/app.rc)
 endif()
 
-# Fonts ship inside the Md3 QML module (see src/Md3/CMakeLists.txt).
+# Fonts / icons ship inside the Md3 QML module (see src/Md3/CMakeLists.txt).
 # Do NOT qt_add_resources them here — QT_RESOURCE_ALIAS + deferred IDE exposure
 # incorrectly resolves basenames under gallery/ on MSVC/Qt Creator.
-
-# Icons: files must live under gallery/ at the same relative path used in qrc.
-# QT_RESOURCE_ALIAS / BASE+basename make MSVC finalize look for gallery/<basename>
-# and fail. PREFIX "/" + relative FILES "md3/icons/..." matches :/md3/icons/...
-set(_gallery_icon_dir "${CMAKE_CURRENT_SOURCE_DIR}/md3/icons")
-file(MAKE_DIRECTORY "${_gallery_icon_dir}")
-set(GALLERY_ICON_NAMES
-    app-icon.png
-    app-icon-16.png
-    app-icon-32.png
-    app-icon-48.png
-    app-icon-256.png
-)
-set(GALLERY_ICON_FILES "")
-foreach (_n IN LISTS GALLERY_ICON_NAMES)
-    set(_src "${MD3_ROOT}/resources/icons/${_n}")
-    set(_dst "${_gallery_icon_dir}/${_n}")
-    if (NOT EXISTS "${_src}")
-        message(FATAL_ERROR "Missing icon: ${_src}")
-    endif()
-    configure_file("${_src}" "${_dst}" COPYONLY)
-    list(APPEND GALLERY_ICON_FILES "md3/icons/${_n}")
-endforeach()
-
-qt_add_resources(appQML_MD3 "md3_app_icons"
-    PREFIX "/"
-    FILES ${GALLERY_ICON_FILES}
-)
+# Default window icons: qrc:/md3/icons/… via Md3AppIcons / Md3ApplicationWindow.
 
 qt_add_qml_module(appQML_MD3
     URI Gallery
