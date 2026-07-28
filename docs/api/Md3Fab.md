@@ -26,6 +26,7 @@ import Md3
 | `size` | `int` | `Md3Fab.Regular` | read/write | `Md3Fab` | — |
 | `colorRole` | `int` | `Md3Fab.Primary` | read/write | `Md3Fab` | — |
 | `icon` | `string` | `"add"` | read/write | `Md3Fab` | — |
+| `iconRotation` | `real` | `0` | read/write | `Md3Fab` | Degrees applied to the glyph (FAB menu uses 45° when open). |
 | `enabled` | `bool` | `true` | read/write | `Md3Fab` | — |
 | `accessibleName` | `string` | `"Floating action button"` | read/write | `Md3Fab` | — |
 | `tooltip` | `string` | `""` | read/write | `Md3Fab` | — |
@@ -59,7 +60,7 @@ Md3Fab {
     size: Md3Fab.Regular
     colorRole: Md3Fab.Primary
     icon: "add"
+    iconRotation: 0
     accessibleName: "Floating action button"
-    tooltip: ""
 }
 ```

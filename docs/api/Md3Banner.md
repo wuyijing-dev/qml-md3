@@ -17,6 +17,7 @@ import Md3
 | `leadingIcon` | `string` | `"info"` | read/write | `Md3Banner` | — |
 | `primaryAction` | `string` | `""` | read/write | `Md3Banner` | — |
 | `secondaryAction` | `string` | `""` | read/write | `Md3Banner` | — |
+| `showClose` | `bool` | `true` | read/write | `Md3Banner` | — |
 | `open` | `bool` | `true` | read/write | `Md3Banner` | — |
 
 ## Signals
@@ -41,6 +42,6 @@ Md3Banner {
     leadingIcon: "info"
     primaryAction: ""
     secondaryAction: ""
-    open: true
+    showClose: true
 }
 ```

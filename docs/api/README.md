@@ -15,7 +15,7 @@
 - [Md3AppSettings](Md3AppSettings.md) — QSettings facade
 - [Md3HotReload](Md3HotReload.md) — QML hot reload watcher
 
-**QML types:** 110
+**QML types:** 113
 
 ## Actions & selection
 
@@ -54,6 +54,9 @@
 - [Md3LiquidGlass](Md3LiquidGlass.md) — Draggable Liquid Glass — regional backdrop sample (not full-scene blur).
 - [Md3NumberField](Md3NumberField.md) — Numeric spin field: TextField chrome + step buttons (form-friendly SpinBox).
 - [Md3Pagination](Md3Pagination.md) — Compact pagination bar for tables / lists.
+- [Md3PathField](Md3PathField.md) — Path field with browse — open file, save file, or folder.
+- [Md3StatusBar](Md3StatusBar.md) — Desktop status bar: message on the left, optional progress, trailing status items.
+- [Md3TreeView](Md3TreeView.md) — Hierarchical tree: model nodes `{ title, icon?, children?, expanded?, data? }`.
 
 ## Containment & feedback
 
@@ -123,7 +126,7 @@
 
 - [Md3BottomAppBar](Md3BottomAppBar.md)
 - [Md3Breadcrumb](Md3Breadcrumb.md) — Horizontal breadcrumb trail. model: ["Home","Folder"] or [{ title, icon? }, ...]
-- [Md3DataTable](Md3DataTable.md) — Data table with sort, multi-select, sticky header, empty/loading, and pagination.
+- [Md3DataTable](Md3DataTable.md) — Data table: sort, multi-select, sticky header, empty/loading, pagination, column resize, horizontal scroll, row action menu.
 - [Md3DocumentTabBar](Md3DocumentTabBar.md) — Win11 Explorer / browser document tabs — reorder, close, tear-off, add pop-in.
 - [Md3ListTile](Md3ListTile.md)
 - [Md3NavigationBar](Md3NavigationBar.md)

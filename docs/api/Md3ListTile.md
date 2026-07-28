@@ -18,6 +18,7 @@ import Md3
 | `supportingText` | `string` | `""` | read/write | `Md3ListTile` | — |
 | `leadingIcon` | `string` | `""` | read/write | `Md3ListTile` | — |
 | `trailingIcon` | `string` | `""` | read/write | `Md3ListTile` | — |
+| `trailingRotation` | `real` | `0` | read/write | `Md3ListTile` | Degrees applied to trailing icon (e.g. ExpansionTile chevron). |
 | `selected` | `bool` | `false` | read/write | `Md3ListTile` | — |
 | `enabled` | `bool` | `true` | read/write | `Md3ListTile` | — |
 | `showDivider` | `bool` | `false` | read/write | `Md3ListTile` | — |

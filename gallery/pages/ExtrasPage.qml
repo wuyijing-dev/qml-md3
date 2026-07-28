@@ -90,6 +90,120 @@ Item {
             }
 
             Text {
+                text: qsTr("Tree view")
+                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                font.pixelSize: Md3Theme.typography.labelLarge.size
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+                Md3Button {
+                    text: qsTr("Expand all")
+                    variant: Md3Button.Text
+                    onClicked: treeDemo.expandAll()
+                }
+                Md3Button {
+                    text: qsTr("Collapse all")
+                    variant: Md3Button.Text
+                    onClicked: treeDemo.collapseAll()
+                }
+                Text {
+                    Layout.fillWidth: true
+                    text: treeDemo.selectedIndex >= 0
+                          ? qsTr("Selected: %1").arg(treeDemo.flatRows[treeDemo.selectedIndex].node.title)
+                          : qsTr("Click a node")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                    elide: Text.ElideRight
+                }
+            }
+            Md3Card {
+                variant: Md3Card.Outlined
+                Layout.fillWidth: true
+                Layout.preferredHeight: 280
+                Md3TreeView {
+                    id: treeDemo
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    model: [
+                        {
+                            title: qsTr("Workspace"),
+                            icon: "folder",
+                            expanded: true,
+                            children: [
+                                { title: qsTr("src"), icon: "folder", expanded: true, children: [
+                                    { title: "main.cpp", icon: "description" },
+                                    { title: "CMakeLists.txt", icon: "description" }
+                                ]},
+                                { title: qsTr("resources"), icon: "folder", children: [
+                                    { title: "icons", icon: "image" }
+                                ]}
+                            ]
+                        },
+                        {
+                            title: qsTr("Settings"),
+                            icon: "settings",
+                            children: [
+                                { title: qsTr("Theme"), icon: "palette" },
+                                { title: qsTr("Keyboard"), icon: "keyboard" }
+                            ]
+                        }
+                    ]
+                }
+            }
+
+            Text {
+                text: qsTr("Path field")
+                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                font.pixelSize: Md3Theme.typography.labelLarge.size
+            }
+            Md3PathField {
+                Layout.fillWidth: true
+                label: qsTr("Open file")
+                mode: Md3PathField.OpenFile
+                nameFilters: ["QML files (*.qml)", "All files (*)"]
+                dialogTitle: qsTr("Choose a file")
+            }
+            Md3PathField {
+                Layout.fillWidth: true
+                label: qsTr("Output folder")
+                mode: Md3PathField.Folder
+                dialogTitle: qsTr("Choose a folder")
+            }
+
+            Text {
+                text: qsTr("Status bar")
+                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                font.pixelSize: Md3Theme.typography.labelLarge.size
+            }
+            Md3Card {
+                variant: Md3Card.Outlined
+                Layout.fillWidth: true
+                Layout.preferredHeight: 36
+                clip: true
+                Md3StatusBar {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    text: qsTr("Ready — 12 files indexed")
+                    leadingIcon: "info"
+                    progress: 0.42
+                    Text {
+                        text: qsTr("Ln 42, Col 8")
+                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                        font.pixelSize: Md3Theme.typography.labelSmall.size
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                    Text {
+                        text: "UTF-8"
+                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                        font.pixelSize: Md3Theme.typography.labelSmall.size
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+            }
+
+            Text {
                 text: qsTr("Data table")
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: Md3Theme.typography.labelLarge.size
@@ -112,7 +226,7 @@ Item {
                     Layout.fillWidth: true
                     text: tableDemo.selectedIndices.length
                           ? qsTr("%1 selected").arg(tableDemo.selectedIndices.length)
-                          : qsTr("Right-click page for context menu")
+                          : qsTr("Drag column edges to resize · row ⋮ for actions")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.bodySmall.size
                     elide: Text.ElideRight
@@ -126,30 +240,41 @@ Item {
                 pagination: true
                 pageSize: 5
                 bodyHeight: 260
+                columnResizeEnabled: true
                 columns: [
                     { title: "Name", role: "name", width: 140 },
                     { title: "Role", role: "role", width: 120 },
                     { title: "Status", role: "status", width: 100 },
-                    { title: "Score", role: "score", width: 80 }
+                    { title: "Score", role: "score", width: 80 },
+                    { title: "Team", role: "team", width: 120 },
+                    { title: "Notes", role: "notes", width: 160 }
                 ]
                 rows: [
-                    { name: "Ada", role: "Admin", status: "Active", score: 98 },
-                    { name: "Alan", role: "Editor", status: "Away", score: 72 },
-                    { name: "Grace", role: "Viewer", status: "Active", score: 88 },
-                    { name: "Linus", role: "Admin", status: "Active", score: 91 },
-                    { name: "Barbara", role: "Editor", status: "Away", score: 65 },
-                    { name: "Dennis", role: "Viewer", status: "Active", score: 77 },
-                    { name: "Ken", role: "Admin", status: "Away", score: 84 },
-                    { name: "Margaret", role: "Editor", status: "Active", score: 95 },
-                    { name: "Donald", role: "Viewer", status: "Away", score: 58 },
-                    { name: "Edsger", role: "Admin", status: "Active", score: 89 },
-                    { name: "Tony", role: "Editor", status: "Active", score: 81 },
-                    { name: "Niklaus", role: "Viewer", status: "Away", score: 70 }
+                    { name: "Ada", role: "Admin", status: "Active", score: 98, team: "Platform", notes: "Core owner" },
+                    { name: "Alan", role: "Editor", status: "Away", score: 72, team: "Docs", notes: "Review queue" },
+                    { name: "Grace", role: "Viewer", status: "Active", score: 88, team: "Design", notes: "" },
+                    { name: "Linus", role: "Admin", status: "Active", score: 91, team: "Kernel", notes: "On-call" },
+                    { name: "Barbara", role: "Editor", status: "Away", score: 65, team: "Docs", notes: "" },
+                    { name: "Dennis", role: "Viewer", status: "Active", score: 77, team: "Tools", notes: "" },
+                    { name: "Ken", role: "Admin", status: "Away", score: 84, team: "Platform", notes: "" },
+                    { name: "Margaret", role: "Editor", status: "Active", score: 95, team: "Design", notes: "Lead" },
+                    { name: "Donald", role: "Viewer", status: "Away", score: 58, team: "Research", notes: "" },
+                    { name: "Edsger", role: "Admin", status: "Active", score: 89, team: "Research", notes: "" },
+                    { name: "Tony", role: "Editor", status: "Active", score: 81, team: "Tools", notes: "" },
+                    { name: "Niklaus", role: "Viewer", status: "Away", score: 70, team: "Platform", notes: "" }
+                ]
+                rowActions: [
+                    { id: "edit", text: qsTr("Edit"), icon: "edit" },
+                    { id: "duplicate", text: qsTr("Duplicate"), icon: "content_copy" },
+                    { id: "delete", text: qsTr("Delete"), icon: "delete" }
                 ]
                 emptyTitle: qsTr("No people")
                 emptyBody: qsTr("Add a row to get started.")
                 emptyActionText: qsTr("Reload sample")
                 onEmptyActionClicked: console.log("reload")
+                onRowActionTriggered: function (sourceIndex, action) {
+                    console.log("row action", sourceIndex, action.id || action.text)
+                }
             }
 
             Text {

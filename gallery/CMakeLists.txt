@@ -4,7 +4,7 @@ if (NOT TARGET Md3)
     message(FATAL_ERROR "Gallery requires Md3 library target — add_subdirectory(src/Md3) first")
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 QuickEffects Multimedia)
+find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 QuickEffects Multimedia QuickDialogs2)
 if (UNIX AND NOT APPLE)
     # PerformanceMonitor / Linux chrome helpers need Widgets + DBus
     find_package(Qt6 REQUIRED COMPONENTS Widgets DBus)
