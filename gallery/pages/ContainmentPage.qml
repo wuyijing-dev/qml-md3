@@ -71,11 +71,15 @@ Item {
                         Repeater {
                             model: 4
                             delegate: Md3Card {
-                                implicitHeight: 72
+                                implicitWidth: 140
+                                implicitHeight: 84
                                 variant: Md3Card.Filled
+                                layoutMode: Md3ContainerBody.Fit
                                 Md3Text {
                                     anchors.centerIn: parent
                                     text: qsTr("Grid %1").arg(index + 1)
+                                    role: Md3Text.TitleSmall
+                                    tone: Md3Text.OnSurface
                                 }
                             }
                         }
@@ -141,18 +145,24 @@ Item {
                     variant: Md3Card.Elevated
                     width: 180
                     height: 100
+                    implicitWidth: width
+                    implicitHeight: height
                     Text { text: "Elevated"; color: Md3Theme.colorScheme.colorOnSurface }
                 }
                 Md3Card {
                     variant: Md3Card.Filled
                     width: 180
                     height: 100
+                    implicitWidth: width
+                    implicitHeight: height
                     Text { text: "Filled"; color: Md3Theme.colorScheme.colorOnSurface }
                 }
                 Md3Card {
                     variant: Md3Card.Outlined
                     width: 180
                     height: 100
+                    implicitWidth: width
+                    implicitHeight: height
                     Text { text: "Outlined"; color: Md3Theme.colorScheme.colorOnSurface }
                 }
             }
