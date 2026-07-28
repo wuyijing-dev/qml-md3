@@ -116,6 +116,19 @@ Flickable {
             font.pixelSize: Md3Theme.typography.labelLarge.size
         }
 
+        Md3ColorPicker {
+            Layout.fillWidth: true
+            Layout.maximumWidth: 360
+            showApplySeed: true
+            color: Md3Theme.seed
+            onColorEdited: function (c) {
+                root.scheduleSeed(c.hslHue, Math.max(0.15, Math.min(0.75, c.hslSaturation)))
+            }
+            onApplySeedRequested: function (c) {
+                Md3Theme.applySeed(c)
+            }
+        }
+
         RowLayout {
             Layout.fillWidth: true
             spacing: 12

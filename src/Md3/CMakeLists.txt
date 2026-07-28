@@ -161,9 +161,14 @@ qt_add_qml_module(Md3
         components/Md3SuggestionChip.qml
         components/Md3ChipGroup.qml
         components/Md3TextField.qml
+        components/Md3Select.qml
         components/Md3Card.qml
         components/Md3Divider.qml
         components/Md3ListTile.qml
+        components/Md3Avatar.qml
+        components/Md3AvatarGroup.qml
+        components/Md3EmptyState.qml
+        components/Md3ColorPicker.qml
         components/Md3Dialog.qml
         components/Md3FullscreenDialog.qml
         components/Md3BottomSheet.qml
@@ -196,6 +201,7 @@ qt_add_qml_module(Md3
         components/Md3SearchBar.qml
         components/Md3SearchView.qml
         components/Md3DatePicker.qml
+        components/Md3DateRangePicker.qml
         components/Md3TimePicker.qml
         components/Md3Tooltip.qml
         components/Md3ExpansionTile.qml

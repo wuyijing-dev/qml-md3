@@ -22,6 +22,7 @@ import Md3
 | `active` | `bool` | `false` | read/write | `Md3Ripple` | — |
 | `originX` | `real` | `width / 2` | read/write | `Md3Ripple` | — |
 | `originY` | `real` | `height / 2` | read/write | `Md3Ripple` | — |
+| `layersNeeded` | `bool` | `_layersArmed` | readonly | `Md3Ripple` | — |
 | `resolvedClipRadius` | `real` | `{…}` | readonly | `Md3Ripple` | — |
 
 ## Signals

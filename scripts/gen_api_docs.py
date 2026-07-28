@@ -561,7 +561,7 @@ def category_of(path: str, name: str = "") -> str:
             )
         ):
             return "Actions & selection"
-        if any(x in n for x in ("TextField", "Search", "Form", "Date", "Time", "CommandPalette")):
+        if any(x in n for x in ("TextField", "Search", "Form", "Date", "Time", "CommandPalette", "Select", "ColorPicker")):
             return "Input"
         if any(
             x in n
@@ -599,6 +599,8 @@ def category_of(path: str, name: str = "") -> str:
                 "Option",
                 "Tour",
                 "SplitView",
+                "Avatar",
+                "EmptyState",
             )
         ):
             return "Containment & feedback"

@@ -21,6 +21,44 @@ Flickable {
             primaryAction: "Update"
             secondaryAction: "Dismiss"
         }
+
+        Text {
+            text: qsTr("Avatar")
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.labelLarge.size
+        }
+        Row {
+            spacing: 12
+            Md3Avatar { initials: "AD"; sizePreset: Md3Avatar.Small }
+            Md3Avatar { initials: "ML"; sizePreset: Md3Avatar.Medium }
+            Md3Avatar { icon: "person"; sizePreset: Md3Avatar.Large }
+            Md3AvatarGroup {
+                maxVisible: 3
+                model: [
+                    { initials: "A" },
+                    { initials: "B" },
+                    { initials: "C" },
+                    { initials: "D" },
+                    { initials: "E" }
+                ]
+            }
+        }
+
+        Text {
+            text: qsTr("Empty state")
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.labelLarge.size
+        }
+        Md3EmptyState {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 220
+            icon: "search_off"
+            title: qsTr("No results")
+            body: qsTr("Try a different filter or clear your search.")
+            actionText: qsTr("Clear filters")
+            onActionClicked: console.log("empty-state CTA")
+        }
+
         Md3Tooltip {
             text: "Tooltip label"
             Md3Button { text: "Hover me" }

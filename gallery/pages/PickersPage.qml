@@ -16,6 +16,7 @@ Flickable {
             font.pixelSize: Md3Theme.typography.headlineMedium.size
         }
         Md3DatePicker { }
+        Md3DateRangePicker { }
         Md3TimePicker { }
     }
 }

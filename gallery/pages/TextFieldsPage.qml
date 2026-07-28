@@ -38,6 +38,34 @@ Flickable {
             text: "Clear me"
         }
 
+        Text {
+            text: qsTr("Select")
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.labelLarge.size
+        }
+        Md3Select {
+            Layout.fillWidth: true
+            Layout.maximumWidth: 360
+            label: qsTr("Role")
+            placeholderText: qsTr("Choose a role")
+            leadingIcon: "badge"
+            model: [
+                { text: qsTr("Admin"), icon: "admin_panel_settings" },
+                { text: qsTr("Editor"), icon: "edit" },
+                { text: qsTr("Viewer"), icon: "visibility" }
+            ]
+            supportingText: qsTr("Field-style ComboBox with label / helper")
+        }
+        Md3Select {
+            Layout.fillWidth: true
+            Layout.maximumWidth: 360
+            variant: Md3Select.Filled
+            label: qsTr("Priority")
+            error: true
+            errorText: qsTr("Required")
+            model: [qsTr("Low"), qsTr("Medium"), qsTr("High")]
+        }
+
         Md3TextField {
             Layout.fillWidth: true
             Layout.maximumWidth: 360

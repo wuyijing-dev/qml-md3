@@ -15,7 +15,7 @@
 - [Md3AppSettings](Md3AppSettings.md) — QSettings facade
 - [Md3HotReload](Md3HotReload.md) — QML hot reload watcher
 
-**QML types:** 98
+**QML types:** 104
 
 ## Actions & selection
 
@@ -54,6 +54,8 @@
 
 ## Containment & feedback
 
+- [Md3Avatar](Md3Avatar.md) — Circular avatar: image, initials, or icon fallback.
+- [Md3AvatarGroup](Md3AvatarGroup.md) — Overlapping row of avatars. model: [{ source?, initials?, icon?, color? }, ...] or strings (initials).
 - [Md3Badge](Md3Badge.md) — Material Badge — numeric / dot / max-count, attach to any item via anchors.
 - [Md3Badged](Md3Badged.md) — Wraps content and positions an Md3Badge (top-end by default).
 - [Md3Banner](Md3Banner.md)
@@ -63,6 +65,7 @@
 - [Md3Dialog](Md3Dialog.md)
 - [Md3Divider](Md3Divider.md)
 - [Md3DropdownMenu](Md3DropdownMenu.md)
+- [Md3EmptyState](Md3EmptyState.md) — Empty / no-results placeholder: icon, title, body, optional CTA.
 - [Md3ExpansionTile](Md3ExpansionTile.md)
 - [Md3FullscreenDialog](Md3FullscreenDialog.md)
 - [Md3Menu](Md3Menu.md)
@@ -95,11 +98,14 @@
 
 ## Input
 
+- [Md3ColorPicker](Md3ColorPicker.md) — Compact HSL color picker for theme seed / design tools.
 - [Md3CommandPalette](Md3CommandPalette.md) — Spotlight-style command palette (Ctrl+K). model: [{ title, subtitle?, icon?, id? }]
 - [Md3DatePicker](Md3DatePicker.md)
+- [Md3DateRangePicker](Md3DateRangePicker.md) — Dual-bound date range calendar (start → end). Same chrome as Md3DatePicker.
 - [Md3Form](Md3Form.md)
 - [Md3SearchBar](Md3SearchBar.md)
 - [Md3SearchView](Md3SearchView.md)
+- [Md3Select](Md3Select.md) — Field-style select (ComboBox): label, helper/error, menu — aligned with Md3TextField.
 - [Md3TextField](Md3TextField.md)
 - [Md3TimePicker](Md3TimePicker.md)
 
