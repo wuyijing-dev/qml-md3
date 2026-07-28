@@ -40,13 +40,14 @@ Window {
     property string dismissText: qsTr("Cancel")
     property bool showDismiss: true
     property string dialogText: ""
+    property int layoutMode: Md3ContainerBody.Fit
 
     signal confirmed()
     signal dismissed()
     signal opened()
     signal closed()
 
-    default property alias content: customContent.data
+    default property alias content: customContent.content
     property alias footer: footerSlot.data
 
     width: 480
@@ -333,16 +334,13 @@ Window {
                             wrapMode: Text.Wrap
                         }
 
-                        Item {
+                        Md3ContainerBody {
                             id: customContent
                             width: parent.width
-                            height: Math.max(0, parent.height
-                                             - y
-                                             - (root.dialogText.length > 0 ? 0 : 0))
+                            layoutMode: root.layoutMode
                         }
                     }
 
-                    // Keep custom content filling remaining column space
                     Binding {
                         target: customContent
                         property: "height"

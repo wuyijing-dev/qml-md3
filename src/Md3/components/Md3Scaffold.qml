@@ -7,7 +7,8 @@ Item {
     property alias navigationBar: navBarSlot.data
     property alias fab: fabSlot.data
     property alias drawer: drawerSlot.data
-    default property alias content: body.data
+    property int layoutMode: Md3ContainerBody.Fit
+    default property alias content: body.content
 
     Rectangle {
         anchors.fill: parent
@@ -29,10 +30,11 @@ Item {
             height: children.length ? children[0].height : 0
         }
 
-        Item {
+        Md3ContainerBody {
             id: body
             width: parent.width
             height: parent.height - appBarSlot.height - navBarSlot.height
+            layoutMode: root.layoutMode
         }
 
         Item {

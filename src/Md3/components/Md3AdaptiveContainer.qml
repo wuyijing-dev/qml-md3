@@ -1,5 +1,7 @@
 import QtQuick
 
+/// Standalone column-stacking adaptive container (gallery / direct use).
+/// Md3 container components embed `Md3ContainerBody` and expose `layoutMode` directly.
 Item {
     id: root
 
@@ -11,25 +13,21 @@ Item {
     property real contentSpacing: 12
     default property alias content: contentColumn.data
 
-    implicitWidth: Math.max(280, contentColumn.implicitWidth + padding * 2)
+    implicitWidth: Math.max(280, body.contentImplicitWidth + padding * 2)
     implicitHeight: layoutMode === Md3AdaptiveContainer.Fit
-                    ? contentColumn.implicitHeight + padding * 2
+                    ? body.contentImplicitHeight + padding * 2
                     : 320
 
-    Flickable {
-        id: flick
+    Md3ContainerBody {
+        id: body
         anchors.fill: parent
-        clip: root.clipContent
-        contentWidth: width
-        contentHeight: contentColumn.implicitHeight + root.padding * 2
-        interactive: root.layoutMode === Md3AdaptiveContainer.Scroll
-        boundsBehavior: Flickable.StopAtBounds
+        layoutMode: root.layoutMode
+        padding: root.padding
+        clipContent: root.clipContent
 
         Column {
             id: contentColumn
-            x: root.padding
-            y: root.padding
-            width: Math.max(0, flick.width - root.padding * 2)
+            width: parent.width
             spacing: root.contentSpacing
         }
     }

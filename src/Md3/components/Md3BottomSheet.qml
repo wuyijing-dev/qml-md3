@@ -5,7 +5,8 @@ Item {
 
     property bool open: false
     property bool modal: true
-    default property alias content: sheetContent.data
+    property int layoutMode: Md3ContainerBody.Fit
+    default property alias content: sheetContent.content
 
     signal dismissed()
 
@@ -36,11 +37,15 @@ Item {
         }
     }
 
+    readonly property real maxSheetHeight: parent ? parent.height * 0.6 : 480
+
     Rectangle {
         id: sheet
         anchors.left: parent.left
         anchors.right: parent.right
-        height: Math.min(parent.height * 0.6, sheetContent.implicitHeight + 48)
+        height: root.layoutMode === Md3ContainerBody.Scroll
+                ? root.maxSheetHeight
+                : Math.min(root.maxSheetHeight, sheetContent.contentImplicitHeight + 48)
         y: root.open ? parent.height - height : parent.height
         radius: 0
         topLeftRadius: Md3Theme.shape.extraLarge
@@ -65,15 +70,17 @@ Item {
             color: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.colorOnSurfaceVariant, 0.4)
         }
 
-        Item {
+        Md3ContainerBody {
             id: sheetContent
             anchors.top: parent.top
             anchors.topMargin: 36
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            anchors.margins: 16
-            implicitHeight: childrenRect.height
+            anchors.leftMargin: 16
+            anchors.rightMargin: 16
+            anchors.bottomMargin: 16
+            layoutMode: root.layoutMode
         }
     }
 }

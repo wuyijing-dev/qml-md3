@@ -199,6 +199,7 @@ qt_add_qml_module(Md3
         components/Md3Select.qml
         components/Md3Card.qml
         components/Md3AdaptiveContainer.qml
+        components/Md3ContainerBody.qml
         components/Md3LiquidGlass.qml
         components/Md3Divider.qml
         components/Md3ListTile.qml

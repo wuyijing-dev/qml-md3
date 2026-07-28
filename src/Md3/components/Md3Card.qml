@@ -9,13 +9,14 @@ Item {
     property bool clickable: false
     // Use Item.enabled (do not redeclare — Qt 6.11 warns on override)
     property real padding: 16
-    default property alias content: contentHost.data
+    property int layoutMode: Md3ContainerBody.Fit
+    default property alias content: contentHost.content
 
     signal clicked()
 
     // Intrinsic only — never bind width/height to implicit* (Layout + fill children loop).
-    implicitWidth: Math.max(280, contentHost.implicitWidth + padding * 2)
-    implicitHeight: contentHost.implicitHeight + padding * 2
+    implicitWidth: Math.max(280, contentHost.contentImplicitWidth + padding * 2)
+    implicitHeight: contentHost.contentImplicitHeight + padding * 2
 
     readonly property real elev: variant === Md3Card.Elevated ? 1 : 0
     readonly property color containerColor: {
@@ -58,18 +59,17 @@ Item {
             radius: bg.radius
         }
 
-        Item {
+        Md3ContainerBody {
             id: contentHost
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.margins: root.padding
+            layoutMode: root.layoutMode
             // Explicit card height (Layouts) → fill; otherwise size to children only.
             height: root.height >= root.padding * 2 + 1
                     ? root.height - root.padding * 2
                     : implicitHeight
-            implicitWidth: childrenRect.width
-            implicitHeight: childrenRect.height
         }
     }
 

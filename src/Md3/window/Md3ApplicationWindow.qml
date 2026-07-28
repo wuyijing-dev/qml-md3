@@ -153,7 +153,8 @@ Window {
     readonly property int navDepth: usesDestinations ? windowBody.navDepth : 0
     readonly property var routeParams: usesDestinations ? windowBody.routeParams : ({})
 
-    default property alias content: customContent.data
+    property int layoutMode: Md3ContainerBody.Fit
+    default property alias content: customContent.content
 
     function navigateTo(index, opts) {
         if (usesDestinations)
@@ -1052,7 +1053,7 @@ Window {
                     }
                 }
 
-                Item {
+                Md3ContainerBody {
                     id: customContent
                     anchors.left: parent.left
                     anchors.right: parent.right
@@ -1060,6 +1061,7 @@ Window {
                     anchors.bottom: statusBarSlot.top
                     visible: !root.usesDestinations
                     enabled: visible
+                    layoutMode: root.layoutMode
                 }
 
                 Column {

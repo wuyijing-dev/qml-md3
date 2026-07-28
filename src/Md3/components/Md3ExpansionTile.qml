@@ -6,6 +6,7 @@ Column {
     property string title: ""
     property string subtitle: ""
     property bool expanded: false
+    property int layoutMode: Md3ContainerBody.Fit
     // Use Item.enabled (do not redeclare — triggers propertyCache override warning)
 
     width: parent ? parent.width : 320
@@ -24,7 +25,7 @@ Column {
     Item {
         id: body
         width: parent.width
-        height: root.expanded ? contentCol.implicitHeight : 0
+        height: root.expanded ? adaptiveBody.implicitHeight : 0
         clip: true
         opacity: root.expanded ? 1 : 0
 
@@ -43,11 +44,16 @@ Column {
             }
         }
 
-        Column {
-            id: contentCol
+        Md3ContainerBody {
+            id: adaptiveBody
             width: parent.width
-            padding: 16
-            default property alias children: contentCol.data
+            layoutMode: root.layoutMode
+
+            Column {
+                id: contentCol
+                width: parent.width
+                padding: 16
+            }
         }
     }
 

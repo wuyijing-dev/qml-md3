@@ -11,7 +11,8 @@ Item {
     property int edge: Md3SideSheet.End
     property real sheetWidth: 360
     property string title: ""
-    default property alias content: sheetBody.data
+    property int layoutMode: Md3ContainerBody.Fit
+    default property alias content: sheetBody.content
 
     signal dismissed()
 
@@ -114,10 +115,11 @@ Item {
                 }
             }
 
-            Item {
+            Md3ContainerBody {
                 id: sheetBody
                 width: parent.width
                 height: parent.height - (root.title.length > 0 ? 64 : 12)
+                layoutMode: root.layoutMode
             }
         }
     }

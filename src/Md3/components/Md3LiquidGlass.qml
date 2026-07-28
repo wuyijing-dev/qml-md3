@@ -26,8 +26,9 @@ Item {
     property real refraction: 1.2
     property real chromaticAberration: 0.5
     property real samplePadding: 24
+    property int layoutMode: Md3ContainerBody.Fit
 
-    default property alias contentData: contentHost.data
+    default property alias contentData: contentHost.content
 
     readonly property bool dragging: dragArea.pressed
     readonly property bool _blurReady: sourceItem !== null
@@ -220,11 +221,13 @@ Item {
             }
         }
 
-        Item {
+        Md3ContainerBody {
             id: contentHost
             anchors.fill: parent
             anchors.margins: 16 + 4 * root._thickness
             z: 2
+            layoutMode: root.layoutMode
+            clipContent: false
         }
     }
 

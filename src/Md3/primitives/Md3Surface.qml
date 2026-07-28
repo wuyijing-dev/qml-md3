@@ -8,6 +8,7 @@ Item {
     property real radius: Md3Theme.shape.medium
     property bool clipContent: true
     property color tintColor: Md3Theme.colorScheme.surfaceTint
+    property int layoutMode: Md3ContainerBody.Fit
 
     implicitWidth: 48
     implicitHeight: 48
@@ -32,10 +33,11 @@ Item {
             opacity: Md3Theme.elevation.tintOpacity(root.elevation)
         }
 
-        default property alias contentData: contentHost.data
-        Item {
+        default property alias contentData: contentHost.content
+        Md3ContainerBody {
             id: contentHost
             anchors.fill: parent
+            layoutMode: root.layoutMode
         }
     }
 }

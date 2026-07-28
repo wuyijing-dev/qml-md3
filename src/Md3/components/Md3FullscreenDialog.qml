@@ -6,7 +6,8 @@ Item {
     property bool open: false
     property string title: ""
     property string confirmText: "Save"
-    default property alias content: body.data
+    property int layoutMode: Md3ContainerBody.Fit
+    default property alias content: body.content
 
     signal confirmed()
     signal dismissed()
@@ -80,13 +81,14 @@ Item {
             }
         }
 
-        Item {
+        Md3ContainerBody {
             id: body
             anchors.top: bar.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.margins: 24
+            layoutMode: root.layoutMode
         }
     }
 }

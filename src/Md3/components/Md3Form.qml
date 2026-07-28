@@ -5,7 +5,8 @@ Item {
 
     property var errors: ({})
     property var values: ({})
-    default property alias content: host.data
+    property int layoutMode: Md3ContainerBody.Fit
+    default property alias content: host.content
 
     function setError(name, message) {
         const next = Object.assign({}, errors)
@@ -40,8 +41,9 @@ Item {
         return errors[name] !== undefined ? errors[name] : ""
     }
 
-    Item {
+    Md3ContainerBody {
         id: host
         anchors.fill: parent
+        layoutMode: root.layoutMode
     }
 }

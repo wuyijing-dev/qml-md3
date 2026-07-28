@@ -17,6 +17,8 @@ Item {
     property var parentMenu: null
     /// Currently open child submenu
     property var childMenu: null
+    property int layoutMode: Md3ContainerBody.Fit
+    property real maxMenuHeight: 480
     readonly property bool isSubMenu: parentMenu !== null
     default property alias content: column.data
     readonly property alias itemColumn: column
@@ -167,7 +169,9 @@ Item {
             readonly property var __md3Menu: root
             x: root.menuX
             width: root.menuWidth > 0 ? root.menuWidth : Math.max(112, column.implicitWidth)
-            height: column.implicitHeight + 16
+            height: root.layoutMode === Md3ContainerBody.Scroll
+                    ? Math.min(root.maxMenuHeight, menuBody.contentImplicitHeight + 16)
+                    : menuBody.contentImplicitHeight + 16
             radius: root.containerRadius
             color: Md3Theme.colorScheme.surfaceContainer
             clip: true
@@ -201,13 +205,19 @@ Item {
                 }
             }
 
-            Column {
-                id: column
+            Md3ContainerBody {
+                id: menuBody
                 anchors.top: parent.top
                 anchors.topMargin: 8
                 anchors.left: parent.left
                 anchors.right: parent.right
-                width: parent.width
+                height: parent.height - 8
+                layoutMode: root.layoutMode
+
+                Column {
+                    id: column
+                    width: parent.width
+                }
             }
         }
     }

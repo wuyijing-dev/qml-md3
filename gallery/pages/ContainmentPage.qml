@@ -26,7 +26,7 @@ Item {
             }
             Md3Text {
                 Layout.fillWidth: true
-                text: qsTr("新增 `Md3Text` 和 `Md3AdaptiveContainer`：文本自动跟随主题，容器可选自适应高度或滚动模式。")
+                text: qsTr("Md3 容器组件默认支持 `layoutMode`（Fit / Scroll）：内容可自适应高度，或在固定高度区域内滚动。`Md3AdaptiveContainer` 仍可用于独立列布局场景。")
                 role: Md3Text.BodyMedium
                 tone: Md3Text.OnSurfaceVariant
                 wrapMode: Text.WordWrap
@@ -39,12 +39,13 @@ Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     variant: Md3Card.Outlined
-                    Md3AdaptiveContainer {
-                        anchors.fill: parent
-                        padding: 16
-                        layoutMode: Md3AdaptiveContainer.Fit
+                    layoutMode: Md3ContainerBody.Fit
+                    Column {
+                        width: parent.width
+                        spacing: 12
                         Md3Text { text: qsTr("Fit 模式"); role: Md3Text.TitleMedium }
                         Md3Text {
+                            width: parent.width
                             text: qsTr("容器高度跟随内容增长，适合卡片说明、设置面板和轻量表单。")
                             tone: Md3Text.OnSurfaceVariant
                             wrapMode: Text.WordWrap
@@ -64,10 +65,10 @@ Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     variant: Md3Card.Outlined
-                    Md3AdaptiveContainer {
-                        anchors.fill: parent
-                        padding: 16
-                        layoutMode: Md3AdaptiveContainer.Scroll
+                    layoutMode: Md3ContainerBody.Scroll
+                    Column {
+                        width: parent.width
+                        spacing: 12
                         Md3Text { text: qsTr("Scroll 模式"); role: Md3Text.TitleMedium }
                         Repeater {
                             model: 10
