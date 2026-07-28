@@ -12,6 +12,8 @@ Item {
     property var model: [] // [{ text, icon?, enabled? }]
     property bool enabled: true
     property int currentIndex: -1 // optional highlight; -1 = none
+    /// When true, clicks update `currentIndex` (no host `onClicked: currentIndex = index` glue).
+    property bool autoSelect: true
     property real spacing: 8
     /// Compact title-bar / dense UIs: set e.g. 24–28
     property real buttonHeight: 40
@@ -182,7 +184,11 @@ Item {
                         const local = mapToItem(stdBg, mouse.x, mouse.y)
                         stdRipple.pulse(local.x, local.y)
                     }
-                    onClicked: root.clicked(std.index)
+                    onClicked: {
+                        if (root.autoSelect)
+                            root.currentIndex = std.index
+                        root.clicked(std.index)
+                    }
                 }
 
                 Accessible.name: std.label
@@ -336,7 +342,11 @@ Item {
                             const local = mapToItem(segFill, mouse.x, mouse.y)
                             segRipple.pulse(local.x, local.y)
                         }
-                        onClicked: root.clicked(seg.index)
+                        onClicked: {
+                            if (root.autoSelect)
+                                root.currentIndex = seg.index
+                            root.clicked(seg.index)
+                        }
                     }
 
                     Accessible.name: seg.label

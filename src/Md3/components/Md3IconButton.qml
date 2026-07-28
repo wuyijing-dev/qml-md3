@@ -10,6 +10,13 @@ Item {
     property bool selected: false
     property string accessibleName: icon
     property bool visualFocus: false
+    /// Built-in badge (no Md3Badged wrapper glue for icon buttons).
+    property string badgeText: ""
+    property bool badgeDot: false
+    property int badgeMax: 99
+    property int badgeSizePreset: Md3Badge.Medium
+    property color badgeColor: Md3Theme.colorScheme.error
+    property color badgeLabelColor: Md3Theme.colorScheme.colorOnError
     signal clicked()
 
     readonly property real circleSize: 40
@@ -120,6 +127,21 @@ Item {
         focused: root.activeFocus
         visualFocus: root.visualFocus
         controlEnabled: root.enabled
+    }
+
+    Md3Badge {
+        anchors.right: bg.right
+        anchors.top: bg.top
+        anchors.rightMargin: -2
+        anchors.topMargin: -2
+        z: 10
+        visible: root.badgeDot || root.badgeText.length > 0
+        text: root.badgeText
+        dot: root.badgeDot
+        max: root.badgeMax
+        sizePreset: root.badgeSizePreset
+        badgeColor: root.badgeColor
+        labelColor: root.badgeLabelColor
     }
 
     MouseArea {

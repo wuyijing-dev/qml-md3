@@ -14,7 +14,7 @@ Item {
         }
         Md3SearchBar {
             Layout.fillWidth: true
-            onClicked: view.open = true
+            searchView: view
         }
         Item { Layout.fillHeight: true }
     }

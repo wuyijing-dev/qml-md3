@@ -13,14 +13,26 @@ Item {
     property bool checkEnabled: false
     property bool triStateCheck: true
     property string filterText: ""
+    /// Built-in filter field (no external TextField sync glue).
+    property bool showFilter: false
+    property string filterPlaceholder: qsTr("Filter")
+    property string filterLabel: qsTr("Filter")
+    /// Expand all / Collapse all buttons beside the filter.
+    property bool showExpandControls: false
     property bool lazyLoad: false
-  property var contextMenu: null
+    property var contextMenu: null
 
     signal activated(int flatIndex, var node)
     signal expandedChanged(int flatIndex, var node, bool expanded)
     signal checkedChanged()
     signal fetchChildren(var node, var path)
     signal contextMenuRequested(int flatIndex, var node, real globalX, real globalY)
+
+    readonly property real _chromeH: {
+        if (!showFilter && !showExpandControls)
+            return 0
+        return 56 + 8
+    }
 
     readonly property var flatRows: {
         const out = []
@@ -83,7 +95,7 @@ Item {
     }
 
     implicitWidth: 280
-    implicitHeight: Math.min(flatRows.length * rowHeight, 360)
+    implicitHeight: Math.min(flatRows.length * rowHeight, 360) + _chromeH
     width: parent ? parent.width : implicitWidth
     height: implicitHeight
     clip: true
@@ -328,9 +340,54 @@ Item {
         }
     }
 
+    Row {
+        id: chrome
+        visible: root.showFilter || root.showExpandControls
+        width: parent.width
+        height: visible ? 56 : 0
+        spacing: 8
+
+        Md3TextField {
+            visible: root.showFilter
+            width: {
+                if (!root.showExpandControls)
+                    return parent.width
+                return Math.max(80, parent.width - expandBtn.implicitWidth
+                                - collapseBtn.implicitWidth - parent.spacing * 2)
+            }
+            height: 56
+            label: root.filterLabel
+            placeholderText: root.filterPlaceholder
+            text: root.filterText
+            leadingIcon: "search"
+            onTextChanged: root.filterText = text
+        }
+
+        Md3Button {
+            id: expandBtn
+            visible: root.showExpandControls
+            anchors.verticalCenter: parent.verticalCenter
+            text: qsTr("Expand all")
+            variant: Md3Button.Text
+            onClicked: root.expandAll()
+        }
+        Md3Button {
+            id: collapseBtn
+            visible: root.showExpandControls
+            anchors.verticalCenter: parent.verticalCenter
+            text: qsTr("Collapse all")
+            variant: Md3Button.Text
+            onClicked: root.collapseAll()
+        }
+    }
+
     Flickable {
         id: flick
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.top: parent.top
+        anchors.topMargin: root._chromeH
         contentWidth: width
         contentHeight: col.height
         clip: true

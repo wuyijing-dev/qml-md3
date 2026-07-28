@@ -251,6 +251,7 @@ qt_add_qml_module(Md3
         components/Md3DateRangePicker.qml
         components/Md3DateField.qml
         components/Md3TimePicker.qml
+        components/Md3TimeField.qml
         components/Md3Tooltip.qml
         components/Md3ExpansionTile.qml
         components/Md3DataTable.qml

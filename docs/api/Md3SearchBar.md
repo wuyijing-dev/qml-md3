@@ -15,7 +15,7 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `text` | `alias` | `input.text` | read/write | `Md3SearchBar` | Alias → `input.text` |
 | `placeholderText` | `string` | `"Search"` | read/write | `Md3SearchBar` | — |
-| `enabled` | `bool` | `true` | read/write | `Md3SearchBar` | — |
+| `searchView` | `var` | `null` | read/write | `Md3SearchBar` | Opens this `Md3SearchView` on click |
 
 ## Signals
 
@@ -26,7 +26,9 @@ import Md3
 
 ## Methods
 
-_None._
+| Method | Defined in | Description |
+|--------|------------|-------------|
+| `openSearchView()` | `Md3SearchBar` | — |
 
 ## Example
 
@@ -34,6 +36,10 @@ _None._
 import Md3
 
 Md3SearchBar {
-    placeholderText: "Search"
+    searchView: view
+}
+Md3SearchView {
+    id: view
+    suggestions: ["Material Design"]
 }
 ```

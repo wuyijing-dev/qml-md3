@@ -18,7 +18,9 @@ import Md3
 | `firstValue` | `real` | `0.2` | read/write | `Md3RangeSlider` | — |
 | `secondValue` | `real` | `0.8` | read/write | `Md3RangeSlider` | — |
 | `stepSize` | `real` | `0` | read/write | `Md3RangeSlider` | — |
-| `enabled` | `bool` | `true` | read/write | `Md3RangeSlider` | — |
+| `label` | `string` | `""` | read/write | `Md3RangeSlider` | Header label |
+| `showValue` | `bool` | `false` | read/write | `Md3RangeSlider` | Show `first – second` |
+| `valueDecimals` | `int` | `0` | read/write | `Md3RangeSlider` | — |
 | `trackHeight` | `real` | `16` | read/write | `Md3RangeSlider` | — |
 | `handleWidth` | `real` | `4` | read/write | `Md3RangeSlider` | Slim handle thickness along the track |
 | `handleHeight` | `real` | `trackHeight + 16` | read/write | `Md3RangeSlider` | Handle length across track — taller than track thickness |
@@ -49,10 +51,11 @@ import Md3
 import Md3
 
 Md3RangeSlider {
+    label: qsTr("Price range")
+    showValue: true
     from: 0
-    to: 1
-    firstValue: 0.2
-    secondValue: 0.8
-    stepSize: 0
+    to: 100
+    firstValue: 20
+    secondValue: 70
 }
 ```

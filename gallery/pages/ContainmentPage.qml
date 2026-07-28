@@ -547,6 +547,13 @@ Item {
                 Md3ListTile { title: "Two line"; subtitle: "Supporting"; leadingIcon: "settings"; showDivider: true }
                 Md3ListTile { title: "Three line"; subtitle: "Subtitle"; supportingText: "Extra supporting text."; leadingIcon: "info" }
                 Md3ListTile {
+                    title: qsTr("Alex Chen")
+                    subtitle: qsTr("Design lead")
+                    leadingAvatar: "AC"
+                    trailingIcon: "chevron_right"
+                    showDivider: true
+                }
+                Md3ListTile {
                     title: qsTr("Dark theme")
                     leadingIcon: "dark_mode"
                     showDivider: true

@@ -27,7 +27,8 @@ import Md3
 | `variant` | `int` | `Md3ButtonGroup.Outlined` | read/write | `Md3ButtonGroup` | — |
 | `model` | `var` | `[]` | read/write | `Md3ButtonGroup` | — |
 | `enabled` | `bool` | `true` | read/write | `Md3ButtonGroup` | — |
-| `currentIndex` | `int` | `-1` | read/write | `Md3ButtonGroup` | — |
+| `currentIndex` | `int` | `-1` | read/write | `Md3ButtonGroup` | Highlighted segment |
+| `autoSelect` | `bool` | `true` | read/write | `Md3ButtonGroup` | Clicks update `currentIndex` |
 | `spacing` | `real` | `8` | read/write | `Md3ButtonGroup` | — |
 | `buttonHeight` | `real` | `40` | read/write | `Md3ButtonGroup` | Compact title-bar / dense UIs: set e.g. 24–28 |
 | `iconSize` | `real` | `18` | read/write | `Md3ButtonGroup` | — |

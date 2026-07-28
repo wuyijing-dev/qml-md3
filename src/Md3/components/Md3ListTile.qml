@@ -8,6 +8,10 @@ Item {
     property string supportingText: ""
     property string leadingIcon: ""
     property string trailingIcon: ""
+    /// Initials for a leading Md3Avatar (when no `leading:` slot).
+    property string leadingAvatar: ""
+    /// Image URL for a leading Md3Avatar.
+    property url leadingAvatarSource: ""
     /// Degrees applied to trailing icon (e.g. ExpansionTile chevron).
     property real trailingRotation: 0
     property bool selected: false
@@ -15,6 +19,8 @@ Item {
     property bool showDivider: false
     /// Stretch to parent width (default) — removes `width: parent.width` glue.
     property bool fillWidth: true
+    /// Optional leading control slot (e.g. custom avatar) — peer of `trailing:`.
+    property alias leading: leadingSlot.data
     /// Optional trailing control slot (e.g. Md3Switch) — prefer over inventing a Row.
     property alias trailing: trailingSlot.data
 
@@ -30,6 +36,9 @@ Item {
     }
     readonly property real minH: lines === 1 ? 56 : (lines === 2 ? 72 : 88)
     readonly property bool hasTrailingSlot: trailingSlot.children.length > 0
+    readonly property bool hasLeadingSlot: leadingSlot.children.length > 0
+    readonly property bool hasLeadingAvatar: leadingAvatar.length > 0
+                                               || (leadingAvatarSource && String(leadingAvatarSource).length > 0)
 
     implicitHeight: Math.max(minH, col.implicitHeight + 16)
     implicitWidth: 320
@@ -58,8 +67,24 @@ Item {
         anchors.rightMargin: 16
         spacing: 16
 
+        Item {
+            id: leadingSlot
+            visible: root.hasLeadingSlot
+            width: childrenRect.width
+            height: Math.max(childrenRect.height, 24)
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        Md3Avatar {
+            visible: !root.hasLeadingSlot && root.hasLeadingAvatar
+            initials: root.leadingAvatar
+            source: root.leadingAvatarSource
+            sizePreset: Md3Avatar.Small
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
         Md3Icon {
-            visible: root.leadingIcon.length > 0
+            visible: !root.hasLeadingSlot && !root.hasLeadingAvatar && root.leadingIcon.length > 0
             icon: root.leadingIcon
             size: 24
             iconColor: root.enabled ? Md3Theme.colorScheme.colorOnSurfaceVariant
@@ -72,7 +97,11 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             width: {
                 let w = parent.width
-                if (root.leadingIcon.length > 0)
+                if (root.hasLeadingSlot)
+                    w -= leadingSlot.width + 16
+                else if (root.hasLeadingAvatar)
+                    w -= 32 + 16
+                else if (root.leadingIcon.length > 0)
                     w -= 24 + 16
                 if (root.trailingIcon.length > 0)
                     w -= 24 + 16

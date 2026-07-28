@@ -137,7 +137,6 @@ Flickable {
                 { text: "Center", icon: "format_align_center" },
                 { text: "Right", icon: "format_align_right" }
             ]
-            onClicked: function (index) { currentIndex = index }
         }
 
         Text {

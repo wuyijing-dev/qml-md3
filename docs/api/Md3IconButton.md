@@ -25,6 +25,9 @@ import Md3
 | `selected` | `bool` | `false` | read/write | `Md3IconButton` | — |
 | `accessibleName` | `string` | `icon` | read/write | `Md3IconButton` | — |
 | `visualFocus` | `bool` | `false` | read/write | `Md3IconButton` | — |
+| `badgeText` | `string` | `""` | read/write | `Md3IconButton` | Built-in badge label |
+| `badgeDot` | `bool` | `false` | read/write | `Md3IconButton` | Dot badge |
+| `badgeMax` | `int` | `99` | read/write | `Md3IconButton` | Cap for numeric badge |
 | `circleSize` | `real` | `40` | readonly | `Md3IconButton` | — |
 | `circleRadius` | `real` | `circleSize / 2` | readonly | `Md3IconButton` | — |
 | `containerColor` | `color` | `{…}` | readonly | `Md3IconButton` | — |
@@ -46,10 +49,7 @@ _None._
 import Md3
 
 Md3IconButton {
-    variant: Md3IconButton.Standard
-    icon: "favorite"
-    selected: false
-    accessibleName: icon
-    visualFocus: false
+    icon: "notifications"
+    badgeText: "3"
 }
 ```

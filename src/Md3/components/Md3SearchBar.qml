@@ -5,10 +5,20 @@ Item {
 
     property alias text: input.text
     property string placeholderText: "Search"
-    property bool enabled: true
+    // Use Item.enabled (do not redeclare)
+    /// When set, click / focus opens this Md3SearchView (forwards `text`).
+    property var searchView: null
 
     signal accepted(string text)
     signal clicked()
+
+    function openSearchView() {
+        if (!searchView)
+            return
+        if (searchView.text !== undefined)
+            searchView.text = text
+        searchView.open = true
+    }
 
     width: parent ? Math.min(parent.width, 720) : 360
     height: 56
@@ -72,6 +82,7 @@ Item {
         z: -1
         onClicked: {
             input.forceActiveFocus()
+            root.openSearchView()
             root.clicked()
         }
     }

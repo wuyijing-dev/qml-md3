@@ -76,11 +76,19 @@ Item {
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: Md3Theme.typography.labelLarge.size
             }
+            Md3TimeField {
+                Layout.preferredWidth: 200
+                label: qsTr("Start time")
+                hour: 10
+                minute: 30
+                supportingText: qsTr("Docked field — peer of Md3DateField")
+                onAccepted: function (h, m) { console.log("time field", h, m) }
+            }
             Md3TimePicker {
                 id: timePicker
                 Layout.alignment: Qt.AlignLeft
-                hour: 10
-                minute: 30
+                hour: 14
+                minute: 0
                 onAccepted: function (h, m) { console.log("time", h, m) }
             }
 

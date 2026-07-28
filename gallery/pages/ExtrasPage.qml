@@ -116,37 +116,20 @@ Item {
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: Md3Theme.typography.labelLarge.size
             }
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 8
-                Md3TextField {
-                    Layout.fillWidth: true
-                    label: qsTr("Filter tree")
-                    placeholderText: qsTr("Type to search nodes")
-                    text: treeDemo.filterText
-                    onTextChanged: treeDemo.filterText = text
-                }
-                Md3Button {
-                    text: qsTr("Expand all")
-                    variant: Md3Button.Text
-                    onClicked: treeDemo.expandAll()
-                }
-                Md3Button {
-                    text: qsTr("Collapse all")
-                    variant: Md3Button.Text
-                    onClicked: treeDemo.collapseAll()
-                }
-            }
             Md3Card {
                 variant: Md3Card.Outlined
                 Layout.fillWidth: true
-                Layout.preferredHeight: 280
+                Layout.preferredHeight: 340
                 Md3TreeView {
                     id: treeDemo
                     anchors.fill: parent
                     anchors.margins: 8
                     showConnectors: true
                     checkEnabled: true
+                    showFilter: true
+                    showExpandControls: true
+                    filterLabel: qsTr("Filter tree")
+                    filterPlaceholder: qsTr("Type to search nodes")
                     onActivated: function (idx, node) {
                         _syncGalleryStatus()
                         const w = _galleryWindow()

@@ -124,6 +124,8 @@ Flickable {
 
         Md3RangeSlider {
             Layout.fillWidth: true
+            label: qsTr("Price range")
+            showValue: true
             from: 0
             to: 100
             firstValue: 20

@@ -230,14 +230,6 @@ Item {
                     anchors.margins: 8
                     spacing: 8
 
-                    Md3TextField {
-                        Layout.fillWidth: true
-                        label: qsTr("Filter tree")
-                        placeholderText: qsTr("Search folders or files")
-                        text: treeView.filterText
-                        onTextChanged: treeView.filterText = text
-                    }
-
                     Md3TreeView {
                         id: treeView
                         Layout.fillWidth: true
@@ -246,6 +238,9 @@ Item {
                         checkEnabled: true
                         triStateCheck: true
                         lazyLoad: true
+                        showFilter: true
+                        filterLabel: qsTr("Filter tree")
+                        filterPlaceholder: qsTr("Search folders or files")
                         model: page.fileTreeModel
                         onActivated: function (flatIndex, node) {
                             page.selectNode(node)

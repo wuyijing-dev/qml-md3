@@ -33,19 +33,12 @@ Item {
             }
             Row {
                 spacing: 20
-                Md3Badged {
-                    badgeText: "3"
-                    Md3IconButton { icon: "home" }
-                }
-                Md3Badged {
-                    badgeDot: true
-                    Md3IconButton { icon: "favorite" }
-                }
-                Md3Badged {
+                Md3IconButton { icon: "home"; badgeText: "3" }
+                Md3IconButton { icon: "favorite"; badgeDot: true }
+                Md3IconButton {
+                    icon: "notifications"
                     badgeText: "128"
                     badgeMax: 99
-                    badgeSizePreset: Md3Badge.Medium
-                    Md3IconButton { icon: "notifications" }
                 }
                 Md3Badged {
                     badgeText: "9"
