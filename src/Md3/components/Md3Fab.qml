@@ -9,6 +9,8 @@ Item {
     property int size: Md3Fab.Regular
     property int colorRole: Md3Fab.Primary
     property string icon: "add"
+    /// Degrees applied to the glyph (FAB menu uses 45° when open).
+    property real iconRotation: 0
     property bool enabled: true
     property string accessibleName: "Floating action button"
     property string tooltip: ""
@@ -123,6 +125,14 @@ Item {
             icon: root.icon
             size: root.iconSize
             iconColor: root.contentColor
+            rotation: root.iconRotation
+            Behavior on rotation {
+                NumberAnimation {
+                    duration: Md3Motion.spatialSnapDuration
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Md3Motion.emphasized
+                }
+            }
         }
     }
 

@@ -16,23 +16,31 @@ Column {
         title: root.title
         subtitle: root.subtitle
         trailingIcon: "expand_more"
+        trailingRotation: root.expanded ? 180 : 0
         enabled: root.enabled
         onClicked: root.expanded = !root.expanded
     }
 
-    // Rotate trailing via rotation on a proxy — list tile icon is static; animate body instead
     Item {
         id: body
         width: parent.width
         height: root.expanded ? contentCol.implicitHeight : 0
         clip: true
+        opacity: root.expanded ? 1 : 0
 
         Behavior on height {
             NumberAnimation {
-                    duration: Md3Motion.spatialDuration
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Md3Motion.emphasized
-                }
+                duration: Md3Motion.spatialDuration
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.emphasized
+            }
+        }
+        Behavior on opacity {
+            NumberAnimation {
+                duration: Md3Motion.short3
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.standard
+            }
         }
 
         Column {

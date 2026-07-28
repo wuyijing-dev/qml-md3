@@ -131,7 +131,8 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         colorRole: root.colorRole
-        icon: root.open ? root.closeIcon : root.icon
+        icon: root.icon
+        iconRotation: root.open ? 45 : 0
         enabled: root.enabled
         onClicked: {
             root.clicked()

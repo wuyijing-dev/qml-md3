@@ -8,6 +8,8 @@ Item {
     property string supportingText: ""
     property string leadingIcon: ""
     property string trailingIcon: ""
+    /// Degrees applied to trailing icon (e.g. ExpansionTile chevron).
+    property real trailingRotation: 0
     property bool selected: false
     property bool enabled: true
     property bool showDivider: false
@@ -63,9 +65,14 @@ Item {
         Column {
             id: col
             anchors.verticalCenter: parent.verticalCenter
-            width: parent.width
-                   - (root.leadingIcon.length > 0 ? 40 : 0)
-                   - (root.trailingIcon.length > 0 ? 40 : 0)
+            width: {
+                let w = parent.width
+                if (root.leadingIcon.length > 0)
+                    w -= 24 + 16
+                if (root.trailingIcon.length > 0)
+                    w -= 24 + 16
+                return Math.max(0, w)
+            }
             spacing: 2
 
             Text {
@@ -107,6 +114,14 @@ Item {
             size: 24
             iconColor: Md3Theme.colorScheme.colorOnSurfaceVariant
             anchors.verticalCenter: parent.verticalCenter
+            rotation: root.trailingRotation
+            Behavior on rotation {
+                NumberAnimation {
+                    duration: Md3Motion.spatialSnapDuration
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Md3Motion.emphasized
+                }
+            }
             MouseArea {
                 anchors.fill: parent
                 enabled: root.enabled
