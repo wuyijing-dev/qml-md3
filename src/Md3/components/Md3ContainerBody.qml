@@ -9,18 +9,42 @@ Item {
     property int layoutMode: Md3ContainerBody.Fit
     property real padding: 0
     property bool clipContent: true
+    property real fitFallbackHeight: 320
 
     default property alias content: contentHost.data
 
     readonly property alias contentHost: contentHost
-    readonly property real contentImplicitWidth: contentHost.implicitWidth
-    readonly property real contentImplicitHeight: contentHost.implicitHeight
+    readonly property real contentImplicitWidth: contentHost.childrenRect.width
+    readonly property bool hasParentFillChild: _hasParentFillChild()
+    readonly property real contentImplicitHeight: _measureContentHeight()
+
+    function _hasParentFillChild() {
+        const kids = contentHost.children
+        for (let i = 0; i < kids.length; ++i) {
+            const c = kids[i]
+            if (!c || c.visible === false || !c.anchors)
+                continue
+            if (c.anchors.fill === contentHost)
+                return true
+            if (c.anchors.top === contentHost && c.anchors.bottom === contentHost)
+                return true
+        }
+        return false
+    }
+
+    function _measureContentHeight() {
+        // If child uses anchors.fill parent, deriving implicit height from childrenRect
+        // creates a feedback loop (parent implicitHeight -> child height -> childrenRect).
+        if (hasParentFillChild)
+            return 0
+        return contentHost.childrenRect.height
+    }
 
     implicitWidth: Math.max(1, contentImplicitWidth + padding * 2)
-    // Keep Scroll mode intrinsic height constant to avoid
-    // parent-height <-> implicitHeight feedback loops.
     implicitHeight: layoutMode === Md3ContainerBody.Fit
-                    ? contentImplicitHeight + padding * 2
+                    ? (hasParentFillChild
+                       ? fitFallbackHeight
+                       : contentImplicitHeight + padding * 2)
                     : 320
 
     Flickable {
@@ -38,8 +62,6 @@ Item {
             x: root.padding
             y: root.padding
             width: Math.max(0, flick.width - root.padding * 2)
-            implicitWidth: childrenRect.width
-            implicitHeight: childrenRect.height
         }
     }
 }

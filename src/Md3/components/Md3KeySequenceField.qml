@@ -158,9 +158,27 @@ Item {
         anchors.fill: box
         radius: box.radius
         overlayColor: Md3Theme.colorScheme.colorOnSurface
-        hovered: input.containsMouse
-        pressed: input.pressed
+        hovered: pointerHit.containsMouse
+        pressed: pointerHit.pressed
         controlEnabled: root.captureEnabled
+    }
+
+    MouseArea {
+        id: pointerHit
+        anchors.fill: box
+        enabled: root.captureEnabled
+        hoverEnabled: true
+        cursorShape: Qt.IBeamCursor
+        onPressed: input.forceActiveFocus()
+    }
+
+    Md3FocusRing {
+        anchors.fill: box
+        anchors.margins: -3
+        radius: Md3Theme.shape.extraSmall
+        focused: input.activeFocus
+        controlEnabled: root.captureEnabled
+        visualFocus: false
     }
 
     Row {
@@ -168,15 +186,6 @@ Item {
         anchors.leftMargin: 12
         anchors.rightMargin: 12
         spacing: 12
-
-        Md3FocusRing {
-            anchors.fill: box
-            anchors.margins: -3
-            radius: Md3Theme.shape.extraSmall
-            focused: input.activeFocus
-            controlEnabled: root.captureEnabled
-            visualFocus: false
-        }
 
         Md3Icon {
             visible: label.length > 0 || root.sequence.length > 0 || root.hasConflict
