@@ -39,12 +39,31 @@ Item {
         id: dividerComp
         Md3MenuDivider {}
     }
-    Component {
-        id: menuComp
-        Md3Menu {
-            menuWidth: 200
-            modal: false
+
+    /// Must not use `Component { Md3Menu {} }` here — that recurses the type compiler.
+    property var _subMenuComp: null
+
+    function _subMenuComponent() {
+        if (_subMenuComp)
+            return _subMenuComp
+        _subMenuComp = Qt.createComponent(Qt.resolvedUrl("Md3Menu.qml"))
+        return _subMenuComp
+    }
+
+    function _createSubMenu(parentObj) {
+        const comp = _subMenuComponent()
+        if (!comp)
+            return null
+        if (comp.status === Component.Error) {
+            console.warn("Md3Menu submenu:", comp.errorString())
+            return null
         }
+        if (comp.status !== Component.Ready) {
+            // Local module resources resolve synchronously; bail if not ready.
+            console.warn("Md3Menu submenu: component not ready", comp.status)
+            return null
+        }
+        return comp.createObject(parentObj || root, { menuWidth: 200, modal: false })
     }
 
     onModelChanged: {
@@ -100,13 +119,12 @@ Item {
             if (!item)
                 continue
             if (kids.length > 0) {
-                const sub = menuComp.createObject(menu)
+                const sub = menu._createSubMenu ? menu._createSubMenu(menu) : _createSubMenu(menu)
                 item.submenu = sub
                 _buildEntries(sub, kids, path)
             } else {
                 item.clicked.connect(function () {
                     menu.itemClicked(path)
-                    // Bubble to root-most menu that owns the model interaction
                     let m = menu
                     while (m && m.parentMenu)
                         m = m.parentMenu

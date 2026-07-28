@@ -9,7 +9,7 @@ Item {
     property string emptyHint: qsTr("or click to browse")
     property var acceptedExtensions: [] // [".zip", ".qml"]
     property bool allowMultiple: true
-    property bool enabled: true
+    // Use Item.enabled (do not redeclare)
     property bool clickable: false
     property bool dragActive: dropArea.containsDrag
     property var droppedPaths: []

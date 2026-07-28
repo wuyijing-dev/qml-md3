@@ -17,7 +17,7 @@ import QtQuick.Window
 Item {
     id: root
 
-    property bool enabled: true
+    // Use Item.enabled (do not redeclare)
     /// Target Md3Menu (required for a useful menu).
     property var contextMenu: null
     property real menuWidth: 0
