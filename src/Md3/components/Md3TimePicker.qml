@@ -357,21 +357,22 @@ Item {
 
                     // Hour labels 1–12 or minute ticks 0,5,…55
                     Repeater {
-                        model: root.dialSelection === Md3TimePicker.Minute ? 12 : 12
+                        model: 12
                         delegate: Item {
+                            id: tick
                             required property int index
                             readonly property int value: root.dialSelection === Md3TimePicker.Minute
                                                          ? index * 5 : (index + 1)
                             readonly property real ang: root.dialSelection === Md3TimePicker.Minute
-                                                        ? (value % 60) * 6 - 90
-                                                        : (value % 12) * 30 - 90
+                                                        ? (tick.value % 60) * 6 - 90
+                                                        : (tick.value % 12) * 30 - 90
                             readonly property real rad: 100
                             readonly property bool selected: {
                                 if (root.dialSelection === Md3TimePicker.Minute) {
                                     const nearest = Math.round(root.minute / 5) * 5 % 60
-                                    return value === nearest
+                                    return tick.value === nearest
                                 }
-                                return root.displayHour12 === value
+                                return root.displayHour12 === tick.value
                             }
                             x: dial.width / 2 + Math.cos(ang * Math.PI / 180) * rad - 20
                             y: dial.height / 2 + Math.sin(ang * Math.PI / 180) * rad - 20
@@ -383,14 +384,14 @@ Item {
                                 width: 40
                                 height: 40
                                 radius: 20
-                                color: parent.selected ? Md3Theme.colorScheme.primary : "transparent"
+                                color: tick.selected ? Md3Theme.colorScheme.primary : "transparent"
                                 Text {
                                     anchors.centerIn: parent
                                     text: root.dialSelection === Md3TimePicker.Minute
-                                          ? String(parent.value).padStart(2, "0")
-                                          : String(parent.value)
-                                    color: parent.selected ? Md3Theme.colorScheme.colorOnPrimary
-                                                           : Md3Theme.colorScheme.colorOnSurface
+                                          ? String(tick.value).padStart(2, "0")
+                                          : String(tick.value)
+                                    color: tick.selected ? Md3Theme.colorScheme.colorOnPrimary
+                                                         : Md3Theme.colorScheme.colorOnSurface
                                     font.family: Md3Theme.typography.fontFamily
                                     font.pixelSize: Md3Theme.typography.bodyLarge.size
                                 }
