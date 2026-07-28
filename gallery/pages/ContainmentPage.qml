@@ -321,7 +321,8 @@ Item {
                         adaptiveTint: adaptiveSlider.value
                         liquidDeform: deformSlider.value
                         squircleN: squircleSlider.value
-                        quality: qualitySlider.value
+                        quality: glassBlocks.count >= 5 ? 0
+                                 : (glassBlocks.count >= 3 ? 1 : qualitySlider.value)
                         liveSampling: glassBackdrop.hasVideo
 
                         Component.onCompleted: {
@@ -431,8 +432,8 @@ Item {
             }
             GlassParamRow {
                 id: qualitySlider
-                label: qsTr("Quality (0/1 blur, 2 + refraction)")
-                from: 0; to: 2; value: 0
+                label: qsTr("Quality (0 low / 2 high)")
+                from: 0; to: 2; value: 1
             }
             GlassParamRow {
                 id: adaptiveSlider

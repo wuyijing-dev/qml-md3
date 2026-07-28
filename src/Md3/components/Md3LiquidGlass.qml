@@ -1,32 +1,31 @@
 import QtQuick
 import QtQuick.Effects
 
-/// Draggable Liquid Glass — regional MultiEffect blur (cheap).
-/// Heavy refraction shader only when quality >= 2.
+/// Draggable Liquid Glass — regional backdrop sample (not full-scene blur).
 Item {
     id: root
 
     property Item sourceItem: null
     property real radius: 28
-    property real elevation: 1.5
+    property real elevation: 2
     property bool draggable: true
     property bool boundToParent: true
     property real squircleN: 5.0
-    property real adaptiveTint: 0.6
+    property real adaptiveTint: 1.0
     property real liquidDeform: 1.0
-    /// 0/1: MultiEffect blur only. 2: + edge refraction shader.
-    property int quality: 0
-    /// true = resample every frame (video). false = update on move end.
-    property bool liveSampling: false
+    /// 0=Low, 1=Medium, 2=High — scales sample res, frost taps, chroma.
+    property int quality: 1
+    /// Keep sampling every frame (video). For static images set false — updates on move.
+    property bool liveSampling: true
 
     property real blurAmount: 0.45
-    property real blurMax: 48
+    property real blurMax: 64
     property real tintOpacity: 0.08
     property color tintColor: "#FFFFFF"
-    property real edgeStrength: 0.85
-    property real refraction: 1.0
-    property real chromaticAberration: 0.35
-    property real samplePadding: 16
+    property real edgeStrength: 0.9
+    property real refraction: 1.2
+    property real chromaticAberration: 0.5
+    property real samplePadding: 24
 
     default property alias contentData: contentHost.data
 
@@ -37,15 +36,21 @@ Item {
     readonly property real _minSide: Math.min(width, height)
     readonly property real _radiusNorm: Math.max(0.02, Math.min(0.49, radius / Math.max(1, _minSide)))
     readonly property real _aspect: width / Math.max(1, height)
-    readonly property real _thickness: Math.min(1.35, Math.max(0.55, _minSide / 150))
-    readonly property real _effBlur: blurAmount * (0.7 + 0.35 * _thickness)
-    readonly property real _effRefraction: refraction * (0.75 + 0.3 * _thickness)
-    readonly property real _effElevation: elevation * (0.7 + 0.35 * _thickness)
-    readonly property real _effEdge: edgeStrength * (0.8 + 0.25 * _thickness)
+    readonly property real _thickness: Math.min(1.45, Math.max(0.55, _minSide / 150))
+    readonly property real _effBlur: blurAmount * (0.65 + 0.45 * _thickness)
+    readonly property real _effRefraction: refraction * (0.7 + 0.4 * _thickness)
+    readonly property real _effElevation: elevation * (0.65 + 0.5 * _thickness)
+    readonly property real _effEdge: edgeStrength * (0.75 + 0.3 * _thickness)
     readonly property bool _softMotion: !Md3Theme.reduceMotion && liquidDeform > 0.01
-    readonly property bool _useLens: _blurReady && quality >= 2 && _effRefraction > 0.05
-    readonly property bool _useSquircleShader: quality >= 2
-    readonly property real _pad: _useLens ? samplePadding : 0
+    readonly property real _pad: {
+        if (quality <= 0)
+            return Math.min(samplePadding, 12)
+        if (quality === 1)
+            return Math.min(samplePadding, 20)
+        return samplePadding
+    }
+    /// Downscale capture texture on lower quality.
+    readonly property real _texScale: quality >= 2 ? 1.0 : (quality === 1 ? 0.55 : 0.35)
     readonly property bool _sampleLive: liveSampling || dragging
 
     property real _grabOffX: 0
@@ -92,22 +97,27 @@ Item {
         const k = 0.012 * root.liquidDeform
         const sx = 1 + Math.max(-0.07, Math.min(0.07, dx * k))
         const sy = 1 + Math.max(-0.07, Math.min(0.07, dy * k))
-        _squashX = Math.max(0.92, Math.min(1.08, sx * (2.0 - sy) / (1.0 + Math.abs(sy - 1.0) * 0.35)))
-        _squashY = Math.max(0.92, Math.min(1.08, sy * (2.0 - sx) / (1.0 + Math.abs(sx - 1.0) * 0.35)))
+        _squashX = sx * (2.0 - sy) / (1.0 + Math.abs(sy - 1.0) * 0.35)
+        _squashY = sy * (2.0 - sx) / (1.0 + Math.abs(sx - 1.0) * 0.35)
+        _squashX = Math.max(0.9, Math.min(1.1, _squashX))
+        _squashY = Math.max(0.9, Math.min(1.1, _squashY))
     }
 
     function _refreshSample() {
-        if (root._blurReady && !root._sampleLive) {
-            cardSample.scheduleUpdate()
-            if (root._useLens)
-                lensSample.scheduleUpdate()
-        }
+        if (root._blurReady && !root._sampleLive)
+            regionSample.scheduleUpdate()
     }
+
+    onXChanged: _refreshSample()
+    onYChanged: _refreshSample()
+    onWidthChanged: _refreshSample()
+    onHeightChanged: _refreshSample()
 
     Md3Shadow {
         anchors.fill: parent
         elevation: root._effElevation
         cornerRadius: root.radius
+        // Skip expensive shadow blur layers when flat.
         visible: root._effElevation > 0.05
     }
 
@@ -115,69 +125,34 @@ Item {
         id: glassBody
         anchors.fill: parent
         layer.enabled: true
-        layer.smooth: false
-        layer.samples: 0
+        layer.smooth: root.quality >= 1
+        layer.samples: root.quality >= 2 ? 2 : 0
         layer.effect: MultiEffect {
             maskEnabled: true
-            maskSource: root._useSquircleShader ? squircleMask : roundMask
+            maskSource: squircleMask
             autoPaddingEnabled: false
         }
 
-        // Card-sized capture → Qt MultiEffect blur (much cheaper than custom frost taps).
+        // Only the card neighbourhood — not the full backdrop.
         ShaderEffectSource {
-            id: cardSample
-            anchors.fill: parent
-            visible: false
-            live: root._sampleLive
-            hideSource: false
-            smooth: false
-            sourceItem: root.sourceItem
-            sourceRect: {
-                if (!root.sourceItem)
-                    return Qt.rect(0, 0, root.width, root.height)
-                void root.x
-                void root.y
-                void root.width
-                void root.height
-                const p = root.mapToItem(root.sourceItem, 0, 0)
-                return Qt.rect(p.x, p.y, root.width, root.height)
-            }
-        }
-
-        MultiEffect {
-            id: frostPlate
-            anchors.fill: parent
-            visible: root._blurReady
-            source: cardSample
-            autoPaddingEnabled: false
-            blurEnabled: true
-            blur: Math.max(0.1, root._effBlur)
-            blurMax: Math.min(48, root.blurMax)
-            blurMultiplier: 1.15
-            saturation: 1.15
-            brightness: 0.04 * root.adaptiveTint
-            contrast: 0.02
-        }
-
-        // Optional edge lens — only quality 2 (was the GPU hog when always on).
-        ShaderEffectSource {
-            id: lensSample
-            width: root.width + root._pad * 2
-            height: root.height + root._pad * 2
+            id: regionSample
+            width: Math.max(2, Math.round((root.width + root._pad * 2) * root._texScale))
+            height: Math.max(2, Math.round((root.height + root._pad * 2) * root._texScale))
             x: -root._pad
             y: -root._pad
             visible: false
-            live: root._sampleLive && root._useLens
+            live: root._sampleLive
             hideSource: false
-            smooth: false
+            smooth: root.quality >= 1
             sourceItem: root.sourceItem
             sourceRect: {
-                if (!root.sourceItem || !root._useLens)
-                    return Qt.rect(0, 0, 1, 1)
+                if (!root.sourceItem)
+                    return Qt.rect(0, 0, width, height)
                 void root.x
                 void root.y
                 void root.width
                 void root.height
+                void root._pad
                 const pad = root._pad
                 const p = root.mapToItem(root.sourceItem, -pad, -pad)
                 return Qt.rect(p.x, p.y, root.width + pad * 2, root.height + pad * 2)
@@ -187,11 +162,11 @@ Item {
         ShaderEffect {
             id: lens
             anchors.fill: parent
-            visible: root._useLens
-            property variant source: lensSample
+            visible: root._blurReady
+            property variant source: regionSample
             property real bend: root._effRefraction
-            property real frost: 0 // blur already done by MultiEffect
-            property real chroma: root.chromaticAberration * 0.5
+            property real frost: root._effBlur * (root.quality >= 2 ? 0.012 : 0.008)
+            property real chroma: root.quality >= 1 ? root.chromaticAberration : 0
             property real radiusNorm: root._radiusNorm
             property real aspect: root._aspect
             property real padU: root._pad / Math.max(1, root.width + root._pad * 2)
@@ -200,7 +175,7 @@ Item {
             property real thickness: root._thickness
             property real adaptive: root.adaptiveTint
             property real baseTint: root.tintOpacity
-            property real quality: 0 // force 1-sample path in shader
+            property real quality: root.quality
             vertexShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.vert.qsb"
             fragmentShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.frag.qsb"
         }
@@ -216,16 +191,16 @@ Item {
             anchors.fill: parent
             visible: root._blurReady
             color: root.tintColor
-            opacity: root.tintOpacity * (0.4 + 0.15 * root._thickness)
+            opacity: root.tintOpacity * (0.35 + 0.2 * root._thickness) * (1.0 - root.adaptiveTint * 0.55)
         }
 
         Rectangle {
             anchors.fill: parent
-            opacity: root._effEdge * 0.28
+            opacity: root._effEdge * 0.32
             gradient: Gradient {
-                GradientStop { position: 0.0; color: Qt.rgba(0.75, 0.9, 1.0, 0.14) }
-                GradientStop { position: 0.5; color: "transparent" }
-                GradientStop { position: 1.0; color: Qt.rgba(1.0, 0.85, 0.7, 0.08) }
+                GradientStop { position: 0.0; color: Qt.rgba(0.75, 0.9, 1.0, 0.16) }
+                GradientStop { position: 0.45; color: "transparent" }
+                GradientStop { position: 1.0; color: Qt.rgba(1.0, 0.85, 0.7, 0.09) }
             }
         }
 
@@ -234,13 +209,13 @@ Item {
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.margins: 1
-            height: Math.max(2, root.height * 0.03)
-            opacity: root._effEdge * 0.75
+            height: Math.max(2, root.height * (0.028 + 0.012 * root._thickness))
+            opacity: root._effEdge * 0.8
             gradient: Gradient {
                 orientation: Gradient.Horizontal
                 GradientStop { position: 0.0; color: "transparent" }
-                GradientStop { position: 0.2; color: Qt.rgba(1, 1, 1, 0.45) }
-                GradientStop { position: 0.8; color: Qt.rgba(1, 1, 1, 0.2) }
+                GradientStop { position: 0.2; color: Qt.rgba(1, 1, 1, 0.5) }
+                GradientStop { position: 0.8; color: Qt.rgba(1, 1, 1, 0.22) }
                 GradientStop { position: 1.0; color: "transparent" }
             }
         }
@@ -248,22 +223,8 @@ Item {
         Item {
             id: contentHost
             anchors.fill: parent
-            anchors.margins: 16 + 3 * root._thickness
+            anchors.margins: 16 + 4 * root._thickness
             z: 2
-        }
-    }
-
-    // Cheap mask (same pattern as Md3Button).
-    Item {
-        id: roundMask
-        width: root.width
-        height: root.height
-        visible: false
-        layer.enabled: true
-        Rectangle {
-            anchors.fill: parent
-            radius: root.radius
-            color: "#ffffff"
         }
     }
 
@@ -272,14 +233,13 @@ Item {
         width: root.width
         height: root.height
         visible: false
-        layer.enabled: root._useSquircleShader
-        layer.smooth: false
+        layer.enabled: true
+        layer.smooth: root.quality >= 1
         ShaderEffect {
             anchors.fill: parent
-            visible: root._useSquircleShader
             property real aspect: root._aspect
             property real squircleN: root.squircleN
-            property real soft: 0.02
+            property real soft: root.quality >= 2 ? 0.014 : 0.022
             vertexShader: "qrc:/qt/qml/Md3/shaders/md3squircle_mask.vert.qsb"
             fragmentShader: "qrc:/qt/qml/Md3/shaders/md3squircle_mask.frag.qsb"
         }
@@ -290,7 +250,7 @@ Item {
         anchors.fill: parent
         z: 100
         enabled: root.draggable
-        hoverEnabled: false
+        hoverEnabled: true
         cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
         preventStealing: true
         propagateComposedEvents: false
