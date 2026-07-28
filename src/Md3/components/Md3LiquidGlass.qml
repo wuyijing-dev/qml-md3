@@ -1,20 +1,23 @@
 import QtQuick
 import QtQuick.Effects
 
-/// Draggable Liquid Glass card.
-/// Backdrop technique (classic QML frosted glass / Acrylic):
-/// blur the *full* sourceItem, then offset it by mapFromItem so the slice under
-/// the card tracks the real background as you drag — the "fluid reflection".
-/// Edge refraction uses a displacement ShaderEffect (GitHub liquid-glass style).
+/// Draggable Liquid Glass — squircle shape, size-scaled thickness,
+/// backdrop-adaptive tint, soft elastic drag deform.
 Item {
     id: root
 
-    /// Backdrop to refract (sibling under the same parent works best).
     property Item sourceItem: null
+    /// Corner softness hint (squircle uses continuous curvature; this scales the bevel).
     property real radius: 28
     property real elevation: 2
     property bool draggable: true
     property bool boundToParent: true
+    /// Superellipse exponent — 2=ellipse, ~5=Apple-ish squircle, →∞ rectangle.
+    property real squircleN: 5.0
+    /// Backdrop-aware lift/veil for legibility (0=off, 1=full).
+    property real adaptiveTint: 1.0
+    /// How much the card soft-squishes while dragging.
+    property real liquidDeform: 1.0
 
     property real blurAmount: 0.45
     property real blurMax: 64
@@ -34,14 +37,39 @@ Item {
     readonly property real _minSide: Math.min(width, height)
     readonly property real _radiusNorm: Math.max(0.02, Math.min(0.49, radius / Math.max(1, _minSide)))
     readonly property real _aspect: width / Math.max(1, height)
+    /// Larger panel → thicker glass (more blur / bend / elevation).
+    readonly property real _thickness: Math.min(1.45, Math.max(0.55, _minSide / 150))
+    readonly property real _effBlur: blurAmount * (0.65 + 0.45 * _thickness)
+    readonly property real _effRefraction: refraction * (0.7 + 0.4 * _thickness)
+    readonly property real _effElevation: elevation * (0.65 + 0.5 * _thickness)
+    readonly property real _effEdge: edgeStrength * (0.75 + 0.3 * _thickness)
+    readonly property bool _softMotion: !Md3Theme.reduceMotion && liquidDeform > 0.01
 
     property real _grabOffX: 0
     property real _grabOffY: 0
+    property real _squashX: 1
+    property real _squashY: 1
 
     implicitWidth: 280
     implicitHeight: 168
     z: dragging ? 20 : 1
     clip: false
+
+    transform: Scale {
+        origin.x: root.width * 0.5
+        origin.y: root.height * 0.5
+        xScale: root._squashX
+        yScale: root._squashY
+    }
+
+    Behavior on _squashX {
+        enabled: root._softMotion
+        SpringAnimation { spring: 2.8; damping: 0.28; mass: 0.85 }
+    }
+    Behavior on _squashY {
+        enabled: root._softMotion
+        SpringAnimation { spring: 2.8; damping: 0.28; mass: 0.85 }
+    }
 
     function _clampPos(nx, ny) {
         if (!boundToParent || !parent)
@@ -52,9 +80,25 @@ Item {
                         Math.max(0, Math.min(maxY, ny)))
     }
 
+    function _setDeform(dx, dy) {
+        if (!root._softMotion) {
+            _squashX = 1
+            _squashY = 1
+            return
+        }
+        const k = 0.012 * root.liquidDeform
+        const sx = 1 + Math.max(-0.07, Math.min(0.07, dx * k))
+        const sy = 1 + Math.max(-0.07, Math.min(0.07, dy * k))
+        // Stretch along motion, slight compress on the other axis.
+        _squashX = sx * (2.0 - sy) / (1.0 + Math.abs(sy - 1.0) * 0.35)
+        _squashY = sy * (2.0 - sx) / (1.0 + Math.abs(sx - 1.0) * 0.35)
+        _squashX = Math.max(0.9, Math.min(1.1, _squashX))
+        _squashY = Math.max(0.9, Math.min(1.1, _squashY))
+    }
+
     Md3Shadow {
         anchors.fill: parent
-        elevation: root.elevation
+        elevation: root._effElevation
         cornerRadius: root.radius
     }
 
@@ -66,12 +110,10 @@ Item {
         layer.samples: 4
         layer.effect: MultiEffect {
             maskEnabled: true
-            maskSource: roundMask
+            maskSource: squircleMask
             autoPaddingEnabled: false
         }
 
-        // Fluid reflection: full backdrop, reverse-offset (1:1 with real background).
-        // autoPaddingEnabled must stay false — padding shifts the blurred image.
         MultiEffect {
             id: fluidBg
             visible: root._blurReady
@@ -94,15 +136,14 @@ Item {
             source: root.sourceItem
             autoPaddingEnabled: false
             blurEnabled: true
-            blur: Math.max(0.12, root.blurAmount)
-            blurMax: root.blurMax
-            blurMultiplier: 1.5
+            blur: Math.max(0.12, root._effBlur)
+            blurMax: root.blurMax * (0.85 + 0.25 * root._thickness)
+            blurMultiplier: 1.35 + 0.25 * root._thickness
             saturation: 1.25
-            brightness: 0.08
+            brightness: 0.06
             contrast: 0.04
         }
 
-        // Padded capture at 1:1 pixel scale (not squeezed into the card).
         ShaderEffectSource {
             id: lensSample
             width: root.width + root.samplePadding * 2
@@ -128,20 +169,22 @@ Item {
             }
         }
 
-        // Edge lens — padU/padV keep the center registered 1:1 with the backdrop.
         ShaderEffect {
             id: lens
             anchors.fill: parent
-            visible: root._blurReady && root.refraction > 0.02
-            opacity: 1.0
+            visible: root._blurReady && root._effRefraction > 0.02
             property variant source: lensSample
-            property real bend: root.refraction
-            property real frost: root.blurAmount * 0.01
+            property real bend: root._effRefraction
+            property real frost: root._effBlur * 0.01
             property real chroma: root.chromaticAberration
             property real radiusNorm: root._radiusNorm
             property real aspect: root._aspect
             property real padU: root.samplePadding / Math.max(1, lensSample.width)
             property real padV: root.samplePadding / Math.max(1, lensSample.height)
+            property real squircleN: root.squircleN
+            property real thickness: root._thickness
+            property real adaptive: root.adaptiveTint
+            property real baseTint: root.tintOpacity
             vertexShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.vert.qsb"
             fragmentShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.frag.qsb"
         }
@@ -153,20 +196,21 @@ Item {
             opacity: Math.max(0.25, root.tintOpacity)
         }
 
+        // Light residual veil; most adaptivity is in the lens shader.
         Rectangle {
             anchors.fill: parent
             visible: root._blurReady
             color: root.tintColor
-            opacity: root.tintOpacity
+            opacity: root.tintOpacity * (0.35 + 0.2 * root._thickness) * (1.0 - root.adaptiveTint * 0.55)
         }
 
         Rectangle {
             anchors.fill: parent
-            opacity: root.edgeStrength * 0.35
+            opacity: root._effEdge * 0.32
             gradient: Gradient {
-                GradientStop { position: 0.0; color: Qt.rgba(0.75, 0.9, 1.0, 0.18) }
+                GradientStop { position: 0.0; color: Qt.rgba(0.75, 0.9, 1.0, 0.16) }
                 GradientStop { position: 0.45; color: "transparent" }
-                GradientStop { position: 1.0; color: Qt.rgba(1.0, 0.85, 0.7, 0.1) }
+                GradientStop { position: 1.0; color: Qt.rgba(1.0, 0.85, 0.7, 0.09) }
             }
         }
 
@@ -175,13 +219,13 @@ Item {
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.margins: 1
-            height: Math.max(2, root.height * 0.035)
-            opacity: root.edgeStrength * 0.85
+            height: Math.max(2, root.height * (0.028 + 0.012 * root._thickness))
+            opacity: root._effEdge * 0.8
             gradient: Gradient {
                 orientation: Gradient.Horizontal
                 GradientStop { position: 0.0; color: "transparent" }
-                GradientStop { position: 0.2; color: Qt.rgba(1, 1, 1, 0.55) }
-                GradientStop { position: 0.8; color: Qt.rgba(1, 1, 1, 0.25) }
+                GradientStop { position: 0.2; color: Qt.rgba(1, 1, 1, 0.5) }
+                GradientStop { position: 0.8; color: Qt.rgba(1, 1, 1, 0.22) }
                 GradientStop { position: 1.0; color: "transparent" }
             }
         }
@@ -190,30 +234,31 @@ Item {
             anchors.fill: parent
             radius: root.radius
             color: "transparent"
-            border.width: 1.5
-            border.color: Qt.rgba(1, 1, 1, 0.45 * root.edgeStrength)
+            border.width: 1 + 0.5 * root._thickness
+            border.color: Qt.rgba(1, 1, 1, 0.4 * root._effEdge)
         }
 
         Item {
             id: contentHost
             anchors.fill: parent
-            anchors.margins: 20
+            anchors.margins: 16 + 4 * root._thickness
             z: 2
         }
     }
 
-    Item {
-        id: roundMask
+    // Squircle mask (white interior) for MultiEffect.
+    ShaderEffect {
+        id: squircleMask
         width: root.width
         height: root.height
         visible: false
+        property real aspect: root._aspect
+        property real squircleN: root.squircleN
+        property real soft: 0.012
         layer.enabled: true
         layer.smooth: true
-        Rectangle {
-            anchors.fill: parent
-            radius: root.radius
-            color: "#ffffff"
-        }
+        vertexShader: "qrc:/qt/qml/Md3/shaders/md3squircle_mask.vert.qsb"
+        fragmentShader: "qrc:/qt/qml/Md3/shaders/md3squircle_mask.frag.qsb"
     }
 
     MouseArea {
@@ -235,9 +280,20 @@ Item {
             if (!pressed)
                 return
             const p = mapToItem(root.parent, mouse.x, mouse.y)
-            const next = root._clampPos(p.x - root._grabOffX, p.y - root._grabOffY)
+            const nx = p.x - root._grabOffX
+            const ny = p.y - root._grabOffY
+            const next = root._clampPos(nx, ny)
+            root._setDeform(next.x - root.x, next.y - root.y)
             root.x = next.x
             root.y = next.y
+        }
+        onReleased: {
+            root._squashX = 1
+            root._squashY = 1
+        }
+        onCanceled: {
+            root._squashX = 1
+            root._squashY = 1
         }
     }
 }

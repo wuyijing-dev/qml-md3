@@ -240,6 +240,8 @@ qt_add_resources(Md3 "md3_liquid_glass_shaders"
     FILES
         shaders/md3liquidglass.vert.qsb
         shaders/md3liquidglass.frag.qsb
+        shaders/md3squircle_mask.vert.qsb
+        shaders/md3squircle_mask.frag.qsb
 )
 
 target_include_directories(Md3

@@ -260,6 +260,9 @@ Item {
                     chromaticAberration: chromaSlider.value
                     edgeStrength: edgeSlider.value
                     elevation: elevSlider.value
+                    adaptiveTint: adaptiveSlider.value
+                    liquidDeform: deformSlider.value
+                    squircleN: squircleSlider.value
 
                     Column {
                         anchors.verticalCenter: parent.verticalCenter
@@ -352,6 +355,21 @@ Item {
                 id: tintSlider
                 label: qsTr("Tint opacity")
                 from: 0; to: 0.55; value: 0.08
+            }
+            GlassParamRow {
+                id: adaptiveSlider
+                label: qsTr("Adaptive tint")
+                from: 0; to: 1; value: 1
+            }
+            GlassParamRow {
+                id: deformSlider
+                label: qsTr("Liquid deform")
+                from: 0; to: 1.5; value: 1
+            }
+            GlassParamRow {
+                id: squircleSlider
+                label: qsTr("Squircle N")
+                from: 2.5; to: 8; value: 5
             }
             GlassParamRow {
                 id: edgeSlider

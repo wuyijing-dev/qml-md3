@@ -7,17 +7,9 @@ layout(location = 0) out vec2 qt_TexCoord0;
 layout(std140, binding = 0) uniform buf {
     mat4 qt_Matrix;
     float qt_Opacity;
-    float bend;
-    float frost;
-    float chroma;
-    float radiusNorm;
     float aspect;
-    float padU;
-    float padV;
     float squircleN;
-    float thickness;
-    float adaptive;
-    float baseTint;
+    float soft;
 };
 
 void main()
