@@ -58,7 +58,6 @@ import Md3
 | `emptyActionClicked()` | `Md3DataTable` | — |
 | `pageChanged(int page)` | `Md3DataTable` | — |
 | `rowActionTriggered(int sourceIndex, var action)` | `Md3DataTable` | — |
-| `columnWidthsChanged()` | `Md3DataTable` | — |
 
 ## Methods
 

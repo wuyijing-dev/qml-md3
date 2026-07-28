@@ -35,7 +35,6 @@ Item {
     signal emptyActionClicked()
     signal pageChanged(int page)
     signal rowActionTriggered(int sourceIndex, var action)
-    signal columnWidthsChanged()
 
     property var columnWidths: []
     property int rowMenuSourceIndex: -1
@@ -134,7 +133,6 @@ Item {
         const arr = effectiveWidths.slice()
         arr[index] = Math.max(minW, w)
         columnWidths = arr
-        columnWidthsChanged()
     }
 
     function _isSelected(sourceIndex) {
