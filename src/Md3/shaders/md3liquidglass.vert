@@ -18,6 +18,7 @@ layout(std140, binding = 0) uniform buf {
     float thickness;
     float adaptive;
     float baseTint;
+    float quality;
 };
 
 void main()

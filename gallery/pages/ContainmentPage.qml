@@ -321,6 +321,9 @@ Item {
                         adaptiveTint: adaptiveSlider.value
                         liquidDeform: deformSlider.value
                         squircleN: squircleSlider.value
+                        quality: glassBlocks.count >= 5 ? 0
+                                 : (glassBlocks.count >= 3 ? 1 : qualitySlider.value)
+                        liveSampling: glassBackdrop.hasVideo
 
                         Component.onCompleted: {
                             x = bx
@@ -426,6 +429,11 @@ Item {
                 id: tintSlider
                 label: qsTr("Tint opacity")
                 from: 0; to: 0.55; value: 0.08
+            }
+            GlassParamRow {
+                id: qualitySlider
+                label: qsTr("Quality (0 low / 2 high)")
+                from: 0; to: 2; value: 1
             }
             GlassParamRow {
                 id: adaptiveSlider

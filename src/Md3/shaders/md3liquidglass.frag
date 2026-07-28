@@ -1,6 +1,7 @@
 #version 440
 
-// Liquid Glass: squircle lens, size-scaled thickness, adaptive tint, chroma.
+// Liquid Glass: regional sample, squircle lens, adaptive tint.
+// quality: 0=low (1 sample), 1=medium (4 frost taps), 2=high (8 taps + chroma)
 layout(location = 0) in vec2 qt_TexCoord0;
 layout(location = 0) out vec4 fragColor;
 
@@ -10,14 +11,15 @@ layout(std140, binding = 0) uniform buf {
     float bend;
     float frost;
     float chroma;
-    float radiusNorm;   // kept for API compat; thickness drives bevel
+    float radiusNorm;
     float aspect;
     float padU;
     float padV;
     float squircleN;
-    float thickness;    // 0.5..1.5 material depth
-    float adaptive;     // 0..1 backdrop-aware tint
-    float baseTint;     // base tint opacity
+    float thickness;
+    float adaptive;
+    float baseTint;
+    float quality;
 };
 
 layout(binding = 1) uniform sampler2D source;
@@ -37,10 +39,11 @@ vec2 cardToTex(vec2 uv)
 
 vec2 refractCardUv(vec2 uv, float iorScale)
 {
+    if (bend < 0.001)
+        return uv;
     vec2 p = (uv - 0.5) * vec2(aspect, 1.0);
     vec2 halfSize = 0.5 * vec2(aspect, 1.0);
     float d = sdSquircle(p, halfSize, squircleN);
-    // Bevel band; thicker glass → wider / stronger bend near rim.
     float bevelWidth = max(0.04, radiusNorm * (0.85 + 0.55 * thickness));
     float inset = clamp(-d / bevelWidth, 0.0, 1.0);
     float bevel = pow(1.0 - inset, 1.55);
@@ -54,12 +57,14 @@ vec2 refractCardUv(vec2 uv, float iorScale)
 vec4 sampleFrost(vec2 texUv)
 {
     float spread = frost * (0.7 + 0.5 * thickness);
-    if (spread < 0.0005)
+    if (spread < 0.0005 || quality < 0.5)
         return texture(source, texUv);
 
     vec4 acc = texture(source, texUv) * 2.0;
-    const int taps = 8;
-    for (int i = 0; i < taps; ++i) {
+    int taps = quality > 1.5 ? 8 : 4;
+    for (int i = 0; i < 8; ++i) {
+        if (i >= taps)
+            break;
         float a = float(i) * 6.2831853 / float(taps);
         vec2 o = vec2(cos(a), sin(a)) * spread;
         o.x /= max(aspect, 0.001);
@@ -72,23 +77,22 @@ vec4 sampleFrost(vec2 texUv)
 
 void main()
 {
-    float iorR = 1.0 - chroma * 0.35;
-    float iorG = 1.0;
-    float iorB = 1.0 + chroma * 0.35;
+    float r, g, b;
+    if (chroma < 0.02 || quality < 0.5) {
+        vec4 c = sampleFrost(cardToTex(refractCardUv(qt_TexCoord0, 1.0)));
+        r = c.r; g = c.g; b = c.b;
+    } else {
+        float iorR = 1.0 - chroma * 0.35;
+        float iorG = 1.0;
+        float iorB = 1.0 + chroma * 0.35;
+        r = sampleFrost(cardToTex(refractCardUv(qt_TexCoord0, iorR))).r;
+        g = sampleFrost(cardToTex(refractCardUv(qt_TexCoord0, iorG))).g;
+        b = sampleFrost(cardToTex(refractCardUv(qt_TexCoord0, iorB))).b;
+    }
 
-    vec2 uvR = refractCardUv(qt_TexCoord0, iorR);
-    vec2 uvG = refractCardUv(qt_TexCoord0, iorG);
-    vec2 uvB = refractCardUv(qt_TexCoord0, iorB);
-
-    float r = sampleFrost(cardToTex(uvR)).r;
-    float g = sampleFrost(cardToTex(uvG)).g;
-    float b = sampleFrost(cardToTex(uvB)).b;
-
-    // Adaptive tint from local luminance (dark behind → lift, bright → veil).
     float lum = dot(vec3(r, g, b), vec3(0.299, 0.587, 0.114));
     float lift = (1.0 - lum) * adaptive * (0.14 + baseTint);
     float veil = lum * adaptive * (0.08 + baseTint * 0.5);
-    // Thickness adds a touch more body on large panels.
     float body = baseTint * (0.55 + 0.35 * thickness);
     r = clamp(r + lift - veil + body * (1.0 - lum) * 0.15, 0.0, 1.0);
     g = clamp(g + lift - veil + body * (1.0 - lum) * 0.15, 0.0, 1.0);
