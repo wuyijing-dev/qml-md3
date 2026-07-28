@@ -113,7 +113,7 @@
 - [Md3SearchView](Md3SearchView.md)
 - [Md3Select](Md3Select.md) — Field-style select (ComboBox): label, helper/error, menu — aligned with Md3TextField. Supports searchable filtering and multi-select.
 - [Md3TextField](Md3TextField.md)
-- [Md3TimePicker](Md3TimePicker.md)
+- [Md3TimePicker](Md3TimePicker.md) — Material 3 time picker — dial / keyboard input, hour↔minute, AM/PM, 12h/24h, modal.
 
 ## Layout
 
