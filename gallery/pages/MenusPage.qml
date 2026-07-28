@@ -110,6 +110,15 @@ Item {
             }
         }
 
+        Text {
+            Layout.fillWidth: true
+            wrapMode: Text.Wrap
+            text: qsTr("Tip: Md3ContextMenuArea + Md3Menu enables page-level right-click menus (see Extras page).")
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.bodySmall.size
+            font.family: Md3Theme.typography.fontFamily
+        }
+
         Item { Layout.fillHeight: true }
     }
 

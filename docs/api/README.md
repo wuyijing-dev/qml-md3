@@ -15,7 +15,7 @@
 - [Md3AppSettings](Md3AppSettings.md) — QSettings facade
 - [Md3HotReload](Md3HotReload.md) — QML hot reload watcher
 
-**QML types:** 104
+**QML types:** 108
 
 ## Actions & selection
 
@@ -51,6 +51,9 @@
 ## Components
 
 - [Md3DeferredSection](Md3DeferredSection.md) — Within-page progressive load: placeholder first, then create `sourceComponent`. Honors Md3Theme.progressiveContent (default on). Set forceImmediate to always load now.
+- [Md3LiquidGlass](Md3LiquidGlass.md) — Draggable Liquid Glass — regional backdrop sample (not full-scene blur).
+- [Md3NumberField](Md3NumberField.md) — Numeric spin field: TextField chrome + step buttons (form-friendly SpinBox).
+- [Md3Pagination](Md3Pagination.md) — Compact pagination bar for tables / lists.
 
 ## Containment & feedback
 
@@ -62,6 +65,7 @@
 - [Md3BottomSheet](Md3BottomSheet.md)
 - [Md3Card](Md3Card.md)
 - [Md3Carousel](Md3Carousel.md)
+- [Md3ContextMenuArea](Md3ContextMenuArea.md) — Transparent right-click host over a page / region. Left-clicks pass through; right-click opens `contextMenu` at the cursor.  ```qml Md3ContextMenuArea { anchors.fill: parent contextMenu: pageMenu } Md3Menu { id: pageMenu Md3MenuItem { text: "Refresh" } } ```
 - [Md3Dialog](Md3Dialog.md)
 - [Md3Divider](Md3Divider.md)
 - [Md3DropdownMenu](Md3DropdownMenu.md)
@@ -105,7 +109,7 @@
 - [Md3Form](Md3Form.md)
 - [Md3SearchBar](Md3SearchBar.md)
 - [Md3SearchView](Md3SearchView.md)
-- [Md3Select](Md3Select.md) — Field-style select (ComboBox): label, helper/error, menu — aligned with Md3TextField.
+- [Md3Select](Md3Select.md) — Field-style select (ComboBox): label, helper/error, menu — aligned with Md3TextField. Supports searchable filtering and multi-select.
 - [Md3TextField](Md3TextField.md)
 - [Md3TimePicker](Md3TimePicker.md)
 
@@ -117,7 +121,7 @@
 
 - [Md3BottomAppBar](Md3BottomAppBar.md)
 - [Md3Breadcrumb](Md3Breadcrumb.md) — Horizontal breadcrumb trail. model: ["Home","Folder"] or [{ title, icon? }, ...]
-- [Md3DataTable](Md3DataTable.md)
+- [Md3DataTable](Md3DataTable.md) — Data table with sort, multi-select, sticky header, empty/loading, and pagination.
 - [Md3DocumentTabBar](Md3DocumentTabBar.md) — Win11 Explorer / browser document tabs — reorder, close, tear-off, add pop-in.
 - [Md3ListTile](Md3ListTile.md)
 - [Md3NavigationBar](Md3NavigationBar.md)

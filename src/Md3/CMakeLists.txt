@@ -161,6 +161,7 @@ qt_add_qml_module(Md3
         components/Md3SuggestionChip.qml
         components/Md3ChipGroup.qml
         components/Md3TextField.qml
+        components/Md3NumberField.qml
         components/Md3Select.qml
         components/Md3Card.qml
         components/Md3LiquidGlass.qml
@@ -197,6 +198,7 @@ qt_add_qml_module(Md3
         components/Md3MenuItem.qml
         components/Md3MenuDivider.qml
         components/Md3MenuBar.qml
+        components/Md3ContextMenuArea.qml
         components/Md3DropdownMenu.qml
         components/Md3Option.qml
         components/Md3SearchBar.qml
@@ -207,6 +209,7 @@ qt_add_qml_module(Md3
         components/Md3Tooltip.qml
         components/Md3ExpansionTile.qml
         components/Md3DataTable.qml
+        components/Md3Pagination.qml
         components/Md3Stepper.qml
         components/Md3Banner.qml
         components/Md3Carousel.qml

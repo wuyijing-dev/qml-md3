@@ -66,6 +66,56 @@ Flickable {
             model: [qsTr("Low"), qsTr("Medium"), qsTr("High")]
         }
 
+        Md3Select {
+            Layout.fillWidth: true
+            Layout.maximumWidth: 360
+            label: qsTr("Tags (multi + search)")
+            placeholderText: qsTr("Pick tags")
+            searchable: true
+            multiSelect: true
+            leadingIcon: "sell"
+            model: [
+                { text: qsTr("Design"), icon: "palette" },
+                { text: qsTr("Engineering"), icon: "code" },
+                { text: qsTr("Product"), icon: "inventory_2" },
+                { text: qsTr("Marketing"), icon: "campaign" },
+                { text: qsTr("Support"), icon: "support_agent" },
+                { text: qsTr("Research"), icon: "science" }
+            ]
+            supportingText: qsTr("Searchable multi-select")
+        }
+
+        Text {
+            text: qsTr("Number field")
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.labelLarge.size
+        }
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.maximumWidth: 360
+            spacing: 12
+            Md3NumberField {
+                Layout.fillWidth: true
+                label: qsTr("Quantity")
+                value: 3
+                from: 0
+                to: 99
+                stepSize: 1
+                supportingText: qsTr("↑↓ or steppers")
+            }
+            Md3NumberField {
+                Layout.preferredWidth: 140
+                variant: Md3NumberField.Filled
+                label: qsTr("Price")
+                value: 12.5
+                from: 0
+                to: 999
+                stepSize: 0.5
+                decimals: 1
+                prefix: "$"
+            }
+        }
+
         Md3TextField {
             Layout.fillWidth: true
             Layout.maximumWidth: 360
