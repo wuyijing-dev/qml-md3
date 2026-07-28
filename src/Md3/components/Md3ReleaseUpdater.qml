@@ -1,8 +1,11 @@
 import QtQuick
 
 /// GitHub Release update client: metadata check, ZIP download, and archive extract.
-QtObject {
+/// NOTE: This is non-visual (0x0) but uses `Item` so it can safely host the C++ backend instance.
+Item {
     id: root
+    width: 0
+    height: 0
 
     property alias owner: backend.owner
     property alias repo: backend.repo

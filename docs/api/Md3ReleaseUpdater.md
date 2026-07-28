@@ -1,9 +1,9 @@
 # Md3ReleaseUpdater
 
-GitHub Release update client: metadata check, ZIP download, and archive extract.
+GitHub Release update client: metadata check, ZIP download, and archive extract. NOTE: This is non-visual (0x0) but uses `Item` so it can safely host the C++ backend instance.
 
 - **Source:** `src/Md3/components/Md3ReleaseUpdater.qml`
-- **Extends:** `QtObject`
+- **Extends:** `Item`
 
 ## Import
 
