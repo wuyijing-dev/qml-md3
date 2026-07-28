@@ -269,7 +269,7 @@ if (WIN32)
         window/platforms/windows/md3wintray.cpp
     )
     target_include_directories(Md3 PRIVATE window/platforms/windows)
-    target_link_libraries(Md3 PRIVATE dwmapi shell32 shlwapi ole32 propsys advapi32 psapi)
+    target_link_libraries(Md3 PRIVATE dwmapi shell32 shlwapi ole32 propsys advapi32 psapi pdh)
 elseif (APPLE)
     list(APPEND MD3_PLATFORM_SOURCES
         window/platforms/macos/md3macosnative.cpp

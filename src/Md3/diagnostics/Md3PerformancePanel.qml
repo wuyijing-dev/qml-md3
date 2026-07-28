@@ -13,11 +13,15 @@ Item {
     property bool detached: false
     property bool fillHeight: false
 
+    readonly property bool isLinux: !!(monitor && monitor.platformId === "linux")
+    readonly property bool isWindows: !!(monitor && monitor.platformId === "windows")
+    readonly property bool gpuOk: !!(monitor && monitor.gpuAvailable && monitor.gpuPercent >= 0)
+
     signal pickToggleRequested()
     signal detachRequested()
     signal dockRequested()
 
-    width: expanded ? 320 : 148
+    width: expanded ? 336 : 148
     height: fillHeight ? parent ? parent.height : chrome.implicitHeight
                        : Math.ceil(chrome.implicitHeight)
 
@@ -42,15 +46,33 @@ Item {
                     size: 18
                     iconColor: Md3Theme.colorScheme.primary
                 }
-                Text {
+                Column {
                     anchors.verticalCenter: parent.verticalCenter
-                    text: qsTr("Performance")
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.titleSmall.size
-                    font.weight: Font.Medium
                     width: parent.width - 132
-                    elide: Text.ElideRight
+                    spacing: 0
+                    Text {
+                        width: parent.width
+                        text: qsTr("Performance")
+                        color: Md3Theme.colorScheme.colorOnSurface
+                        font.family: Md3Theme.typography.fontFamily
+                        font.pixelSize: Md3Theme.typography.titleSmall.size
+                        font.weight: Font.Medium
+                        elide: Text.ElideRight
+                    }
+                    Text {
+                        visible: root.expanded && !!(root.monitor)
+                        width: parent.width
+                        text: {
+                            if (!root.monitor)
+                                return ""
+                            const plat = root.monitor.platformLabel || ""
+                            const api = root.monitor.graphicsApi || ""
+                            return api && api !== "—" ? (plat + " · " + api) : plat
+                        }
+                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                        font.pixelSize: 10
+                        elide: Text.ElideRight
+                    }
                 }
                 Md3TitleBarButton {
                     buttonWidth: 28
@@ -127,7 +149,43 @@ Item {
                 }
 
                 Text {
-                    text: qsTr("Memory")
+                    text: qsTr("GPU")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: 11
+                }
+                Text {
+                    text: root.gpuOk
+                          ? (root.monitor.gpuPercent.toFixed(1) + "%")
+                          : qsTr("n/a")
+                    color: root.gpuOk
+                           ? Md3Theme.colorScheme.colorOnSurface
+                           : Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: 13
+                    horizontalAlignment: Text.AlignRight
+                    width: parent.width / 2 - 6
+                }
+
+                Text {
+                    visible: !!(root.monitor && root.monitor.gpuMemoryMb >= 0)
+                    text: qsTr("GPU mem")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: 11
+                }
+                Text {
+                    visible: !!(root.monitor && root.monitor.gpuMemoryMb >= 0)
+                    text: root.monitor
+                          ? (root.monitor.gpuMemoryMb.toFixed(1) + " MB")
+                          : "—"
+                    color: Md3Theme.colorScheme.colorOnSurface
+                    font.pixelSize: 13
+                    horizontalAlignment: Text.AlignRight
+                    width: parent.width / 2 - 6
+                }
+
+                Text {
+                    text: root.monitor && root.monitor.memoryLabel
+                          ? root.monitor.memoryLabel
+                          : qsTr("Memory")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: 11
                 }
@@ -141,16 +199,69 @@ Item {
                     width: parent.width / 2 - 6
                 }
 
+                // Windows: show Private Bytes (commit) as secondary — often ~2× Task Manager.
                 Text {
-                    visible: !!(root.monitor && root.expanded)
+                    visible: root.isWindows
+                    text: qsTr("Private bytes")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: 10
+                }
+                Text {
+                    visible: root.isWindows
+                    text: root.monitor
+                          ? (root.monitor.privateBytesMb.toFixed(1) + " MB")
+                          : "—"
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: 10
+                    horizontalAlignment: Text.AlignRight
+                    width: parent.width / 2 - 6
+                }
+
+                Text {
+                    visible: root.isWindows
                     text: qsTr("Working set")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: 10
                 }
                 Text {
-                    visible: !!(root.monitor && root.expanded)
+                    visible: root.isWindows
                     text: root.monitor
                           ? (root.monitor.workingSetMb.toFixed(1) + " MB")
+                          : "—"
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: 10
+                    horizontalAlignment: Text.AlignRight
+                    width: parent.width / 2 - 6
+                }
+
+                // Linux: RSS is primary; show PSS + Private for System Monitor comparison.
+                Text {
+                    visible: root.isLinux
+                    text: qsTr("PSS")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: 10
+                }
+                Text {
+                    visible: root.isLinux
+                    text: root.monitor
+                          ? (root.monitor.privateWorkingSetMb.toFixed(1) + " MB")
+                          : "—"
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: 10
+                    horizontalAlignment: Text.AlignRight
+                    width: parent.width / 2 - 6
+                }
+
+                Text {
+                    visible: root.isLinux
+                    text: qsTr("Private")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.pixelSize: 10
+                }
+                Text {
+                    visible: root.isLinux
+                    text: root.monitor
+                          ? (root.monitor.privateBytesMb.toFixed(1) + " MB")
                           : "—"
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: 10
@@ -167,6 +278,16 @@ Item {
                 minY: 0
                 maxY: 120
                 stroke: Md3Theme.colorScheme.primary
+            }
+
+            Md3Sparkline {
+                visible: root.expanded && root.gpuOk
+                width: parent.width
+                height: 36
+                values: (root.expanded && root.monitor) ? root.monitor.gpuHistory : []
+                minY: 0
+                maxY: 100
+                stroke: Md3Theme.colorScheme.secondary
             }
 
             Md3Sparkline {
