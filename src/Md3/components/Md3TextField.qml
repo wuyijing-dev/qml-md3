@@ -353,7 +353,9 @@ Item {
                     radius: Md3Theme.shape.extraSmall
                     focused: input.activeFocus
                     controlEnabled: root.enabled
-                    visualFocus: Md3Accessibility.showFocusRings && input.activeFocus
+                    // Outlined already thickens its border on focus — a second outer ring looks like a double frame.
+                    visualFocus: root.variant !== Md3TextField.Outlined
+                                 && Md3Accessibility.showFocusRings && input.activeFocus
                 }
 
                 Text {
