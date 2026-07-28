@@ -39,9 +39,27 @@ Md3ApplicationWindow {
     aboutText: qsTr("Material Design 3 组件图库 — 演示窗口、导航与控件。")
     aboutIcon: windowIcon
 
-    property string pageRoot: hotReload
-            ? "file:///D:/QML_MD3/QML_MD3/gallery/pages/"
-            : "qrc:/qt/qml/Gallery/pages/"
+    // Dev: prefer Md3HotReload-discovered gallery/pages (cross-platform).
+    // Else resolve next to Main.qml; if Main is from qrc, use bundled pages.
+    property string pageRoot: {
+        if (hotReload && hotReloadAgent
+                && hotReloadAgent.galleryPagesDir
+                && String(hotReloadAgent.galleryPagesDir).length > 0) {
+            let p = String(hotReloadAgent.galleryPagesDir).replace(/\\/g, "/")
+            if (!p.endsWith("/"))
+                p += "/"
+            if (p.indexOf("file:") === 0)
+                return p
+            // Unix absolute vs Windows drive
+            return (p.charAt(0) === "/" ? "file://" : "file:///") + p
+        }
+        if (!hotReload)
+            return "qrc:/qt/qml/Gallery/pages/"
+        const local = String(Qt.resolvedUrl("./pages/"))
+        if (local.indexOf("qrc:") === 0)
+            return "qrc:/qt/qml/Gallery/pages/"
+        return local
+    }
     property int windowPageIndex: 21
 
     overlay: [
