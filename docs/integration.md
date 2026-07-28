@@ -122,6 +122,29 @@ If you load QML modules from the filesystem instead:
 export QML_IMPORT_PATH=/path/to/Md3/lib/qml
 ```
 
+For shared-package consumer apps on Windows, also add the executable directory and deploy `qml/Md3` beside the exe (see [consumer-app-main-qml.md](consumer-app-main-qml.md)).
+
+---
+
+## Consumer app: `Main.qml` fails to load
+
+Symptom:
+
+```text
+qrc:/qt/qml/YourApp/qml/Main.qml: No such file or directory
+```
+
+Fix (summary):
+
+1. In `qt_add_qml_module`, set `RESOURCE_PREFIX /qt/qml`
+2. Set `QT_RESOURCE_ALIAS Main.qml` on your entry QML file
+3. Load with `engine.loadFromModule("YourApp", "Main")` (not a hard-coded `qml/Main.qml` URL)
+4. Deploy shared `Md3.dll` + `qml/Md3/` next to the executable
+5. Set `visible: true` on `Md3ApplicationWindow`
+
+Full walkthrough and copy-paste templates: **[consumer-app-main-qml.md](consumer-app-main-qml.md)**.  
+Reference implementation: sibling project `auto_deploy_Qt`.
+
 ## Theme
 
 ```qml
