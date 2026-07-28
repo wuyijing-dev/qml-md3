@@ -35,7 +35,6 @@ Item {
     readonly property real _radiusNorm: Math.max(0.02, Math.min(0.49, radius / Math.max(1, _minSide)))
     readonly property real _aspect: width / Math.max(1, height)
 
-    property real _pressScale: 1
     property real _grabOffX: 0
     property real _grabOffY: 0
 
@@ -60,167 +59,160 @@ Item {
     }
 
     Item {
-        id: visual
+        id: glassBody
         anchors.fill: parent
-        scale: root._pressScale
-        transformOrigin: Item.Center
-
-        Behavior on scale {
-            NumberAnimation {
-                duration: Md3Motion.short4
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Md3Motion.standard
-            }
+        layer.enabled: true
+        layer.smooth: true
+        layer.samples: 4
+        layer.effect: MultiEffect {
+            maskEnabled: true
+            maskSource: roundMask
+            autoPaddingEnabled: false
         }
 
-        Item {
-            id: glassBody
-            anchors.fill: parent
-            layer.enabled: true
-            layer.smooth: true
-            layer.samples: 4
-            layer.effect: MultiEffect {
-                maskEnabled: true
-                maskSource: roundMask
-                autoPaddingEnabled: false
+        // Fluid reflection: full backdrop, reverse-offset (1:1 with real background).
+        // autoPaddingEnabled must stay false — padding shifts the blurred image.
+        MultiEffect {
+            id: fluidBg
+            visible: root._blurReady
+            width: root.sourceItem ? root.sourceItem.width : 0
+            height: root.sourceItem ? root.sourceItem.height : 0
+            x: {
+                if (!root.sourceItem)
+                    return 0
+                void root.x
+                void root.y
+                return glassBody.mapFromItem(root.sourceItem, 0, 0).x
             }
-
-            MultiEffect {
-                id: fluidBg
-                visible: root._blurReady
-                width: root.sourceItem ? root.sourceItem.width : 0
-                height: root.sourceItem ? root.sourceItem.height : 0
-                x: {
-                    if (!root.sourceItem)
-                        return 0
-                    void root.x
-                    void root.y
-                    return root.mapFromItem(root.sourceItem, 0, 0).x
-                }
-                y: {
-                    if (!root.sourceItem)
-                        return 0
-                    void root.x
-                    void root.y
-                    return root.mapFromItem(root.sourceItem, 0, 0).y
-                }
-                source: root.sourceItem
-                blurEnabled: true
-                blur: Math.max(0.12, root.blurAmount)
-                blurMax: root.blurMax
-                blurMultiplier: 1.5
-                saturation: 1.25
-                brightness: 0.08
-                contrast: 0.04
+            y: {
+                if (!root.sourceItem)
+                    return 0
+                void root.x
+                void root.y
+                return glassBody.mapFromItem(root.sourceItem, 0, 0).y
             }
-
-            ShaderEffectSource {
-                id: lensSample
-                anchors.fill: parent
-                visible: false
-                live: true
-                hideSource: false
-                smooth: true
-                sourceItem: root.sourceItem
-                sourceRect: {
-                    if (!root.sourceItem)
-                        return Qt.rect(0, 0, root.width, root.height)
-                    void root.x
-                    void root.y
-                    void root.width
-                    void root.height
-                    void root.samplePadding
-                    const pad = root.samplePadding
-                    const p = root.mapToItem(root.sourceItem, -pad, -pad)
-                    return Qt.rect(p.x, p.y, root.width + pad * 2, root.height + pad * 2)
-                }
-            }
-
-            ShaderEffect {
-                id: lens
-                anchors.fill: parent
-                visible: root._blurReady && root.refraction > 0.02
-                opacity: 0.92
-                property variant source: lensSample
-                property real bend: root.refraction
-                property real frost: root.blurAmount * 0.012
-                property real chroma: root.chromaticAberration
-                property real radiusNorm: root._radiusNorm
-                property real aspect: root._aspect
-                property real padU: 0
-                property real padV: 0
-                vertexShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.vert.qsb"
-                fragmentShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.frag.qsb"
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                visible: !root._blurReady
-                color: root.tintColor
-                opacity: Math.max(0.25, root.tintOpacity)
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                visible: root._blurReady
-                color: root.tintColor
-                opacity: root.tintOpacity
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                opacity: root.edgeStrength * 0.35
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: Qt.rgba(0.75, 0.9, 1.0, 0.18) }
-                    GradientStop { position: 0.45; color: "transparent" }
-                    GradientStop { position: 1.0; color: Qt.rgba(1.0, 0.85, 0.7, 0.1) }
-                }
-            }
-
-            Rectangle {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.margins: 1
-                height: Math.max(2, root.height * 0.035)
-                opacity: root.edgeStrength * 0.85
-                gradient: Gradient {
-                    orientation: Gradient.Horizontal
-                    GradientStop { position: 0.0; color: "transparent" }
-                    GradientStop { position: 0.2; color: Qt.rgba(1, 1, 1, 0.55) }
-                    GradientStop { position: 0.8; color: Qt.rgba(1, 1, 1, 0.25) }
-                    GradientStop { position: 1.0; color: "transparent" }
-                }
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                radius: root.radius
-                color: "transparent"
-                border.width: 1.5
-                border.color: Qt.rgba(1, 1, 1, 0.45 * root.edgeStrength)
-            }
-
-            Item {
-                id: contentHost
-                anchors.fill: parent
-                anchors.margins: 20
-                z: 2
-            }
+            source: root.sourceItem
+            autoPaddingEnabled: false
+            blurEnabled: true
+            blur: Math.max(0.12, root.blurAmount)
+            blurMax: root.blurMax
+            blurMultiplier: 1.5
+            saturation: 1.25
+            brightness: 0.08
+            contrast: 0.04
         }
 
-        Item {
-            id: roundMask
-            width: root.width
-            height: root.height
+        // Padded capture at 1:1 pixel scale (not squeezed into the card).
+        ShaderEffectSource {
+            id: lensSample
+            width: root.width + root.samplePadding * 2
+            height: root.height + root.samplePadding * 2
+            x: -root.samplePadding
+            y: -root.samplePadding
             visible: false
-            layer.enabled: true
-            layer.smooth: true
-            Rectangle {
-                anchors.fill: parent
-                radius: root.radius
-                color: "#ffffff"
+            live: true
+            hideSource: false
+            smooth: true
+            sourceItem: root.sourceItem
+            sourceRect: {
+                if (!root.sourceItem)
+                    return Qt.rect(0, 0, width, height)
+                void root.x
+                void root.y
+                void root.width
+                void root.height
+                void root.samplePadding
+                const pad = root.samplePadding
+                const p = root.mapToItem(root.sourceItem, -pad, -pad)
+                return Qt.rect(p.x, p.y, root.width + pad * 2, root.height + pad * 2)
             }
+        }
+
+        // Edge lens — padU/padV keep the center registered 1:1 with the backdrop.
+        ShaderEffect {
+            id: lens
+            anchors.fill: parent
+            visible: root._blurReady && root.refraction > 0.02
+            opacity: 1.0
+            property variant source: lensSample
+            property real bend: root.refraction
+            property real frost: root.blurAmount * 0.01
+            property real chroma: root.chromaticAberration
+            property real radiusNorm: root._radiusNorm
+            property real aspect: root._aspect
+            property real padU: root.samplePadding / Math.max(1, lensSample.width)
+            property real padV: root.samplePadding / Math.max(1, lensSample.height)
+            vertexShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.vert.qsb"
+            fragmentShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.frag.qsb"
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            visible: !root._blurReady
+            color: root.tintColor
+            opacity: Math.max(0.25, root.tintOpacity)
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            visible: root._blurReady
+            color: root.tintColor
+            opacity: root.tintOpacity
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            opacity: root.edgeStrength * 0.35
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: Qt.rgba(0.75, 0.9, 1.0, 0.18) }
+                GradientStop { position: 0.45; color: "transparent" }
+                GradientStop { position: 1.0; color: Qt.rgba(1.0, 0.85, 0.7, 0.1) }
+            }
+        }
+
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: 1
+            height: Math.max(2, root.height * 0.035)
+            opacity: root.edgeStrength * 0.85
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop { position: 0.0; color: "transparent" }
+                GradientStop { position: 0.2; color: Qt.rgba(1, 1, 1, 0.55) }
+                GradientStop { position: 0.8; color: Qt.rgba(1, 1, 1, 0.25) }
+                GradientStop { position: 1.0; color: "transparent" }
+            }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            radius: root.radius
+            color: "transparent"
+            border.width: 1.5
+            border.color: Qt.rgba(1, 1, 1, 0.45 * root.edgeStrength)
+        }
+
+        Item {
+            id: contentHost
+            anchors.fill: parent
+            anchors.margins: 20
+            z: 2
+        }
+    }
+
+    Item {
+        id: roundMask
+        width: root.width
+        height: root.height
+        visible: false
+        layer.enabled: true
+        layer.smooth: true
+        Rectangle {
+            anchors.fill: parent
+            radius: root.radius
+            color: "#ffffff"
         }
     }
 
@@ -238,7 +230,6 @@ Item {
             const p = mapToItem(root.parent, mouse.x, mouse.y)
             root._grabOffX = p.x - root.x
             root._grabOffY = p.y - root.y
-            root._pressScale = 1.045
         }
         onPositionChanged: function(mouse) {
             if (!pressed)
@@ -248,7 +239,5 @@ Item {
             root.x = next.x
             root.y = next.y
         }
-        onReleased: root._pressScale = 1
-        onCanceled: root._pressScale = 1
     }
 }
