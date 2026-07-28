@@ -10,8 +10,8 @@ Rectangle {
     property real progress: -1
     property bool indeterminateProgress: false
     property bool showProgress: progress >= 0 || indeterminateProgress
-  property string _transientText: ""
-  property bool _showTransient: false
+    property string _transientText: ""
+    property bool _showTransient: false
 
     default property alias leftContent: leftExtra.data
     property alias centerContent: centerRow.data
@@ -25,6 +25,11 @@ Rectangle {
     height: implicitHeight
     color: Md3Theme.colorScheme.surfaceContainer
     clip: true
+
+    readonly property string displayText: _showTransient && _transientText.length
+            ? _transientText : text
+    readonly property real _leftZoneWidth: Math.max(120, width * 0.34)
+    readonly property real _centerZoneWidth: Math.min(280, Math.max(80, width * 0.28))
 
     function showMessage(message, timeout) {
         const ms = (timeout !== undefined && timeout > 0) ? timeout : 4000
@@ -40,9 +45,6 @@ Rectangle {
         _transientText = ""
     }
 
-    readonly property string displayText: _showTransient && _transientText.length
-            ? _transientText : text
-
     Md3Divider {
         anchors.top: parent.top
         width: parent.width
@@ -54,55 +56,63 @@ Rectangle {
         onTriggered: root.clearMessage()
     }
 
-    Row {
-        id: leftRow
+    // Left zone — fixed width fraction (no cross-refs to center/right layout).
+    Item {
+        id: leftZone
         anchors.left: parent.left
         anchors.leftMargin: 12
-        anchors.verticalCenter: parent.verticalCenter
-        spacing: 8
-        height: parent.height
-
-        Md3Icon {
-            visible: root.leadingIcon.length > 0
-            anchors.verticalCenter: parent.verticalCenter
-            icon: root.leadingIcon
-            size: 16
-            iconColor: Md3Theme.colorScheme.colorOnSurfaceVariant
-        }
-
-        Text {
-            id: msg
-            anchors.verticalCenter: parent.verticalCenter
-            width: Math.min(
-                       Math.max(80, root.width * 0.34),
-                       Math.max(80, centerSlot.x - leftRow.x - leftRow.width - 16))
-            text: root.displayText
-            elide: Text.ElideRight
-            color: root._showTransient ? Md3Theme.colorScheme.primary
-                                       : Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.family: Md3Theme.typography.fontFamily
-            font.pixelSize: Md3Theme.typography.labelSmall.size
-            MouseArea {
-                anchors.fill: parent
-                enabled: root.displayText.length > 0
-                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                onClicked: root.messageClicked()
-            }
-        }
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        width: root._leftZoneWidth
 
         Row {
-            id: leftExtra
+            id: leftRow
+            anchors.fill: parent
             spacing: 8
-            height: parent.height
+
+            Md3Icon {
+                visible: root.leadingIcon.length > 0
+                anchors.verticalCenter: parent.verticalCenter
+                icon: root.leadingIcon
+                size: 16
+                iconColor: Md3Theme.colorScheme.colorOnSurfaceVariant
+            }
+
+            Text {
+                id: msg
+                anchors.verticalCenter: parent.verticalCenter
+                width: Math.max(0, leftZone.width
+                                - (root.leadingIcon.length > 0 ? 24 : 0)
+                                - leftExtra.implicitWidth - leftRow.spacing * 2)
+                text: root.displayText
+                elide: Text.ElideRight
+                color: root._showTransient ? Md3Theme.colorScheme.primary
+                                           : Md3Theme.colorScheme.colorOnSurfaceVariant
+                font.family: Md3Theme.typography.fontFamily
+                font.pixelSize: Md3Theme.typography.labelSmall.size
+                MouseArea {
+                    anchors.fill: parent
+                    enabled: root.displayText.length > 0
+                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    onClicked: root.messageClicked()
+                }
+            }
+
+            Row {
+                id: leftExtra
+                spacing: 8
+                height: parent.height
+            }
         }
     }
 
+    // Center zone — fixed width, centered independently.
     Item {
         id: centerSlot
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-        width: Math.min(parent.width * 0.38, Math.max(80, centerRow.implicitWidth))
-        height: parent.height
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        width: root._centerZoneWidth
         clip: true
 
         Row {
@@ -110,10 +120,12 @@ Rectangle {
             anchors.centerIn: parent
             spacing: 8
             height: parent.height
+            width: Math.min(implicitWidth, centerSlot.width)
 
             Text {
                 visible: root.centerText.length > 0
                 anchors.verticalCenter: parent.verticalCenter
+                width: Math.min(implicitWidth, centerSlot.width)
                 text: root.centerText
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.family: Md3Theme.typography.fontFamily
@@ -123,6 +135,7 @@ Rectangle {
         }
     }
 
+    // Right zone — anchored to trailing edge only.
     Row {
         id: trail
         anchors.right: parent.right
