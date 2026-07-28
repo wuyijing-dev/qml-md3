@@ -1,8 +1,9 @@
 # Md3Badged
 
+Wraps content and positions an Md3Badge (top-end by default).
+
 - **Source:** `src/Md3/components/Md3Badged.qml`
 - **Extends:** `Item`
-- **Related:** `Md3Badge`
 
 ## Import
 
@@ -12,19 +13,27 @@ import Md3
 
 ## Properties
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `badgeText` | `string` | `""` | Text forwarded to the badge. |
-| `badgeDot` | `bool` | `false` | Show a dot badge with no label. |
-| `badgeMax` | `int` | `99` | Numeric cap used by the embedded badge. |
-| `badgeSizePreset` | `enum` | `Md3Badge.Medium` | Badge size preset. |
-| `badgeColor` | `color` | `error` | Badge fill color. |
-| `badgeLabelColor` | `color` | `onError` | Badge label color. |
-| `badgeVisible` | `bool` | `badgeDot || badgeText.length > 0` | Manual visibility override. |
-| `badgeOffsetX` | `real` | `2` | Horizontal offset from the top-end corner. |
-| `badgeOffsetY` | `real` | `-2` | Vertical offset from the top-end corner. |
-| `badge` | `Md3Badge` | readonly | Alias to the embedded badge instance. |
-| `content` | `list<Item>` | default | Child content hosted underneath the badge. |
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `badge` | `alias` | `badgeItem` | read/write | `Md3Badged` | Alias → `badgeItem` |
+| `badgeText` | `string` | `""` | read/write | `Md3Badged` | — |
+| `badgeDot` | `bool` | `false` | read/write | `Md3Badged` | — |
+| `badgeMax` | `int` | `99` | read/write | `Md3Badged` | — |
+| `badgeSizePreset` | `int` | `Md3Badge.Medium` | read/write | `Md3Badged` | — |
+| `badgeColor` | `color` | `Md3Theme.colorScheme.error` | read/write | `Md3Badged` | — |
+| `badgeLabelColor` | `color` | `Md3Theme.colorScheme.colorOnError` | read/write | `Md3Badged` | — |
+| `badgeVisible` | `bool` | `badgeDot \|\| badgeText.length > 0` | read/write | `Md3Badged` | — |
+| `badgeOffsetX` | `real` | `2` | read/write | `Md3Badged` | Offset from the top-end corner |
+| `badgeOffsetY` | `real` | `-2` | read/write | `Md3Badged` | — |
+| `content` | `alias` | `contentHost.data` | default read/write | `Md3Badged` | Default property → `contentHost.data` |
+
+## Signals
+
+_None._
+
+## Methods
+
+_None._
 
 ## Example
 
@@ -32,8 +41,10 @@ import Md3
 import Md3
 
 Md3Badged {
-    badgeText: "12"
-    badgeMax: 9
-    Md3IconButton { icon: "mail" }
+    badgeText: ""
+    badgeDot: false
+    badgeMax: 99
+    badgeSizePreset: Md3Badge.Medium
+    badgeColor: Md3Theme.colorScheme.error
 }
 ```

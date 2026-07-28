@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Extract QML public API from Md3 sources and write docs/api/<Type>.md."""
+"""Extract QML public API from Md3 sources and write docs/api/<Type>.md.
+
+Parses top-level QML members (properties, aliases, enums, signals, functions),
+file /// summaries, pragma Singleton, and Md3 inheritance chains.
+"""
 
 from __future__ import annotations
 
@@ -29,16 +33,20 @@ SKIP_NAMES = {
     "Md3ChartInteraction",  # documented via Md3Chart
 }
 
-EXTENDS_RE = re.compile(
-    r"^(?:///.*\n)*(?:import .+\n)*([A-Za-z0-9_.]+)\s*\{",
-    re.MULTILINE,
-)
 ENUM_RE = re.compile(r"^\s*enum\s+(\w+)\s*\{([^}]*)\}", re.MULTILINE)
+
+# property [default] [required] [readonly] Type name[: default]
+# property [default] alias name: path
 PROP_RE = re.compile(
-    r"^\s*(readonly\s+)?property\s+"
-    r"(?:(?P<type>[A-Za-z0-9_.<>,\s*]+?)\s+)"
+    r"^\s*(?:(?P<default_prop>default)\s+)?"
+    r"(?:(?P<required>required)\s+)?"
+    r"(?:(?P<readonly>readonly)\s+)?"
+    r"property\s+"
+    r"(?:alias\s+(?P<alias_name>[A-Za-z_][A-Za-z0-9_]*)\s*:\s*(?P<alias_target>[^\n]+)"
+    r"|"
+    r"(?P<type>[A-Za-z0-9_.<>,\s*]+?)\s+"
     r"(?P<name>[A-Za-z_][A-Za-z0-9_]*)"
-    r"(?:\s*:\s*(?P<default>[^\n]+))?",
+    r"(?:\s*:\s*(?P<default>[^\n]+))?)",
     re.MULTILINE,
 )
 SIGNAL_RE = re.compile(
@@ -52,10 +60,29 @@ FUNC_RE = re.compile(
     re.MULTILINE,
 )
 DOC_LINE_RE = re.compile(r"^\s*///\s?(.*)$")
+SINGLETON_RE = re.compile(r"^\s*pragma\s+Singleton\b", re.MULTILINE)
 
 
 def strip_block_comments(text: str) -> str:
     return re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
+
+
+def strip_line_comment(s: str) -> str:
+    """Remove trailing // comment outside quotes (best-effort)."""
+    out = []
+    in_s = in_d = False
+    i = 0
+    while i < len(s):
+        c = s[i]
+        if c == "'" and not in_d:
+            in_s = not in_s
+        elif c == '"' and not in_s:
+            in_d = not in_d
+        elif c == "/" and not in_s and not in_d and i + 1 < len(s) and s[i + 1] == "/":
+            break
+        out.append(c)
+        i += 1
+    return "".join(out).rstrip()
 
 
 def leading_doc(lines: list[str], idx: int) -> str:
@@ -91,50 +118,137 @@ def find_extends(text: str) -> str:
     return "Item"
 
 
+def truncate_default(default: str) -> str:
+    default = strip_line_comment(default).strip()
+    if not default:
+        return ""
+    if "{" in default:
+        return "{…}"
+    if len(default) > 80:
+        return default[:77] + "…"
+    return default
+
+
+def looks_incomplete_default(default: str) -> bool:
+    s = default.rstrip()
+    if not s:
+        return False
+    if s.endswith(("?", ":", "||", "&&", "+", "-", "*", "/", ",", "(")):
+        return True
+    # Unbalanced braces/parens/brackets
+    for a, b in (("(", ")"), ("[", "]"), ("{", "}")):
+        if s.count(a) > s.count(b):
+            return True
+    return False
+
+
+def expand_multiline_default(lines: list[str], start_idx: int, default: str) -> str:
+    """Join following indented continuation lines into a property default."""
+    if not default or not looks_incomplete_default(default):
+        return default
+    parts = [default]
+    j = start_idx + 1
+    while j < len(lines):
+        nxt = lines[j]
+        if not nxt.strip():
+            break
+        indent = len(nxt) - len(nxt.lstrip(" "))
+        if indent < 8:
+            break
+        piece = strip_line_comment(nxt).strip()
+        if not piece or piece.startswith("property ") or piece.startswith("function ") or piece.startswith("signal "):
+            break
+        parts.append(piece)
+        joined = " ".join(parts)
+        if not looks_incomplete_default(joined):
+            return truncate_default(joined)
+        j += 1
+    return truncate_default(" ".join(parts))
+
+
 def parse_qml(path: Path) -> dict:
     raw = path.read_text(encoding="utf-8")
     text = strip_block_comments(raw)
     lines = text.splitlines()
     name = path.stem
     extends = find_extends(text)
+    singleton = bool(SINGLETON_RE.search(text))
 
-    file_doc = []
-    for line in lines[:30]:
+    file_doc: list[str] = []
+    for line in lines[:40]:
         m = DOC_LINE_RE.match(line)
         if m:
             file_doc.append(m.group(1).strip())
-        elif line.strip() and not line.strip().startswith("import") and not line.strip().startswith("///"):
-            if not line.strip().startswith("//"):
-                break
+            continue
+        s = line.strip()
+        if not s or s.startswith("import ") or s.startswith("pragma ") or s.startswith("//"):
+            continue
+        if s.startswith("///"):
+            continue
+        break
 
     enums = []
     for m in ENUM_RE.finditer(text):
-        values = [v.strip() for v in m.group(2).split(",") if v.strip()]
-        enums.append({"name": m.group(1), "values": values})
+        raw_vals = m.group(2).split(",")
+        values = []
+        for v in raw_vals:
+            v = strip_line_comment(v).strip()
+            if not v:
+                continue
+            # enum Entry = 1 → Entry
+            values.append(v.split("=")[0].strip())
+        if values:
+            enums.append({"name": m.group(1), "values": values})
 
     props = []
     for i, line in enumerate(lines):
         m = PROP_RE.match(line)
         if not m:
             continue
-        # skip nested object properties deep inside (heuristic: indent > 4 and not top-level)
         indent = len(line) - len(line.lstrip(" "))
         if indent > 4:
             continue
-        ptype = (m.group("type") or "").strip()
+
+        if m.group("alias_name"):
+            pname = m.group("alias_name")
+            if pname.startswith("_"):
+                continue
+            target = truncate_default(m.group("alias_target") or "")
+            is_default = bool(m.group("default_prop"))
+            props.append(
+                {
+                    "readonly": False,
+                    "required": False,
+                    "default_prop": is_default,
+                    "type": "alias",
+                    "name": pname,
+                    "default": target,
+                    "doc": leading_doc(lines, i)
+                    or (("Default property → " if is_default else "Alias → ") + f"`{target}`"),
+                }
+            )
+            continue
+
         pname = m.group("name")
-        default = (m.group("default") or "").strip()
-        if default.endswith("{"):
-            default = "{…}"
-        elif len(default) > 80:
-            default = default[:77] + "…"
+        if not pname or pname.startswith("_"):
+            continue
+        ptype = (m.group("type") or "").strip()
+        raw_default = (m.group("default") or "").strip()
+        default = truncate_default(expand_multiline_default(lines, i, raw_default))
+        doc = leading_doc(lines, i)
+        if m.group("default_prop") and not doc:
+            doc = "Default property"
+        if m.group("required") and not doc:
+            doc = "Required"
         props.append(
             {
-                "readonly": bool(m.group(1)),
+                "readonly": bool(m.group("readonly")),
+                "required": bool(m.group("required")),
+                "default_prop": bool(m.group("default_prop")),
                 "type": ptype,
                 "name": pname,
                 "default": default,
-                "doc": leading_doc(lines, i),
+                "doc": doc,
             }
         )
 
@@ -146,9 +260,12 @@ def parse_qml(path: Path) -> dict:
         indent = len(line) - len(line.lstrip(" "))
         if indent > 4:
             continue
+        sname = m.group("name")
+        if sname.startswith("_"):
+            continue
         signals.append(
             {
-                "name": m.group("name"),
+                "name": sname,
                 "args": (m.group("args") or "").strip(),
                 "doc": leading_doc(lines, i),
             }
@@ -164,7 +281,7 @@ def parse_qml(path: Path) -> dict:
             continue
         fname = m.group("name")
         if fname.startswith("_"):
-            continue  # private
+            continue
         funcs.append(
             {
                 "name": fname,
@@ -173,7 +290,6 @@ def parse_qml(path: Path) -> dict:
             }
         )
 
-    # de-dupe props by name (keep first)
     seen = set()
     uniq_props = []
     for p in props:
@@ -186,6 +302,7 @@ def parse_qml(path: Path) -> dict:
         "name": name,
         "path": path.relative_to(ROOT).as_posix(),
         "extends": extends,
+        "singleton": singleton,
         "summary": " ".join(file_doc).strip(),
         "enums": enums,
         "props": uniq_props,
@@ -199,7 +316,7 @@ def md_escape(s: str) -> str:
 
 
 def collect_inherited_members(name: str, infos: dict[str, dict]) -> tuple[list, list, list, list]:
-    """Flatten parent props/signals/funcs/enums (nearest parent wins on name clash for listing)."""
+    """Flatten parent props/signals/funcs/enums (nearest parent wins on name clash)."""
     props, signals, funcs, enums = [], [], [], []
     seen_p, seen_s, seen_f, seen_e = set(), set(), set(), set()
     cur = infos[name]["extends"]
@@ -228,6 +345,19 @@ def collect_inherited_members(name: str, infos: dict[str, dict]) -> tuple[list, 
     return props, signals, funcs, enums
 
 
+def access_label(p: dict) -> str:
+    parts = []
+    if p.get("default_prop"):
+        parts.append("default")
+    if p.get("required"):
+        parts.append("required")
+    if p.get("readonly"):
+        parts.append("readonly")
+    else:
+        parts.append("read/write")
+    return " ".join(parts)
+
+
 def render(info: dict, infos: dict[str, dict], inheritance: dict[str, list[str]]) -> str:
     name = info["name"]
     lines = [f"# {name}", ""]
@@ -236,6 +366,10 @@ def render(info: dict, infos: dict[str, dict], inheritance: dict[str, list[str]]
     lines += [
         f"- **Source:** `{info['path']}`",
         f"- **Extends:** `{info['extends']}`",
+    ]
+    if info.get("singleton"):
+        lines.append("- **Singleton:** `true` (`pragma Singleton`)")
+    lines += [
         "",
         "## Import",
         "",
@@ -256,19 +390,15 @@ def render(info: dict, infos: dict[str, dict], inheritance: dict[str, list[str]]
 
     ih_props, ih_signals, ih_funcs, ih_enums = collect_inherited_members(name, infos)
 
-    # Enums: own + inherited
     all_enums = [{**e, "from": name} for e in info["enums"]] + ih_enums
     if all_enums:
         lines += ["## Enums", ""]
         for e in all_enums:
             src = e.get("from", name)
-            vals = ", ".join(f"`{name if src == name else src}.{v}`" for v in e["values"])
-            # Prefer documenting as Type.EnumValue using defining type
             vals = ", ".join(f"`{src}.{v}`" for v in e["values"])
             note = "" if src == name else f" _(from [{src}]({src}.md))_"
             lines += [f"### `{src}.{e['name']}`{note}", "", vals, ""]
 
-    # Properties table: own first, then inherited
     lines += ["## Properties", ""]
     own = info["props"]
     if not own and not ih_props:
@@ -279,13 +409,12 @@ def render(info: dict, infos: dict[str, dict], inheritance: dict[str, list[str]]
             "|------|------|---------|--------|------------|-------------|",
         ]
         for p in own:
-            access = "readonly" if p["readonly"] else "read/write"
             lines.append(
                 "| `{n}` | `{t}` | `{d}` | {a} | `{src}` | {doc} |".format(
                     n=p["name"],
                     t=md_escape(p["type"] or "?"),
                     d=md_escape(p["default"] or "—"),
-                    a=access,
+                    a=access_label(p),
                     src=name,
                     doc=md_escape(p["doc"] or "—"),
                 )
@@ -293,13 +422,12 @@ def render(info: dict, infos: dict[str, dict], inheritance: dict[str, list[str]]
         for p in ih_props:
             if any(o["name"] == p["name"] for o in own):
                 continue
-            access = "readonly" if p["readonly"] else "read/write"
             lines.append(
                 "| `{n}` | `{t}` | `{d}` | {a} | [`{f}`]({f}.md) | {doc} |".format(
                     n=p["name"],
                     t=md_escape(p["type"] or "?"),
                     d=md_escape(p["default"] or "—"),
-                    a=access,
+                    a=access_label(p),
                     f=p["from"],
                     doc=md_escape(p["doc"] or "—"),
                 )
@@ -350,20 +478,43 @@ def render(info: dict, infos: dict[str, dict], inheritance: dict[str, list[str]]
         "```qml",
         "import Md3",
         "",
-        f"{name} {{",
     ]
-    shown = 0
-    for p in own + ih_props:
-        if p["readonly"] or shown >= 5:
-            continue
-        if p["name"] in ("width", "height", "visible", "enabled", "opacity", "clip", "z", "x", "y", "anchors", "parent"):
-            continue
-        val = p["default"] if p["default"] and p["default"] not in ("{…}", "—") else "/* … */"
-        lines.append(f"    {p['name']}: {val}")
-        shown += 1
-    if shown == 0:
-        lines.append("    // see properties above")
-    lines += ["}", "```", ""]
+    if info.get("singleton"):
+        lines += [
+            f"// Singleton — use as `{name}.…`",
+            f"console.log({name})",
+        ]
+    else:
+        lines.append(f"{name} {{")
+        shown = 0
+        for p in own + ih_props:
+            if p.get("readonly") or p.get("required") or shown >= 5:
+                continue
+            if p["name"] in (
+                "width",
+                "height",
+                "visible",
+                "enabled",
+                "opacity",
+                "clip",
+                "z",
+                "x",
+                "y",
+                "anchors",
+                "parent",
+            ):
+                continue
+            if p["type"] == "alias" and p.get("default_prop"):
+                continue
+            val = p["default"] if p["default"] and p["default"] not in ("{…}", "—") else "/* … */"
+            if p["type"] == "alias":
+                continue
+            lines.append(f"    {p['name']}: {val}")
+            shown += 1
+        if shown == 0:
+            lines.append("    // see properties above")
+        lines.append("}")
+    lines += ["```", ""]
     return "\n".join(lines)
 
 
@@ -372,7 +523,6 @@ def build_inheritance(infos: dict[str, dict]) -> dict[str, list[str]]:
     for name, info in infos.items():
         chain = []
         cur = info["extends"]
-        # strip QtQuick. prefix variants
         seen = set()
         while cur and cur in infos and cur not in seen:
             seen.add(cur)
@@ -382,7 +532,7 @@ def build_inheritance(infos: dict[str, dict]) -> dict[str, list[str]]:
     return out
 
 
-def category_of(path: str) -> str:
+def category_of(path: str, name: str = "") -> str:
     if "/foundation/" in path:
         return "Foundation"
     if "/primitives/" in path:
@@ -392,16 +542,65 @@ def category_of(path: str) -> str:
     if "/layout/" in path:
         return "Layout"
     if "/components/" in path:
-        n = Path(path).stem
+        n = name or Path(path).stem
         if "Chart" in n or n == "Md3CodeBlock":
             return "Charts"
-        if any(x in n for x in ("Button", "Fab", "Chip", "Checkbox", "Radio", "Switch", "Slider", "Segmented", "Toggle", "Split")):
+        if any(
+            x in n
+            for x in (
+                "Button",
+                "Fab",
+                "Chip",
+                "Checkbox",
+                "Radio",
+                "Switch",
+                "Slider",
+                "Segmented",
+                "Toggle",
+                "SplitButton",
+            )
+        ):
             return "Actions & selection"
-        if any(x in n for x in ("TextField", "Search", "Form", "Date", "Time")):
+        if any(x in n for x in ("TextField", "Search", "Form", "Date", "Time", "CommandPalette")):
             return "Input"
-        if any(x in n for x in ("Nav", "Tab", "AppBar", "Drawer", "List", "Rail", "Document")):
+        if any(
+            x in n
+            for x in (
+                "Nav",
+                "Tab",
+                "AppBar",
+                "Drawer",
+                "List",
+                "Rail",
+                "Document",
+                "Breadcrumb",
+                "Scaffold",
+            )
+        ):
             return "Navigation"
-        if any(x in n for x in ("Card", "Dialog", "Sheet", "Snack", "Banner", "Tooltip", "Badge", "Divider", "Expansion", "Carousel", "Table", "Stepper", "Skeleton", "Menu", "Dropdown", "Option")):
+        if any(
+            x in n
+            for x in (
+                "Card",
+                "Dialog",
+                "Sheet",
+                "Snack",
+                "Banner",
+                "Tooltip",
+                "Badge",
+                "Divider",
+                "Expansion",
+                "Carousel",
+                "Table",
+                "Stepper",
+                "Skeleton",
+                "Menu",
+                "Dropdown",
+                "Option",
+                "Tour",
+                "SplitView",
+            )
+        ):
             return "Containment & feedback"
         if "Progress" in n or "Loading" in n:
             return "Progress"
@@ -419,7 +618,6 @@ def main() -> None:
                 continue
             if p.stem in SKIP_NAMES:
                 continue
-            # skip nested platforms folder qml already covered
             if "platforms" in p.parts:
                 continue
             files.append(p)
@@ -438,6 +636,8 @@ def main() -> None:
         "Md3Graphics.md",
         "Md3WindowHelper.md",
         "Md3ChartData.md",
+        "Md3AppSettings.md",
+        "Md3HotReload.md",
     }
     for old in OUT.glob("*.md"):
         if old.name in KEEP:
@@ -449,10 +649,9 @@ def main() -> None:
             render(info, infos, inheritance), encoding="utf-8"
         )
 
-    # Index
     by_cat: dict[str, list[str]] = {}
     for name, info in infos.items():
-        by_cat.setdefault(category_of(info["path"]), []).append(name)
+        by_cat.setdefault(category_of(info["path"], name), []).append(name)
 
     index = [
         "# Md3 API Reference",
@@ -469,6 +668,8 @@ def main() -> None:
         "- [Md3Graphics](Md3Graphics.md) — RHI / alpha buffer",
         "- [Md3WindowHelper](Md3WindowHelper.md) — 原生窗口能力",
         "- [Md3ChartData](Md3ChartData.md) — 大数据序列降采样",
+        "- [Md3AppSettings](Md3AppSettings.md) — QSettings facade",
+        "- [Md3HotReload](Md3HotReload.md) — QML hot reload watcher",
         "",
         f"**QML types:** {len(infos)}",
         "",
@@ -477,8 +678,9 @@ def main() -> None:
         index += [f"## {cat}", ""]
         for n in sorted(by_cat[cat]):
             summary = infos[n]["summary"]
+            singleton = " _(singleton)_" if infos[n].get("singleton") else ""
             extra = f" — {summary}" if summary else ""
-            index.append(f"- [{n}]({n}.md){extra}")
+            index.append(f"- [{n}]({n}.md){singleton}{extra}")
         index.append("")
 
     (OUT / "README.md").write_text("\n".join(index) + "\n", encoding="utf-8")

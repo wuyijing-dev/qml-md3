@@ -13,7 +13,7 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `model` | `var` | `[] // [{ icon, text?, colorRole?, enabled? }] — first item nearest primary` | read/write | `Md3FabMenu` | — |
+| `model` | `var` | `[]` | read/write | `Md3FabMenu` | — |
 | `open` | `bool` | `false` | read/write | `Md3FabMenu` | — |
 | `colorRole` | `int` | `Md3Fab.Primary` | read/write | `Md3FabMenu` | — |
 | `icon` | `string` | `"add"` | read/write | `Md3FabMenu` | — |
@@ -41,7 +41,7 @@ import Md3
 import Md3
 
 Md3FabMenu {
-    model: [] // [{ icon, text?, colorRole?, enabled? }] — first item nearest primary
+    model: []
     open: false
     colorRole: Md3Fab.Primary
     icon: "add"

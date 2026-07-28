@@ -15,7 +15,7 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `checked` | `bool` | `false` | read/write | `Md3Checkbox` | — |
 | `tristate` | `bool` | `false` | read/write | `Md3Checkbox` | — |
-| `checkState` | `var` | `checked ? Qt.Checked : Qt.Unchecked // Qt.PartiallyChecked` | read/write | `Md3Checkbox` | — |
+| `checkState` | `var` | `checked ? Qt.Checked : Qt.Unchecked` | read/write | `Md3Checkbox` | — |
 | `enabled` | `bool` | `true` | read/write | `Md3Checkbox` | — |
 | `accessibleName` | `string` | `"Checkbox"` | read/write | `Md3Checkbox` | — |
 | `isChecked` | `bool` | `checkState === Qt.Checked` | readonly | `Md3Checkbox` | — |
@@ -42,7 +42,7 @@ import Md3
 Md3Checkbox {
     checked: false
     tristate: false
-    checkState: checked ? Qt.Checked : Qt.Unchecked // Qt.PartiallyChecked
+    checkState: checked ? Qt.Checked : Qt.Unchecked
     accessibleName: "Checkbox"
 }
 ```

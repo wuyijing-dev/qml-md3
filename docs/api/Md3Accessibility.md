@@ -1,42 +1,45 @@
 # Md3Accessibility
 
-- **Source:** `src/Md3/foundation/Md3Accessibility.qml`
-- **Type:** QML singleton (`import Md3`)
+Library-wide accessibility preferences and helpers.
 
-Central accessibility preferences and screen-reader announcements.
+- **Source:** `src/Md3/foundation/Md3Accessibility.qml`
+- **Extends:** `QtObject`
+- **Singleton:** `true` (`pragma Singleton`)
+
+## Import
+
+```qml
+import Md3
+```
 
 ## Properties
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `reduceMotion` | `bool` | mirrors `Md3Theme.reduceMotion` | Collapse motion durations (~1ms) |
-| `highContrast` | `bool` | mirrors `Md3Theme.highContrast` | Stronger outlines via theme |
-| `showFocusRings` | `bool` | `true` | Always show keyboard focus rings |
-| `textScale` | `real` | mirrors `Md3Theme.textScale` | Global type scale |
-| `liveMessage` | `string` | readonly | Last `announce()` text |
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `reduceMotion` | `bool` | `Md3Theme.reduceMotion` | read/write | `Md3Accessibility` | Prefer reduced / near-zero motion (mirrors Md3Theme.reduceMotion). |
+| `highContrast` | `bool` | `Md3Theme.highContrast` | read/write | `Md3Accessibility` | Stronger outlines / surfaces (mirrors Md3Theme.highContrast). |
+| `showFocusRings` | `bool` | `true` | read/write | `Md3Accessibility` | Always show keyboard focus rings when true. |
+| `textScale` | `real` | `Md3Theme.textScale` | read/write | `Md3Accessibility` | Extra text scale convenience (delegates to Md3Theme.textScale). |
+| `liveMessage` | `string` | `_announceText` | readonly | `Md3Accessibility` | Screen-reader live message (read via Accessible on the gallery/window live region). |
+| `liveSerial` | `int` | `_announceSerial` | readonly | `Md3Accessibility` | — |
+
+## Signals
+
+_None._
 
 ## Methods
 
-| Method | Description |
-|--------|-------------|
-| `announce(message)` | Push a live-region string (window hosts an invisible Accessible label) |
-| `syncFromTheme()` / `applyToTheme()` | Bidirectional sync helpers |
-
-## Theme integration
-
-- `Md3Theme.reduceMotion` → `Md3Motion` duration tokens become ~1ms
-- `Md3Theme.highContrast` → boosts `outline` / `outlineVariant` after `applySeed`
-- `Md3ApplicationWindow.persistSession` stores `a11y/*` keys
+| Method | Defined in | Description |
+|--------|------------|-------------|
+| `announce(message)` | `Md3Accessibility` | — |
+| `syncFromTheme()` | `Md3Accessibility` | — |
+| `applyToTheme()` | `Md3Accessibility` | — |
 
 ## Example
 
 ```qml
-Md3Switch {
-    text-related: true
-    checked: Md3Theme.reduceMotion
-    onToggled: function (on) {
-        Md3Theme.reduceMotion = on
-        Md3Accessibility.announce(on ? qsTr("减弱动效已开") : qsTr("减弱动效已关"))
-    }
-}
+import Md3
+
+// Singleton — use as `Md3Accessibility.…`
+console.log(Md3Accessibility)
 ```

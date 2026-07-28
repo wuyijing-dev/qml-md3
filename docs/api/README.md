@@ -12,8 +12,10 @@
 - [Md3Graphics](Md3Graphics.md) — RHI / alpha buffer
 - [Md3WindowHelper](Md3WindowHelper.md) — 原生窗口能力
 - [Md3ChartData](Md3ChartData.md) — 大数据序列降采样
+- [Md3AppSettings](Md3AppSettings.md) — QSettings facade
+- [Md3HotReload](Md3HotReload.md) — QML hot reload watcher
 
-**QML types:** 87
+**QML types:** 98
 
 ## Actions & selection
 
@@ -48,11 +50,12 @@
 
 ## Components
 
-- [Md3Scaffold](Md3Scaffold.md)
+- [Md3DeferredSection](Md3DeferredSection.md) — Within-page progressive load: placeholder first, then create `sourceComponent`. Honors Md3Theme.progressiveContent (default on). Set forceImmediate to always load now.
 
 ## Containment & feedback
 
-- [Md3Badge](Md3Badge.md)
+- [Md3Badge](Md3Badge.md) — Material Badge — numeric / dot / max-count, attach to any item via anchors.
+- [Md3Badged](Md3Badged.md) — Wraps content and positions an Md3Badge (top-end by default).
 - [Md3Banner](Md3Banner.md)
 - [Md3BottomSheet](Md3BottomSheet.md)
 - [Md3Card](Md3Card.md)
@@ -67,25 +70,32 @@
 - [Md3MenuDivider](Md3MenuDivider.md)
 - [Md3MenuItem](Md3MenuItem.md)
 - [Md3Option](Md3Option.md)
+- [Md3SideSheet](Md3SideSheet.md) — Modal/standard side sheet — slides from start (left) or end (right).
 - [Md3Skeleton](Md3Skeleton.md) — MD3 skeleton bone — low-cost opacity pulse (avoids continuous sheen transforms).
-- [Md3SkeletonPane](Md3SkeletonPane.md) — Full-pane skeleton used by Md3PageHost while a destination loads.
+- [Md3SkeletonPane](Md3SkeletonPane.md) — Full-pane skeleton used by Md3PageHost while a destination loads. Prefer `bones` (per-page outline); otherwise fall back to `layout` presets.
 - [Md3Snackbar](Md3Snackbar.md)
+- [Md3SnackbarHost](Md3SnackbarHost.md) — Window-level snackbar queue: stacks up to maxVisible, then queues the rest.
+- [Md3SplitView](Md3SplitView.md) — Horizontal (or vertical) draggable split panes for list/detail layouts.
 - [Md3Stepper](Md3Stepper.md)
 - [Md3Tooltip](Md3Tooltip.md)
+- [Md3Tour](Md3Tour.md) — Guided tour overlay: rounded spotlight cutout + animated step transitions.
 
 ## Foundation
 
+- [Md3Accessibility](Md3Accessibility.md) _(singleton)_ — Library-wide accessibility preferences and helpers.
 - [Md3ColorScheme](Md3ColorScheme.md)
 - [Md3DynamicScheme](Md3DynamicScheme.md)
 - [Md3Elevation](Md3Elevation.md)
-- [Md3Motion](Md3Motion.md)
+- [Md3IconFonts](Md3IconFonts.md) _(singleton)_ — Shared Material Icons font faces — one FontLoader pair for the whole app (not per Md3Icon).
+- [Md3Motion](Md3Motion.md) _(singleton)_
 - [Md3Shape](Md3Shape.md)
 - [Md3StateLayer](Md3StateLayer.md)
-- [Md3Theme](Md3Theme.md)
+- [Md3Theme](Md3Theme.md) _(singleton)_
 - [Md3Typography](Md3Typography.md)
 
 ## Input
 
+- [Md3CommandPalette](Md3CommandPalette.md) — Spotlight-style command palette (Ctrl+K). model: [{ title, subtitle?, icon?, id? }]
 - [Md3DatePicker](Md3DatePicker.md)
 - [Md3Form](Md3Form.md)
 - [Md3SearchBar](Md3SearchBar.md)
@@ -100,12 +110,14 @@
 ## Navigation
 
 - [Md3BottomAppBar](Md3BottomAppBar.md)
+- [Md3Breadcrumb](Md3Breadcrumb.md) — Horizontal breadcrumb trail. model: ["Home","Folder"] or [{ title, icon? }, ...]
 - [Md3DataTable](Md3DataTable.md)
 - [Md3DocumentTabBar](Md3DocumentTabBar.md) — Win11 Explorer / browser document tabs — reorder, close, tear-off, add pop-in.
 - [Md3ListTile](Md3ListTile.md)
 - [Md3NavigationBar](Md3NavigationBar.md)
 - [Md3NavigationDrawer](Md3NavigationDrawer.md)
 - [Md3NavigationRail](Md3NavigationRail.md)
+- [Md3Scaffold](Md3Scaffold.md)
 - [Md3TabBar](Md3TabBar.md)
 - [Md3TopAppBar](Md3TopAppBar.md)
 
@@ -121,12 +133,10 @@
 
 ## Progress
 
-- [Md3CircularProgressIndicator](Md3CircularProgressIndicator.md) — Circular progress — Standard: PathAngleArc; wavy: PathPolyline + RoundJoin (GPU, no seams). Thin track + thicker active arc when `contained` (default).
-- [Md3LinearProgressIndicator](Md3LinearProgressIndicator.md) — Linear progress — Standard uses Rectangles; wavy uses QtQuick.Shapes (GPU stroke, RoundJoin, no seams). Thin track + thicker indicator when `contained` (default).
-- [Md3LoadingIndicator](Md3LoadingIndicator.md) — Material 3 Loading indicator — Shape PathAngleArc (GPU), optional caption.
-- [Md3MorphLoadingIndicator](Md3MorphLoadingIndicator.md) — Expressive 8-lobe clover/star morph loader (bare or contained).
-- [Md3Badge](Md3Badge.md) — Numeric / dot badge.
-- [Md3Badged](Md3Badged.md) — Wraps content and pins an `Md3Badge` at the top-end corner.
+- [Md3CircularProgressIndicator](Md3CircularProgressIndicator.md) — Circular progress — Standard animates PathAngleArc in-place; wavy uses sparse polyline.
+- [Md3LinearProgressIndicator](Md3LinearProgressIndicator.md) — Linear progress — Standard uses Rectangles; wavy uses sparse polylines + throttled rebuild.
+- [Md3LoadingIndicator](Md3LoadingIndicator.md) — Material 3 Loading indicator — PathAngleArc updated in-place (no per-frame Shape rebuild).
+- [Md3MorphLoadingIndicator](Md3MorphLoadingIndicator.md) — Material 3 Expressive morph loading indicator — rounded 8-lobe clover / asterisk.
 
 ## Window
 
@@ -136,5 +146,5 @@
 - [Md3PageHost](Md3PageHost.md)
 - [Md3TitleBar](Md3TitleBar.md)
 - [Md3TitleBarButton](Md3TitleBarButton.md)
-- [Md3WindowCapabilities](Md3WindowCapabilities.md)
+- [Md3WindowCapabilities](Md3WindowCapabilities.md) _(singleton)_
 

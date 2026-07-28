@@ -1,6 +1,6 @@
 # Md3CircularProgressIndicator
 
-Circular progress — Standard: PathAngleArc; wavy: PathPolyline + RoundJoin (GPU, no seams).
+Circular progress — Standard animates PathAngleArc in-place; wavy uses sparse polyline.
 
 - **Source:** `src/Md3/components/Md3CircularProgressIndicator.qml`
 - **Extends:** `Item`
@@ -33,13 +33,12 @@ import Md3
 | `sweep` | `real` | `Math.PI * 0.55` | read/write | `Md3CircularProgressIndicator` | — |
 | `waveSpeed` | `real` | `Math.PI * 2 / 1.8` | read/write | `Md3CircularProgressIndicator` | — |
 | `spinSpeed` | `real` | `Math.PI * 2 / (Md3Motion.progressSpin / 1000)` | read/write | `Md3CircularProgressIndicator` | — |
-| `contained` | `bool` | `true` | read/write | `Md3CircularProgressIndicator` | Thin track + thicker active arc. |
-| `trackLineWidth` | `real` | `{…}` | readonly | `Md3CircularProgressIndicator` | Drawn track stroke when `contained`. |
-| `indicatorLineWidth` | `real` | `{…}` | readonly | `Md3CircularProgressIndicator` | Drawn active arc stroke width. |
+| `contained` | `bool` | `true` | read/write | `Md3CircularProgressIndicator` | Thin track + thicker active arc (M3 expressive). |
+| `trackLineWidth` | `real` | `contained` | readonly | `Md3CircularProgressIndicator` | — |
+| `indicatorLineWidth` | `real` | `strokeWidth` | readonly | `Md3CircularProgressIndicator` | — |
 | `sweepMin` | `real` | `Math.PI * 0.28` | readonly | `Md3CircularProgressIndicator` | — |
 | `sweepMax` | `real` | `Math.PI * 1.15` | readonly | `Md3CircularProgressIndicator` | — |
 | `isWavy` | `bool` | `style !== Md3CircularProgressIndicator.Standard` | readonly | `Md3CircularProgressIndicator` | — |
-| `_treeShown` | `bool` | `true` | read/write | `Md3CircularProgressIndicator` | — |
 | `sceneActive` | `bool` | `enabled && _treeShown` | readonly | `Md3CircularProgressIndicator` | — |
 | `radius` | `real` | `Math.min(width, height) / 2 - indicatorLineWidth - (isWavy ? amplitude : 0)` | readonly | `Md3CircularProgressIndicator` | — |
 | `sweepDir` | `real` | `1` | read/write | `Md3CircularProgressIndicator` | — |
@@ -53,8 +52,8 @@ _None._
 | Method | Defined in | Description |
 |--------|------------|-------------|
 | `radToDeg(r)` | `Md3CircularProgressIndicator` | — |
-| `rebuildWavy()` | `Md3CircularProgressIndicator` | Rebuilds the expressive polyline ring. |
-| `syncStandardArc()` | `Md3CircularProgressIndicator` | Updates the standard `PathAngleArc` in place. |
+| `rebuildWavy()` | `Md3CircularProgressIndicator` | — |
+| `syncStandardArc()` | `Md3CircularProgressIndicator` | — |
 
 ## Example
 

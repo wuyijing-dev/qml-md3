@@ -13,7 +13,7 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `model` | `var` | `[] // [{ text, icon?, enabled? }]` | read/write | `Md3SegmentedButton` | — |
+| `model` | `var` | `[]` | read/write | `Md3SegmentedButton` | — |
 | `currentIndex` | `int` | `0` | read/write | `Md3SegmentedButton` | — |
 | `multiSelect` | `bool` | `false` | read/write | `Md3SegmentedButton` | — |
 | `selectedIndices` | `var` | `[]` | read/write | `Md3SegmentedButton` | — |
@@ -40,7 +40,7 @@ import Md3
 import Md3
 
 Md3SegmentedButton {
-    model: [] // [{ text, icon?, enabled? }]
+    model: []
     currentIndex: 0
     multiSelect: false
     selectedIndices: []

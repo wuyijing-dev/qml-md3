@@ -21,8 +21,8 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `variant` | `int` | `Md3Card.Elevated` | read/write | `Md3Card` | — |
 | `clickable` | `bool` | `false` | read/write | `Md3Card` | — |
-| `enabled` | `bool` | `true` | read/write | `Md3Card` | — |
 | `padding` | `real` | `16` | read/write | `Md3Card` | — |
+| `content` | `alias` | `contentHost.data` | default read/write | `Md3Card` | Default property → `contentHost.data` |
 | `elev` | `real` | `variant === Md3Card.Elevated ? 1 : 0` | readonly | `Md3Card` | — |
 | `containerColor` | `color` | `{…}` | readonly | `Md3Card` | — |
 

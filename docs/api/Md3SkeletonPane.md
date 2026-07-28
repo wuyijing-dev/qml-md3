@@ -1,14 +1,41 @@
 # Md3SkeletonPane
 
+Full-pane skeleton used by Md3PageHost while a destination loads. Prefer `bones` (per-page outline); otherwise fall back to `layout` presets.
+
 - **Source:** `src/Md3/components/Md3SkeletonPane.qml`
-- **Related:** `Md3Skeleton`, `Md3PageHost`
+- **Extends:** `Item`
+
+## Import
+
+```qml
+import Md3
+```
 
 ## Properties
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `active` | `bool` | `true` | Pulse animation |
-| `layout` | `string` | `"page"` | Fallback: `page` / `list` / `cards` |
-| `bones` | `var` | `[]` | Preferred outline: `[{ variant, width, height }]` |
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `active` | `bool` | `true` | read/write | `Md3SkeletonPane` | — |
+| `layout` | `string` | `"page"` | read/write | `Md3SkeletonPane` | "page" \| "list" \| "cards" |
+| `bones` | `var` | `[]` | read/write | `Md3SkeletonPane` | Optional outline: [{ variant, width, height, radius? }, ...] variant: "text"\|"circular"\|"rounded"\|"rectangular" or Md3Skeleton enum int |
+| `useBones` | `bool` | `bones && bones.length > 0` | readonly | `Md3SkeletonPane` | — |
 
-`width` may be a fraction `0–1` of the pane width. Destination entries may set `skeletonBones` or `skeletonLayout`; PageHost picks them while `awaitingTarget`.
+## Signals
+
+_None._
+
+## Methods
+
+_None._
+
+## Example
+
+```qml
+import Md3
+
+Md3SkeletonPane {
+    active: true
+    layout: "page"
+    bones: []
+}
+```

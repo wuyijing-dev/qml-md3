@@ -19,7 +19,7 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `model` | `var` | `[] // [{ text, icon?, enabled?, selected? }]` | read/write | `Md3ChipGroup` | — |
+| `model` | `var` | `[]` | read/write | `Md3ChipGroup` | — |
 | `selectionMode` | `int` | `Md3ChipGroup.Single` | read/write | `Md3ChipGroup` | — |
 | `currentIndex` | `int` | `-1` | read/write | `Md3ChipGroup` | — |
 | `selectedIndices` | `var` | `[]` | read/write | `Md3ChipGroup` | — |
@@ -50,7 +50,7 @@ import Md3
 import Md3
 
 Md3ChipGroup {
-    model: [] // [{ text, icon?, enabled?, selected? }]
+    model: []
     selectionMode: Md3ChipGroup.Single
     currentIndex: -1
     selectedIndices: []

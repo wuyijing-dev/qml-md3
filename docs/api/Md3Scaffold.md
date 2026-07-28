@@ -13,10 +13,11 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `appBar` | `alias` | `appBarSlot.data` | read/write | `Md3Scaffold` | — |
-| `navigationBar` | `alias` | `navBarSlot.data` | read/write | `Md3Scaffold` | — |
-| `fab` | `alias` | `fabSlot.data` | read/write | `Md3Scaffold` | — |
-| `drawer` | `alias` | `drawerSlot.data` | read/write | `Md3Scaffold` | — |
+| `appBar` | `alias` | `appBarSlot.data` | read/write | `Md3Scaffold` | Alias → `appBarSlot.data` |
+| `navigationBar` | `alias` | `navBarSlot.data` | read/write | `Md3Scaffold` | Alias → `navBarSlot.data` |
+| `fab` | `alias` | `fabSlot.data` | read/write | `Md3Scaffold` | Alias → `fabSlot.data` |
+| `drawer` | `alias` | `drawerSlot.data` | read/write | `Md3Scaffold` | Alias → `drawerSlot.data` |
+| `content` | `alias` | `body.data` | default read/write | `Md3Scaffold` | Default property → `body.data` |
 
 ## Signals
 
@@ -32,9 +33,6 @@ _None._
 import Md3
 
 Md3Scaffold {
-    appBar: appBarSlot.data
-    navigationBar: navBarSlot.data
-    fab: fabSlot.data
-    drawer: drawerSlot.data
+    // see properties above
 }
 ```

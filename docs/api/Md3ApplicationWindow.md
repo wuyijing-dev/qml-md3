@@ -18,9 +18,10 @@ import Md3
 | `roundedCorners` | `bool` | `Md3WindowCapabilities.roundedCorners` | read/write | `Md3ApplicationWindow` | — |
 | `cornerRadius` | `real` | `Md3WindowCapabilities.windowCornerRadius` | read/write | `Md3ApplicationWindow` | — |
 | `showWindowBorder` | `bool` | `true` | read/write | `Md3ApplicationWindow` | — |
-| `titleBarItem` | `alias` | `titleBarLoader.item` | read/write | `Md3ApplicationWindow` | — |
-| `overlay` | `alias` | `overlayHost.data` | read/write | `Md3ApplicationWindow` | — |
-| `overlayItem` | `alias` | `overlayHost` | read/write | `Md3ApplicationWindow` | — |
+| `titleBarItem` | `alias` | `titleBarLoader.item` | read/write | `Md3ApplicationWindow` | Alias → `titleBarLoader.item` |
+| `overlay` | `alias` | `overlayHost.data` | read/write | `Md3ApplicationWindow` | Alias → `overlayHost.data` |
+| `overlayItem` | `alias` | `overlayHost` | read/write | `Md3ApplicationWindow` | Alias → `overlayHost` |
+| `snackbarHostItem` | `alias` | `snackbarHost` | read/write | `Md3ApplicationWindow` | Alias → `snackbarHost` |
 | `titleBar` | `Component` | `null` | read/write | `Md3ApplicationWindow` | — |
 | `windowIcon` | `url` | `""` | read/write | `Md3ApplicationWindow` | App icon for title bar + taskbar / Alt-Tab (qrc or file URL) |
 | `syncImmersiveDarkMode` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Sync DWM immersive dark mode with Md3Theme.dark (Windows) |
@@ -32,13 +33,13 @@ import Md3
 | `backdropTitleTint` | `real` | `0.06` | read/write | `Md3ApplicationWindow` | — |
 | `showPinButton` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Title-bar pin (always-on-top). On by default. |
 | `pinned` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
-| `showAboutButton` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Title-bar About (info) → modeless dialog |
+| `showAboutButton` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Title-bar About (info) button → modeless About dialog |
 | `aboutAppName` | `string` | `""` | read/write | `Md3ApplicationWindow` | — |
 | `aboutVersion` | `string` | `""` | read/write | `Md3ApplicationWindow` | — |
 | `aboutOrganization` | `string` | `""` | read/write | `Md3ApplicationWindow` | — |
 | `aboutText` | `string` | `""` | read/write | `Md3ApplicationWindow` | — |
 | `aboutIcon` | `url` | `""` | read/write | `Md3ApplicationWindow` | — |
-| `aboutContent` | `Component` | `null` | read/write | `Md3ApplicationWindow` | Custom About body |
+| `aboutContent` | `Component` | `null` | read/write | `Md3ApplicationWindow` | — |
 | `themeRevealEnabled` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Circular reveal when toggling light/dark (Material-style wipe from click) |
 | `themeRevealBusy` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
 | `themeRevealDuration` | `int` | `Md3Motion.long2` | read/write | `Md3ApplicationWindow` | — |
@@ -48,23 +49,35 @@ import Md3
 | `navigationRail` | `bool` | `true` | read/write | `Md3ApplicationWindow` | — |
 | `railExpanded` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
 | `railHeader` | `string` | `""` | read/write | `Md3ApplicationWindow` | — |
-| `pageCacheMode` | `string` | `"arc"` | read/write | `Md3ApplicationWindow` | "none" \| "one" \| "lru" \| "all" \| "adaptive" \| "arc" Best combo default: arc + small L1 + L2 + predict(L2) + leave snapshot |
-| `pageCacheLimit` | `int` | `2` | read/write | `Md3ApplicationWindow` | — |
-| `pageIdleTrimMs` | `int` | `12000` | read/write | `Md3ApplicationWindow` | Idle time before adaptive/arc mode drops to a single resident page |
+| `pageCacheMode` | `string` | `"arc"` | read/write | `Md3ApplicationWindow` | "none" \| "one" \| "lru" \| "all" \| "adaptive" \| "arc" Library default: arc + L1=1 + tiny L2 (snappy, low RSS). Override only if needed. |
+| `pageCacheLimit` | `int` | `1` | read/write | `Md3ApplicationWindow` | — |
+| `pageIdleTrimMs` | `int` | `4000` | read/write | `Md3ApplicationWindow` | — |
 | `pagePadding` | `real` | `20` | read/write | `Md3ApplicationWindow` | — |
-| `pagePrefetch` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Prefetch ±1 neighbors into L1 (Item) — off in best combo (use L2 instead) |
-| `pagePredictPrefetch` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Markov + rail-hover → L2 Component only |
-| `pageL2Cache` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Keep compiled QQmlComponent after Item teardown |
-| `pageL2CacheLimit` | `int` | `24` | read/write | `Md3ApplicationWindow` | — |
-| `pageL2Warm` | `bool` | `true` | read/write | `Md3ApplicationWindow` | After startup, compile all destination Components in the background |
-| `pageLeaveSnapshot` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Freeze leaving page while cold target loads |
-| `pageAsync` | `bool` | `true` | read/write | `Md3ApplicationWindow` | — |
-| `pageWarmStart` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Background-warm all destinations as Items (off — high memory) |
-| `pageSourceBase` | `url` | `""` | read/write | `Md3ApplicationWindow` | Resolve relative destination sources against this URL (Gallery: Qt.resolvedUrl(".")) |
-| `pageTransition` | `string` | `"fade"` | read/write | `Md3ApplicationWindow` | "none" \| "fade" \| "slide" \| "slideUp" \| "fadeThrough" \| "scale" \| "launch" |
-| `pageTransitionDuration` | `int` | `Md3Motion.spatialDuration` | read/write | `Md3ApplicationWindow` | — |
-| `pageHost` | `alias` | `windowBody.pageHost` | read/write | `Md3ApplicationWindow` | Exposes the route host for advanced `navigateTo(index, opts)` usage. |
-| `pageSkeleton` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Show Md3SkeletonPane while a destination loads |
+| `pagePrefetch` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
+| `pagePredictPrefetch` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
+| `pageL2Cache` | `bool` | `true` | read/write | `Md3ApplicationWindow` | — |
+| `pageL2CacheLimit` | `int` | `1` | read/write | `Md3ApplicationWindow` | — |
+| `pageL2Warm` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Off: never precompile every destination Component |
+| `pageLeaveSnapshot` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
+| `pageAsync` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
+| `pageWarmStart` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
+| `pageSourceBase` | `url` | `""` | read/write | `Md3ApplicationWindow` | — |
+| `pageTransition` | `string` | `"fade"` | read/write | `Md3ApplicationWindow` | — |
+| `pageTransitionDuration` | `int` | `100` | read/write | `Md3ApplicationWindow` | — |
+| `pageSkeleton` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
+| `pageHost` | `alias` | `windowBody.pageHost` | read/write | `Md3ApplicationWindow` | Alias → `windowBody.pageHost` |
+| `shellRail` | `alias` | `windowBody.rail` | read/write | `Md3ApplicationWindow` | Alias → `windowBody.rail` |
+| `progressiveContent` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Within-page progressive sections (Md3DeferredSection). Default on. |
+| `persistSession` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Persist geometry / theme / shell via Md3AppSettings (QSettings). |
+| `settingsOrganization` | `string` | `"QML_MD3"` | read/write | `Md3ApplicationWindow` | — |
+| `settingsApplication` | `string` | `"Md3"` | read/write | `Md3ApplicationWindow` | — |
+| `hotReload` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Dev hot-reload of QML sources (file watcher + clearComponentCache). |
+| `hotReloadAgent` | `alias` | `hotReloadInst` | read/write | `Md3ApplicationWindow` | Alias → `hotReloadInst` |
+| `showPerformanceButton` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Built-in performance overlay (title-bar speed button + floating panel). |
+| `showPerformanceOverlay` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
+| `performanceDetached` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Optional: pop the panel into its own non-modal window. |
+| `performanceMonitor` | `alias` | `perfMonitor` | read/write | `Md3ApplicationWindow` | Alias → `perfMonitor` |
+| `performancePanel` | `alias` | `perfPanel` | read/write | `Md3ApplicationWindow` | Alias → `perfPanel` |
 | `documentTabsEnabled` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Show Win11-style tab strip under the title bar. |
 | `documentTabsManaged` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Auto-handle activate / close / add / reorder + sync with currentIndex. |
 | `documentTabsCloseWindowWhenEmpty` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
@@ -73,13 +86,16 @@ import Md3
 | `documentTabsClosable` | `bool` | `true` | read/write | `Md3ApplicationWindow` | — |
 | `documentTabsTearOff` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Tear-off to a separate window is disabled (no Md3TabWindow). |
 | `documentTabsShowAdd` | `bool` | `true` | read/write | `Md3ApplicationWindow` | — |
-| `documentTabBar` | `alias` | `docTabBar` | read/write | `Md3ApplicationWindow` | — |
-| `_docTabSyncing` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
+| `documentTabBar` | `alias` | `docTabBar` | read/write | `Md3ApplicationWindow` | Alias → `docTabBar` |
 | `usesDestinations` | `bool` | `destinations && destinations.length > 0` | readonly | `Md3ApplicationWindow` | — |
+| `canGoBack` | `bool` | `usesDestinations && windowBody.canGoBack` | readonly | `Md3ApplicationWindow` | — |
+| `navDepth` | `int` | `usesDestinations ? windowBody.navDepth : 0` | readonly | `Md3ApplicationWindow` | — |
+| `routeParams` | `var` | `{…}` | readonly | `Md3ApplicationWindow` | — |
+| `content` | `alias` | `customContent.data` | default read/write | `Md3ApplicationWindow` | Default property → `customContent.data` |
 | `isMaximizedLike` | `bool` | `visibility === Window.Maximized` | readonly | `Md3ApplicationWindow` | — |
 | `effectiveRadius` | `real` | `{…}` | readonly | `Md3ApplicationWindow` | — |
 | `useTransparentFrame` | `bool` | `customChrome && Md3WindowCapabilities.customChrome` | readonly | `Md3ApplicationWindow` | — |
-| `windowNative` | `alias` | `windowHelper` | readonly | `Md3ApplicationWindow` | Access native helper (signals: thumbBarButtonClicked, trayActivated, dpiChanged). |
+| `windowNative` | `alias` | `windowHelper` | read/write | `Md3ApplicationWindow` | Access native helper (signals: thumbBarButtonClicked, trayActivated, dpiChanged). |
 | `chromeTop` | `real` | `{…}` | readonly | `Md3ApplicationWindow` | — |
 | `edge` | `real` | `6` | readonly | `Md3ApplicationWindow` | — |
 | `canResize` | `bool` | `customChrome && Md3WindowCapabilities.systemResize` | readonly | `Md3ApplicationWindow` | — |
@@ -104,7 +120,10 @@ import Md3
 
 | Method | Defined in | Description |
 |--------|------------|-------------|
-| `navigateTo(index, opts)` | `Md3ApplicationWindow` | Route-level page navigation. `opts.transitionMode: "launch"` enables tap-origin whole-page animation (Android `LaunchAnimator` style: linear time, emphasized Y/scale, dedicated X path, early leave fade). Tune via `pageHost.launchIntensity` and `pageHost.launchAxisProportional`. |
+| `navigateTo(index, opts)` | `Md3ApplicationWindow` | — |
+| `pushRoute(index, params, opts)` | `Md3ApplicationWindow` | — |
+| `goBack(opts)` | `Md3ApplicationWindow` | — |
+| `replaceRoute(index, params, opts)` | `Md3ApplicationWindow` | — |
 | `documentTabMeta(pageIndex)` | `Md3ApplicationWindow` | — |
 | `openTab(pageIndex, asNew)` | `Md3ApplicationWindow` | — |
 | `addTab(pageIndex)` | `Md3ApplicationWindow` | — |
@@ -114,7 +133,11 @@ import Md3
 | `tearOffTab(index, globalX, globalY)` | `Md3ApplicationWindow` | Tear-off windows removed — signal only for apps that want custom handling. |
 | `toggleThemeAt(x, y)` | `Md3ApplicationWindow` | Toggle theme with circular reveal from a point in chrome / contentItem coords. |
 | `toggleThemeFrom(item)` | `Md3ApplicationWindow` | Toggle theme revealing from the center of `item` (mapped into the window chrome). |
-| `openAbout()` | `Md3ApplicationWindow` | Open modeless About dialog (title-bar info button) |
+| `openAbout()` | `Md3ApplicationWindow` | Open modeless About dialog (also used by Md3TitleBar info button). |
+| `showSnackbar(message, options)` | `Md3ApplicationWindow` | Enqueue a snackbar on the window host. options: { actionText, dualLine, durationMs, id } |
+| `restoreSession()` | `Md3ApplicationWindow` | — |
+| `saveSession()` | `Md3ApplicationWindow` | — |
+| `reloadCurrentPage()` | `Md3ApplicationWindow` | — |
 | `toCssColor(c)` | `Md3ApplicationWindow` | Hex helper for Gallery / apps (accepts color or string). |
 | `setNativeBorderColor(c)` | `Md3ApplicationWindow` | — |
 | `setSystemBackdropMode(mode)` | `Md3ApplicationWindow` | UNSUITABLE FOR PRODUCTION — API retained; Gallery no longer exposes it. |

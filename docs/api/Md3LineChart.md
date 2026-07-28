@@ -65,8 +65,6 @@ import Md3
 | `probeActive` | `bool` | `false` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `probeSeries` | `var` | `[]` | read/write | [`Md3Chart`](Md3Chart.md) | [{ label, value, color }] |
 | `gestureActive` | `bool` | `false` | read/write | [`Md3Chart`](Md3Chart.md) | True while user is dragging / wheeling — charts should skip heavy work. |
-| `_panVelocity` | `real` | `0` | read/write | [`Md3Chart`](Md3Chart.md) | — |
-| `_viewDirty` | `bool` | `false` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `paused` | `bool` | `false` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `interactionBlocked` | `bool` | `{…}` | readonly | [`Md3Chart`](Md3Chart.md) | Only block when minimized/hidden — never for theme reveal. |
 | `chartActive` | `bool` | `!paused && !interactionBlocked && enabled` | readonly | [`Md3Chart`](Md3Chart.md) | — |

@@ -1,8 +1,9 @@
 # Md3Badge
 
+Material Badge — numeric / dot / max-count, attach to any item via anchors.
+
 - **Source:** `src/Md3/components/Md3Badge.qml`
 - **Extends:** `Item`
-- **Related:** `Md3Badged` wraps content and positions a badge at the top-end corner.
 
 ## Import
 
@@ -10,38 +11,47 @@
 import Md3
 ```
 
+## Enums
+
+### `Md3Badge.Size`
+
+`Md3Badge.Small`, `Md3Badge.Medium`, `Md3Badge.Large`
+
 ## Properties
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `text` | `string` | `""` | Badge label (numeric or short text). |
-| `dot` | `bool` | `false` | Small dot with no label. |
-| `max` | `int` | `999` | Cap numeric display (e.g. `99` → `"99+"`). |
-| `sizePreset` | `enum` | `Medium` | `Small`, `Medium`, `Large`. |
-| `badgeColor` | `color` | `error` | Fill color. |
-| `labelColor` | `color` | `onError` | Label color. |
-| `displayText` | `string` | readonly | Text after `max` formatting. |
-| `large` | `bool` | readonly | Whether a label is shown. |
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `text` | `string` | `""` | read/write | `Md3Badge` | — |
+| `dot` | `bool` | `false` | read/write | `Md3Badge` | — |
+| `max` | `int` | `999` | read/write | `Md3Badge` | Cap display, e.g. 99 → "99+" |
+| `sizePreset` | `int` | `Md3Badge.Medium` | read/write | `Md3Badge` | — |
+| `badgeColor` | `color` | `Md3Theme.colorScheme.error` | read/write | `Md3Badge` | — |
+| `labelColor` | `color` | `Md3Theme.colorScheme.colorOnError` | read/write | `Md3Badge` | — |
+| `displayText` | `string` | `{…}` | readonly | `Md3Badge` | — |
+| `large` | `bool` | `!dot && displayText.length > 0` | readonly | `Md3Badge` | — |
+| `padX` | `real` | `{…}` | readonly | `Md3Badge` | — |
+| `fixedHeight` | `real` | `{…}` | readonly | `Md3Badge` | Fixed height per preset (label badges); dots use a smaller side. |
+| `dotSide` | `real` | `{…}` | readonly | `Md3Badge` | — |
+| `fontPx` | `real` | `{…}` | readonly | `Md3Badge` | — |
 
-## Sizing
+## Signals
 
-Label badges use a **fixed height** per preset (Small 14 / Medium 16 / Large 18); width grows with text only. Dots use 6 / 8 / 10. Prefer `Medium` on icon buttons and larger hosts for consistent visual weight.
+_None._
+
+## Methods
+
+_None._
 
 ## Example
 
 ```qml
 import Md3
 
-Md3Badged {
-    badgeText: "128"
-    badgeMax: 99
-    Md3IconButton { icon: "notifications" }
-}
-
 Md3Badge {
-    anchors.right: parent.right
-    anchors.top: parent.top
-    text: "3"
+    text: ""
+    dot: false
+    max: 999
     sizePreset: Md3Badge.Medium
+    badgeColor: Md3Theme.colorScheme.error
 }
 ```

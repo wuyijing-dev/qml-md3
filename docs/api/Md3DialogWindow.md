@@ -20,8 +20,8 @@ import Md3
 | `roundedCorners` | `bool` | `Md3WindowCapabilities.roundedCorners` | read/write | `Md3DialogWindow` | — |
 | `cornerRadius` | `real` | `Md3WindowCapabilities.windowCornerRadius` | read/write | `Md3DialogWindow` | — |
 | `showWindowBorder` | `bool` | `true` | read/write | `Md3DialogWindow` | — |
-| `titleBarItem` | `alias` | `titleBarLoader.item` | read/write | `Md3DialogWindow` | — |
-| `overlay` | `alias` | `overlayHost.data` | read/write | `Md3DialogWindow` | — |
+| `titleBarItem` | `alias` | `titleBarLoader.item` | read/write | `Md3DialogWindow` | Alias → `titleBarLoader.item` |
+| `overlay` | `alias` | `overlayHost.data` | read/write | `Md3DialogWindow` | Alias → `overlayHost.data` |
 | `titleBar` | `Component` | `null` | read/write | `Md3DialogWindow` | — |
 | `windowIcon` | `url` | `""` | read/write | `Md3DialogWindow` | — |
 | `syncImmersiveDarkMode` | `bool` | `true` | read/write | `Md3DialogWindow` | — |
@@ -45,10 +45,11 @@ import Md3
 | `dismissText` | `string` | `qsTr("Cancel")` | read/write | `Md3DialogWindow` | — |
 | `showDismiss` | `bool` | `true` | read/write | `Md3DialogWindow` | — |
 | `dialogText` | `string` | `""` | read/write | `Md3DialogWindow` | — |
-| `footer` | `alias` | `footerSlot.data` | read/write | `Md3DialogWindow` | — |
+| `content` | `alias` | `customContent.data` | default read/write | `Md3DialogWindow` | Default property → `customContent.data` |
+| `footer` | `alias` | `footerSlot.data` | read/write | `Md3DialogWindow` | Alias → `footerSlot.data` |
 | `isMaximizedLike` | `bool` | `visibility === Window.Maximized` | readonly | `Md3DialogWindow` | — |
 | `effectiveRadius` | `real` | `{…}` | readonly | `Md3DialogWindow` | — |
-| `windowNative` | `alias` | `windowHelper` | readonly | `Md3DialogWindow` | — |
+| `windowNative` | `alias` | `windowHelper` | read/write | `Md3DialogWindow` | Alias → `windowHelper` |
 | `edge` | `real` | `6` | readonly | `Md3DialogWindow` | — |
 | `canResize` | `bool` | `resizable && customChrome && Md3WindowCapabilities.systemResize` | readonly | `Md3DialogWindow` | — |
 

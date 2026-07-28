@@ -2,6 +2,7 @@
 
 - **Source:** `src/Md3/foundation/Md3Theme.qml`
 - **Extends:** `QtObject`
+- **Singleton:** `true` (`pragma Singleton`)
 
 ## Import
 
@@ -17,12 +18,15 @@ import Md3
 | `seed` | `color` | `"#6750A4"` | read/write | `Md3Theme` | — |
 | `textScale` | `real` | `1.0` | read/write | `Md3Theme` | — |
 | `highContrast` | `bool` | `false` | read/write | `Md3Theme` | — |
-| `colorScheme` | `Md3ColorScheme` | `Md3ColorScheme { }` | read/write | `Md3Theme` | — |
-| `dynamicScheme` | `Md3DynamicScheme` | `Md3DynamicScheme { }` | read/write | `Md3Theme` | — |
-| `typography` | `Md3Typography` | `Md3Typography {}` | read/write | `Md3Theme` | — |
-| `shape` | `Md3Shape` | `Md3Shape {}` | read/write | `Md3Theme` | — |
-| `elevation` | `Md3Elevation` | `Md3Elevation {}` | read/write | `Md3Theme` | — |
-| `stateLayer` | `Md3StateLayer` | `Md3StateLayer {}` | read/write | `Md3Theme` | — |
+| `reduceMotion` | `bool` | `false` | read/write | `Md3Theme` | Prefer near-instant motion for vestibular / a11y preferences. |
+| `progressiveContent` | `bool` | `true` | read/write | `Md3Theme` | Within-page progressive load (Md3DeferredSection). Default on; set false to load everything immediately. |
+| `colorScheme` | `Md3ColorScheme` | `{…}` | read/write | `Md3Theme` | — |
+| `dynamicScheme` | `Md3DynamicScheme` | `{…}` | read/write | `Md3Theme` | — |
+| `typography` | `Md3Typography` | `{…}` | read/write | `Md3Theme` | — |
+| `shape` | `Md3Shape` | `{…}` | read/write | `Md3Theme` | — |
+| `elevation` | `Md3Elevation` | `{…}` | read/write | `Md3Theme` | — |
+| `stateLayer` | `Md3StateLayer` | `{…}` | read/write | `Md3Theme` | — |
+| `accessibleOutline` | `color` | `highContrast` | readonly | `Md3Theme` | Outline role — stronger in high-contrast mode. |
 
 ## Signals
 
@@ -41,11 +45,6 @@ _None._
 ```qml
 import Md3
 
-Md3Theme {
-    dark: false
-    seed: "#6750A4"
-    textScale: 1.0
-    highContrast: false
-    colorScheme: Md3ColorScheme { }
-}
+// Singleton — use as `Md3Theme.…`
+console.log(Md3Theme)
 ```

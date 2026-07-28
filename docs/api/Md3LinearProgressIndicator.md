@@ -1,6 +1,6 @@
 # Md3LinearProgressIndicator
 
-Linear progress — Standard uses Rectangles; wavy uses QtQuick.Shapes (GPU stroke, RoundJoin, no seams).
+Linear progress — Standard uses Rectangles; wavy uses sparse polylines + throttled rebuild.
 
 - **Source:** `src/Md3/components/Md3LinearProgressIndicator.qml`
 - **Extends:** `Item`
@@ -27,17 +27,16 @@ import Md3
 | `style` | `int` | `Md3LinearProgressIndicator.Standard` | read/write | `Md3LinearProgressIndicator` | — |
 | `wavelength` | `real` | `style === Md3LinearProgressIndicator.Lively ? 28` | read/write | `Md3LinearProgressIndicator` | — |
 | `amplitude` | `real` | `{…}` | read/write | `Md3LinearProgressIndicator` | — |
-| `trackThickness` | `real` | `{…}` | read/write | Indicator thickness (active segment). |
-| `contained` | `bool` | `true` | Thin track + thicker active segment. |
-| `trackLineThickness` | `real` | readonly | Drawn track height when `contained`. |
-| `indicatorThickness` | `real` | readonly | Drawn active segment thickness. |
+| `trackThickness` | `real` | `{…}` | read/write | `Md3LinearProgressIndicator` | — |
+| `contained` | `bool` | `true` | read/write | `Md3LinearProgressIndicator` | Expressive look: thin track + thicker active segment (matches M3 specs). |
+| `trackLineThickness` | `real` | `contained` | readonly | `Md3LinearProgressIndicator` | — |
+| `indicatorThickness` | `real` | `trackThickness` | readonly | `Md3LinearProgressIndicator` | — |
 | `wavePhase` | `real` | `0` | read/write | `Md3LinearProgressIndicator` | — |
 | `showStopIndicator` | `bool` | `true` | read/write | `Md3LinearProgressIndicator` | — |
 | `waveSpeed` | `real` | `Math.PI * 2 / 1.8` | read/write | `Md3LinearProgressIndicator` | — |
 | `isWavy` | `bool` | `style !== Md3LinearProgressIndicator.Standard` | readonly | `Md3LinearProgressIndicator` | — |
 | `progress` | `real` | `Math.max(0, Math.min(1, value))` | readonly | `Md3LinearProgressIndicator` | — |
 | `barWidth` | `real` | `indeterminate ? Math.max(48, width * 0.35) : width * progress` | readonly | `Md3LinearProgressIndicator` | — |
-| `_treeShown` | `bool` | `true` | read/write | `Md3LinearProgressIndicator` | — |
 | `sceneActive` | `bool` | `enabled && _treeShown` | readonly | `Md3LinearProgressIndicator` | — |
 | `travelX` | `real` | `-barWidth` | read/write | `Md3LinearProgressIndicator` | — |
 

@@ -13,8 +13,9 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `errors` | `var` | `({})` | read/write | `Md3Form` | — |
-| `values` | `var` | `({})` | read/write | `Md3Form` | — |
+| `errors` | `var` | `{…}` | read/write | `Md3Form` | — |
+| `values` | `var` | `{…}` | read/write | `Md3Form` | — |
+| `content` | `alias` | `host.data` | default read/write | `Md3Form` | Default property → `host.data` |
 
 ## Signals
 
@@ -35,7 +36,7 @@ _None._
 import Md3
 
 Md3Form {
-    errors: ({})
-    values: ({})
+    errors: /* … */
+    values: /* … */
 }
 ```

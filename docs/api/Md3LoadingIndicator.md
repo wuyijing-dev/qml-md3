@@ -1,6 +1,6 @@
 # Md3LoadingIndicator
 
-Material 3 Loading indicator — Shape PathAngleArc (GPU), optional caption.
+Material 3 Loading indicator — PathAngleArc updated in-place (no per-frame Shape rebuild).
 
 - **Source:** `src/Md3/components/Md3LoadingIndicator.qml`
 - **Extends:** `Item`
@@ -29,7 +29,6 @@ import Md3
 | `trackColor` | `color` | `Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.primary, 0.2)` | read/write | `Md3LoadingIndicator` | — |
 | `strokeWidth` | `real` | `{…}` | read/write | `Md3LoadingIndicator` | — |
 | `indicatorSize` | `real` | `{…}` | read/write | `Md3LoadingIndicator` | — |
-| `_treeShown` | `bool` | `true` | read/write | `Md3LoadingIndicator` | — |
 | `sceneActive` | `bool` | `enabled && _treeShown` | readonly | `Md3LoadingIndicator` | — |
 | `radius` | `real` | `indicatorSize / 2 - strokeWidth` | readonly | `Md3LoadingIndicator` | — |
 | `rotation` | `real` | `-Math.PI / 2` | read/write | `Md3LoadingIndicator` | — |
@@ -46,7 +45,7 @@ _None._
 | Method | Defined in | Description |
 |--------|------------|-------------|
 | `radToDeg(r)` | `Md3LoadingIndicator` | — |
-| `rebuild()` | `Md3LoadingIndicator` | — |
+| `syncArc()` | `Md3LoadingIndicator` | — |
 
 ## Example
 

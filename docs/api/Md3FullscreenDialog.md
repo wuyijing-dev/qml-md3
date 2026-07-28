@@ -16,6 +16,7 @@ import Md3
 | `open` | `bool` | `false` | read/write | `Md3FullscreenDialog` | — |
 | `title` | `string` | `""` | read/write | `Md3FullscreenDialog` | — |
 | `confirmText` | `string` | `"Save"` | read/write | `Md3FullscreenDialog` | — |
+| `content` | `alias` | `body.data` | default read/write | `Md3FullscreenDialog` | Default property → `body.data` |
 
 ## Signals
 

@@ -16,6 +16,7 @@ import Md3
 | `text` | `string` | `""` | read/write | `Md3Tooltip` | — |
 | `open` | `bool` | `false` | read/write | `Md3Tooltip` | — |
 | `showDelay` | `int` | `500` | read/write | `Md3Tooltip` | — |
+| `content` | `alias` | `host.data` | default read/write | `Md3Tooltip` | Default property → `host.data` |
 
 ## Signals
 

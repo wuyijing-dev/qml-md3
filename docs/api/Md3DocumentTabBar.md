@@ -29,23 +29,8 @@ import Md3
 | `animateAdd` | `bool` | `true` | read/write | `Md3DocumentTabBar` | Play pop-in when a tab is appended |
 | `barColor` | `color` | `{…}` | readonly | `Md3DocumentTabBar` | — |
 | `tabSelected` | `color` | `{…}` | readonly | `Md3DocumentTabBar` | — |
-| `tabHover` | `color` | `Md3Theme.colorScheme.withOpacity(` | readonly | `Md3DocumentTabBar` | — |
+| `tabHover` | `color` | `Md3Theme.colorScheme.withOpacity( Md3Theme.colorScheme.colorOnSurface, 0.05)` | readonly | `Md3DocumentTabBar` | — |
 | `tabRadius` | `real` | `8` | readonly | `Md3DocumentTabBar` | — |
-| `_dragIndex` | `int` | `-1` | read/write | `Md3DocumentTabBar` | — |
-| `_dropIndex` | `int` | `-1` | read/write | `Md3DocumentTabBar` | — |
-| `_dragStartX` | `real` | `0` | read/write | `Md3DocumentTabBar` | — |
-| `_dragStartY` | `real` | `0` | read/write | `Md3DocumentTabBar` | — |
-| `_dragging` | `bool` | `false` | read/write | `Md3DocumentTabBar` | — |
-| `_tearArmed` | `bool` | `false` | read/write | `Md3DocumentTabBar` | — |
-| `_ghostX` | `real` | `0` | read/write | `Md3DocumentTabBar` | — |
-| `_ghostY` | `real` | `0` | read/write | `Md3DocumentTabBar` | — |
-| `_ghostTitle` | `string` | `""` | read/write | `Md3DocumentTabBar` | — |
-| `_ghostIcon` | `string` | `""` | read/write | `Md3DocumentTabBar` | — |
-| `_prevCount` | `int` | `0` | read/write | `Md3DocumentTabBar` | — |
-| `_animIndex` | `int` | `-1` | read/write | `Md3DocumentTabBar` | — |
-| `_canScroll` | `bool` | `list.contentWidth > list.width + 1` | readonly | `Md3DocumentTabBar` | — |
-| `_canScrollLeft` | `bool` | `{…}` | readonly | `Md3DocumentTabBar` | — |
-| `_canScrollRight` | `bool` | `{…}` | readonly | `Md3DocumentTabBar` | — |
 
 ## Signals
 

@@ -13,7 +13,7 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `actions` | `var` | `[] // icon names` | read/write | `Md3BottomAppBar` | — |
+| `actions` | `var` | `[]` | read/write | `Md3BottomAppBar` | — |
 | `showFab` | `bool` | `false` | read/write | `Md3BottomAppBar` | — |
 
 ## Signals
@@ -33,7 +33,7 @@ _None._
 import Md3
 
 Md3BottomAppBar {
-    actions: [] // icon names
+    actions: []
     showFab: false
 }
 ```

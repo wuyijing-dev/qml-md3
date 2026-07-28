@@ -9,31 +9,10 @@ Text {
     // "filled" (default; reliable TTF ligatures) | "outlined"
     property string variant: "filled"
 
-    // Explicit qrc FontLoader — does not rely on loadFonts() timing.
-    FontLoader {
-        id: filledLoader
-        source: "qrc:/md3/fonts/resources/fonts/MaterialIcons-Regular.ttf"
-    }
-    FontLoader {
-        id: outlinedLoader
-        source: "qrc:/md3/fonts/resources/fonts/MaterialIconsOutlined-Regular.otf"
-    }
-
-    readonly property string resolvedFamily: {
-        if (variant === "outlined") {
-            if (outlinedLoader.status === FontLoader.Ready)
-                return outlinedLoader.name
-            return Md3Theme.typography.iconFontFamilyOutlined
-        }
-        if (filledLoader.status === FontLoader.Ready)
-            return filledLoader.name
-        return Md3Theme.typography.iconFontFamily
-    }
-
     text: ligatureFor(icon)
     color: iconColor
     font.pixelSize: size
-    font.family: resolvedFamily
+    font.family: Md3IconFonts.familyFor(variant)
     font.weight: Font.Normal
     font.hintingPreference: Font.PreferFullHinting
     font.preferShaping: true

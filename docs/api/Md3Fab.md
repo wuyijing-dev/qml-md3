@@ -32,7 +32,7 @@ import Md3
 | `fabSize` | `real` | `{…}` | readonly | `Md3Fab` | — |
 | `corner` | `real` | `{…}` | readonly | `Md3Fab` | — |
 | `iconSize` | `real` | `size === Md3Fab.Large ? 36 : 24` | readonly | `Md3Fab` | — |
-| `shadowPad` | `real` | `28 // set lower in dense layouts (e.g. FAB menu)` | read/write | `Md3Fab` | — |
+| `shadowPad` | `real` | `28` | read/write | `Md3Fab` | — |
 | `containerColor` | `color` | `{…}` | readonly | `Md3Fab` | — |
 | `contentColor` | `color` | `{…}` | readonly | `Md3Fab` | — |
 | `hovered` | `bool` | `mouse.containsMouse` | readonly | `Md3Fab` | — |

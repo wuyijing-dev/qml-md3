@@ -1,6 +1,6 @@
 # Md3MorphLoadingIndicator
 
-Material 3 Expressive morph loading — rounded 8-lobe clover / asterisk that spins and morphs.
+Material 3 Expressive morph loading indicator — rounded 8-lobe clover / asterisk.
 
 - **Source:** `src/Md3/components/Md3MorphLoadingIndicator.qml`
 - **Extends:** `Item`
@@ -13,31 +13,48 @@ import Md3
 
 ## Enums
 
-### `Variant`
+### `Md3MorphLoadingIndicator.Variant`
 
-`Bare`, `Contained` — contained draws the morph shape inside a circular primary-container disc.
+`Md3MorphLoadingIndicator.Bare`, `Md3MorphLoadingIndicator.Contained`
 
-### `Size`
+### `Md3MorphLoadingIndicator.Size`
 
-`Small` (28), `Medium` (40), `Large` (56)
+`Md3MorphLoadingIndicator.Small`, `Md3MorphLoadingIndicator.Medium`, `Md3MorphLoadingIndicator.Large`
 
 ## Properties
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `variant` | `enum` | `Bare` | Bare flower or contained-in-circle. |
-| `sizePreset` | `enum` | `Medium` | Overall size. |
-| `indeterminate` | `bool` | `true` | Animation runs while true. |
-| `indicatorColor` | `color` | `primary` | Fill of the morph shape. |
-| `containerColor` | `color` | `primaryContainer` | Contained disc fill. |
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `variant` | `int` | `Md3MorphLoadingIndicator.Bare` | read/write | `Md3MorphLoadingIndicator` | — |
+| `sizePreset` | `int` | `Md3MorphLoadingIndicator.Medium` | read/write | `Md3MorphLoadingIndicator` | — |
+| `indeterminate` | `bool` | `true` | read/write | `Md3MorphLoadingIndicator` | — |
+| `indicatorColor` | `color` | `Md3Theme.colorScheme.primary` | read/write | `Md3MorphLoadingIndicator` | — |
+| `containerColor` | `color` | `Md3Theme.colorScheme.primaryContainer` | read/write | `Md3MorphLoadingIndicator` | — |
+| `morphPhase` | `real` | `0` | read/write | `Md3MorphLoadingIndicator` | — |
+| `spin` | `real` | `0` | read/write | `Md3MorphLoadingIndicator` | — |
+| `box` | `real` | `{…}` | readonly | `Md3MorphLoadingIndicator` | — |
+| `sceneActive` | `bool` | `enabled && _treeShown && indeterminate` | readonly | `Md3MorphLoadingIndicator` | — |
+
+## Signals
+
+_None._
+
+## Methods
+
+| Method | Defined in | Description |
+|--------|------------|-------------|
+| `rebuildPath()` | `Md3MorphLoadingIndicator` | Flower / clover path: r(θ) = R*(a + b*cos(8θ)) with morphing a/b. |
 
 ## Example
 
 ```qml
-Md3MorphLoadingIndicator { }
+import Md3
 
 Md3MorphLoadingIndicator {
-    variant: Md3MorphLoadingIndicator.Contained
-    sizePreset: Md3MorphLoadingIndicator.Large
+    variant: Md3MorphLoadingIndicator.Bare
+    sizePreset: Md3MorphLoadingIndicator.Medium
+    indeterminate: true
+    indicatorColor: Md3Theme.colorScheme.primary
+    containerColor: Md3Theme.colorScheme.primaryContainer
 }
 ```

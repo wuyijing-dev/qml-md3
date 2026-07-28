@@ -2,6 +2,7 @@
 
 - **Source:** `src/Md3/window/Md3WindowCapabilities.qml`
 - **Extends:** `QtObject`
+- **Singleton:** `true` (`pragma Singleton`)
 
 ## Import
 
@@ -19,10 +20,10 @@ import Md3
 | `isLinux` | `bool` | `os === "linux"` | readonly | `Md3WindowCapabilities` | — |
 | `isMobile` | `bool` | `os === "android" \|\| os === "ios"` | readonly | `Md3WindowCapabilities` | — |
 | `isDesktop` | `bool` | `!isMobile` | readonly | `Md3WindowCapabilities` | — |
-| `windows` | `Md3WindowPlatformWindows` | `Md3WindowPlatformWindows {}` | read/write | `Md3WindowCapabilities` | — |
-| `macOS` | `Md3WindowPlatformMacOS` | `Md3WindowPlatformMacOS {}` | read/write | `Md3WindowCapabilities` | — |
-| `linux` | `Md3WindowPlatformLinux` | `Md3WindowPlatformLinux {}` | read/write | `Md3WindowCapabilities` | — |
-| `mobile` | `Md3WindowPlatformMobile` | `Md3WindowPlatformMobile {}` | read/write | `Md3WindowCapabilities` | — |
+| `windows` | `Md3WindowPlatformWindows` | `{…}` | read/write | `Md3WindowCapabilities` | — |
+| `macOS` | `Md3WindowPlatformMacOS` | `{…}` | read/write | `Md3WindowCapabilities` | — |
+| `linux` | `Md3WindowPlatformLinux` | `{…}` | read/write | `Md3WindowCapabilities` | — |
+| `mobile` | `Md3WindowPlatformMobile` | `{…}` | read/write | `Md3WindowCapabilities` | — |
 | `platform` | `var` | `{…}` | readonly | `Md3WindowCapabilities` | — |
 | `platformId` | `string` | `platform.id` | readonly | `Md3WindowCapabilities` | — |
 | `customChrome` | `bool` | `platform.customChrome` | readonly | `Md3WindowCapabilities` | — |
@@ -67,10 +68,6 @@ _None._
 ```qml
 import Md3
 
-Md3WindowCapabilities {
-    windows: Md3WindowPlatformWindows {}
-    macOS: Md3WindowPlatformMacOS {}
-    linux: Md3WindowPlatformLinux {}
-    mobile: Md3WindowPlatformMobile {}
-}
+// Singleton — use as `Md3WindowCapabilities.…`
+console.log(Md3WindowCapabilities)
 ```

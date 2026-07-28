@@ -26,7 +26,6 @@ import Md3
 | `boneHeight` | `real` | `variant === Md3Skeleton.Text ? 12 : height` | read/write | `Md3Skeleton` | — |
 | `baseColor` | `color` | `Md3Theme.colorScheme.surfaceContainerHighest` | read/write | `Md3Skeleton` | — |
 | `pulseOpacity` | `real` | `0.7` | read/write | `Md3Skeleton` | — |
-| `_radius` | `real` | `{…}` | readonly | `Md3Skeleton` | — |
 
 ## Signals
 

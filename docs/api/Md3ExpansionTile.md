@@ -16,7 +16,7 @@ import Md3
 | `title` | `string` | `""` | read/write | `Md3ExpansionTile` | — |
 | `subtitle` | `string` | `""` | read/write | `Md3ExpansionTile` | — |
 | `expanded` | `bool` | `false` | read/write | `Md3ExpansionTile` | — |
-| `enabled` | `bool` | `true` | read/write | `Md3ExpansionTile` | — |
+| `content` | `alias` | `contentCol.data` | default read/write | `Md3ExpansionTile` | Default property → `contentCol.data` |
 
 ## Signals
 

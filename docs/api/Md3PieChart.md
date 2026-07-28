@@ -21,7 +21,7 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `innerRatio` | `real` | `0` | read/write | `Md3PieChart` | Inner radius ratio 0 = pie, 0.55 ≈ donut. |
 | `showPercentLabels` | `bool` | `true` | read/write | `Md3PieChart` | — |
-| `startAngle` | `real` | `-90 // degrees, 0 = 3 o'clock` | read/write | `Md3PieChart` | — |
+| `startAngle` | `real` | `-90` | read/write | `Md3PieChart` | — |
 | `cx` | `real` | `width / 2` | readonly | `Md3PieChart` | — |
 | `cy` | `real` | `height / 2` | readonly | `Md3PieChart` | — |
 | `outerR` | `real` | `Math.max(8, Math.min(width, height) / 2 - contentPadding)` | readonly | `Md3PieChart` | — |
@@ -67,8 +67,6 @@ import Md3
 | `probeActive` | `bool` | `false` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `probeSeries` | `var` | `[]` | read/write | [`Md3Chart`](Md3Chart.md) | [{ label, value, color }] |
 | `gestureActive` | `bool` | `false` | read/write | [`Md3Chart`](Md3Chart.md) | True while user is dragging / wheeling — charts should skip heavy work. |
-| `_panVelocity` | `real` | `0` | read/write | [`Md3Chart`](Md3Chart.md) | — |
-| `_viewDirty` | `bool` | `false` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `paused` | `bool` | `false` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `interactionBlocked` | `bool` | `{…}` | readonly | [`Md3Chart`](Md3Chart.md) | Only block when minimized/hidden — never for theme reveal. |
 | `chartActive` | `bool` | `!paused && !interactionBlocked && enabled` | readonly | [`Md3Chart`](Md3Chart.md) | — |
@@ -128,7 +126,7 @@ import Md3
 Md3PieChart {
     innerRatio: 0
     showPercentLabels: true
-    startAngle: -90 // degrees, 0 = 3 o'clock
+    startAngle: -90
     values: []
     series: []
 }

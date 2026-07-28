@@ -13,7 +13,7 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `text` | `alias` | `input.text` | read/write | `Md3SearchBar` | — |
+| `text` | `alias` | `input.text` | read/write | `Md3SearchBar` | Alias → `input.text` |
 | `placeholderText` | `string` | `"Search"` | read/write | `Md3SearchBar` | — |
 | `enabled` | `bool` | `true` | read/write | `Md3SearchBar` | — |
 
@@ -34,7 +34,6 @@ _None._
 import Md3
 
 Md3SearchBar {
-    text: input.text
     placeholderText: "Search"
 }
 ```

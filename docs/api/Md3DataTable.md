@@ -13,8 +13,8 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `columns` | `var` | `[] // [{ title, role, width }]` | read/write | `Md3DataTable` | — |
-| `rows` | `var` | `[]    // array of objects` | read/write | `Md3DataTable` | — |
+| `columns` | `var` | `[]` | read/write | `Md3DataTable` | — |
+| `rows` | `var` | `[]` | read/write | `Md3DataTable` | — |
 | `selectedRow` | `int` | `-1` | read/write | `Md3DataTable` | — |
 
 ## Signals
@@ -33,8 +33,8 @@ _None._
 import Md3
 
 Md3DataTable {
-    columns: [] // [{ title, role, width }]
-    rows: []    // array of objects
+    columns: []
+    rows: []
     selectedRow: -1
 }
 ```

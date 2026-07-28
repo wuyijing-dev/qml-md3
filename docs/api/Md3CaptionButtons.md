@@ -21,7 +21,7 @@ import Md3
 | `buttonWidth` | `real` | `40` | read/write | `Md3CaptionButtons` | — |
 | `cornerRadius` | `real` | `0` | read/write | `Md3CaptionButtons` | — |
 | `maximized` | `bool` | `{…}` | readonly | `Md3CaptionButtons` | — |
-| `maximizeButton` | `alias` | `maxBtn` | readonly | `Md3CaptionButtons` | — |
+| `maximizeButton` | `alias` | `maxBtn` | read/write | `Md3CaptionButtons` | Alias → `maxBtn` |
 
 ## Signals
 

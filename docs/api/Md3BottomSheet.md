@@ -15,6 +15,7 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `open` | `bool` | `false` | read/write | `Md3BottomSheet` | — |
 | `modal` | `bool` | `true` | read/write | `Md3BottomSheet` | — |
+| `content` | `alias` | `sheetContent.data` | default read/write | `Md3BottomSheet` | Default property → `sheetContent.data` |
 
 ## Signals
 

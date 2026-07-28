@@ -9,6 +9,16 @@
 import Md3
 ```
 
+## Enums
+
+### `Md3PageHost.LaunchIntensity`
+
+`Md3PageHost.Subtle`, `Md3PageHost.Normal`, `Md3PageHost.Premium`
+
+### `Md3PageHost.LaunchBackdrop`
+
+`Md3PageHost.Dim`, `Md3PageHost.Frosted`, `Md3PageHost.Blur`
+
 ## Properties
 
 | Name | Type | Default | Access | Defined in | Description |
@@ -16,55 +26,68 @@ import Md3
 | `model` | `var` | `[]` | read/write | `Md3PageHost` | — |
 | `currentIndex` | `int` | `0` | read/write | `Md3PageHost` | — |
 | `displayedIndex` | `int` | `0` | read/write | `Md3PageHost` | — |
-| `cacheMode` | `string` | `"lru"` | read/write | `Md3PageHost` | — |
-| `cacheLimit` | `int` | `4` | read/write | `Md3PageHost` | — |
-| `idleTrimMs` | `int` | `45000` | read/write | `Md3PageHost` | Adaptive / arc: milliseconds without navigation before trimming to one page |
-| `adaptiveCacheMin` | `int` | `1` | read/write | `Md3PageHost` | Adaptive / arc: minimum / starting resident pages while idle |
-| `_liveCacheLimit` | `int` | `1` | read/write | `Md3PageHost` | — |
-| `_adaptivePrefetch` | `bool` | `false` | read/write | `Md3PageHost` | — |
+| `cacheMode` | `string` | `"arc"` | read/write | `Md3PageHost` | — |
+| `cacheLimit` | `int` | `1` | read/write | `Md3PageHost` | Resident Item pages — keep at 1 for low memory (current only after idle trim) |
+| `idleTrimMs` | `int` | `4000` | read/write | `Md3PageHost` | Adaptive / arc: ms without navigation before trimming to adaptiveCacheMin |
+| `adaptiveCacheMin` | `int` | `1` | read/write | `Md3PageHost` | — |
 | `contentPadding` | `real` | `20` | read/write | `Md3PageHost` | — |
-| `asynchronous` | `bool` | `true` | read/write | `Md3PageHost` | — |
+| `asynchronous` | `bool` | `false` | read/write | `Md3PageHost` | — |
 | `prefetchNeighbors` | `bool` | `false` | read/write | `Md3PageHost` | — |
-| `l2Components` | `bool` | `true` | read/write | `Md3PageHost` | Keep compiled Components after L1 eviction (re-instantiate without re-parse) |
-| `l2CacheLimit` | `int` | `16` | read/write | `Md3PageHost` | Max L2 Component entries (metadata + bytecode; cheaper than Item trees) |
-| `l2WarmIdle` | `bool` | `true` | read/write | `Md3PageHost` | Idle: compile all destination Components (no Item) after startup |
-| `predictPrefetch` | `bool` | `true` | read/write | `Md3PageHost` | Markov + hover: L2 always; L1 only if prefetchNeighbors |
-| `leaveSnapshot` | `bool` | `true` | read/write | `Md3PageHost` | Freeze leaving page texture while cold target loads (cheap perceived speed) |
+| `l2Components` | `bool` | `true` | read/write | `Md3PageHost` | — |
+| `l2CacheLimit` | `int` | `1` | read/write | `Md3PageHost` | Few compiled Components — enough for back/forward, not every destination |
+| `l2WarmIdle` | `bool` | `false` | read/write | `Md3PageHost` | If true, only warm L2 for current ±1 + Markov (never full destination list) |
+| `predictPrefetch` | `bool` | `false` | read/write | `Md3PageHost` | — |
+| `leaveSnapshot` | `bool` | `false` | read/write | `Md3PageHost` | Off by default: ShaderEffectSource holds a full-size GPU texture |
+| `leaveSnapOpacity` | `real` | `0` | read/write | `Md3PageHost` | — |
+| `leaveSnapHiRes` | `bool` | `false` | read/write | `Md3PageHost` | Full-res leave snapshot during launch (avoids chroma fringing on blurred text). |
 | `warmStart` | `bool` | `false` | read/write | `Md3PageHost` | — |
 | `showBusyIndicator` | `bool` | `false` | read/write | `Md3PageHost` | — |
-| `showSkeleton` | `bool` | `true` | read/write | `Md3PageHost` | — |
+| `showSkeleton` | `bool` | `false` | read/write | `Md3PageHost` | — |
 | `skeletonLayout` | `string` | `"page"` | read/write | `Md3PageHost` | — |
+| `skeletonBones` | `var` | `[]` | read/write | `Md3PageHost` | Optional override bones; when empty, uses destination.skeletonBones / skeletonLayout |
 | `pageTransition` | `string` | `"fade"` | read/write | `Md3PageHost` | "none" \| "fade" \| "slide" \| "slideUp" \| "fadeThrough" \| "scale" \| "launch" |
-| `pageTransitionDuration` | `int` | `Md3Motion.spatialDuration` | read/write | `Md3PageHost` | — |
-| `launchTransitionDuration` | `int` | `Md3Motion.long2` | read/write | `Md3PageHost` | Duration for tap-origin launch transition. |
-| `launchIntensity` | `int` | `Md3PageHost.Normal` | read/write | `Md3PageHost` | Launch strength preset: `Subtle`, `Normal`, `Premium`. |
-| `launchBackdropEffect` | `int` | `Md3PageHost.Frosted` | read/write | `Md3PageHost` | Leave-page backdrop: `Frosted` (default 毛玻璃 — light blur + surface tint), `Dim` (dark scrim, sharp text), `Blur` (stronger blur). |
-| `launchAxisProportional` | `bool` | `true` | read/write | `Md3PageHost` | When true, X position follows Android's dedicated launch X path while Y/width/height use emphasized easing. |
-| `launchRememberLastSource` | `bool` | `true` | read/write | `Md3PageHost` | Remember last source bounds for return animation fallback. |
+| `pageTransitionDuration` | `int` | `100` | read/write | `Md3PageHost` | — |
+| `launchTransitionDuration` | `int` | `Md3Motion.long2` | read/write | `Md3PageHost` | Duration used by nonlinear tap-origin launch transition. |
+| `launchIntensity` | `int` | `Md3PageHost.Normal` | read/write | `Md3PageHost` | Subtle/Normal/Premium controls launch spring feel and visual strength. |
+| `launchBackdropEffect` | `int` | `Md3PageHost.Frosted` | read/write | `Md3PageHost` | Backdrop while launch runs — default 毛玻璃 (Frosted). |
+| `launchAxisProportional` | `bool` | `true` | read/write | `Md3PageHost` | Keep X/Y motion progression proportional to travel distance. |
+| `launchRememberLastSource` | `bool` | `true` | read/write | `Md3PageHost` | — |
+| `lastLaunchSourceRect` | `var` | `Qt.rect(0, 0, 0, 0)` | read/write | `Md3PageHost` | — |
+| `lastLaunchSourceRadius` | `real` | `0` | read/write | `Md3PageHost` | — |
+| `lastLaunchSourceIndex` | `int` | `-1` | read/write | `Md3PageHost` | — |
+| `lastLaunchTargetIndex` | `int` | `-1` | read/write | `Md3PageHost` | — |
 | `sourceBase` | `url` | `""` | read/write | `Md3PageHost` | — |
 | `currentItem` | `var` | `{…}` | readonly | `Md3PageHost` | — |
 | `loading` | `bool` | `{…}` | readonly | `Md3PageHost` | — |
 | `awaitingTarget` | `bool` | `{…}` | readonly | `Md3PageHost` | True while the destination page is loading and not yet Ready. |
+| `activeDestination` | `var` | `entryAt(currentIndex)` | readonly | `Md3PageHost` | — |
+| `effectiveSkeletonBones` | `var` | `{…}` | readonly | `Md3PageHost` | — |
+| `effectiveSkeletonLayout` | `string` | `{…}` | readonly | `Md3PageHost` | — |
 | `keepFlags` | `var` | `[]` | read/write | `Md3PageHost` | — |
 | `lruOrder` | `var` | `[]` | read/write | `Md3PageHost` | — |
 | `generation` | `int` | `0` | read/write | `Md3PageHost` | — |
-| `_arcT1` | `var` | `[]` | read/write | `Md3PageHost` | — |
-| `_arcT2` | `var` | `[]` | read/write | `Md3PageHost` | — |
-| `_arcB1` | `var` | `[]` | read/write | `Md3PageHost` | — |
-| `_arcB2` | `var` | `[]` | read/write | `Md3PageHost` | — |
-| `_arcP` | `real` | `0` | read/write | `Md3PageHost` | — |
-| `_l2Map` | `var` | `({})` | read/write | `Md3PageHost` | — |
-| `_l2Order` | `var` | `[]` | read/write | `Md3PageHost` | — |
-| `_markov` | `var` | `({})` | read/write | `Md3PageHost` | — |
-| `_navPrev` | `int` | `-1` | read/write | `Md3PageHost` | — |
-| `_hoverHint` | `int` | `-1` | read/write | `Md3PageHost` | — |
+| `navStack` | `var` | `[]` | read/write | `Md3PageHost` | — |
+| `routeParams` | `var` | `{…}` | read/write | `Md3PageHost` | — |
+| `sectionRootIndex` | `int` | `-1` | read/write | `Md3PageHost` | — |
+| `canGoBack` | `bool` | `navStack.length > 0` | readonly | `Md3PageHost` | — |
+| `navDepth` | `int` | `navStack.length` | readonly | `Md3PageHost` | — |
 | `transitioning` | `bool` | `false` | read/write | `Md3PageHost` | — |
 | `transitionFrom` | `int` | `-1` | read/write | `Md3PageHost` | — |
 | `transitionTo` | `int` | `-1` | read/write | `Md3PageHost` | — |
 | `transitionDir` | `int` | `1` | read/write | `Md3PageHost` | — |
+| `transitionModeActive` | `string` | `pageTransition` | read/write | `Md3PageHost` | — |
 | `transitionProgress` | `real` | `1` | read/write | `Md3PageHost` | — |
-| `_pendingShowIndex` | `int` | `-1` | read/write | `Md3PageHost` | Defer enter transition after Loader.Ready so first layout doesn't hitch the anim. |
-| `_pendingShowPasses` | `int` | `0` | read/write | `Md3PageHost` | — |
+| `launchReturning` | `bool` | `false` | read/write | `Md3PageHost` | — |
+| `launchStartRect` | `rect` | `Qt.rect(0, 0, 0, 0)` | read/write | `Md3PageHost` | — |
+| `launchEndRect` | `rect` | `Qt.rect(0, 0, 0, 0)` | read/write | `Md3PageHost` | — |
+| `launchStartRadius` | `real` | `16` | read/write | `Md3PageHost` | — |
+| `launchEndRadius` | `real` | `Md3Theme.shape.large` | read/write | `Md3PageHost` | — |
+| `launchCurveX` | `var` | `[0.0, 0.0, 0.2, 1.0]` | read/write | `Md3PageHost` | — |
+| `launchCurveY` | `var` | `Md3Motion.emphasizedDecelerate` | read/write | `Md3PageHost` | — |
+| `launchWeightX` | `real` | `0.5` | read/write | `Md3PageHost` | — |
+| `launchWeightY` | `real` | `0.5` | read/write | `Md3PageHost` | — |
+| `launchPivotX` | `real` | `0` | read/write | `Md3PageHost` | Tap origin in page-loader local coordinates (for scale pivot). |
+| `launchPivotY` | `real` | `0` | read/write | `Md3PageHost` | — |
 
 ## Signals
 
@@ -74,12 +97,17 @@ _None._
 
 | Method | Defined in | Description |
 |--------|------------|-------------|
+| `resetNavStack()` | `Md3PageHost` | — |
+| `pushRoute(index, params, opts)` | `Md3PageHost` | — |
+| `replaceRoute(index, params, opts)` | `Md3PageHost` | — |
+| `goBack(opts)` | `Md3PageHost` | — |
 | `entryAt(index)` | `Md3PageHost` | — |
+| `reloadCurrent()` | `Md3PageHost` | Clear current page Loader and reopen (used by hot reload). |
 | `resolveSource(src)` | `Md3PageHost` | — |
 | `noteActivity()` | `Md3PageHost` | — |
 | `prefetchHint(index)` | `Md3PageHost` | — |
 | `clearPrefetchHint(index)` | `Md3PageHost` | — |
-| `navigateTo(index, opts)` | `Md3PageHost` | Route-level page navigation. `opts` supports `transitionMode`, `sourcePoint` (preferred), `sourceRect`, `sourceRadius`, `returnToSource`, `rememberSource`. `transitionMode: "launch"` morph-reveals the destination through a rounded-rect mask from the tap point; the leave snapshot uses frosted-glass backdrop (`launchBackdropEffect`, default `Frosted`) under the entering page (z=10). `returnToSource: true` uses a normal transition (`slide` when `pageTransition` is `launch`). |
+| `navigateTo(index, opts)` | `Md3PageHost` | — |
 
 ## Example
 
@@ -90,7 +118,7 @@ Md3PageHost {
     model: []
     currentIndex: 0
     displayedIndex: 0
-    cacheMode: "lru"
-    cacheLimit: 4
+    cacheMode: "arc"
+    cacheLimit: 1
 }
 ```

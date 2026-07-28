@@ -13,7 +13,7 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `model` | `var` | `[] // [{ title, subtitle?, color?, source? }]` | read/write | `Md3Carousel` | — |
+| `model` | `var` | `[]` | read/write | `Md3Carousel` | — |
 | `currentIndex` | `int` | `0` | read/write | `Md3Carousel` | — |
 | `itemHeight` | `real` | `168` | read/write | `Md3Carousel` | — |
 | `peekRatio` | `real` | `0.12` | read/write | `Md3Carousel` | Fraction of next item visible (peek). 0 = full-bleed page. |
@@ -46,7 +46,7 @@ import Md3
 import Md3
 
 Md3Carousel {
-    model: [] // [{ title, subtitle?, color?, source? }]
+    model: []
     currentIndex: 0
     itemHeight: 168
     peekRatio: 0.12

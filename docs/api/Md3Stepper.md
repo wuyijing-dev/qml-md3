@@ -13,7 +13,7 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `model` | `var` | `[] // [{ title, subtitle }]` | read/write | `Md3Stepper` | — |
+| `model` | `var` | `[]` | read/write | `Md3Stepper` | — |
 | `currentStep` | `int` | `0` | read/write | `Md3Stepper` | — |
 | `vertical` | `bool` | `false` | read/write | `Md3Stepper` | — |
 
@@ -31,7 +31,7 @@ _None._
 import Md3
 
 Md3Stepper {
-    model: [] // [{ title, subtitle }]
+    model: []
     currentStep: 0
     vertical: false
 }

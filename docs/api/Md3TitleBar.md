@@ -23,13 +23,15 @@ import Md3
 | `showAppIcon` | `bool` | `true` | read/write | `Md3TitleBar` | — |
 | `showThemeToggle` | `bool` | `true` | read/write | `Md3TitleBar` | — |
 | `showAboutButton` | `bool` | `true` | read/write | `Md3TitleBar` | Info button opens a modeless About dialog |
-| `showTourButton` | `bool` | `false` | read/write | `Md3TitleBar` | Tour / onboarding guide button (before About) |
-| `aboutAppName` | `string` | `""` | read/write | `Md3TitleBar` | Empty → Qt.application.displayName / name / title |
-| `aboutVersion` | `string` | `""` | read/write | `Md3TitleBar` | Empty → Qt.application.version |
-| `aboutOrganization` | `string` | `""` | read/write | `Md3TitleBar` | Empty → Qt.application.organization |
-| `aboutText` | `string` | `""` | read/write | `Md3TitleBar` | Body text when `aboutContent` is null |
-| `aboutIcon` | `url` | `""` | read/write | `Md3TitleBar` | Empty → `appIcon` |
-| `aboutContent` | `Component` | `null` | read/write | `Md3TitleBar` | Custom About body |
+| `aboutAppName` | `string` | `""` | read/write | `Md3TitleBar` | — |
+| `aboutVersion` | `string` | `""` | read/write | `Md3TitleBar` | — |
+| `aboutOrganization` | `string` | `""` | read/write | `Md3TitleBar` | — |
+| `aboutText` | `string` | `""` | read/write | `Md3TitleBar` | — |
+| `aboutIcon` | `url` | `""` | read/write | `Md3TitleBar` | — |
+| `aboutContent` | `Component` | `null` | read/write | `Md3TitleBar` | Optional custom body for the About dialog (replaces default text block) |
+| `showPerformanceToggle` | `bool` | `false` | read/write | `Md3TitleBar` | Performance monitor toggle (right of trailing content, before theme) |
+| `performanceChecked` | `bool` | `false` | read/write | `Md3TitleBar` | — |
+| `showTourButton` | `bool` | `false` | read/write | `Md3TitleBar` | Product tour / onboarding guide (before About / performance / theme) |
 | `showPin` | `bool` | `true` | read/write | `Md3TitleBar` | Pin / always-on-top (shown by default) |
 | `pinned` | `bool` | `false` | read/write | `Md3TitleBar` | — |
 | `showMinimize` | `bool` | `true` | read/write | `Md3TitleBar` | — |
@@ -50,15 +52,15 @@ import Md3
 | `maxTitleWidth` | `real` | `240` | read/write | `Md3TitleBar` | — |
 | `responsiveMode` | `int` | `0` | read/write | `Md3TitleBar` | 0=Auto (narrow → second row for middle only), 1=SingleRow, 2=TwoRow |
 | `collapseWidth` | `real` | `900` | read/write | `Md3TitleBar` | — |
-| `leadingContent` | `alias` | `leadingSlot.data` | read/write | `Md3TitleBar` | — |
-| `trailingContent` | `alias` | `trailingSlot.data` | read/write | `Md3TitleBar` | — |
-| `extraActions` | `alias` | `trailingSlot.data` | read/write | `Md3TitleBar` | — |
-| `middleContent` | `alias` | `middleFlow.content` | read/write | `Md3TitleBar` | — |
-| `centerContent` | `alias` | `middleFlow.content` | read/write | `Md3TitleBar` | — |
+| `leadingContent` | `alias` | `leadingSlot.data` | read/write | `Md3TitleBar` | Alias → `leadingSlot.data` |
+| `trailingContent` | `alias` | `trailingSlot.data` | read/write | `Md3TitleBar` | Alias → `trailingSlot.data` |
+| `extraActions` | `alias` | `trailingSlot.data` | read/write | `Md3TitleBar` | Alias → `trailingSlot.data` |
+| `middleContent` | `alias` | `middleFlow.content` | read/write | `Md3TitleBar` | Alias → `middleFlow.content` |
+| `centerContent` | `alias` | `middleFlow.content` | read/write | `Md3TitleBar` | Alias → `middleFlow.content` |
+| `content` | `alias` | `middleFlow.content` | default read/write | `Md3TitleBar` | Default property → `middleFlow.content` |
 | `baseHeight` | `real` | `barHeight >= 0 ? barHeight` | readonly | `Md3TitleBar` | — |
 | `twoRow` | `bool` | `{…}` | readonly | `Md3TitleBar` | — |
 | `contentHeight` | `real` | `{…}` | readonly | `Md3TitleBar` | — |
-| `_titleBlockWidth` | `real` | `{…}` | readonly | `Md3TitleBar` | — |
 
 ## Signals
 
@@ -67,15 +69,19 @@ import Md3
 | `leadingClicked()` | `Md3TitleBar` | — |
 | `themeToggled()` | `Md3TitleBar` | — |
 | `performanceClicked()` | `Md3TitleBar` | — |
-| `tourClicked()` | `Md3TitleBar` | Emitted when the tour button is clicked |
+| `tourClicked()` | `Md3TitleBar` | — |
 | `pinToggled(bool pinned)` | `Md3TitleBar` | — |
-| `aboutClicked()` | `Md3TitleBar` | Emitted when About dialog is opened |
+| `aboutClicked()` | `Md3TitleBar` | — |
 
 ## Methods
 
 | Method | Defined in | Description |
 |--------|------------|-------------|
-| `openAbout()` | `Md3TitleBar` | Delegates to `targetWindow.openAbout()` when available |
+| `resolvedAboutName()` | `Md3TitleBar` | — |
+| `resolvedAboutVersion()` | `Md3TitleBar` | — |
+| `resolvedAboutOrganization()` | `Md3TitleBar` | — |
+| `resolvedAboutIcon()` | `Md3TitleBar` | — |
+| `openAbout()` | `Md3TitleBar` | — |
 | `setPinned(onTop)` | `Md3TitleBar` | — |
 | `togglePinned()` | `Md3TitleBar` | — |
 | `reportNativeHits()` | `Md3TitleBar` | — |
