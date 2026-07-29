@@ -260,14 +260,17 @@ Item {
                 variant: Md3Card.Outlined
                 Layout.fillWidth: true
                 Layout.preferredHeight: 260
+                padding: 8
                 Md3VirtualList {
                     id: virtualDemo
                     anchors.fill: parent
-                    anchors.margins: 8
                     itemHeight: 40
-                    model: Array.from({ length: 5000 }, function (_, i) {
-                        return { title: qsTr("Log row %1").arg(i + 1) }
-                    })
+                    model: {
+                        const rows = []
+                        for (let i = 0; i < 5000; ++i)
+                            rows.push({ title: qsTr("Log row %1").arg(i + 1) })
+                        return rows
+                    }
                     onCurrentIndexChangedByUser: function (index, item) {
                         const w = _galleryWindow()
                         if (w)

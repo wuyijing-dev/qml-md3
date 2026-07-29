@@ -89,73 +89,79 @@ Item {
         filesDropped(items)
     }
 
-    Md3Card {
+    // Own surface — avoid nesting fill-anchored content inside Md3Card bodySlot.
+    Rectangle {
+        id: surface
         anchors.fill: parent
-        variant: Md3Card.Outlined
-        clickable: root.clickable
-        onClicked: root.clicked()
+        radius: Md3Theme.shape.medium
+        color: root.dragActive
+               ? Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.primary, 0.10)
+               : Md3Theme.colorScheme.surface
+        border.width: root.dragActive ? 2 : 1
+        border.color: root.dragActive
+                      ? Md3Theme.colorScheme.primary
+                      : Md3Theme.colorScheme.outlineVariant
+        border.pixelAligned: true
 
-        Rectangle {
+        Md3StateOverlay {
+            visible: root.clickable
             anchors.fill: parent
-            radius: Md3Theme.shape.medium
-            color: root.dragActive
-                   ? Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.primary, 0.10)
-                   : "transparent"
-            border.width: root.dragActive ? 2 : 1
-            border.color: root.dragActive
-                          ? Md3Theme.colorScheme.primary
-                          : Md3Theme.colorScheme.outlineVariant
-            border.pixelAligned: true
-            anchors.margins: 1
+            radius: surface.radius
+            overlayColor: Md3Theme.colorScheme.colorOnSurface
+            hovered: clickArea.containsMouse
+            pressed: clickArea.pressed
+            controlEnabled: root.enabled && root.clickable
+        }
 
-            Column {
-                anchors.centerIn: parent
-                width: parent.width - 24
-                spacing: 10
+        Column {
+            anchors.centerIn: parent
+            width: parent.width - 24
+            spacing: 10
 
-                Md3Icon {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    icon: root.leadingIcon
-                    size: 32
-                    iconColor: root.dragActive
-                               ? Md3Theme.colorScheme.primary
-                               : Md3Theme.colorScheme.colorOnSurfaceVariant
-                }
-
-                Text {
-                    width: parent.width
-                    text: root.title
-                    horizontalAlignment: Text.AlignHCenter
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.titleMedium.size
-                    font.weight: Font.Medium
-                    wrapMode: Text.WordWrap
-                }
-
-                Text {
-                    width: parent.width
-                    text: root.dragActive ? qsTr("Release to import") : root.subtitle
-                    horizontalAlignment: Text.AlignHCenter
-                    color: root.dragActive
+            Md3Icon {
+                anchors.horizontalCenter: parent.horizontalCenter
+                icon: root.leadingIcon
+                size: 32
+                iconColor: root.dragActive
                            ? Md3Theme.colorScheme.primary
                            : Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.bodyMedium.size
-                    wrapMode: Text.WordWrap
-                }
+            }
 
-                Text {
-                    width: parent.width
-                    text: root.summaryText
-                    horizontalAlignment: Text.AlignHCenter
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.labelMedium.size
-                    elide: Text.ElideMiddle
-                }
+            Md3Text {
+                width: parent.width
+                text: root.title
+                role: Md3Text.TitleMedium
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+            }
+
+            Md3Text {
+                width: parent.width
+                text: root.dragActive ? qsTr("Release to import") : root.subtitle
+                role: Md3Text.BodyMedium
+                tone: root.dragActive ? Md3Text.Primary : Md3Text.OnSurfaceVariant
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+            }
+
+            Md3Text {
+                width: parent.width
+                text: root.summaryText
+                role: Md3Text.LabelMedium
+                tone: Md3Text.OnSurfaceVariant
+                horizontalAlignment: Text.AlignHCenter
+                elide: Text.ElideMiddle
             }
         }
+    }
+
+    MouseArea {
+        id: clickArea
+        anchors.fill: parent
+        enabled: root.clickable && root.enabled
+        hoverEnabled: root.clickable
+        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+        onClicked: root.clicked()
     }
 
     DropArea {
@@ -170,4 +176,3 @@ Item {
         }
     }
 }
-

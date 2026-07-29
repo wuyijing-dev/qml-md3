@@ -161,8 +161,31 @@ Item {
                 Item {
                     id: bodySlot
                     width: parent.width
-                    height: childrenRect.height
-                    implicitHeight: childrenRect.height
+                    // Fill-anchored children (common for tables/lists) cannot drive
+                    // height via childrenRect — that collapses to 0. Expand to the
+                    // remaining card body height instead.
+                    readonly property bool hasFillChild: {
+                        void children.length
+                        const kids = children
+                        for (let i = 0; i < kids.length; ++i) {
+                            const c = kids[i]
+                            if (!c || c.visible === false || !c.anchors)
+                                continue
+                            if (c.anchors.fill === bodySlot)
+                                return true
+                            if (c.anchors.top === bodySlot.top && c.anchors.bottom === bodySlot.bottom)
+                                return true
+                        }
+                        return false
+                    }
+                    height: {
+                        if (hasFillChild && root.height > root.padding * 2 + 1) {
+                            const headerH = headerRow.visible ? (headerRow.height + 8) : 0
+                            return Math.max(1, contentHost.height - headerH)
+                        }
+                        return childrenRect.height
+                    }
+                    implicitHeight: hasFillChild ? Math.max(48, childrenRect.height) : childrenRect.height
                     implicitWidth: childrenRect.width
                 }
             }
