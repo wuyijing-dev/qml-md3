@@ -21,6 +21,9 @@ Item {
 
     property real lineWidth: 2.5
     property bool showArea: true
+    /// 0–1 multiplier on theme/default area fill (higher = stronger area emphasis).
+    property real areaOpacity: 0.28
+    property bool areaEmphasis: false
     property bool showDots: false
     property bool showGrid: true
     property bool showYLabels: true
@@ -93,8 +96,10 @@ Item {
         return lineColor.a > 0.01 ? lineColor : Md3Theme.colorScheme.primary
     }
     function resolvedFillColor() {
-        return fillColor.a > 0.01 ? fillColor
-             : Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.primary, 0.20)
+        if (fillColor.a > 0.01)
+            return fillColor
+        const a = areaEmphasis ? Math.min(0.55, areaOpacity * 1.6) : areaOpacity
+        return Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.primary, a)
     }
     function resolvedGridColor() {
         return gridColor.a > 0.01 ? gridColor : Md3Theme.colorScheme.outlineVariant
@@ -358,6 +363,8 @@ Item {
     onSeriesChanged: requestRebuild()
     onSeriesColorsChanged: requestRebuild()
     onShowAreaChanged: requestRebuild()
+    onAreaOpacityChanged: requestRebuild()
+    onAreaEmphasisChanged: requestRebuild()
     onShowDotsChanged: requestRebuild()
     onShowGridChanged: requestRebuild()
     onSmoothChanged: requestRebuild()

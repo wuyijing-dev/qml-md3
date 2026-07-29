@@ -105,7 +105,8 @@ Md3Chart {
                 line: pts,
                 area: area,
                 color: col,
-                fill: s === 0 ? fill0 : Qt.rgba(col.r, col.g, col.b, 0.12),
+                fill: s === 0 ? fill0 : Qt.rgba(col.r, col.g, col.b,
+                        root.areaEmphasis ? Math.min(0.45, root.areaOpacity * 1.4) : root.areaOpacity * 0.55),
                 dots: showDots && pts.length <= dotsMaxPoints
             })
             samples.push({ nums: nums, color: col, label: qsTr("S%1").arg(s + 1) })

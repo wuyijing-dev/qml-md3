@@ -202,8 +202,10 @@ qt_add_qml_module(Md3
         components/Md3InputChip.qml
         components/Md3SuggestionChip.qml
         components/Md3ChipGroup.qml
+        components/Md3TagField.qml
         components/Md3Text.qml
         components/Md3TextField.qml
+        components/Md3PasswordField.qml
         components/Md3NumberField.qml
         components/Md3Select.qml
         components/Md3Card.qml
@@ -266,6 +268,7 @@ qt_add_qml_module(Md3
         components/Md3Pagination.qml
         components/Md3Stepper.qml
         components/Md3Banner.qml
+        components/Md3InfoBar.qml
         components/Md3Carousel.qml
         components/Md3Form.qml
         components/Md3Chart.qml
@@ -274,12 +277,14 @@ qt_add_qml_module(Md3
         components/Md3BarChart.qml
         components/Md3ScatterChart.qml
         components/Md3PieChart.qml
+        components/Md3HeatmapChart.qml
+        components/Md3Gauge.qml
+        components/Md3Sparkline.qml
         components/Md3CodeBlock.qml
         components/Md3Skeleton.qml
         components/Md3SkeletonPane.qml
         components/Md3DeferredSection.qml
         components/Md3Tour.qml
-        diagnostics/Md3Sparkline.qml
         diagnostics/Md3ElementPicker.qml
         diagnostics/Md3PerformancePanel.qml
     RESOURCES

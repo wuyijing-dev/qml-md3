@@ -253,6 +253,46 @@ Md3DateField { label: qsTr("Due date"); selectedDate: new Date() }
 Md3TimeField { label: qsTr("Start"); hour: 10; minute: 30 }
 ```
 
+## Tag / password fields
+
+```qml
+Md3TagField {
+    label: qsTr("Recipients")
+    tags: ["ada@example.com"]
+    // Enter / comma commits; Backspace removes last
+}
+
+Md3PasswordField {
+    label: qsTr("Password")
+    showStrength: true
+}
+```
+
+## Info bar vs snackbar
+
+```qml
+Md3InfoBar {
+    severity: Md3InfoBar.Warning
+    title: qsTr("Storage low")
+    message: qsTr("Free up space…")
+    actionText: qsTr("Manage")
+}
+Md3Notify.snackbar(qsTr("Saved"), { actionText: qsTr("Undo") })  // transient
+```
+
+## Gauge / sparkline / heatmap
+
+```qml
+Md3Gauge { value: 72; label: qsTr("CPU"); unit: "%" }
+Md3Sparkline { values: [12, 18, 22, 31]; showArea: true; showLastDot: true }
+Md3HeatmapChart {
+    rowLabels: ["Mon", "Tue"]
+    columnLabels: ["AM", "PM"]
+    values: [[2, 8], [4, 12]]
+}
+Md3LineChart { showArea: true; areaEmphasis: true; areaOpacity: 0.35 }
+```
+
 ## Snackbar (no Window.host glue)
 
 ```qml

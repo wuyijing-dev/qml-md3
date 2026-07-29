@@ -43,11 +43,14 @@
 ## Charts
 
 - [Md3BarChart](Md3BarChart.md) — Vertical / horizontal / stacked bar chart — zoom/pan/probe like Md3LineChart.
-- [Md3Chart](Md3Chart.md) — Base for all Md3 charts — shared plot metrics, theme resolve, pause/rebuild API.
+- [Md3Chart](Md3Chart.md) — Base for all Md3 charts — shared plot metrics, theme resolve, pause/rebuild API. Includes `areaOpacity` / `areaEmphasis` for area fills.
 - [Md3CodeBlock](Md3CodeBlock.md) — Read-only code block with lightweight syntax highlighting (QML / JS / C++ / JSON / plain).
+- [Md3Gauge](Md3Gauge.md) — Circular KPI gauge / meter.
+- [Md3HeatmapChart](Md3HeatmapChart.md) — Heatmap matrix chart.
 - [Md3LineChart](Md3LineChart.md) — Line / area chart — QtQuick.Shapes. Extends Md3Chart. Supports X zoom/pan (`interactive`) and nearest-point probe (`showProbe`).
 - [Md3PieChart](Md3PieChart.md) — Pie / donut chart with hover probe (slice value + percent).
 - [Md3ScatterChart](Md3ScatterChart.md) — Scatter chart — X/Y points with zoom/pan/probe (parity with line chart ops).
+- [Md3Sparkline](Md3Sparkline.md) — Lightweight KPI sparkline (Canvas).
 
 ## Components
 
@@ -70,6 +73,7 @@
 - [Md3Badge](Md3Badge.md) — Material Badge — numeric / dot / max-count, attach to any item via anchors.
 - [Md3Badged](Md3Badged.md) — Wraps content and positions an Md3Badge (top-end by default).
 - [Md3Banner](Md3Banner.md)
+- [Md3InfoBar](Md3InfoBar.md) — WinUI-style persistent in-page alert (vs transient Snackbar).
 - [Md3BottomSheet](Md3BottomSheet.md)
 - [Md3Card](Md3Card.md) — Surface card with optional `title`/`subtitle` and Fit/Scroll `layoutMode`.
 - [Md3Carousel](Md3Carousel.md)
@@ -123,6 +127,8 @@
 - [Md3SearchBar](Md3SearchBar.md)
 - [Md3SearchView](Md3SearchView.md)
 - [Md3Select](Md3Select.md) — Field-style select (ComboBox): label, helper/error, menu — aligned with Md3TextField. Supports searchable filtering and multi-select.
+- [Md3TagField](Md3TagField.md) — Multi-tag chip input.
+- [Md3PasswordField](Md3PasswordField.md) — Password + strength meter.
 - [Md3Text](Md3Text.md) — Themed text with MD3 role/tone tokens.
 - [Md3TextField](Md3TextField.md)
 - [Md3TimePicker](Md3TimePicker.md) — Material 3 time picker — dial / keyboard input, hour↔minute, AM/PM, 12h/24h, modal.

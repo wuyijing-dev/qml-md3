@@ -18,12 +18,14 @@ Item {
                 stage1.arm()
                 stage1b.arm()
             }
-            if (contentY > 180) {
+                if (contentY > 180) {
                 stage2a.arm()
                 stage2b.arm()
                 stage2c.arm()
                 stage2d.arm()
                 stage2e.arm()
+                stage2f.arm()
+                stage2g.arm()
             }
         }
 
@@ -63,6 +65,12 @@ Item {
                     variant: liveChart.item && liveChart.item.showArea ? Md3Button.Filled : Md3Button.Outlined
                     enabled: !!(liveChart.item)
                     onClicked: if (liveChart.item) liveChart.item.showArea = !liveChart.item.showArea
+                }
+                Md3Button {
+                    text: qsTr("面积强调")
+                    variant: liveChart.item && liveChart.item.areaEmphasis ? Md3Button.Filled : Md3Button.Outlined
+                    enabled: !!(liveChart.item)
+                    onClicked: if (liveChart.item) liveChart.item.areaEmphasis = !liveChart.item.areaEmphasis
                 }
                 Md3Button {
                     text: qsTr("网格")
@@ -178,6 +186,18 @@ Item {
                 preferredHeight: 320
                 delayMs: 80
                 sourceComponent: codeCard
+            }
+            Md3DeferredSection {
+                id: stage2f
+                preferredHeight: 280
+                delayMs: 96
+                sourceComponent: kpiCard
+            }
+            Md3DeferredSection {
+                id: stage2g
+                preferredHeight: 300
+                delayMs: 112
+                sourceComponent: heatCard
             }
         }
     }
@@ -480,6 +500,94 @@ Item {
 }
 Md3ScatterChart { interactive: true; showProbe: true; values: [...] }
 Md3PieChart { innerRatio: 0.55; labels: [\"A\",\"B\"]; values: [40, 60] }"
+                }
+            }
+        }
+    }
+
+    Component {
+        id: kpiCard
+        Md3Card {
+            variant: Md3Card.Outlined
+            width: root.width
+            height: 280
+            Column {
+                width: parent.width
+                spacing: 12
+                Text {
+                    text: qsTr("KPI — Gauge + Sparkline")
+                    color: Md3Theme.colorScheme.colorOnSurface
+                    font.pixelSize: Md3Theme.typography.titleSmall.size
+                }
+                Row {
+                    spacing: 24
+                    Md3Gauge {
+                        value: 72
+                        label: qsTr("CPU")
+                        unit: "%"
+                        size: 120
+                    }
+                    Md3Gauge {
+                        value: 48
+                        from: 0
+                        to: 100
+                        label: qsTr("Memory")
+                        unit: "%"
+                        valueColor: Md3Theme.colorScheme.tertiary
+                        size: 120
+                    }
+                    Column {
+                        spacing: 8
+                        anchors.verticalCenter: parent.verticalCenter
+                        Text {
+                            text: qsTr("Requests / min")
+                            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                            font.pixelSize: Md3Theme.typography.labelLarge.size
+                        }
+                        Md3Sparkline {
+                            width: 160
+                            height: 48
+                            showArea: true
+                            showLastDot: true
+                            values: [12, 18, 15, 22, 28, 24, 31, 27, 35, 40, 38, 42]
+                        }
+                        Text {
+                            text: qsTr("42 peak")
+                            color: Md3Theme.colorScheme.primary
+                            font.pixelSize: Md3Theme.typography.titleMedium.size
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: heatCard
+        Md3Card {
+            variant: Md3Card.Outlined
+            width: root.width
+            height: 300
+            Column {
+                width: parent.width
+                spacing: 8
+                Text {
+                    text: qsTr("Heatmap")
+                    color: Md3Theme.colorScheme.colorOnSurface
+                    font.pixelSize: Md3Theme.typography.titleSmall.size
+                }
+                Md3HeatmapChart {
+                    width: parent.width
+                    height: 240
+                    rowLabels: ["Mon", "Tue", "Wed", "Thu", "Fri"]
+                    columnLabels: ["0", "4", "8", "12", "16", "20"]
+                    values: [
+                        [2, 4, 8, 12, 9, 3],
+                        [1, 3, 10, 18, 14, 5],
+                        [3, 5, 11, 16, 12, 4],
+                        [2, 6, 9, 14, 11, 6],
+                        [1, 2, 7, 10, 8, 2]
+                    ]
                 }
             }
         }

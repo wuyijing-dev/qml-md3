@@ -134,6 +134,22 @@ Flickable {
             password: true
         }
 
+        Md3PasswordField {
+            Layout.fillWidth: true
+            Layout.maximumWidth: 360
+            label: qsTr("Password (strength)")
+            supportingText: qsTr("Built-in visibility toggle + strength meter")
+        }
+
+        Md3TagField {
+            Layout.fillWidth: true
+            Layout.maximumWidth: 480
+            label: qsTr("Recipients")
+            placeholderText: qsTr("Type and press Enter")
+            tags: ["ada@example.com", "design"]
+            supportingText: qsTr("Enter / comma to add · Backspace removes last")
+        }
+
         Md3TextField {
             Layout.fillWidth: true
             Layout.maximumWidth: 360

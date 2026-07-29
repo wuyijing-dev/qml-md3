@@ -1,0 +1,90 @@
+import QtQuick
+import QtQuick.Shapes
+
+/// Circular gauge / meter for dashboard KPIs.
+Item {
+    id: root
+
+    property real value: 0
+    property real from: 0
+    property real to: 100
+    property string label: ""
+    property string unit: ""
+    property int decimals: 0
+    property real strokeWidth: 10
+    property real startAngle: -210   // degrees, Shape PathAngleArc style
+    property real sweepAngle: 240    // total arc span
+    property color trackColor: Md3Theme.colorScheme.surfaceContainerHighest
+    property color valueColor: Md3Theme.colorScheme.primary
+    property bool showValue: true
+    property real size: 140
+
+    readonly property real progress: {
+        const span = Math.max(1e-6, to - from)
+        return Math.max(0, Math.min(1, (value - from) / span))
+    }
+    readonly property string valueText: Number(value).toFixed(decimals) + (unit.length ? unit : "")
+
+    width: size
+    height: size
+    implicitWidth: size
+    implicitHeight: size
+
+    Shape {
+        anchors.fill: parent
+        preferredRendererType: Shape.GeometryRenderer
+
+        ShapePath {
+            strokeWidth: root.strokeWidth
+            strokeColor: root.trackColor
+            fillColor: "transparent"
+            capStyle: ShapePath.RoundCap
+            PathAngleArc {
+                centerX: root.width / 2
+                centerY: root.height / 2
+                radiusX: Math.min(root.width, root.height) / 2 - root.strokeWidth
+                radiusY: radiusX
+                startAngle: root.startAngle
+                sweepAngle: root.sweepAngle
+            }
+        }
+
+        ShapePath {
+            strokeWidth: root.strokeWidth
+            strokeColor: root.valueColor
+            fillColor: "transparent"
+            capStyle: ShapePath.RoundCap
+            PathAngleArc {
+                centerX: root.width / 2
+                centerY: root.height / 2
+                radiusX: Math.min(root.width, root.height) / 2 - root.strokeWidth
+                radiusY: radiusX
+                startAngle: root.startAngle
+                sweepAngle: root.sweepAngle * root.progress
+            }
+        }
+    }
+
+    Column {
+        anchors.centerIn: parent
+        spacing: 2
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            visible: root.showValue
+            text: root.valueText
+            color: Md3Theme.colorScheme.colorOnSurface
+            font.family: Md3Theme.typography.fontFamily
+            font.pixelSize: Md3Theme.typography.headlineSmall.size
+            font.weight: Font.Medium
+        }
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            visible: root.label.length > 0
+            text: root.label
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.family: Md3Theme.typography.fontFamily
+            font.pixelSize: Md3Theme.typography.labelLarge.size
+        }
+    }
+}

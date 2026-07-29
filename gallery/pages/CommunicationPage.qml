@@ -149,6 +149,32 @@ Item {
                 }
             }
 
+            Text {
+                text: qsTr("Info bar (persistent)")
+                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                font.pixelSize: Md3Theme.typography.labelMedium.size
+            }
+            Md3InfoBar {
+                Layout.fillWidth: true
+                severity: Md3InfoBar.Informational
+                title: qsTr("Sync available")
+                message: qsTr("A new device profile is ready to download.")
+                actionText: qsTr("View")
+                onActionClicked: Md3Notify.snackbar(qsTr("Opening sync…"))
+            }
+            Md3InfoBar {
+                Layout.fillWidth: true
+                severity: Md3InfoBar.Warning
+                title: qsTr("Storage low")
+                message: qsTr("Free up space to keep uploads reliable.")
+                actionText: qsTr("Manage")
+            }
+            Md3InfoBar {
+                Layout.fillWidth: true
+                severity: Md3InfoBar.Critical
+                message: qsTr("Connection lost — changes are queued offline.")
+            }
+
             Md3Button {
                 text: "Show snackbar"
                 onClicked: Md3Notify.snackbar(qsTr("Message sent"), { actionText: qsTr("Undo") })
