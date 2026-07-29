@@ -111,13 +111,12 @@ Item {
                         }
                     }
 
-                    Text {
+                    Md3Text {
                         id: label
                         visible: row.item.text !== undefined && String(row.item.text).length > 0
                         text: row.item.text !== undefined ? row.item.text : ""
-                        color: Md3Theme.colorScheme.colorOnSurface
-                        font.family: Md3Theme.typography.fontFamily
-                        font.pixelSize: Md3Theme.typography.labelLarge.size
+                        role: Md3Text.LabelLarge
+                        tone: Md3Text.OnSurface
                         anchors.verticalCenter: parent.verticalCenter
                     }
                 }

@@ -149,11 +149,12 @@ Item {
                                                       : Md3Theme.colorScheme.disabledContent()
                             anchors.verticalCenter: parent.verticalCenter
                         }
-                        Text {
+                        Md3Text {
                             text: std.label
-                            color: std.btnEnabled ? root.contentFor(std.selected)
-                                                  : Md3Theme.colorScheme.disabledContent()
-                            font.family: Md3Theme.typography.fontFamily
+                            role: Md3Text.LabelLarge
+                            tone: Md3Text.Custom
+                            customColor: std.btnEnabled ? root.contentFor(std.selected)
+                                                         : Md3Theme.colorScheme.disabledContent()
                             font.pixelSize: root.fontSize
                             font.weight: Md3Theme.typography.labelLarge.weight
                             anchors.verticalCenter: parent.verticalCenter
@@ -299,15 +300,16 @@ Item {
                                     }
                                 }
                             }
-                            Text {
+                            Md3Text {
                                 text: seg.label
-                                color: {
+                                role: Md3Text.LabelLarge
+                                tone: Md3Text.Custom
+                                customColor: {
                                     if (!seg.segEnabled)
                                         return Md3Theme.colorScheme.disabledContent()
                                     return seg.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
                                                         : Md3Theme.colorScheme.colorOnSurface
                                 }
-                                font.family: Md3Theme.typography.fontFamily
                                 font.pixelSize: root.fontSize
                                 font.weight: Md3Theme.typography.labelLarge.weight
                                 anchors.verticalCenter: parent.verticalCenter

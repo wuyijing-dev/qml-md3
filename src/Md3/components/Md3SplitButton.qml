@@ -104,8 +104,8 @@ Md3AbstractButton {
             }
             Md3StateOverlay {
                 overlayColor: root.contentColor
-                hovered: mainMouse.containsMouse
-                pressed: mainMouse.pressed
+                hovered: root.hovered
+                pressed: root.pressed
                 focused: root.activeFocus && root.visualFocus
                 controlEnabled: root.enabled
                 topLeftRadius: root.corner

@@ -67,21 +67,25 @@ Item {
                     iconColor: Md3Theme.colorScheme.colorOnSurfaceVariant
                 }
 
-                Text {
+                Md3Text {
                     visible: crumbRow.collapsedGap
                     anchors.verticalCenter: parent.verticalCenter
                     text: "…"
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.family: Md3Theme.typography.fontFamily
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.OnSurfaceVariant
                     font.pixelSize: root.fontSize
                 }
 
-                Item {
+                Md3AbstractButton {
                     id: crumb
                     visible: !crumbRow.collapsedGap
                     height: 28
                     width: crumbLabel.implicitWidth + (modelData.icon.length > 0 ? 22 : 12)
                     anchors.verticalCenter: parent.verticalCenter
+                    accessibleName: modelData.title
+                    pressEnabled: !crumbRow.isLast
+                    onClicked: root.crumbClicked(index)
+                    onPressFeedback: function (x, y) { }
 
                     Row {
                         anchors.centerIn: parent
@@ -94,13 +98,14 @@ Item {
                             iconColor: crumbRow.isLast ? Md3Theme.colorScheme.colorOnSurface
                                                        : Md3Theme.colorScheme.primary
                         }
-                        Text {
+                        Md3Text {
                             id: crumbLabel
                             anchors.verticalCenter: parent.verticalCenter
                             text: modelData.title
-                            color: crumbRow.isLast ? Md3Theme.colorScheme.colorOnSurface
-                                                   : Md3Theme.colorScheme.primary
-                            font.family: Md3Theme.typography.fontFamily
+                            role: Md3Text.LabelLarge
+                            tone: Md3Text.Custom
+                            customColor: crumbRow.isLast ? Md3Theme.colorScheme.colorOnSurface
+                                                         : Md3Theme.colorScheme.primary
                             font.pixelSize: root.fontSize
                             font.weight: crumbRow.isLast ? Font.Medium : Font.Normal
                         }
@@ -110,23 +115,7 @@ Item {
                         anchors.fill: parent
                         radius: Md3Theme.shape.extraSmall
                         color: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.primary, 0.08)
-                        visible: crumbMa.containsMouse && !crumbRow.isLast
-                    }
-
-                    MouseArea {
-                        id: crumbMa
-                        anchors.fill: parent
-                        enabled: !crumbRow.isLast
-                        hoverEnabled: true
-                        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                        onClicked: root.crumbClicked(index)
-                    }
-
-                    Accessible.role: Accessible.Button
-                    Accessible.name: modelData.title
-                    Accessible.onPressAction: {
-                        if (!crumbRow.isLast)
-                            root.crumbClicked(index)
+                        visible: crumb.hovered && !crumbRow.isLast
                     }
                 }
             }
