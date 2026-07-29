@@ -8,7 +8,6 @@ Item {
     property int colorRole: Md3Fab.Primary
     property string icon: "add"
     property string closeIcon: "close"
-    property bool enabled: true
     property real actionGap: 4
 
     signal clicked()

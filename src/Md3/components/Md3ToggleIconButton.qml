@@ -8,7 +8,6 @@ Item {
 
     property int variant: Md3ToggleIconButton.Standard
     property string icon: "favorite"
-    property bool enabled: true
     property bool checked: false
     property string accessibleName: icon
     property bool visualFocus: false

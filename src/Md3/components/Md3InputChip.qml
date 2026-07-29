@@ -5,7 +5,6 @@ Item {
 
     property string text: ""
     property string avatarIcon: ""
-    property bool enabled: true
     property string accessibleName: text
 
     signal clicked()

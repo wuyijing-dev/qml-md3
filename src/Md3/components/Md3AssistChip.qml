@@ -6,7 +6,6 @@ Item {
     property string text: ""
     property string icon: ""
     property bool elevated: false
-    property bool enabled: true
     property string accessibleName: text
 
     signal clicked()

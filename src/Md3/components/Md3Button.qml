@@ -11,7 +11,6 @@ Item {
     property int size: Md3Button.Small
     property string text: ""
     property string icon: ""
-    property bool enabled: true
     property string accessibleName: text
     property bool visualFocus: false
 

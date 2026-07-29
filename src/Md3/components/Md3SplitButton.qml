@@ -10,7 +10,6 @@ Item {
     property string text: ""
     property string icon: ""
     property var menuModel: []
-    property bool enabled: true
     property string accessibleName: text
     property bool visualFocus: false
 

@@ -8,7 +8,6 @@ Item {
     property string leadingIcon: ""
     property var model: []
     property int currentIndex: -1
-    property bool enabled: true
     readonly property bool open: menu.open
 
     signal activated(int index)

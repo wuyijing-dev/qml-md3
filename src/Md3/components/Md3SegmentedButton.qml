@@ -7,7 +7,6 @@ Item {
     property int currentIndex: 0
     property bool multiSelect: false
     property var selectedIndices: []
-    property bool enabled: true
 
     signal selectionChanged()
 

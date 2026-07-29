@@ -9,7 +9,6 @@ Item {
     property string icon: "add"
     property string text: "Create"
     property bool extended: true
-    property bool enabled: true
     property string accessibleName: text
 
     signal clicked()

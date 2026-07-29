@@ -8,7 +8,6 @@ Item {
     property int currentPage: 0 // 0-based
     property int totalCount: -1
     property int pageSize: 10
-    property bool enabled: true
     property bool showTotal: true
 
     signal pageRequested(int page)

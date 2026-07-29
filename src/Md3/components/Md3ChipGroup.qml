@@ -12,7 +12,6 @@ Item {
     property var selectedIndices: []
     property real spacing: 8
     property bool elevated: false
-    property bool enabled: true
     property real chipHeight: 32
     property real iconSize: 18
     property real fontSize: Md3Theme.scaled(Md3Theme.typography.labelLarge.size)

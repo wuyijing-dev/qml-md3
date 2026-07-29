@@ -7,7 +7,6 @@ Item {
     property string text: ""
     property string icon: ""
     property string trailingIcon: ""
-    property bool enabled: true
     property bool destructive: false
     property bool selected: false
     property bool showCheck: false

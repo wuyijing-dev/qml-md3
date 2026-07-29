@@ -33,7 +33,8 @@ Item {
     readonly property bool sceneActive: enabled && _treeShown
     readonly property real radius: indicatorSize / 2 - strokeWidth
 
-    property real rotation: -Math.PI / 2
+    /// Arc start angle in radians (not Item.rotation).
+    property real arcRotation: -Math.PI / 2
     property real sweep: Math.PI * 0.65
     property real sweepDir: 1
     property real spinSpeed: Math.PI * 2 / (Md3Motion.progressSpin / 1000)
@@ -60,7 +61,7 @@ Item {
 
     function syncArc() {
         if (indeterminate) {
-            indArc.startAngle = radToDeg(rotation)
+            indArc.startAngle = radToDeg(arcRotation)
             indArc.sweepAngle = -radToDeg(sweep)
         } else {
             indArc.startAngle = -90
@@ -152,7 +153,7 @@ Item {
         running: root.sceneActive && root.indeterminate
         onTriggered: {
             const dt = frameTime
-            root.rotation += root.spinSpeed * dt
+            root.arcRotation += root.spinSpeed * dt
             root.sweep += root.sweepDir * Math.PI * 1.1 * dt
             if (root.sweep > Math.PI * 1.2) {
                 root.sweep = Math.PI * 1.2

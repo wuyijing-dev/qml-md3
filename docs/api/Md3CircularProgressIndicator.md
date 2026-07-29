@@ -29,7 +29,7 @@ import Md3
 | `amplitude` | `real` | `{…}` | read/write | `Md3CircularProgressIndicator` | — |
 | `waveCount` | `int` | `{…}` | read/write | `Md3CircularProgressIndicator` | — |
 | `wavePhase` | `real` | `0` | read/write | `Md3CircularProgressIndicator` | — |
-| `rotation` | `real` | `-Math.PI / 2` | read/write | `Md3CircularProgressIndicator` | — |
+| `arcRotation` | `real` | `-Math.PI / 2` | read/write | `Md3CircularProgressIndicator` | Arc start angle in radians (not Item.rotation) |
 | `sweep` | `real` | `Math.PI * 0.55` | read/write | `Md3CircularProgressIndicator` | — |
 | `waveSpeed` | `real` | `Math.PI * 2 / 1.8` | read/write | `Md3CircularProgressIndicator` | — |
 | `spinSpeed` | `real` | `Math.PI * 2 / (Md3Motion.progressSpin / 1000)` | read/write | `Md3CircularProgressIndicator` | — |

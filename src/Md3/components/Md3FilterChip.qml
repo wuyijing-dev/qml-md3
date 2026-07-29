@@ -7,7 +7,6 @@ Item {
     property string icon: ""
     property bool selected: false
     property bool elevated: false
-    property bool enabled: true
     property string accessibleName: text
     /// Compact density for title bars (e.g. 24)
     property real chipHeight: 32

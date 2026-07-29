@@ -10,7 +10,6 @@ Item {
 
     property real value: 0
     property bool indeterminate: false
-    property bool enabled: true
     property int style: Md3LinearProgressIndicator.Standard
     property real wavelength: style === Md3LinearProgressIndicator.Lively ? 28
                             : (style === Md3LinearProgressIndicator.Soft ? 56 : 40)

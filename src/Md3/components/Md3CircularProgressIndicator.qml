@@ -37,7 +37,8 @@ Item {
         }
     }
     property real wavePhase: 0
-    property real rotation: -Math.PI / 2
+    /// Arc start angle in radians (not Item.rotation).
+    property real arcRotation: -Math.PI / 2
     property real sweep: Math.PI * 0.55
     property real waveSpeed: Math.PI * 2 / 1.8
     property real spinSpeed: Math.PI * 2 / (Md3Motion.progressSpin / 1000)
@@ -103,7 +104,7 @@ Item {
             return
         trackPoly.path = _arcPoints(-Math.PI / 2, Math.PI * 2)
         if (indeterminate)
-            indPoly.path = _arcPoints(rotation, sweep)
+            indPoly.path = _arcPoints(arcRotation, sweep)
         else
             indPoly.path = _arcPoints(-Math.PI / 2, Math.PI * 2 * Math.max(0, Math.min(1, value)))
     }
@@ -112,7 +113,7 @@ Item {
         if (isWavy)
             return
         if (indeterminate) {
-            indArc.startAngle = radToDeg(rotation)
+            indArc.startAngle = radToDeg(arcRotation)
             indArc.sweepAngle = -radToDeg(sweep)
         } else {
             indArc.startAngle = -90
@@ -208,7 +209,7 @@ Item {
             if (root.isWavy)
                 root.wavePhase = (root.wavePhase + root.waveSpeed * frameTime) % (Math.PI * 2)
             if (root.indeterminate) {
-                root.rotation = (root.rotation + root.spinSpeed * frameTime) % (Math.PI * 2)
+                root.arcRotation = (root.arcRotation + root.spinSpeed * frameTime) % (Math.PI * 2)
                 root.sweep += root.sweepDir * (root.sweepMax - root.sweepMin)
                              * frameTime / (Md3Motion.progressSweep / 1000)
                 if (root.sweep >= root.sweepMax) {

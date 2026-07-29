@@ -31,7 +31,7 @@ import Md3
 | `indicatorSize` | `real` | `{…}` | read/write | `Md3LoadingIndicator` | — |
 | `sceneActive` | `bool` | `enabled && _treeShown` | readonly | `Md3LoadingIndicator` | — |
 | `radius` | `real` | `indicatorSize / 2 - strokeWidth` | readonly | `Md3LoadingIndicator` | — |
-| `rotation` | `real` | `-Math.PI / 2` | read/write | `Md3LoadingIndicator` | — |
+| `arcRotation` | `real` | `-Math.PI / 2` | read/write | `Md3LoadingIndicator` | Arc start angle in radians (not Item.rotation) |
 | `sweep` | `real` | `Math.PI * 0.65` | read/write | `Md3LoadingIndicator` | — |
 | `sweepDir` | `real` | `1` | read/write | `Md3LoadingIndicator` | — |
 | `spinSpeed` | `real` | `Math.PI * 2 / (Md3Motion.progressSpin / 1000)` | read/write | `Md3LoadingIndicator` | — |

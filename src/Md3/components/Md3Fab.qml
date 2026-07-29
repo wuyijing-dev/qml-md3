@@ -11,7 +11,6 @@ Item {
     property string icon: "add"
     /// Degrees applied to the glyph (FAB menu uses 45° when open).
     property real iconRotation: 0
-    property bool enabled: true
     property string accessibleName: "Floating action button"
     property string tooltip: ""
 

@@ -6,7 +6,6 @@ Item {
     enum Variant { Standard, Filled, FilledTonal, Outlined }
     property int variant: Md3IconButton.Standard
     property string icon: "favorite"
-    property bool enabled: true
     property bool selected: false
     property string accessibleName: icon
     property bool visualFocus: false
