@@ -244,7 +244,7 @@ Item {
                 radius: field.radius
             }
 
-            Text {
+            Md3Text {
                 id: labelItem
                 text: root.label
                 visible: root.label.length > 0
@@ -252,13 +252,12 @@ Item {
                 y: (root.displayText.length > 0 || menu.open || root.placeholderText.length > 0)
                         ? 6 : (parent.height - height) / 2
                 z: 2
-                color: menu.open || root.hasError ? root.activeColor
-                       : Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.family: Md3Theme.typography.fontFamily
-                font.pixelSize: (root.displayText.length > 0 || menu.open || root.placeholderText.length > 0)
-                                ? Md3Theme.typography.labelSmall.size
-                                : Md3Theme.typography.bodyLarge.size
-                font.weight: Font.Medium
+                role: (root.displayText.length > 0 || menu.open || root.placeholderText.length > 0)
+                        ? Md3Text.LabelSmall
+                        : Md3Text.BodyLarge
+                tone: Md3Text.Custom
+                customColor: menu.open || root.hasError ? root.activeColor
+                                                           : Md3Theme.colorScheme.colorOnSurfaceVariant
 
                 Rectangle {
                     visible: root.variant === Md3Select.Outlined
@@ -287,20 +286,20 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
-                Text {
+                Md3Text {
                     anchors.verticalCenter: parent.verticalCenter
                     width: parent.width - (root.leadingIcon.length > 0 ? 36 : 0) - 40
                     text: root.displayText.length > 0 ? root.displayText : root.placeholderText
                     elide: Text.ElideRight
-                    color: {
+                    role: Md3Text.BodyLarge
+                    tone: Md3Text.Custom
+                    customColor: {
                         if (!root.enabled)
                             return Md3Theme.colorScheme.disabledContent()
                         if (root.displayText.length === 0)
                             return Md3Theme.colorScheme.colorOnSurfaceVariant
                         return Md3Theme.colorScheme.colorOnSurface
                     }
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.bodyLarge.size
                     opacity: (root.displayText.length > 0 || root.placeholderText.length > 0
                               || root.label.length === 0) ? 1 : 0
                 }
@@ -332,16 +331,16 @@ Item {
             }
         }
 
-        Text {
+        Md3Text {
             visible: root.helper.length > 0
             width: parent.width
             leftPadding: 16
             text: root.helper
             wrapMode: Text.Wrap
-            color: root.hasError ? Md3Theme.colorScheme.error
-                                 : Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.family: Md3Theme.typography.fontFamily
-            font.pixelSize: Md3Theme.typography.bodySmall.size
+            role: Md3Text.BodySmall
+            tone: Md3Text.Custom
+            customColor: root.hasError ? Md3Theme.colorScheme.error
+                                         : Md3Theme.colorScheme.colorOnSurfaceVariant
         }
     }
 
@@ -435,16 +434,15 @@ Item {
             }
         }
 
-        Text {
+        Md3Text {
             visible: root.searchable && root.filteredEntries.length === 0
             width: Math.max(menu.menuWidth, 168)
             height: 48
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             text: qsTr("No matches")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.family: Md3Theme.typography.fontFamily
-            font.pixelSize: Md3Theme.typography.bodyMedium.size
+            role: Md3Text.BodyMedium
+            tone: Md3Text.OnSurfaceVariant
         }
     }
 }
