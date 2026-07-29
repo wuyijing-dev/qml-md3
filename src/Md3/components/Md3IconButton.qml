@@ -1,27 +1,27 @@
 import QtQuick
 import QtQuick.Effects
 
-Item {
+Md3AbstractButton {
     id: root
+
     enum Variant { Standard, Filled, FilledTonal, Outlined }
+
     property int variant: Md3IconButton.Standard
-    property string icon: "favorite"
     property bool selected: false
-    property string accessibleName: icon
-    property bool visualFocus: false
-    /// Built-in badge (no Md3Badged wrapper glue for icon buttons).
     property string badgeText: ""
     property bool badgeDot: false
     property int badgeMax: 99
     property int badgeSizePreset: Md3Badge.Medium
     property color badgeColor: Md3Theme.colorScheme.error
     property color badgeLabelColor: Md3Theme.colorScheme.colorOnError
-    signal clicked()
+
+    icon: "favorite"
 
     readonly property real circleSize: 40
     readonly property real circleRadius: circleSize / 2
+    cornerRadius: circleRadius
 
-    readonly property color containerColor: {
+    containerColor: {
         if (!enabled && variant !== Md3IconButton.Standard)
             return Md3Theme.colorScheme.disabledContainer()
         switch (variant) {
@@ -33,7 +33,7 @@ Item {
         default: return "transparent"
         }
     }
-    readonly property color contentColor: {
+    contentColor: {
         if (!enabled) return Md3Theme.colorScheme.disabledContent()
         switch (variant) {
         case Md3IconButton.Filled: return Md3Theme.colorScheme.colorOnPrimary
@@ -43,11 +43,11 @@ Item {
         }
     }
 
+    pressTarget: bg
+    onPressFeedback: function (x, y) { ripple.pulse(x, y) }
+
     width: 48
     height: 48
-    activeFocusOnTab: enabled
-    Accessible.name: accessibleName
-    Accessible.role: Accessible.Button
 
     Item {
         id: bg
@@ -84,9 +84,9 @@ Item {
         }
         Md3StateOverlay {
             overlayColor: root.contentColor
-            hovered: mouse.containsMouse
+            hovered: root.hovered
             focused: root.activeFocus && root.visualFocus
-            pressed: mouse.pressed
+            pressed: root.pressed
             controlEnabled: root.enabled
             radius: root.circleRadius
         }
@@ -142,27 +142,4 @@ Item {
         badgeColor: root.badgeColor
         labelColor: root.badgeLabelColor
     }
-
-    MouseArea {
-        id: mouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-        enabled: root.enabled
-        onClicked: function (mouse) {
-            root.visualFocus = false
-            const local = mapToItem(bg, mouse.x, mouse.y)
-            ripple.pulse(local.x, local.y)
-            root.forceActiveFocus()
-            root.clicked()
-        }
-    }
-    Keys.onPressed: function (event) {
-        if (event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab
-                || event.key === Qt.Key_Left || event.key === Qt.Key_Right
-                || event.key === Qt.Key_Up || event.key === Qt.Key_Down)
-            root.visualFocus = true
-    }
-    Keys.onReturnPressed: if (enabled) { visualFocus = true; clicked() }
-    Keys.onSpacePressed: if (enabled) { visualFocus = true; clicked() }
 }

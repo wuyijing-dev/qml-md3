@@ -74,7 +74,7 @@ Text {
 
     readonly property var _type: _typeForRole()
     font.family: monospace ? "Consolas" : Md3Theme.typography.fontFamily
-    font.pixelSize: _type.size
+    font.pixelSize: Md3Theme.scaled(_type.size)
     font.weight: _type.weight
     font.letterSpacing: _type.letterSpacing
 }

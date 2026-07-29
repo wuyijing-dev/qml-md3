@@ -1,40 +1,41 @@
 import QtQuick
 
-Item {
+Md3AbstractButton {
     id: root
 
-    property string text: ""
     property string avatarIcon: ""
-    property string accessibleName: text
 
-    signal clicked()
+    accessibleName: text
+    pressRightMargin: 32
+    cornerRadius: Md3Theme.shape.small
+    containerColor: enabled ? Md3Theme.colorScheme.surfaceContainerLow
+                            : Md3Theme.colorScheme.disabledContainer()
+    contentColor: enabled ? Md3Theme.colorScheme.colorOnSurfaceVariant
+                          : Md3Theme.colorScheme.disabledContent()
+
+    pressTarget: bg
+    onPressFeedback: function (x, y) { ripple.pulse(x, y) }
+
     signal removed()
 
     implicitHeight: 32
     implicitWidth: row.implicitWidth + 4
     height: implicitHeight
     width: implicitWidth
-    activeFocusOnTab: enabled
-    Accessible.name: accessibleName
-    Accessible.role: Accessible.Button
-
-    readonly property color contentColor: enabled ? Md3Theme.colorScheme.colorOnSurfaceVariant
-                                                  : Md3Theme.colorScheme.disabledContent()
 
     Rectangle {
         id: bg
         anchors.fill: parent
-        radius: Md3Theme.shape.small
-        color: root.enabled ? Md3Theme.colorScheme.surfaceContainerLow
-                            : Md3Theme.colorScheme.disabledContainer()
+        radius: root.cornerRadius
+        color: root.containerColor
         clip: true
 
         Md3Ripple { id: ripple; rippleColor: root.contentColor; clipRadius: bg.radius }
         Md3StateOverlay {
             overlayColor: root.contentColor
-            hovered: chipMouse.containsMouse
-            pressed: chipMouse.pressed
-            focused: root.activeFocus
+            hovered: root.hovered
+            pressed: root.pressed
+            focused: root.activeFocus && root.visualFocus
             controlEnabled: root.enabled
             radius: bg.radius
         }
@@ -61,11 +62,11 @@ Item {
                 }
             }
 
-            Text {
+            Md3Text {
                 text: root.text
-                color: root.contentColor
-                font.family: Md3Theme.typography.fontFamily
-                font.pixelSize: Md3Theme.scaled(Md3Theme.typography.labelLarge.size)
+                role: Md3Text.LabelLarge
+                tone: Md3Text.Custom
+                customColor: root.contentColor
                 anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -80,20 +81,6 @@ Item {
                     iconColor: root.contentColor
                 }
             }
-        }
-    }
-
-    MouseArea {
-        id: chipMouse
-        anchors.fill: parent
-        anchors.rightMargin: 32
-        hoverEnabled: true
-        enabled: root.enabled
-        z: 1
-        onClicked: function (mouse) {
-            ripple.pulse(mouse.x, mouse.y)
-            root.forceActiveFocus()
-            root.clicked()
         }
     }
 

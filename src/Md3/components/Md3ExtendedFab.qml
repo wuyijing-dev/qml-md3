@@ -1,25 +1,29 @@
 import QtQuick
 
-Item {
+Md3AbstractButton {
     id: root
 
     enum ColorRole { Primary, Secondary, Tertiary, Surface }
 
     property int colorRole: Md3ExtendedFab.Primary
-    property string icon: "add"
-    property string text: "Create"
     property bool extended: true
-    property string accessibleName: text
 
-    signal clicked()
+    icon: "add"
+    text: "Create"
+    accessibleName: text
+    cornerRadius: Md3Theme.shape.large
 
     readonly property real fabHeight: 56
-    readonly property real corner: Md3Theme.shape.large
     readonly property real iconSize: 24
     readonly property real padStart: icon.length > 0 ? 16 : 20
     readonly property real padEnd: 20
+    readonly property real elev: enabled ? (hovered && !pressed ? 8 : 6) : 0
+    readonly property real shadowPad: 28
+    readonly property real collapsedWidth: fabHeight
+    readonly property real expandedWidth: padStart + (icon.length > 0 ? iconSize + 8 : 0)
+                                          + label.implicitWidth + padEnd
 
-    readonly property color containerColor: {
+    containerColor: {
         if (!enabled)
             return Md3Theme.colorScheme.disabledContainer()
         switch (colorRole) {
@@ -29,7 +33,7 @@ Item {
         default: return Md3Theme.colorScheme.primaryContainer
         }
     }
-    readonly property color contentColor: {
+    contentColor: {
         if (!enabled)
             return Md3Theme.colorScheme.disabledContent()
         switch (colorRole) {
@@ -40,28 +44,13 @@ Item {
         }
     }
 
-    readonly property bool hovered: mouse.containsMouse
-    readonly property bool pressed: mouse.pressed
-    readonly property bool focused: activeFocus
-    readonly property real elev: enabled ? (hovered && !pressed ? 8 : 6) : 0
-    readonly property real shadowPad: 28
-
-    readonly property real collapsedWidth: fabHeight
-    readonly property real expandedWidth: padStart + (icon.length > 0 ? iconSize + 8 : 0)
-                                          + label.implicitWidth + padEnd
+    pressTarget: bg
+    onPressFeedback: function (x, y) { ripple.pulse(x, y) }
 
     implicitWidth: (extended ? expandedWidth : collapsedWidth) + shadowPad * 2
     implicitHeight: fabHeight + shadowPad * 2
     width: implicitWidth
     height: implicitHeight
-
-    activeFocusOnTab: enabled
-    Accessible.name: accessibleName
-    Accessible.role: Accessible.Button
-    Accessible.onPressAction: if (enabled) root.clicked()
-
-    Keys.onReturnPressed: if (enabled) clicked()
-    Keys.onSpacePressed: if (enabled) clicked()
 
     Behavior on width {
         NumberAnimation {
@@ -76,7 +65,7 @@ Item {
         width: bg.width
         height: bg.height
         elevation: root.elev
-        cornerRadius: root.corner
+        cornerRadius: root.cornerRadius
     }
 
     Rectangle {
@@ -84,7 +73,7 @@ Item {
         anchors.centerIn: parent
         width: root.extended ? root.expandedWidth : root.collapsedWidth
         height: root.fabHeight
-        radius: root.corner
+        radius: root.cornerRadius
         color: root.containerColor
         clip: true
 
@@ -107,16 +96,16 @@ Item {
         Md3Ripple {
             id: ripple
             rippleColor: root.contentColor
-            clipRadius: root.corner
+            clipRadius: root.cornerRadius
         }
 
         Md3StateOverlay {
             overlayColor: root.contentColor
             hovered: root.hovered
-            focused: root.focused
+            focused: root.activeFocus && root.visualFocus
             pressed: root.pressed
             controlEnabled: root.enabled
-            radius: root.corner
+            radius: root.cornerRadius
         }
 
         Row {
@@ -142,16 +131,14 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
             }
 
-            Text {
+            Md3Text {
                 id: label
                 text: root.text
-                color: root.contentColor
+                role: Md3Text.LabelLarge
+                tone: Md3Text.Custom
+                customColor: root.contentColor
                 visible: root.extended
                 opacity: root.extended ? 1 : 0
-                font.family: Md3Theme.typography.fontFamily
-                font.pixelSize: Md3Theme.scaled(Md3Theme.typography.labelLarge.size)
-                font.weight: Md3Theme.typography.labelLarge.weight
-                font.letterSpacing: Md3Theme.typography.labelLarge.letterSpacing
                 anchors.verticalCenter: parent.verticalCenter
 
                 Behavior on opacity {
@@ -169,23 +156,9 @@ Item {
         anchors.centerIn: parent
         width: bg.width + 6
         height: bg.height + 6
-        radius: root.corner + 3
-        focused: root.focused
+        radius: root.cornerRadius + 3
+        focused: root.activeFocus
+        visualFocus: root.visualFocus
         controlEnabled: root.enabled
-    }
-
-    MouseArea {
-        id: mouse
-        anchors.centerIn: parent
-        width: bg.width
-        height: bg.height
-        hoverEnabled: true
-        enabled: root.enabled
-        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-        onClicked: function (mouse) {
-            ripple.pulse(mouse.x, mouse.y)
-            root.forceActiveFocus()
-            root.clicked()
-        }
     }
 }

@@ -1,24 +1,22 @@
 import QtQuick
 import QtQuick.Effects
 
-Item {
+Md3AbstractButton {
     id: root
 
     enum Variant { Standard, Filled, FilledTonal, Outlined }
 
     property int variant: Md3ToggleIconButton.Standard
-    property string icon: "favorite"
-    property bool checked: false
-    property string accessibleName: icon
-    property bool visualFocus: false
 
-    signal clicked()
-    signal toggled(bool checked)
+    icon: "favorite"
+    checkable: true
+    accessibleName: icon
+    cornerRadius: circleRadius
 
     readonly property real circleSize: 40
     readonly property real circleRadius: circleSize / 2
 
-    readonly property color containerColor: {
+    containerColor: {
         if (!enabled) {
             if (variant === Md3ToggleIconButton.Standard && !checked)
                 return "transparent"
@@ -38,7 +36,7 @@ Item {
         }
     }
 
-    readonly property color contentColor: {
+    contentColor: {
         if (!enabled)
             return Md3Theme.colorScheme.disabledContent()
         switch (variant) {
@@ -57,22 +55,13 @@ Item {
         }
     }
 
+    pressTarget: bg
+    onPressFeedback: function (x, y) { ripple.pulse(x, y) }
+
     width: 48
     height: 48
-    activeFocusOnTab: enabled
-    Accessible.name: accessibleName
-    Accessible.role: Accessible.Button
-    Accessible.checkable: true
-    Accessible.checked: checked
-    Accessible.onPressAction: if (enabled) root.toggle()
 
-    function toggle() {
-        if (!enabled)
-            return
-        checked = !checked
-        toggled(checked)
-        clicked()
-    }
+    function toggle() { activate(true) }
 
     Item {
         id: bg
@@ -118,9 +107,9 @@ Item {
         }
         Md3StateOverlay {
             overlayColor: root.contentColor
-            hovered: mouse.containsMouse
+            hovered: root.hovered
             focused: root.activeFocus && root.visualFocus
-            pressed: mouse.pressed
+            pressed: root.pressed
             controlEnabled: root.enabled
             radius: root.circleRadius
         }
@@ -161,27 +150,4 @@ Item {
         visualFocus: root.visualFocus
         controlEnabled: root.enabled
     }
-
-    MouseArea {
-        id: mouse
-        anchors.fill: parent
-        hoverEnabled: true
-        enabled: root.enabled
-        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-        onClicked: function (mouse) {
-            root.visualFocus = false
-            const local = mapToItem(bg, mouse.x, mouse.y)
-            ripple.pulse(local.x, local.y)
-            root.forceActiveFocus()
-            root.toggle()
-        }
-    }
-    Keys.onPressed: function (event) {
-        if (event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab
-                || event.key === Qt.Key_Left || event.key === Qt.Key_Right
-                || event.key === Qt.Key_Up || event.key === Qt.Key_Down)
-            root.visualFocus = true
-    }
-    Keys.onReturnPressed: if (enabled) { visualFocus = true; toggle() }
-    Keys.onSpacePressed: if (enabled) { visualFocus = true; toggle() }
 }

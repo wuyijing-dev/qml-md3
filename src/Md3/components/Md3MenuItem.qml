@@ -116,15 +116,6 @@ Item {
             radius: bg.radius
         }
 
-        Md3FocusRing {
-            anchors.fill: parent
-            anchors.margins: -2
-            radius: root.itemRadius + 2
-            focused: root.highlighted
-            controlEnabled: root.enabled
-            visualFocus: root.highlighted
-        }
-
         Row {
             id: leading
             anchors.left: parent.left
@@ -174,7 +165,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
             }
 
-            Text {
+            Md3Text {
                 text: root.text
                 elide: Text.ElideRight
                 width: Math.max(40, bg.width - 24
@@ -183,13 +174,13 @@ Item {
                                 - (root.icon.length > 0 ? 24 : 0)
                                 - ((root.resolvedTrailing.length > 0 || root.showTrailingCheck) ? 36 : 0)
                                 - 12)
-                color: root.enabled
+                role: Md3Text.BodyLarge
+                tone: Md3Text.Custom
+                customColor: root.enabled
                        ? (root.destructive ? Md3Theme.colorScheme.error
                           : (root.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
                                            : Md3Theme.colorScheme.colorOnSurface))
                        : Md3Theme.colorScheme.disabledContent()
-                font.family: Md3Theme.typography.fontFamily
-                font.pixelSize: Md3Theme.typography.bodyLarge.size
                 anchors.verticalCenter: parent.verticalCenter
             }
         }

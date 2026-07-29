@@ -1,6 +1,6 @@
 import QtQuick
 
-Item {
+Md3AbstractButton {
     id: root
 
     enum Size { Small, Regular, Large }
@@ -8,13 +8,12 @@ Item {
 
     property int size: Md3Fab.Regular
     property int colorRole: Md3Fab.Primary
-    property string icon: "add"
-    /// Degrees applied to the glyph (FAB menu uses 45° when open).
     property real iconRotation: 0
-    property string accessibleName: "Floating action button"
     property string tooltip: ""
+    property real shadowPad: 28
 
-    signal clicked()
+    icon: "add"
+    accessibleName: qsTr("Floating action button")
 
     readonly property real fabSize: {
         switch (size) {
@@ -23,7 +22,7 @@ Item {
         default: return 56
         }
     }
-    readonly property real corner: {
+    cornerRadius: {
         switch (size) {
         case Md3Fab.Small: return Md3Theme.shape.medium
         case Md3Fab.Large: return Md3Theme.shape.extraLarge
@@ -31,9 +30,15 @@ Item {
         }
     }
     readonly property real iconSize: size === Md3Fab.Large ? 36 : 24
-    property real shadowPad: 28 // set lower in dense layouts (e.g. FAB menu)
+    readonly property real elev: {
+        if (!enabled)
+            return 0
+        if (hovered && !pressed)
+            return 8
+        return 6
+    }
 
-    readonly property color containerColor: {
+    containerColor: {
         if (!enabled)
             return Md3Theme.colorScheme.disabledContainer()
         switch (colorRole) {
@@ -43,7 +48,7 @@ Item {
         default: return Md3Theme.colorScheme.primaryContainer
         }
     }
-    readonly property color contentColor: {
+    contentColor: {
         if (!enabled)
             return Md3Theme.colorScheme.disabledContent()
         switch (colorRole) {
@@ -54,37 +59,20 @@ Item {
         }
     }
 
-    readonly property bool hovered: mouse.containsMouse
-    readonly property bool pressed: mouse.pressed
-    readonly property bool focused: activeFocus
-    readonly property real elev: {
-        if (!enabled)
-            return 0
-        if (hovered && !pressed)
-            return 8
-        return 6
-    }
+    pressTarget: bg
+    onPressFeedback: function (x, y) { ripple.pulse(x, y) }
 
     implicitWidth: Math.max(48, fabSize) + shadowPad * 2
     implicitHeight: Math.max(48, fabSize) + shadowPad * 2
     width: implicitWidth
     height: implicitHeight
 
-    activeFocusOnTab: enabled
-    Accessible.name: accessibleName
-    Accessible.role: Accessible.Button
-    Accessible.onPressAction: if (enabled) root.clicked()
-
-    Keys.onReturnPressed: if (enabled) clicked()
-    Keys.onEnterPressed: if (enabled) clicked()
-    Keys.onSpacePressed: if (enabled) clicked()
-
     Md3Shadow {
         anchors.centerIn: parent
         width: fabSize
         height: fabSize
         elevation: root.elev
-        cornerRadius: root.corner
+        cornerRadius: root.cornerRadius
     }
 
     Rectangle {
@@ -92,7 +80,7 @@ Item {
         anchors.centerIn: parent
         width: root.fabSize
         height: root.fabSize
-        radius: root.corner
+        radius: root.cornerRadius
         color: root.containerColor
         clip: true
 
@@ -107,16 +95,16 @@ Item {
         Md3Ripple {
             id: ripple
             rippleColor: root.contentColor
-            clipRadius: root.corner
+            clipRadius: root.cornerRadius
         }
 
         Md3StateOverlay {
             overlayColor: root.contentColor
             hovered: root.hovered
-            focused: root.focused
+            focused: root.activeFocus && root.visualFocus
             pressed: root.pressed
             controlEnabled: root.enabled
-            radius: root.corner
+            radius: root.cornerRadius
         }
 
         Md3Icon {
@@ -139,25 +127,9 @@ Item {
         anchors.centerIn: parent
         width: bg.width + 6
         height: bg.height + 6
-        radius: root.corner + 3
-        focused: root.focused
+        radius: root.cornerRadius + 3
+        focused: root.activeFocus
+        visualFocus: root.visualFocus
         controlEnabled: root.enabled
-    }
-
-    MouseArea {
-        id: mouse
-        anchors.centerIn: parent
-        width: Math.max(48, root.fabSize)
-        height: Math.max(48, root.fabSize)
-        hoverEnabled: true
-        enabled: root.enabled
-        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-        onClicked: function (mouse) {
-            const ox = mouse.x - (width - bg.width) / 2
-            const oy = mouse.y - (height - bg.height) / 2
-            ripple.pulse(ox, oy)
-            root.forceActiveFocus()
-            root.clicked()
-        }
     }
 }

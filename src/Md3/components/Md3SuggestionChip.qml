@@ -1,37 +1,36 @@
 import QtQuick
 
-Item {
+Md3AbstractButton {
     id: root
 
-    property string text: ""
     property bool elevated: false
-    property string accessibleName: text
 
-    signal clicked()
+    accessibleName: text
+    cornerRadius: Md3Theme.shape.small
+    contentColor: enabled ? Md3Theme.colorScheme.colorOnSurfaceVariant
+                          : Md3Theme.colorScheme.disabledContent()
+    containerColor: elevated ? Md3Theme.colorScheme.surfaceContainerLow
+                             : (enabled ? Md3Theme.colorScheme.surface : Md3Theme.colorScheme.disabledContainer())
+
+    pressTarget: bg
+    onPressFeedback: function (x, y) { ripple.pulse(x, y) }
 
     implicitHeight: 32
     implicitWidth: label.implicitWidth + 24
     height: implicitHeight
     width: implicitWidth
-    activeFocusOnTab: enabled
-    Accessible.name: accessibleName
-    Accessible.role: Accessible.Button
-
-    readonly property color contentColor: enabled ? Md3Theme.colorScheme.colorOnSurfaceVariant
-                                                  : Md3Theme.colorScheme.disabledContent()
 
     Md3Shadow {
         anchors.fill: bg
         elevation: root.elevated && root.enabled ? 1 : 0
-        cornerRadius: Md3Theme.shape.small
+        cornerRadius: root.cornerRadius
     }
 
     Rectangle {
         id: bg
         anchors.fill: parent
-        radius: Md3Theme.shape.small
-        color: root.elevated ? Md3Theme.colorScheme.surfaceContainerLow
-                             : (root.enabled ? Md3Theme.colorScheme.surface : Md3Theme.colorScheme.disabledContainer())
+        radius: root.cornerRadius
+        color: root.containerColor
         border.width: root.elevated ? 0 : 1
         border.color: Md3Theme.colorScheme.outline
         clip: true
@@ -39,34 +38,20 @@ Item {
         Md3Ripple { id: ripple; rippleColor: root.contentColor; clipRadius: bg.radius }
         Md3StateOverlay {
             overlayColor: root.contentColor
-            hovered: mouse.containsMouse
-            focused: root.activeFocus
-            pressed: mouse.pressed
+            hovered: root.hovered
+            focused: root.activeFocus && root.visualFocus
+            pressed: root.pressed
             controlEnabled: root.enabled
             radius: bg.radius
         }
 
-        Text {
+        Md3Text {
             id: label
             anchors.centerIn: parent
             text: root.text
-            color: root.contentColor
-            font.family: Md3Theme.typography.fontFamily
-            font.pixelSize: Md3Theme.scaled(Md3Theme.typography.labelLarge.size)
-            font.weight: Md3Theme.typography.labelLarge.weight
-        }
-    }
-
-    MouseArea {
-        id: mouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-        enabled: root.enabled
-        onClicked: function (mouse) {
-            ripple.pulse(mouse.x, mouse.y)
-            root.forceActiveFocus()
-            root.clicked()
+            role: Md3Text.LabelLarge
+            tone: Md3Text.Custom
+            customColor: root.contentColor
         }
     }
 }

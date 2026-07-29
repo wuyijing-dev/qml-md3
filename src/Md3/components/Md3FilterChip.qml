@@ -1,54 +1,51 @@
 import QtQuick
 
-Item {
+/// Filter chip — selection is usually owned by the host (`selected:` binding).
+/// Does not auto-toggle; emit `clicked` and let the parent update `selected`.
+Md3AbstractButton {
     id: root
 
-    property string text: ""
-    property string icon: ""
-    property bool selected: false
     property bool elevated: false
-    property string accessibleName: text
-    /// Compact density for title bars (e.g. 24)
+    property bool selected: false
     property real chipHeight: 32
     property real iconSize: 18
     property real fontSize: Md3Theme.scaled(Md3Theme.typography.labelLarge.size)
 
-    signal clicked()
-
-    implicitHeight: chipHeight
-    implicitWidth: row.implicitWidth + Math.max(12, chipHeight * 0.5)
-    height: implicitHeight
-    width: implicitWidth
-    activeFocusOnTab: enabled
-    Accessible.name: accessibleName
-    Accessible.role: Accessible.Button
-    Accessible.checkable: true
-    Accessible.checked: selected
-
-    readonly property color containerColor: {
+    checkable: false
+    accessibleName: text
+    cornerRadius: Md3Theme.shape.small
+    containerColor: {
         if (!enabled)
             return selected ? Md3Theme.colorScheme.disabledContainer() : "transparent"
         if (selected)
             return Md3Theme.colorScheme.secondaryContainer
         return elevated ? Md3Theme.colorScheme.surfaceContainerLow : Md3Theme.colorScheme.surface
     }
-    readonly property color contentColor: {
+    contentColor: {
         if (!enabled)
             return Md3Theme.colorScheme.disabledContent()
         return selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
                         : Md3Theme.colorScheme.colorOnSurfaceVariant
     }
 
+    pressTarget: bg
+    onPressFeedback: function (x, y) { ripple.pulse(x, y) }
+
+    implicitHeight: chipHeight
+    implicitWidth: row.implicitWidth + Math.max(12, chipHeight * 0.5)
+    height: implicitHeight
+    width: implicitWidth
+
     Md3Shadow {
         anchors.fill: bg
         elevation: root.elevated && root.enabled && !root.selected ? 1 : 0
-        cornerRadius: Md3Theme.shape.small
+        cornerRadius: root.cornerRadius
     }
 
     Rectangle {
         id: bg
         anchors.fill: parent
-        radius: Md3Theme.shape.small
+        radius: root.cornerRadius
         color: root.containerColor
         border.width: (!root.selected && !root.elevated) ? 1 : 0
         border.color: Md3Theme.colorScheme.outline
@@ -65,9 +62,9 @@ Item {
         Md3Ripple { id: ripple; rippleColor: root.contentColor; clipRadius: bg.radius }
         Md3StateOverlay {
             overlayColor: root.contentColor
-            hovered: mouse.containsMouse
-            focused: root.activeFocus
-            pressed: mouse.pressed
+            hovered: root.hovered
+            focused: root.activeFocus && root.visualFocus
+            pressed: root.pressed
             controlEnabled: root.enabled
             radius: bg.radius
         }
@@ -90,28 +87,14 @@ Item {
                 iconColor: root.contentColor
                 anchors.verticalCenter: parent.verticalCenter
             }
-            Text {
+            Md3Text {
                 text: root.text
-                color: root.contentColor
-                font.family: Md3Theme.typography.fontFamily
+                role: Md3Text.LabelLarge
+                tone: Md3Text.Custom
+                customColor: root.contentColor
                 font.pixelSize: root.fontSize
-                font.weight: Md3Theme.typography.labelLarge.weight
                 anchors.verticalCenter: parent.verticalCenter
             }
-        }
-    }
-
-    MouseArea {
-        id: mouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-        enabled: root.enabled
-        onClicked: function (mouse) {
-            ripple.pulse(mouse.x, mouse.y)
-            root.selected = !root.selected
-            root.forceActiveFocus()
-            root.clicked()
         }
     }
 }
