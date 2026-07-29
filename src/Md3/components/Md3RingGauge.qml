@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Shapes
 
-/// Classic horseshoe / arc KPI gauge (open bottom).
+/// Full 360° ring / donut progress gauge.
 Item {
     id: root
 
@@ -11,12 +11,12 @@ Item {
     property string label: ""
     property string unit: "%"
     property int decimals: 0
-    property real strokeWidth: 10
-    property real startAngle: -210
-    property real sweepAngle: 240
+    property real strokeWidth: 12
+    property real startAngle: -90
     property color trackColor: Md3Theme.colorScheme.surfaceContainerHighest
     property color valueColor: Md3Theme.colorScheme.primary
     property bool showValue: true
+    property bool roundedCaps: true
     property real size: 140
 
     readonly property real progress: {
@@ -24,6 +24,7 @@ Item {
         return Math.max(0, Math.min(1, (value - from) / span))
     }
     readonly property string valueText: Number(value).toFixed(decimals) + (unit.length ? unit : "")
+    readonly property real _r: Math.min(width, height) / 2 - strokeWidth
 
     width: size
     height: size
@@ -38,14 +39,14 @@ Item {
             strokeWidth: root.strokeWidth
             strokeColor: root.trackColor
             fillColor: "transparent"
-            capStyle: ShapePath.RoundCap
+            capStyle: root.roundedCaps ? ShapePath.RoundCap : ShapePath.FlatCap
             PathAngleArc {
                 centerX: root.width / 2
                 centerY: root.height / 2
-                radiusX: Math.min(root.width, root.height) / 2 - root.strokeWidth
-                radiusY: radiusX
+                radiusX: root._r
+                radiusY: root._r
                 startAngle: root.startAngle
-                sweepAngle: root.sweepAngle
+                sweepAngle: 360
             }
         }
 
@@ -53,14 +54,14 @@ Item {
             strokeWidth: root.strokeWidth
             strokeColor: root.valueColor
             fillColor: "transparent"
-            capStyle: ShapePath.RoundCap
+            capStyle: root.roundedCaps ? ShapePath.RoundCap : ShapePath.FlatCap
             PathAngleArc {
                 centerX: root.width / 2
                 centerY: root.height / 2
-                radiusX: Math.min(root.width, root.height) / 2 - root.strokeWidth
-                radiusY: radiusX
+                radiusX: root._r
+                radiusY: root._r
                 startAngle: root.startAngle
-                sweepAngle: root.sweepAngle * root.progress
+                sweepAngle: 360 * root.progress
             }
         }
     }

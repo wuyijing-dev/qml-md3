@@ -45,8 +45,13 @@
 - [Md3BarChart](Md3BarChart.md) — Vertical / horizontal / stacked bar chart — zoom/pan/probe like Md3LineChart.
 - [Md3Chart](Md3Chart.md) — Base for all Md3 charts — shared plot metrics, theme resolve, pause/rebuild API. Includes `areaOpacity` / `areaEmphasis` for area fills.
 - [Md3CodeBlock](Md3CodeBlock.md) — Read-only code block with lightweight syntax highlighting (QML / JS / C++ / JSON / plain).
-- [Md3Gauge](Md3Gauge.md) — Circular KPI gauge / meter.
-- [Md3HeatmapChart](Md3HeatmapChart.md) — Heatmap matrix chart.
+- [Md3Gauge](Md3Gauge.md) — Open-arc KPI gauge (see also Ring / Needle / Segment / Dots / MultiRing).
+- [Md3RingGauge](Md3RingGauge.md) — Full 360° ring gauge.
+- [Md3NeedleGauge](Md3NeedleGauge.md) — Analog needle gauge with ticks.
+- [Md3SegmentGauge](Md3SegmentGauge.md) — Segmented arc gauge.
+- [Md3DotsGauge](Md3DotsGauge.md) — Circular dots progress gauge.
+- [Md3MultiRingGauge](Md3MultiRingGauge.md) — Concentric multi-ring gauge.
+- [Md3HeatmapChart](Md3HeatmapChart.md) — Matrix or GitHub contribution heatmap.
 - [Md3LineChart](Md3LineChart.md) — Line / area chart — QtQuick.Shapes. Extends Md3Chart. Supports X zoom/pan (`interactive`) and nearest-point probe (`showProbe`).
 - [Md3PieChart](Md3PieChart.md) — Pie / donut chart with hover probe (slice value + percent).
 - [Md3ScatterChart](Md3ScatterChart.md) — Scatter chart — X/Y points with zoom/pan/probe (parity with line chart ops).

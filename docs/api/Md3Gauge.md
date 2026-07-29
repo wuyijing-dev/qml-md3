@@ -1,9 +1,19 @@
 # Md3Gauge
 
 - **Source:** `src/Md3/components/Md3Gauge.qml`
-- **Extends:** `Item`
 
-Circular KPI gauge / meter.
+Classic open-arc (horseshoe) KPI gauge.
+
+## Related gauges (separate files)
+
+| Component | File | Look |
+|-----------|------|------|
+| `Md3Gauge` | `Md3Gauge.qml` | Open arc |
+| `Md3RingGauge` | `Md3RingGauge.qml` | Full 360° ring |
+| `Md3NeedleGauge` | `Md3NeedleGauge.qml` | Needle + ticks |
+| `Md3SegmentGauge` | `Md3SegmentGauge.qml` | Discrete segments |
+| `Md3DotsGauge` | `Md3DotsGauge.qml` | Dots around ring |
+| `Md3MultiRingGauge` | `Md3MultiRingGauge.qml` | Concentric rings |
 
 ## Properties
 
@@ -13,6 +23,6 @@ Circular KPI gauge / meter.
 | `label` / `unit` | `string` | |
 | `size` | `real` | `140` |
 | `strokeWidth` | `real` | `10` |
+| `startAngle` / `sweepAngle` | `real` | `-210` / `240` |
 | `valueColor` / `trackColor` | `color` | theme |
 | `showValue` | `bool` | `true` |
-| `progress` | `real` | readonly 0–1 |

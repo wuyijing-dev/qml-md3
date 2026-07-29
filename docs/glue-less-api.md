@@ -312,11 +312,22 @@ Md3ScrollView {
 
 ```qml
 Md3Gauge { value: 72; label: qsTr("CPU"); unit: "%" }
+Md3RingGauge { value: 64; label: qsTr("Disk") }
+Md3NeedleGauge { value: 55; label: qsTr("Speed") }
+Md3SegmentGauge { value: 8; to: 12; segments: 12 }
+Md3DotsGauge { value: 70 }
+Md3MultiRingGauge {
+    centerValue: "81%"
+    rings: [
+        { value: 81, color: Md3Theme.colorScheme.primary },
+        { value: 64, color: Md3Theme.colorScheme.tertiary }
+    ]
+}
 Md3Sparkline { values: [12, 18, 22, 31]; showArea: true; showLastDot: true }
 Md3HeatmapChart {
-    rowLabels: ["Mon", "Tue"]
-    columnLabels: ["AM", "PM"]
-    values: [[2, 8], [4, 12]]
+    style: Md3HeatmapChart.Contribution
+    weeks: 53
+    values: contributionDayCounts
 }
 Md3LineChart { showArea: true; areaEmphasis: true; areaOpacity: 0.35 }
 ```

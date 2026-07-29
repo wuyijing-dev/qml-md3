@@ -10,50 +10,82 @@ Item {
         Md3Card {
             variant: Md3Card.Outlined
             width: root.width
-            height: 280
+            // bodySlot fillFallback-friendly: give card enough height
+            implicitHeight: 420
+            height: 420
             Column {
                 width: parent.width
-                spacing: 12
+                spacing: 16
                 Text {
-                    text: qsTr("KPI — Gauge + Sparkline")
+                    text: qsTr("圆形表盘")
                     color: Md3Theme.colorScheme.colorOnSurface
                     font.pixelSize: Md3Theme.typography.titleSmall.size
                 }
-                Row {
-                    spacing: 24
+                Flow {
+                    width: parent.width
+                    spacing: 20
                     Md3Gauge {
                         value: 72
-                        label: qsTr("CPU")
+                        label: qsTr("Arc")
                         unit: "%"
-                        size: 120
+                        size: 112
                     }
-                    Md3Gauge {
-                        value: 48
-                        label: qsTr("Memory")
+                    Md3RingGauge {
+                        value: 64
+                        label: qsTr("Ring")
                         unit: "%"
+                        size: 112
                         valueColor: Md3Theme.colorScheme.tertiary
+                    }
+                    Md3NeedleGauge {
+                        value: 55
+                        label: qsTr("Needle")
+                        unit: ""
                         size: 120
                     }
-                    Column {
-                        spacing: 8
+                    Md3SegmentGauge {
+                        value: 8
+                        from: 0
+                        to: 12
+                        segments: 12
+                        label: qsTr("Segment")
+                        unit: ""
+                        decimals: 0
+                        size: 112
+                        valueColor: Md3Theme.colorScheme.secondary
+                    }
+                    Md3DotsGauge {
+                        value: 70
+                        label: qsTr("Dots")
+                        unit: "%"
+                        size: 112
+                        valueColor: Md3Theme.colorScheme.primary
+                    }
+                    Md3MultiRingGauge {
+                        size: 120
+                        centerValue: "81%"
+                        centerLabel: qsTr("Multi")
+                        rings: [
+                            { value: 81, color: Md3Theme.colorScheme.primary },
+                            { value: 64, color: Md3Theme.colorScheme.tertiary },
+                            { value: 42, color: Md3Theme.colorScheme.secondary }
+                        ]
+                    }
+                }
+                Row {
+                    spacing: 16
+                    Text {
                         anchors.verticalCenter: parent.verticalCenter
-                        Text {
-                            text: qsTr("Requests / min")
-                            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                            font.pixelSize: Md3Theme.typography.labelLarge.size
-                        }
-                        Md3Sparkline {
-                            width: 160
-                            height: 48
-                            showArea: true
-                            showLastDot: true
-                            values: [12, 18, 15, 22, 28, 24, 31, 27, 35, 40, 38, 42]
-                        }
-                        Text {
-                            text: qsTr("42 peak")
-                            color: Md3Theme.colorScheme.primary
-                            font.pixelSize: Md3Theme.typography.titleMedium.size
-                        }
+                        text: qsTr("Requests / min")
+                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                        font.pixelSize: Md3Theme.typography.labelLarge.size
+                    }
+                    Md3Sparkline {
+                        width: 160
+                        height: 40
+                        showArea: true
+                        showLastDot: true
+                        values: [12, 18, 15, 22, 28, 24, 31, 27, 35, 40, 38, 42]
                     }
                 }
             }
@@ -64,27 +96,38 @@ Item {
         Md3Card {
             variant: Md3Card.Outlined
             width: root.width
-            height: 300
+            height: 220
             Column {
                 width: parent.width
                 spacing: 8
                 Text {
-                    text: qsTr("Heatmap")
+                    text: qsTr("Contribution heatmap (GitHub)")
                     color: Md3Theme.colorScheme.colorOnSurface
                     font.pixelSize: Md3Theme.typography.titleSmall.size
                 }
                 Md3HeatmapChart {
                     width: parent.width
-                    height: 240
-                    rowLabels: ["Mon", "Tue", "Wed", "Thu", "Fri"]
-                    columnLabels: ["0", "4", "8", "12", "16", "20"]
-                    values: [
-                        [2, 4, 8, 12, 9, 3],
-                        [1, 3, 10, 18, 14, 5],
-                        [3, 5, 11, 16, 12, 4],
-                        [2, 6, 9, 14, 11, 6],
-                        [1, 2, 7, 10, 8, 2]
-                    ]
+                    style: Md3HeatmapChart.Contribution
+                    weeks: 53
+                    cellSize: 11
+                    cellGap: 3
+                    cellRadius: 2
+                    values: {
+                        const rows = []
+                        for (let i = 0; i < 53 * 7; ++i) {
+                            const w = i % 7
+                            const week = Math.floor(i / 7)
+                            let n = 0
+                            if ((week + w) % 5 === 0)
+                                n = 1 + (i % 4)
+                            if ((week * 3 + w) % 11 === 0)
+                                n = 3 + (i % 2)
+                            if (i % 29 === 0)
+                                n = 4
+                            rows.push(n)
+                        }
+                        return rows
+                    }
                 }
             }
         }

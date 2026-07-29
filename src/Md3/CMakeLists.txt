@@ -286,6 +286,11 @@ qt_add_qml_module(Md3
         components/Md3PieChart.qml
         components/Md3HeatmapChart.qml
         components/Md3Gauge.qml
+        components/Md3RingGauge.qml
+        components/Md3NeedleGauge.qml
+        components/Md3SegmentGauge.qml
+        components/Md3MultiRingGauge.qml
+        components/Md3DotsGauge.qml
         components/Md3Sparkline.qml
         components/Md3CodeBlock.qml
         components/Md3Skeleton.qml
