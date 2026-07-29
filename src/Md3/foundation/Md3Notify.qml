@@ -36,7 +36,9 @@ QtObject {
         return ""
     }
 
-    /// Top-center short toast. options: { severity, durationMs }
+    /// Toast. options: { severity, durationMs, position, id }
+    /// position: Md3ToastHost.TopCenter|TopRight|TopLeft|BottomRight|BottomLeft
+    ///   or string "topCenter" / "topRight" / "topLeft" / "bottomRight" / "bottomLeft"
     /// severity: Md3Toast.Default | Success | Warning | Error (or 0–3)
     function toast(message, options) {
         if (toastHost && typeof toastHost.show === "function")

@@ -176,12 +176,13 @@ Item {
             }
 
             Text {
-                text: qsTr("Toast (top, short) vs Snackbar (bottom queue)")
+                text: qsTr("Toast (multi + position) vs Snackbar (bottom queue)")
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: Md3Theme.typography.labelMedium.size
             }
             RowLayout {
                 spacing: 8
+                Layout.fillWidth: true
                 Md3Button {
                     text: qsTr("Toast")
                     onClicked: Md3Notify.toast(qsTr("Copied to clipboard"), { severity: Md3Toast.Success })
@@ -190,6 +191,45 @@ Item {
                     text: qsTr("Toast warning")
                     variant: Md3Button.Outlined
                     onClicked: Md3Notify.toast(qsTr("Still syncing…"), { severity: Md3Toast.Warning })
+                }
+                Md3Button {
+                    text: qsTr("Queue 3 toasts")
+                    variant: Md3Button.Outlined
+                    onClicked: {
+                        Md3Notify.toast(qsTr("First toast"), { severity: Md3Toast.Success })
+                        Md3Notify.toast(qsTr("Second toast"), { severity: Md3Toast.Default })
+                        Md3Notify.toast(qsTr("Third toast"), { severity: Md3Toast.Warning })
+                    }
+                }
+            }
+            Md3FlowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+                rowSpacing: 8
+                Md3Button {
+                    text: qsTr("Top center")
+                    variant: Md3Button.Text
+                    onClicked: Md3Notify.toast(qsTr("Top center"), { position: Md3ToastHost.TopCenter })
+                }
+                Md3Button {
+                    text: qsTr("Top right")
+                    variant: Md3Button.Text
+                    onClicked: Md3Notify.toast(qsTr("Top right"), { position: Md3ToastHost.TopRight, severity: Md3Toast.Success })
+                }
+                Md3Button {
+                    text: qsTr("Top left")
+                    variant: Md3Button.Text
+                    onClicked: Md3Notify.toast(qsTr("Top left"), { position: Md3ToastHost.TopLeft })
+                }
+                Md3Button {
+                    text: qsTr("Bottom right")
+                    variant: Md3Button.Text
+                    onClicked: Md3Notify.toast(qsTr("Bottom right"), { position: Md3ToastHost.BottomRight, severity: Md3Toast.Warning })
+                }
+                Md3Button {
+                    text: qsTr("Bottom left")
+                    variant: Md3Button.Text
+                    onClicked: Md3Notify.toast(qsTr("Bottom left"), { position: Md3ToastHost.BottomLeft, severity: Md3Toast.Error })
                 }
             }
 

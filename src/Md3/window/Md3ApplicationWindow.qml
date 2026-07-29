@@ -447,7 +447,7 @@ Window {
         return snackbarHost.show(message, options)
     }
 
-    /// Top-center toast. options: { severity, durationMs }
+    /// Toast. options: { severity, durationMs, position, id }
     function showToast(message, options) {
         return toastHost.show(message, options)
     }
@@ -1098,9 +1098,9 @@ Window {
 
             Md3ToastHost {
                 id: toastHost
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
+                anchors.fill: parent
+                dodgeBottom: root.statusBarHeight
+                             + (perfDockHost.wantVisible ? (perfPanel.height + 28) : 0)
                 z: 1300
             }
 

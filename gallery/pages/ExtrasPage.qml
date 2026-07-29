@@ -242,12 +242,14 @@ Item {
             Md3FileDropZone {
                 id: dropDemo
                 Layout.fillWidth: true
-                Layout.preferredHeight: 180
-                acceptedExtensions: [".qml", ".json", ".md"]
+                Layout.preferredHeight: 280
+                tableBodyHeight: 180
+                acceptedExtensions: [".qml", ".json", ".md", ".txt", ".png", ".jpg", ".zip"]
                 onFilesDropped: function (items) {
-                    const w = _galleryWindow()
-                    if (w)
-                        w.showStatusMessage(qsTr("Dropped %1 item(s)").arg(items.length))
+                    Md3Notify.toast(qsTr("Added %1 file(s)").arg(items.length), {
+                        severity: Md3Toast.Success,
+                        position: Md3ToastHost.TopRight
+                    })
                 }
             }
 

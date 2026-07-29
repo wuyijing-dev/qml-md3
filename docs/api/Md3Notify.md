@@ -9,7 +9,7 @@ Singleton helpers for app-wide notifications.
 
 | Method | Description |
 |--------|-------------|
-| `toast(message, options?)` | Top-center short toast on `Md3ToastHost` |
+| `toast(message, options?)` | Multi-toast on `Md3ToastHost` — options: `{ severity, durationMs, position, id }` |
 | `snackbar(message, options?)` | Enqueue on registered `Md3SnackbarHost` |
 | `dismissAll()` | Clear snackbars + toast |
 | `registerHost` / `unregisterHost` | Snackbar host (automatic) |

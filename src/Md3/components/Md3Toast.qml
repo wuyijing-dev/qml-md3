@@ -1,7 +1,6 @@
 import QtQuick
 
-/// Short-lived toast — top-center, non-blocking. Prefer Snackbar for actions / bottom queue,
-/// InfoBar for persistent in-page status.
+/// Short-lived toast chip. Prefer Md3ToastHost / Md3Notify.toast for stacking & position.
 Item {
     id: root
 
@@ -15,14 +14,12 @@ Item {
 
     signal closed()
 
-    width: Math.min(maxWidth, (parent ? parent.width : maxWidth) - 48)
+    width: Math.min(maxWidth, box.implicitWidth)
     height: box.implicitHeight
-    visible: open || opacity > 0.01
+    visible: open || opacity > 0.01 || scale > 0.92
     opacity: open ? 1 : 0
-    z: 1300
-    anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
-    anchors.top: parent ? parent.top : undefined
-    anchors.topMargin: 16 + (open ? 0 : -8)
+    scale: open ? 1 : 0.94
+    transformOrigin: Item.Center
 
     readonly property color bg: {
         switch (severity) {
@@ -73,7 +70,7 @@ Item {
             easing.bezierCurve: Md3Motion.standard
         }
     }
-    Behavior on anchors.topMargin {
+    Behavior on scale {
         NumberAnimation {
             duration: Md3Motion.spatialDuration
             easing.type: Easing.BezierSpline
@@ -86,6 +83,7 @@ Item {
         anchors.fill: parent
         radius: Md3Theme.shape.full
         color: root.bg
+        implicitWidth: Math.min(root.maxWidth, label.implicitWidth + 40)
         implicitHeight: label.implicitHeight + 20
 
         Text {
