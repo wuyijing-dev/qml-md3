@@ -932,6 +932,7 @@ Item {
                                                 }
                                             }
                                             MouseArea {
+                                                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                                                 anchors.fill: parent
                                                 anchors.rightMargin: root.actionsColWidth
                                                 z: -1
@@ -1049,6 +1050,7 @@ Item {
                                 height: parent.height
                                 Md3Checkbox { anchors.centerIn: parent; tristate: true; checkState: root.headerCheckState }
                                 MouseArea {
+                                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                                     anchors.fill: parent
                                     z: 1
                                     onClicked: root.selectPage(root.headerCheckState !== Qt.Checked)

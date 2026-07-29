@@ -90,6 +90,7 @@ Item {
         anchors.topMargin: root._top
         anchors.bottomMargin: root._bottom
         hoverEnabled: chart && (chart.showProbe || (root.enableZoomPan && chart.interactive))
+        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
         acceptedButtons: Qt.LeftButton
         preventStealing: root.enableZoomPan && chart && chart.interactive
                          && (pressed || dragging)

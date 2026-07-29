@@ -171,7 +171,7 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         enabled: root.enabled
-        cursorShape: Qt.PointingHandCursor
+        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
         onClicked: function (mouse) {
             root.visualFocus = false
             const local = mapToItem(bg, mouse.x, mouse.y)

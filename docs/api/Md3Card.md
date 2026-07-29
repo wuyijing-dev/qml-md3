@@ -1,17 +1,8 @@
 # Md3Card
 
 - **Source:** `src/Md3/components/Md3Card.qml`
-- **Extends:** `Item`
-
-## Import
-
-```qml
-import Md3
-```
 
 ## Enums
-
-### `Md3Card.Variant`
 
 `Elevated`, `Filled`, `Outlined`
 
@@ -22,25 +13,24 @@ import Md3
 | `variant` | int | `Elevated` | Surface style |
 | `clickable` | bool | `false` | Emits `clicked` |
 | `padding` | real | `16` | Content inset |
-| `layoutMode` | int | `Md3ContainerBody.Fit` | Fit or Scroll body |
-| `title` | string | `""` | Optional header (no nested Text needed) |
-| `subtitle` | string | `""` | Optional supporting header |
-| `content` | alias | default | Body children under the header |
-| `elev` / `containerColor` | readonly | — | Resolved chrome |
+| `layoutMode` | int | `Fit` | Fit or Scroll body |
+| `title` / `subtitle` | string | `""` | Optional header |
+| `headerTrailing` | alias | — | Custom trailing header slot |
+| `actions` | var | `[]` | `[{ text, icon?, variant? }]` header buttons |
+| `content` | alias | default | Body under the header |
 
 ## Signals
 
-| Signal | Description |
-|--------|-------------|
-| `clicked()` | When `clickable` |
+`clicked()`, `actionClicked(int index)`
 
 ## Example
 
 ```qml
 Md3Card {
     title: qsTr("Storage")
-    subtitle: qsTr("Local cache settings")
-    layoutMode: Md3ContainerBody.Scroll
-    Md3Switch { /* ... */ }
+    subtitle: qsTr("Local cache")
+    actions: [{ text: qsTr("Reset"), variant: "outlined" }]
+    onActionClicked: (i) => console.log(i)
+    Md3Switch { text: qsTr("Enabled") }
 }
 ```

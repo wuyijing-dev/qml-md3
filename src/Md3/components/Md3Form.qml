@@ -8,7 +8,16 @@ Item {
     property int layoutMode: Md3ContainerBody.Fit
     /// Optional required field names used by validate() when no list is passed.
     property var requiredFields: []
-    default property alias content: host.content
+    /// Vertical spacing between direct field children (built-in stack — no Md3VStack glue).
+    property real spacing: 12
+    /// Stretch direct children to form width.
+    property bool fillFields: true
+    default property alias content: formStack.data
+
+    implicitWidth: Math.max(200, host.implicitWidth)
+    implicitHeight: host.implicitHeight
+    width: parent ? parent.width : implicitWidth
+    height: implicitHeight
 
     function setError(name, message) {
         const next = Object.assign({}, errors)
@@ -31,7 +40,7 @@ Item {
 
     function collectFields() {
         const out = []
-        _walk(host.contentHost, out)
+        _walk(formStack, out)
         return out
     }
 
@@ -120,7 +129,15 @@ Item {
 
     Md3ContainerBody {
         id: host
-        anchors.fill: parent
+        width: parent.width
         layoutMode: root.layoutMode
+
+        Md3VStack {
+            id: formStack
+            width: parent.width
+            spacing: root.spacing
+            fillWidth: root.fillFields
+            stretchChildren: root.fillFields
+        }
     }
 }

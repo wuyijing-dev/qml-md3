@@ -169,6 +169,7 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 enabled: root.enabled
+                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                 onClicked: root.trailingClicked()
             }
         }
@@ -186,6 +187,7 @@ Item {
         id: mouse
         anchors.fill: parent
         hoverEnabled: true
+        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
         enabled: root.enabled
         z: -1
         onClicked: {

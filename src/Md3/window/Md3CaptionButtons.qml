@@ -148,7 +148,7 @@ Item {
             id: mouse
             anchors.fill: parent
             hoverEnabled: true
-            cursorShape: Qt.ArrowCursor
+            cursorShape: Qt.PointingHandCursor
             // When snap layouts claim HTMAXBUTTON, OS may swallow events; still wire click for other platforms
             onClicked: btn.clicked()
             onContainsMouseChanged: {

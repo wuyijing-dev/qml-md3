@@ -181,6 +181,7 @@ Item {
         id: mouse
         anchors.fill: parent
         hoverEnabled: true
+        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
         enabled: root.enabled
         onClicked: {
             root.forceActiveFocus()

@@ -238,6 +238,7 @@ Item {
         MouseArea {
             anchors.fill: parent
             enabled: root.modal && root.open
+            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
             onClicked: root.cancel()
         }
     }
@@ -501,6 +502,7 @@ Item {
                                 MouseArea {
                                     anchors.fill: parent
                                     enabled: cell.dayEnabled
+                                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                                     onClicked: root.pickDay(cell.cellDate)
                                 }
                             }

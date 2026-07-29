@@ -124,6 +124,7 @@ Rectangle {
                     id: mouse
                     anchors.fill: parent
                     hoverEnabled: true
+                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                     onClicked: function (mouse) {
                         const local = mapToItem(iconSlot, mouse.x, mouse.y)
                         ripple.pulse(local.x, local.y)

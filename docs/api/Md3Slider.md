@@ -10,6 +10,7 @@ Material 3 capsule slider with optional field label.
 |------|------|---------|-------------|
 | `from` / `to` / `value` / `stepSize` | real | `0`/`1`/`0.5`/`0` | Range |
 | `label` | string | `""` | Header label above track |
+| `leadingIcon` | string | `""` | Icon left of label (volume-row pattern) |
 | `showValue` | bool | `false` | Inline value next to label |
 | `valueDecimals` | int | `2` | Digits when not integer steps |
 | `showLabel` | bool | `false` | Floating bubble while dragging |
@@ -25,6 +26,7 @@ Material 3 capsule slider with optional field label.
 
 ```qml
 Md3Slider {
+    leadingIcon: "volume_up"
     label: qsTr("Volume")
     showValue: true
     from: 0; to: 100; value: 42

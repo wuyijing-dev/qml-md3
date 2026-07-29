@@ -104,6 +104,7 @@ Item {
             }
 
             MouseArea {
+                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                 anchors.fill: parent
                 onClicked: {
                     list.currentIndex = parent.listIndex

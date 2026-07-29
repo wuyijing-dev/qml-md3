@@ -403,6 +403,7 @@ Item {
                                     font.pixelSize: Md3Theme.typography.bodyLarge.size
                                 }
                                 MouseArea {
+                                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                                     anchors.fill: parent
                                     onClicked: root.pickYear(modelData)
                                 }

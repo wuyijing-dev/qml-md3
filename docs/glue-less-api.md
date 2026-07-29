@@ -16,9 +16,10 @@ Md3Radio { text: qsTr("Option A"); value: "a"; group: g }
 
 ```qml
 Md3Slider {
-    label: qsTr("Frost / blur")
+    leadingIcon: "volume_up"
+    label: qsTr("Media volume")
     showValue: true
-    from: 0; to: 1; value: 0.45
+    from: 0; to: 100; value: 42
 }
 
 Md3RangeSlider {
@@ -29,6 +30,19 @@ Md3RangeSlider {
 ```
 
 `showLabel` on Slider still shows the floating bubble while dragging; `showValue` is the inline header value.
+
+## Radio group
+
+```qml
+Md3RadioGroup {
+    value: "a"
+    model: [
+        { text: qsTr("Option A"), value: "a" },
+        { text: qsTr("Option B"), value: "b" },
+        { text: qsTr("Option C"), value: "c", enabled: false }
+    ]
+}
+```
 
 ## Button group
 
@@ -77,6 +91,8 @@ Md3ListTile {
 Md3Card {
     title: qsTr("Storage")
     subtitle: qsTr("Local cache")
+    actions: [{ text: qsTr("Reset"), variant: "outlined" }]
+    onActionClicked: (i) => console.log(i)
     layoutMode: Md3ContainerBody.Scroll
     /* body */
 }
@@ -132,6 +148,7 @@ Md3Menu {
 Md3Form {
     id: form
     requiredFields: ["email"]
+    // Built-in vertical stack — no Md3VStack / width: parent.width glue
     Md3TextField { name: "email"; label: qsTr("Email") }
     Md3Button {
         text: qsTr("Save")

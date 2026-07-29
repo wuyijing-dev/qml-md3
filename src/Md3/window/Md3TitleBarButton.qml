@@ -57,7 +57,7 @@ Item {
         id: mouse
         anchors.fill: parent
         hoverEnabled: true
-        cursorShape: Qt.ArrowCursor
+        cursorShape: Qt.PointingHandCursor
         onClicked: root.clicked()
     }
 }

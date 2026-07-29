@@ -16,6 +16,8 @@ Item {
     property bool showLabel: false
     /// Field label above the track (replaces Column { Text; Slider } glue).
     property string label: ""
+    /// Material icon left of `label` (Android volume-row pattern).
+    property string leadingIcon: ""
     /// Show current value to the right of `label`.
     property bool showValue: false
     property int valueDecimals: 2
@@ -35,7 +37,7 @@ Item {
 
     signal moved(real value)
 
-    readonly property real _headerH: (label.length > 0 || showValue) ? 24 : 0
+    readonly property real _headerH: (label.length > 0 || showValue || leadingIcon.length > 0) ? 24 : 0
     readonly property real _bodyH: Math.max(48, handleHeight + 16)
 
     height: _headerH > 0 ? _headerH + 4 + _bodyH : _bodyH
@@ -92,13 +94,23 @@ Item {
 
     Row {
         id: headerRow
-        visible: root.label.length > 0 || root.showValue
+        visible: root.label.length > 0 || root.showValue || root.leadingIcon.length > 0
         width: parent.width
         height: root._headerH
         spacing: 8
 
+        Md3Icon {
+            visible: root.leadingIcon.length > 0
+            icon: root.leadingIcon
+            size: 20
+            iconColor: root.enabled ? Md3Theme.colorScheme.primary
+                                    : Md3Theme.colorScheme.disabledContent()
+            anchors.verticalCenter: parent.verticalCenter
+        }
         Md3Text {
-            width: Math.max(0, parent.width - valueLabel.implicitWidth - parent.spacing)
+            width: Math.max(0, parent.width
+                            - (root.leadingIcon.length > 0 ? 20 + parent.spacing : 0)
+                            - valueLabel.implicitWidth - parent.spacing)
             text: root.label
             role: Md3Text.BodyMedium
             tone: Md3Text.OnSurfaceVariant
@@ -262,6 +274,7 @@ Item {
         parent: sliderBody
         anchors.fill: parent
         hoverEnabled: true
+        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
         enabled: root.enabled
         preventStealing: true
         onPressed: function (mouse) {

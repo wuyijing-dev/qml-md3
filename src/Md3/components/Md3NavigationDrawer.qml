@@ -50,6 +50,7 @@ Item {
         MouseArea {
             anchors.fill: parent
             enabled: root.open && root.modal
+            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
             onClicked: root.dismiss()
         }
     }
@@ -198,6 +199,7 @@ Item {
                             id: mouse
                             anchors.fill: parent
                             hoverEnabled: true
+                            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                             onClicked: function (mouse) {
                                 ripple.pulse(mouse.x, mouse.y)
                                 root.currentIndex = dest.index

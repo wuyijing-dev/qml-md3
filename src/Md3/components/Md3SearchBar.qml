@@ -79,6 +79,7 @@ Item {
         id: mouse
         anchors.fill: parent
         hoverEnabled: true
+        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
         z: -1
         onClicked: {
             input.forceActiveFocus()

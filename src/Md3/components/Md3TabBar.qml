@@ -38,6 +38,7 @@ Item {
                 }
 
                 MouseArea {
+                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                     anchors.fill: parent
                     onClicked: {
                         root.currentIndex = index

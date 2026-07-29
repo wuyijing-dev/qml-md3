@@ -60,6 +60,7 @@ Item {
         anchors.fill: parent
         acceptedButtons: Qt.RightButton
         enabled: root.enabled && root.contextMenu
+        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
         preventStealing: true
         onPressed: function (mouse) {
             if (mouse.button === Qt.RightButton) {

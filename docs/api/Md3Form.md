@@ -1,6 +1,7 @@
 # Md3Form
 
 Container that syncs `values` / `errors` onto named fields (`name` on TextField / Select / NumberField).
+Built-in vertical stack — direct children need no wrapping `Md3VStack`.
 
 - **Source:** `src/Md3/components/Md3Form.qml`
 
@@ -11,6 +12,8 @@ Container that syncs `values` / `errors` onto named fields (`name` on TextField 
 | `errors` | var | `{}` | name → message |
 | `values` | var | `{}` | name → value (from syncValues) |
 | `requiredFields` | var | `[]` | Default list for validate() |
+| `spacing` | real | `12` | Between stacked children |
+| `fillFields` | bool | `true` | Stretch children to form width |
 | `layoutMode` | int | `Fit` | — |
 | `content` | alias | default | Fields |
 

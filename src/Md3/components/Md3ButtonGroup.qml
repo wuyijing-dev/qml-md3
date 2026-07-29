@@ -10,7 +10,7 @@ Item {
     property int layout: Md3ButtonGroup.Standard
     property int variant: Md3ButtonGroup.Outlined
     property var model: [] // [{ text, icon?, enabled? }]
-    property bool enabled: true
+    // Use Item.enabled (do not redeclare)
     property int currentIndex: -1 // optional highlight; -1 = none
     /// When true, clicks update `currentIndex` (no host `onClicked: currentIndex = index` glue).
     property bool autoSelect: true

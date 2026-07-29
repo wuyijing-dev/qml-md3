@@ -180,6 +180,7 @@ Item {
                         }
 
                         MouseArea {
+                            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                             anchors.fill: parent
                             onClicked: {
                                 if (view.currentIndex !== delegateRoot.index)

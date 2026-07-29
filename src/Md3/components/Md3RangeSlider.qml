@@ -154,6 +154,7 @@ Item {
                 anchors.fill: parent
                 anchors.margins: -14
                 enabled: root.enabled
+                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                 preventStealing: true
                 onPositionChanged: function (mouse) {
                     if (!pressed)

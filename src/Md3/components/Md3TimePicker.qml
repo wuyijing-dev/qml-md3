@@ -167,6 +167,7 @@ Item {
         MouseArea {
             anchors.fill: parent
             enabled: root.modal && root.open
+            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
             onClicked: root.cancel()
         }
     }
@@ -332,6 +333,7 @@ Item {
                                 font.weight: Font.Medium
                             }
                             MouseArea {
+                                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                                 anchors.fill: parent
                                 onClicked: root.setPeriod(false)
                             }

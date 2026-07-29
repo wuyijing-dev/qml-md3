@@ -193,6 +193,7 @@ qt_add_qml_module(Md3
         components/Md3SegmentedButton.qml
         components/Md3Checkbox.qml
         components/Md3Radio.qml
+        components/Md3RadioGroup.qml
         components/Md3Switch.qml
         components/Md3Slider.qml
         components/Md3RangeSlider.qml

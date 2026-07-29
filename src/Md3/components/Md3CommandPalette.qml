@@ -86,6 +86,7 @@ Item {
         MouseArea {
             anchors.fill: parent
             enabled: root.open
+            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
             onClicked: root.dismiss()
         }
     }
@@ -263,6 +264,7 @@ Item {
                     MouseArea {
                         anchors.fill: parent
                         hoverEnabled: true
+                        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                         onEntered: root.highlightIndex = index
                         onClicked: root.activateIndex(index)
                     }

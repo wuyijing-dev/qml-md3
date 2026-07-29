@@ -262,6 +262,7 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 enabled: root.open && root.modal && !root.isSubMenu
+                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                 onClicked: root.dismissCascade()
             }
         }

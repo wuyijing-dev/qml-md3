@@ -162,46 +162,39 @@ Flickable {
                 width: parent.width
                 requiredFields: ["email", "role"]
 
-                Md3VStack {
-                    width: parent.width
-                    spacing: 12
-                    Md3TextField {
-                        width: parent.width
-                        name: "email"
-                        label: qsTr("Email")
-                        placeholderText: "you@example.com"
-                    }
-                    Md3Select {
-                        width: parent.width
-                        name: "role"
-                        label: qsTr("Role")
-                        placeholderText: qsTr("Choose a role")
-                        model: [qsTr("Admin"), qsTr("Editor"), qsTr("Viewer")]
-                    }
-                    Md3NumberField {
-                        width: parent.width
-                        name: "seats"
-                        label: qsTr("Seats")
-                        value: 1
-                        from: 1
-                        to: 99
-                    }
-                    Md3HStack {
-                        spacing: 8
-                        Md3Button {
-                            text: qsTr("Validate")
-                            onClicked: {
-                                if (demoForm.validate())
-                                    Md3Notify.snackbar(qsTr("Form OK"))
-                                else
-                                    Md3Notify.snackbar(qsTr("Fix required fields"))
-                            }
+                Md3TextField {
+                    name: "email"
+                    label: qsTr("Email")
+                    placeholderText: "you@example.com"
+                }
+                Md3Select {
+                    name: "role"
+                    label: qsTr("Role")
+                    placeholderText: qsTr("Choose a role")
+                    model: [qsTr("Admin"), qsTr("Editor"), qsTr("Viewer")]
+                }
+                Md3NumberField {
+                    name: "seats"
+                    label: qsTr("Seats")
+                    value: 1
+                    from: 1
+                    to: 99
+                }
+                Md3HStack {
+                    spacing: 8
+                    Md3Button {
+                        text: qsTr("Validate")
+                        onClicked: {
+                            if (demoForm.validate())
+                                Md3Notify.snackbar(qsTr("Form OK"))
+                            else
+                                Md3Notify.snackbar(qsTr("Fix required fields"))
                         }
-                        Md3Button {
-                            text: qsTr("Clear errors")
-                            variant: Md3Button.Outlined
-                            onClicked: demoForm.clearErrors()
-                        }
+                    }
+                    Md3Button {
+                        text: qsTr("Clear errors")
+                        variant: Md3Button.Outlined
+                        onClicked: demoForm.clearErrors()
                     }
                 }
             }

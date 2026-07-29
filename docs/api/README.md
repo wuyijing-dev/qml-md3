@@ -31,6 +31,7 @@
 - [Md3IconButton](Md3IconButton.md)
 - [Md3InputChip](Md3InputChip.md)
 - [Md3Radio](Md3Radio.md)
+- [Md3RadioGroup](Md3RadioGroup.md) — Model-driven radio row/column.
 - [Md3RangeSlider](Md3RangeSlider.md)
 - [Md3SegmentedButton](Md3SegmentedButton.md)
 - [Md3Slider](Md3Slider.md)

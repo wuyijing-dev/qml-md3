@@ -224,6 +224,7 @@ Rectangle {
         z: 0
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         enabled: root.dragEnabled && root.targetWindow !== null
+        cursorShape: Qt.ArrowCursor
         onPressed: function (mouse) {
             if (mouse.button === Qt.RightButton) {
                 const g = mapToGlobal(mouse.x, mouse.y)

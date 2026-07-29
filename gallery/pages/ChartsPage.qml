@@ -106,38 +106,30 @@ Item {
                 variant: Md3Card.Filled
                 Layout.fillWidth: true
                 Layout.preferredHeight: 220
-                Column {
+                title: qsTr("Live sine (Md3LineChart)")
+                Loader {
+                    id: liveChart
                     width: parent.width
-                    spacing: 8
-                    Text {
-                        text: qsTr("Live sine (Md3LineChart)")
-                        color: Md3Theme.colorScheme.colorOnSurface
-                        font.pixelSize: Md3Theme.typography.titleSmall.size
-                    }
-                    Loader {
-                        id: liveChart
-                        width: parent.width
-                        height: 160
-                        active: true
-                        asynchronous: false
-                        sourceComponent: Component {
-                            Md3LineChart {
-                                live: true
-                                paused: true
-                                livePointCount: 32
-                                showDots: false
-                                showArea: true
-                                showProbe: true
-                                smooth: false
-                                minY: 0
-                                maxY: 100
-                                horizontalGridLines: 4
-                                Component.onCompleted: liveArm.start()
-                                Timer {
-                                    id: liveArm
-                                    interval: 32
-                                    onTriggered: parent.paused = false
-                                }
+                    height: 160
+                    active: true
+                    asynchronous: false
+                    sourceComponent: Component {
+                        Md3LineChart {
+                            live: true
+                            paused: true
+                            livePointCount: 32
+                            showDots: false
+                            showArea: true
+                            showProbe: true
+                            smooth: false
+                            minY: 0
+                            maxY: 100
+                            horizontalGridLines: 4
+                            Component.onCompleted: liveArm.start()
+                            Timer {
+                                id: liveArm
+                                interval: 32
+                                onTriggered: parent.paused = false
                             }
                         }
                     }
@@ -209,45 +201,24 @@ Item {
             variant: Md3Card.Outlined
             width: root.width
             height: 280
-            Column {
+            title: qsTr("Zoom / pan / probe (wheel · drag · hover)")
+            subtitle: qsTr("滚轮缩放 · 拖动平移（带惯性）· 悬停探针 · 双击重置。interactive/showProbe 默认开启。")
+            actions: [{ text: qsTr("重置视图"), variant: "outlined" }]
+            onActionClicked: interactChart.resetView()
+            Md3LineChart {
+                id: interactChart
                 width: parent.width
-                spacing: 8
-                RowLayout {
-                    width: parent.width
-                    Text {
-                        Layout.fillWidth: true
-                        text: qsTr("Zoom / pan / probe (wheel · drag · hover)")
-                        color: Md3Theme.colorScheme.colorOnSurface
-                        font.pixelSize: Md3Theme.typography.titleSmall.size
-                    }
-                    Md3Button {
-                        text: qsTr("重置视图")
-                        variant: Md3Button.Outlined
-                        onClicked: interactChart.resetView()
-                    }
-                }
-                Text {
-                    width: parent.width
-                    text: qsTr("滚轮缩放 · 拖动平移（带惯性）· 悬停探针 · 双击重置。interactive/showProbe 默认开启。")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.bodySmall.size
-                    wrapMode: Text.Wrap
-                }
-                Md3LineChart {
-                    id: interactChart
-                    width: parent.width
-                    height: 200
-                    valueDecimals: 1
-                    series: [root._demoSeriesA(), root._demoSeriesB()]
-                    seriesColors: [
-                        Md3Theme.colorScheme.primary,
-                        Md3Theme.colorScheme.secondary
-                    ]
-                    showDots: false
-                    showArea: true
-                    smooth: true
-                    horizontalGridLines: 4
-                }
+                height: 200
+                valueDecimals: 1
+                series: [root._demoSeriesA(), root._demoSeriesB()]
+                seriesColors: [
+                    Md3Theme.colorScheme.primary,
+                    Md3Theme.colorScheme.secondary
+                ]
+                showDots: false
+                showArea: true
+                smooth: true
+                horizontalGridLines: 4
             }
         }
     }

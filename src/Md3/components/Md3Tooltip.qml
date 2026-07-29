@@ -25,6 +25,7 @@ Item {
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
+        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
         acceptedButtons: Qt.NoButton
         onEntered: delay.start()
         onExited: {

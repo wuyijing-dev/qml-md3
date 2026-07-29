@@ -63,6 +63,7 @@ Item {
         MouseArea {
             anchors.fill: parent
             enabled: root.open && root.modal
+            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
             onClicked: root.dismiss()
         }
     }

@@ -115,6 +115,7 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 enabled: host.visible
+                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                 onClicked: root.closePicker()
             }
         }

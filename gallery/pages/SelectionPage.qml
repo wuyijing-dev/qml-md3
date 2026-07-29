@@ -8,46 +8,6 @@ Flickable {
     contentHeight: column.height
     clip: true
 
-    QtObject {
-        id: radioGroup
-        property var selectedValue: "a"
-    }
-
-    component VolumeRow: ColumnLayout {
-        property string iconName: "volume_up"
-        property string title: ""
-        property alias from: slider.from
-        property alias to: slider.to
-        property alias value: slider.value
-        property alias stepSize: slider.stepSize
-        property alias discrete: slider.discrete
-        Layout.fillWidth: true
-        spacing: 6
-
-        RowLayout {
-            spacing: 8
-            Md3Icon {
-                icon: iconName
-                size: 20
-                iconColor: Md3Theme.colorScheme.primary
-            }
-            Text {
-                text: title
-                color: Md3Theme.colorScheme.colorOnSurface
-                font.pixelSize: Md3Theme.typography.bodyMedium.size
-                font.family: Md3Theme.typography.fontFamily
-                Layout.fillWidth: true
-            }
-        }
-            Md3Slider {
-                id: slider
-                Layout.fillWidth: true
-                trackHeight: 20
-                handleWidth: 10
-                showStopIndicator: true
-            }
-    }
-
     ColumnLayout {
         id: column
         width: root.width
@@ -68,11 +28,13 @@ Flickable {
             Md3Checkbox { text: qsTr("Disabled"); enabled: false; checked: true }
         }
 
-        RowLayout {
-            spacing: 8
-            Md3Radio { text: qsTr("Option A"); value: "a"; group: radioGroup; checked: true }
-            Md3Radio { text: qsTr("Option B"); value: "b"; group: radioGroup }
-            Md3Radio { text: qsTr("Option C"); value: "c"; group: radioGroup; enabled: false }
+        Md3RadioGroup {
+            value: "a"
+            model: [
+                { text: qsTr("Option A"), value: "a" },
+                { text: qsTr("Option B"), value: "b" },
+                { text: qsTr("Option C"), value: "c", enabled: false }
+            ]
         }
 
         RowLayout {
@@ -89,25 +51,37 @@ Flickable {
             tone: Md3Text.OnSurfaceVariant
         }
 
-        VolumeRow {
-            iconName: "call"
-            title: qsTr("Call volume")
-            from: 0; to: 100; value: 75; stepSize: 0
+        Md3Slider {
+            Layout.fillWidth: true
+            leadingIcon: "call"
+            label: qsTr("Call volume")
+            from: 0; to: 100; value: 75
+            trackHeight: 20
+            handleWidth: 10
         }
-        VolumeRow {
-            iconName: "alarm"
-            title: qsTr("Alarm volume")
+        Md3Slider {
+            Layout.fillWidth: true
+            leadingIcon: "alarm"
+            label: qsTr("Alarm volume")
             from: 0; to: 100; value: 75; stepSize: 10; discrete: true
+            trackHeight: 20
+            handleWidth: 10
         }
-        VolumeRow {
-            iconName: "notifications"
-            title: qsTr("Ring volume")
-            from: 0; to: 100; value: 25; stepSize: 0
+        Md3Slider {
+            Layout.fillWidth: true
+            leadingIcon: "notifications"
+            label: qsTr("Ring volume")
+            from: 0; to: 100; value: 25
+            trackHeight: 20
+            handleWidth: 10
         }
-        VolumeRow {
-            iconName: "music_note"
-            title: qsTr("Media volume")
-            from: 0; to: 100; value: 28; stepSize: 0
+        Md3Slider {
+            Layout.fillWidth: true
+            leadingIcon: "music_note"
+            label: qsTr("Media volume")
+            from: 0; to: 100; value: 28
+            trackHeight: 20
+            handleWidth: 10
         }
 
         Md3Slider {
