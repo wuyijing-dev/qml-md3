@@ -11,6 +11,7 @@ Item {
     property int quality: 2
     property int dragCount: 0
     property bool liveSampling: true
+    property real samplePadding: 28
 
     readonly property real playgroundAspect: width / Math.max(1, height)
     readonly property real _pad: samplePadding

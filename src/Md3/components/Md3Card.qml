@@ -161,9 +161,11 @@ Item {
                 Item {
                     id: bodySlot
                     width: parent.width
-                    // Fill-anchored children (common for tables/lists) cannot drive
-                    // height via childrenRect — that collapses to 0. Expand to the
-                    // remaining card body height instead.
+                    // Fill-anchored children cannot drive height via childrenRect (collapses
+                    // to 0 / binding loops). Use a stable fallback intrinsic, and only expand
+                    // when the card height is set externally (Layout/anchors).
+                    readonly property real fillFallback: 160
+                    readonly property real headerBlock: headerRow.visible ? (headerRow.height + 8) : 0
                     readonly property bool hasFillChild: {
                         void children.length
                         const kids = children
@@ -171,21 +173,24 @@ Item {
                             const c = kids[i]
                             if (!c || c.visible === false || !c.anchors)
                                 continue
-                            if (c.anchors.fill === bodySlot)
+                            if (c.anchors.fill)
                                 return true
-                            if (c.anchors.top === bodySlot.top && c.anchors.bottom === bodySlot.bottom)
+                            if (c.anchors.top && c.anchors.bottom
+                                    && c.anchors.top === bodySlot.top
+                                    && c.anchors.bottom === bodySlot.bottom)
                                 return true
                         }
                         return false
                     }
                     height: {
-                        if (hasFillChild && root.height > root.padding * 2 + 1) {
-                            const headerH = headerRow.visible ? (headerRow.height + 8) : 0
-                            return Math.max(1, contentHost.height - headerH)
-                        }
-                        return childrenRect.height
+                        if (!hasFillChild)
+                            return childrenRect.height
+                        const intrinsic = root.padding * 2 + headerBlock + fillFallback
+                        if (root.height > intrinsic + 0.5)
+                            return Math.max(1, root.height - root.padding * 2 - headerBlock)
+                        return fillFallback
                     }
-                    implicitHeight: hasFillChild ? Math.max(48, childrenRect.height) : childrenRect.height
+                    implicitHeight: hasFillChild ? fillFallback : childrenRect.height
                     implicitWidth: childrenRect.width
                 }
             }
