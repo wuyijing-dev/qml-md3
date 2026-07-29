@@ -116,9 +116,6 @@ Item {
         anchors.leftMargin: root._isLeft ? root.sideMargin : 0
         anchors.rightMargin: root._isRight ? root.sideMargin : 0
 
-        // Newest on top for top positions; newest at bottom for bottom positions.
-        layoutDirection: Qt.LeftToRight
-
         move: Transition {
             NumberAnimation {
                 properties: "x,y"
