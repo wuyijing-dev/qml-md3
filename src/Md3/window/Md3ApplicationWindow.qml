@@ -442,9 +442,14 @@ Window {
         aboutDialog.openDialog(root)
     }
 
-    /// Enqueue a snackbar on the window host. options: { actionText, dualLine, durationMs, id }
+    /// Enqueue a snackbar on the window host. options: { actionText, dualLine, durationMs, id, priority }
     function showSnackbar(message, options) {
         return snackbarHost.show(message, options)
+    }
+
+    /// Top-center toast. options: { severity, durationMs }
+    function showToast(message, options) {
+        return toastHost.show(message, options)
     }
 
     property real themeRevealCx: 0
@@ -1089,6 +1094,14 @@ Window {
                 dodgeBottom: root.statusBarHeight
                              + (perfDockHost.wantVisible ? (perfPanel.height + 28) : 0)
                 z: 1200
+            }
+
+            Md3ToastHost {
+                id: toastHost
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                z: 1300
             }
 
             // Screen-reader live region for Md3Accessibility.announce()

@@ -18,6 +18,14 @@ Item {
         }
 
         Text {
+            Layout.fillWidth: true
+            wrapMode: Text.Wrap
+            text: qsTr("Keyboard: ↑↓ highlight · Enter/Space activate · Esc dismiss · → submenu · ← close submenu. Tables/trees: arrows · Home/End · PageUp/Down · focus ring when focused.")
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.bodySmall.size
+        }
+
+        Text {
             text: "Option dropdown (animated)"
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.pixelSize: Md3Theme.typography.titleSmall.size

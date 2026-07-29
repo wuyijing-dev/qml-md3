@@ -9,17 +9,21 @@ Singleton helpers for app-wide notifications.
 
 | Method | Description |
 |--------|-------------|
+| `toast(message, options?)` | Top-center short toast on `Md3ToastHost` |
 | `snackbar(message, options?)` | Enqueue on registered `Md3SnackbarHost` |
-| `dismissAll()` | Clear queue + visible snacks |
-| `registerHost(host)` | Usually automatic |
-| `unregisterHost(host)` | Usually automatic |
+| `dismissAll()` | Clear snackbars + toast |
+| `registerHost` / `unregisterHost` | Snackbar host (automatic) |
+| `registerToastHost` / `unregisterToastHost` | Toast host (automatic) |
 
-`options`: `{ actionText, dualLine, durationMs, id, priority }` — higher `priority` is shown before lower ones still waiting in the queue.
+Snackbar `options`: `{ actionText, dualLine, durationMs, id, priority }`
+
+Toast `options`: `{ severity, durationMs }` — severity `Md3Toast.Default|Success|Warning|Error`
 
 ## Example
 
 ```qml
+Md3Notify.toast(qsTr("Copied"))
 Md3Notify.snackbar(qsTr("Saved"), { actionText: qsTr("Undo") })
 ```
 
-`Md3ApplicationWindow` includes a host; bare windows need `Md3SnackbarHost { anchors... }`.
+See [feedback.md](../feedback.md). `Md3ApplicationWindow` registers both hosts.

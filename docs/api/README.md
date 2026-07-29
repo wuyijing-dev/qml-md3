@@ -4,7 +4,7 @@
 
 由 `scripts/gen_api_docs.py` 从 QML 源码生成；改完控件后请重跑该脚本。
 
-集成与 C++ 启动：[../integration.md](../integration.md) · 主题令牌：[../tokens.md](../tokens.md) · 布局少写胶水：[../layout.md](../layout.md) · 控件少写胶水：[../glue-less-api.md](../glue-less-api.md) · 性能取舍：[../performance.md](../performance.md)
+集成与 C++ 启动：[../integration.md](../integration.md) · 主题令牌：[../tokens.md](../tokens.md) · 布局少写胶水：[../layout.md](../layout.md) · 控件少写胶水：[../glue-less-api.md](../glue-less-api.md) · 反馈分工：[../feedback.md](../feedback.md) · 性能取舍：[../performance.md](../performance.md)
 
 ## C++ / native
 
@@ -74,6 +74,8 @@
 - [Md3Badged](Md3Badged.md) — Wraps content and positions an Md3Badge (top-end by default).
 - [Md3Banner](Md3Banner.md)
 - [Md3InfoBar](Md3InfoBar.md) — WinUI-style persistent in-page alert (vs transient Snackbar).
+- [Md3Toast](Md3Toast.md) — Short top-center confirmation.
+- [Md3ToastHost](Md3ToastHost.md)
 - [Md3BottomSheet](Md3BottomSheet.md)
 - [Md3Card](Md3Card.md) — Surface card with optional `title`/`subtitle` and Fit/Scroll `layoutMode`.
 - [Md3Carousel](Md3Carousel.md)
@@ -93,6 +95,8 @@
 - [Md3SideSheet](Md3SideSheet.md) — Modal/standard side sheet — slides from start (left) or end (right).
 - [Md3Skeleton](Md3Skeleton.md) — MD3 skeleton bone — low-cost opacity pulse (avoids continuous sheen transforms).
 - [Md3SkeletonPane](Md3SkeletonPane.md) — Full-pane skeleton used by Md3PageHost while a destination loads. Prefer `bones` (per-page outline); otherwise fall back to `layout` presets.
+- [Md3ScrollBar](Md3ScrollBar.md) — Themed scrollbar for Flickable.
+- [Md3ScrollView](Md3ScrollView.md) — Flickable + Md3ScrollBar overlays.
 - [Md3Snackbar](Md3Snackbar.md)
 - [Md3SnackbarHost](Md3SnackbarHost.md) — Window-level snackbar queue: stacks up to maxVisible, then queues the rest.
 - [Md3SplitView](Md3SplitView.md) — Horizontal (or vertical) draggable split panes for list/detail layouts.

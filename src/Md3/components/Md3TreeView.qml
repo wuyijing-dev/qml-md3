@@ -337,6 +337,14 @@ Item {
                 toggleCheckAt(selectedIndex)
             event.accepted = true
             break
+        case Qt.Key_Home:
+            selectedIndex = 0
+            event.accepted = true
+            break
+        case Qt.Key_End:
+            selectedIndex = n - 1
+            event.accepted = true
+            break
         }
     }
 
@@ -437,6 +445,8 @@ Item {
                         anchors.rightMargin: 4
                         color: row.selected ? Md3Theme.colorScheme.secondaryContainer : "transparent"
                         radius: Md3Theme.shape.small
+                        border.width: row.selected && root.activeFocus ? 2 : 0
+                        border.color: Md3Theme.colorScheme.secondary
                     }
 
                     Row {

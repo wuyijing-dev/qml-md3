@@ -269,6 +269,10 @@ qt_add_qml_module(Md3
         components/Md3Stepper.qml
         components/Md3Banner.qml
         components/Md3InfoBar.qml
+        components/Md3Toast.qml
+        components/Md3ToastHost.qml
+        components/Md3ScrollBar.qml
+        components/Md3ScrollView.qml
         components/Md3Carousel.qml
         components/Md3Form.qml
         components/Md3Chart.qml

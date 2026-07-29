@@ -18,10 +18,40 @@ Item {
     anchors.fill: parent
     visible: open || scrim.opacity > 0
     z: 1000
+    focus: open
+
+    function accept() {
+        open = false
+        confirmed()
+    }
+
+    function reject() {
+        open = false
+        dismissed()
+    }
 
     onOpenChanged: {
-        if (open)
+        if (open) {
             forceActiveFocus()
+            Qt.callLater(function () {
+                if (confirmBtn.visible)
+                    confirmBtn.forceActiveFocus()
+                else if (dismissBtn.visible)
+                    dismissBtn.forceActiveFocus()
+            })
+        }
+    }
+
+    Keys.onPressed: function (event) {
+        if (!open)
+            return
+        if (event.key === Qt.Key_Escape) {
+            reject()
+            event.accepted = true
+        } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+            accept()
+            event.accepted = true
+        }
     }
 
     Rectangle {
@@ -39,10 +69,7 @@ Item {
         MouseArea {
             cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
             anchors.fill: parent
-            onClicked: {
-                root.open = false
-                root.dismissed()
-            }
+            onClicked: root.reject()
         }
     }
 
@@ -70,6 +97,15 @@ Item {
                     easing.type: Easing.BezierSpline
                     easing.bezierCurve: Md3Motion.standard
                 }
+        }
+
+        Md3FocusRing {
+            anchors.fill: parent
+            anchors.margins: -4
+            radius: panel.radius + 4
+            focused: root.activeFocus
+            controlEnabled: true
+            visualFocus: root.activeFocus
         }
 
         Column {
@@ -110,21 +146,17 @@ Item {
                 anchors.right: parent.right
                 spacing: 8
                 Md3Button {
+                    id: dismissBtn
                     visible: root.showDismiss
                     text: root.dismissText
                     variant: Md3Button.Text
-                    onClicked: {
-                        root.open = false
-                        root.dismissed()
-                    }
+                    onClicked: root.reject()
                 }
                 Md3Button {
+                    id: confirmBtn
                     text: root.confirmText
                     variant: Md3Button.Text
-                    onClicked: {
-                        root.open = false
-                        root.confirmed()
-                    }
+                    onClicked: root.accept()
                 }
             }
         }

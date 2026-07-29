@@ -24,12 +24,77 @@ Item {
     property var model: []
     readonly property bool isSubMenu: parentMenu !== null
     default property alias content: column.data
+    property int highlightedIndex: -1
     readonly property alias itemColumn: column
 
     readonly property real containerRadius: Md3Theme.shape.large
     readonly property var __md3Menu: root
 
     signal itemClicked(string path)
+
+    function _menuItems() {
+        const out = []
+        const kids = column.children
+        for (let i = 0; i < kids.length; ++i) {
+            const c = kids[i]
+            // Md3MenuItem exposes ownerMenu(); skip dividers / spacers.
+            if (c && typeof c.ownerMenu === "function" && c.visible !== false && c.enabled !== false)
+                out.push(c)
+        }
+        return out
+    }
+
+    function _syncHighlight() {
+        const items = _menuItems()
+        for (let i = 0; i < items.length; ++i)
+            items[i].highlighted = (i === highlightedIndex)
+    }
+
+    function _moveHighlight(delta) {
+        const items = _menuItems()
+        if (!items.length)
+            return
+        let next = highlightedIndex
+        if (next < 0)
+            next = delta > 0 ? 0 : items.length - 1
+        else
+            next = (next + delta + items.length) % items.length
+        highlightedIndex = next
+        _syncHighlight()
+    }
+
+    function _activateHighlighted() {
+        const items = _menuItems()
+        if (highlightedIndex < 0 || highlightedIndex >= items.length)
+            return
+        const item = items[highlightedIndex]
+        if (item.hasSubMenu && typeof item.openSubmenu === "function")
+            item.openSubmenu()
+        else if (typeof item.clicked === "function")
+            item.clicked()
+    }
+
+    function _openHighlightedSubmenu() {
+        const items = _menuItems()
+        if (highlightedIndex < 0 || highlightedIndex >= items.length)
+            return
+        const item = items[highlightedIndex]
+        if (item.hasSubMenu && typeof item.openSubmenu === "function")
+            item.openSubmenu()
+    }
+
+    onOpenChanged: {
+        if (open) {
+            highlightedIndex = 0
+            Qt.callLater(function () {
+                _syncHighlight()
+                host.forceActiveFocus()
+            })
+        } else {
+            highlightedIndex = -1
+            _syncHighlight()
+        }
+    }
 
     Component {
         id: itemComp
@@ -246,6 +311,53 @@ Item {
         z: 5000
         visible: root.open || panel.opacity > 0.01
                  || (root.childMenu && root.childMenu.open)
+        focus: root.open && !root.isSubMenu
+
+        Keys.onPressed: function (event) {
+            if (!root.open)
+                return
+            switch (event.key) {
+            case Qt.Key_Escape:
+                root.dismissCascade()
+                event.accepted = true
+                break
+            case Qt.Key_Up:
+                root._moveHighlight(-1)
+                event.accepted = true
+                break
+            case Qt.Key_Down:
+                root._moveHighlight(1)
+                event.accepted = true
+                break
+            case Qt.Key_Return:
+            case Qt.Key_Enter:
+            case Qt.Key_Space:
+                root._activateHighlighted()
+                event.accepted = true
+                break
+            case Qt.Key_Right:
+                root._openHighlightedSubmenu()
+                event.accepted = true
+                break
+            case Qt.Key_Left:
+                if (root.isSubMenu)
+                    root.dismiss()
+                event.accepted = true
+                break
+            case Qt.Key_Home:
+                root.highlightedIndex = 0
+                root._syncHighlight()
+                event.accepted = true
+                break
+            case Qt.Key_End: {
+                const items = root._menuItems()
+                root.highlightedIndex = items.length ? items.length - 1 : -1
+                root._syncHighlight()
+                event.accepted = true
+                break
+            }
+            }
+        }
 
         Rectangle {
             anchors.fill: parent

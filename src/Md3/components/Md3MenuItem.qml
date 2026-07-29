@@ -11,6 +11,8 @@ Item {
     property bool selected: false
     property bool showCheck: false
     property bool leadingCheck: true
+    /// Keyboard highlight from parent Md3Menu.
+    property bool highlighted: false
     /// Nested cascading menu (Md3Menu). Hover / click opens it to the side.
     /// Use `var` so inline / sibling menus assign reliably across Loaders.
     property var submenu: null
@@ -107,11 +109,20 @@ Item {
         Md3StateOverlay {
             overlayColor: root.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
                                         : Md3Theme.colorScheme.colorOnSurface
-            hovered: mouse.containsMouse
+            hovered: mouse.containsMouse || root.highlighted
             pressed: mouse.pressed
-            focused: false
+            focused: root.highlighted
             controlEnabled: root.enabled
             radius: bg.radius
+        }
+
+        Md3FocusRing {
+            anchors.fill: parent
+            anchors.margins: -2
+            radius: root.itemRadius + 2
+            focused: root.highlighted
+            controlEnabled: root.enabled
+            visualFocus: root.highlighted
         }
 
         Row {
@@ -216,6 +227,17 @@ Item {
         cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
         onEntered: {
             root.closeSiblingSubmenus()
+            const owner = root.ownerMenu()
+            if (owner) {
+                const items = owner._menuItems ? owner._menuItems() : []
+                for (let i = 0; i < items.length; ++i) {
+                    if (items[i] === root) {
+                        owner.highlightedIndex = i
+                        owner._syncHighlight()
+                        break
+                    }
+                }
+            }
             if (root.submenu)
                 openSubTimer.restart()
         }

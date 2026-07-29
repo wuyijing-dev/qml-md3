@@ -268,16 +268,44 @@ Md3PasswordField {
 }
 ```
 
-## Info bar vs snackbar
+## Feedback: Toast vs InfoBar vs Snackbar
+
+| | **Toast** | **InfoBar** | **Snackbar** |
+|--|-----------|-------------|--------------|
+| Placement | Top-center | In-page flow | Bottom queue |
+| Lifetime | Short (~2s) | Until dismissed | Timed + queue |
+| Actions | No | Optional action | Optional action |
+| Use for | Quick confirm (“Copied”) | Persistent status | Undo / recoverable ops |
 
 ```qml
+Md3Notify.toast(qsTr("Copied"), { severity: Md3Toast.Success })
 Md3InfoBar {
     severity: Md3InfoBar.Warning
     title: qsTr("Storage low")
     message: qsTr("Free up space…")
     actionText: qsTr("Manage")
 }
-Md3Notify.snackbar(qsTr("Saved"), { actionText: qsTr("Undo") })  // transient
+Md3Notify.snackbar(qsTr("Saved"), { actionText: qsTr("Undo") })
+Md3Notify.snackbar(qsTr("Urgent"), { priority: 10 })
+```
+
+Requires `Md3ApplicationWindow` (hosts auto-register) or place `Md3ToastHost` / `Md3SnackbarHost`.
+
+## ScrollView
+
+```qml
+Md3ScrollView {
+    Layout.fillWidth: true
+    Layout.preferredHeight: 200
+    Column {
+        width: parent.width
+        spacing: 8
+        Repeater {
+            model: 20
+            Text { text: "Row " + (index + 1); color: Md3Theme.colorScheme.colorOnSurface }
+        }
+    }
+}
 ```
 
 ## Gauge / sparkline / heatmap

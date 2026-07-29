@@ -175,6 +175,24 @@ Item {
                 message: qsTr("Connection lost — changes are queued offline.")
             }
 
+            Text {
+                text: qsTr("Toast (top, short) vs Snackbar (bottom queue)")
+                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                font.pixelSize: Md3Theme.typography.labelMedium.size
+            }
+            RowLayout {
+                spacing: 8
+                Md3Button {
+                    text: qsTr("Toast")
+                    onClicked: Md3Notify.toast(qsTr("Copied to clipboard"), { severity: Md3Toast.Success })
+                }
+                Md3Button {
+                    text: qsTr("Toast warning")
+                    variant: Md3Button.Outlined
+                    onClicked: Md3Notify.toast(qsTr("Still syncing…"), { severity: Md3Toast.Warning })
+                }
+            }
+
             Md3Button {
                 text: "Show snackbar"
                 onClicked: Md3Notify.snackbar(qsTr("Message sent"), { actionText: qsTr("Undo") })

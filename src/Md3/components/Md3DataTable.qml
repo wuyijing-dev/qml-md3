@@ -606,6 +606,8 @@ Item {
         height: root.rowHeight
         color: keyboardFocused ? Md3Theme.colorScheme.primaryContainer
               : (highlighted ? Md3Theme.colorScheme.secondaryContainer : "transparent")
+        border.width: keyboardFocused && tableFocus.activeFocus ? 2 : 0
+        border.color: Md3Theme.colorScheme.secondary
 
         property int dragFromIndex: -1
         property int dragTargetIndex: -1
@@ -746,7 +748,25 @@ Item {
                 root.focusedPageRow = root.pageEntries.length ? root.pageEntries.length - 1 : -1
                 event.accepted = true
                 break
+            case Qt.Key_PageUp:
+                root._moveFocus(-Math.max(1, Math.floor(root.bodyHeight / root.rowHeight) - 1))
+                event.accepted = true
+                break
+            case Qt.Key_PageDown:
+                root._moveFocus(Math.max(1, Math.floor(root.bodyHeight / root.rowHeight) - 1))
+                event.accepted = true
+                break
             }
+        }
+
+        Md3FocusRing {
+            anchors.fill: parent
+            anchors.margins: 2
+            radius: Md3Theme.shape.small
+            focused: tableFocus.activeFocus
+            controlEnabled: root.keyboardNavigationEnabled
+            visualFocus: tableFocus.activeFocus
+            z: 20
         }
 
         Column {

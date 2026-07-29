@@ -31,6 +31,31 @@ Item {
                 tone: Md3Text.OnSurfaceVariant
                 wrapMode: Text.WordWrap
             }
+
+            Md3PageSection {
+                Layout.fillWidth: true
+                title: qsTr("ScrollView")
+                subtitle: qsTr("Themed Md3ScrollBar overlays on a Flickable.")
+
+                Md3ScrollView {
+                    width: parent.width
+                    height: 160
+                    Column {
+                        width: parent.width
+                        spacing: 8
+                        Repeater {
+                            model: 24
+                            Text {
+                                required property int index
+                                text: qsTr("Scrollable row %1").arg(index + 1)
+                                color: Md3Theme.colorScheme.colorOnSurface
+                                font.pixelSize: Md3Theme.typography.bodyMedium.size
+                            }
+                        }
+                    }
+                }
+            }
+
             Md3PageSection {
                 Layout.fillWidth: true
                 title: qsTr("布局组件（VStack / HStack / Flow / Grid）")
