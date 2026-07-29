@@ -32,6 +32,12 @@ import Md3
 | `edgeStrength` | `real` | `0.9` | read/write | `Md3LiquidGlass` | — |
 | `refraction` | `real` | `1.2` | read/write | `Md3LiquidGlass` | — |
 | `chromaticAberration` | `real` | `0.5` | read/write | `Md3LiquidGlass` | — |
+| `fusionAmount` | `real` | `0.0` | read/write | `Md3LiquidGlass` | 0..1 SDF blend between the base glass body and droplets. |
+| `dropletA` | `vector4d` | `Qt.vector4d(0.5, 0.5, 0.0, 0.0)` | read/write | `Md3LiquidGlass` | UV-space droplet: `x, y, radius, enabled`. |
+| `dropletB` | `vector4d` | `Qt.vector4d(0.5, 0.5, 0.0, 0.0)` | read/write | `Md3LiquidGlass` | UV-space droplet: `x, y, radius, enabled`. |
+| `dropletC` | `vector4d` | `Qt.vector4d(0.5, 0.5, 0.0, 0.0)` | read/write | `Md3LiquidGlass` | UV-space droplet: `x, y, radius, enabled`. |
+| `edgeSpectralStrength` | `real` | `0.75` | read/write | `Md3LiquidGlass` | Refracted scene-light color injected into the glass edge. |
+| `sceneColorStrength` | `real` | `0.55` | read/write | `Md3LiquidGlass` | Dynamic background color pickup blended into the glass body. |
 | `samplePadding` | `real` | `24` | read/write | `Md3LiquidGlass` | — |
 | `contentData` | `alias` | `contentHost.data` | default read/write | `Md3LiquidGlass` | Default property → `contentHost.data` |
 | `dragging` | `bool` | `dragArea.pressed` | readonly | `Md3LiquidGlass` | — |
@@ -50,10 +56,28 @@ _None._
 import Md3
 
 Md3LiquidGlass {
-    sourceItem: null
+    sourceItem: backdrop
     radius: 28
     elevation: 2
-    draggable: true
-    boundToParent: true
+    refraction: 1.35
+    fusionAmount: 0.6
+    edgeSpectralStrength: 0.9
+    sceneColorStrength: 0.55
+    dropletA: Qt.vector4d(0.30, 0.34, 0.16, 1.0)
+    dropletB: Qt.vector4d(0.68, 0.58, 0.14, 1.0)
+    dropletC: Qt.vector4d(0.48, 0.72, 0.10, 1.0)
 }
 ```
+
+## Notes
+
+- Open the Gallery `Containment` page to see the live demo sliders for:
+  - `SDF droplet fusion`
+  - `Scene light at edge`
+  - `Background color pickup`
+- `dropletA/B/C` use normalized UV coordinates:
+  - `x`, `y`: center in `0..1`
+  - `radius`: relative droplet radius
+  - `enabled`: `0` = off, `1` = on
+- The new edge spectral lighting samples backdrop color near the refracted boundary, so bright or saturated backgrounds will tint the rim automatically.
+- The dynamic scene color pickup averages nearby backdrop samples and mixes that hue back into the glass body.

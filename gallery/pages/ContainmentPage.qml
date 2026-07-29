@@ -439,10 +439,16 @@ Item {
                         refraction: refractionSlider.value
                         chromaticAberration: chromaSlider.value
                         edgeStrength: edgeSlider.value
+                        edgeSpectralStrength: spectralSlider.value
+                        sceneColorStrength: sceneColorSlider.value
+                        fusionAmount: fusionSlider.value
                         elevation: elevSlider.value
                         adaptiveTint: adaptiveSlider.value
                         liquidDeform: deformSlider.value
                         squircleN: squircleSlider.value
+                        dropletA: Qt.vector4d(0.28 + index * 0.05, 0.34, 0.16 * fusionSlider.value, fusionSlider.value > 0.01 ? 1 : 0)
+                        dropletB: Qt.vector4d(0.68, 0.58 - index * 0.04, 0.14 * fusionSlider.value, fusionSlider.value > 0.01 ? 1 : 0)
+                        dropletC: Qt.vector4d(0.48, 0.72, 0.10 * fusionSlider.value, fusionSlider.value > 0.35 ? 1 : 0)
                         quality: glassBlocks.count >= 5 ? 0
                                  : (glassBlocks.count >= 3 ? 1 : qualitySlider.value)
                         liveSampling: glassBackdrop.hasVideo
@@ -463,22 +469,20 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                             width: parent.width
                             spacing: 4
-                            Text {
+                            Md3Text {
                                 text: glassBlock.label
-                                color: "#FFFFFF"
-                                style: Text.Outline
-                                styleColor: Qt.rgba(0, 0, 0, 0.25)
-                                font.family: Md3Theme.typography.fontFamily
-                                font.pixelSize: Md3Theme.typography.titleMedium.size
+                                role: Md3Text.TitleMedium
+                                tone: Md3Text.Custom
+                                customColor: "#FFFFFF"
                                 font.weight: Font.DemiBold
                             }
-                            Text {
+                            Md3Text {
                                 width: parent.width
                                 wrapMode: Text.Wrap
-                                text: qsTr("Drag me")
-                                color: Qt.rgba(1, 1, 1, 0.88)
-                                font.family: Md3Theme.typography.fontFamily
-                                font.pixelSize: Md3Theme.typography.bodyMedium.size
+                                text: qsTr("Drag me. Fusion and spectral edge light follow the backdrop.")
+                                role: Md3Text.BodyMedium
+                                tone: Md3Text.Custom
+                                customColor: Qt.rgba(1, 1, 1, 0.88)
                             }
                         }
                     }
@@ -553,6 +557,21 @@ Item {
                 id: edgeSlider
                 label: qsTr("Edge / rim")
                 from: 0; to: 1; value: 0.85
+            }
+            GlassParamRow {
+                id: spectralSlider
+                label: qsTr("Scene light at edge")
+                from: 0; to: 1.5; value: 0.75
+            }
+            GlassParamRow {
+                id: sceneColorSlider
+                label: qsTr("Background color pickup")
+                from: 0; to: 1; value: 0.55
+            }
+            GlassParamRow {
+                id: fusionSlider
+                label: qsTr("SDF droplet fusion")
+                from: 0; to: 1; value: 0.6
             }
             GlassParamRow {
                 id: radiusSlider
