@@ -6,7 +6,8 @@ For **prebuilt folder + same-directory layout**, see **[packaging.md](packaging.
 
 For **writing less layout glue** (stacks, flow, grid, Card.title, layoutMode), see **[layout.md](layout.md)**.
 
-For **selection / list / sheet / dialog shortcuts**, see **[glue-less-api.md](glue-less-api.md)**.
+For **selection / list / sheet / dialog shortcuts**, see **[glue-less-api.md](glue-less-api.md)**.  
+For **first paint / page cache / memory tradeoffs**, see **[performance.md](performance.md)**.
 
 ## CMake — subdirectory (dev / from sources)
 

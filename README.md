@@ -155,6 +155,7 @@ int main(int argc, char *argv[]) {
 - [docs/api/README.md](docs/api/README.md) — **完整控件 API**（一控件一文档，含全部属性/信号/方法）
 - [docs/packaging.md](docs/packaging.md) — **预编译包（默认 shared）/ 系统安装 / 同目录 `Md3/`**
 - [docs/integration.md](docs/integration.md) — CMake + `Md3::run`
+- [docs/performance.md](docs/performance.md) — first paint / page cache / memory tradeoffs
 - [docs/consumer-app-main-qml.md](docs/consumer-app-main-qml.md) — fix consumer app `Main.qml` / qrc load failures
 - [docs/tokens.md](docs/tokens.md) — 主题令牌
 - [CHANGELOG.md](CHANGELOG.md)

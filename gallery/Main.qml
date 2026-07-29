@@ -21,10 +21,13 @@ Md3ApplicationWindow {
     railHeader: qsTr("组件图库")
     pagePadding: 20
     pageSkeleton: true
+    // Perf: keep library low-RSS defaults (arc, L1=1). For instant revisits see docs/performance.md
+    // pageCacheLimit: 6; pagePrefetch: true; pageTransition: "none"
     persistSession: true
     settingsOrganization: "QML_MD3"
     settingsApplication: "Gallery"
-    hotReload: true
+    // Hot-reload clears QML caches and slows cold open — enable only while iterating QML.
+    hotReload: false
 
     // Document tabs under the title bar (no browserChrome / no tear-off window)
     documentTabsEnabled: true
@@ -112,8 +115,7 @@ Md3ApplicationWindow {
         }
     }
 
-    // Dev: prefer Md3HotReload-discovered gallery/pages (cross-platform).
-    // Else resolve next to Main.qml; if Main is from qrc, use bundled pages.
+    // Dev: optional Md3HotReload gallery/pages path; else disk next to Main, else qrc.
     property string pageRoot: {
         if (hotReload && hotReloadAgent
                 && hotReloadAgent.galleryPagesDir
@@ -123,11 +125,8 @@ Md3ApplicationWindow {
                 p += "/"
             if (p.indexOf("file:") === 0)
                 return p
-            // Unix absolute vs Windows drive
             return (p.charAt(0) === "/" ? "file://" : "file:///") + p
         }
-        if (!hotReload)
-            return "qrc:/qt/qml/Gallery/pages/"
         const local = String(Qt.resolvedUrl("./pages/"))
         if (local.indexOf("qrc:") === 0)
             return "qrc:/qt/qml/Gallery/pages/"

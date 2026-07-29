@@ -4,7 +4,7 @@
 
 由 `scripts/gen_api_docs.py` 从 QML 源码生成；改完控件后请重跑该脚本。
 
-集成与 C++ 启动：[../integration.md](../integration.md) · 主题令牌：[../tokens.md](../tokens.md) · 布局少写胶水：[../layout.md](../layout.md) · 控件少写胶水：[../glue-less-api.md](../glue-less-api.md)
+集成与 C++ 启动：[../integration.md](../integration.md) · 主题令牌：[../tokens.md](../tokens.md) · 布局少写胶水：[../layout.md](../layout.md) · 控件少写胶水：[../glue-less-api.md](../glue-less-api.md) · 性能取舍：[../performance.md](../performance.md)
 
 ## C++ / native
 
