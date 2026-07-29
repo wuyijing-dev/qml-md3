@@ -19,6 +19,12 @@ layout(std140, binding = 0) uniform buf {
     float adaptive;
     float baseTint;
     float quality;
+    float fusion;
+    vec4 dropA;
+    vec4 dropB;
+    vec4 dropC;
+    float edgeSpectral;
+    float sceneColor;
 };
 
 void main()

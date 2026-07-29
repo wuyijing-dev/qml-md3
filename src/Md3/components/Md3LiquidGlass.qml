@@ -25,6 +25,16 @@ Item {
     property real edgeStrength: 0.9
     property real refraction: 1.2
     property real chromaticAberration: 0.5
+    /// 0..1 SDF blend between base glass body and droplets.
+    property real fusionAmount: 0.0
+    /// Optional droplets in UV space: Qt.vector4d(x, y, radius, enabled)
+    property vector4d dropletA: Qt.vector4d(0.5, 0.5, 0.0, 0.0)
+    property vector4d dropletB: Qt.vector4d(0.5, 0.5, 0.0, 0.0)
+    property vector4d dropletC: Qt.vector4d(0.5, 0.5, 0.0, 0.0)
+    /// Scene-light color from refracted edge highlights.
+    property real edgeSpectralStrength: 0.75
+    /// Background dynamic color pickup.
+    property real sceneColorStrength: 0.55
     property real samplePadding: 24
     property int layoutMode: Md3ContainerBody.Fit
 
@@ -177,6 +187,12 @@ Item {
             property real adaptive: root.adaptiveTint
             property real baseTint: root.tintOpacity
             property real quality: root.quality
+            property real fusion: Math.max(0.0, Math.min(1.0, root.fusionAmount))
+            property vector4d dropA: root.dropletA
+            property vector4d dropB: root.dropletB
+            property vector4d dropC: root.dropletC
+            property real edgeSpectral: root.edgeSpectralStrength
+            property real sceneColor: root.sceneColorStrength
             vertexShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.vert.qsb"
             fragmentShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.frag.qsb"
         }
