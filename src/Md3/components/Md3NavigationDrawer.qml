@@ -92,8 +92,9 @@ Item {
 
             Text {
                 visible: root.title.length > 0
-                height: visible ? implicitHeight + 16 : 0
                 width: parent.width
+                // Avoid `height: visible ? …` — that binds height↔visible and loops.
+                height: root.title.length > 0 ? implicitHeight : 0
                 text: root.title
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 font.pixelSize: Md3Theme.typography.titleSmall.size

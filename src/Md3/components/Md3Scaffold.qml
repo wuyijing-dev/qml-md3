@@ -5,6 +5,8 @@ import QtQuick
 Item {
     id: root
 
+    clip: true
+
     /// Convenience: materialize Md3TopAppBar when set (and appBar slot empty).
     property string title: ""
     property string leadingIcon: "menu"

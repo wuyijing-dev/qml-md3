@@ -13,14 +13,17 @@ Item {
     property int currentIndex: 0
     /// Content pages (synced with currentIndex). Prefer over external StackLayout.
     default property alias pages: pageStack.data
+    /// Extra height for page area when `pages` are present (Layout / implicit).
+    property real pageAreaHeight: 96
 
     signal currentIndexChangedByUser(int index)
 
     readonly property bool hasPages: pageStack.children.length > 0
 
-    implicitHeight: hasPages ? tabStrip.height + pageStack.implicitHeight : 48
-    height: hasPages ? (parent ? parent.height : implicitHeight) : 48
-    width: parent ? parent.width : 360
+    implicitWidth: 360
+    implicitHeight: hasPages ? (48 + pageAreaHeight) : 48
+    // Do not bind height to parent.height — that fights ColumnLayout and overlaps siblings.
+    width: parent && parent.width > 0 ? parent.width : implicitWidth
 
     ColumnLayout {
         anchors.fill: parent
@@ -30,8 +33,7 @@ Item {
             id: tabStrip
             Layout.fillWidth: true
             Layout.preferredHeight: 48
-            height: 48
-            width: parent.width
+            Layout.maximumHeight: 48
 
             Row {
                 id: row
