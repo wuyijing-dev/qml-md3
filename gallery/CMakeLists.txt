@@ -43,6 +43,7 @@ qt_add_qml_module(appQML_MD3
         pages/TextFieldsPage.qml
         pages/ChipsPage.qml
         pages/ContainmentPage.qml
+        pages/LiquidGlassFusionPage.qml
         pages/CommunicationPage.qml
         pages/NavigationPage.qml
         pages/MenusPage.qml

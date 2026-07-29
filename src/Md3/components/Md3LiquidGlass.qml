@@ -11,30 +11,32 @@ Item {
     property bool draggable: true
     property bool boundToParent: true
     property real squircleN: 5.0
-    property real adaptiveTint: 1.0
+    property real adaptiveTint: 0.25
     property real liquidDeform: 1.0
     /// 0=Low, 1=Medium, 2=High — scales sample res, frost taps, chroma.
     property int quality: 1
     /// Keep sampling every frame (video). For static images set false — updates on move.
     property bool liveSampling: true
 
-    property real blurAmount: 0.45
+    property real blurAmount: 0.18
     property real blurMax: 64
-    property real tintOpacity: 0.08
+    property real tintOpacity: 0.02
     property color tintColor: "#FFFFFF"
-    property real edgeStrength: 0.9
-    property real refraction: 1.2
-    property real chromaticAberration: 0.5
+    property real edgeStrength: 1.0
+    property real refraction: 1.15
+    property real chromaticAberration: 0.25
     /// 0..1 SDF blend between base glass body and droplets.
     property real fusionAmount: 0.0
+    /// Second body in UV space (cx, cy, halfW, halfH). Set halfW=0 to disable.
+    property vector4d mergeBody: Qt.vector4d(0, 0, 0, 0)
     /// Optional droplets in UV space: Qt.vector4d(x, y, radius, enabled)
     property vector4d dropletA: Qt.vector4d(0.5, 0.5, 0.0, 0.0)
     property vector4d dropletB: Qt.vector4d(0.5, 0.5, 0.0, 0.0)
     property vector4d dropletC: Qt.vector4d(0.5, 0.5, 0.0, 0.0)
     /// Scene-light color from refracted edge highlights.
-    property real edgeSpectralStrength: 0.75
+    property real edgeSpectralStrength: 1.35
     /// Background dynamic color pickup.
-    property real sceneColorStrength: 0.55
+    property real sceneColorStrength: 0.4
     property real samplePadding: 24
     property int layoutMode: Md3ContainerBody.Fit
 
@@ -140,7 +142,7 @@ Item {
         layer.samples: root.quality >= 2 ? 2 : 0
         layer.effect: MultiEffect {
             maskEnabled: true
-            maskSource: squircleMask
+            maskSource: fieldMask
             autoPaddingEnabled: false
         }
 
@@ -188,6 +190,9 @@ Item {
             property real baseTint: root.tintOpacity
             property real quality: root.quality
             property real fusion: Math.max(0.0, Math.min(1.0, root.fusionAmount))
+            property real fusionK: (0.04 + 0.10 * fusion) * Math.min(root._aspect, 1.0)
+            property vector4d mergeA: Qt.vector4d(0.5, 0.5, 0.5, 0.5)
+            property vector4d mergeB: root.mergeBody
             property vector4d dropA: root.dropletA
             property vector4d dropB: root.dropletB
             property vector4d dropC: root.dropletC
@@ -208,16 +213,16 @@ Item {
             anchors.fill: parent
             visible: root._blurReady
             color: root.tintColor
-            opacity: root.tintOpacity * (0.35 + 0.2 * root._thickness) * (1.0 - root.adaptiveTint * 0.55)
+            opacity: root.tintOpacity * (0.2 + 0.1 * root._thickness) * (1.0 - root.adaptiveTint * 0.7)
         }
 
         Rectangle {
             anchors.fill: parent
-            opacity: root._effEdge * 0.32
+            opacity: root._effEdge * 0.18
             gradient: Gradient {
-                GradientStop { position: 0.0; color: Qt.rgba(0.75, 0.9, 1.0, 0.16) }
+                GradientStop { position: 0.0; color: Qt.rgba(0.85, 0.95, 1.0, 0.12) }
                 GradientStop { position: 0.45; color: "transparent" }
-                GradientStop { position: 1.0; color: Qt.rgba(1.0, 0.85, 0.7, 0.09) }
+                GradientStop { position: 1.0; color: Qt.rgba(1.0, 0.9, 0.75, 0.06) }
             }
         }
 
@@ -227,7 +232,7 @@ Item {
             anchors.top: parent.top
             anchors.margins: 1
             height: Math.max(2, root.height * (0.028 + 0.012 * root._thickness))
-            opacity: root._effEdge * 0.8
+            opacity: root._effEdge * 0.55
             gradient: Gradient {
                 orientation: Gradient.Horizontal
                 GradientStop { position: 0.0; color: "transparent" }
@@ -248,7 +253,7 @@ Item {
     }
 
     Item {
-        id: squircleMask
+        id: fieldMask
         width: root.width
         height: root.height
         visible: false
@@ -259,8 +264,15 @@ Item {
             property real aspect: root._aspect
             property real squircleN: root.squircleN
             property real soft: root.quality >= 2 ? 0.014 : 0.022
-            vertexShader: "qrc:/qt/qml/Md3/shaders/md3squircle_mask.vert.qsb"
-            fragmentShader: "qrc:/qt/qml/Md3/shaders/md3squircle_mask.frag.qsb"
+            property real fusion: Math.max(0.0, Math.min(1.0, root.fusionAmount))
+            property real fusionK: (0.04 + 0.10 * fusion) * Math.min(root._aspect, 1.0)
+            property vector4d mergeA: Qt.vector4d(0.5, 0.5, 0.5, 0.5)
+            property vector4d mergeB: root.mergeBody
+            property vector4d dropA: root.dropletA
+            property vector4d dropB: root.dropletB
+            property vector4d dropC: root.dropletC
+            vertexShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass_mask.vert.qsb"
+            fragmentShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass_mask.frag.qsb"
         }
     }
 

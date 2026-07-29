@@ -7,18 +7,9 @@ layout(location = 0) out vec2 qt_TexCoord0;
 layout(std140, binding = 0) uniform buf {
     mat4 qt_Matrix;
     float qt_Opacity;
-    float bend;
-    float frost;
-    float chroma;
-    float radiusNorm;
     float aspect;
-    float padU;
-    float padV;
     float squircleN;
-    float thickness;
-    float adaptive;
-    float baseTint;
-    float quality;
+    float soft;
     float fusion;
     float fusionK;
     vec4 mergeA;
@@ -26,8 +17,6 @@ layout(std140, binding = 0) uniform buf {
     vec4 dropA;
     vec4 dropB;
     vec4 dropC;
-    float edgeSpectral;
-    float sceneColor;
 };
 
 void main()

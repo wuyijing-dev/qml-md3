@@ -21,23 +21,24 @@ import Md3
 | `draggable` | `bool` | `true` | read/write | `Md3LiquidGlass` | — |
 | `boundToParent` | `bool` | `true` | read/write | `Md3LiquidGlass` | — |
 | `squircleN` | `real` | `5.0` | read/write | `Md3LiquidGlass` | — |
-| `adaptiveTint` | `real` | `1.0` | read/write | `Md3LiquidGlass` | — |
+| `adaptiveTint` | `real` | `0.25` | read/write | `Md3LiquidGlass` | — |
 | `liquidDeform` | `real` | `1.0` | read/write | `Md3LiquidGlass` | — |
 | `quality` | `int` | `1` | read/write | `Md3LiquidGlass` | 0=Low, 1=Medium, 2=High — scales sample res, frost taps, chroma. |
 | `liveSampling` | `bool` | `true` | read/write | `Md3LiquidGlass` | Keep sampling every frame (video). For static images set false — updates on move. |
-| `blurAmount` | `real` | `0.45` | read/write | `Md3LiquidGlass` | — |
+| `blurAmount` | `real` | `0.18` | read/write | `Md3LiquidGlass` | Lower = clearer glass. |
 | `blurMax` | `real` | `64` | read/write | `Md3LiquidGlass` | — |
-| `tintOpacity` | `real` | `0.08` | read/write | `Md3LiquidGlass` | — |
+| `tintOpacity` | `real` | `0.02` | read/write | `Md3LiquidGlass` | — |
 | `tintColor` | `color` | `"#FFFFFF"` | read/write | `Md3LiquidGlass` | — |
-| `edgeStrength` | `real` | `0.9` | read/write | `Md3LiquidGlass` | — |
-| `refraction` | `real` | `1.2` | read/write | `Md3LiquidGlass` | — |
-| `chromaticAberration` | `real` | `0.5` | read/write | `Md3LiquidGlass` | — |
+| `edgeStrength` | `real` | `1.0` | read/write | `Md3LiquidGlass` | — |
+| `refraction` | `real` | `1.15` | read/write | `Md3LiquidGlass` | — |
+| `chromaticAberration` | `real` | `0.25` | read/write | `Md3LiquidGlass` | — |
 | `fusionAmount` | `real` | `0.0` | read/write | `Md3LiquidGlass` | 0..1 SDF blend between the base glass body and droplets. |
+| `mergeBody` | `vector4d` | `Qt.vector4d(0, 0, 0, 0)` | read/write | `Md3LiquidGlass` | Second body in UV space `(cx, cy, halfW, halfH)`. |
 | `dropletA` | `vector4d` | `Qt.vector4d(0.5, 0.5, 0.0, 0.0)` | read/write | `Md3LiquidGlass` | UV-space droplet: `x, y, radius, enabled`. |
 | `dropletB` | `vector4d` | `Qt.vector4d(0.5, 0.5, 0.0, 0.0)` | read/write | `Md3LiquidGlass` | UV-space droplet: `x, y, radius, enabled`. |
 | `dropletC` | `vector4d` | `Qt.vector4d(0.5, 0.5, 0.0, 0.0)` | read/write | `Md3LiquidGlass` | UV-space droplet: `x, y, radius, enabled`. |
-| `edgeSpectralStrength` | `real` | `0.75` | read/write | `Md3LiquidGlass` | Refracted scene-light color injected into the glass edge. |
-| `sceneColorStrength` | `real` | `0.55` | read/write | `Md3LiquidGlass` | Dynamic background color pickup blended into the glass body. |
+| `edgeSpectralStrength` | `real` | `1.35` | read/write | `Md3LiquidGlass` | Refracted scene-light color injected into the glass edge. |
+| `sceneColorStrength` | `real` | `0.4` | read/write | `Md3LiquidGlass` | Dynamic background color pickup blended into the glass body. |
 | `samplePadding` | `real` | `24` | read/write | `Md3LiquidGlass` | — |
 | `contentData` | `alias` | `contentHost.data` | default read/write | `Md3LiquidGlass` | Default property → `contentHost.data` |
 | `dragging` | `bool` | `dragArea.pressed` | readonly | `Md3LiquidGlass` | — |
@@ -71,10 +72,9 @@ Md3LiquidGlass {
 
 ## Notes
 
-- Open the Gallery `Containment` page to see the live demo sliders for:
-  - `SDF droplet fusion`
-  - `Scene light at edge`
-  - `Background color pickup`
+- **Two-block fusion:** use `Md3LiquidGlassFusionPlayground` (Gallery → **液态玻璃**) — two draggable bodies share one SDF field and mask, so they visually merge when close.
+- Single `Md3LiquidGlass` cards use the same SDF mask; optional `mergeBody` can attach a second body in UV space.
+- Open Gallery **容器** for multi-card draggable demos; **液态玻璃** for droplet/body fusion.
 - `dropletA/B/C` use normalized UV coordinates:
   - `x`, `y`: center in `0..1`
   - `radius`: relative droplet radius

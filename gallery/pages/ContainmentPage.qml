@@ -439,16 +439,10 @@ Item {
                         refraction: refractionSlider.value
                         chromaticAberration: chromaSlider.value
                         edgeStrength: edgeSlider.value
-                        edgeSpectralStrength: spectralSlider.value
-                        sceneColorStrength: sceneColorSlider.value
-                        fusionAmount: fusionSlider.value
                         elevation: elevSlider.value
                         adaptiveTint: adaptiveSlider.value
                         liquidDeform: deformSlider.value
                         squircleN: squircleSlider.value
-                        dropletA: Qt.vector4d(0.28 + index * 0.05, 0.34, 0.16 * fusionSlider.value, fusionSlider.value > 0.01 ? 1 : 0)
-                        dropletB: Qt.vector4d(0.68, 0.58 - index * 0.04, 0.14 * fusionSlider.value, fusionSlider.value > 0.01 ? 1 : 0)
-                        dropletC: Qt.vector4d(0.48, 0.72, 0.10 * fusionSlider.value, fusionSlider.value > 0.35 ? 1 : 0)
                         quality: glassBlocks.count >= 5 ? 0
                                  : (glassBlocks.count >= 3 ? 1 : qualitySlider.value)
                         liveSampling: glassBackdrop.hasVideo
@@ -479,7 +473,7 @@ Item {
                             Md3Text {
                                 width: parent.width
                                 wrapMode: Text.Wrap
-                                text: qsTr("Drag me. Fusion and spectral edge light follow the backdrop.")
+                                text: qsTr("Drag me")
                                 role: Md3Text.BodyMedium
                                 tone: Md3Text.Custom
                                 customColor: Qt.rgba(1, 1, 1, 0.88)
@@ -516,22 +510,22 @@ Item {
             GlassParamRow {
                 id: refractionSlider
                 label: qsTr("Refraction (lens bend)")
-                from: 0; to: 2.2; value: 1.2
+                from: 0; to: 2.2; value: 1.15
             }
             GlassParamRow {
                 id: chromaSlider
                 label: qsTr("Chromatic aberration")
-                from: 0; to: 1; value: 0.5
+                from: 0; to: 1; value: 0.25
             }
             GlassParamRow {
                 id: blurSlider
                 label: qsTr("Frost / blur")
-                from: 0; to: 1; value: 0.45
+                from: 0; to: 1; value: 0.18
             }
             GlassParamRow {
                 id: tintSlider
                 label: qsTr("Tint opacity")
-                from: 0; to: 0.55; value: 0.08
+                from: 0; to: 0.55; value: 0.02
             }
             GlassParamRow {
                 id: qualitySlider
@@ -541,7 +535,7 @@ Item {
             GlassParamRow {
                 id: adaptiveSlider
                 label: qsTr("Adaptive tint")
-                from: 0; to: 1; value: 1
+                from: 0; to: 1; value: 0.25
             }
             GlassParamRow {
                 id: deformSlider
@@ -556,22 +550,7 @@ Item {
             GlassParamRow {
                 id: edgeSlider
                 label: qsTr("Edge / rim")
-                from: 0; to: 1; value: 0.85
-            }
-            GlassParamRow {
-                id: spectralSlider
-                label: qsTr("Scene light at edge")
-                from: 0; to: 1.5; value: 0.75
-            }
-            GlassParamRow {
-                id: sceneColorSlider
-                label: qsTr("Background color pickup")
-                from: 0; to: 1; value: 0.55
-            }
-            GlassParamRow {
-                id: fusionSlider
-                label: qsTr("SDF droplet fusion")
-                from: 0; to: 1; value: 0.6
+                from: 0; to: 1; value: 1.0
             }
             GlassParamRow {
                 id: radiusSlider

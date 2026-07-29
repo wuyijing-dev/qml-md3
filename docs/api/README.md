@@ -58,6 +58,7 @@
 - [Md3FileDropZone](Md3FileDropZone.md) — Desktop file drop target with preview, extension filtering, and structured results.
 - [Md3KeySequenceField](Md3KeySequenceField.md) — Desktop shortcut capture field: captures a single chord like Ctrl+K / Shift+Enter.
 - [Md3LiquidGlass](Md3LiquidGlass.md) — Draggable Liquid Glass — regional backdrop sample (not full-scene blur).
+- [Md3LiquidGlassFusionPlayground](Md3LiquidGlassFusionPlayground.md) — Two-body SDF fusion playground for liquid glass merging.
 - [Md3NumberField](Md3NumberField.md) — Numeric spin field: TextField chrome + step buttons (form-friendly SpinBox).
 - [Md3Pagination](Md3Pagination.md) — Compact pagination bar for tables / lists.
 - [Md3PathField](Md3PathField.md) — Path field — open/save file, multi-file, or folder; recent paths, validation, drop, breadcrumb.
