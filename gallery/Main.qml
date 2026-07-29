@@ -132,7 +132,7 @@ Md3ApplicationWindow {
             return "qrc:/qt/qml/Gallery/pages/"
         return local
     }
-    property int windowPageIndex: 22
+    property int windowPageIndex: 21
 
     overlay: [
         Md3Tour {
@@ -278,8 +278,6 @@ Md3ApplicationWindow {
           ] },
         { title: qsTr("容器"), icon: "dashboard", source: pageRoot + "ContainmentPage.qml",
           skeletonLayout: "cards" },
-        { title: qsTr("液态玻璃"), icon: "water_drop", source: pageRoot + "LiquidGlassFusionPage.qml",
-          skeletonLayout: "page" },
         { title: qsTr("反馈"), icon: "chat", source: pageRoot + "CommunicationPage.qml",
           skeletonLayout: "page" },
         { title: qsTr("导航"), icon: "menu", source: pageRoot + "NavigationPage.qml",

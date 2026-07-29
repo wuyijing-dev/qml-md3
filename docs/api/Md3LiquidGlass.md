@@ -72,9 +72,8 @@ Md3LiquidGlass {
 
 ## Notes
 
-- **Two-block fusion:** use `Md3LiquidGlassFusionPlayground` (Gallery → **液态玻璃**) — two draggable bodies share one SDF field and mask, so they visually merge when close.
-- Single `Md3LiquidGlass` cards use the same SDF mask; optional `mergeBody` can attach a second body in UV space.
-- Open Gallery **容器** for multi-card draggable demos; **液态玻璃** for droplet/body fusion.
+- **Two-block fusion:** Gallery → **容器** → section **水滴融合 (SDF)** (`Md3LiquidGlassFusionPlayground`).
+- Open Gallery **容器** for Liquid Glass cards and droplet/body fusion demos.
 - `dropletA/B/C` use normalized UV coordinates:
   - `x`, `y`: center in `0..1`
   - `radius`: relative droplet radius

@@ -9,7 +9,8 @@ Item {
     property real fusionStrength: 0.14
     property real squircleN: 5.0
     property int quality: 2
-    property real samplePadding: 28
+    property int dragCount: 0
+    property bool liveSampling: true
 
     readonly property real playgroundAspect: width / Math.max(1, height)
     readonly property real _pad: samplePadding
@@ -101,19 +102,28 @@ Item {
             x: -root._pad
             y: -root._pad
             visible: false
-            live: true
+            live: root.liveSampling || root.dragCount > 0
             hideSource: false
             smooth: true
             sourceItem: root._backdrop
-            sourceRect: Qt.rect(-root._pad, -root._pad, root.width + root._pad * 2, root.height + root._pad * 2)
+            sourceRect: {
+                if (!root._backdrop || root._backdrop === backdropHost)
+                    return Qt.rect(-root._pad, -root._pad, root.width + root._pad * 2, root.height + root._pad * 2)
+                void root.width
+                void root.height
+                void root._pad
+                const pad = root._pad
+                const p = root.mapToItem(root._backdrop, -pad, -pad)
+                return Qt.rect(p.x, p.y, root.width + pad * 2, root.height + pad * 2)
+            }
         }
 
         ShaderEffect {
             anchors.fill: parent
             property variant source: regionSample
-            property real bend: 1.15
-            property real frost: 0.004
-            property real chroma: 0.28
+            property real bend: 1.42
+            property real frost: 0.0025
+            property real chroma: 0.42
             property real radiusNorm: 0.22
             property real aspect: root.playgroundAspect
             property real padU: root._pad / Math.max(1, root.width + root._pad * 2)
@@ -130,8 +140,8 @@ Item {
             property vector4d dropA: Qt.vector4d(0, 0, 0, 0)
             property vector4d dropB: Qt.vector4d(0, 0, 0, 0)
             property vector4d dropC: Qt.vector4d(0, 0, 0, 0)
-            property real edgeSpectral: 1.45
-            property real sceneColor: 0.42
+            property real edgeSpectral: 1.65
+            property real sceneColor: 0.38
             vertexShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.vert.qsb"
             fragmentShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.frag.qsb"
         }
@@ -189,10 +199,14 @@ Item {
             id: dragArea
             anchors.fill: parent
             cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+            preventStealing: pressed
             onPressed: function (mouse) {
                 blob._grabX = mouse.x
                 blob._grabY = mouse.y
+                root.dragCount++
             }
+            onReleased: root.dragCount = Math.max(0, root.dragCount - 1)
+            onCanceled: root.dragCount = Math.max(0, root.dragCount - 1)
             onPositionChanged: function (mouse) {
                 if (!pressed)
                     return

@@ -32,4 +32,4 @@ Md3LiquidGlassFusionPlayground {
 
 ## Gallery
 
-Open **液态玻璃** in the Md3 Gallery. Drag **Glass A** and **Glass B** together to see the liquid bridge and edge spectral highlights.
+Open **容器** in the Md3 Gallery (scroll to **水滴融合**). Drag **Glass A** and **Glass B** together to see the liquid bridge and edge spectral highlights.

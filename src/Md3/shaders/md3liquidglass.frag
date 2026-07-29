@@ -108,7 +108,8 @@ vec2 refractCardUv(vec2 uv, float iorScale)
         vec2 p = (uv - 0.5) * vec2(aspect, 1.0);
         dir = length(p) > 1e-4 ? normalize(p) : vec2(0.0);
     }
-    float amount = bevel * bend * iorScale * (0.18 + 0.14 * thickness);
+    // Convex lens: strongest warp at the rim (Apple Liquid Glass reads as a domed lens).
+    float amount = bevel * bevel * bend * iorScale * (0.28 + 0.22 * thickness);
     vec2 offset = dir * amount;
     offset.x /= max(aspect, 0.001);
     return uv - offset;
@@ -150,30 +151,35 @@ vec3 sampleSceneAverage(vec2 texUv)
 
 void main()
 {
-    float r, g, b;
-    if (chroma < 0.02 || quality < 0.5) {
-        vec4 c = sampleFrost(cardToTex(refractCardUv(qt_TexCoord0, 1.0)));
-        r = c.r; g = c.g; b = c.b;
-    } else {
-        float iorR = 1.0 - chroma * 0.35;
-        float iorG = 1.0;
-        float iorB = 1.0 + chroma * 0.35;
-        r = sampleFrost(cardToTex(refractCardUv(qt_TexCoord0, iorR))).r;
-        g = sampleFrost(cardToTex(refractCardUv(qt_TexCoord0, iorG))).g;
-        b = sampleFrost(cardToTex(refractCardUv(qt_TexCoord0, iorB))).b;
-    }
-
     vec2 uv = qt_TexCoord0;
     float d = fusedField(uv);
     float bevelWidth = max(0.035, radiusNorm * (0.85 + 0.55 * thickness));
     float edgeBand = 1.0 - smoothstep(0.0, bevelWidth * 1.35, abs(d));
+    float rimMask = 1.0 - smoothstep(0.0, bevelWidth * 1.05, max(-d, 0.0));
+    float chromaEdge = chroma * rimMask * (quality >= 0.5 ? 1.0 : 0.0);
+
+    float r, g, b;
+    if (chromaEdge < 0.02) {
+        vec4 c = sampleFrost(cardToTex(refractCardUv(uv, 1.0)));
+        r = c.r; g = c.g; b = c.b;
+    } else {
+        float iorR = 1.0 - chromaEdge * 0.55;
+        float iorG = 1.0;
+        float iorB = 1.0 + chromaEdge * 0.55;
+        r = sampleFrost(cardToTex(refractCardUv(uv, iorR))).r;
+        g = sampleFrost(cardToTex(refractCardUv(uv, iorG))).g;
+        b = sampleFrost(cardToTex(refractCardUv(uv, iorB))).b;
+    }
     vec2 grad = sdfGradient(uv);
     vec2 rimOffset = grad * (0.025 + 0.02 * bend);
     rimOffset.x /= max(aspect, 0.001);
     vec2 rimUv = clamp(cardToTex(uv + rimOffset), 0.001, 0.999);
     vec3 rimScene = texture(source, rimUv).rgb;
     float rimLum = dot(rimScene, vec3(0.299, 0.587, 0.114));
-    float fresnel = pow(clamp(edgeBand, 0.0, 1.0), 0.65);
+    float fresnel = pow(clamp(edgeBand, 0.0, 1.0), 0.55);
+    vec3 lightDir = normalize(vec3(-0.32, -0.48, 0.82));
+    vec3 nrm = vec3(grad * rimMask, sqrt(max(0.02, 1.0 - rimMask * rimMask)));
+    float spec = pow(max(dot(nrm, lightDir), 0.0), 28.0) * rimMask;
 
     float lum = dot(vec3(r, g, b), vec3(0.299, 0.587, 0.114));
     float lift = (1.0 - lum) * adaptive * (0.08 + baseTint * 0.5);
@@ -185,9 +191,11 @@ void main()
     col = mix(col, mix(col, sceneAvg, 0.35), clamp(sceneColor, 0.0, 1.0));
 
     float spectral = clamp(edgeSpectral, 0.0, 2.5);
-    vec3 rimGlow = rimScene * (0.55 + rimLum * 0.45);
-    col += rimGlow * fresnel * spectral * (0.22 + 0.18 * bend);
-    col += vec3(1.0) * fresnel * spectral * 0.06;
+    vec3 rimGlow = rimScene * (0.65 + rimLum * 0.55);
+    col += rimGlow * fresnel * spectral * (0.32 + 0.22 * bend);
+    col += vec3(1.0) * fresnel * spectral * 0.11;
+    col += vec3(1.0) * spec * (0.35 + 0.25 * bend);
+    col *= 1.0 - rimMask * 0.04;
     col = clamp(col, 0.0, 1.0);
 
     fragColor = vec4(col, 1.0) * qt_Opacity;

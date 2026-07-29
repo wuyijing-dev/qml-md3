@@ -13,7 +13,7 @@ Item {
         contentWidth: width
         contentHeight: column.height
         clip: true
-        interactive: glassPlayground.dragCount === 0
+        interactive: glassPlayground.dragCount === 0 && fusionPlayground.dragCount === 0
         boundsBehavior: Flickable.StopAtBounds
         ColumnLayout {
             id: column
@@ -232,10 +232,32 @@ Item {
                 }
             }
 
+            Text {
+                text: qsTr("水滴融合 (SDF)")
+                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                font.pixelSize: Md3Theme.typography.labelLarge.size
+            }
+            Md3Text {
+                Layout.fillWidth: true
+                wrapMode: Text.Wrap
+                role: Md3Text.BodySmall
+                tone: Md3Text.OnSurfaceVariant
+                text: qsTr("演示区底部两块可拖玻璃会在同一 SDF 场融合；拖动时本页不滚动，松手后可继续上下滑动。")
+            }
+
+            GlassParamRow {
+                id: fusionStrengthSlider
+                label: qsTr("Body fusion (smooth-min)")
+                from: 0.04
+                to: 0.28
+                value: 0.14
+            }
+
             Item {
                 id: glassPlayground
                 Layout.fillWidth: true
-                Layout.preferredHeight: glassBackdrop.fittedHeight
+                readonly property int fusionPanelHeight: 400
+                Layout.preferredHeight: glassBackdrop.stageHeight + fusionPanelHeight + 12
                 clip: true
 
                 property int dragCount: 0
@@ -255,8 +277,9 @@ Item {
                         { w: 280, h: 120 }
                     ]
                     const s = sizes[i % sizes.length]
+                    const stageH = glassBackdrop.stageHeight
                     const maxX = Math.max(8, width - s.w - 8)
-                    const maxY = Math.max(8, height - s.h - 8)
+                    const maxY = Math.max(8, stageH - s.h - 8)
                     glassBlocks.append({
                         "bx": 24 + (i * 36) % Math.max(24, maxX),
                         "by": 36 + (i * 44) % Math.max(24, maxY),
@@ -287,7 +310,7 @@ Item {
                     readonly property bool hasImage: backgroundImage.toString().length > 0
                     readonly property bool hasVideo: backgroundVideo.toString().length > 0
                     readonly property bool hasMedia: hasImage || hasVideo
-                    readonly property int fittedHeight: {
+                    readonly property int stageHeight: {
                         const w = glassPlayground.width > 1 ? glassPlayground.width : 640
                         const h = Math.round(w / Math.max(0.4, contentAspect))
                         return Math.min(560, Math.max(220, h))
@@ -480,6 +503,17 @@ Item {
                             }
                         }
                     }
+                }
+
+                Md3LiquidGlassFusionPlayground {
+                    id: fusionPlayground
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    height: glassPlayground.fusionPanelHeight
+                    fusionStrength: fusionStrengthSlider.value
+                    liveSampling: glassBackdrop.hasVideo
+                    sourceItem: glassBackdrop
                 }
             }
 
