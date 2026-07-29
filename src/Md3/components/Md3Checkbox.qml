@@ -1,28 +1,16 @@
 import QtQuick
 
-Item {
+Md3SelectionControl {
     id: root
 
-    property bool checked: false
     property bool tristate: false
     property var checkState: checked ? Qt.Checked : Qt.Unchecked
-    // Use Item.enabled (do not redeclare)
-    property string text: ""
-    property string accessibleName: text.length ? text : "Checkbox"
-    property real labelSpacing: 12
+    accessibleName: text.length ? text : "Checkbox"
+    accessibleRole: Accessible.CheckBox
+    labelRole: Md3Text.BodyLarge
+    onActivated: cycle()
 
     signal toggled(var state)
-
-    implicitWidth: text.length > 0 ? boxChrome.width + labelSpacing + labelText.implicitWidth : boxChrome.width
-    implicitHeight: 48
-    width: implicitWidth
-    height: implicitHeight
-    activeFocusOnTab: enabled
-    Accessible.name: accessibleName
-    Accessible.role: Accessible.CheckBox
-    Accessible.checkable: true
-    Accessible.checked: checkState === Qt.Checked
-    Accessible.onToggleAction: root.cycle()
 
     readonly property bool isChecked: checkState === Qt.Checked
     readonly property bool isPartial: checkState === Qt.PartiallyChecked
@@ -51,9 +39,6 @@ Item {
             checkState = checked ? Qt.Checked : Qt.Unchecked
     }
 
-    Keys.onSpacePressed: cycle()
-    Keys.onReturnPressed: cycle()
-
     Item {
         id: boxChrome
         width: 48
@@ -72,9 +57,9 @@ Item {
             Md3StateOverlay {
                 overlayColor: root.selected ? Md3Theme.colorScheme.primary
                                             : Md3Theme.colorScheme.colorOnSurface
-                hovered: mouse.containsMouse
+                hovered: root.hovered
                 focused: root.activeFocus
-                pressed: mouse.pressed
+                pressed: root.pressed
                 controlEnabled: root.enabled
                 radius: stateLayer.radius
             }
@@ -160,32 +145,6 @@ Item {
             radius: 23
             focused: root.activeFocus
             controlEnabled: root.enabled
-        }
-    }
-
-    Md3Text {
-        id: labelText
-        visible: root.text.length > 0
-        anchors.left: boxChrome.right
-        anchors.leftMargin: root.labelSpacing
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.right: parent.right
-        text: root.text
-        role: Md3Text.BodyLarge
-        tone: root.enabled ? Md3Text.OnSurface : Md3Text.OnSurfaceVariant
-        elide: Text.ElideRight
-        opacity: root.enabled ? 1 : 0.38
-    }
-
-    MouseArea {
-        id: mouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-        enabled: root.enabled
-        onClicked: {
-            root.forceActiveFocus()
-            root.cycle()
         }
     }
 

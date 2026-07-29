@@ -1,28 +1,16 @@
 import QtQuick
 
-Item {
+Md3SelectionControl {
     id: root
 
-    property bool checked: false
     property var group: null
     property var value: null
-    // Use Item.enabled (do not redeclare)
-    property string text: ""
-    property string accessibleName: text.length ? text : "Radio"
-    property real labelSpacing: 12
+    accessibleName: text.length ? text : "Radio"
+    accessibleRole: Accessible.RadioButton
+    labelRole: Md3Text.BodyLarge
+    onActivated: select()
 
     signal clicked()
-
-    implicitWidth: text.length > 0 ? radioChrome.width + labelSpacing + labelText.implicitWidth : radioChrome.width
-    implicitHeight: 48
-    width: implicitWidth
-    height: implicitHeight
-    activeFocusOnTab: enabled
-    Accessible.name: accessibleName
-    Accessible.role: Accessible.RadioButton
-    Accessible.checkable: true
-    Accessible.checked: checked
-    Accessible.onToggleAction: select()
 
     function select() {
         if (!enabled)
@@ -41,9 +29,6 @@ Item {
         }
     }
 
-    Keys.onSpacePressed: select()
-    Keys.onReturnPressed: select()
-
     Item {
         id: radioChrome
         width: 48
@@ -60,9 +45,9 @@ Item {
             Md3StateOverlay {
                 overlayColor: root.checked ? Md3Theme.colorScheme.primary
                                            : Md3Theme.colorScheme.colorOnSurface
-                hovered: mouse.containsMouse
+                hovered: root.hovered
                 focused: root.activeFocus
-                pressed: mouse.pressed
+                pressed: root.pressed
                 controlEnabled: root.enabled
                 radius: 20
             }
@@ -108,32 +93,6 @@ Item {
             radius: 23
             focused: root.activeFocus
             controlEnabled: root.enabled
-        }
-    }
-
-    Md3Text {
-        id: labelText
-        visible: root.text.length > 0
-        anchors.left: radioChrome.right
-        anchors.leftMargin: root.labelSpacing
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.right: parent.right
-        text: root.text
-        role: Md3Text.BodyLarge
-        tone: root.enabled ? Md3Text.OnSurface : Md3Text.OnSurfaceVariant
-        elide: Text.ElideRight
-        opacity: root.enabled ? 1 : 0.38
-    }
-
-    MouseArea {
-        id: mouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-        enabled: root.enabled
-        onClicked: {
-            root.forceActiveFocus()
-            root.select()
         }
     }
 }

@@ -164,6 +164,7 @@ qt_add_qml_module(Md3
         primitives/Md3Shadow.qml
         primitives/Md3Control.qml
         primitives/Md3AbstractButton.qml
+        primitives/Md3SelectionControl.qml
         window/Md3WindowCapabilities.qml
         window/platforms/Md3WindowPlatformWindows.qml
         window/platforms/Md3WindowPlatformMacOS.qml
