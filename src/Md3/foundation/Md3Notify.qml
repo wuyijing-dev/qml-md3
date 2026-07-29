@@ -17,7 +17,8 @@ QtObject {
             host = null
     }
 
-    /// Show a snackbar. options: { actionText, dualLine, durationMs, id }
+    /// Show a snackbar. options: { actionText, dualLine, durationMs, id, priority }
+    /// Higher `priority` is shown before lower ones still waiting in the queue.
     function snackbar(message, options) {
         if (host && typeof host.show === "function")
             return host.show(message, options)

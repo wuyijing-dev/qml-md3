@@ -162,6 +162,14 @@ Item {
                     Md3Notify.snackbar(qsTr("Third notice — stacked / queued via Md3SnackbarHost"))
                 }
             }
+            Md3Button {
+                text: qsTr("Priority snackbar")
+                variant: Md3Button.Text
+                onClicked: {
+                    Md3Notify.snackbar(qsTr("Low priority (queued)"), { priority: 0 })
+                    Md3Notify.snackbar(qsTr("High priority jumps ahead"), { priority: 10, actionText: qsTr("OK") })
+                }
+            }
         }
     }
 }

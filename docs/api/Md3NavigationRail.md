@@ -13,7 +13,7 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `model` | `var` | `[]` | read/write | `Md3NavigationRail` | Main (scrollable) destinations. Each entry: { icon, label, destIndex? } destIndex defaults to array index when omitted (legacy). |
+| `model` | `var` | `[]` | read/write | `Md3NavigationRail` | Destinations: `{ icon, label, badge?, badgeText?, badgeDot?, badgeMax?, destIndex? }` |
 | `footerModel` | `var` | `[]` | read/write | `Md3NavigationRail` | Bottom-pinned destinations (same entry shape). Use real destIndex for PageHost. |
 | `currentIndex` | `int` | `0` | read/write | `Md3NavigationRail` | Selected destination index (maps to destIndex, not visual row). |
 | `expanded` | `bool` | `false` | read/write | `Md3NavigationRail` | — |

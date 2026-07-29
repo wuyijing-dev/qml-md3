@@ -67,6 +67,74 @@ Md3IconButton { icon: "favorite"; badgeDot: true }
 
 Use `Md3Badged` only when wrapping non-icon content (e.g. a text button).
 
+Nav destinations and TopAppBar trailing icons accept the same fields on model objects:
+
+```qml
+Md3NavigationBar {
+    model: [
+        { icon: "home", label: "Home", badgeDot: true },
+        { icon: "mail", label: "Mail", badge: "3" }  // or badgeText / badgeMax
+    ]
+}
+Md3TopAppBar {
+    trailingIcons: [
+        { icon: "notifications", badgeText: "12" },
+        { icon: "more_vert", badgeDot: true }
+    ]
+}
+```
+
+## TabBar pages
+
+```qml
+Md3TabBar {
+    model: [{ text: "One" }, { text: "Two" }]
+    Item { /* page 0 */ }
+    Item { /* page 1 */ }
+}
+```
+
+## Scaffold shell
+
+```qml
+Md3Scaffold {
+    title: qsTr("Inbox")
+    trailingIcons: ["search", "more_vert"]
+    navModel: [
+        { icon: "mail", label: qsTr("Mail"), badge: "2" },
+        { icon: "chat", label: qsTr("Chat") }
+    ]
+    drawerModel: [ { icon: "inbox", label: qsTr("Inbox") } ]
+    /* content */
+}
+```
+
+Custom `appBar:` / `navigationBar:` / `drawer:` slots still override the built-ins.
+
+## Stepper wizard
+
+```qml
+Md3Stepper {
+    model: [{ title: "Details" }, { title: "Confirm" }]
+    onFinished: Md3Notify.snackbar(qsTr("Done"))
+    Item { /* step 0 */ }
+    Item { /* step 1 */ }
+}
+```
+
+## DataTable cell types
+
+```qml
+columns: [
+    { title: "Name", role: "name", type: "avatar" },
+    { title: "Status", role: "status", type: "chip",
+      chipIconMap: { "Active": "check_circle", "Away": "schedule" } },
+    { title: "OK", role: "ok", type: "check" }
+]
+```
+
+Types: `text` (default), `chip`, `avatar`, `check`. Use `cellDelegate` only for custom cells.
+
 ## List tile
 
 ```qml
@@ -189,6 +257,7 @@ Md3TimeField { label: qsTr("Start"); hour: 10; minute: 30 }
 
 ```qml
 Md3Notify.snackbar(qsTr("Saved"), { actionText: qsTr("Undo") })
+Md3Notify.snackbar(qsTr("Urgent"), { priority: 10 })  // jumps ahead in the queue
 ```
 
 Requires `Md3ApplicationWindow` or any `Md3SnackbarHost` in the tree (auto-registers).

@@ -490,6 +490,12 @@ Item {
         property int sourceIndex: -1
         property string displayText: root.cellText(rowData, columnDef)
 
+        readonly property string cellType: {
+            const t = columnDef && columnDef.type !== undefined ? String(columnDef.type).toLowerCase() : "text"
+            return t.length ? t : "text"
+        }
+        readonly property bool useBuiltin: root.cellDelegate === null
+
         Loader {
             anchors.fill: parent
             active: root.cellDelegate !== null
@@ -504,16 +510,85 @@ Item {
                 item.sourceIndex = cellHost.sourceIndex
             }
         }
+
+        // type: "text" (default)
         Text {
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width
             leftPadding: 8
-            visible: root.cellDelegate === null
+            visible: cellHost.useBuiltin && cellHost.cellType === "text"
             text: cellHost.displayText
             color: Md3Theme.colorScheme.colorOnSurface
             font.family: Md3Theme.typography.fontFamily
             font.pixelSize: Md3Theme.typography.bodyMedium.size
             elide: Text.ElideRight
+        }
+
+        // type: "chip" — optional chipIcon / chipIconMap / chipIconRole
+        Md3AssistChip {
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 4
+            visible: cellHost.useBuiltin && cellHost.cellType === "chip"
+            text: cellHost.displayText
+            icon: {
+                const def = cellHost.columnDef || {}
+                if (def.chipIcon)
+                    return String(def.chipIcon)
+                if (def.chipIconRole && cellHost.rowData)
+                    return String(cellHost.rowData[def.chipIconRole] || "")
+                if (def.chipIconMap && typeof def.chipIconMap === "object") {
+                    const k = cellHost.displayText
+                    if (def.chipIconMap[k] !== undefined)
+                        return String(def.chipIconMap[k])
+                }
+                return ""
+            }
+        }
+
+        // type: "avatar" — initials from displayText or avatarRole / avatarSourceRole
+        Md3Avatar {
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 8
+            visible: cellHost.useBuiltin && cellHost.cellType === "avatar"
+            sizePreset: Md3Avatar.ExtraSmall
+            initials: {
+                const def = cellHost.columnDef || {}
+                if (def.avatarRole && cellHost.rowData && cellHost.rowData[def.avatarRole] !== undefined)
+                    return String(cellHost.rowData[def.avatarRole])
+                const t = cellHost.displayText.trim()
+                if (!t.length)
+                    return ""
+                const parts = t.split(/\s+/)
+                if (parts.length >= 2)
+                    return (parts[0][0] + parts[1][0]).toUpperCase()
+                return t.slice(0, 2).toUpperCase()
+            }
+            source: {
+                const def = cellHost.columnDef || {}
+                if (def.avatarSourceRole && cellHost.rowData)
+                    return cellHost.rowData[def.avatarSourceRole] || ""
+                return ""
+            }
+        }
+
+        // type: "check" — truthy display / boolean role
+        Md3Checkbox {
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 8
+            visible: cellHost.useBuiltin && cellHost.cellType === "check"
+            enabled: false
+            checked: {
+                const v = cellHost.rowData && cellHost.columnDef && cellHost.columnDef.role
+                          ? cellHost.rowData[cellHost.columnDef.role]
+                          : cellHost.displayText
+                if (typeof v === "boolean")
+                    return v
+                const s = String(v).toLowerCase()
+                return s === "1" || s === "true" || s === "yes" || s === "checked"
+            }
         }
     }
 

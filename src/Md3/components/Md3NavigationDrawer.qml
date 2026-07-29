@@ -195,6 +195,38 @@ Item {
                             }
                         }
 
+                        Md3Badge {
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.rightMargin: 16
+                            z: 5
+                            visible: {
+                                const m = modelData
+                                if (!m)
+                                    return false
+                                if (m.badgeDot === true)
+                                    return true
+                                if (m.badge !== undefined && m.badge !== null && String(m.badge).length > 0)
+                                    return true
+                                if (m.badgeText !== undefined && String(m.badgeText).length > 0)
+                                    return true
+                                return false
+                            }
+                            dot: !!(modelData && modelData.badgeDot)
+                            text: {
+                                const m = modelData
+                                if (!m || m.badgeDot)
+                                    return ""
+                                if (m.badge !== undefined && m.badge !== null)
+                                    return String(m.badge)
+                                if (m.badgeText !== undefined)
+                                    return String(m.badgeText)
+                                return ""
+                            }
+                            max: modelData && modelData.badgeMax !== undefined ? Number(modelData.badgeMax) : 99
+                            sizePreset: Md3Badge.Small
+                        }
+
                         MouseArea {
                             id: mouse
                             anchors.fill: parent

@@ -100,6 +100,40 @@ Rectangle {
                                 }
                             }
                         }
+
+                        Md3Badge {
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            anchors.rightMargin: 4
+                            anchors.topMargin: 0
+                            z: 5
+                            visible: {
+                                const m = dest.modelData
+                                if (!m)
+                                    return false
+                                if (m.badgeDot === true)
+                                    return true
+                                if (m.badge !== undefined && m.badge !== null && String(m.badge).length > 0)
+                                    return true
+                                if (m.badgeText !== undefined && String(m.badgeText).length > 0)
+                                    return true
+                                return false
+                            }
+                            dot: !!(dest.modelData && dest.modelData.badgeDot)
+                            text: {
+                                const m = dest.modelData
+                                if (!m || m.badgeDot)
+                                    return ""
+                                if (m.badge !== undefined && m.badge !== null)
+                                    return String(m.badge)
+                                if (m.badgeText !== undefined)
+                                    return String(m.badgeText)
+                                return ""
+                            }
+                            max: dest.modelData && dest.modelData.badgeMax !== undefined
+                                 ? Number(dest.modelData.badgeMax) : 99
+                            sizePreset: Md3Badge.Small
+                        }
                     }
 
                     Text {

@@ -336,39 +336,16 @@ Item {
                         ]
                         columns: [
                             { title: qsTr("Name"), role: "name", width: 180 },
-                            { title: qsTr("Status"), role: "status", width: 120, filterable: true },
+                            {
+                                title: qsTr("Status"), role: "status", width: 120, filterable: true,
+                                type: "chip",
+                                chipIconMap: { "Active": "check_circle", "Away": "schedule" }
+                            },
                             { title: qsTr("Size"), role: "size", width: 100 },
                             { title: qsTr("Modified"), role: "modified", width: 140 },
                             { title: qsTr("Team"), role: "team", width: 120 },
                             { title: qsTr("Path"), role: "path", width: 280 }
                         ]
-                        cellDelegate: Component {
-                            Item {
-                                property var rowData
-                                property var columnDef
-                                property int columnIndex
-                                property string displayText
-                                property int sourceIndex
-
-                                Text {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    leftPadding: 8
-                                    visible: !columnDef || columnDef.role !== "status"
-                                    width: parent.width
-                                    text: displayText
-                                    color: Md3Theme.colorScheme.colorOnSurface
-                                    font.pixelSize: Md3Theme.typography.bodyMedium.size
-                                    elide: Text.ElideMiddle
-                                }
-
-                                Md3AssistChip {
-                                    visible: columnDef && columnDef.role === "status"
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: displayText
-                                    icon: displayText === "Active" ? "check_circle" : "schedule"
-                                }
-                            }
-                        }
                         onPageRequested: function (pageIndex, sortColumn, sortOrder) {
                             page.serverPage = pageIndex
                             loading = true

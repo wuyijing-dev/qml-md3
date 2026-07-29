@@ -14,7 +14,7 @@ Singleton helpers for app-wide notifications.
 | `registerHost(host)` | Usually automatic |
 | `unregisterHost(host)` | Usually automatic |
 
-`options`: `{ actionText, dualLine, durationMs, id }`
+`options`: `{ actionText, dualLine, durationMs, id, priority }` — higher `priority` is shown before lower ones still waiting in the queue.
 
 ## Example
 

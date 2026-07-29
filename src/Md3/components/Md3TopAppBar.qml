@@ -65,6 +65,20 @@ Rectangle {
                 required property int index
                 required property var modelData
                 icon: typeof modelData === "string" ? modelData : modelData.icon
+                badgeText: {
+                    if (typeof modelData === "string")
+                        return ""
+                    if (modelData.badgeDot)
+                        return ""
+                    if (modelData.badge !== undefined && modelData.badge !== null)
+                        return String(modelData.badge)
+                    if (modelData.badgeText !== undefined)
+                        return String(modelData.badgeText)
+                    return ""
+                }
+                badgeDot: typeof modelData === "object" && !!modelData.badgeDot
+                badgeMax: typeof modelData === "object" && modelData.badgeMax !== undefined
+                          ? Number(modelData.badgeMax) : 99
                 anchors.verticalCenter: parent.verticalCenter
                 onClicked: root.trailingClicked(index)
             }

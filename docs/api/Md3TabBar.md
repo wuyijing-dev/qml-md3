@@ -22,6 +22,8 @@ import Md3
 | `variant` | `int` | `Md3TabBar.Primary` | read/write | `Md3TabBar` | — |
 | `model` | `var` | `[]` | read/write | `Md3TabBar` | — |
 | `currentIndex` | `int` | `0` | read/write | `Md3TabBar` | — |
+| `pages` | `alias` | `pageStack.data` | default read/write | `Md3TabBar` | Optional content pages; StackLayout tracks `currentIndex` |
+| `hasPages` | `bool` | — | readonly | `Md3TabBar` | — |
 
 ## Signals
 
@@ -29,18 +31,14 @@ import Md3
 |--------|------------|-------------|
 | `currentIndexChangedByUser(int index)` | `Md3TabBar` | — |
 
-## Methods
-
-_None._
-
 ## Example
 
 ```qml
 import Md3
 
 Md3TabBar {
-    variant: Md3TabBar.Primary
-    model: []
-    currentIndex: 0
+    model: [{ text: "One" }, { text: "Two" }]
+    Item { /* page 0 */ }
+    Item { /* page 1 */ }
 }
 ```

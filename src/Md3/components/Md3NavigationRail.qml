@@ -168,6 +168,12 @@ Rectangle {
                         }
                     }
                 }
+                Item {
+                    // Badge sits on the icon when collapsed; beside label when expanded.
+                    width: badge.visible ? Math.max(8, badge.width - 4) : 0
+                    height: 1
+                    visible: false
+                }
                 Text {
                     opacity: root.expanded ? 1 : 0
                     visible: opacity > 0.02
@@ -203,10 +209,47 @@ Rectangle {
                 }
             }
 
+            Md3Badge {
+                id: badge
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.leftMargin: root.expanded
+                                   ? root.indicatorInset + 28
+                                   : root.indicatorInset + root.collapsedIndicatorWidth - 14
+                anchors.topMargin: (parent.height - root.indicatorHeight) / 2 - 2
+                z: 6
+                visible: {
+                    const m = modelData
+                    if (!m)
+                        return false
+                    if (m.badgeDot === true)
+                        return true
+                    if (m.badge !== undefined && m.badge !== null && String(m.badge).length > 0)
+                        return true
+                    if (m.badgeText !== undefined && String(m.badgeText).length > 0)
+                        return true
+                    return false
+                }
+                dot: !!(modelData && modelData.badgeDot)
+                text: {
+                    const m = modelData
+                    if (!m || m.badgeDot)
+                        return ""
+                    if (m.badge !== undefined && m.badge !== null)
+                        return String(m.badge)
+                    if (m.badgeText !== undefined)
+                        return String(m.badgeText)
+                    return ""
+                }
+                max: modelData && modelData.badgeMax !== undefined ? Number(modelData.badgeMax) : 99
+                sizePreset: Md3Badge.Small
+            }
+
             MouseArea {
                 id: mouse
                 anchors.fill: parent
                 hoverEnabled: true
+                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                 onEntered: root.destinationHovered(dest.destIndex)
                 onExited: root.destinationUnhovered(dest.destIndex)
                 onClicked: function (mouse) {

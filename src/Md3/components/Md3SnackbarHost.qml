@@ -34,14 +34,28 @@ Item {
     function show(message, options) {
         const opts = options || {}
         const snackId = opts.id !== undefined ? String(opts.id) : ("snack-" + (++_serial))
+        const priority = opts.priority !== undefined ? Number(opts.priority) : 0
         const entry = {
             snackId: snackId,
             text: String(message || ""),
             actionText: opts.actionText !== undefined ? String(opts.actionText) : "",
             dualLine: !!opts.dualLine,
-            durationMs: opts.durationMs !== undefined ? Number(opts.durationMs) : defaultDurationMs
+            durationMs: opts.durationMs !== undefined ? Number(opts.durationMs) : defaultDurationMs,
+            priority: priority
         }
-        _queue = _queue.concat([entry])
+        // Higher priority first; equal priority keeps FIFO order.
+        let inserted = false
+        const next = []
+        for (let i = 0; i < _queue.length; ++i) {
+            if (!inserted && priority > Number(_queue[i].priority || 0)) {
+                next.push(entry)
+                inserted = true
+            }
+            next.push(_queue[i])
+        }
+        if (!inserted)
+            next.push(entry)
+        _queue = next
         _pump()
         return snackId
     }

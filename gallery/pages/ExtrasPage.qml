@@ -102,13 +102,45 @@ Item {
                 }
             }
             Md3Stepper {
+                id: stepperDemo
                 Layout.fillWidth: true
-                currentStep: 1
+                Layout.preferredHeight: 220
+                currentStep: 0
                 model: [
                     { title: "Details" },
                     { title: "Review" },
                     { title: "Confirm" }
                 ]
+                onFinished: Md3Notify.snackbar(qsTr("Stepper finished"))
+                Item {
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: 8
+                        Text {
+                            text: qsTr("Enter details")
+                            color: Md3Theme.colorScheme.colorOnSurface
+                        }
+                        Md3TextField {
+                            width: 240
+                            label: qsTr("Name")
+                            placeholderText: qsTr("Ada Lovelace")
+                        }
+                    }
+                }
+                Item {
+                    Text {
+                        anchors.centerIn: parent
+                        text: qsTr("Review your choices")
+                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    }
+                }
+                Item {
+                    Text {
+                        anchors.centerIn: parent
+                        text: qsTr("Confirm and finish")
+                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    }
+                }
             }
 
             Text {
@@ -294,51 +326,30 @@ Item {
                 keyboardNavigationEnabled: true
                 columnFilters: ({ status: statusFilter.text })
                 columns: [
-                    { title: "Name", role: "name", width: 140 },
+                    { title: "Name", role: "name", width: 140, type: "avatar" },
                     { title: "Role", role: "role", width: 120 },
-                    { title: "Status", role: "status", width: 100 },
+                    {
+                        title: "Status", role: "status", width: 120, type: "chip",
+                        chipIconMap: { "Active": "check_circle", "Away": "schedule" }
+                    },
+                    { title: "OK", role: "ok", width: 64, type: "check" },
                     { title: "Score", role: "score", width: 80 },
                     { title: "Team", role: "team", width: 120 },
                     { title: "Notes", role: "notes", width: 160 }
                 ]
-                cellDelegate: Component {
-                    Item {
-                        property var rowData
-                        property var columnDef
-                        property int columnIndex
-                        property string displayText
-                        property int sourceIndex
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            leftPadding: 8
-                            visible: !columnDef || columnDef.role !== "status"
-                            text: displayText
-                            color: Md3Theme.colorScheme.colorOnSurface
-                            font.pixelSize: Md3Theme.typography.bodyMedium.size
-                            elide: Text.ElideRight
-                        }
-                        Md3AssistChip {
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.leftMargin: 8
-                            visible: columnDef && columnDef.role === "status"
-                            text: displayText
-                            icon: displayText === "Active" ? "check_circle" : "schedule"
-                        }
-                    }
-                }
                 rows: [
-                    { name: "Ada", role: "Admin", status: "Active", score: 98, team: "Platform", notes: "Core owner" },
-                    { name: "Alan", role: "Editor", status: "Away", score: 72, team: "Docs", notes: "Review queue" },
-                    { name: "Grace", role: "Viewer", status: "Active", score: 88, team: "Design", notes: "" },
-                    { name: "Linus", role: "Admin", status: "Active", score: 91, team: "Kernel", notes: "On-call" },
-                    { name: "Barbara", role: "Editor", status: "Away", score: 65, team: "Docs", notes: "" },
-                    { name: "Dennis", role: "Viewer", status: "Active", score: 77, team: "Tools", notes: "" },
-                    { name: "Ken", role: "Admin", status: "Away", score: 84, team: "Platform", notes: "" },
-                    { name: "Margaret", role: "Editor", status: "Active", score: 95, team: "Design", notes: "Lead" },
-                    { name: "Donald", role: "Viewer", status: "Away", score: 58, team: "Research", notes: "" },
-                    { name: "Edsger", role: "Admin", status: "Active", score: 89, team: "Research", notes: "" },
-                    { name: "Tony", role: "Editor", status: "Active", score: 81, team: "Tools", notes: "" },
-                    { name: "Niklaus", role: "Viewer", status: "Away", score: 70, team: "Platform", notes: "" }
+                    { name: "Ada", role: "Admin", status: "Active", ok: true, score: 98, team: "Platform", notes: "Core owner" },
+                    { name: "Alan", role: "Editor", status: "Away", ok: false, score: 72, team: "Docs", notes: "Review queue" },
+                    { name: "Grace", role: "Viewer", status: "Active", ok: true, score: 88, team: "Design", notes: "" },
+                    { name: "Linus", role: "Admin", status: "Active", ok: true, score: 91, team: "Kernel", notes: "On-call" },
+                    { name: "Barbara", role: "Editor", status: "Away", ok: false, score: 65, team: "Docs", notes: "" },
+                    { name: "Dennis", role: "Viewer", status: "Active", ok: true, score: 77, team: "Tools", notes: "" },
+                    { name: "Ken", role: "Admin", status: "Away", ok: false, score: 84, team: "Platform", notes: "" },
+                    { name: "Margaret", role: "Editor", status: "Active", ok: true, score: 95, team: "Design", notes: "Lead" },
+                    { name: "Donald", role: "Viewer", status: "Away", ok: false, score: 58, team: "Research", notes: "" },
+                    { name: "Edsger", role: "Admin", status: "Active", ok: true, score: 89, team: "Research", notes: "" },
+                    { name: "Tony", role: "Editor", status: "Active", ok: true, score: 81, team: "Tools", notes: "" },
+                    { name: "Niklaus", role: "Viewer", status: "Away", ok: false, score: 70, team: "Platform", notes: "" }
                 ]
                 rowActions: [
                     { id: "edit", text: qsTr("Edit"), icon: "edit" },

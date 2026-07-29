@@ -54,7 +54,7 @@ import Md3
 | `autoReorderRows` | `bool` | `true` | read/write | `Md3DataTable` | — |
 | `showColumnFilterIcons` | `bool` | `false` | read/write | `Md3DataTable` | — |
 | `rowActions` | `var` | `[]` | read/write | `Md3DataTable` | — |
-| `cellDelegate` | `Component` | `null` | read/write | `Md3DataTable` | Optional cell renderer: set `rowData`, `columnDef`, `columnIndex`, `displayText`, `sourceIndex`. |
+| `cellDelegate` | `Component` | `null` | read/write | `Md3DataTable` | Optional cell renderer. When null, `columns[].type` presets apply: `text`, `chip`, `avatar`, `check`. |
 | `columnWidths` | `var` | `[]` | read/write | `Md3DataTable` | — |
 | `rowMenuSourceIndex` | `int` | `-1` | read/write | `Md3DataTable` | — |
 | `focusedPageRow` | `int` | `-1` | read/write | `Md3DataTable` | — |
