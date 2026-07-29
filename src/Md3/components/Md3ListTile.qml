@@ -1,6 +1,6 @@
 import QtQuick
 
-Item {
+Md3AbstractButton {
     id: root
 
     property string title: ""
@@ -24,7 +24,6 @@ Item {
     /// Optional trailing control slot (e.g. Md3Switch) — prefer over inventing a Row.
     property alias trailing: trailingSlot.data
 
-    signal clicked()
     signal trailingClicked()
 
     readonly property int lines: {
@@ -44,22 +43,32 @@ Item {
     implicitWidth: 320
     height: implicitHeight
     width: fillWidth && parent ? parent.width : implicitWidth
-    activeFocusOnTab: enabled
-    Accessible.name: title
-    Accessible.role: Accessible.ListItem
+    accessibleName: title
+    accessibleRole: Accessible.ListItem
 
     Rectangle {
+        id: bg
         anchors.fill: parent
         color: root.selected ? Md3Theme.colorScheme.secondaryContainer : "transparent"
         Md3StateOverlay {
             overlayColor: root.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
                                         : Md3Theme.colorScheme.colorOnSurface
-            hovered: mouse.containsMouse
-            focused: root.activeFocus
-            pressed: mouse.pressed
+            hovered: root.hovered
+            focused: root.activeFocus && root.visualFocus
+            pressed: root.pressed
             controlEnabled: root.enabled
         }
     }
+
+    pressTarget: bg
+    pressRightMargin: {
+        if (root.hasTrailingSlot)
+            return trailingSlot.width + 16
+        if (root.trailingIcon.length > 0)
+            return 40
+        return 0
+    }
+    onPressFeedback: function (x, y) { }
 
     Row {
         anchors.fill: parent
@@ -111,34 +120,34 @@ Item {
             }
             spacing: 2
 
-            Text {
+            Md3Text {
                 width: parent.width
                 text: root.title
-                color: root.enabled
-                       ? (root.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer : Md3Theme.colorScheme.colorOnSurface)
-                       : Md3Theme.colorScheme.disabledContent()
-                font.family: Md3Theme.typography.fontFamily
-                font.pixelSize: Md3Theme.scaled(Md3Theme.typography.bodyLarge.size)
+                role: Md3Text.BodyLarge
+                tone: Md3Text.Custom
+                customColor: root.enabled
+                             ? (root.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer : Md3Theme.colorScheme.colorOnSurface)
+                             : Md3Theme.colorScheme.disabledContent()
                 elide: Text.ElideRight
             }
-            Text {
+            Md3Text {
                 visible: root.subtitle.length > 0
                 width: parent.width
                 text: root.subtitle
-                color: root.enabled ? Md3Theme.colorScheme.colorOnSurfaceVariant
-                                    : Md3Theme.colorScheme.disabledContent()
-                font.family: Md3Theme.typography.fontFamily
-                font.pixelSize: Md3Theme.scaled(Md3Theme.typography.bodyMedium.size)
+                role: Md3Text.BodyMedium
+                tone: Md3Text.Custom
+                customColor: root.enabled ? Md3Theme.colorScheme.colorOnSurfaceVariant
+                                          : Md3Theme.colorScheme.disabledContent()
                 elide: Text.ElideRight
             }
-            Text {
+            Md3Text {
                 visible: root.supportingText.length > 0
                 width: parent.width
                 text: root.supportingText
-                color: root.enabled ? Md3Theme.colorScheme.colorOnSurfaceVariant
-                                    : Md3Theme.colorScheme.disabledContent()
-                font.family: Md3Theme.typography.fontFamily
-                font.pixelSize: Md3Theme.scaled(Md3Theme.typography.bodyMedium.size)
+                role: Md3Text.BodyMedium
+                tone: Md3Text.Custom
+                customColor: root.enabled ? Md3Theme.colorScheme.colorOnSurfaceVariant
+                                          : Md3Theme.colorScheme.disabledContent()
                 wrapMode: Text.Wrap
                 maximumLineCount: 2
             }
@@ -183,16 +192,4 @@ Item {
         variant: Md3Divider.Inset
     }
 
-    MouseArea {
-        id: mouse
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-        enabled: root.enabled
-        z: -1
-        onClicked: {
-            root.forceActiveFocus()
-            root.clicked()
-        }
-    }
 }

@@ -9,6 +9,7 @@ Item {
     property string text: ""
     property string icon: ""
     property string accessibleName: text.length ? text : (icon.length ? icon : qsTr("Button"))
+    property int accessibleRole: Accessible.Button
     /// Keyboard focus ring — set true on Tab / arrow keys; cleared on mouse click.
     property bool visualFocus: false
     property color contentColor: Md3Theme.colorScheme.colorOnSurface
@@ -35,7 +36,7 @@ Item {
 
     activeFocusOnTab: enabled
     Accessible.name: accessibleName
-    Accessible.role: Accessible.Button
+    Accessible.role: accessibleRole
     Accessible.checkable: checkable
     Accessible.checked: checked
     Accessible.onPressAction: if (enabled) root.activate(true)

@@ -1,19 +1,14 @@
 import QtQuick
 import QtQuick.Effects
 
-Item {
+Md3AbstractButton {
     id: root
 
     enum Variant { Filled, FilledTonal, Outlined }
 
     property int variant: Md3SplitButton.Filled
-    property string text: ""
-    property string icon: ""
     property var menuModel: []
-    property string accessibleName: text
-    property bool visualFocus: false
 
-    signal clicked()
     signal menuItemClicked(int index)
 
     readonly property bool menuOpen: menu.open
@@ -44,10 +39,10 @@ Item {
     implicitHeight: Math.max(48, h)
     width: implicitWidth
     height: implicitHeight
-    activeFocusOnTab: enabled
-    Accessible.name: accessibleName
-    Accessible.role: Accessible.Button
-    Accessible.onPressAction: if (enabled) root.clicked()
+    accessibleName: text
+    pressTarget: mainSeg
+    pressRightMargin: trailingWidth
+    onPressFeedback: function (x, y) { mainRipple.pulse(x, y) }
 
     function openMenu() {
         if (!enabled || menuModel.length === 0)
@@ -137,12 +132,11 @@ Item {
                         }
                     }
                 }
-                Text {
+                Md3Text {
                     text: root.text
-                    color: root.contentColor
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.scaled(Md3Theme.typography.labelLarge.size)
-                    font.weight: Md3Theme.typography.labelLarge.weight
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.Custom
+                    customColor: root.contentColor
                     anchors.verticalCenter: parent.verticalCenter
                     Behavior on color {
                         ColorAnimation {
@@ -154,21 +148,6 @@ Item {
                 }
             }
 
-            MouseArea {
-                id: mainMouse
-                anchors.fill: parent
-                hoverEnabled: true
-                enabled: root.enabled
-                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                onPressed: function (mouse) {
-                    mainRipple.pulse(mouse.x, mouse.y)
-                }
-                onClicked: {
-                    root.visualFocus = false
-                    root.forceActiveFocus()
-                    root.clicked()
-                }
-            }
         }
 
         Item {
@@ -231,7 +210,7 @@ Item {
                 overlayColor: root.contentColor
                 hovered: trailMouse.containsMouse
                 pressed: trailMouse.pressed
-                focused: false
+                focused: root.activeFocus && root.visualFocus && root.menuOpen
                 controlEnabled: root.enabled
                 topLeftRadius: 0
                 bottomLeftRadius: 0
@@ -310,8 +289,6 @@ Item {
         if (event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab)
             root.visualFocus = true
     }
-    Keys.onReturnPressed: if (enabled) { visualFocus = true; clicked() }
-    Keys.onSpacePressed: if (enabled) { visualFocus = true; clicked() }
     Keys.onDownPressed: if (enabled) openMenu()
 
     Md3Menu {
