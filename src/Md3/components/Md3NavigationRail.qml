@@ -174,16 +174,16 @@ Rectangle {
                     height: 1
                     visible: false
                 }
-                Text {
+                Md3Text {
                     opacity: root.expanded ? 1 : 0
                     visible: opacity > 0.02
                     width: root.expanded ? implicitWidth : 0
                     clip: true
                     text: modelData.label !== undefined ? modelData.label : ""
-                    color: dest.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
-                                         : Md3Theme.colorScheme.colorOnSurface
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.Custom
+                    customColor: dest.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
+                                               : Md3Theme.colorScheme.colorOnSurface
                     anchors.verticalCenter: parent.verticalCenter
                     Behavior on opacity {
                         NumberAnimation {
@@ -352,13 +352,12 @@ Rectangle {
                 iconColor: Md3Theme.colorScheme.colorOnSurfaceVariant
                 anchors.verticalCenter: parent.verticalCenter
             }
-            Text {
+            Md3Text {
                 text: qsTr("Menu")
                 opacity: root.expanded ? 1 : 0
                 visible: root.expanded
-                color: Md3Theme.colorScheme.colorOnSurface
-                font.family: Md3Theme.typography.fontFamily
-                font.pixelSize: Md3Theme.typography.labelLarge.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurface
                 anchors.verticalCenter: parent.verticalCenter
                 Behavior on opacity {
                     NumberAnimation {
@@ -406,15 +405,14 @@ Rectangle {
             width: flick.width
             spacing: 4
 
-            Text {
+            Md3Text {
                 opacity: root.expanded && root.headerLabel.length > 0 ? 1 : 0
                 visible: root.expanded && root.headerLabel.length > 0
                 width: parent.width
                 text: root.headerLabel
                 leftPadding: 16
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.titleSmall.size
-                font.family: Md3Theme.typography.fontFamily
+                role: Md3Text.TitleSmall
+                tone: Md3Text.OnSurfaceVariant
                 Behavior on opacity {
                     NumberAnimation {
                         duration: Md3Motion.short3

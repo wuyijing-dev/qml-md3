@@ -148,15 +148,16 @@ Item {
                                 anchors.verticalCenter: parent.verticalCenter
                             }
 
-                            Text {
+                            Md3Text {
                                 text: seg.label
-                                color: {
+                                role: Md3Text.LabelLarge
+                                tone: Md3Text.Custom
+                                customColor: {
                                     if (!seg.segEnabled)
                                         return Md3Theme.colorScheme.disabledContent()
                                     return seg.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
                                                         : Md3Theme.colorScheme.colorOnSurface
                                 }
-                                font.family: Md3Theme.typography.fontFamily
                                 font.pixelSize: Md3Theme.scaled(Md3Theme.typography.labelLarge.size)
                                 font.weight: Md3Theme.typography.labelLarge.weight
                                 anchors.verticalCenter: parent.verticalCenter

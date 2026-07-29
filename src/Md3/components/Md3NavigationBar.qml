@@ -136,13 +136,13 @@ Rectangle {
                         }
                     }
 
-                    Text {
+                    Md3Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: dest.modelData.label !== undefined ? dest.modelData.label : ""
-                        color: dest.selected ? Md3Theme.colorScheme.colorOnSurface
-                                             : Md3Theme.colorScheme.colorOnSurfaceVariant
-                        font.family: Md3Theme.typography.fontFamily
-                        font.pixelSize: Md3Theme.typography.labelMedium.size
+                        role: Md3Text.LabelMedium
+                        tone: Md3Text.Custom
+                        customColor: dest.selected ? Md3Theme.colorScheme.colorOnSurface
+                                                   : Md3Theme.colorScheme.colorOnSurfaceVariant
                         font.weight: Md3Theme.typography.labelMedium.weight
                         Behavior on color {
                             ColorAnimation {
