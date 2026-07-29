@@ -11,20 +11,22 @@ Item {
     property bool draggable: true
     property bool boundToParent: true
     property real squircleN: 5.0
-    property real adaptiveTint: 0.25
+    property real adaptiveTint: 0.85
     property real liquidDeform: 1.0
     /// 0=Low, 1=Medium, 2=High — scales sample res, frost taps, chroma.
-    property int quality: 1
+    property int quality: 2
     /// Keep sampling every frame (video). For static images set false — updates on move.
     property bool liveSampling: true
 
-    property real blurAmount: 0.18
+    // Defaults aligned with first-version look + open recreations
+    // (kennsorr ior≈1.5 / glass-gl curve≈2.8 / ybouane fresnel rim).
+    property real blurAmount: 0.4
     property real blurMax: 64
-    property real tintOpacity: 0.02
+    property real tintOpacity: 0.08
     property color tintColor: "#FFFFFF"
-    property real edgeStrength: 1.0
-    property real refraction: 1.15
-    property real chromaticAberration: 0.25
+    property real edgeStrength: 0.9
+    property real refraction: 1.2
+    property real chromaticAberration: 0.5
     /// 0..1 SDF blend between base glass body and droplets.
     property real fusionAmount: 0.0
     /// Second body in UV space (cx, cy, halfW, halfH). Set halfW=0 to disable.
@@ -33,11 +35,11 @@ Item {
     property vector4d dropletA: Qt.vector4d(0.5, 0.5, 0.0, 0.0)
     property vector4d dropletB: Qt.vector4d(0.5, 0.5, 0.0, 0.0)
     property vector4d dropletC: Qt.vector4d(0.5, 0.5, 0.0, 0.0)
-    /// Scene-light color from refracted edge highlights.
-    property real edgeSpectralStrength: 1.35
-    /// Background dynamic color pickup.
-    property real sceneColorStrength: 0.4
-    property real samplePadding: 24
+    /// White Fresnel rim / specular strength (not coloured scene glow).
+    property real edgeSpectralStrength: 0.7
+    /// Light ambient spill from backdrop (keep low).
+    property real sceneColorStrength: 0.12
+    property real samplePadding: 28
     property int layoutMode: Md3ContainerBody.Fit
 
     default property alias contentData: contentHost.content
@@ -178,7 +180,7 @@ Item {
             visible: root._blurReady
             property variant source: regionSample
             property real bend: root._effRefraction
-            property real frost: root._effBlur * (root.quality >= 2 ? 0.012 : 0.008)
+            property real frost: root._effBlur * 0.01
             property real chroma: root.quality >= 1 ? root.chromaticAberration : 0
             property real radiusNorm: root._radiusNorm
             property real aspect: root._aspect
@@ -213,7 +215,7 @@ Item {
             anchors.fill: parent
             visible: root._blurReady
             color: root.tintColor
-            opacity: root.tintOpacity * (0.2 + 0.1 * root._thickness) * (1.0 - root.adaptiveTint * 0.7)
+            opacity: root.tintOpacity * (0.35 + 0.2 * root._thickness) * (1.0 - root.adaptiveTint * 0.55)
         }
 
         Rectangle {

@@ -121,17 +121,17 @@ Item {
         ShaderEffect {
             anchors.fill: parent
             property variant source: regionSample
-            property real bend: 1.42
-            property real frost: 0.0025
-            property real chroma: 0.42
+            property real bend: 1.2
+            property real frost: 0.004
+            property real chroma: 0.5
             property real radiusNorm: 0.22
             property real aspect: root.playgroundAspect
             property real padU: root._pad / Math.max(1, root.width + root._pad * 2)
             property real padV: root._pad / Math.max(1, root.height + root._pad * 2)
             property real squircleN: root.squircleN
             property real thickness: 1.0
-            property real adaptive: 0.2
-            property real baseTint: 0.02
+            property real adaptive: 0.85
+            property real baseTint: 0.08
             property real quality: root.quality
             property real fusion: 0.0
             property real fusionK: root.fusionStrength
@@ -140,8 +140,8 @@ Item {
             property vector4d dropA: Qt.vector4d(0, 0, 0, 0)
             property vector4d dropB: Qt.vector4d(0, 0, 0, 0)
             property vector4d dropC: Qt.vector4d(0, 0, 0, 0)
-            property real edgeSpectral: 1.65
-            property real sceneColor: 0.38
+            property real edgeSpectral: 0.7
+            property real sceneColor: 0.12
             vertexShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.vert.qsb"
             fragmentShader: "qrc:/qt/qml/Md3/shaders/md3liquidglass.frag.qsb"
         }

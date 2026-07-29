@@ -544,32 +544,32 @@ Item {
             GlassParamRow {
                 id: refractionSlider
                 label: qsTr("Refraction (lens bend)")
-                from: 0; to: 2.2; value: 1.15
+                from: 0; to: 2.2; value: 1.2
             }
             GlassParamRow {
                 id: chromaSlider
                 label: qsTr("Chromatic aberration")
-                from: 0; to: 1; value: 0.25
+                from: 0; to: 1; value: 0.5
             }
             GlassParamRow {
                 id: blurSlider
                 label: qsTr("Frost / blur")
-                from: 0; to: 1; value: 0.18
+                from: 0; to: 1; value: 0.4
             }
             GlassParamRow {
                 id: tintSlider
                 label: qsTr("Tint opacity")
-                from: 0; to: 0.55; value: 0.02
+                from: 0; to: 0.55; value: 0.08
             }
             GlassParamRow {
                 id: qualitySlider
                 label: qsTr("Quality (0 low / 2 high)")
-                from: 0; to: 2; value: 1
+                from: 0; to: 2; value: 2
             }
             GlassParamRow {
                 id: adaptiveSlider
                 label: qsTr("Adaptive tint")
-                from: 0; to: 1; value: 0.25
+                from: 0; to: 1; value: 0.85
             }
             GlassParamRow {
                 id: deformSlider
@@ -584,7 +584,7 @@ Item {
             GlassParamRow {
                 id: edgeSlider
                 label: qsTr("Edge / rim")
-                from: 0; to: 1; value: 1.0
+                from: 0; to: 1; value: 0.9
             }
             GlassParamRow {
                 id: radiusSlider
