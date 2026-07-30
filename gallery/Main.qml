@@ -70,24 +70,6 @@ Md3ApplicationWindow {
     property bool galleryTableLoading: false
     property string galleryTreeSelection: ""
 
-    toolBar: Md3AppToolBar {
-        Md3Button {
-            text: qsTr("Reload")
-            variant: Md3Button.Text
-            onClicked: window.reloadCurrentPage()
-        }
-        Md3TextField {
-            width: 320
-            label: qsTr("Quick path")
-            placeholderText: qsTr("Jump to desktop patterns")
-            onAccepted: {
-                const t = text.trim().toLowerCase()
-                if (t.indexOf("desktop") >= 0)
-                    window.openTab(12, false)
-            }
-        }
-    }
-
     statusBar: Md3StatusBar {
         text: {
             const d = window.destinations && window.destinations[window.currentIndex]
