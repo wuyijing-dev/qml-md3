@@ -1,5 +1,6 @@
 pragma Singleton
 import QtQuick
+import Md3
 
 QtObject {
     id: root

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Effects
 import QtQuick.Window
+import Md3
 
 /*
   Instant navigation host with MD3 / WinUI-style page transitions:

@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 // Compact title-bar action — fixed hit size aligned with caption buttons
 Item {
