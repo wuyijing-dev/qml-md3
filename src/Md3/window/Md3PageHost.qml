@@ -11,7 +11,8 @@ import QtQuick.Window
     arc: ARC (recency+frequency+ghost) + cost-aware victim pick; optional idle trim
   - L2: keep compiled Component after Item teardown (cheap warm re-open)
   - Prefetch: ±1 neighbors, Markov next-hop, rail hover hint
-  Defaults tuned for snappy switch + low RSS (L1=1, no full L2 warm-all).
+  - l2WarmIdle: after delay, pace-compile ALL destination Components (L2 only — no Item RSS)
+  Defaults: low L1; enable pageL2Warm for “any page” cold-open without fat Item caches.
 */
 Item {
     id: root
@@ -36,7 +37,7 @@ Item {
     property bool l2Components: true
     /// Few compiled Components — enough for back/forward, not every destination
     property int l2CacheLimit: 1
-    /// If true, only warm L2 for current ±1 + Markov (never full destination list)
+    /// If true, after idle delay pace-compile every destination Component (L2 only).
     property bool l2WarmIdle: false
     property bool predictPrefetch: false
     /// Off by default: ShaderEffectSource holds a full-size GPU texture
@@ -1018,7 +1019,11 @@ Item {
     function _trimL2() {
         if (!l2Components)
             return
+        // Idle full-catalog warm must keep room for every destination Component.
         const limit = Math.max(0, l2CacheLimit)
+        const effective = (l2WarmIdle && model && model.length)
+                         ? Math.max(limit, model.length)
+                         : limit
         const liveUrls = {}
         if (model) {
             for (let i = 0; i < model.length; ++i) {
@@ -1029,7 +1034,7 @@ Item {
                 }
             }
         }
-        while (_l2Order.length > limit) {
+        while (_l2Order.length > effective) {
             let dropped = false
             for (let j = 0; j < _l2Order.length; ++j) {
                 const url = _l2Order[j]
@@ -1365,10 +1370,12 @@ Item {
     }
 
     function _warmAllL2() {
-        // Never compile every destination — only nearby + Markov (bounded by l2CacheLimit).
+        // Pace-compile every destination Component (L2 only — no Item instantiation).
         if (!l2Components || !model || cacheMode === "none")
             return
-        _prefetchSmart(currentIndex)
+        l2WarmTimer.cursor = 0
+        if (!l2WarmTimer.running)
+            l2WarmTimer.start()
     }
 
     Timer {
@@ -1391,7 +1398,7 @@ Item {
 
     Timer {
         id: l2WarmDelay
-        interval: 1200
+        interval: 900
         repeat: false
         onTriggered: root._warmAllL2()
     }
@@ -1399,10 +1406,22 @@ Item {
     Timer {
         id: l2WarmTimer
         property int cursor: 0
-        interval: 28
+        interval: 20
         repeat: true
         running: false
-        onTriggered: stop()
+        onTriggered: {
+            if (!root.l2Components || !root.model || root.cacheMode === "none") {
+                stop()
+                return
+            }
+            const n = root.model.length
+            if (cursor < n) {
+                root._ensureL2(cursor)
+                cursor++
+                return
+            }
+            stop()
+        }
     }
 
     NumberAnimation {

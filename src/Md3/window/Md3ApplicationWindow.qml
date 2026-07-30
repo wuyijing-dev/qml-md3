@@ -84,7 +84,7 @@ Window {
     property bool pagePredictPrefetch: false
     property bool pageL2Cache: true
     property int pageL2CacheLimit: 1
-    /// Off: never precompile every destination Component
+    /// Idle L2 warm-all: pace-compile every destination Component (no live Item RSS).
     property bool pageL2Warm: false
     property bool pageLeaveSnapshot: false
     property bool pageAsync: false

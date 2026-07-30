@@ -57,7 +57,7 @@ import Md3
 | `pagePredictPrefetch` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
 | `pageL2Cache` | `bool` | `true` | read/write | `Md3ApplicationWindow` | — |
 | `pageL2CacheLimit` | `int` | `1` | read/write | `Md3ApplicationWindow` | — |
-| `pageL2Warm` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Off: never precompile every destination Component |
+| `pageL2Warm` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Idle L2 warm-all: pace-compile every destination Component (no live Item RSS). |
 | `pageLeaveSnapshot` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
 | `pageAsync` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
 | `pageWarmStart` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |

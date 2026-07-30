@@ -86,7 +86,7 @@
 ### 2.1 性能
 
 - [ ] `docs/performance.md` 增加「官方推荐配置」表（弱机/办公/高刷）
-- [ ] 首启：空壳出窗 → 再暖页（已有方向）写成可复用 API / 文档样例
+- [x] 首启：空壳出窗 → 再暖页（已有方向）写成可复用 API / 文档样例
 - [x] Release 包默认 **启用 qmlcachegen**；Dev 可 `NO_CACHEGEN`（`-DMD3_QML_CACHEGEN=OFF`）
 - [ ] Charts：Live/Wave 默认档位与 CPU 预算文档化
 - [ ] Rail：拖动时禁止 hover 预编译（已部分做）补测试防回归

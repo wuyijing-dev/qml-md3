@@ -133,23 +133,39 @@ Md3ApplicationWindow {
 
 1. **`MD3_QML_CACHEGEN=ON`（CMake 默认）** — 编译期 bytecode，几乎不占运行期 RSS  
 2. **`pageAsync: true`** — 冷开摊到多帧 + skeleton  
-3. **小 L1 + 大 L2** — 最多保留少量 Item；Component 缓存便宜  
-4. **关 neighbor Item prefetch / warmStart** — 避免 Charts 级页面偷偷常驻  
-5. **页内 `Md3DeferredSection`** — 重块延后创建（Charts 已做）
+3. **`pageL2Warm: true`** — 空闲后按帧 `_ensureL2` 全表 Component（**不**建 Item）  
+4. **小 L1 + 关 neighbor Item prefetch** — 最多少量活页  
+5. **页内空壳秒出** — 标题先画；图表/大表用 `Md3DeferredSection { asynchronous: true }`
 
 ```qml
 Md3ApplicationWindow {
     pageAsync: true
     pageSkeleton: true
-    pageCacheLimit: 1          // after warm → 3
-    pageL2CacheLimit: 1        // after warm → 16
+    pageL2Warm: true              // after ~900ms, compile all destination Components
+    pageCacheLimit: 1             // after warm → 3
+    pageL2CacheLimit: 32          // ≥ destinations.length while L2-warming
     pagePrefetch: false
     pagePredictPrefetch: false
-    pageWarmStart: false
-    pageL2Warm: false
+    pageWarmStart: false          // never pre-create Items
     pageLeaveSnapshot: false
     hotReload: false
     progressiveContent: true
+}
+```
+
+Page author pattern (Charts already):
+
+```qml
+Flickable {
+    ColumnLayout {
+        Text { text: qsTr("Title") /* shell — sync */ }
+        Md3DeferredSection {
+            preferredHeight: 280
+            delayMs: 0
+            asynchronous: true
+            sourceComponent: heavyBlock
+        }
+    }
 }
 ```
 
@@ -157,9 +173,10 @@ Md3ApplicationWindow {
 |------|----------|-----|
 | qmlcachegen | ↑↑ | ≈0 |
 | pageAsync + skeleton | ↑（不假死） | ≈0 |
+| pageL2Warm（全表 Component） | 任意页首次明显更顺 | 低（无活页） |
 | L1=3 / 关 prefetch | 回访略快 | 可控 |
 | L1=6+prefetch / warmStart | 回访很快 | **易炸** |
-| DeferredSection | 首屏更轻 | ↓ |
+| DeferredSection 空壳 | 首屏立刻 | ↓ |
 
 ---
 
@@ -216,7 +233,7 @@ If first window is slow → profile C + kill hot reload.
 ## Quick decision
 
 ```
-要冷开不卡且内存可控？ → Profile E：cachegen + pageAsync + L1≤3 + 大 L2 + DeferredSection
+要冷开不卡且内存可控？ → Profile E：cachegen + pageAsync + pageL2Warm + L1≤3 + DeferredSection 空壳
 要秒开翻页（可接受内存）？ → 提高 pageCacheLimit + prefetch（Profile B）
 要省内存极限？         → cacheLimit=1，关 prefetch，列表无 elevation
 要首启快？             → 关 hotReload / warmStart，progressiveContent=true

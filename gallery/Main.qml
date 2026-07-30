@@ -21,15 +21,15 @@ Md3ApplicationWindow {
     railHeader: qsTr("组件图库")
     pagePadding: 20
     pageSkeleton: true
-    // Low-RAM snappy: async cold open + small L1 Item cache + larger L2 Component cache.
-    // Do NOT raise L1/prefetch aggressively — heavy pages (Charts) would blow RSS.
+    // Instant chrome + progressive body: async open, L2 warm-all (Components only), small L1.
     pageAsync: true
     pageCacheLimit: 1
     pageL2CacheLimit: 1
     pagePrefetch: false
     pagePredictPrefetch: false
     pageWarmStart: false
-    pageL2Warm: false
+    // After shell up: pace-compile every destination Component (not live Items).
+    pageL2Warm: true
     pageLeaveSnapshot: false
     persistSession: true
     settingsOrganization: "QML_MD3"
@@ -39,7 +39,7 @@ Md3ApplicationWindow {
 
     property bool _navWarmReady: false
 
-    /// After shell paint: modest L1 (few live pages) + larger L2 (cheap compiled Components).
+    /// After shell paint: modest L1 + room for full-catalog L2 (pageL2Warm).
     Timer {
         id: navWarmTimer
         interval: 80
@@ -49,10 +49,11 @@ Md3ApplicationWindow {
                 return
             window._navWarmReady = true
             window.pageCacheLimit = 3
-            window.pageL2CacheLimit = 16
-            // Neighbor Item prefetch keeps Charts-class pages alive → skip for RAM.
+            // ≥ destination count so idle L2 warm is not trimmed away
+            window.pageL2CacheLimit = Math.max(32, (window.destinations || []).length)
             window.pagePrefetch = false
             window.pagePredictPrefetch = false
+            window.pageL2Warm = true
         }
     }
 

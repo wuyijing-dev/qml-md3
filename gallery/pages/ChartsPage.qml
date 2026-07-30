@@ -305,8 +305,109 @@ Item {
                 wrapMode: Text.Wrap
             }
 
-            Flow {
+            // Shell-first: title shows immediately; live chart + toolbar incubate next frames.
+            Md3DeferredSection {
                 Layout.fillWidth: true
+                preferredHeight: 280
+                delayMs: 0
+                asynchronous: true
+                sourceComponent: heroLiveBlock
+            }
+
+            Md3DeferredSection {
+                id: stage1
+                Layout.fillWidth: true
+                preferredHeight: 280
+                delayMs: 1
+                asynchronous: true
+                sourceComponent: multiCard
+            }
+            Md3DeferredSection {
+                id: stage1b
+                preferredHeight: 260
+                delayMs: 1
+                asynchronous: true
+                sourceComponent: barCard
+            }
+            Md3DeferredSection {
+                id: stage2a
+                preferredHeight: 240
+                delayMs: 48
+                asynchronous: true
+                sourceComponent: bigCard
+            }
+            Md3DeferredSection {
+                id: stage2b
+                preferredHeight: 200
+                delayMs: 48
+                asynchronous: true
+                sourceComponent: sparseCard
+            }
+            Md3DeferredSection {
+                id: stage2c
+                preferredHeight: 240
+                delayMs: 64
+                asynchronous: true
+                sourceComponent: scatterCard
+            }
+            Md3DeferredSection {
+                id: stage2d
+                preferredHeight: 240
+                delayMs: 64
+                asynchronous: true
+                sourceComponent: pieCard
+            }
+            Md3DeferredSection {
+                id: stage2e
+                preferredHeight: 320
+                delayMs: 80
+                asynchronous: true
+                sourceComponent: codeCard
+            }
+            Md3DeferredSection {
+                id: stage2f
+                preferredHeight: 620
+                delayMs: 96
+                asynchronous: true
+                sourceComponent: root.kpiCard
+            }
+            Md3DeferredSection {
+                id: stage2g
+                preferredHeight: 220
+                delayMs: 112
+                asynchronous: true
+                sourceComponent: root.heatCard
+            }
+            Md3DeferredSection {
+                id: stage2h
+                preferredHeight: 560
+                delayMs: 128
+                asynchronous: true
+                sourceComponent: root.extraChartsCard
+            }
+        }
+    }
+
+    function _demoSeriesA() {
+        const a = []
+        for (let i = 0; i < 160; ++i)
+            a.push(42 + Math.sin(i * 0.14) * 22 + Math.sin(i * 0.03) * 8)
+        return a
+    }
+    function _demoSeriesB() {
+        const b = []
+        for (let i = 0; i < 160; ++i)
+            b.push(28 + Math.cos(i * 0.11) * 16 + i * 0.02)
+        return b
+    }
+
+    Component {
+        id: heroLiveBlock
+        Column {
+            width: root.width
+            spacing: 16
+            Flow {
+                width: parent.width
                 spacing: 8
                 Md3Button {
                     text: liveChart.item && liveChart.item.paused ? qsTr("继续") : qsTr("暂停")
@@ -366,19 +467,18 @@ Item {
                     }
                 }
             }
-
-            // Hero live chart — sync, starts paused for one frame then runs
             Md3Card {
                 variant: Md3Card.Filled
-                Layout.fillWidth: true
-                Layout.preferredHeight: 220
+                width: parent.width
+                implicitHeight: 220
+                height: 220
                 title: qsTr("Live sine (Md3LineChart)")
                 Loader {
                     id: liveChart
                     width: parent.width
                     height: 160
                     active: true
-                    asynchronous: false
+                    asynchronous: true
                     sourceComponent: Component {
                         Md3LineChart {
                             live: true
@@ -401,82 +501,7 @@ Item {
                     }
                 }
             }
-
-            Md3DeferredSection {
-                id: stage1
-                Layout.fillWidth: true
-                preferredHeight: 280
-                delayMs: 1
-                sourceComponent: multiCard
-            }
-            Md3DeferredSection {
-                id: stage1b
-                preferredHeight: 260
-                delayMs: 1
-                sourceComponent: barCard
-            }
-            Md3DeferredSection {
-                id: stage2a
-                preferredHeight: 240
-                delayMs: 48
-                sourceComponent: bigCard
-            }
-            Md3DeferredSection {
-                id: stage2b
-                preferredHeight: 200
-                delayMs: 48
-                sourceComponent: sparseCard
-            }
-            Md3DeferredSection {
-                id: stage2c
-                preferredHeight: 240
-                delayMs: 64
-                sourceComponent: scatterCard
-            }
-            Md3DeferredSection {
-                id: stage2d
-                preferredHeight: 240
-                delayMs: 64
-                sourceComponent: pieCard
-            }
-            Md3DeferredSection {
-                id: stage2e
-                preferredHeight: 320
-                delayMs: 80
-                sourceComponent: codeCard
-            }
-            Md3DeferredSection {
-                id: stage2f
-                preferredHeight: 620
-                delayMs: 96
-                sourceComponent: root.kpiCard
-            }
-            Md3DeferredSection {
-                id: stage2g
-                preferredHeight: 220
-                delayMs: 112
-                sourceComponent: root.heatCard
-            }
-            Md3DeferredSection {
-                id: stage2h
-                preferredHeight: 560
-                delayMs: 128
-                sourceComponent: root.extraChartsCard
-            }
         }
-    }
-
-    function _demoSeriesA() {
-        const a = []
-        for (let i = 0; i < 160; ++i)
-            a.push(42 + Math.sin(i * 0.14) * 22 + Math.sin(i * 0.03) * 8)
-        return a
-    }
-    function _demoSeriesB() {
-        const b = []
-        for (let i = 0; i < 160; ++i)
-            b.push(28 + Math.cos(i * 0.11) * 16 + i * 0.02)
-        return b
     }
 
     Component {
