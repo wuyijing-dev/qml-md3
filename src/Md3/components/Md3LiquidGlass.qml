@@ -14,7 +14,7 @@ Item {
     property real adaptiveTint: 0.85
     property real liquidDeform: 1.0
     /// 0=Low, 1=Medium, 2=High — scales sample res, frost taps, chroma.
-    property int quality: 2
+    property int quality: Md3Theme.effectsGlassQuality
     /// Keep sampling every frame (video). For static images set false — updates on move.
     property bool liveSampling: true
 

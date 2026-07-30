@@ -51,8 +51,8 @@ Item {
     property real viewStart: 0
     property real viewSpan: 1
     property real minViewSpan: 0.04
-    /// Inertia decay per second after pan release (0 = hard stop).
-    property real panInertia: 0.92
+    /// Inertia decay per second after pan release (0 = hard stop). Overridden by effects level.
+    property real panInertia: Md3Theme.effectsChartInertia ? 0.92 : 0
     property int probeIndex: -1
     property real probePixelX: 0
     property real probePixelY: 0
@@ -63,6 +63,8 @@ Item {
     property bool gestureActive: false
     property real _panVelocity: 0
     property bool _viewDirty: false
+    /// True while dragging or coasting — skip Catmull / async Shape to avoid release flicker.
+    readonly property bool viewMoving: gestureActive || Math.abs(_panVelocity) > 1e-5
 
     property bool paused: false
     /// Only block when minimized/hidden/suspended — never for theme reveal.
@@ -285,6 +287,12 @@ Item {
     }
     function endGesture() {
         gestureActive = false
+        if (!Md3Theme.effectsChartInertia)
+            _panVelocity = 0
+        // Coasting: keep raw paths; do not smooth-rebuild here (that was the release flicker).
+        if (Math.abs(_panVelocity) > 1e-5)
+            return
+        _panVelocity = 0
         if (_viewDirty) {
             _viewDirty = false
             rebuild()
@@ -384,8 +392,8 @@ Item {
         }
     }
     FrameAnimation {
-        running: root.interactive && root.chartActive && !root.gestureActive
-                 && Math.abs(root._panVelocity) > 1e-5
+        running: root.interactive && root.chartActive && Md3Theme.effectsChartInertia
+                 && !root.gestureActive && Math.abs(root._panVelocity) > 1e-5
         onTriggered: {
             root.viewStart += root._panVelocity
             root.clampView()
@@ -394,6 +402,7 @@ Item {
                 root._panVelocity = 0
             if (Math.abs(root._panVelocity) < 1e-5) {
                 root._panVelocity = 0
+                root._viewDirty = false
                 root.rebuild()
             } else {
                 root._markViewDirty()

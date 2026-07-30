@@ -7,22 +7,27 @@ Item {
     property real elevation: 0
     property real cornerRadius: 0
     property color shadowColor: Md3Theme.colorScheme.shadow
+    readonly property real _elev: {
+        if (!Md3Theme.effectsShadows || elevation <= 0)
+            return 0
+        return Math.min(elevation, Md3Theme.effectsMaxElevation)
+    }
 
-    visible: elevation > 0
+    visible: _elev > 0
     z: -1
 
     // Soft ambient — separates surface from background
     Item {
         id: ambientHost
         anchors.fill: parent
-        anchors.topMargin: Md3Theme.elevation.ambientY(root.elevation)
+        anchors.topMargin: Md3Theme.elevation.ambientY(root._elev)
         anchors.margins: -6
-        opacity: Md3Theme.elevation.ambientOpacity(root.elevation)
+        opacity: Md3Theme.elevation.ambientOpacity(root._elev)
         layer.enabled: true
         layer.smooth: true
         layer.effect: MultiEffect {
             blurEnabled: true
-            blur: Md3Theme.elevation.ambientBlur(root.elevation)
+            blur: Md3Theme.elevation.ambientBlur(root._elev)
             blurMax: 48
             blurMultiplier: 1.0
         }
@@ -39,14 +44,14 @@ Item {
     Item {
         id: keyHost
         anchors.fill: parent
-        anchors.topMargin: Md3Theme.elevation.keyY(root.elevation)
+        anchors.topMargin: Md3Theme.elevation.keyY(root._elev)
         anchors.margins: -3
-        opacity: Md3Theme.elevation.keyOpacity(root.elevation)
+        opacity: Md3Theme.elevation.keyOpacity(root._elev)
         layer.enabled: true
         layer.smooth: true
         layer.effect: MultiEffect {
             blurEnabled: true
-            blur: Md3Theme.elevation.keyBlur(root.elevation)
+            blur: Md3Theme.elevation.keyBlur(root._elev)
             blurMax: 32
             blurMultiplier: 0.9
         }

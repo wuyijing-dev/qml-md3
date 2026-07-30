@@ -340,6 +340,50 @@ Flickable {
                 Layout.fillWidth: true
                 spacing: 2
                 Text {
+                    text: qsTr("特效等级")
+                    color: Md3Theme.colorScheme.colorOnSurface
+                    font.family: Md3Theme.typography.fontFamily
+                    font.pixelSize: Md3Theme.typography.bodyLarge.size
+                }
+                Text {
+                    width: parent.width
+                    wrapMode: Text.Wrap
+                    text: qsTr("流畅：少阴影/无惯性平滑；均衡：默认；画质：曲线平滑与满帧实时图。可按设备性能切换。")
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.family: Md3Theme.typography.fontFamily
+                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                }
+            }
+        }
+        Md3SegmentedButton {
+            id: effectsSeg
+            Layout.fillWidth: true
+            model: [
+                { text: qsTr("流畅") },
+                { text: qsTr("均衡") },
+                { text: qsTr("画质") }
+            ]
+            currentIndex: Md3Theme.effectsLevel
+            onSelectionChanged: {
+                Md3Theme.setEffectsLevel(currentIndex)
+                Md3Accessibility.announce(qsTr("特效等级：%1").arg(Md3Theme.effectsLevelLabel()))
+            }
+        }
+        Connections {
+            target: Md3Theme
+            function onEffectsLevelChanged() {
+                if (effectsSeg.currentIndex !== Md3Theme.effectsLevel)
+                    effectsSeg.currentIndex = Md3Theme.effectsLevel
+            }
+        }
+
+        RowLayout {
+            spacing: 12
+            Layout.fillWidth: true
+            Column {
+                Layout.fillWidth: true
+                spacing: 2
+                Text {
                     text: qsTr("减弱动效")
                     color: Md3Theme.colorScheme.colorOnSurface
                     font.family: Md3Theme.typography.fontFamily

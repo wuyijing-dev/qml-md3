@@ -102,14 +102,19 @@ Item {
         }
     }
 
-    // Full-rate when warmly in view; optional FPS cap via animationFps.
+    // Full-rate when warmly in view; optional FPS cap via animationFps / effectsLevel.
     FrameAnimation {
-        running: root.animated && root.viewportWarm && root.animationFps <= 0
+        running: root.animated && root.viewportWarm && Md3Theme.effectsLiveMotion
+                 && root.animationFps <= 0 && Md3Theme.effectsLiveFps <= 0
         onTriggered: root._advance(frameTime)
     }
     Timer {
-        interval: Math.max(16, Math.round(1000 / Math.max(1, root.animationFps)))
-        running: root.animated && root.viewportWarm && root.animationFps > 0
+        interval: {
+            const fps = root.animationFps > 0 ? root.animationFps : Md3Theme.effectsLiveFps
+            return Math.max(16, Math.round(1000 / Math.max(1, fps)))
+        }
+        running: root.animated && root.viewportWarm && Md3Theme.effectsLiveMotion
+                 && (root.animationFps > 0 || Md3Theme.effectsLiveFps > 0)
         repeat: true
         onTriggered: root._advance(interval / 1000)
     }

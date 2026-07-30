@@ -134,8 +134,10 @@ Md3Chart {
                 const x = plotLeft + plotWidth * (i - win.start) / denom
                 pts.push(Qt.point(x, yAt(nums[i])))
             }
-            // Skip Catmull during pan/zoom — keeps drag at 60fps.
-            if (smooth && !live && !gestureActive && pts.length <= smoothMaxPoints && pts.length >= 3)
+            // Skip Catmull while moving — switching smooth on release caused flicker.
+            // Also honor global effectsLevel (smooth only on High).
+            if (smooth && Md3Theme.effectsChartSmooth && !live && !viewMoving
+                    && pts.length <= smoothMaxPoints && pts.length >= 3)
                 pts = _catmull(pts, 3)
 
             const col = colorAt(s)
@@ -203,12 +205,17 @@ Md3Chart {
     }
 
     FrameAnimation {
-        running: root.live && root.animateInView && root.liveFps <= 0
+        running: root.live && root.animateInView && Md3Theme.effectsLiveMotion
+                 && root.liveFps <= 0 && Md3Theme.effectsLiveFps <= 0
         onTriggered: root.advanceLive(frameTime)
     }
     Timer {
-        interval: Math.max(16, Math.round(1000 / Math.max(1, root.liveFps)))
-        running: root.live && root.animateInView && root.liveFps > 0
+        interval: {
+            const fps = root.liveFps > 0 ? root.liveFps : Md3Theme.effectsLiveFps
+            return Math.max(16, Math.round(1000 / Math.max(1, fps)))
+        }
+        running: root.live && root.animateInView && Md3Theme.effectsLiveMotion
+                 && (root.liveFps > 0 || Md3Theme.effectsLiveFps > 0)
         repeat: true
         onTriggered: root.advanceLive(interval / 1000)
     }
@@ -272,7 +279,8 @@ Md3Chart {
                 Shape {
                     anchors.fill: parent
                     preferredRendererType: Shape.GeometryRenderer
-                    asynchronous: !root.live && !root.gestureActive
+                    // Never flip async on gesture end — that flashed the plot after pan release.
+                    asynchronous: false
                     visible: modelData.area && modelData.area.length > 2
                     ShapePath {
                         strokeWidth: 0
@@ -284,7 +292,7 @@ Md3Chart {
                 Shape {
                     anchors.fill: parent
                     preferredRendererType: Shape.GeometryRenderer
-                    asynchronous: !root.live && !root.gestureActive
+                    asynchronous: false
                     ShapePath {
                         strokeWidth: root.lineWidth
                         strokeColor: modelData.color
