@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Window
 import Md3
 
 /// Docked MD3 date field: text field + calendar popup (Material docked date picker).
@@ -18,6 +17,8 @@ Item {
     property int weekStartsOn: -1
     property bool controlEnabled: true
     property string accessibleName: ""
+    /// Optional explicit Window for overlay reparent (else Window.window).
+    property var overlayWindow: null
 
     signal accepted(date date)
 
@@ -60,19 +61,11 @@ Item {
     }
 
     function _contentItem() {
-        const win = Window.window
-        return (win && win.contentItem) ? win.contentItem : null
+        return Md3OverlayHost.contentItem(root.overlayWindow, root)
     }
 
     function hostEnsureParent() {
-        const target = _contentItem()
-        if (!target)
-            return
-        if (host.parent !== target) {
-            host.parent = target
-            host.anchors.fill = target
-        }
-        host.z = 5600
+        Md3OverlayHost.ensureHostParent(host, root.overlayWindow, root, 5600)
     }
 
     function applyDate(d) {

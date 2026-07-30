@@ -1,21 +1,12 @@
 import QtQuick
-import QtQuick.Window
 import QtQuick.Layouts
 import Md3
 
-Item {
+Md3Page {
     id: root
-    anchors.fill: parent
-
-    property var md3HostWindow: null
-    property var md3PushRoute: null
-
-    function _host() {
-        return md3HostWindow || Window.window
-    }
 
     function _destinationIndexBySuffix(suffix) {
-        const win = _host()
+        const win = hostWindow()
         if (!win || !win.destinations)
             return -1
         for (let i = 0; i < win.destinations.length; ++i) {
@@ -28,11 +19,8 @@ Item {
     }
 
     function _openDetailFrom(sourceItem, title, body, localX, localY) {
-        const win = _host()
-        const push = typeof md3PushRoute === "function" ? md3PushRoute
-                    : (win && typeof win.pushRoute === "function"
-                       ? function (i, p, o) { return win.pushRoute(i, p, o) } : null)
-        if (!push || !win || !win.pageHost)
+        const win = hostWindow()
+        if (!win || !win.pageHost)
             return
         const detailIndex = _destinationIndexBySuffix("LaunchDetailScene.qml")
         if (detailIndex < 0)
@@ -40,7 +28,7 @@ Item {
         const gp = sourceItem.mapToGlobal(localX !== undefined ? localX : sourceItem.width / 2,
                                          localY !== undefined ? localY : sourceItem.height / 2)
         const p = win.pageHost.mapFromGlobal(gp.x, gp.y)
-        push(detailIndex, {
+        pushRoute(detailIndex, {
             title: title,
             body: body
         }, {

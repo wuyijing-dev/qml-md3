@@ -133,6 +133,7 @@
 - [Md3Motion](Md3Motion.md) _(singleton)_
 - [Md3Notify](Md3Notify.md) _(singleton)_ — `Md3Notify.snackbar(...)` without Window host glue.
 - [Md3TreeVisibility](Md3TreeVisibility.md) _(singleton)_ — ancestor/window shown checks (no duplicated parent walks).
+- [Md3OverlayHost](Md3OverlayHost.md) _(singleton)_ — overlay contentItem / map / reparent helpers for menus and pickers.
 - [Md3Shape](Md3Shape.md)
 - [Md3StateLayer](Md3StateLayer.md)
 - [Md3Theme](Md3Theme.md) _(singleton)_
@@ -206,6 +207,7 @@ Guide: [../layout.md](../layout.md)
 - [Md3TabWindow](Md3TabWindow.md)
 - [Md3CaptionButtons](Md3CaptionButtons.md)
 - [Md3DialogWindow](Md3DialogWindow.md) — Separate OS-level dialog window (QWidget-like multi-window), not an overlay.
+- [Md3Page](Md3Page.md) — Base Item for PageHost destinations (injectables + `goBack` / `pushRoute`).
 - [Md3PageHost](Md3PageHost.md)
 - [Md3TitleBar](Md3TitleBar.md)
 - [Md3TitleBarButton](Md3TitleBarButton.md)

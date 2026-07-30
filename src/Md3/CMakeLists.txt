@@ -177,6 +177,7 @@ set_source_files_properties(
     foundation/Md3AppIcons.qml
     foundation/Md3Notify.qml
     foundation/Md3TreeVisibility.qml
+    foundation/Md3OverlayHost.qml
     window/Md3WindowCapabilities.qml
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE
 )
@@ -228,6 +229,7 @@ qt_add_qml_module(Md3
         foundation/Md3AppIcons.qml
         foundation/Md3Notify.qml
         foundation/Md3TreeVisibility.qml
+        foundation/Md3OverlayHost.qml
         foundation/Md3ColorScheme.qml
         foundation/Md3DynamicScheme.qml
         foundation/Md3Typography.qml
@@ -251,6 +253,7 @@ qt_add_qml_module(Md3
         window/Md3CaptionButtons.qml
         window/Md3TitleBarButton.qml
         window/Md3TitleBar.qml
+        window/Md3Page.qml
         window/Md3PageHost.qml
         window/Md3WindowBody.qml
         window/Md3ApplicationWindow.qml

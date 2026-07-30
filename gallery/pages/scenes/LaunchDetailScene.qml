@@ -1,32 +1,19 @@
 import QtQuick
-import QtQuick.Window
 import QtQuick.Layouts
 import Md3
 
-Item {
+Md3Page {
     id: root
-    anchors.fill: parent
-
-    /// Injected by Md3PageHost (prefer over Window.window duck-typing).
-    property var md3HostWindow: null
-    property var md3RouteParams: ({})
-    property int md3NavDepth: 0
-    property var md3GoBack: null
-    property var md3PushRoute: null
-
-    readonly property var route: md3RouteParams && typeof md3RouteParams === "object"
-            ? md3RouteParams : ({})
-    readonly property int navDepth: md3NavDepth
 
     readonly property string detailTitle: {
-        if (route.title !== undefined && String(route.title).length > 0)
-            return String(route.title)
+        if (routeParams.title !== undefined && String(routeParams.title).length > 0)
+            return String(routeParams.title)
         return qsTr("Detail")
     }
 
     readonly property string detailBody: {
-        if (route.body !== undefined && String(route.body).length > 0)
-            return String(route.body)
+        if (routeParams.body !== undefined && String(routeParams.body).length > 0)
+            return String(routeParams.body)
         return qsTr("Whole-page route opened from source bounds.")
     }
 
@@ -44,46 +31,23 @@ Item {
         return items
     }
 
-    function _host() {
-        return md3HostWindow || Window.window
-    }
-
-    function _back() {
-        if (typeof md3GoBack === "function") {
-            md3GoBack()
-            return
-        }
-        const win = _host()
-        if (win && typeof win.goBack === "function")
-            win.goBack()
-    }
-
     function _goCrumb(index) {
         // index 0 = list root → pop entire stack
         const pops = Math.max(0, crumbModel.length - 1 - index)
         for (let i = 0; i < pops; ++i) {
-            if (typeof md3GoBack === "function") {
-                if (!md3GoBack())
-                    break
-            } else {
-                const win = _host()
-                if (!win || typeof win.goBack !== "function" || !win.goBack())
-                    break
-            }
+            if (!goBack())
+                break
         }
     }
 
     function _openLevel2() {
-        const win = _host()
-        const push = typeof md3PushRoute === "function" ? md3PushRoute
-                    : (win && typeof win.pushRoute === "function"
-                       ? function (i, p, o) { return win.pushRoute(i, p, o) } : null)
-        if (!push || !win || !win.pageHost)
+        const win = hostWindow()
+        if (!win || !win.pageHost)
             return
         const gp = mapToGlobal(width / 2, height / 2)
         const p = win.pageHost.mapFromGlobal(gp.x, gp.y)
         const pageIndex = win.currentIndex !== undefined ? win.currentIndex : 0
-        push(pageIndex, {
+        pushRoute(pageIndex, {
             title: qsTr("Level %1").arg(navDepth + 2),
             body: qsTr("Nested pushRoute on the same detail page. goBack() returns to the previous level.")
         }, {
@@ -102,7 +66,7 @@ Item {
             title: root.detailTitle
             leadingIcon: "arrow_back"
             size: Md3TopAppBar.Small
-            onLeadingClicked: root._back()
+            onLeadingClicked: root.goBack()
         }
 
         Md3Breadcrumb {
@@ -148,7 +112,7 @@ Item {
                     spacing: 12
                     Md3Button {
                         text: qsTr("Back")
-                        onClicked: root._back()
+                        onClicked: root.goBack()
                     }
                     Md3Button {
                         text: qsTr("Open level 2")

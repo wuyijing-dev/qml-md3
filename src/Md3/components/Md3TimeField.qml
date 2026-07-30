@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Window
 import Md3
 
 /// Docked MD3 time field: text field + time picker popup (peer of Md3DateField).
@@ -19,6 +18,8 @@ Item {
     property bool controlEnabled: true
     property string accessibleName: ""
     property string name: ""
+    /// Optional explicit Window for overlay reparent (else Window.window).
+    property var overlayWindow: null
 
     signal accepted(int hour, int minute)
 
@@ -69,19 +70,11 @@ Item {
     }
 
     function _contentItem() {
-        const win = Window.window
-        return (win && win.contentItem) ? win.contentItem : null
+        return Md3OverlayHost.contentItem(root.overlayWindow, root)
     }
 
     function hostEnsureParent() {
-        const target = _contentItem()
-        if (!target)
-            return
-        if (host.parent !== target) {
-            host.parent = target
-            host.anchors.fill = target
-        }
-        host.z = 5600
+        Md3OverlayHost.ensureHostParent(host, root.overlayWindow, root, 5600)
     }
 
     function applyTime(h, m) {

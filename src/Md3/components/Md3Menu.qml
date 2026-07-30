@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Window
 import Md3
 
 Item {
@@ -27,6 +26,8 @@ Item {
     default property alias content: column.data
     property int highlightedIndex: -1
     readonly property alias itemColumn: column
+    /// Optional explicit Window for overlay reparent (else Window.window).
+    property var overlayWindow: null
 
     readonly property real containerRadius: Md3Theme.shape.large
     readonly property var __md3Menu: root
@@ -232,21 +233,22 @@ Item {
     }
 
     function _contentItem() {
-        const win = Window.window
-        return (win && win.contentItem) ? win.contentItem : null
+        return Md3OverlayHost.contentItem(root.overlayWindow, root)
     }
 
     function hostEnsureParent(contentItem) {
-        const target = contentItem || _contentItem()
-        if (!target)
+        if (contentItem) {
+            if (host.parent !== contentItem) {
+                host.parent = contentItem
+                host.x = 0
+                host.y = 0
+                host.anchors.fill = contentItem
+            }
+            host.z = root.isSubMenu ? 6000 : 5000
             return
-        if (host.parent !== target) {
-            host.parent = target
-            host.x = 0
-            host.y = 0
-            host.anchors.fill = target
         }
-        host.z = root.isSubMenu ? 6000 : 5000
+        Md3OverlayHost.ensureHostParent(host, root.overlayWindow, root,
+                                        root.isSubMenu ? 6000 : 5000)
     }
 
     function popup(x, y) {

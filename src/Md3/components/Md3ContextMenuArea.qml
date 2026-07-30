@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Window
 import Md3
 
 /// Transparent right-click host over a page / region.
@@ -22,6 +21,8 @@ Item {
     /// Target Md3Menu (required for a useful menu).
     property var contextMenu: null
     property real menuWidth: 0
+    /// Optional explicit Window for overlay mapping (else Window.window).
+    property var overlayWindow: null
     signal aboutToShow(real x, real y)
     signal opened()
     signal closed()
@@ -35,22 +36,12 @@ Item {
         if (!enabled || !contextMenu)
             return
         aboutToShow(x, y)
-        const win = Window.window
-        const target = (win && win.contentItem) ? win.contentItem : null
-        let gx = x
-        let gy = y
-        if (target) {
-            const p = mapToItem(target, x, y)
-            gx = p.x
-            gy = p.y
-        } else {
-            const p = mapToItem(null, x, y)
-            gx = p.x
-            gy = p.y
-        }
+        const p = Md3OverlayHost.mapToOverlay(root, x, y, root.overlayWindow)
         if (menuWidth > 0 && contextMenu.menuWidth !== undefined)
             contextMenu.menuWidth = menuWidth
-        contextMenu.popup(gx, gy)
+        if (root.overlayWindow && contextMenu.overlayWindow !== undefined)
+            contextMenu.overlayWindow = root.overlayWindow
+        contextMenu.popup(p.x, p.y)
         opened()
     }
 
