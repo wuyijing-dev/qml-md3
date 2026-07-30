@@ -49,9 +49,11 @@ Md3Page {
             size: Md3TopAppBar.Small
         }
 
-        Rectangle {
+        Md3Surface {
             width: parent.width
             height: Math.max(0, root.height - topBar.implicitHeight)
+            radius: 0
+            elevation: 0
             color: Md3Theme.colorScheme.surfaceContainerLow
 
             Md3VStack {

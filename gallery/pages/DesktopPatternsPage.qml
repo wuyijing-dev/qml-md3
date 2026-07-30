@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts // keep QtQuick.Layouts for split-pane card fill layout
 import Md3
 
 Md3Page {
@@ -216,26 +215,21 @@ Md3Page {
             }
         }
 
-        // keep QtQuick.Layouts for split-pane card fill layout
-        RowLayout {
+        Md3SplitView {
             width: parent.width
             height: Math.max(0, page.height - 120)
-            spacing: 12
+            splitRatio: 0.32
+            minPane1: 240
+            minPane2: 320
 
             Md3Card {
                 variant: Md3Card.Outlined
-                Layout.preferredWidth: 300
-                Layout.fillHeight: true
-
-                ColumnLayout {
+                Item {
                     anchors.fill: parent
                     anchors.margins: 8
-                    spacing: 8
-
                     Md3TreeView {
                         id: treeView
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+                        anchors.fill: parent
                         showConnectors: true
                         checkEnabled: true
                         triStateCheck: true
@@ -261,26 +255,23 @@ Md3Page {
 
             Md3Card {
                 variant: Md3Card.Outlined
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-
-                ColumnLayout {
+                Item {
                     anchors.fill: parent
                     anchors.margins: 8
-                    spacing: 8
 
-                    RowLayout {
-                        Layout.fillWidth: true
+                    Md3HStack {
+                        id: filesHeader
+                        anchors.top: parent.top
+                        width: parent.width
                         spacing: 8
-
                         Md3Text {
-                            Layout.fillWidth: true
+                            width: Math.max(80, parent.width - densityBtn.width - parent.spacing)
                             text: qsTr("Files in %1").arg(page.currentPath)
                             role: Md3Text.TitleMedium
                             elide: Text.ElideMiddle
                         }
-
                         Md3Button {
+                            id: densityBtn
                             text: fileTable.density === Md3DataTable.Compact ? qsTr("Comfortable") : qsTr("Compact")
                             variant: Md3Button.Text
                             onClicked: fileTable.density = fileTable.density === Md3DataTable.Compact
@@ -288,13 +279,15 @@ Md3Page {
                         }
                     }
 
-                    RowLayout {
-                        Layout.fillWidth: true
+                    Md3HStack {
+                        id: filesFilters
+                        anchors.top: filesHeader.bottom
+                        anchors.topMargin: 8
+                        width: parent.width
                         spacing: 8
-
                         Md3TextField {
                             id: statusFilterField
-                            Layout.preferredWidth: 200
+                            width: 200
                             label: qsTr("Status filter")
                             placeholderText: qsTr("Active / Away")
                             text: page.currentStatusFilter
@@ -303,7 +296,6 @@ Md3Page {
                                 fileTable.setColumnFilterValue(1, text)
                             }
                         }
-
                         Md3Button {
                             text: qsTr("Clear filters")
                             variant: Md3Button.Text
@@ -316,12 +308,15 @@ Md3Page {
 
                     Md3DataTable {
                         id: fileTable
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+                        anchors.top: filesFilters.bottom
+                        anchors.topMargin: 8
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
                         selectionEnabled: true
                         pagination: true
                         pageSize: page.serverPageSize
-                        bodyHeight: Math.max(240, page.height - 260)
+                        bodyHeight: Math.max(240, height - 120)
                         showFilterBar: true
                         showColumnFilterIcons: true
                         filterPlaceholder: qsTr("Search files in current folder")

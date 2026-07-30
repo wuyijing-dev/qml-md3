@@ -5,15 +5,17 @@ Md3Page {
     id: root
 
     // Host = gallery content pane only; drawer stays inside this clip, not the OS window.
-    Rectangle {
+    Md3Surface {
         anchors.fill: parent
+        radius: 0
+        elevation: 0
         color: {
             const w = hostWindow()
             if (w && w.usesSystemBackdrop)
                 return "transparent"
             return Md3Theme.colorScheme.surface
         }
-        clip: true
+        clipContent: true
 
         Flickable {
             id: flick
@@ -52,8 +54,7 @@ Md3Page {
                         { text: "Tab two" },
                         { text: "Tab three" }
                     ]
-                    Rectangle {
-                        color: "transparent"
+                    Item {
                         Md3Text {
                             anchors.centerIn: parent
                             text: qsTr("Page one — TabBar pages track currentIndex")
@@ -61,8 +62,7 @@ Md3Page {
                             tone: Md3Text.OnSurfaceVariant
                         }
                     }
-                    Rectangle {
-                        color: "transparent"
+                    Item {
                         Md3Text {
                             anchors.centerIn: parent
                             text: qsTr("Page two")
@@ -70,8 +70,7 @@ Md3Page {
                             tone: Md3Text.OnSurfaceVariant
                         }
                     }
-                    Rectangle {
-                        color: "transparent"
+                    Item {
                         Md3Text {
                             anchors.centerIn: parent
                             text: qsTr("Page three")
@@ -130,14 +129,13 @@ Md3Page {
                 }
 
                 // Clipped demo host — Scaffold must not spill over siblings.
-                Rectangle {
+                Md3Surface {
                     width: parent.width
                     height: 220
                     radius: Md3Theme.shape.medium
+                    elevation: 0
                     color: Md3Theme.colorScheme.surfaceContainerLow
-                    border.color: Md3Theme.colorScheme.outlineVariant
-                    border.width: 1
-                    clip: true
+                    clipContent: true
 
                     Md3Scaffold {
                         anchors.fill: parent

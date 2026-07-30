@@ -18,7 +18,7 @@ Item {
                     text: qsTr("圆形表盘")
                     role: Md3Text.TitleSmall
                 }
-                Flow {
+                Md3FlowLayout {
                     width: parent.width
                     spacing: 20
                     Md3Gauge {
@@ -397,7 +397,7 @@ Item {
         Md3VStack {
             width: root.width
             spacing: 16
-            Flow {
+            Md3FlowLayout {
                 width: parent.width
                 spacing: 8
                 Md3Button {

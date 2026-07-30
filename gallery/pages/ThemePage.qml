@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
 Flickable {
@@ -48,8 +47,7 @@ Flickable {
         property string roleName: ""
         property color roleColor: "transparent"
         property color labelColor: Md3Theme.colorScheme.colorOnSurface
-        Layout.fillWidth: true
-        Layout.preferredHeight: 56
+        height: 56
         radius: Md3Theme.shape.medium
         color: roleColor
         Md3Text {
@@ -160,7 +158,7 @@ Flickable {
             tone: Md3Text.OnSurfaceVariant
         }
 
-        Flow {
+        Md3FlowLayout {
             width: parent.width
             spacing: 8
             Repeater {
@@ -188,10 +186,10 @@ Flickable {
             tone: Md3Text.OnSurfaceVariant
         }
 
-        GridLayout {
+        Md3GridLayout {
             width: parent.width
             columns: 2
-            columnSpacing: 8
+            spacing: 8
             rowSpacing: 8
 
             Swatch {
@@ -347,24 +345,19 @@ Flickable {
             role: Md3Text.TitleMedium
         }
 
-        // keep QtQuick.Layouts for dense form alignment
-        RowLayout {
-            spacing: 12
+        Md3VStack {
             width: parent.width
-            Md3VStack {
-                Layout.fillWidth: true
-                spacing: 2
-                Md3Text {
-                    text: qsTr("特效等级")
-                    role: Md3Text.BodyLarge
-                }
-                Md3Text {
-                    width: parent.width
-                    wrapMode: Text.Wrap
-                    text: qsTr("三档过渡相同。流畅：圆角按压闪（无涟漪遮罩 FBO）；均衡/画质：圆角遮罩涟漪。强度调节反馈深浅。")
-                    role: Md3Text.BodySmall
-                    tone: Md3Text.OnSurfaceVariant
-                }
+            spacing: 2
+            Md3Text {
+                text: qsTr("特效等级")
+                role: Md3Text.BodyLarge
+            }
+            Md3Text {
+                width: parent.width
+                wrapMode: Text.Wrap
+                text: qsTr("三档过渡相同。流畅：圆角按压闪（无涟漪遮罩 FBO）；均衡/画质：圆角遮罩涟漪。强度调节反馈深浅。")
+                role: Md3Text.BodySmall
+                tone: Md3Text.OnSurfaceVariant
             }
         }
         Md3SegmentedButton {
@@ -389,12 +382,11 @@ Flickable {
             }
         }
 
-        // keep QtQuick.Layouts for dense form alignment
-        RowLayout {
-            spacing: 12
+        Md3HStack {
             width: parent.width
+            spacing: 12
             Md3VStack {
-                Layout.fillWidth: true
+                width: Math.max(120, parent.width - 180)
                 spacing: 2
                 Md3Text {
                     text: qsTr("特效强度")
@@ -408,7 +400,7 @@ Flickable {
                 }
             }
             Md3Slider {
-                Layout.preferredWidth: 160
+                width: 160
                 from: 0.35
                 to: 1.35
                 value: Md3Theme.effectsIntensity
@@ -416,12 +408,11 @@ Flickable {
             }
         }
 
-        // keep QtQuick.Layouts for dense form alignment
-        RowLayout {
-            spacing: 12
+        Md3HStack {
             width: parent.width
+            spacing: 12
             Md3VStack {
-                Layout.fillWidth: true
+                width: Math.max(120, parent.width - 80)
                 spacing: 2
                 Md3Text {
                     text: qsTr("减弱动效")
@@ -445,12 +436,11 @@ Flickable {
             }
         }
 
-        // keep QtQuick.Layouts for dense form alignment
-        RowLayout {
-            spacing: 12
+        Md3HStack {
             width: parent.width
+            spacing: 12
             Md3VStack {
-                Layout.fillWidth: true
+                width: Math.max(120, parent.width - 180)
                 spacing: 2
                 Md3Text {
                     text: qsTr("动效倍速")
@@ -464,7 +454,7 @@ Flickable {
                 }
             }
             Md3Slider {
-                Layout.preferredWidth: 160
+                width: 160
                 from: 1
                 to: 3
                 value: Md3Motion.durationScale

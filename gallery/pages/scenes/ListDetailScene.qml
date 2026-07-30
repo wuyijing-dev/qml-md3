@@ -10,7 +10,9 @@ Md3SplitView {
 
     property string detailText: qsTr("Select an item")
 
-    Rectangle {
+    Md3Surface {
+        radius: 0
+        elevation: 0
         color: Md3Theme.colorScheme.surfaceContainerLow
         Md3VStack {
             anchors.fill: parent
@@ -45,7 +47,9 @@ Md3SplitView {
         }
     }
 
-    Rectangle {
+    Md3Surface {
+        radius: 0
+        elevation: 0
         color: Md3Theme.colorScheme.surface
         Md3VStack {
             anchors.fill: parent

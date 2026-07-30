@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
 Flickable {
@@ -19,11 +18,12 @@ Flickable {
             role: Md3Text.HeadlineMedium
         }
 
-        Rectangle {
+        Md3Surface {
             width: parent.width
             visible: Md3Theme.reduceMotion
             height: visible ? warnCol.implicitHeight + 24 : 0
             radius: Md3Theme.shape.medium
+            elevation: 0
             color: Md3Theme.colorScheme.errorContainer
 
             Md3VStack {
@@ -119,10 +119,11 @@ Flickable {
             Md3Button { text: qsTr("Outlined"); variant: Md3Button.Outlined }
         }
 
-        GridLayout {
+        Md3GridLayout {
             columns: 4
-            columnSpacing: 12
+            spacing: 12
             rowSpacing: 8
+            minCellHeight: 36
             width: parent.width
 
             Repeater {
@@ -138,8 +139,6 @@ Flickable {
                 ]
                 delegate: Rectangle {
                     required property string modelData
-                    Layout.preferredWidth: 120
-                    Layout.preferredHeight: 36
                     radius: Md3Theme.shape.extraSmall
                     color: Md3Theme.colorScheme.surfaceContainerHigh
                     Md3Text {
