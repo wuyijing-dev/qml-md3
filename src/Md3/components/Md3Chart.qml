@@ -65,14 +65,13 @@ Item {
     property bool _viewDirty: false
 
     property bool paused: false
-    /// Only block when minimized/hidden/inactive — never for theme reveal.
+    /// Only block when minimized/hidden/suspended — never for theme reveal.
+    /// Do not use window.active here: focus blips while scrolling cause live rebuild flicker.
     readonly property bool interactionBlocked: {
         const w = Window.window
         if (!w)
             return false
         if (w.visibility === Window.Minimized || w.visibility === Window.Hidden)
-            return true
-        if (!w.active)
             return true
         if (Qt.application.state === Qt.ApplicationSuspended
                 || Qt.application.state === Qt.ApplicationHidden)
@@ -91,8 +90,10 @@ Item {
         return true
     }
     property var _flick: null
-    /// Pause live work while scrolled out of the page Flickable (no visual downgrade on-screen).
-    readonly property bool inViewport: {
+    property real viewportMargin: 96
+    /// Sticky: enter immediately, leave after debounce — avoids flicker on flick/rubber-band.
+    property bool viewportWarm: true
+    readonly property bool _viewportHit: {
         if (!effectivelyShown)
             return false
         const f = _flick
@@ -100,17 +101,44 @@ Item {
             return true
         const _cy = f.contentY
         const _cx = f.contentX
+        const m = root.viewportMargin
         const p = mapToItem(f, 0, 0)
-        return p.y < f.height && (p.y + height) > 0
-                && p.x < f.width && (p.x + width) > 0
+        return p.y < (f.height + m) && (p.y + height) > -m
+                && p.x < (f.width + m) && (p.x + width) > -m
     }
+    /// Page/window visibility only — not scroll hit-testing (that caused post-flick flicker).
     readonly property bool chartActive: !paused && !interactionBlocked && enabled
-                                        && inViewport
+                                        && effectivelyShown
+    /// Live/animated work: chartActive + sticky viewport.
+    readonly property bool animateInView: chartActive && viewportWarm
 
     property int renderedPointCount: 0
 
     signal cleared()
     signal rebuilt()
+
+    Timer {
+        id: viewportLeaveTimer
+        interval: 220
+        repeat: false
+        onTriggered: root.viewportWarm = false
+    }
+    on_ViewportHitChanged: {
+        if (_viewportHit) {
+            viewportLeaveTimer.stop()
+            viewportWarm = true
+        } else if (viewportWarm) {
+            viewportLeaveTimer.restart()
+        }
+    }
+    onEffectivelyShownChanged: {
+        if (!effectivelyShown) {
+            viewportLeaveTimer.stop()
+            viewportWarm = false
+        } else if (_viewportHit) {
+            viewportWarm = true
+        }
+    }
 
     implicitWidth: 280
     implicitHeight: 160

@@ -31,6 +31,8 @@ Item {
     readonly property string valueText: Number(value).toFixed(decimals) + (unit.length ? unit : "")
 
     property var _flick: null
+    property real viewportMargin: 96
+    property bool viewportWarm: true
 
     /// Parent page slots hide via opacity/visible — child.visible stays true, so walk the tree.
     readonly property bool effectivelyShown: {
@@ -41,20 +43,15 @@ Item {
             p = p.parent
         }
         const w = Window.window
-        if (w) {
-            if (w.visibility === Window.Minimized || w.visibility === Window.Hidden)
-                return false
-            if (!w.active)
-                return false
-        }
+        if (w && (w.visibility === Window.Minimized || w.visibility === Window.Hidden))
+            return false
         if (Qt.application.state === Qt.ApplicationSuspended
                 || Qt.application.state === Qt.ApplicationHidden)
             return false
         return true
     }
 
-    /// Skip work while scrolled off-screen (same look when scrolled back).
-    readonly property bool inViewport: {
+    readonly property bool _viewportHit: {
         if (!effectivelyShown)
             return false
         const f = _flick
@@ -62,9 +59,10 @@ Item {
             return true
         const _cy = f.contentY
         const _cx = f.contentX
+        const m = root.viewportMargin
         const p = mapToItem(f, 0, 0)
-        return p.y < f.height && (p.y + height) > 0
-                && p.x < f.width && (p.x + width) > 0
+        return p.y < (f.height + m) && (p.y + height) > -m
+                && p.x < (f.width + m) && (p.x + width) > -m
     }
 
     width: size
@@ -81,14 +79,37 @@ Item {
         canvas.requestPaint()
     }
 
-    // Full-rate when on screen; Timer path only if animationFps > 0.
+    Timer {
+        id: viewportLeaveTimer
+        interval: 220
+        repeat: false
+        onTriggered: root.viewportWarm = false
+    }
+    on_ViewportHitChanged: {
+        if (_viewportHit) {
+            viewportLeaveTimer.stop()
+            viewportWarm = true
+        } else if (viewportWarm) {
+            viewportLeaveTimer.restart()
+        }
+    }
+    onEffectivelyShownChanged: {
+        if (!effectivelyShown) {
+            viewportLeaveTimer.stop()
+            viewportWarm = false
+        } else if (_viewportHit) {
+            viewportWarm = true
+        }
+    }
+
+    // Full-rate when warmly in view; optional FPS cap via animationFps.
     FrameAnimation {
-        running: root.animated && root.inViewport && root.animationFps <= 0
+        running: root.animated && root.viewportWarm && root.animationFps <= 0
         onTriggered: root._advance(frameTime)
     }
     Timer {
         interval: Math.max(16, Math.round(1000 / Math.max(1, root.animationFps)))
-        running: root.animated && root.inViewport && root.animationFps > 0
+        running: root.animated && root.viewportWarm && root.animationFps > 0
         repeat: true
         onTriggered: root._advance(interval / 1000)
     }
@@ -103,9 +124,6 @@ Item {
     Canvas {
         id: canvas
         anchors.fill: parent
-        // FBO path is cheaper than Image-backed Canvas for steady redraws.
-        renderTarget: Canvas.FramebufferObject
-        renderStrategy: Canvas.Cooperative
         onPaint: {
             const ctx = getContext("2d")
             ctx.clearRect(0, 0, width, height)

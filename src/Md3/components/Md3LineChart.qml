@@ -203,12 +203,12 @@ Md3Chart {
     }
 
     FrameAnimation {
-        running: root.live && root.chartActive && root.liveFps <= 0
+        running: root.live && root.animateInView && root.liveFps <= 0
         onTriggered: root.advanceLive(frameTime)
     }
     Timer {
         interval: Math.max(16, Math.round(1000 / Math.max(1, root.liveFps)))
-        running: root.live && root.chartActive && root.liveFps > 0
+        running: root.live && root.animateInView && root.liveFps > 0
         repeat: true
         onTriggered: root.advanceLive(interval / 1000)
     }
