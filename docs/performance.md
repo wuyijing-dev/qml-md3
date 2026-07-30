@@ -127,6 +127,42 @@ Md3ApplicationWindow {
 
 ---
 
+### E. 冷开不卡 + 内存不炸（**当前 Gallery 默认**）
+
+不要靠堆高 L1 活页换手感。优先：
+
+1. **`MD3_QML_CACHEGEN=ON`（CMake 默认）** — 编译期 bytecode，几乎不占运行期 RSS  
+2. **`pageAsync: true`** — 冷开摊到多帧 + skeleton  
+3. **小 L1 + 大 L2** — 最多保留少量 Item；Component 缓存便宜  
+4. **关 neighbor Item prefetch / warmStart** — 避免 Charts 级页面偷偷常驻  
+5. **页内 `Md3DeferredSection`** — 重块延后创建（Charts 已做）
+
+```qml
+Md3ApplicationWindow {
+    pageAsync: true
+    pageSkeleton: true
+    pageCacheLimit: 1          // after warm → 3
+    pageL2CacheLimit: 1        // after warm → 16
+    pagePrefetch: false
+    pagePredictPrefetch: false
+    pageWarmStart: false
+    pageL2Warm: false
+    pageLeaveSnapshot: false
+    hotReload: false
+    progressiveContent: true
+}
+```
+
+| 手段 | 冷开手感 | RSS |
+|------|----------|-----|
+| qmlcachegen | ↑↑ | ≈0 |
+| pageAsync + skeleton | ↑（不假死） | ≈0 |
+| L1=3 / 关 prefetch | 回访略快 | 可控 |
+| L1=6+prefetch / warmStart | 回访很快 | **易炸** |
+| DeferredSection | 首屏更轻 | ↓ |
+
+---
+
 ## Off-screen: don’t pay for effects
 
 1. **Long pages** — wrap below-the-fold blocks:
@@ -180,8 +216,9 @@ If first window is slow → profile C + kill hot reload.
 ## Quick decision
 
 ```
-要秒开翻页？     → 提高 pageCacheLimit + prefetch（接受内存）
-要省内存？       → cacheLimit=1，关 prefetch，列表无 elevation
-要首启快？       → 关 hotReload / warmStart，progressiveContent=true
-要看不见不算特效？ → Loader/DeferredSection/VirtualList，别只靠 visible
+要冷开不卡且内存可控？ → Profile E：cachegen + pageAsync + L1≤3 + 大 L2 + DeferredSection
+要秒开翻页（可接受内存）？ → 提高 pageCacheLimit + prefetch（Profile B）
+要省内存极限？         → cacheLimit=1，关 prefetch，列表无 elevation
+要首启快？             → 关 hotReload / warmStart，progressiveContent=true
+要看不见不算特效？     → Loader/DeferredSection/VirtualList，别只靠 visible
 ```

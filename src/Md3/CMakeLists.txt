@@ -128,10 +128,13 @@ set_source_files_properties(
 )
 
 set(MD3_QML_NO_CACHEGEN)
-# Skip qmlcache for static library packages: cachegen objects are easy to omit from
-# install/find_package and then show up as undefined qInitResources_qmlcache_*.
-# Shared builds also keep NO_CACHEGEN for a simpler install layout.
-set(MD3_QML_NO_CACHEGEN NO_CACHEGEN)
+# qmlcachegen speeds cold open (bytecode in binary) without raising live page RSS.
+# Packaging must ship qmlcache init objects with static libs — see docs/packaging.md.
+# Rapid QML iterate: -DMD3_QML_CACHEGEN=OFF
+if (NOT MD3_QML_CACHEGEN)
+    set(MD3_QML_NO_CACHEGEN NO_CACHEGEN)
+endif()
+message(STATUS "Md3 qmlcachegen: ${MD3_QML_CACHEGEN}")
 qt_add_qml_module(Md3
     URI Md3
     VERSION 1.0

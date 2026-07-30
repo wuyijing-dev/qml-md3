@@ -162,7 +162,7 @@ cmake -S . -B build -G Ninja -DMD3_ROOT=/path/to/QML_MD3
 | App starts then exits immediately (Qt Creator: terminated abnormally) | Set `visible: true` on root `Md3ApplicationWindow`; deploy `Md3.dll` + `qml/Md3/` beside exe |
 | `module "Md3" is not installed` | Static: `Q_IMPORT_QML_PLUGIN(Md3Plugin)` + whole-archive / `Md3::QmlPlugin`. Shared: DLLs on PATH / `ldconfig` / `QML_IMPORT_PATH` |
 | `undefined reference` to `qml_register_types_Md3` / `qInitResources_*` | Static link order: plugin before Md3; use `WHOLE_ARCHIVE`. **Re-run** package script after pulling |
-| `undefined reference` to `qInitResources_qmlcache_*` | Old static package with cachegen — rebuild package from latest QML_MD3 |
+| `undefined reference` to `qInitResources_qmlcache_*` | Static package missing qmlcache objects. Rebuild package with current QML_MD3 (`MD3_QML_CACHEGEN=ON` default), or temporarily `-DMD3_QML_CACHEGEN=OFF` |
 | `cannot open shared object file: libMd3.so.*` | `sudo ldconfig` or `LD_LIBRARY_PATH=…/lib` |
 | Windows: missing `Md3.dll` at runtime | Add install `bin\` to PATH or copy DLL beside exe |
 | `cannot open output file Md3Create: Is a directory` | Do not create a folder named `Md3Create` under `build/`. Exe is `build/bin/Md3Create` |

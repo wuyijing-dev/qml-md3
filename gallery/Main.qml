@@ -21,14 +21,16 @@ Md3ApplicationWindow {
     railHeader: qsTr("组件图库")
     pagePadding: 20
     pageSkeleton: true
-    // Fast first paint: start with low-RSS (no warm / no neighbor prefetch).
-    // After the shell is up, navWarmTimer raises L1/L2 + enables prefetch (Profile B).
+    // Low-RAM snappy: async cold open + small L1 Item cache + larger L2 Component cache.
+    // Do NOT raise L1/prefetch aggressively — heavy pages (Charts) would blow RSS.
+    pageAsync: true
     pageCacheLimit: 1
     pageL2CacheLimit: 1
     pagePrefetch: false
     pagePredictPrefetch: false
     pageWarmStart: false
     pageL2Warm: false
+    pageLeaveSnapshot: false
     persistSession: true
     settingsOrganization: "QML_MD3"
     settingsApplication: "Gallery"
@@ -37,7 +39,7 @@ Md3ApplicationWindow {
 
     property bool _navWarmReady: false
 
-    /// Next beat after the window is shown: keep more pages + warm neighbors.
+    /// After shell paint: modest L1 (few live pages) + larger L2 (cheap compiled Components).
     Timer {
         id: navWarmTimer
         interval: 80
@@ -46,10 +48,10 @@ Md3ApplicationWindow {
             if (window._navWarmReady)
                 return
             window._navWarmReady = true
-            window.pageCacheLimit = 6
-            window.pageL2CacheLimit = 8
-            window.pagePrefetch = true
-            // Hover-predict compiles pages while dragging the rail — keep off.
+            window.pageCacheLimit = 3
+            window.pageL2CacheLimit = 16
+            // Neighbor Item prefetch keeps Charts-class pages alive → skip for RAM.
+            window.pagePrefetch = false
             window.pagePredictPrefetch = false
         }
     }

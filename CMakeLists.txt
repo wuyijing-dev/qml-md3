@@ -16,6 +16,9 @@ if (NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 endif()
 option(MD3_BUILD_GALLERY "Build the Md3 Gallery demo application" ${_md3_gallery_default})
 option(MD3_BUILD_SHARED "Build Md3 as a shared library" OFF)
+# qmlcachegen: faster cold page open without keeping more page Items in RAM.
+# Turn OFF while iterating QML without clean rebuilds (-DMD3_QML_CACHEGEN=OFF).
+option(MD3_QML_CACHEGEN "Compile QML with qmlcachegen (recommended for day-to-day / Release)" ON)
 
 # ----- Library (URI Md3) — always built -----
 add_subdirectory(src/Md3)
