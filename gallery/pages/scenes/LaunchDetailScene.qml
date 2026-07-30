@@ -7,15 +7,16 @@ Item {
     id: root
     anchors.fill: parent
 
-    readonly property var route: {
-        const win = Window.window
-        return win && win.routeParams ? win.routeParams : ({})
-    }
+    /// Injected by Md3PageHost (prefer over Window.window duck-typing).
+    property var md3HostWindow: null
+    property var md3RouteParams: ({})
+    property int md3NavDepth: 0
+    property var md3GoBack: null
+    property var md3PushRoute: null
 
-    readonly property int navDepth: {
-        const win = Window.window
-        return win && win.navDepth !== undefined ? win.navDepth : 0
-    }
+    readonly property var route: md3RouteParams && typeof md3RouteParams === "object"
+            ? md3RouteParams : ({})
+    readonly property int navDepth: md3NavDepth
 
     readonly property string detailTitle: {
         if (route.title !== undefined && String(route.title).length > 0)
@@ -43,32 +44,46 @@ Item {
         return items
     }
 
+    function _host() {
+        return md3HostWindow || Window.window
+    }
+
     function _back() {
-        const win = Window.window
-        if (!win)
+        if (typeof md3GoBack === "function") {
+            md3GoBack()
             return
-        win.goBack()
+        }
+        const win = _host()
+        if (win && typeof win.goBack === "function")
+            win.goBack()
     }
 
     function _goCrumb(index) {
-        const win = Window.window
-        if (!win)
-            return
         // index 0 = list root → pop entire stack
         const pops = Math.max(0, crumbModel.length - 1 - index)
         for (let i = 0; i < pops; ++i) {
-            if (!win.goBack())
-                break
+            if (typeof md3GoBack === "function") {
+                if (!md3GoBack())
+                    break
+            } else {
+                const win = _host()
+                if (!win || typeof win.goBack !== "function" || !win.goBack())
+                    break
+            }
         }
     }
 
     function _openLevel2() {
-        const win = Window.window
-        if (!win || !win.pageHost)
+        const win = _host()
+        const push = typeof md3PushRoute === "function" ? md3PushRoute
+                    : (win && typeof win.pushRoute === "function"
+                       ? function (i, p, o) { return win.pushRoute(i, p, o) } : null)
+        if (!push || !win || !win.pageHost)
             return
         const gp = mapToGlobal(width / 2, height / 2)
         const p = win.pageHost.mapFromGlobal(gp.x, gp.y)
-        win.pushRoute(win.currentIndex, {
+        const pageIndex = win.currentIndex !== undefined ? win.currentIndex : 0
+        push(pageIndex, {
             title: qsTr("Level %1").arg(navDepth + 2),
             body: qsTr("Nested pushRoute on the same detail page. goBack() returns to the previous level.")
         }, {

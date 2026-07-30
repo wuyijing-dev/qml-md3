@@ -31,23 +31,7 @@ Item {
     }
     readonly property string valueText: Number(value).toFixed(decimals) + (unit.length ? unit : "")
     readonly property int _effectiveFps: animationFps > 0 ? animationFps : Md3Theme.effectsLiveFps
-
-    /// Parent page slots hide via opacity/visible — child.visible stays true, so walk the tree.
-    readonly property bool effectivelyShown: {
-        let p = root
-        while (p) {
-            if (!p.visible || p.opacity < 0.01)
-                return false
-            p = p.parent
-        }
-        const w = Window.window
-        if (w && (w.visibility === Window.Minimized || w.visibility === Window.Hidden))
-            return false
-        if (Qt.application.state === Qt.ApplicationSuspended
-                || Qt.application.state === Qt.ApplicationHidden)
-            return false
-        return true
-    }
+    readonly property bool effectivelyShown: Md3TreeVisibility.isLiveMotionScene(root, Window.window)
 
     width: size
     height: size

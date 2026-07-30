@@ -6,7 +6,11 @@ import Md3
 Item {
     id: page
 
+    property var md3HostWindow: null
+
     function _galleryWindow() {
+        if (md3HostWindow && md3HostWindow.galleryTableSelection !== undefined)
+            return md3HostWindow
         const w = Window.window
         return (w && w.galleryTableSelection !== undefined) ? w : null
     }

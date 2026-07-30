@@ -132,6 +132,7 @@
 - [Md3IconFonts](Md3IconFonts.md) _(singleton)_ — Shared Material Icons font faces — one FontLoader pair for the whole app (not per Md3Icon).
 - [Md3Motion](Md3Motion.md) _(singleton)_
 - [Md3Notify](Md3Notify.md) _(singleton)_ — `Md3Notify.snackbar(...)` without Window host glue.
+- [Md3TreeVisibility](Md3TreeVisibility.md) _(singleton)_ — ancestor/window shown checks (no duplicated parent walks).
 - [Md3Shape](Md3Shape.md)
 - [Md3StateLayer](Md3StateLayer.md)
 - [Md3Theme](Md3Theme.md) _(singleton)_

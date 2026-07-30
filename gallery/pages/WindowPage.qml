@@ -10,13 +10,11 @@ Flickable {
     contentHeight: column.height
     clip: true
 
+    /// Injected by Md3PageHost; fallback Window.window (ApplicationWindow is the Window).
+    property var md3HostWindow: null
     readonly property var appWin: {
-        let p = parent
-        while (p) {
-            if (p.systemBackdrop !== undefined && typeof p.flashTaskbar === "function")
-                return p
-            p = p.parent
-        }
+        if (md3HostWindow && md3HostWindow.systemBackdrop !== undefined)
+            return md3HostWindow
         const w = Window.window
         if (w && w.systemBackdrop !== undefined)
             return w

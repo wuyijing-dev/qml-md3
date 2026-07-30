@@ -34,19 +34,7 @@ Item {
     height: box
 
     function _refreshTreeShown() {
-        let ok = visible && opacity > 0.01
-        let p = parent
-        while (ok && p) {
-            if (p.visible === false)
-                ok = false
-            else if (p.opacity !== undefined && p.opacity < 0.01)
-                ok = false
-            else
-                p = p.parent
-        }
-        const w = Window.window
-        if (!w || w.visibility === Window.Hidden || w.visibility === Window.Minimized)
-            ok = false
+        const ok = Md3TreeVisibility.isSceneActive(root, Window.window)
         if (_treeShown !== ok)
             _treeShown = ok
     }

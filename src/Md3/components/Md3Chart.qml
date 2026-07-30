@@ -68,31 +68,9 @@ Item {
     readonly property bool viewMoving: gestureActive || Math.abs(_panVelocity) > 1e-5
 
     property bool paused: false
-    /// Only block when minimized/hidden/suspended — never for theme reveal.
-    readonly property bool interactionBlocked: {
-        const w = Window.window
-        if (!w)
-            return false
-        if (w.visibility === Window.Minimized || w.visibility === Window.Hidden)
-            return true
-        if (Qt.application.state === Qt.ApplicationSuspended
-                || Qt.application.state === Qt.ApplicationHidden)
-            return true
-        return false
-    }
-    /// Walk ancestors — PageHost hides cached pages via parent opacity/visible.
-    readonly property bool effectivelyShown: {
-        let p = root
-        while (p) {
-            if (!p.visible || p.opacity < 0.01)
-                return false
-            p = p.parent
-        }
-        return true
-    }
-    /// Page/window visibility only — no per-scroll mapToItem (that starved the UI thread / rail).
-    readonly property bool chartActive: !paused && !interactionBlocked && enabled
-                                        && effectivelyShown
+    /// Page/window/app visibility — no per-scroll mapToItem (that starved the UI thread / rail).
+    readonly property bool chartActive: !paused && enabled
+            && Md3TreeVisibility.isLiveMotionScene(root, Window.window)
 
     property int renderedPointCount: 0
 

@@ -168,7 +168,7 @@
 - [ ] `qmllint` / 静态检查进 CI
 - [ ] API 文档 CI：改 QML 未跑 `gen_api_docs` 则失败或自动提交策略
 - [ ] 依赖锁定：文档写死 Qt 最低小版本
-- [ ] 内部模块边界：foundation / primitives / components / charts / window 依赖图
+- [x] 内部模块边界：foundation / primitives / components / charts / window 依赖图
 - [ ] 公共头文件与私有实现分离（C++ 部分）
 - [ ] 日志：库内 `qCDebug(md3)` 分类，默认安静
 

@@ -6,6 +6,8 @@ import Md3
 Item {
     id: page
 
+    property var md3HostWindow: null
+
     property var fileTreeModel: [
         {
             title: "Workspace",
@@ -58,6 +60,9 @@ Item {
     property string currentStatusFilter: ""
 
     function galleryWindow() {
+        if (typeof md3HostWindow !== "undefined" && md3HostWindow
+                && md3HostWindow.galleryTableSelection !== undefined)
+            return md3HostWindow
         const w = Window.window
         return (w && w.galleryTableSelection !== undefined) ? w : null
     }

@@ -1109,6 +1109,45 @@ Item {
             loader.source = url
     }
 
+    function _trySetPageProp(obj, name, value) {
+        if (!obj)
+            return
+        try {
+            obj[name] = value
+        } catch (e) {
+            // Page did not declare this property.
+        }
+    }
+
+    /// Inject shell context so pages need not walk parents / duck-type Window.
+    function _syncPageContext(item) {
+        if (!item)
+            return
+        const win = Window.window
+        const host = root
+        _trySetPageProp(item, "md3HostWindow", win)
+        _trySetPageProp(item, "md3RouteParams", routeParams)
+        _trySetPageProp(item, "routeParams", routeParams)
+        _trySetPageProp(item, "md3NavDepth", navDepth)
+        _trySetPageProp(item, "navDepth", navDepth)
+        _trySetPageProp(item, "md3GoBack", function (opts) {
+            return host.goBack(opts)
+        })
+        _trySetPageProp(item, "md3PushRoute", function (index, params, opts) {
+            return host.pushRoute(index, params, opts)
+        })
+    }
+
+    function _syncCurrentPageContext() {
+        const ldr = _loaderAt(currentIndex)
+        if (ldr && ldr.item)
+            _syncPageContext(ldr.item)
+    }
+
+    onRouteParamsChanged: Qt.callLater(_syncCurrentPageContext)
+    onNavDepthChanged: Qt.callLater(_syncCurrentPageContext)
+    onCurrentIndexChanged: Qt.callLater(_syncCurrentPageContext)
+
     /// Soft-warm: L2 only unless allowL1; never inflates beyond cacheLimit.
     function _warmPage(index, allowL1) {
         if (!model || index < 0 || index >= model.length)
@@ -1818,6 +1857,7 @@ Item {
                     if (item) {
                         item.width = Qt.binding(function () { return pageLoader.width })
                         item.height = Qt.binding(function () { return pageLoader.height })
+                        root._syncPageContext(item)
                     }
                     if (index === root.currentIndex)
                         root._tryShow(index)
