@@ -14,6 +14,9 @@ Classic open-arc (horseshoe) KPI gauge.
 | `Md3SegmentGauge` | `Md3SegmentGauge.qml` | Discrete segments |
 | `Md3DotsGauge` | `Md3DotsGauge.qml` | Dots around ring |
 | `Md3MultiRingGauge` | `Md3MultiRingGauge.qml` | Concentric rings |
+| `Md3HalfGauge` | `Md3HalfGauge.qml` | Semicircle |
+| `Md3WaveGauge` | `Md3WaveGauge.qml` | Liquid wave fill |
+| `Md3TickRingGauge` | `Md3TickRingGauge.qml` | Ring + radial ticks |
 
 ## Properties
 

@@ -10,9 +10,8 @@ Item {
         Md3Card {
             variant: Md3Card.Outlined
             width: root.width
-            // bodySlot fillFallback-friendly: give card enough height
-            implicitHeight: 420
-            height: 420
+            implicitHeight: 520
+            height: 520
             Column {
                 width: parent.width
                 spacing: 16
@@ -59,7 +58,6 @@ Item {
                         label: qsTr("Dots")
                         unit: "%"
                         size: 112
-                        valueColor: Md3Theme.colorScheme.primary
                     }
                     Md3MultiRingGauge {
                         size: 120
@@ -70,6 +68,26 @@ Item {
                             { value: 64, color: Md3Theme.colorScheme.tertiary },
                             { value: 42, color: Md3Theme.colorScheme.secondary }
                         ]
+                    }
+                    Md3HalfGauge {
+                        value: 68
+                        label: qsTr("Half")
+                        unit: "%"
+                        size: 130
+                        valueColor: Md3Theme.colorScheme.tertiary
+                    }
+                    Md3WaveGauge {
+                        value: 58
+                        label: qsTr("Wave")
+                        unit: "%"
+                        size: 112
+                    }
+                    Md3TickRingGauge {
+                        value: 76
+                        label: qsTr("Ticks")
+                        unit: "%"
+                        size: 112
+                        valueColor: Md3Theme.colorScheme.secondary
                     }
                 }
                 Row {
@@ -86,6 +104,54 @@ Item {
                         showArea: true
                         showLastDot: true
                         values: [12, 18, 15, 22, 28, 24, 31, 27, 35, 40, 38, 42]
+                    }
+                }
+            }
+        }
+    }
+
+    property Component extraChartsCard: Component {
+        Md3Card {
+            variant: Md3Card.Outlined
+            width: root.width
+            height: 320
+            Column {
+                width: parent.width
+                spacing: 12
+                Text {
+                    text: qsTr("Radar · Funnel · Radial bars")
+                    color: Md3Theme.colorScheme.colorOnSurface
+                    font.pixelSize: Md3Theme.typography.titleSmall.size
+                }
+                Row {
+                    width: parent.width
+                    spacing: 12
+                    Md3RadarChart {
+                        width: Math.min(260, (parent.width - 24) / 3)
+                        height: 240
+                        categories: [qsTr("Speed"), qsTr("Reliability"), qsTr("UX"), qsTr("Docs"), qsTr("A11y"), qsTr("Perf")]
+                        values: [80, 92, 75, 68, 88, 70]
+                    }
+                    Md3FunnelChart {
+                        width: Math.min(260, (parent.width - 24) / 3)
+                        height: 240
+                        values: [
+                            { label: qsTr("Visit"), value: 1200 },
+                            { label: qsTr("Signup"), value: 640 },
+                            { label: qsTr("Activate"), value: 310 },
+                            { label: qsTr("Pay"), value: 120 }
+                        ]
+                    }
+                    Md3RadialBarChart {
+                        width: Math.min(260, (parent.width - 24) / 3)
+                        height: 240
+                        showLabels: true
+                        values: [
+                            { label: "A", value: 86 },
+                            { label: "B", value: 64 },
+                            { label: "C", value: 48 },
+                            { label: "D", value: 32 }
+                        ]
                     }
                 }
             }
@@ -153,6 +219,7 @@ Item {
                 stage2e.arm()
                 stage2f.arm()
                 stage2g.arm()
+                stage2h.arm()
             }
         }
 
@@ -316,15 +383,21 @@ Item {
             }
             Md3DeferredSection {
                 id: stage2f
-                preferredHeight: 280
+                preferredHeight: 520
                 delayMs: 96
                 sourceComponent: root.kpiCard
             }
             Md3DeferredSection {
                 id: stage2g
-                preferredHeight: 300
+                preferredHeight: 220
                 delayMs: 112
                 sourceComponent: root.heatCard
+            }
+            Md3DeferredSection {
+                id: stage2h
+                preferredHeight: 320
+                delayMs: 128
+                sourceComponent: root.extraChartsCard
             }
         }
     }

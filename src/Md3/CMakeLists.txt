@@ -291,6 +291,12 @@ qt_add_qml_module(Md3
         components/Md3SegmentGauge.qml
         components/Md3MultiRingGauge.qml
         components/Md3DotsGauge.qml
+        components/Md3HalfGauge.qml
+        components/Md3WaveGauge.qml
+        components/Md3TickRingGauge.qml
+        components/Md3RadarChart.qml
+        components/Md3FunnelChart.qml
+        components/Md3RadialBarChart.qml
         components/Md3Sparkline.qml
         components/Md3CodeBlock.qml
         components/Md3Skeleton.qml

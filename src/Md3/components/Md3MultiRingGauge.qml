@@ -14,11 +14,24 @@ Item {
     property string centerLabel: ""
     property string centerValue: ""
     property real size: 160
+    /// Extra inset so center text stays clear of the innermost stroke.
+    property real centerPadding: 6
 
     width: size
     height: size
     implicitWidth: size
     implicitHeight: size
+
+    readonly property int _ringCount: rings && rings.length ? rings.length : 0
+    /// Clear radius inside the innermost ring track (center hole).
+    readonly property real innerHoleRadius: {
+        const n = Math.max(1, _ringCount)
+        const outer = Math.min(width, height) / 2 - strokeWidth
+        const hole = outer - (n - 1) * (strokeWidth + ringGap) - strokeWidth * 0.5 - centerPadding
+        return Math.max(8, hole)
+    }
+    readonly property real _valuePx: Math.max(11, Math.min(22, innerHoleRadius * 0.55))
+    readonly property real _labelPx: Math.max(9, Math.min(12, innerHoleRadius * 0.28))
 
     function _rad(deg) { return deg * Math.PI / 180 }
 
@@ -67,28 +80,45 @@ Item {
     onWidthChanged: canvas.requestPaint()
     onHeightChanged: canvas.requestPaint()
     onStrokeWidthChanged: canvas.requestPaint()
+    onRingGapChanged: canvas.requestPaint()
     Component.onCompleted: canvas.requestPaint()
 
-    Column {
-        anchors.centerIn: parent
-        spacing: 2
+    Item {
+        id: centerHole
         visible: root.showCenterLabel
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            visible: root.centerValue.length > 0
-            text: root.centerValue
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.family: Md3Theme.typography.fontFamily
-            font.pixelSize: Md3Theme.typography.titleLarge.size
-            font.weight: Font.Medium
-        }
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            visible: root.centerLabel.length > 0
-            text: root.centerLabel
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.family: Md3Theme.typography.fontFamily
-            font.pixelSize: Md3Theme.typography.labelMedium.size
+        anchors.centerIn: parent
+        width: root.innerHoleRadius * 2
+        height: root.innerHoleRadius * 2
+        clip: true
+
+        Column {
+            anchors.centerIn: parent
+            width: parent.width - 4
+            spacing: 0
+
+            Text {
+                width: parent.width
+                visible: root.centerValue.length > 0
+                text: root.centerValue
+                color: Md3Theme.colorScheme.colorOnSurface
+                horizontalAlignment: Text.AlignHCenter
+                elide: Text.ElideRight
+                maximumLineCount: 1
+                font.family: Md3Theme.typography.fontFamily
+                font.pixelSize: root._valuePx
+                font.weight: Font.DemiBold
+            }
+            Text {
+                width: parent.width
+                visible: root.centerLabel.length > 0
+                text: root.centerLabel
+                color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                horizontalAlignment: Text.AlignHCenter
+                elide: Text.ElideRight
+                maximumLineCount: 1
+                font.family: Md3Theme.typography.fontFamily
+                font.pixelSize: root._labelPx
+            }
         }
     }
 }
