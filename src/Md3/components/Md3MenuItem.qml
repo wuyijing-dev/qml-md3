@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Window
 import Md3
 
 Item {
@@ -53,11 +52,7 @@ Item {
             owner.openSubMenu(submenu, root)
         else {
             submenu.modal = false
-            const win = Window.window
-            if (!win)
-                return
-            const host = win.contentItem
-            const p = root.mapToItem(host, root.width, 0)
+            const p = Md3OverlayHost.mapToOverlay(root, root.width, 0)
             submenu.popup(p.x + 2, p.y - 8)
         }
     }

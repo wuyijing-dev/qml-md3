@@ -9,6 +9,8 @@ Item {
     property string leadingIcon: ""
     property var model: []
     property int currentIndex: -1
+    /// Optional explicit Window for menu overlay.
+    property var overlayWindow: null
     readonly property bool open: menu.open
 
     signal activated(int index)
@@ -41,8 +43,10 @@ Item {
     function openMenu() {
         if (!enabled)
             return
-        const p = field.mapToItem(null, 0, field.height + 4)
+        const p = Md3OverlayHost.mapToOverlay(field, 0, field.height + 4, root.overlayWindow)
         menu.menuWidth = field.width
+        if (menu.overlayWindow !== undefined)
+            menu.overlayWindow = root.overlayWindow
         menu.popup(p.x, p.y)
         root.opened()
     }

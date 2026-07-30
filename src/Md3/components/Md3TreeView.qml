@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Window
 import Md3
 
 /// Hierarchical tree: `{ title, icon?, children?, expanded?, checked?, data? }`.
@@ -22,6 +21,8 @@ Item {
     property bool showExpandControls: false
     property bool lazyLoad: false
     property var contextMenu: null
+    /// Optional explicit Window for context-menu overlay coords.
+    property var overlayWindow: null
 
     signal activated(int flatIndex, var node)
     signal expandedChanged(int flatIndex, var node, bool expanded)
@@ -557,11 +558,15 @@ Item {
                         z: -1
                         onClicked: function (mouse) {
                             if (mouse.button === Qt.RightButton) {
-                                const win = Window.window
                                 const g = mapToGlobal(mouse.x, mouse.y)
                                 contextMenuRequested(row.index, row.node, g.x, g.y)
-                                if (root.contextMenu)
-                                    root.contextMenu.popup(g.x, g.y)
+                                if (root.contextMenu) {
+                                    const p = Md3OverlayHost.mapToOverlay(this, mouse.x, mouse.y,
+                                                                          root.overlayWindow)
+                                    if (root.contextMenu.overlayWindow !== undefined)
+                                        root.contextMenu.overlayWindow = root.overlayWindow
+                                    root.contextMenu.popup(p.x, p.y)
+                                }
                                 return
                             }
                             root.selectedIndex = row.index

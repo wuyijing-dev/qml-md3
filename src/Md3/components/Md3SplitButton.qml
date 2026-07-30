@@ -9,6 +9,8 @@ Md3AbstractButton {
 
     property int variant: Md3SplitButton.Filled
     property var menuModel: []
+    /// Optional explicit Window for menu overlay.
+    property var overlayWindow: null
 
     signal menuItemClicked(int index)
 
@@ -48,8 +50,10 @@ Md3AbstractButton {
     function openMenu() {
         if (!enabled || menuModel.length === 0)
             return
-        const p = shell.mapToItem(null, 0, shell.height + 4)
+        const p = Md3OverlayHost.mapToOverlay(shell, 0, shell.height + 4, root.overlayWindow)
         menu.menuWidth = Math.max(shell.width, 168)
+        if (menu.overlayWindow !== undefined)
+            menu.overlayWindow = root.overlayWindow
         menu.popup(p.x, p.y)
     }
 

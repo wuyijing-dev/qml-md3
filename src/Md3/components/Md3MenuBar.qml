@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Window
 import Md3
 
 Rectangle {
@@ -7,6 +6,8 @@ Rectangle {
 
     /// [{ text, icon?, items?: [...] }] — use `items` (not `children`; that clashes with Item)
     property var model: []
+    /// Optional explicit Window for menu overlay (else Window.window).
+    property var overlayWindow: null
     signal itemClicked(string path)
 
     implicitHeight: 48
@@ -77,9 +78,9 @@ Rectangle {
         // Ensure previous dynamic items are gone before rebuilding
         menu.clearItems()
         root._buildItems(menu, dest.submenuItems, dest.title)
-        const win = Window.window
-        const target = (win && win.contentItem) ? win.contentItem : null
-        const p = dest.mapToItem(target, 0, dest.height)
+        const p = Md3OverlayHost.mapToOverlay(dest, 0, dest.height, root.overlayWindow)
+        if (menu.overlayWindow !== undefined)
+            menu.overlayWindow = root.overlayWindow
         menu.popup(p.x, p.y)
     }
 

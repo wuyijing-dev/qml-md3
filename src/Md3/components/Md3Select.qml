@@ -28,6 +28,8 @@ Item {
     property bool multiSelect: false
     property string searchPlaceholder: qsTr("Search")
     property int suggestionLimit: 0 // 0 = unlimited
+    /// Optional explicit Window for menu overlay.
+    property var overlayWindow: null
 
     signal activated(int index)
     signal selectionChanged()
@@ -178,8 +180,10 @@ Item {
             return
         if (searchable)
             searchField.text = ""
-        const p = field.mapToItem(null, 0, field.height + 4)
+        const p = Md3OverlayHost.mapToOverlay(field, 0, field.height + 4, root.overlayWindow)
         menu.menuWidth = field.width
+        if (menu.overlayWindow !== undefined)
+            menu.overlayWindow = root.overlayWindow
         menu.popup(p.x, p.y)
         root.opened()
         if (searchable)

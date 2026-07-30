@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Window
 import Md3
 
 Item {
@@ -36,6 +35,8 @@ Item {
     property int suggestionIndex: -1
     property string accessibleName: ""
     property string accessibleDescription: ""
+    /// Optional explicit Window for autocomplete overlay reparent.
+    property var overlayWindow: null
 
     signal trailingClicked()
     signal accepted()
@@ -453,8 +454,7 @@ Item {
     property real _suggestionY: 0
 
     function _suggestionHost() {
-        const w = root.Window.window
-        return (w && w.contentItem) ? w.contentItem : root
+        return Md3OverlayHost.contentItem(root.overlayWindow, root) || root
     }
 
     function _syncSuggestionGeometry() {

@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Window
 import Md3
 
 /// Enterprise data table: sort, filter, multi-select, pagination, frozen columns,
@@ -35,6 +34,8 @@ Item {
     property var columnFilters: ({})
     property bool showFilterBar: false
     property string filterPlaceholder: qsTr("Search table…")
+    /// Optional explicit Window for row-action menu overlay.
+    property var overlayWindow: null
 
     Accessible.role: Accessible.Table
     Accessible.name: qsTr("Data table")
@@ -376,11 +377,9 @@ Item {
         if (!rowActions || !rowActions.length || !anchorItem)
             return
         rowMenuSourceIndex = sourceIndex
-        const win = Window.window
-        const target = (win && win.contentItem) ? win.contentItem : null
-        if (!target)
-            return
-        const p = anchorItem.mapToItem(target, 0, anchorItem.height)
+        const p = Md3OverlayHost.mapToOverlay(anchorItem, 0, anchorItem.height, root.overlayWindow)
+        if (rowMenu.overlayWindow !== undefined)
+            rowMenu.overlayWindow = root.overlayWindow
         rowMenu.popup(p.x, p.y)
     }
 

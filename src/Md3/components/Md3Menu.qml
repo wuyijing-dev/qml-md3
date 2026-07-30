@@ -278,8 +278,7 @@ Item {
     function popupAtItem(item, x, y) {
         if (!item)
             return
-        const target = _contentItem() || host
-        const p = item.mapToItem(target, x, y)
+        const p = Md3OverlayHost.mapToOverlay(item, x, y, root.overlayWindow)
         popup(p.x, p.y)
     }
 
@@ -296,11 +295,11 @@ Item {
         menu.modal = false
         const target = _contentItem() || host
         menu.hostEnsureParent(target)
-        const p = anchorItem.mapToItem(target, anchorItem.width, 0)
+        const p = Md3OverlayHost.mapToOverlay(anchorItem, anchorItem.width, 0, root.overlayWindow)
         let x = p.x + 4
         let y = Math.max(8, p.y - 8)
         const mw = menu.menuWidth > 0 ? menu.menuWidth : 200
-        if (target.width > 0 && x + mw > target.width - 8)
+        if (target && target.width > 0 && x + mw > target.width - 8)
             x = Math.max(8, p.x - mw - 4)
         menu.popup(x, y)
     }
