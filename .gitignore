@@ -90,6 +90,9 @@ coverage/
 *.gcno
 
 /build-lib/
+/build-lib-*/
 /build-mingw*/
+/build-cmake-*/
+/build-compat-*/
 /dist/
 
