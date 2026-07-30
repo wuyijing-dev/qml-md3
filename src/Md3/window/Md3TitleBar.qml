@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import Md3
 
 // Win-native style title bar: [icon][single-line title] | flexible middle | trailing | caption
 // Title block is reserved — middle content must not squeeze it.

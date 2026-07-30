@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import Md3
 
 // Win11 / Electron-style caption buttons (full title-bar height)
 Item {

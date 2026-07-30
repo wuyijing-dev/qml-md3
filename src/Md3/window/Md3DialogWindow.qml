@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Window
 import QtQuick.Effects
+import Md3
 
 /// Separate OS-level dialog window (QWidget-like multi-window), not an overlay.
 Window {

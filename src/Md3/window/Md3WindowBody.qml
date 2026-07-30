@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 // Built-in body: left NavigationRail + lazy Md3PageHost (used by Md3ApplicationWindow)
 Item {

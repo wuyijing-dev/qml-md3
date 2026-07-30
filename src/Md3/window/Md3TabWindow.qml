@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import Md3
 
 /// Peer window spawned by document-tab tear-off (`Md3ApplicationWindow.tearOffTab`).
 /// Uses the normal title bar + tab strip (browserChrome was removed).
