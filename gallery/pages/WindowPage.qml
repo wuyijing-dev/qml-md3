@@ -13,9 +13,7 @@ Flickable {
     /// Injected by Md3PageHost; fallback Window.window (ApplicationWindow is the Window).
     property var md3HostWindow: null
     readonly property var appWin: {
-        if (md3HostWindow && md3HostWindow.systemBackdrop !== undefined)
-            return md3HostWindow
-        const w = Window.window
+        const w = Md3OverlayHost.resolveWindow(md3HostWindow, root)
         if (w && w.systemBackdrop !== undefined)
             return w
         return null
@@ -901,8 +899,9 @@ Flickable {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             text: {
-                const dpr = root.appWin ? root.appWin.windowDpr : nativeHelper.devicePixelRatio(Window.window)
-                const dpi = root.appWin ? root.appWin.windowDpi : nativeHelper.windowDpi(Window.window)
+                const win = root.appWin || Md3OverlayHost.resolveWindow(root.md3HostWindow, root)
+                const dpr = root.appWin ? root.appWin.windowDpr : nativeHelper.devicePixelRatio(win)
+                const dpi = root.appWin ? root.appWin.windowDpi : nativeHelper.windowDpi(win)
                 return qsTr("运行环境=%1  标签=%2  dpr=%3  dpi=%4")
                       .arg(Md3WindowCapabilities.platformId)
                       .arg([qsTr("Windows"), qsTr("Linux"), qsTr("macOS")][root.platformTab])

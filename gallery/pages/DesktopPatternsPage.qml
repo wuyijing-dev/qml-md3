@@ -1,12 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Window
 import Md3
 
-Item {
+Md3Page {
     id: page
-
-    property var md3HostWindow: null
 
     property var fileTreeModel: [
         {
@@ -60,10 +57,7 @@ Item {
     property string currentStatusFilter: ""
 
     function galleryWindow() {
-        if (typeof md3HostWindow !== "undefined" && md3HostWindow
-                && md3HostWindow.galleryTableSelection !== undefined)
-            return md3HostWindow
-        const w = Window.window
+        const w = hostWindow()
         return (w && w.galleryTableSelection !== undefined) ? w : null
     }
 

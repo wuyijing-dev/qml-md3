@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Window
 import Md3
 
 Rectangle {
@@ -15,6 +14,8 @@ Rectangle {
     property bool expanded: false
     property string headerLabel: ""
     property bool showExpandToggle: true
+    /// Optional Window for system-backdrop tint (else Window.window).
+    property var hostWindow: null
 
     signal currentIndexChangedByUser(int index)
     signal destinationHovered(int index)
@@ -34,7 +35,7 @@ Rectangle {
     width: expanded ? 256 : 80
     height: parent ? parent.height : 400
     color: {
-        const w = Window.window
+        const w = Md3OverlayHost.resolveWindow(root.hostWindow, root)
         if (w && w.usesSystemBackdrop) {
             const t = w.backdropTitleTint !== undefined ? w.backdropTitleTint : 0.22
             return Qt.alpha(Md3Theme.colorScheme.surfaceContainer, Math.max(0.15, t + 0.05))

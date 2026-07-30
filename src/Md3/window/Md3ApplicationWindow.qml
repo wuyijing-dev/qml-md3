@@ -1137,6 +1137,7 @@ Window {
                     visible: root.documentTabsEnabled
                     height: visible ? implicitHeight : 0
                     unifiedWithTitleBar: root.unifiedTitleChrome
+                    hostWindow: root
                     model: root.documentTabs
                     currentIndex: root.documentTabIndex
                     closable: root.documentTabsClosable

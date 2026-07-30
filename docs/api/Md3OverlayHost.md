@@ -19,6 +19,7 @@ Resolve overlay parents and popup coordinates without each control re-implementi
 Controls may expose optional `overlayWindow`. Wired into:
 
 `Md3Menu`, `Md3MenuBar`, `Md3MenuItem`, `Md3ContextMenuArea`, `Md3DateField`, `Md3TimeField`,
-`Md3Select`, `Md3DropdownMenu`, `Md3SplitButton`, `Md3DataTable`, `Md3TreeView`, `Md3TextField` (autocomplete).
+`Md3Select`, `Md3DropdownMenu`, `Md3SplitButton`, `Md3DataTable`, `Md3TreeView`, `Md3TextField` (autocomplete),
+`Md3TrayHost`, `Md3DocumentTabBar`, `Md3NavigationRail` (`resolveWindow` / `hostWindow`).
 
 See [module-boundaries.md](../module-boundaries.md).

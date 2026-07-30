@@ -41,11 +41,14 @@ Item {
     function _popupAtCursor() {
         const h = root.helper
         const win = hostWindow
-        if (!h || !win || !win.contentItem)
+        const content = Md3OverlayHost.contentItem(win, root)
+        if (!h || !content)
             return
         root.contextMenuAboutToShow()
+        if (trayMenu.overlayWindow !== undefined)
+            trayMenu.overlayWindow = win
         const screen = h.cursorScreenPos()
-        const local = win.contentItem.mapFromGlobal(screen.x, screen.y)
+        const local = content.mapFromGlobal(screen.x, screen.y)
         trayMenu.popup(local.x, local.y)
     }
 

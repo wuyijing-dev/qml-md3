@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Window
 import Md3
 
 // Built-in body: left NavigationRail + lazy Md3PageHost (used by Md3ApplicationWindow)
@@ -154,6 +155,7 @@ Item {
             footerModel: root.railFooterModel
             currentIndex: root.railHighlightIndex
             showExpandToggle: true
+            hostWindow: Window.window
             onCurrentIndexChangedByUser: function (index) {
                 root.navigateTo(index)
             }

@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Window
 import Md3
 
 /// Win11 Explorer / browser document tabs — reorder, close, tear-off, add pop-in.
@@ -22,6 +21,8 @@ Item {
     property bool animateAdd: true
     /// When true, bar fill is transparent so a parent chrome strip paints title+tabs as one.
     property bool unifiedWithTitleBar: false
+    /// Optional Window for backdrop tint / tear-off bounds (else Window.window).
+    property var hostWindow: null
 
     signal tabActivated(int index)
     signal tabCloseRequested(int index)
@@ -40,7 +41,7 @@ Item {
     readonly property color barColor: {
         if (unifiedWithTitleBar)
             return "transparent"
-        const w = Window.window
+        const w = Md3OverlayHost.resolveWindow(root.hostWindow, root)
         const base = Md3Theme.colorScheme.surfaceContainer
         if (w && w.usesSystemBackdrop) {
             const t = w.backdropTitleTint !== undefined ? w.backdropTitleTint : 0.06
@@ -49,7 +50,7 @@ Item {
         return base
     }
     readonly property color tabSelected: {
-        const w = Window.window
+        const w = Md3OverlayHost.resolveWindow(root.hostWindow, root)
         if (w && w.usesSystemBackdrop)
             return Qt.alpha(Md3Theme.colorScheme.surface, 0.55)
         return Md3Theme.colorScheme.surface
@@ -146,7 +147,7 @@ Item {
     }
 
     function _outsideWindow(gx, gy) {
-        const w = Window.window
+        const w = Md3OverlayHost.resolveWindow(root.hostWindow, root)
         if (!w)
             return true
         return gx < w.x || gy < w.y || gx > w.x + w.width || gy > w.y + w.height

@@ -57,7 +57,9 @@ Item {
         picker.dialSelection = Md3TimePicker.Hour
 
         const target = _contentItem()
-        const p = field.mapToItem(target, 0, field.height + 4)
+        if (!target)
+            return
+        const p = Md3OverlayHost.mapToOverlay(field, 0, field.height + 4, root.overlayWindow)
         const pw = picker.implicitWidth
         const ph = picker.implicitHeight
         host.panelX = Math.max(8, Math.min(p.x, target.width - pw - 8))
