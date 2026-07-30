@@ -1,4 +1,4 @@
-"""Interactive prompts for scripts/package.py."""
+"""Interactive prompts for scripts/packaging/cli.py."""
 
 from __future__ import annotations
 

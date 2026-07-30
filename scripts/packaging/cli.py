@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Md3 packaging entry — TUI or CLI.
+"""Md3 packaging CLI — TUI or non-interactive flags.
 
 Interactive (default):
-  python scripts/package.py
+  python scripts/packaging/cli.py
 
 Non-interactive:
-  python scripts/package.py --qt-prefix D:/Qt/6.11.0/msvc2022_64 --build-type Release --shared --yes
+  python scripts/packaging/cli.py --qt-prefix D:/Qt/6.11.0/msvc2022_64 --build-type Release --shared -y
 """
 
 from __future__ import annotations
@@ -15,15 +15,16 @@ import os
 import sys
 from pathlib import Path
 
-SCRIPTS_DIR = Path(__file__).resolve().parent
-if str(SCRIPTS_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS_DIR))
+_PACKAGING_DIR = Path(__file__).resolve().parent
+_SCRIPTS_DIR = _PACKAGING_DIR.parent
+if str(_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS_DIR))
 
 from packaging.core import PackageOptions, run_package
 from packaging.qt_detect import _kit_from_prefix, discover_qt_kits, pick_default_kit
 from packaging.tui import run_interactive
 
-ROOT = SCRIPTS_DIR.parent
+ROOT = _SCRIPTS_DIR.parent
 
 
 def _env_bool(name: str, default: bool) -> bool:

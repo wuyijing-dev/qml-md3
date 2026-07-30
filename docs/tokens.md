@@ -65,7 +65,7 @@ Icon fonts (bundled locally):
 - **Material Icons Outlined** — default for `Md3Icon` (`variant: "outlined"`)
 - **Material Icons** — filled (`variant: "filled"`)
 
-Re-download: `powershell -File scripts/download-fonts.ps1`
+Re-download: `powershell -File scripts/assets/download-fonts.ps1`
 
 ## Shape scale (dp)
 

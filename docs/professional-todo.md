@@ -7,7 +7,7 @@
 **当前基线（已有）**
 
 - [x] 较大 MD3 / 桌面控件面 + Gallery
-- [x] `docs/api` 一控件一页 + `scripts/gen_api_docs.py`
+- [x] `docs/api` 一控件一页 + `scripts/docs/gen_api_docs.py`
 - [x] 打包脚本 / `find_package(Md3)` / `docs/packaging.md` / `docs/integration.md`
 - [x] 主题 token、动效、特效等级、部分 a11y 开关
 - [x] `CHANGELOG.md` · 版本号 `1.0.0`

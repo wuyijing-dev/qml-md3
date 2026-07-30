@@ -660,7 +660,7 @@ def main() -> None:
         "",
         "每个控件一份完整 API：**属性（含继承）/ 枚举 / 信号 / 方法**。",
         "",
-        "由 `scripts/gen_api_docs.py` 从 QML 源码生成；改完控件后请重跑该脚本。",
+        "由 `scripts/docs/gen_api_docs.py` 从 QML 源码生成；改完控件后请重跑该脚本。",
         "",
         "集成与 C++ 启动：[../integration.md](../integration.md) · 主题令牌：[../tokens.md](../tokens.md)",
         "",

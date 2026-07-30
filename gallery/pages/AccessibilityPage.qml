@@ -219,7 +219,7 @@ Flickable {
                 Text {
                     width: parent.width
                     wrapMode: Text.WordWrap
-                    text: qsTr("在仓库根目录运行：\npython scripts/check_a11y_qml.py --json docs/a11y-scan.json\npython scripts/check_qstr_coverage.py --json docs/i18n-scan.json\n然后复制 docs/a11y-scan.json → gallery/data/ 并重建 Gallery。")
+                    text: qsTr("在仓库根目录运行：\npython scripts/checks/check_a11y_qml.py --json docs/a11y-scan.json\npython scripts/checks/check_qstr_coverage.py --json docs/i18n-scan.json\n然后复制 docs/a11y-scan.json → gallery/data/ 并重建 Gallery。")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.pixelSize: Md3Theme.typography.bodySmall.size
                     font.family: Md3Theme.typography.fontFamily

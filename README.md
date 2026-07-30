@@ -6,7 +6,7 @@ Enterprise Material Design 3 component library for **Qt Quick / QML 6.8+**, visu
 
 - Pixel- and motion-accurate MD3 controls matching Flutter Material defaults
 - Design tokens first: color roles, typography, shape, elevation, state layers, motion
-- Per-control API docs under `docs/api/` (regenerate with `scripts/gen_api_docs.py`)
+- Per-control API docs under `docs/api/` (regenerate with `scripts/docs/gen_api_docs.py`)
 - Distributable QML module URI: `Md3`
 
 ## Requirements
@@ -59,25 +59,22 @@ Produces target **`Md3`** / **`Md3::Md3`** (static QML module `URI Md3`). Galler
 ### Linux — one-click package (shared by default + system install)
 
 ```bash
-python scripts/package.py          # interactive TUI
-./scripts/package-linux.sh         # legacy wrapper
-# stages dist/Md3, installs to /usr/local, runs ldconfig
-# static: SHARED=0 ./scripts/package-linux.sh
-# stage only: SKIP_SYSTEM_INSTALL=1 ./scripts/package-linux.sh
-CMAKE_PREFIX_PATH=$HOME/Qt/6.10.2/gcc_64 ./scripts/package-linux.sh
+python scripts/packaging/cli.py          # interactive TUI
+./scripts/packaging/package-linux.sh     # same CLI
+# static: SHARED=0 ./scripts/packaging/package-linux.sh
+# stage only: SKIP_SYSTEM_INSTALL=1 ./scripts/packaging/package-linux.sh
+CMAKE_PREFIX_PATH=$HOME/Qt/6.10.2/gcc_64 ./scripts/packaging/package-linux.sh
 ```
 
 ### Windows — one-click package (shared by default + user install)
 
 ```powershell
-python scripts/package.py
-.\scripts\package-windows.ps1
-# installs to %LOCALAPPDATA%\Md3 by default
-.\scripts\package-windows.ps1 -CmakePrefixPath "D:\Qt\6.10.2\mingw_64"
-.\scripts\package-windows.ps1 -Shared:$false          # static
-.\scripts\package-windows.ps1 -SkipSystemInstall      # stage only
-# Place next to Md3Create.exe as fixed sibling name "Md3":
-.\scripts\package-windows.ps1 -CreateBundleDir "D:\path\to\Md3CreateDir"
+python scripts/packaging/cli.py
+.\scripts\packaging\package-windows.ps1
+.\scripts\packaging\package-windows.ps1 --qt-prefix "D:\Qt\6.10.2\mingw_64" -y
+.\scripts\packaging\package-windows.ps1 --static -y
+.\scripts\packaging\package-windows.ps1 --skip-install -y
+.\scripts\packaging\package-windows.ps1 --bundle-dir "D:\path\to\Md3CreateDir" -y
 ```
 
 Both write `dist/Md3/` (`lib/`, `include/`, `lib/cmake/Md3/`, and `bin/` for Windows DLLs) plus a zip/tarball. With Md3 Create, keep this layout:
@@ -175,7 +172,7 @@ Sibling tools:
 Regenerate QML API pages after editing controls:
 
 ```powershell
-python scripts/gen_api_docs.py
+python scripts/docs/gen_api_docs.py
 ```
 
 ## Version

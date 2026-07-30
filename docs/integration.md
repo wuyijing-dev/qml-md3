@@ -40,7 +40,7 @@ See [qt-version-matrix.md](qt-version-matrix.md) for the current support scope.
 
 ## CMake — packaged `./Md3` (recommended for apps)
 
-1. Run `python scripts/package.py` (or `scripts/package-linux.sh` / `scripts/package-windows.ps1`)  
+1. Run `python scripts/packaging/cli.py` (or `scripts/packaging/package-linux.sh` / `package-windows.ps1`)  
    (default **shared**; stages `dist/Md3` and installs to `/usr/local` or `%LOCALAPPDATA%\Md3`)
 2. Copy `dist/Md3` beside your `CMakeLists.txt` as `./Md3`, **or** use the system install prefix
 3. In CMake:
@@ -178,7 +178,7 @@ By default Md3 bundles **HarmonyOS Sans SC Regular** + Material Icons. Medium/Bo
 
 - CMake: `-DMD3_BUNDLE_EXTRA_UI_FONTS=ON` to pack Medium/Bold into the module qrc
 - Or drop `HarmonyOS_SansSC_Medium.ttf` / `HarmonyOS_SansSC_Bold.ttf` next to the app under `fonts/` — `Md3::loadFonts()` picks them up if present
-- Download: `scripts/download-fonts.ps1` (Regular only); add `-ExtraWeights` for Medium/Bold
+- Download: `scripts/assets/download-fonts.ps1` (Regular only); add `-ExtraWeights` for Medium/Bold
 
 Prefer **`Md3::run` / `Md3::initialize`**. Manual qrc path: `:/md3/fonts/resources/fonts/`.
 

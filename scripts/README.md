@@ -1,52 +1,49 @@
-# Scripts layout
+# Scripts
 
-| Directory | Purpose |
-|-----------|---------|
-| [`package.py`](package.py) | **Main entry** — TUI/CLI to build & package Md3 (`python scripts/package.py`) |
-| [`packaging/`](packaging/) | Qt auto-discovery, CMake packaging core, interactive prompts |
-| [`checks/`](checks/) | Static analysis (a11y, i18n `qsTr` coverage) |
-| [`docs/`](docs/) | API doc generator (`gen_api_docs.py`) |
-| [`assets/`](assets/) | Font download and other asset helpers |
+按功能分类；根目录只保留本说明。
 
-## Packaging
+| Directory | Purpose | Entry |
+|-----------|---------|-------|
+| [`packaging/`](packaging/) | Qt 探测、CMake 打包、TUI | `python scripts/packaging/cli.py` |
+| [`checks/`](checks/) | 静态检查（a11y / qsTr） | `python scripts/checks/check_*.py` |
+| [`docs/`](docs/) | API 文档生成 | `python scripts/docs/gen_api_docs.py` |
+| [`assets/`](assets/) | 字体等资源下载 | `powershell -File scripts/assets/download-fonts.ps1` |
+
+## packaging/
 
 ```bash
-# Interactive TUI (pick Qt kit, Debug/Release, shared/static)
-python scripts/package.py
+# Interactive TUI — 选 Qt / Debug|Release / shared|static
+python scripts/packaging/cli.py
 
 # Non-interactive
-python scripts/package.py --qt-prefix D:/Qt/6.11.0/msvc2022_64 --build-type Release --shared -y
+python scripts/packaging/cli.py --qt-prefix D:/Qt/6.11.0/msvc2022_64 --build-type Release --shared -y
 
-# List detected Qt installations
-python scripts/package.py --list-qt
+# List kits
+python scripts/packaging/cli.py --list-qt
+
+# Platform wrappers (same CLI)
+./scripts/packaging/package-linux.sh
+.\scripts\packaging\package-windows.ps1
 ```
 
-Legacy wrappers (forward to `package.py`):
+Env (CI): `CMAKE_PREFIX_PATH`, `BUILD_TYPE`, `SHARED`, `SKIP_SYSTEM_INSTALL`, `BUILD_DIR`, `MAKE_TARBALL`, `GENERATOR`.
 
-- `scripts/package-linux.sh`
-- `scripts/package-windows.ps1`
-
-Environment variables still supported for CI: `CMAKE_PREFIX_PATH`, `BUILD_TYPE`, `SHARED`, `SKIP_SYSTEM_INSTALL`, `BUILD_DIR`, `MAKE_TARBALL`.
-
-## Quality checks
+## checks/
 
 ```bash
 python scripts/checks/check_a11y_qml.py --json docs/a11y-scan.json
 python scripts/checks/check_qstr_coverage.py --json docs/i18n-scan.json
 ```
 
-Shims at `scripts/check_*.py` remain for older docs/commands.
-
-## API docs
+## docs/
 
 ```bash
 python scripts/docs/gen_api_docs.py
-# or: python scripts/gen_api_docs.py
 ```
 
-## Assets
+## assets/
 
 ```powershell
 powershell -File scripts/assets/download-fonts.ps1
-# or: powershell -File scripts/download-fonts.ps1
+powershell -File scripts/assets/download-fonts.ps1 -ExtraWeights
 ```

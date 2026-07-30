@@ -8,45 +8,30 @@ Default packaging mode is **shared** (`.so` / `.dll`). Use `SHARED=0` / `-Shared
 
 | Platform | Script | Default |
 |----------|--------|---------|
-| Linux | [`scripts/package.py`](package.py) (`package-linux.sh` wrapper) | shared → stage `dist/Md3/` + install `/usr/local` + tarball |
-| Windows | [`scripts/package.py`](package.py) (`package-windows.ps1` wrapper) | shared → stage `dist/Md3/` + install `%LOCALAPPDATA%\Md3` + zip |
+| All | [`scripts/packaging/cli.py`](../scripts/packaging/cli.py) | TUI/CLI package (shared → `dist/Md3/`) |
+| Linux | [`scripts/packaging/package-linux.sh`](../scripts/packaging/package-linux.sh) | wrapper → `cli.py` + install `/usr/local` + tarball |
+| Windows | [`scripts/packaging/package-windows.ps1`](../scripts/packaging/package-windows.ps1) | wrapper → `cli.py` + install `%LOCALAPPDATA%\Md3` + zip |
 
 ### Linux
 
 ```bash
 cd /path/to/QML_MD3
-# Interactive TUI (recommended): auto-detect Qt, pick Debug/Release & shared/static
-python scripts/package.py
-
-# Legacy wrapper / env vars still work:
-./scripts/package-linux.sh
-# shared (default): stages dist/Md3, installs to /usr/local, runs ldconfig
-# static only:
-SHARED=0 ./scripts/package-linux.sh
-# stage only (no system install):
-SKIP_SYSTEM_INSTALL=1 ./scripts/package-linux.sh
-# custom system prefix:
-SYS_PREFIX=$HOME/.local ./scripts/package-linux.sh
-CMAKE_PREFIX_PATH=$HOME/Qt/6.10.2/gcc_64 ./scripts/package-linux.sh
+python scripts/packaging/cli.py
+./scripts/packaging/package-linux.sh
+SHARED=0 ./scripts/packaging/package-linux.sh
+SKIP_SYSTEM_INSTALL=1 ./scripts/packaging/package-linux.sh
+CMAKE_PREFIX_PATH=$HOME/Qt/6.10.2/gcc_64 ./scripts/packaging/package-linux.sh
 ```
 
 ### Windows
 
 ```powershell
 cd D:\path\to\QML_MD3
-# Interactive TUI (recommended)
-python scripts/package.py
-
-# Legacy wrapper:
-.\scripts\package-windows.ps1 -CmakePrefixPath "D:\Qt\6.10.2\mingw_64"
-# static:
-.\scripts\package-windows.ps1 -Shared:$false
-# stage only:
-.\scripts\package-windows.ps1 -SkipSystemInstall
-# custom user install:
-.\scripts\package-windows.ps1 -InstallPrefix "$env:LOCALAPPDATA\Md3"
-# Copy next to Md3Create as fixed sibling name:
-.\scripts\package-windows.ps1 -CreateBundleDir "D:\path\to\Md3CreateDir"
+python scripts/packaging/cli.py
+.\scripts\packaging\package-windows.ps1 --qt-prefix "D:\Qt\6.10.2\mingw_64" -y
+.\scripts\packaging\package-windows.ps1 --static -y
+.\scripts\packaging\package-windows.ps1 --skip-install -y
+.\scripts\packaging\package-windows.ps1 --bundle-dir "D:\path\to\Md3CreateDir" -y
 ```
 
 ## Package layout

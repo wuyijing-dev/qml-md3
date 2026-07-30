@@ -2,7 +2,7 @@
 """Scan Md3 QML for interactive controls that may lack Accessible.name/role.
 
 Usage:
-  python scripts/check_a11y_qml.py
+  python scripts/checks/check_a11y_qml.py
   python scripts/checks/check_a11y_qml.py --json docs/a11y-scan.json
 
 Exit 0 always (report); use --strict to exit 1 when findings > 0.

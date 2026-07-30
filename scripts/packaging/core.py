@@ -214,7 +214,7 @@ def _find_lib(stage: Path, shared: bool) -> Path | None:
 
 
 def _write_readme(opt: PackageOptions, stage: Path, shared_label: str) -> None:
-    script_name = "scripts/package.py"
+    script_name = "scripts/packaging/cli.py"
     if platform.system() == "Windows":
         layout = (
             "| `lib\\` / `bin\\` | Core library + plugin |\n"
