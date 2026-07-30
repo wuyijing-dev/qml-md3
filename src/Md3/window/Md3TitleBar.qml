@@ -67,6 +67,9 @@ Rectangle {
     property alias centerContent: middleFlow.content
     default property alias content: middleFlow.content
 
+    Accessible.role: Accessible.TitleBar
+    Accessible.name: title.length ? title : qsTr("Title bar")
+
     signal leadingClicked()
     signal themeToggled()
     signal performanceClicked()

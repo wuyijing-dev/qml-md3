@@ -48,6 +48,9 @@ Item {
     readonly property bool multiMode: mode === Md3PathField.OpenFiles
     readonly property var breadcrumbModel: _splitPath(path)
 
+    Accessible.role: Accessible.EditableText
+    Accessible.name: accessibleName.length ? accessibleName : (label.length ? label : (dialogTitle.length ? dialogTitle : qsTr("Path field")))
+
     function browse() {
         if (!controlEnabled)
             return

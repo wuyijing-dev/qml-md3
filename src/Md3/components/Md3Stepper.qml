@@ -26,6 +26,9 @@ Item {
     readonly property bool isFirst: currentStep <= 0
     readonly property bool isLast: currentStep >= Math.max(0, model.length - 1)
 
+    Accessible.role: Accessible.Grouping
+    Accessible.name: qsTr("Stepper")
+
     function goNext() {
         if (isLast) {
             finished()

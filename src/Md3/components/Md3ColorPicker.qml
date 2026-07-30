@@ -20,6 +20,9 @@ Item {
     implicitWidth: 280
     implicitHeight: col.implicitHeight
 
+    Accessible.role: Accessible.ComboBox
+    Accessible.name: qsTr("Color picker")
+
     function _emit() {
         const c = Qt.hsla(_h, _s, _l, 1)
         color = c

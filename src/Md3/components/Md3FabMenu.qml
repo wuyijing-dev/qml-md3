@@ -28,6 +28,9 @@ Item {
     height: implicitHeight
     clip: false
 
+    Accessible.role: Accessible.Grouping
+    Accessible.name: qsTr("Floating action menu")
+
     function toggle() {
         if (!enabled)
             return

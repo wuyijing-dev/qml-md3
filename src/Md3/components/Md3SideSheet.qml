@@ -30,6 +30,9 @@ Item {
     z: 960
     clip: true
 
+    Accessible.role: Accessible.Dialog
+    Accessible.name: title.length ? title : qsTr("Side sheet")
+
     function dismiss() {
         open = false
         dismissed()

@@ -39,6 +39,9 @@ Item {
     signal cancelled()
     signal rangeChanged(date start, date end)
 
+    Accessible.role: Accessible.ComboBox
+    Accessible.name: title.length ? title : qsTr("Date range picker")
+
     readonly property date today: {
         const n = new Date()
         return new Date(n.getFullYear(), n.getMonth(), n.getDate())

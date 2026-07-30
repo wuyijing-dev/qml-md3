@@ -28,6 +28,8 @@ Item {
 
     anchors.fill: parent
     z: 10000
+    Accessible.role: Accessible.Pane
+    Accessible.name: qsTr("Context menu area")
 
     function popupAt(x, y) {
         if (!enabled || !contextMenu)

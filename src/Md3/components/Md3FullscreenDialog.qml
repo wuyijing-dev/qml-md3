@@ -16,6 +16,8 @@ Item {
     anchors.fill: parent
     visible: open || panel.y < height
     z: 1000
+    Accessible.role: Accessible.Dialog
+    Accessible.name: title.length ? title : qsTr("Fullscreen dialog")
 
     Rectangle {
         anchors.fill: parent

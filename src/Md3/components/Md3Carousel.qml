@@ -27,6 +27,9 @@ Item {
     height: implicitHeight
     width: implicitWidth
 
+    Accessible.role: Accessible.List
+    Accessible.name: qsTr("Carousel")
+
     readonly property real pageWidth: Math.max(120, width * (1 - peekRatio) - spacing)
 
     onCurrentIndexChanged: {

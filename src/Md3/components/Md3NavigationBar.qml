@@ -16,6 +16,9 @@ Rectangle {
     height: 80
     color: Md3Theme.colorScheme.surfaceContainer
 
+    Accessible.role: Accessible.PageTabList
+    Accessible.name: qsTr("Navigation bar")
+
     // Shared sliding active indicator (behind destinations)
     Rectangle {
         id: activeIndicator

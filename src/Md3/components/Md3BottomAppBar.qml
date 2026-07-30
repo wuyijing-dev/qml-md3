@@ -10,6 +10,9 @@ Rectangle {
     signal actionClicked(int index)
     signal fabClicked()
 
+    Accessible.role: Accessible.Pane
+    Accessible.name: qsTr("Bottom app bar")
+
     width: parent ? parent.width : 360
     height: 80
     color: Md3Theme.colorScheme.surfaceContainer

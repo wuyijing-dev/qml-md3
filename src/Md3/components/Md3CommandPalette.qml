@@ -17,6 +17,8 @@ Item {
     anchors.fill: parent
     visible: open || panel.opacity > 0.01 || scrim.opacity > 0.01
     z: 4000
+    Accessible.role: Accessible.Dialog
+    Accessible.name: placeholder.length ? placeholder : qsTr("Command palette")
 
     property string query: ""
     property int highlightIndex: 0

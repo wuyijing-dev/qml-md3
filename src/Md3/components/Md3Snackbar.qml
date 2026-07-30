@@ -19,6 +19,9 @@ Item {
     opacity: open ? 1 : 0
     z: 1200
 
+    Accessible.role: Accessible.Alert
+    Accessible.name: text.length ? text : qsTr("Snackbar")
+
     function show(message) {
         if (message !== undefined)
             text = message

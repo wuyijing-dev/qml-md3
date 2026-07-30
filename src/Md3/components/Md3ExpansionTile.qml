@@ -13,6 +13,9 @@ Column {
     width: parent ? parent.width : 320
     spacing: 0
 
+    Accessible.role: Accessible.Button
+    Accessible.name: title.length ? title : qsTr("Expansion tile")
+
     Md3ListTile {
         width: parent.width
         title: root.title

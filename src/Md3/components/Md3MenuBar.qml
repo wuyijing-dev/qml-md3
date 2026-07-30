@@ -14,6 +14,9 @@ Rectangle {
     width: parent ? parent.width : 400
     color: Md3Theme.colorScheme.surfaceContainer
 
+    Accessible.role: Accessible.MenuBar
+    Accessible.name: qsTr("Menu bar")
+
     function _kidsOf(entry) {
         if (!entry)
             return []

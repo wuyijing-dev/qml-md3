@@ -32,6 +32,9 @@ Rectangle {
     readonly property real _leftZoneWidth: Math.max(120, width * 0.34)
     readonly property real _centerZoneWidth: Math.min(280, Math.max(80, width * 0.28))
 
+    Accessible.role: Accessible.Pane
+    Accessible.name: displayText.length ? displayText : (centerText.length ? centerText : qsTr("Status bar"))
+
     function showMessage(message, timeout) {
         const ms = (timeout !== undefined && timeout > 0) ? timeout : 4000
         _transientText = message

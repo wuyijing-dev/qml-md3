@@ -12,6 +12,9 @@ Item {
     property color surplusColor: Md3Theme.colorScheme.surfaceContainerHighest
     property color surplusContentColor: Md3Theme.colorScheme.colorOnSurfaceVariant
 
+    Accessible.role: Accessible.Grouping
+    Accessible.name: qsTr("Avatar group")
+
     signal avatarClicked(int index)
 
     readonly property real avatarSize: {

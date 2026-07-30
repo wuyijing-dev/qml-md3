@@ -18,6 +18,9 @@ Item {
     width: 280
     height: 56
 
+    Accessible.role: Accessible.PopupMenu
+    Accessible.name: label.length ? label : (text.length ? text : qsTr("Dropdown menu"))
+
     readonly property string displayText: {
         if (currentIndex >= 0 && currentIndex < model.length) {
             const m = model[currentIndex]

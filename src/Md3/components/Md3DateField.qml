@@ -28,6 +28,9 @@ Item {
     width: implicitWidth
     height: implicitHeight
 
+    Accessible.role: Accessible.EditableText
+    Accessible.name: accessibleName.length ? accessibleName : (label.length ? label : qsTr("Date field"))
+
     function openPicker() {
         if (!controlEnabled)
             return

@@ -14,6 +14,8 @@ Item {
     anchors.fill: parent
     visible: open
     z: 980
+    Accessible.role: Accessible.EditableText
+    Accessible.name: text.length ? text : qsTr("Search view")
 
     Rectangle {
         anchors.fill: parent

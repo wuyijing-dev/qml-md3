@@ -42,6 +42,9 @@ Rectangle {
     }
     property string icon: defaultIcon
 
+    Accessible.role: Accessible.Alert
+    Accessible.name: title.length ? title : (message.length ? message : qsTr("Info bar"))
+
     color: Md3Theme.colorScheme.withOpacity(accent, 0.12)
 
     Rectangle {

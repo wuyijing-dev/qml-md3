@@ -12,6 +12,9 @@ Item {
     width: host.childrenRect.width
     height: host.childrenRect.height
 
+    Accessible.role: Accessible.StaticText
+    Accessible.name: text.length ? text : qsTr("Tooltip")
+
     Item {
         id: host
         anchors.fill: parent

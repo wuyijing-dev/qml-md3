@@ -26,6 +26,9 @@ Item {
     z: 950
     clip: true // keep drawer/scrim inside host (e.g. gallery content pane)
 
+    Accessible.role: Accessible.Pane
+    Accessible.name: title.length ? title : qsTr("Navigation drawer")
+
     function destinationY(index) {
         return index * (destinationHeight + destinationSpacing)
     }

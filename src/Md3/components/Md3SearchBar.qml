@@ -24,6 +24,9 @@ Item {
     width: parent ? Math.min(parent.width, 720) : 360
     height: 56
 
+    Accessible.role: Accessible.EditableText
+    Accessible.name: placeholderText.length ? placeholderText : qsTr("Search bar")
+
     Rectangle {
         anchors.fill: parent
         radius: Md3Theme.shape.full

@@ -32,6 +32,9 @@ Item {
     width: parent ? parent.width : 400
     clip: false
 
+    Accessible.role: Accessible.PageTabList
+    Accessible.name: qsTr("Document tabs")
+
     readonly property color barColor: {
         const w = Window.window
         if (w && w.usesSystemBackdrop) {

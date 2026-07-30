@@ -39,6 +39,9 @@ Item {
     signal cancelled()
     signal dateClicked(date date)
 
+    Accessible.role: Accessible.ComboBox
+    Accessible.name: title.length ? title : qsTr("Date picker")
+
     readonly property date today: {
         const n = new Date()
         return new Date(n.getFullYear(), n.getMonth(), n.getDate())

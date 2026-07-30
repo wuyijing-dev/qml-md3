@@ -35,6 +35,10 @@ Item {
     property var columnFilters: ({})
     property bool showFilterBar: false
     property string filterPlaceholder: qsTr("Search table…")
+
+    Accessible.role: Accessible.Table
+    Accessible.name: qsTr("Data table")
+
     property bool serverSidePagination: false
     property int serverTotalCount: 0
     property bool keyboardNavigationEnabled: true

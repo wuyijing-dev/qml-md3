@@ -58,6 +58,8 @@ Window {
     visible: false
     title: qsTr("Dialog")
     modality: root.dialogModality
+    Accessible.role: Accessible.Dialog
+    Accessible.name: title.length ? title : qsTr("Dialog")
     transientParent: {
         if (owner && owner instanceof Window)
             return owner

@@ -27,6 +27,9 @@ Item {
     signal cancelled()
     signal timeChanged(int hour, int minute)
 
+    Accessible.role: Accessible.ComboBox
+    Accessible.name: title.length ? title : qsTr("Time picker")
+
     readonly property bool isPm: hour >= 12
     readonly property int displayHour12: {
         const h = hour % 12

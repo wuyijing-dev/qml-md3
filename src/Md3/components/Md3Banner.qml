@@ -15,6 +15,9 @@ Rectangle {
     signal secondaryClicked()
     signal closed()
 
+    Accessible.role: Accessible.Alert
+    Accessible.name: text.length ? text : qsTr("Banner")
+
     visible: open
     width: parent ? parent.width : 400
     implicitHeight: Math.max(68, Math.max(leadIcon.height, message.implicitHeight, actions.implicitHeight) + 32)

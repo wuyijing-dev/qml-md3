@@ -29,6 +29,9 @@ Item {
     signal fetchChildren(var node, var path)
     signal contextMenuRequested(int flatIndex, var node, real globalX, real globalY)
 
+    Accessible.role: Accessible.Tree
+    Accessible.name: qsTr("Tree view")
+
     readonly property real _chromeH: {
         if (!showFilter && !showExpandControls)
             return 0

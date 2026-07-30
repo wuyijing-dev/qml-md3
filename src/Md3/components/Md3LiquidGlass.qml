@@ -80,6 +80,9 @@ Item {
     z: dragging ? 20 : 1
     clip: false
 
+    Accessible.role: Accessible.Pane
+    Accessible.name: qsTr("Liquid glass")
+
     transform: Scale {
         origin.x: root.width * 0.5
         origin.y: root.height * 0.5

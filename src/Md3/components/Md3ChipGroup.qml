@@ -25,6 +25,9 @@ Item {
     height: implicitHeight
     width: implicitWidth
 
+    Accessible.role: Accessible.Grouping
+    Accessible.name: qsTr("Chip group")
+
     function isSelected(index) {
         if (selectionMode === Md3ChipGroup.Single)
             return currentIndex === index

@@ -23,6 +23,9 @@ Item {
     readonly property real _bottom: usePlotMargins && chart
                                     ? (chart.height - chart.plotBottom) : 0
 
+    Accessible.role: Accessible.Pane
+    Accessible.name: probeTitle.length ? probeTitle : qsTr("Chart interaction")
+
     // Crosshair
     Rectangle {
         visible: root.showCrosshair && chart && chart.probeActive && chart.showProbe

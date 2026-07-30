@@ -39,6 +39,9 @@ Item {
         }
     }
 
+    Accessible.role: Accessible.Pane
+    Accessible.name: title.length ? title : qsTr("Card")
+
     function _actionVariant(e) {
         if (!e || e.variant === undefined)
             return Md3Button.Outlined

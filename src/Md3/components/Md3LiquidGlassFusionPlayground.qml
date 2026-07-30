@@ -23,6 +23,9 @@ Item {
     implicitHeight: 420
     clip: true
 
+    Accessible.role: Accessible.Pane
+    Accessible.name: qsTr("Liquid glass playground")
+
     function _bodyFromRect(x, y, w, h) {
         return Qt.vector4d((x + w * 0.5) / root.width,
                              (y + h * 0.5) / root.height,

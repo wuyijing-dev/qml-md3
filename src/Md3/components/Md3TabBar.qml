@@ -26,6 +26,9 @@ Item {
     // Do not bind height to parent.height — that fights ColumnLayout and overlaps siblings.
     width: parent && parent.width > 0 ? parent.width : implicitWidth
 
+    Accessible.role: Accessible.PageTabList
+    Accessible.name: qsTr("Tab bar")
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 0

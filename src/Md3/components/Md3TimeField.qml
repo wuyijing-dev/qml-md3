@@ -29,6 +29,9 @@ Item {
     width: implicitWidth
     height: implicitHeight
 
+    Accessible.role: Accessible.EditableText
+    Accessible.name: accessibleName.length ? accessibleName : (label.length ? label : qsTr("Time field"))
+
     function formatTime(h, m) {
         const hh = Math.max(0, Math.min(23, h | 0))
         const mm = Math.max(0, Math.min(59, m | 0))

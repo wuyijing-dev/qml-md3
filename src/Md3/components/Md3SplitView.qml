@@ -28,6 +28,9 @@ Item {
     }
     readonly property real _pane2Size: Math.max(0, _span - _handle - _pane1Size)
 
+    Accessible.role: Accessible.Pane
+    Accessible.name: qsTr("Split view")
+
     Item {
         id: paneHost
         anchors.fill: parent

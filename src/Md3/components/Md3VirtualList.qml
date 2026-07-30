@@ -20,6 +20,9 @@ Item {
     implicitWidth: 320
     implicitHeight: 280
 
+    Accessible.role: Accessible.List
+    Accessible.name: emptyText.length ? emptyText : qsTr("Virtual list")
+
     function scrollToIndex(index) {
         if (index < 0 || index >= (model ? model.length : 0))
             return

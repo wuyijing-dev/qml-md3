@@ -43,6 +43,9 @@ Item {
     width: parent ? parent.width : implicitWidth
     height: implicitHeight
 
+    Accessible.role: Accessible.EditableText
+    Accessible.name: label.length ? label : (placeholderText.length ? placeholderText : qsTr("Key sequence field"))
+
     function normalizeSeq(s) {
         if (s === undefined || s === null)
             return ""

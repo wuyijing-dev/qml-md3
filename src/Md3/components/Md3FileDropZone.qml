@@ -38,6 +38,9 @@ Item {
         return qsTr("%1 files").arg(droppedItems.length)
     }
 
+    Accessible.role: Accessible.Grouping
+    Accessible.name: title.length ? title : qsTr("File drop zone")
+
     function _urlToLocal(u) {
         let p = u ? u.toString() : ""
         if (p.indexOf("file:///") === 0) {

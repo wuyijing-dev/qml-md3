@@ -32,6 +32,9 @@ Item {
         return ""
     }
 
+    Accessible.role: Accessible.MenuItem
+    Accessible.name: text.length ? text : qsTr("Menu item")
+
     function ownerMenu() {
         let p = parent
         while (p) {

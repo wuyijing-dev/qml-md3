@@ -27,6 +27,9 @@ Rectangle {
     height: barHeight
     color: Md3Theme.colorScheme.surface
 
+    Accessible.role: Accessible.Pane
+    Accessible.name: title.length ? title : qsTr("Top app bar")
+
     Row {
         id: topRow
         anchors.top: parent.top

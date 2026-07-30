@@ -43,6 +43,9 @@ Item {
     opacity: (_shown || _hovered || _dragging || !autoHide) ? 1 : 0
     z: 50
 
+    Accessible.role: Accessible.ScrollBar
+    Accessible.name: qsTr("Scroll bar")
+
     Behavior on opacity {
         NumberAnimation {
             duration: Md3Motion.effectsDuration

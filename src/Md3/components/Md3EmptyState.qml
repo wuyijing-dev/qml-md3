@@ -17,6 +17,9 @@ Item {
     implicitWidth: Math.min(parent ? parent.width : maxContentWidth, maxContentWidth + 48)
     implicitHeight: col.implicitHeight + 48
 
+    Accessible.role: Accessible.StaticText
+    Accessible.name: title.length ? title : qsTr("Empty state")
+
     Column {
         id: col
         anchors.centerIn: parent

@@ -19,6 +19,8 @@ Item {
     anchors.fill: parent
     visible: open || sheet.y < height - 0.5 || scrim.opacity > 0.01
     z: 900
+    Accessible.role: Accessible.Dialog
+    Accessible.name: title.length ? title : qsTr("Bottom sheet")
 
     Rectangle {
         id: scrim

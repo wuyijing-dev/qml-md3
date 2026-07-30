@@ -20,6 +20,9 @@ Item {
     implicitHeight: 48
     height: implicitHeight
 
+    Accessible.role: Accessible.Grouping
+    Accessible.name: qsTr("Pagination")
+
     function goTo(page) {
         if (!enabled)
             return
