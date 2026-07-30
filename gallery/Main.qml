@@ -118,13 +118,6 @@ Md3ApplicationWindow {
 
             Md3Button {
                 anchors.verticalCenter: parent.verticalCenter
-                text: qsTr("Back")
-                variant: Md3Button.Text
-                enabled: window.canGoBack
-                onClicked: window.goBack()
-            }
-            Md3Button {
-                anchors.verticalCenter: parent.verticalCenter
                 text: qsTr("Reload")
                 variant: Md3Button.Text
                 onClicked: window.reloadCurrentPage()
@@ -403,6 +396,9 @@ Md3ApplicationWindow {
             collapseWidth: 960
             minTitleWidth: 100
             maxTitleWidth: 200
+            unifiedChrome: window.unifiedTitleChrome
+            showBackButton: window.showTitleBackButton
+            backEnabled: window.canGoBack
             showThemeToggle: true
             showTourButton: true
             showAboutButton: window.showAboutButton

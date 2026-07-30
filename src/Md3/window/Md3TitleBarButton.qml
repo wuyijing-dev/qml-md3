@@ -9,6 +9,7 @@ Item {
     property string accessibleName: icon
     property bool checked: false
     property bool destructive: false
+    property bool enabled: true
     property real buttonWidth: 40
     property real buttonHeight: 28
     property real iconSize: 14
@@ -19,14 +20,18 @@ Item {
     height: buttonHeight
     implicitWidth: buttonWidth
     implicitHeight: buttonHeight
+    opacity: enabled ? 1 : 0.38
     Accessible.name: accessibleName
     Accessible.role: Accessible.Button
-    Accessible.onPressAction: root.clicked()
+    Accessible.onPressAction: {
+        if (root.enabled)
+            root.clicked()
+    }
 
     Rectangle {
         anchors.fill: parent
         color: {
-            if (!mouse.containsMouse && !mouse.pressed && !root.checked)
+            if (!root.enabled || (!mouse.containsMouse && !mouse.pressed && !root.checked))
                 return "transparent"
             if (root.destructive && mouse.containsMouse)
                 return mouse.pressed ? Md3Theme.colorScheme.error
@@ -57,8 +62,9 @@ Item {
     MouseArea {
         id: mouse
         anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
+        enabled: root.enabled
+        hoverEnabled: root.enabled
+        cursorShape: root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
         onClicked: root.clicked()
     }
 }

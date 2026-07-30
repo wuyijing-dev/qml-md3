@@ -19,6 +19,10 @@ import Md3
 | `subtitle` | `string` | `""` | read/write | `Md3TitleBar` | Deprecated — Win title bars are single-line; kept for API compat, not shown |
 | `leadingIcon` | `string` | `""` | read/write | `Md3TitleBar` | — |
 | `showLeading` | `bool` | `leadingIcon.length > 0` | read/write | `Md3TitleBar` | — |
+| `showBackButton` | `bool` | `false` | read/write | `Md3TitleBar` | Page-stack back (left of icon/title) |
+| `backEnabled` | `bool` | `true` | read/write | `Md3TitleBar` | — |
+| `backIcon` | `string` | `"arrow_back"` | read/write | `Md3TitleBar` | — |
+| `unifiedChrome` | `bool` | `false` | read/write | `Md3TitleBar` | Transparent fill; parent paints title+tabs strip |
 | `showTitle` | `bool` | `true` | read/write | `Md3TitleBar` | — |
 | `showAppIcon` | `bool` | `true` | read/write | `Md3TitleBar` | — |
 | `showThemeToggle` | `bool` | `true` | read/write | `Md3TitleBar` | — |
@@ -67,6 +71,7 @@ import Md3
 | Signal | Defined in | Description |
 |--------|------------|-------------|
 | `leadingClicked()` | `Md3TitleBar` | — |
+| `backClicked()` | `Md3TitleBar` | Page-stack back |
 | `themeToggled()` | `Md3TitleBar` | — |
 | `performanceClicked()` | `Md3TitleBar` | — |
 | `tourClicked()` | `Md3TitleBar` | — |

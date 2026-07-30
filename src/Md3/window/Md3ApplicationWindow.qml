@@ -131,6 +131,8 @@ Window {
     /// Drag a tab outside the window to spawn a peer `Md3TabWindow`.
     property bool documentTabsTearOff: true
     property bool documentTabsShowAdd: true
+    /// Paint title bar + document tabs as one chrome strip (same surfaceContainer).
+    property bool unifiedTitleChrome: true
     property alias documentTabBar: docTabBar
     property bool _docTabSyncing: false
     /// Keep tear-off windows alive (createObject parent is null).
@@ -153,9 +155,19 @@ Window {
     signal documentTabTearOff(int index, real globalX, real globalY)
 
     readonly property bool usesDestinations: destinations && destinations.length > 0
+    /// Title-bar back when navigation rail + destinations shell are active.
+    property bool showTitleBackButton: navigationRail && usesDestinations
     readonly property bool canGoBack: usesDestinations && windowBody.canGoBack
     readonly property int navDepth: usesDestinations ? windowBody.navDepth : 0
     readonly property var routeParams: usesDestinations ? windowBody.routeParams : ({})
+    readonly property color chromeStripColor: {
+        const base = Md3Theme.colorScheme.surfaceContainer
+        if (usesSystemBackdrop) {
+            const t = backdropTitleTint !== undefined ? backdropTitleTint : 0.06
+            return Qt.alpha(base, t)
+        }
+        return base
+    }
 
     property int layoutMode: Md3ContainerBody.Fit
     default property alias content: customContent.content
@@ -430,14 +442,7 @@ Window {
     /// Access native helper (signals: thumbBarButtonClicked, trayActivated, dpiChanged).
     readonly property alias windowNative: windowHelper
 
-    readonly property real chromeTop: {
-        let h = 0
-        if (showTitleBar && customChrome)
-            h += titleBarLoader.height
-        if (documentTabsEnabled && docTabBar.visible)
-            h += docTabBar.height
-        return h
-    }
+    readonly property real chromeTop: chromeHost.height
     readonly property real edge: 6
     readonly property bool canResize: customChrome && Md3WindowCapabilities.systemResize
                                       && !isMaximizedLike
@@ -972,17 +977,34 @@ Window {
                 z: 50
             }
 
-            Loader {
-                id: titleBarLoader
+            Item {
+                id: chromeHost
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                active: root.showTitleBar && root.customChrome
-                height: active && item ? item.height : 0
+                height: (titleBarLoader.active ? titleBarLoader.height : 0)
+                        + (docTabBar.visible ? docTabBar.height : 0)
                 z: 100
-                sourceComponent: root.titleBar !== null ? root.titleBar : defaultTitleBar
-                onLoaded: {
-                    if (item) {
+
+                Rectangle {
+                    anchors.fill: parent
+                    visible: root.unifiedTitleChrome
+                    color: root.chromeStripColor
+                    topLeftRadius: root.effectiveRadius
+                    topRightRadius: root.effectiveRadius
+                }
+
+                Loader {
+                    id: titleBarLoader
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    active: root.showTitleBar && root.customChrome
+                    height: active && item ? item.height : 0
+                    sourceComponent: root.titleBar !== null ? root.titleBar : defaultTitleBar
+                    onLoaded: {
+                        if (!item)
+                            return
                         if (item.targetWindow !== undefined)
                             item.targetWindow = root
                         if (item.windowHelper !== undefined)
@@ -994,88 +1016,107 @@ Window {
                             item.title = root.title
                         if (item.appIcon !== undefined && root.windowIcon.toString().length > 0)
                             item.appIcon = Qt.binding(function () { return root.windowIcon })
-                        // Custom title bars: only sync checked state if they already enable the toggle.
                         if (item.performanceChecked !== undefined && item.showPerformanceToggle)
                             item.performanceChecked = Qt.binding(function () {
                                 return root.showPerformanceOverlay
                             })
+                        if (item.unifiedChrome !== undefined)
+                            item.unifiedChrome = Qt.binding(function () {
+                                return root.unifiedTitleChrome
+                            })
+                        if (item.showBackButton !== undefined)
+                            item.showBackButton = Qt.binding(function () {
+                                return root.showTitleBackButton
+                            })
+                        if (item.backEnabled !== undefined)
+                            item.backEnabled = Qt.binding(function () {
+                                return root.canGoBack
+                            })
                     }
                 }
-            }
 
-            Component {
-                id: defaultTitleBar
-                Md3TitleBar {
-                    title: root.title
-                    appIcon: root.windowIcon
-                    showAppIcon: true
-                    showPin: root.showPinButton
-                    pinned: root.pinned
-                    showPerformanceToggle: root.showPerformanceButton
-                    performanceChecked: root.showPerformanceOverlay
-                    showAboutButton: root.showAboutButton
-                    aboutAppName: root.aboutAppName
-                    aboutVersion: root.aboutVersion
-                    aboutOrganization: root.aboutOrganization
-                    aboutText: root.aboutText
-                    aboutIcon: root.aboutIcon
-                    aboutContent: root.aboutContent
-                    targetWindow: root
-                    // Use windowNative — `windowHelper: windowHelper` self-binds (same name as id).
-                    windowHelper: root.windowNative
-                    cornerRadius: root.effectiveRadius
-                    preferredHeight: 28
-                    barHeight: 28
-                    leadingInset: root.windowNative.trafficLightsInset > 0
-                                  ? root.windowNative.trafficLightsInset
-                                  : Md3WindowCapabilities.trafficLightsInset
-                    onPinToggled: function (onTop) { root.pinned = onTop }
-                    onPerformanceClicked: root.showPerformanceOverlay = !root.showPerformanceOverlay
+                Connections {
+                    target: titleBarLoader.item
+                    enabled: titleBarLoader.item !== null
+                    function onBackClicked() { root.goBack() }
                 }
-            }
 
-            Md3DocumentTabBar {
-                id: docTabBar
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: titleBarLoader.bottom
-                z: 90
-                visible: root.documentTabsEnabled
-                height: visible ? implicitHeight : 0
-                model: root.documentTabs
-                currentIndex: root.documentTabIndex
-                closable: root.documentTabsClosable
-                tearOffEnabled: root.documentTabsTearOff
-                showAddButton: root.documentTabsShowAdd
-                onCurrentIndexChanged: {
-                    if (root.documentTabIndex !== currentIndex)
-                        root.documentTabIndex = currentIndex
+                Component {
+                    id: defaultTitleBar
+                    Md3TitleBar {
+                        title: root.title
+                        appIcon: root.windowIcon
+                        showAppIcon: true
+                        showPin: root.showPinButton
+                        pinned: root.pinned
+                        showPerformanceToggle: root.showPerformanceButton
+                        performanceChecked: root.showPerformanceOverlay
+                        showAboutButton: root.showAboutButton
+                        aboutAppName: root.aboutAppName
+                        aboutVersion: root.aboutVersion
+                        aboutOrganization: root.aboutOrganization
+                        aboutText: root.aboutText
+                        aboutIcon: root.aboutIcon
+                        aboutContent: root.aboutContent
+                        targetWindow: root
+                        windowHelper: root.windowNative
+                        cornerRadius: root.effectiveRadius
+                        preferredHeight: 28
+                        barHeight: 28
+                        unifiedChrome: root.unifiedTitleChrome
+                        showBackButton: root.showTitleBackButton
+                        backEnabled: root.canGoBack
+                        leadingInset: root.windowNative.trafficLightsInset > 0
+                                      ? root.windowNative.trafficLightsInset
+                                      : Md3WindowCapabilities.trafficLightsInset
+                        onPinToggled: function (onTop) { root.pinned = onTop }
+                        onPerformanceClicked: root.showPerformanceOverlay = !root.showPerformanceOverlay
+                    }
                 }
-                onTabActivated: function (index) {
-                    if (root.documentTabsManaged)
-                        root.activateTab(index)
-                    root.documentTabActivated(index)
-                }
-                onTabCloseRequested: function (index) {
-                    if (root.documentTabsManaged)
-                        root.closeTab(index)
-                    root.documentTabCloseRequested(index)
-                }
-                onTabAddRequested: {
-                    if (root.documentTabsManaged)
-                        root.addTab(root.currentIndex)
-                    root.documentTabAddRequested()
-                }
-                onTabMoved: function (from, to) {
-                    if (root.documentTabsManaged)
-                        root.moveTab(from, to)
-                    root.documentTabMoved(from, to)
-                }
-                onTabTearOff: function (index, gx, gy) {
-                    if (root.documentTabsManaged)
-                        root.tearOffTab(index, gx, gy)
-                    else
-                        root.documentTabTearOff(index, gx, gy)
+
+                Md3DocumentTabBar {
+                    id: docTabBar
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: titleBarLoader.bottom
+                    visible: root.documentTabsEnabled
+                    height: visible ? implicitHeight : 0
+                    unifiedWithTitleBar: root.unifiedTitleChrome
+                    model: root.documentTabs
+                    currentIndex: root.documentTabIndex
+                    closable: root.documentTabsClosable
+                    tearOffEnabled: root.documentTabsTearOff
+                    showAddButton: root.documentTabsShowAdd
+                    onCurrentIndexChanged: {
+                        if (root.documentTabIndex !== currentIndex)
+                            root.documentTabIndex = currentIndex
+                    }
+                    onTabActivated: function (index) {
+                        if (root.documentTabsManaged)
+                            root.activateTab(index)
+                        root.documentTabActivated(index)
+                    }
+                    onTabCloseRequested: function (index) {
+                        if (root.documentTabsManaged)
+                            root.closeTab(index)
+                        root.documentTabCloseRequested(index)
+                    }
+                    onTabAddRequested: {
+                        if (root.documentTabsManaged)
+                            root.addTab(root.currentIndex)
+                        root.documentTabAddRequested()
+                    }
+                    onTabMoved: function (from, to) {
+                        if (root.documentTabsManaged)
+                            root.moveTab(from, to)
+                        root.documentTabMoved(from, to)
+                    }
+                    onTabTearOff: function (index, gx, gy) {
+                        if (root.documentTabsManaged)
+                            root.tearOffTab(index, gx, gy)
+                        else
+                            root.documentTabTearOff(index, gx, gy)
+                    }
                 }
             }
 
@@ -1083,7 +1124,7 @@ Window {
                 id: contentHost
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.top: docTabBar.visible ? docTabBar.bottom : titleBarLoader.bottom
+                anchors.top: chromeHost.bottom
                 anchors.bottom: parent.bottom
                 clip: true
                 z: 0

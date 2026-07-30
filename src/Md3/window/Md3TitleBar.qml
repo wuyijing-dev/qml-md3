@@ -15,6 +15,10 @@ Rectangle {
     property string subtitle: ""
     property string leadingIcon: ""
     property bool showLeading: leadingIcon.length > 0
+    /// Page-stack back (left of icon/title). Typical with navigation rail shells.
+    property bool showBackButton: false
+    property bool backEnabled: true
+    property string backIcon: "arrow_back"
     property bool showTitle: true
     property bool showAppIcon: true
     property bool showThemeToggle: true
@@ -42,6 +46,8 @@ Rectangle {
     property bool nativeCaptionHit: Md3WindowCapabilities.captionHitTest
     property real leadingInset: Md3WindowCapabilities.trafficLightsInset
     property real cornerRadius: 0
+    /// When true, fill is transparent so a parent chrome strip paints title+tabs as one.
+    property bool unifiedChrome: false
 
     /// Window / taskbar icon (qrc or file). Synced from Md3ApplicationWindow.windowIcon when bound.
     property url appIcon: ""
@@ -71,6 +77,7 @@ Rectangle {
     Accessible.name: title.length ? title : qsTr("Title bar")
 
     signal leadingClicked()
+    signal backClicked()
     signal themeToggled()
     signal performanceClicked()
     signal tourClicked()
@@ -189,6 +196,8 @@ Rectangle {
     }
 
     color: {
+        if (root.unifiedChrome)
+            return "transparent"
         const base = Md3Theme.colorScheme.surfaceContainer
         if (root.targetWindow && root.targetWindow.usesSystemBackdrop) {
             const t = root.targetWindow.backdropTitleTint !== undefined
@@ -197,8 +206,8 @@ Rectangle {
         }
         return base
     }
-    topLeftRadius: cornerRadius
-    topRightRadius: cornerRadius
+    topLeftRadius: root.unifiedChrome ? 0 : cornerRadius
+    topRightRadius: root.unifiedChrome ? 0 : cornerRadius
     clip: true
     height: contentHeight
     width: parent ? parent.width : 400
@@ -267,6 +276,17 @@ Rectangle {
             anchors.leftMargin: root.padding
             anchors.verticalCenter: parent.verticalCenter
             spacing: root.contentSpacing
+
+            Md3TitleBarButton {
+                visible: root.showBackButton
+                buttonWidth: 40
+                buttonHeight: root.baseHeight
+                iconSize: 14
+                icon: root.backIcon
+                enabled: root.backEnabled
+                accessibleName: qsTr("Back")
+                onClicked: root.backClicked()
+            }
 
             Md3TitleBarButton {
                 visible: root.showLeading

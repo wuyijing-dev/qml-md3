@@ -20,6 +20,8 @@ Item {
     property real tearOffSlop: 28
     /// Play pop-in when a tab is appended
     property bool animateAdd: true
+    /// When true, bar fill is transparent so a parent chrome strip paints title+tabs as one.
+    property bool unifiedWithTitleBar: false
 
     signal tabActivated(int index)
     signal tabCloseRequested(int index)
@@ -36,12 +38,15 @@ Item {
     Accessible.name: qsTr("Document tabs")
 
     readonly property color barColor: {
+        if (unifiedWithTitleBar)
+            return "transparent"
         const w = Window.window
+        const base = Md3Theme.colorScheme.surfaceContainer
         if (w && w.usesSystemBackdrop) {
             const t = w.backdropTitleTint !== undefined ? w.backdropTitleTint : 0.06
-            return Qt.alpha(Md3Theme.colorScheme.surfaceContainerHigh, Math.max(0.12, t + 0.06))
+            return Qt.alpha(base, t)
         }
-        return Md3Theme.colorScheme.surfaceContainerHigh
+        return base
     }
     readonly property color tabSelected: {
         const w = Window.window
