@@ -49,7 +49,8 @@ Md3ApplicationWindow {
             window.pageCacheLimit = 6
             window.pageL2CacheLimit = 8
             window.pagePrefetch = true
-            window.pagePredictPrefetch = true
+            // Hover-predict compiles pages while dragging the rail — keep off.
+            window.pagePredictPrefetch = false
         }
     }
 

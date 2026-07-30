@@ -20,6 +20,9 @@ Rectangle {
     signal destinationUnhovered(int index)
     signal expandToggleClicked()
 
+    /// True while the destination list is being flicked/dragged.
+    readonly property bool scrolling: flick.moving || flick.dragging
+
     readonly property real destinationHeight: 56
     readonly property real destinationSpacing: 4
     readonly property real indicatorInset: 12
@@ -250,7 +253,11 @@ Rectangle {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                onEntered: root.destinationHovered(dest.destIndex)
+                onEntered: {
+                    // Don't prefetch while the user is dragging the rail — that freezes flicks.
+                    if (!root.scrolling)
+                        root.destinationHovered(dest.destIndex)
+                }
                 onExited: root.destinationUnhovered(dest.destIndex)
                 onClicked: function (mouse) {
                     const local = mapToItem(hit, mouse.x, mouse.y)
@@ -399,6 +406,10 @@ Rectangle {
         contentWidth: width
         contentHeight: mainColumn.height
         flickableDirection: Flickable.VerticalFlick
+        // Prefer vertical drag over destination click while gesturing.
+        pressDelay: 80
+        maximumFlickVelocity: 2500
+        flickDeceleration: 1500
 
         Column {
             id: mainColumn

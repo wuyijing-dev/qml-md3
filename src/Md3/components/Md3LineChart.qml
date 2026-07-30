@@ -204,18 +204,17 @@ Md3Chart {
         property int sampleCount: 0
     }
 
+    readonly property int _effectiveLiveFps: root.liveFps > 0 ? root.liveFps : Md3Theme.effectsLiveFps
+
     FrameAnimation {
-        running: root.live && root.animateInView && Md3Theme.effectsLiveMotion
-                 && root.liveFps <= 0 && Md3Theme.effectsLiveFps <= 0
+        running: root.live && root.chartActive && Md3Theme.effectsLiveMotion
+                 && root._effectiveLiveFps <= 0
         onTriggered: root.advanceLive(frameTime)
     }
     Timer {
-        interval: {
-            const fps = root.liveFps > 0 ? root.liveFps : Md3Theme.effectsLiveFps
-            return Math.max(16, Math.round(1000 / Math.max(1, fps)))
-        }
-        running: root.live && root.animateInView && Md3Theme.effectsLiveMotion
-                 && (root.liveFps > 0 || Md3Theme.effectsLiveFps > 0)
+        interval: Math.max(16, Math.round(1000 / Math.max(1, root._effectiveLiveFps)))
+        running: root.live && root.chartActive && Md3Theme.effectsLiveMotion
+                 && root._effectiveLiveFps > 0
         repeat: true
         onTriggered: root.advanceLive(interval / 1000)
     }

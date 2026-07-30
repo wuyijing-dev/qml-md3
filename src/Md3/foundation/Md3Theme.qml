@@ -25,10 +25,10 @@ QtObject {
     readonly property bool effectsChartSmooth: effectsLevel >= 2 && !reduceMotion
     /// Chart pan inertia after drag release.
     readonly property bool effectsChartInertia: effectsLevel >= 1 && !reduceMotion
-    /// Live chart / wave continuous animation.
-    readonly property bool effectsLiveMotion: effectsLevel >= 1 && !reduceMotion
+    /// Live chart / wave continuous animation (all tiers; FPS capped on lower tiers).
+    readonly property bool effectsLiveMotion: !reduceMotion
     /// 0 = display refresh; >0 caps live charts / wave.
-    readonly property int effectsLiveFps: effectsLevel >= 2 ? 0 : (effectsLevel >= 1 ? 30 : 12)
+    readonly property int effectsLiveFps: effectsLevel >= 2 ? 0 : (effectsLevel >= 1 ? 24 : 15)
     /// Soft dual-blur elevation shadows (MultiEffect FBOs).
     readonly property bool effectsShadows: effectsLevel >= 1
     /// Max elevation applied when shadows are on (High keeps full).

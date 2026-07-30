@@ -157,6 +157,8 @@ Item {
                 root.navigateTo(index)
             }
             onDestinationHovered: function (index) {
+                if (rail.scrolling)
+                    return
                 host.prefetchHint(index)
             }
             onDestinationUnhovered: function (index) {

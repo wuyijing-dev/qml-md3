@@ -29,10 +29,7 @@ Item {
         return Math.max(0, Math.min(1, (value - from) / span))
     }
     readonly property string valueText: Number(value).toFixed(decimals) + (unit.length ? unit : "")
-
-    property var _flick: null
-    property real viewportMargin: 96
-    property bool viewportWarm: true
+    readonly property int _effectiveFps: animationFps > 0 ? animationFps : Md3Theme.effectsLiveFps
 
     /// Parent page slots hide via opacity/visible — child.visible stays true, so walk the tree.
     readonly property bool effectivelyShown: {
@@ -51,20 +48,6 @@ Item {
         return true
     }
 
-    readonly property bool _viewportHit: {
-        if (!effectivelyShown)
-            return false
-        const f = _flick
-        if (!f)
-            return true
-        const _cy = f.contentY
-        const _cx = f.contentX
-        const m = root.viewportMargin
-        const p = mapToItem(f, 0, 0)
-        return p.y < (f.height + m) && (p.y + height) > -m
-                && p.x < (f.width + m) && (p.x + width) > -m
-    }
-
     width: size
     height: size
     implicitWidth: size
@@ -79,42 +62,15 @@ Item {
         canvas.requestPaint()
     }
 
-    Timer {
-        id: viewportLeaveTimer
-        interval: 220
-        repeat: false
-        onTriggered: root.viewportWarm = false
-    }
-    on_ViewportHitChanged: {
-        if (_viewportHit) {
-            viewportLeaveTimer.stop()
-            viewportWarm = true
-        } else if (viewportWarm) {
-            viewportLeaveTimer.restart()
-        }
-    }
-    onEffectivelyShownChanged: {
-        if (!effectivelyShown) {
-            viewportLeaveTimer.stop()
-            viewportWarm = false
-        } else if (_viewportHit) {
-            viewportWarm = true
-        }
-    }
-
-    // Full-rate when warmly in view; optional FPS cap via animationFps / effectsLevel.
     FrameAnimation {
-        running: root.animated && root.viewportWarm && Md3Theme.effectsLiveMotion
-                 && root.animationFps <= 0 && Md3Theme.effectsLiveFps <= 0
+        running: root.animated && root.effectivelyShown && Md3Theme.effectsLiveMotion
+                 && root._effectiveFps <= 0
         onTriggered: root._advance(frameTime)
     }
     Timer {
-        interval: {
-            const fps = root.animationFps > 0 ? root.animationFps : Md3Theme.effectsLiveFps
-            return Math.max(16, Math.round(1000 / Math.max(1, fps)))
-        }
-        running: root.animated && root.viewportWarm && Md3Theme.effectsLiveMotion
-                 && (root.animationFps > 0 || Md3Theme.effectsLiveFps > 0)
+        interval: Math.max(16, Math.round(1000 / Math.max(1, root._effectiveFps)))
+        running: root.animated && root.effectivelyShown && Md3Theme.effectsLiveMotion
+                 && root._effectiveFps > 0
         repeat: true
         onTriggered: root._advance(interval / 1000)
     }
@@ -220,15 +176,5 @@ Item {
         }
     }
 
-    Component.onCompleted: {
-        let p = parent
-        while (p) {
-            if (p.contentY !== undefined && p.moving !== undefined) {
-                _flick = p
-                break
-            }
-            p = p.parent
-        }
-        canvas.requestPaint()
-    }
+    Component.onCompleted: canvas.requestPaint()
 }
