@@ -87,7 +87,7 @@
 
 - [ ] `docs/performance.md` 增加「官方推荐配置」表（弱机/办公/高刷）
 - [x] 首启：空壳出窗 → 再暖页（已有方向）写成可复用 API / 文档样例
-- [x] Release 包默认 **启用 qmlcachegen**；Dev/Debug 默认 `NO_CACHEGEN`（`-DMD3_QML_CACHEGEN=ON` 可强制开）
+- [x] 默认 **启用 qmlcachegen**（`-DMD3_QML_CACHEGEN=OFF` 可关，便于狂改 QML）
 - [ ] Charts：Live/Wave 默认档位与 CPU 预算文档化
 - [ ] Rail：拖动时禁止 hover 预编译（已部分做）补测试防回归
 - [ ] 大列表：强制推荐 `Md3VirtualList`；禁止层叠 `layer.enabled` 的检查清单
