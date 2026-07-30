@@ -58,8 +58,6 @@ Window {
     visible: false
     title: qsTr("Dialog")
     modality: root.dialogModality
-    Accessible.role: Accessible.Dialog
-    Accessible.name: title.length ? title : qsTr("Dialog")
     transientParent: {
         if (owner && owner instanceof Window)
             return owner
@@ -204,6 +202,9 @@ Window {
         id: shell
         anchors.fill: parent
         z: 0
+        // Window itself cannot host Accessible — attach on the content root Item.
+        Accessible.role: Accessible.Dialog
+        Accessible.name: root.title.length ? root.title : qsTr("Dialog")
 
         Item {
             id: chrome
