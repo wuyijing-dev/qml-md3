@@ -196,12 +196,13 @@ Flickable {
                     from: 1
                     to: 99
                 }
-                Md3HStack {
+                    Md3HStack {
                     spacing: 8
                     Md3Button {
-                        text: qsTr("Validate")
+                        text: qsTr("Submit")
+                        enabled: demoForm.canSubmit
                         onClicked: {
-                            if (demoForm.validate())
+                            if (demoForm.submit())
                                 Md3Notify.snackbar(qsTr("Form OK"))
                             else
                                 Md3Notify.snackbar(qsTr("Fix required fields"))

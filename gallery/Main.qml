@@ -317,6 +317,8 @@ Md3ApplicationWindow {
           skeletonLayout: "cards" },
         { title: qsTr("反馈"), icon: "chat", source: pageRoot + "CommunicationPage.qml",
           skeletonLayout: "page" },
+        { title: qsTr("模式"), icon: "design_services", source: pageRoot + "PatternsPage.qml",
+          skeletonLayout: "page" },
         { title: qsTr("导航"), icon: "menu", source: pageRoot + "NavigationPage.qml",
           skeletonLayout: "list" },
         { title: qsTr("菜单"), icon: "more_vert", source: pageRoot + "MenusPage.qml",

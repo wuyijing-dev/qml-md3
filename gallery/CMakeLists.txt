@@ -69,6 +69,7 @@ qt_add_qml_module(appQML_MD3
         pages/ChipsPage.qml
         pages/ContainmentPage.qml
         pages/CommunicationPage.qml
+        pages/PatternsPage.qml
         pages/NavigationPage.qml
         pages/MenusPage.qml
         pages/PickersPage.qml

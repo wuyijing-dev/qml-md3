@@ -10,10 +10,20 @@ Item {
     /// Optional required field names used by validate() when no list is passed.
     property var requiredFields: []
     /// Vertical spacing between direct field children (built-in stack — no Md3VStack glue).
-    property real spacing: 12
+    property real spacing: Md3Theme.spacingMd
     /// Stretch direct children to form width.
     property bool fillFields: true
+    /// Poll named fields so `canSubmit` / `hasErrors` stay fresh while typing.
+    property bool liveGate: true
+    /// True when any entry in `errors` is a non-empty string.
+    property bool hasErrors: false
+    /// True when required fields are non-empty and `hasErrors` is false (does not run validators).
+    property bool canSubmit: true
+    /// True when every `requiredFields` entry has a non-empty value.
+    property bool requiredSatisfied: true
     default property alias content: formStack.data
+
+    signal submitted(var values)
 
     implicitWidth: Math.max(200, host.implicitWidth)
     implicitHeight: host.implicitHeight
@@ -28,11 +38,13 @@ Item {
             delete next[name]
         errors = next
         _applyErrors()
+        refreshGate()
     }
 
     function clearErrors() {
         errors = ({})
         _applyErrors()
+        refreshGate()
     }
 
     function errorFor(name) {
@@ -103,6 +115,38 @@ Item {
         }
     }
 
+    function _mapHasErrors(map) {
+        if (!map)
+            return false
+        for (const k in map) {
+            if (map[k] !== undefined && map[k] !== null && String(map[k]).length > 0)
+                return true
+        }
+        return false
+    }
+
+    function _requiredOk(vals, req) {
+        if (!req || !req.length)
+            return true
+        for (let i = 0; i < req.length; ++i) {
+            const v = vals[req[i]]
+            if (v === undefined || v === null || String(v).length === 0)
+                return false
+        }
+        return true
+    }
+
+    /// Refresh `hasErrors` / `requiredSatisfied` / `canSubmit` from current fields + `errors`.
+    function refreshGate() {
+        syncValues()
+        const err = _mapHasErrors(errors)
+        const reqOk = _requiredOk(values, requiredFields)
+        hasErrors = err
+        requiredSatisfied = reqOk
+        canSubmit = reqOk && !err
+        return canSubmit
+    }
+
     function validate(required) {
         syncValues()
         let ok = true
@@ -111,6 +155,7 @@ Item {
         if (!req || !req.length) {
             errors = ({})
             _applyErrors()
+            refreshGate()
             return true
         }
         for (let i = 0; i < req.length; ++i) {
@@ -123,10 +168,31 @@ Item {
         }
         errors = next
         _applyErrors()
+        refreshGate()
         return ok
     }
 
-    onErrorsChanged: Qt.callLater(_applyErrors)
+    /// Run `validate()`; on success emit `submitted(values)` and return true.
+    function submit() {
+        if (!validate())
+            return false
+        submitted(values)
+        return true
+    }
+
+    onErrorsChanged: Qt.callLater(function () {
+        _applyErrors()
+        refreshGate()
+    })
+    onRequiredFieldsChanged: Qt.callLater(refreshGate)
+    Component.onCompleted: Qt.callLater(refreshGate)
+
+    Timer {
+        interval: 250
+        running: root.liveGate && root.visible
+        repeat: true
+        onTriggered: root.refreshGate()
+    }
 
     Md3ContainerBody {
         id: host

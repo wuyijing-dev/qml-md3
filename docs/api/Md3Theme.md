@@ -20,6 +20,12 @@ import Md3
 | `highContrast` | `bool` | `false` | read/write | `Md3Theme` | — |
 | `reduceMotion` | `bool` | `false` | read/write | `Md3Theme` | Prefer near-instant motion for vestibular / a11y preferences. |
 | `progressiveContent` | `bool` | `true` | read/write | `Md3Theme` | Within-page progressive load (Md3DeferredSection). Default on; set false to load everything immediately. |
+| `density` | `int` | `0` | read/write | `Md3Theme` | `0` Comfortable / `1` Compact — drives spacing* / pagePadding / controlHeight. |
+| `densityCompact` | `bool` | — | readonly | `Md3Theme` | `density >= 1`. |
+| `spacingXs` … `spacingXl` | `real` | — | readonly | `Md3Theme` | Density-aware spacing scale (4 → 24 / tighter when compact). |
+| `pagePadding` | `real` | — | readonly | `Md3Theme` | Page inset hint (20 / 12). |
+| `controlHeight` | `real` | — | readonly | `Md3Theme` | Control height hint (40 / 36). |
+| `tableRowHeight` | `real` | — | readonly | `Md3Theme` | Table row hint (52 / 40). |
 | `effectsLevel` | `int` | `1` | read/write | `Md3Theme` | Global effects budget: `0` 流畅 / `1` 均衡 / `2` 画质. Drives ripple, state layers, charts, shadows, glass. |
 | `effectsIntensity` | `real` | `1.0` | read/write | `Md3Theme` | Extra multiplier (0.35–1.35) on ripple / hover-press state opacity. |
 | `effectsRipple` | `bool` | — | readonly | `Md3Theme` | Expanding ink (Balanced+). Low uses rounded press-flash instead. |
@@ -54,6 +60,8 @@ _None._
 | `applySeed(c)` | `Md3Theme` | Rebuild the full MD3 role set from seed + dark (Material You–style). |
 | `setEffectsLevel(level)` | `Md3Theme` | Clamp and set `effectsLevel` to 0–2. |
 | `setEffectsIntensity(v)` | `Md3Theme` | Clamp and set `effectsIntensity` to 0.35–1.35. |
+| `setDensity(level)` | `Md3Theme` | Clamp and set `density` to 0–1. |
+| `densityLabel()` | `Md3Theme` | Localized 舒适 / 紧凑. |
 | `effectsLevelLabel()` | `Md3Theme` | Localized label for the current effects level. |
 | `toggleDark()` | `Md3Theme` | — |
 | `scaled(px)` | `Md3Theme` | — |

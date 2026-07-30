@@ -14,6 +14,27 @@ QtObject {
     /// Within-page progressive load (Md3DeferredSection). Default on; set false to load everything immediately.
     property bool progressiveContent: true
 
+    /// Desktop UI density: `0` Comfortable (默认) / `1` Compact（工具/数据密集）。
+    /// Aligns with `Md3DataTable.Density`; drives spacing* / pagePadding / controlHeight hints.
+    property int density: 0
+    readonly property bool densityCompact: density >= 1
+    /// 4 / 4 dp
+    readonly property real spacingXs: 4
+    /// 8 → 6
+    readonly property real spacingSm: densityCompact ? 6 : 8
+    /// 12 → 8（表单、区块内）
+    readonly property real spacingMd: densityCompact ? 8 : 12
+    /// 16 → 12
+    readonly property real spacingLg: densityCompact ? 12 : 16
+    /// 24 → 16（区块之间）
+    readonly property real spacingXl: densityCompact ? 16 : 24
+    /// Window / page content inset hint（`Md3ApplicationWindow.pagePadding` 可绑此值）
+    readonly property real pagePadding: densityCompact ? 12 : 20
+    /// Default control row height hint（按钮/字段外壳；控件可自有高度）
+    readonly property real controlHeight: densityCompact ? 36 : 40
+    /// Data table row height hint（与 Md3DataTable Comfortable/Compact 对齐）
+    readonly property real tableRowHeight: densityCompact ? 40 : 52
+
     /// Global visual-effects budget for device adaptation.
     /// 0 = Low (流畅), 1 = Balanced (均衡), 2 = High (画质).
     property int effectsLevel: 1
@@ -63,6 +84,14 @@ QtObject {
 
     function setEffectsIntensity(v) {
         effectsIntensity = Math.max(0.35, Math.min(1.35, Number(v)))
+    }
+
+    function setDensity(level) {
+        density = Math.max(0, Math.min(1, Math.round(Number(level))))
+    }
+
+    function densityLabel() {
+        return densityCompact ? qsTr("紧凑") : qsTr("舒适")
     }
 
     function effectsLevelLabel() {

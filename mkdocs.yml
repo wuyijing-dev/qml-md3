@@ -48,6 +48,7 @@ nav:
   - 首页: index.md
   - 集成: integration.md
   - 性能: performance.md
+  - 设计与模式: design-guidelines.md
   - 无障碍: a11y.md
   - 国际化: i18n.md
   - 打包: packaging.md

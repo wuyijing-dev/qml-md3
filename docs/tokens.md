@@ -122,3 +122,20 @@ Shadows use a **key + ambient** pair (`Md3Shadow` + `MultiEffect` blur) so eleva
 
 **Interactive UI** uses `SmoothedAnimation` + `Sync` (`smoothSnap*` / `smoothPanel*`) — see [Md3Motion](api/Md3Motion.md).
 
+## Density & spacing
+
+`Md3Theme.density`: `0` Comfortable (default) / `1` Compact.
+
+| Token | Comfortable | Compact |
+|-------|-------------|---------|
+| `spacingXs` | 4 | 4 |
+| `spacingSm` | 8 | 6 |
+| `spacingMd` | 12 | 8 |
+| `spacingLg` | 16 | 12 |
+| `spacingXl` | 24 | 16 |
+| `pagePadding` | 20 | 12 |
+| `controlHeight` | 40 | 36 |
+| `tableRowHeight` | 52 | 40 |
+
+`setDensity(0|1)` / `densityLabel()`. Align `Md3DataTable.density` with `densityCompact`. Full UX rules: [design-guidelines.md](design-guidelines.md).
+

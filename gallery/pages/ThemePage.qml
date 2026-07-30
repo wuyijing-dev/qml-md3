@@ -326,6 +326,42 @@ Flickable {
         }
 
         Text {
+            text: qsTr("Density")
+            color: Md3Theme.colorScheme.colorOnSurface
+            font.pixelSize: Md3Theme.typography.titleMedium.size
+            font.family: Md3Theme.typography.fontFamily
+            Layout.topMargin: 8
+        }
+        Text {
+            Layout.fillWidth: true
+            wrapMode: Text.Wrap
+            text: qsTr("舒适：默认桌面间距；紧凑：工具/宽表（spacing*、pagePadding、controlHeight）。")
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.family: Md3Theme.typography.fontFamily
+            font.pixelSize: Md3Theme.typography.bodySmall.size
+        }
+        Md3SegmentedButton {
+            id: densitySeg
+            Layout.fillWidth: true
+            model: [
+                { text: qsTr("舒适") },
+                { text: qsTr("紧凑") }
+            ]
+            currentIndex: Md3Theme.density
+            onSelectionChanged: {
+                Md3Theme.setDensity(currentIndex)
+                Md3Accessibility.announce(qsTr("密度：%1").arg(Md3Theme.densityLabel()))
+            }
+        }
+        Connections {
+            target: Md3Theme
+            function onDensityChanged() {
+                if (densitySeg.currentIndex !== Md3Theme.density)
+                    densitySeg.currentIndex = Md3Theme.density
+            }
+        }
+
+        Text {
             text: qsTr("Accessibility")
             color: Md3Theme.colorScheme.colorOnSurface
             font.pixelSize: Md3Theme.typography.titleMedium.size

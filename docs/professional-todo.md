@@ -116,15 +116,15 @@
 
 ### 3.2 设计与模式
 
-- [ ] `docs/design-guidelines.md`：变体选用、密度、桌面间距、何时用 Sheet/Dialog
-- [ ] 表单模式：校验、错误展示、提交禁用统一（`Md3Form` 增强 + 文档）
-- [ ] 空态 / 加载 / 错误态：组件 + Gallery「模式」页
-- [ ] 快捷键与命令面板约定（Gallery 已有雏形 → 抽成指南）
-- [ ] 密度 token（comfortable / compact）若桌面要专业级
+- [x] `docs/design-guidelines.md`：变体选用、密度、桌面间距、何时用 Sheet/Dialog
+- [x] 表单模式：校验、错误展示、提交禁用统一（`Md3Form` 增强 + 文档）
+- [x] 空态 / 加载 / 错误态：组件 + Gallery「模式」页
+- [x] 快捷键与命令面板约定（Gallery 已有雏形 → 抽成指南）
+- [x] 密度 token（comfortable / compact）若桌面要专业级
 
 ### 3.3 文档站点（可选但专业）
 
-- [ ] 静态文档站（MkDocs / VitePress）托管 API + 指南
+- [x] 静态文档站（MkDocs / VitePress）托管 API + 指南
 - [ ] 控件页：属性表 + 可运行片段截图 / 视频
 - [ ] 搜索 API
 - [ ] 中英至少一种完整；另一种摘要也可
