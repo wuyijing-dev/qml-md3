@@ -169,9 +169,8 @@ Item {
                 Item {
                     id: bodySlot
                     width: parent.width
-                    /// Measured without a binding to childrenRect (avoids implicitHeight loops).
+                    /// Measured without binding to childrenRect (avoids implicit size loops).
                     property real contentHeight: 0
-                    property real contentWidth: 0
                     property bool _measureGuard: false
                     readonly property real fillFallback: 160
                     readonly property bool hasFillChild: {
@@ -191,27 +190,27 @@ Item {
                         return false
                     }
 
+                    // Width is always parent-driven; never bind implicitWidth to width/childrenRect.
+                    implicitWidth: 1
                     implicitHeight: hasFillChild ? fillFallback : contentHeight
-                    implicitWidth: hasFillChild ? Math.max(1, width) : Math.max(1, contentWidth)
 
                     function _syncFromChildrenRect() {
-                        if (_measureGuard)
+                        if (_measureGuard || hasFillChild)
                             return
-                        if (hasFillChild) {
-                            contentHeight = fillFallback
-                            contentWidth = Math.max(1, width)
-                            return
-                        }
                         _measureGuard = true
                         contentHeight = Math.max(0, childrenRect.height)
-                        contentWidth = Math.max(0, childrenRect.width)
                         _measureGuard = false
                     }
 
                     onChildrenChanged: Qt.callLater(_syncFromChildrenRect)
                     onChildrenRectChanged: Qt.callLater(_syncFromChildrenRect)
                     onWidthChanged: Qt.callLater(_syncFromChildrenRect)
-                    onHasFillChildChanged: Qt.callLater(_syncFromChildrenRect)
+                    onHasFillChildChanged: {
+                        if (hasFillChild)
+                            contentHeight = fillFallback
+                        else
+                            Qt.callLater(_syncFromChildrenRect)
+                    }
                     Component.onCompleted: Qt.callLater(_syncFromChildrenRect)
                 }
             }
