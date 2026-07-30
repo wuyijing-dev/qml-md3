@@ -1,9 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Window
 import Md3
 
-Item {
+Md3Page {
     id: page
 
     ColumnLayout {
@@ -111,9 +110,7 @@ Item {
             id: ctxBtn
             text: "Open context menu (cascading)"
             onClicked: {
-                const win = Window.window
-                const target = (win && win.contentItem) ? win.contentItem : null
-                const p = ctxBtn.mapToItem(target, 0, ctxBtn.height + 8)
+                const p = Md3OverlayHost.mapToOverlay(ctxBtn, 0, ctxBtn.height + 8)
                 ctx.popup(p.x, p.y)
             }
         }

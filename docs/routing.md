@@ -19,6 +19,8 @@ win.navigateTo(1, { transition: "fade" })  // 见 PageHost opts
 
 页面可继承 `Md3Page`（或自行声明 `md3HostWindow` / `md3RouteParams` / `md3GoBack` / `md3PushRoute`），由 `Md3PageHost` 注入，避免 `while (parent)` 或 duck-type `Window.window`（见 [module-boundaries.md](module-boundaries.md)）。
 
+Flickable 根页面不便继承 `Md3Page` 时，至少声明 `md3HostWindow`，并用 `Md3OverlayHost.resolveWindow(md3HostWindow, root)`。
+
 `Md3AppSettings` 键 `shell/pageIndex`（窗口 `persistSession` 时）。
 
 ## 可选 URL 层（应用侧）

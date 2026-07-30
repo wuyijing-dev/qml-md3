@@ -1,11 +1,10 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Window
 import QtQuick.Dialogs
 import QtMultimedia
 import Md3
 
-Item {
+Md3Page {
     id: root
 
     Flickable {
@@ -194,12 +193,12 @@ Item {
             Md3Button {
                 text: "Open dialog window"
                 variant: Md3Button.FilledTonal
-                onClicked: winDlg.openDialog(Window.window)
+                onClicked: winDlg.openDialog(root.hostWindow())
             }
             Md3Button {
                 text: "Open modeless window"
                 variant: Md3Button.Outlined
-                onClicked: modelessDlg.openDialog(Window.window)
+                onClicked: modelessDlg.openDialog(root.hostWindow())
             }
             Text {
                 Layout.fillWidth: true

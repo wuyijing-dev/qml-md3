@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Window
 import Md3
 
 Flickable {
@@ -8,6 +7,9 @@ Flickable {
     contentWidth: width
     contentHeight: column.height
     clip: true
+
+    /// Injected by Md3PageHost (Flickable root — declare injectables without Md3Page).
+    property var md3HostWindow: null
 
     LayoutMirroring.enabled: rtlSwitch.checked
     LayoutMirroring.childrenInherit: true
@@ -89,7 +91,7 @@ Flickable {
                 id: themeSwitchBtn
                 text: Md3Theme.dark ? qsTr("Switch to light") : qsTr("Switch to dark")
                 onClicked: {
-                    const w = Window.window
+                    const w = Md3OverlayHost.resolveWindow(root.md3HostWindow, root)
                     if (w && typeof w.toggleThemeFrom === "function")
                         w.toggleThemeFrom(themeSwitchBtn)
                     else

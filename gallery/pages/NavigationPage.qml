@@ -1,16 +1,15 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Window
 import Md3
 
-Item {
+Md3Page {
     id: root
 
     // Host = gallery content pane only; drawer stays inside this clip, not the OS window.
     Rectangle {
         anchors.fill: parent
         color: {
-            const w = Window.window
+            const w = hostWindow()
             if (w && w.usesSystemBackdrop)
                 return "transparent"
             return Md3Theme.colorScheme.surface
