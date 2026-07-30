@@ -169,8 +169,10 @@ Item {
                 Item {
                     id: bodySlot
                     width: parent.width
-                    // Fill-anchored children cannot drive height via childrenRect (collapses
-                    // to 0 / binding loops). Use a stable fallback intrinsic.
+                    /// Measured without a binding to childrenRect (avoids implicitHeight loops).
+                    property real contentHeight: 0
+                    property real contentWidth: 0
+                    property bool _measureGuard: false
                     readonly property real fillFallback: 160
                     readonly property bool hasFillChild: {
                         void children.length
@@ -188,12 +190,29 @@ Item {
                         }
                         return false
                     }
-                    // Do NOT assign `height: childrenRect.height` — that feedback-loops on
-                    // Qt 6 when any descendant height depends on the parent. Column uses
-                    // implicitHeight when height is not explicitly set.
-                    implicitHeight: hasFillChild ? fillFallback
-                                                 : Math.max(0, childrenRect.height)
-                    implicitWidth: childrenRect.width
+
+                    implicitHeight: hasFillChild ? fillFallback : contentHeight
+                    implicitWidth: hasFillChild ? Math.max(1, width) : Math.max(1, contentWidth)
+
+                    function _syncFromChildrenRect() {
+                        if (_measureGuard)
+                            return
+                        if (hasFillChild) {
+                            contentHeight = fillFallback
+                            contentWidth = Math.max(1, width)
+                            return
+                        }
+                        _measureGuard = true
+                        contentHeight = Math.max(0, childrenRect.height)
+                        contentWidth = Math.max(0, childrenRect.width)
+                        _measureGuard = false
+                    }
+
+                    onChildrenChanged: Qt.callLater(_syncFromChildrenRect)
+                    onChildrenRectChanged: Qt.callLater(_syncFromChildrenRect)
+                    onWidthChanged: Qt.callLater(_syncFromChildrenRect)
+                    onHasFillChildChanged: Qt.callLater(_syncFromChildrenRect)
+                    Component.onCompleted: Qt.callLater(_syncFromChildrenRect)
                 }
             }
         }
