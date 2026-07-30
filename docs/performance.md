@@ -236,7 +236,8 @@ If first window is slow → profile C + kill hot reload.
 ## Quick decision
 
 ```
-要冷开不卡且内存可控？ → Profile E：cachegen + pageAsync + pageL2Warm + L1≤3 + DeferredSection 空壳
+要冷开不卡且可多占一点内存？ → Profile E+：L1=6 + prefetch + idleTrim 拉长 + L2 warm
+要冷开不卡且内存更省？     → Profile E：cachegen + pageAsync + pageL2Warm + L1≤3 + DeferredSection 空壳
 要秒开翻页（可接受内存）？ → 提高 pageCacheLimit + prefetch（Profile B）
 要省内存极限？         → cacheLimit=1，关 prefetch，列表无 elevation
 要首启快？             → 关 hotReload / warmStart，progressiveContent=true
