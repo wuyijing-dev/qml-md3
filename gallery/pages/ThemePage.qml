@@ -348,7 +348,7 @@ Flickable {
                 Text {
                     width: parent.width
                     wrapMode: Text.Wrap
-                    text: qsTr("流畅：弱涟漪/无阴影遮罩；均衡：默认涟漪与阴影；画质：强涟漪、平滑曲线与满帧实时图。下方可再调强度。")
+                    text: qsTr("流畅：关闭涟漪，保留页面/控件过渡；均衡：涟漪+阴影；画质：强涟漪与高画质图表。强度只调涟漪/态层深浅。")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.family: Md3Theme.typography.fontFamily
                     font.pixelSize: Md3Theme.typography.bodySmall.size

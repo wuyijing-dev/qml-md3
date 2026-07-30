@@ -35,29 +35,26 @@ QtObject {
     readonly property real effectsMaxElevation: effectsLevel >= 2 ? 12 : (effectsLevel >= 1 ? 3 : 0)
     /// Liquid-glass quality hint: 0 low / 1 mid / 2 high.
     readonly property int effectsGlassQuality: Math.max(0, Math.min(2, effectsLevel))
-    /// Prefer short/no page transitions on Low.
-    readonly property bool effectsPageMotion: effectsLevel >= 1 && !reduceMotion
+    /// Prefer page / overlay transitions (always on unless reduceMotion — independent of ripple).
+    readonly property bool effectsPageMotion: !reduceMotion
 
-    /// Ripple ink enabled (off when reduceMotion).
-    readonly property bool effectsRipple: !reduceMotion
-    /// Rounded MultiEffect mask for ripple (skip on 流畅 to avoid FBO cost).
-    readonly property bool effectsRippleMasked: effectsLevel >= 1 && effectsRipple
+    /// Ripple ink — off on 流畅 (keep transitions); on for 均衡/画质.
+    readonly property bool effectsRipple: effectsLevel >= 1 && !reduceMotion
+    /// Rounded MultiEffect mask for ripple (均衡+).
+    readonly property bool effectsRippleMasked: effectsRipple
     /// Peak / hold opacity for ripple circle.
     readonly property real effectsRipplePeak: {
-        const base = effectsLevel >= 2 ? 0.18 : (effectsLevel >= 1 ? 0.14 : 0.09)
+        const base = effectsLevel >= 2 ? 0.18 : 0.14
         return Math.max(0.02, Math.min(0.35, base * effectsIntensity))
     }
     readonly property real effectsRippleHold: effectsRipplePeak * 0.5
-    /// Expand factor for ripple diameter (smaller on Low).
-    readonly property real effectsRippleSpread: effectsLevel >= 2 ? 2.2 : (effectsLevel >= 1 ? 2.0 : 1.6)
-    /// Hover / press state-layer strength.
+    /// Expand factor for ripple diameter.
+    readonly property real effectsRippleSpread: effectsLevel >= 2 ? 2.2 : 2.0
+    /// Hover / press state-layer strength (still present on 流畅, just softer).
     readonly property real effectsStateIntensity: {
-        const base = effectsLevel >= 2 ? 1.0 : (effectsLevel >= 1 ? 0.75 : 0.45)
+        const base = effectsLevel >= 2 ? 1.0 : (effectsLevel >= 1 ? 0.75 : 0.55)
         return Math.max(0.2, Math.min(1.4, base * effectsIntensity))
     }
-    /// Scales Md3Motion durations (on top of durationScale / reduceMotion).
-    readonly property real effectsMotionFactor: effectsLevel >= 2 ? 1.0
-            : (effectsLevel >= 1 ? 0.9 : 0.7)
 
     function setEffectsLevel(level) {
         effectsLevel = Math.max(0, Math.min(2, Math.round(Number(level))))
