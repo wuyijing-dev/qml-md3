@@ -128,14 +128,20 @@ Item {
         repeat: true
         onTriggered: root._refreshTreeShown()
     }
-    Component.onCompleted: {
-        _refreshTreeShown()
-        Qt.callLater(function () {
+    Timer {
+        id: deferredSyncTimer
+        interval: 0
+        repeat: false
+        onTriggered: {
             if (root.isWavy)
                 root.rebuildWavy()
             else
                 root.syncStandardArc()
-        })
+        }
+    }
+    Component.onCompleted: {
+        _refreshTreeShown()
+        deferredSyncTimer.restart()
     }
     onVisibleChanged: _refreshTreeShown()
     onOpacityChanged: _refreshTreeShown()
@@ -241,12 +247,7 @@ Item {
         else
             syncStandardArc()
     }
-    onStyleChanged: Qt.callLater(function () {
-        if (root.isWavy)
-            root.rebuildWavy()
-        else
-            root.syncStandardArc()
-    })
+    onStyleChanged: deferredSyncTimer.restart()
     onWidthChanged: {
         if (isWavy)
             rebuildWavy()

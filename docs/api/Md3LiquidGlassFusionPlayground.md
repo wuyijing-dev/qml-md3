@@ -4,6 +4,7 @@ Two draggable glass bodies rendered in a **single fused SDF pass** (real metabal
 
 - **Source:** `src/Md3/components/Md3LiquidGlassFusionPlayground.qml`
 - **Extends:** `Item`
+- **Stability:** **Experimental** (API and behavior may change)
 
 ## Import
 
@@ -30,6 +31,6 @@ Md3LiquidGlassFusionPlayground {
 }
 ```
 
-## Gallery
+## Notes
 
-Open **容器** in the Md3 Gallery (scroll to **水滴融合**). Drag **Glass A** and **Glass B** together to see the liquid bridge and edge spectral highlights.
+Liquid Glass 相关演示已从 Gallery 默认导航移除；该组件用于实验/验证场景，不保证长期 API 稳定性。

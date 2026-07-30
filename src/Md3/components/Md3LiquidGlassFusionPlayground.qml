@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Effects
 import Md3
 
+/// EXPERIMENTAL: Liquid Glass fusion demo API may change.
 /// Two draggable glass bodies rendered in one fused SDF pass (real metaball merge).
 Item {
     id: root

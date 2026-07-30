@@ -157,7 +157,7 @@
 
 ### 4.4 明确不做 / 实验区
 
-- [ ] `docs/experimental.md`：液态玻璃、部分图表交互标 Experimental
+- [x] `docs/experimental.md`：液态玻璃、部分图表交互标 Experimental
 - [ ] 避免无测试、无文档的新控件合入 main
 
 ---

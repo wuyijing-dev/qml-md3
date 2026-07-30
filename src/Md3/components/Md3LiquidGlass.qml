@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Effects
 import Md3
 
+/// EXPERIMENTAL: Liquid Glass API may change without compatibility guarantees.
 /// Draggable Liquid Glass — regional backdrop sample (not full-scene blur).
 Item {
     id: root

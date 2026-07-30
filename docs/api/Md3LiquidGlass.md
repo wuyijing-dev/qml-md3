@@ -4,6 +4,7 @@ Draggable Liquid Glass — regional backdrop sample (not full-scene blur).
 
 - **Source:** `src/Md3/components/Md3LiquidGlass.qml`
 - **Extends:** `Item`
+- **Stability:** **Experimental** (API and behavior may change)
 
 ## Import
 
@@ -70,8 +71,8 @@ Md3LiquidGlass {
 ## Notes
 
 - Lens math follows open recreations ([kennsorr/glass-lens-effect](https://github.com/kennsorr/glass-lens-effect), [glass-gl](https://github.com/wiiiimm/glass-gl)): Snell's Law `surfaceSlope`, subtle chroma (`±0.02×dispersion`), white Fresnel rim.
-- **Two-block fusion:** Gallery → **容器** → section **水滴融合 (SDF)** (`Md3LiquidGlassFusionPlayground`).
-- Open Gallery **容器** for Liquid Glass cards and droplet/body fusion demos.
+- Gallery 默认不展示 Liquid Glass；请在业务中按需接入，并先完成性能与兼容性验证。
+- 融合能力参见 `Md3LiquidGlassFusionPlayground`，同属 Experimental。
 - `dropletA/B/C` use normalized UV coordinates:
   - `x`, `y`: center in `0..1`
   - `radius`: relative droplet radius

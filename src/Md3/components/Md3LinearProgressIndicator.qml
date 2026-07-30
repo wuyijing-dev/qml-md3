@@ -111,10 +111,16 @@ Item {
         repeat: true
         onTriggered: root._refreshTreeShown()
     }
+    Timer {
+        id: deferredWaveTimer
+        interval: 0
+        repeat: false
+        onTriggered: root.rebuildWave()
+    }
     Component.onCompleted: {
         _refreshTreeShown()
         if (isWavy)
-            Qt.callLater(rebuildWave)
+            deferredWaveTimer.restart()
     }
     onVisibleChanged: _refreshTreeShown()
     onOpacityChanged: _refreshTreeShown()
@@ -224,6 +230,6 @@ Item {
             rebuildWave()
     }
     onValueChanged: if (isWavy) rebuildWave()
-    onStyleChanged: if (isWavy) Qt.callLater(rebuildWave)
+    onStyleChanged: if (isWavy) deferredWaveTimer.restart()
     onTravelXChanged: if (isWavy && !waveFrames.running) rebuildWave()
 }
