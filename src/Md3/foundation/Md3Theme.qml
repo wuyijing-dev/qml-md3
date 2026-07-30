@@ -35,25 +35,26 @@ QtObject {
     readonly property real effectsMaxElevation: effectsLevel >= 2 ? 12 : (effectsLevel >= 1 ? 3 : 0)
     /// Liquid-glass quality hint: 0 low / 1 mid / 2 high.
     readonly property int effectsGlassQuality: Math.max(0, Math.min(2, effectsLevel))
-    /// Prefer page / overlay transitions (always on unless reduceMotion — independent of ripple).
+    /// Prefer page / overlay transitions (identical across effects tiers; only reduceMotion kills them).
     readonly property bool effectsPageMotion: !reduceMotion
 
-    /// Ripple ink — off on 流畅 (keep transitions); on for 均衡/画质.
-    readonly property bool effectsRipple: effectsLevel >= 1 && !reduceMotion
-    /// Rounded MultiEffect mask for ripple (均衡+).
-    readonly property bool effectsRippleMasked: effectsRipple
+    /// Ripple ink — always on for click feedback (unless reduceMotion). Tier only changes cost/strength.
+    readonly property bool effectsRipple: !reduceMotion
+    /// Rounded MultiEffect mask for ripple (均衡/画质). 流畅 uses cheap rectangular clip.
+    readonly property bool effectsRippleMasked: effectsLevel >= 1 && effectsRipple
     /// Peak / hold opacity for ripple circle.
     readonly property real effectsRipplePeak: {
-        const base = effectsLevel >= 2 ? 0.18 : 0.14
-        return Math.max(0.02, Math.min(0.35, base * effectsIntensity))
+        // 流畅 still needs a visible press flash; High is strongest.
+        const base = effectsLevel >= 2 ? 0.18 : (effectsLevel >= 1 ? 0.14 : 0.12)
+        return Math.max(0.04, Math.min(0.35, base * effectsIntensity))
     }
     readonly property real effectsRippleHold: effectsRipplePeak * 0.5
-    /// Expand factor for ripple diameter.
-    readonly property real effectsRippleSpread: effectsLevel >= 2 ? 2.2 : 2.0
-    /// Hover / press state-layer strength (still present on 流畅, just softer).
+    /// Expand factor for ripple diameter (slightly smaller on 流畅 = cheaper paint).
+    readonly property real effectsRippleSpread: effectsLevel >= 2 ? 2.2 : (effectsLevel >= 1 ? 2.0 : 1.7)
+    /// Hover / press state-layer strength — keep press readable on 流畅.
     readonly property real effectsStateIntensity: {
-        const base = effectsLevel >= 2 ? 1.0 : (effectsLevel >= 1 ? 0.75 : 0.55)
-        return Math.max(0.2, Math.min(1.4, base * effectsIntensity))
+        const base = effectsLevel >= 2 ? 1.0 : (effectsLevel >= 1 ? 0.85 : 0.8)
+        return Math.max(0.35, Math.min(1.4, base * effectsIntensity))
     }
 
     function setEffectsLevel(level) {

@@ -12,7 +12,7 @@ QtObject {
     readonly property bool reduced: Md3Theme ? Md3Theme.reduceMotion : false
 
     // Base durations × durationScale (or 1ms when reduced).
-    // Do not scale by effectsLevel — 流畅 turns off ripples, not page/UI transitions.
+    // Transitions/motion tokens are identical across effectsLevel — tier only gates ink cost & live FPS.
     readonly property int short1: _scaled(50)
     readonly property int short2: _scaled(100)
     readonly property int short3: _scaled(150)
