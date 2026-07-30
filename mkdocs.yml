@@ -1,6 +1,10 @@
+# Local preview only. Canonical MkDocs + GitHub Pages live in:
+#   https://github.com/wuyijing-dev/QML_MD3_Document
+# Sync: python scripts/docs/sync_document_repo.py --push
+
 site_name: QML MD3
 site_description: Material Design 3 component library for Qt Quick / QML
-site_url: https://wuyijing-dev.github.io/QML_MD3/
+site_url: https://wuyijing-dev.github.io/QML_MD3_Document/
 repo_url: https://github.com/wuyijing-dev/QML_MD3
 repo_name: wuyijing-dev/QML_MD3
 

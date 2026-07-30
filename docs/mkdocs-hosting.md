@@ -1,96 +1,56 @@
-# 用 MkDocs 托管文档
+# 用 MkDocs 托管文档（专用仓）
 
-仓库根目录已提供 `mkdocs.yml`（`docs_dir: docs`）。构建产物在 `site/`（已 gitignore）。
+对外站点放在独立仓库 **[QML_MD3_Document](https://github.com/wuyijing-dev/QML_MD3_Document)**，不在本库开 Pages。
 
-## 本地预览
-
-```bash
-pip install "mkdocs-material>=9"
-mkdocs serve
-# 浏览器打开 http://127.0.0.1:8000
-```
-
-静态构建：
-
-```bash
-mkdocs build
-# 输出：./site
-```
-
-## GitHub Pages（推荐）
-
-### 方式 A：GitHub Actions（自动）
-
-1. 仓库 Settings → Pages → Source 选 **GitHub Actions**。
-2. 合并下方 workflow 到 `main` 后，每次推送会发布 `site/`。
-
-示例 `.github/workflows/docs.yml`：
-
-```yaml
-name: docs
-on:
-  push:
-    branches: [main]
-    paths: [docs/**, mkdocs.yml, .github/workflows/docs.yml]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - run: pip install "mkdocs-material>=9"
-      - run: mkdocs build --strict
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
-```
-
-站点地址一般为：`https://<user>.github.io/<repo>/`  
-若使用 project pages，确认 `mkdocs.yml` 里 `site_url` / `repo_url` 与仓库一致。
-
-### 方式 B：手动 `gh-pages` 分支
-
-```bash
-pip install "mkdocs-material>=9" mkdocs-gh-deploy
-mkdocs gh-deploy
-```
-
-会构建并强制更新 `gh-pages` 分支（仅文档发布用，勿与业务分支混用）。
-
-## 其它静态托管
-
-把 `mkdocs build` 生成的 `site/` 整目录上传即可：
-
-| 平台 | 要点 |
+| 仓库 | 角色 |
 |------|------|
-| Cloudflare Pages | 构建命令 `mkdocs build`，输出目录 `site` |
-| Netlify | 同上；或拖拽 `site/` |
-| Nginx / IIS | 将 `site/` 指为网站根；SPA 不需要，MkDocs 是多页静态站 |
+| [QML_MD3](https://github.com/wuyijing-dev/QML_MD3) | `docs/` 真源；改文档、跑 `gen_api_docs.py` |
+| [QML_MD3_Document](https://github.com/wuyijing-dev/QML_MD3_Document) | `mkdocs.yml` + 同步内容；**GitHub Pages 构建与发布** |
+
+站点：https://wuyijing-dev.github.io/QML_MD3_Document/
+
+## 日常流程
+
+1. 在本库改 `docs/`（或重生 API 文档）
+2. 同步到 Document 仓：
+
+```bash
+# 默认目标：与本仓同级的 ../QML_MD3_Document
+python scripts/docs/sync_document_repo.py
+
+# 或指定路径 / 直接 push
+python scripts/docs/sync_document_repo.py --dest D:/QML_MD3/QML_MD3_Document --push
+```
+
+3. Document 仓的 Actions 自动 `mkdocs build` 并部署 Pages
+
+CI：本库 `.github/workflows/docs-sync.yml` 在 `docs/**` 变更时可自动同步（需配置 secret `DOCUMENT_SYNC_TOKEN`，见下）。
+
+## Document 仓本地预览
+
+```bash
+cd ../QML_MD3_Document   # 或 clone git@github.com:wuyijing-dev/QML_MD3_Document.git
+pip install "mkdocs-material>=9"
+mkdocs serve             # http://127.0.0.1:8000
+mkdocs build             # 输出 ./site
+```
+
+## GitHub Pages（在 Document 仓）
+
+1. 打开 [QML_MD3_Document Settings → Pages](https://github.com/wuyijing-dev/QML_MD3_Document/settings/pages)
+2. Source 选 **GitHub Actions**
+3. 推送 `main` 后由 Document 仓内 `.github/workflows/docs.yml` 发布
+
+## CI 自动同步（可选）
+
+在 **QML_MD3** 仓库 Settings → Secrets 增加：
+
+- `DOCUMENT_SYNC_TOKEN`：具备 `repo` 权限的 PAT（或 fine-grained：对 `QML_MD3_Document` 的 Contents 写权限）
+
+未配置 secret 时，同步 workflow 会跳过 push，仅本地/`workflow_dispatch` 人工同步。
 
 ## 维护注意
 
-- API 页由 `python scripts/docs/gen_api_docs.py` 生成；改控件后先重生再 `mkdocs build`。
-- `docs/professional-todo.md` 为内部清单，默认未进导航；需要可在 `mkdocs.yml` `nav` 中打开。
-- `--strict` 会把断链当错误；CI 建议开启。
+- API 页：`python scripts/docs/gen_api_docs.py`（在本库）→ 再 `sync_document_repo.py`
+- `docs/professional-todo.md` 为内部清单，默认不进 MkDocs `nav`
+- Document 仓 `mkdocs build --strict` 会把断链当错误

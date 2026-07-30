@@ -2,6 +2,8 @@
 
 Enterprise Material Design 3 组件库（Qt Quick / QML）。
 
+对外站点托管在专用仓：[QML_MD3_Document](https://github.com/wuyijing-dev/QML_MD3_Document) → [GitHub Pages](https://wuyijing-dev.github.io/QML_MD3_Document/)。
+
 ## 指南
 
 - [集成](integration.md) — `find_package(Md3)`、链接与启动

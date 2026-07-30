@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
 - [docs/integration.md](docs/integration.md) — CMake + `Md3::run`
 - [docs/qt-version-matrix.md](docs/qt-version-matrix.md) — Qt 5.15 / 6.5 / 6.8 stage matrix
 - [docs/performance.md](docs/performance.md) — first paint / page cache / memory tradeoffs
-- [docs/mkdocs-hosting.md](docs/mkdocs-hosting.md) — MkDocs 本地预览与 GitHub Pages 托管
+- [docs/mkdocs-hosting.md](docs/mkdocs-hosting.md) — MkDocs → 专用仓 [QML_MD3_Document](https://github.com/wuyijing-dev/QML_MD3_Document) / Pages
 - [docs/consumer-app-main-qml.md](docs/consumer-app-main-qml.md) — fix consumer app `Main.qml` / qrc load failures
 - [docs/tokens.md](docs/tokens.md) — 主题令牌
 - [CHANGELOG.md](CHANGELOG.md)
