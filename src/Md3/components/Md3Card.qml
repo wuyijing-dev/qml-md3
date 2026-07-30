@@ -92,9 +92,13 @@ Item {
             anchors.top: parent.top
             anchors.margins: root.padding
             layoutMode: root.layoutMode
-            height: root.height >= root.padding * 2 + 1
-                    ? root.height - root.padding * 2
-                    : implicitHeight
+            // Also break contentHost ↔ root.implicitHeight feedback when auto-sized.
+    height: {
+        const autoSized = Math.abs(root.height - root.implicitHeight) <= 1.5
+        if (!autoSized && root.height >= root.padding * 2 + 1)
+            return root.height - root.padding * 2
+        return implicitHeight
+    }
 
             Md3VStack {
                 width: parent.width
@@ -182,15 +186,10 @@ Item {
                         }
                         return false
                     }
-                    height: {
-                        if (!hasFillChild)
-                            return childrenRect.height
-                        const intrinsic = root.padding * 2 + headerBlock + fillFallback
-                        if (root.height > intrinsic + 0.5)
-                            return Math.max(1, root.height - root.padding * 2 - headerBlock)
-                        return fillFallback
-                    }
-                    implicitHeight: hasFillChild ? fillFallback : childrenRect.height
+                    // Never read root.height here — it tracks implicitHeight which includes
+                    // this height, and that forms a binding loop (Qt warns on line height).
+                    height: hasFillChild ? fillFallback : Math.max(0, childrenRect.height)
+                    implicitHeight: hasFillChild ? fillFallback : Math.max(0, childrenRect.height)
                     implicitWidth: childrenRect.width
                 }
             }

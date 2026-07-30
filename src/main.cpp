@@ -1,7 +1,12 @@
 #include "md3.h"
 
+#include <QByteArray>
+
 int main(int argc, char *argv[])
 {
+    // Gallery AccessibilityPage loads qrc:/gallery/data/*.json via XHR.
+    qputenv("QML_XHR_ALLOW_FILE_READ", QByteArrayLiteral("1"));
+
     Md3::RunOptions opts;
     opts.organization = QStringLiteral("QML_MD3");
     opts.applicationName = QStringLiteral("Md3 Gallery");
