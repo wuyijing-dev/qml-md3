@@ -65,17 +65,33 @@ Item {
     property bool _viewDirty: false
 
     property bool paused: false
-    /// Only block when minimized/hidden — never for theme reveal.
+    /// Only block when minimized/hidden/inactive — never for theme reveal.
     readonly property bool interactionBlocked: {
         const w = Window.window
         if (!w)
             return false
         if (w.visibility === Window.Minimized || w.visibility === Window.Hidden)
             return true
+        if (!w.active)
+            return true
+        if (Qt.application.state === Qt.ApplicationSuspended
+                || Qt.application.state === Qt.ApplicationHidden)
+            return true
         return false
     }
+    /// Walk ancestors — PageHost hides cached pages via parent opacity/visible,
+    /// which does not flip this item's own visible/opacity.
+    readonly property bool effectivelyShown: {
+        let p = root
+        while (p) {
+            if (!p.visible || p.opacity < 0.01)
+                return false
+            p = p.parent
+        }
+        return true
+    }
     readonly property bool chartActive: !paused && !interactionBlocked && enabled
-                                        && visible && opacity > 0.01
+                                        && effectivelyShown
 
     property int renderedPointCount: 0
 

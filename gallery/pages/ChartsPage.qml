@@ -82,6 +82,7 @@ Item {
                         label: qsTr("Wave")
                         unit: "%"
                         size: 112
+                        animationFps: 16
                     }
                     Md3TickRingGauge {
                         value: 76
@@ -383,7 +384,8 @@ Item {
                         Md3LineChart {
                             live: true
                             paused: true
-                            livePointCount: 32
+                            livePointCount: 28
+                            liveFps: 16
                             showDots: false
                             showArea: true
                             showProbe: true

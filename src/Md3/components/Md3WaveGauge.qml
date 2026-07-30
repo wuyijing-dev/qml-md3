@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Window
 
 /// Circular gauge with animated liquid / wave fill level (seamless loop).
 Item {
@@ -16,6 +17,8 @@ Item {
     property color waveColor: Qt.rgba(valueColor.r, valueColor.g, valueColor.b, 0.55)
     property bool showValue: true
     property bool animated: !Md3Theme.reduceMotion
+    /// Cap wave redraws (Canvas 2D is expensive at 60fps).
+    property int animationFps: 20
     property real size: 140
     property real strokeWidth: 3
     /// Radians advanced per second (wave travel speed).
@@ -27,6 +30,27 @@ Item {
     }
     readonly property string valueText: Number(value).toFixed(decimals) + (unit.length ? unit : "")
 
+    /// Parent page slots hide via opacity/visible — child.visible stays true, so walk the tree.
+    readonly property bool effectivelyShown: {
+        let p = root
+        while (p) {
+            if (!p.visible || p.opacity < 0.01)
+                return false
+            p = p.parent
+        }
+        const w = Window.window
+        if (w) {
+            if (w.visibility === Window.Minimized || w.visibility === Window.Hidden)
+                return false
+            if (!w.active)
+                return false
+        }
+        if (Qt.application.state === Qt.ApplicationSuspended
+                || Qt.application.state === Qt.ApplicationHidden)
+            return false
+        return true
+    }
+
     width: size
     height: size
     implicitWidth: size
@@ -34,14 +58,14 @@ Item {
 
     property real wavePhase: 0
 
-    // Continuous phase — no Animation loops restart (that caused a visible hitch
-    // when secondary waves used non-integer phase multipliers).
-    FrameAnimation {
-        running: root.animated && root.visible
+    // Throttled wave — not FrameAnimation (that kept Canvas at display refresh).
+    Timer {
+        interval: Math.max(16, Math.round(1000 / Math.max(1, root.animationFps)))
+        running: root.animated && root.effectivelyShown
+        repeat: true
         onTriggered: {
-            root.wavePhase += root.waveSpeed * frameTime
-            // Keep phase bounded; all wave terms use integer multiples of phase
-            // so wrapping by 2π is C∞ continuous for sin().
+            const dt = interval / 1000
+            root.wavePhase += root.waveSpeed * dt
             if (root.wavePhase > Math.PI * 2)
                 root.wavePhase -= Math.PI * 2
             canvas.requestPaint()

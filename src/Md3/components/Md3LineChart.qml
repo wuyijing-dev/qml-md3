@@ -10,6 +10,8 @@ Md3Chart {
     property int livePointCount: 48
     property real liveSpeed: 2.4
     property real livePhase: 0
+    /// Cap live rebuilds — full Shape rebuild at 60fps is the Charts-page CPU hog.
+    property int liveFps: 18
     /// Mutated in place — avoids allocating a new array every animation frame.
     property var liveBuffer: []
 
@@ -158,9 +160,11 @@ Md3Chart {
         property int sampleCount: 0
     }
 
-    FrameAnimation {
+    Timer {
+        interval: Math.max(16, Math.round(1000 / Math.max(1, root.liveFps)))
         running: root.live && root.chartActive
-        onTriggered: root.advanceLive(frameTime)
+        repeat: true
+        onTriggered: root.advanceLive(interval / 1000)
     }
 
     onLiveChanged: {
