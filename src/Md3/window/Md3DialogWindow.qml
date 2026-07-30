@@ -249,7 +249,7 @@ Window {
                     if (item.targetWindow !== undefined)
                         item.targetWindow = root
                     if (item.windowHelper !== undefined)
-                        item.windowHelper = windowHelper
+                        item.windowHelper = root.windowNative
                     if (item.cornerRadius !== undefined)
                         item.cornerRadius = Qt.binding(function () { return root.effectiveRadius })
                     if (item.title !== undefined)
@@ -292,12 +292,13 @@ Window {
                     showMaximize: root.showMaximizeButton
                     showClose: root.closable
                     targetWindow: root
-                    windowHelper: windowHelper
+                    // Use windowNative — `windowHelper: windowHelper` self-binds (same name as id).
+                    windowHelper: root.windowNative
                     cornerRadius: root.effectiveRadius
                     preferredHeight: 28
                     barHeight: 28
-                    leadingInset: windowHelper.trafficLightsInset > 0
-                                  ? windowHelper.trafficLightsInset
+                    leadingInset: root.windowNative.trafficLightsInset > 0
+                                  ? root.windowNative.trafficLightsInset
                                   : Md3WindowCapabilities.trafficLightsInset
                     onPinToggled: function (onTop) { root.pinned = onTop }
                 }
@@ -400,7 +401,10 @@ Window {
             id: chromeMask
             width: chrome.width
             height: chrome.height
-            layer.enabled: chrome.layer.enabled
+            // Independent of chrome.layer.enabled — avoids MultiEffect t2 “no texture provider”
+            // while the mask FBO is still coming up in the same frame as the chrome layer.
+            layer.enabled: root.effectiveRadius > 0 && !root.usesSystemBackdrop
+            layer.smooth: true
             visible: false
             Rectangle {
                 anchors.fill: parent

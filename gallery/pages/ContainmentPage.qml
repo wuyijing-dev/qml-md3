@@ -13,7 +13,7 @@ Item {
         contentWidth: width
         contentHeight: column.height
         clip: true
-        interactive: glassPlayground.dragCount === 0 && fusionPlayground.dragCount === 0
+        interactive: true
         boundsBehavior: Flickable.StopAtBounds
         ColumnLayout {
             id: column
