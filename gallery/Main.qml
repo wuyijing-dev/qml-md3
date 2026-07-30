@@ -21,13 +21,42 @@ Md3ApplicationWindow {
     railHeader: qsTr("组件图库")
     pagePadding: 20
     pageSkeleton: true
-    // Perf: keep library low-RSS defaults (arc, L1=1). For instant revisits see docs/performance.md
-    // pageCacheLimit: 6; pagePrefetch: true; pageTransition: "none"
+    // Fast first paint: start with low-RSS (no warm / no neighbor prefetch).
+    // After the shell is up, navWarmTimer raises L1/L2 + enables prefetch (Profile B).
+    pageCacheLimit: 1
+    pageL2CacheLimit: 1
+    pagePrefetch: false
+    pagePredictPrefetch: false
+    pageWarmStart: false
+    pageL2Warm: false
     persistSession: true
     settingsOrganization: "QML_MD3"
     settingsApplication: "Gallery"
     // Hot-reload clears QML caches and slows cold open — enable only while iterating QML.
     hotReload: false
+
+    property bool _navWarmReady: false
+
+    /// Next beat after the window is shown: keep more pages + warm neighbors.
+    Timer {
+        id: navWarmTimer
+        interval: 80
+        repeat: false
+        onTriggered: {
+            if (window._navWarmReady)
+                return
+            window._navWarmReady = true
+            window.pageCacheLimit = 6
+            window.pageL2CacheLimit = 8
+            window.pagePrefetch = true
+            window.pagePredictPrefetch = true
+        }
+    }
+
+    onVisibleChanged: {
+        if (visible && !_navWarmReady && !navWarmTimer.running)
+            navWarmTimer.start()
+    }
 
     // Document tabs under the title bar (no browserChrome / no tear-off window)
     documentTabsEnabled: true
@@ -241,6 +270,9 @@ Md3ApplicationWindow {
         })
         if (!Md3AppSettings.value("tour/completed", false))
             Qt.callLater(function () { window.startTour() })
+        // Window may already be visible before this runs on some platforms.
+        if (visible && !_navWarmReady && !navWarmTimer.running)
+            navWarmTimer.start()
     }
 
     destinations: [

@@ -93,6 +93,40 @@ Gallery historically used `hotReload: true` for开发 — that **clears componen
 
 ---
 
+### D. Fast first open + snappy switches（推荐 Gallery）
+
+Start like profile C (no warm / no prefetch). After the window is visible (~80ms), raise L1/L2 and enable neighbor prefetch — see `gallery/Main.qml` `navWarmTimer`.
+
+```qml
+Md3ApplicationWindow {
+    pageCacheLimit: 1
+    pageL2CacheLimit: 1
+    pagePrefetch: false
+    pagePredictPrefetch: false
+    pageWarmStart: false
+    pageL2Warm: false
+    pageSkeleton: true
+    hotReload: false
+
+    Timer {
+        interval: 80
+        running: parent.visible  // or start from onVisibleChanged
+        onTriggered: {
+            pageCacheLimit = 6
+            pageL2CacheLimit = 8
+            pagePrefetch = true
+            pagePredictPrefetch = true
+        }
+    }
+}
+```
+
+- 首启：不和邻居编译抢 CPU  
+- 切页：暖机后近似 Profile B  
+- 内存：比纯 Low memory 高，低于启动即 Warm 全部  
+
+---
+
 ## Off-screen: don’t pay for effects
 
 1. **Long pages** — wrap below-the-fold blocks:
