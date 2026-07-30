@@ -24,6 +24,20 @@ endif()
 
 When this repo is added via `add_subdirectory` from another project, `MD3_BUILD_GALLERY` defaults to **OFF**.
 
+### Qt version selector
+
+Stage 1 multi-version support adds:
+
+```cmake
+set(MD3_QT_VERSION AUTO CACHE STRING "")  # AUTO / 5 / 6
+```
+
+- `AUTO`: prefer Qt6, fall back to Qt5
+- `6`: full Md3 + Gallery path
+- `5`: **stage 1 minimal bootstrap only**; use `MD3_BUILD_GALLERY=OFF`
+
+See [qt-version-matrix.md](qt-version-matrix.md) for the current support scope.
+
 ## CMake — packaged `./Md3` (recommended for apps)
 
 1. Run `scripts/package-linux.sh` or `scripts/package-windows.ps1`  

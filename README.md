@@ -150,6 +150,7 @@ int main(int argc, char *argv[]) {
 | `MD3_BUILD_GALLERY` | ON if top-level, **OFF** if `add_subdirectory` | Build Gallery app |
 | `MD3_BUILD_SHARED` | OFF (scripts default ON) | Shared instead of static `Md3` |
 | `MD3_QML_CACHEGEN` | **ON** | qmlcachegen for faster cold open; `-DOFF` only when iterating QML without clean rebuild |
+| `MD3_QT_VERSION` | `AUTO` | Qt major selector: `AUTO` / `5` / `6` |
 
 ## Docs
 
@@ -159,6 +160,7 @@ int main(int argc, char *argv[]) {
 - [docs/api/README.md](docs/api/README.md) — **完整控件 API**（一控件一文档，含全部属性/信号/方法）
 - [docs/packaging.md](docs/packaging.md) — **预编译包（默认 shared）/ 系统安装 / 同目录 `Md3/`**
 - [docs/integration.md](docs/integration.md) — CMake + `Md3::run`
+- [docs/qt-version-matrix.md](docs/qt-version-matrix.md) — Qt 5.15 / 6.5 / 6.8 stage matrix
 - [docs/performance.md](docs/performance.md) — first paint / page cache / memory tradeoffs
 - [docs/consumer-app-main-qml.md](docs/consumer-app-main-qml.md) — fix consumer app `Main.qml` / qrc load failures
 - [docs/tokens.md](docs/tokens.md) — 主题令牌

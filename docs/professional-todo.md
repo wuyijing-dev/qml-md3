@@ -95,7 +95,7 @@
 
 ### 2.2 平台矩阵
 
-- [ ] 官方支持矩阵表（README）：OS × Qt × 编译器 × shared/static
+- [x] 官方支持矩阵表（README / `docs/qt-version-matrix.md` 初版）：OS × Qt × 编译器 × shared/static
 - [ ] Windows 10/11 打包与运行冒烟
 - [ ] Linux（至少一种主流桌面）打包与运行冒烟
 - [ ] macOS（若宣称桌面库跨平台）：窗口/标题栏能力差异文档

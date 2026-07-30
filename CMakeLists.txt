@@ -5,8 +5,16 @@ project(QML_MD3 VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 QuickEffects QuickShapesPrivate QuickDialogs2 Network)
-qt_standard_project_setup(REQUIRES 6.8)
+include(cmake/Md3QtCompat.cmake)
+
+if (MD3_QT_MAJOR EQUAL 6)
+    md3_find_qt(Core Qml Quick QuickControls2 QuickEffects QuickShapesPrivate QuickDialogs2 Network)
+    # Stage 1 target: full path validated on 6.5+ (6.8 recommended baseline).
+    qt_standard_project_setup(REQUIRES 6.5)
+else()
+    md3_find_qt(Quick QuickControls2 Network)
+    message(STATUS "Md3: Qt5.15 compatibility mode (stage 1) enabled")
+endif()
 
 # Top-level repo build → Gallery ON by default.
 # add_subdirectory(this-repo) from another project → Gallery OFF (library only).
@@ -19,6 +27,12 @@ option(MD3_BUILD_SHARED "Build Md3 as a shared library" OFF)
 # qmlcachegen: faster cold page open (bytecode in binary). Default ON for all configs.
 # Turn OFF only while iterating QML without clean rebuilds: -DMD3_QML_CACHEGEN=OFF
 option(MD3_QML_CACHEGEN "Compile QML with qmlcachegen (faster cold open)" ON)
+
+if (MD3_QT_MAJOR EQUAL 5)
+    # Stage 1: Qt5 branch compiles the core bootstrap library only.
+    set(MD3_BUILD_GALLERY OFF CACHE BOOL "" FORCE)
+    set(MD3_QML_CACHEGEN OFF CACHE BOOL "" FORCE)
+endif()
 
 # ----- Library (URI Md3) — always built -----
 add_subdirectory(src/Md3)

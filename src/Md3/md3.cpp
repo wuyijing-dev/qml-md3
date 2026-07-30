@@ -172,7 +172,12 @@ int loadFonts()
     families << QStringLiteral("Sans Serif");
 
     QFont font;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     font.setFamilies(families);
+#else
+    if (!families.isEmpty())
+        font.setFamily(families.first());
+#endif
     font.setStyleHint(QFont::SansSerif);
     font.setStyleStrategy(QFont::PreferAntialias);
     // NoHinting + Qt distance-field text: smoother edges than Native+VerticalHinting.
@@ -296,7 +301,16 @@ int run(int argc, char **argv,
     if (QFile::exists(diskMain)) {
         engine.load(QUrl::fromLocalFile(diskMain));
     } else {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         engine.loadFromModule(moduleUri, mainComponent);
+#else
+        const QString qrcMain = QStringLiteral("qrc:/")
+                + moduleUri
+                + QLatin1Char('/')
+                + mainComponent
+                + QStringLiteral(".qml");
+        engine.load(QUrl(qrcMain));
+#endif
     }
     return app.exec();
 }

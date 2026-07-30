@@ -4,10 +4,18 @@ if (NOT TARGET Md3)
     message(FATAL_ERROR "Gallery requires Md3 library target — add_subdirectory(src/Md3) first")
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 QuickEffects Multimedia QuickDialogs2)
+if (NOT DEFINED MD3_QT_MAJOR)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/Md3QtCompat.cmake)
+endif()
+
+if (MD3_QT_MAJOR EQUAL 5)
+    message(FATAL_ERROR "Gallery is stage2+ for Qt6 only. Use -DMD3_BUILD_GALLERY=OFF for Qt5.15 stage1.")
+endif()
+
+md3_find_qt(Core Qml Quick QuickControls2 QuickEffects Multimedia QuickDialogs2)
 if (UNIX AND NOT APPLE)
     # PerformanceMonitor / Linux chrome helpers need Widgets + DBus
-    find_package(Qt6 REQUIRED COMPONENTS Widgets DBus)
+    md3_find_qt(Widgets DBus)
 endif()
 
 # Prefer parent option MD3_QML_CACHEGEN (default ON). Gallery-only override:
@@ -42,6 +50,9 @@ qt_add_resources(appQML_MD3 "gallery_data"
         data/a11y-scan.json
 )
 
+set(QT_KNOWN_POLICY_QTP0001 TRUE)
+set(QT_KNOWN_POLICY_QTP0004 TRUE)
+set(QT_KNOWN_POLICY_QTP0005 TRUE)
 qt_add_qml_module(appQML_MD3
     URI Gallery
     VERSION 1.0
