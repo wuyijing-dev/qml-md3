@@ -152,6 +152,7 @@ int main(int argc, char *argv[]) {
 
 ## Docs
 
+- [docs/professional-todo.md](docs/professional-todo.md) — **专业组件库完整 TODO**（治理 / CI / 测试 / a11y / 发版）
 - [docs/api/README.md](docs/api/README.md) — **完整控件 API**（一控件一文档，含全部属性/信号/方法）
 - [docs/packaging.md](docs/packaging.md) — **预编译包（默认 shared）/ 系统安装 / 同目录 `Md3/`**
 - [docs/integration.md](docs/integration.md) — CMake + `Md3::run`
