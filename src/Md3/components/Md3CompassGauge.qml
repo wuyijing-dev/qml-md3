@@ -24,17 +24,21 @@ Item {
         return p
     }
     readonly property string valueText: Number(value).toFixed(decimals) + (unit.length ? unit : "")
+    readonly property real _captionH: (showValue || label.length) ? 22 : 0
 
     width: size
-    height: size
+    height: size + _captionH
     implicitWidth: size
-    implicitHeight: size
+    implicitHeight: size + _captionH
 
     function _rad(deg) { return deg * Math.PI / 180 }
 
     Canvas {
         id: canvas
-        anchors.fill: parent
+        width: root.size
+        height: root.size
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
         onPaint: {
             const ctx = getContext("2d")
             ctx.clearRect(0, 0, width, height)
@@ -50,7 +54,6 @@ Item {
             ctx.lineWidth = 1
             ctx.stroke()
 
-            // Ticks every 15°, major every 45°
             for (let i = 0; i < 24; ++i) {
                 const ang = root._rad(-90 + i * 15)
                 const major = (i % 3) === 0
@@ -80,7 +83,6 @@ Item {
                 }
             }
 
-            // Needle (0° = North = -90 in canvas)
             const nang = root._rad(-90 + 360 * root.progress)
             ctx.strokeStyle = root.valueColor
             ctx.fillStyle = root.valueColor
@@ -101,14 +103,18 @@ Item {
     onHeightChanged: canvas.requestPaint()
     Component.onCompleted: canvas.requestPaint()
 
+    // Caption sits under the dial — never over N/E/S/W
     Text {
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 10
-        visible: root.showValue
+        anchors.top: canvas.bottom
+        anchors.topMargin: 2
+        width: root.size
+        horizontalAlignment: Text.AlignHCenter
+        visible: root.showValue || root.label.length > 0
         text: root.label.length ? (root.label + " " + root.valueText) : root.valueText
         color: Md3Theme.colorScheme.colorOnSurfaceVariant
         font.family: Md3Theme.typography.fontFamily
         font.pixelSize: Md3Theme.typography.labelMedium.size
+        elide: Text.ElideRight
     }
 }

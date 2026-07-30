@@ -23,17 +23,21 @@ Item {
         return Math.max(0, Math.min(1, (value - from) / span))
     }
     readonly property string valueText: Number(value).toFixed(decimals) + (unit.length ? unit : "")
+    readonly property real _captionH: (showValue || label.length) ? 36 : 0
 
     width: size
-    height: size
+    height: size + _captionH
     implicitWidth: size
-    implicitHeight: size
+    implicitHeight: size + _captionH
 
     function _rad(deg) { return deg * Math.PI / 180 }
 
     Canvas {
         id: canvas
-        anchors.fill: parent
+        width: root.size
+        height: root.size
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
         onPaint: {
             const ctx = getContext("2d")
             ctx.clearRect(0, 0, width, height)
@@ -44,7 +48,6 @@ Item {
             const a1 = root._rad(root.startAngle + root.sweepAngle)
             const ap = root._rad(root.startAngle + root.sweepAngle * root.progress)
 
-            // Track arc
             ctx.lineWidth = 6
             ctx.lineCap = "round"
             ctx.strokeStyle = root.trackColor
@@ -56,7 +59,6 @@ Item {
             ctx.arc(cx, cy, r - 2, a0, ap, false)
             ctx.stroke()
 
-            // Knob body
             ctx.beginPath()
             ctx.arc(cx, cy, r * 0.62, 0, Math.PI * 2)
             ctx.fillStyle = root.knobColor
@@ -65,7 +67,6 @@ Item {
             ctx.lineWidth = 1
             ctx.stroke()
 
-            // Notch
             const nr = r * 0.42
             ctx.strokeStyle = root.valueColor
             ctx.lineWidth = 3
@@ -75,7 +76,6 @@ Item {
             ctx.lineTo(cx + Math.cos(ap) * nr, cy + Math.sin(ap) * nr)
             ctx.stroke()
 
-            // Center pip
             ctx.beginPath()
             ctx.arc(cx, cy, 4, 0, Math.PI * 2)
             ctx.fillStyle = root.valueColor
@@ -90,11 +90,14 @@ Item {
 
     Column {
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 6
+        anchors.top: canvas.bottom
+        anchors.topMargin: 2
+        width: root.size
         spacing: 0
+
         Text {
-            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
             visible: root.showValue
             text: root.valueText
             color: Md3Theme.colorScheme.colorOnSurface
@@ -103,7 +106,8 @@ Item {
             font.weight: Font.Medium
         }
         Text {
-            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
             visible: root.label.length > 0
             text: root.label
             color: Md3Theme.colorScheme.colorOnSurfaceVariant

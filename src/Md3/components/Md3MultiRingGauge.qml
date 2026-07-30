@@ -14,8 +14,8 @@ Item {
     property string centerLabel: ""
     property string centerValue: ""
     property real size: 160
-    /// Extra inset so center text stays clear of the innermost stroke.
-    property real centerPadding: 6
+    /// Minimum center hole as a fraction of diameter (keeps text readable).
+    property real minCenterRatio: 0.40
 
     width: size
     height: size
@@ -23,15 +23,20 @@ Item {
     implicitHeight: size
 
     readonly property int _ringCount: rings && rings.length ? rings.length : 0
-    /// Clear radius inside the innermost ring track (center hole).
-    readonly property real innerHoleRadius: {
+    readonly property real _dialR: Math.min(width, height) / 2
+    /// Guaranteed readable hole; rings auto-thin to leave this clear.
+    readonly property real innerHoleRadius: Math.max(22, _dialR * minCenterRatio)
+    readonly property real _effGap: {
         const n = Math.max(1, _ringCount)
-        const outer = Math.min(width, height) / 2 - strokeWidth
-        const hole = outer - (n - 1) * (strokeWidth + ringGap) - strokeWidth * 0.5 - centerPadding
-        return Math.max(8, hole)
+        const band = Math.max(8, _dialR - 2 - innerHoleRadius)
+        return Math.min(ringGap, Math.max(2, band * 0.12))
     }
-    readonly property real _valuePx: Math.max(11, Math.min(22, innerHoleRadius * 0.55))
-    readonly property real _labelPx: Math.max(9, Math.min(12, innerHoleRadius * 0.28))
+    readonly property real _effStroke: {
+        const n = Math.max(1, _ringCount)
+        const band = Math.max(8, _dialR - 2 - innerHoleRadius)
+        const stroke = (band - (n - 1) * _effGap) / n
+        return Math.max(3.5, Math.min(strokeWidth, stroke))
+    }
 
     function _rad(deg) { return deg * Math.PI / 180 }
 
@@ -53,13 +58,18 @@ Item {
                 return
             const cx = width / 2
             const cy = height / 2
-            let r = Math.min(width, height) / 2 - root.strokeWidth
-            ctx.lineWidth = root.strokeWidth
+            const stroke = root._effStroke
+            const gap = root._effGap
+            let r = root._dialR - stroke * 0.5 - 1
+            ctx.lineWidth = stroke
             ctx.lineCap = "round"
             for (let i = 0; i < list.length; ++i) {
                 const ring = list[i]
                 const p = root._progress(ring)
                 const col = ring.color !== undefined ? ring.color : Md3Theme.colorScheme.primary
+                // Keep stroke outside the reserved center hole
+                if (r - stroke * 0.5 < root.innerHoleRadius)
+                    break
                 ctx.strokeStyle = root.trackColor
                 ctx.beginPath()
                 ctx.arc(cx, cy, r, 0, Math.PI * 2)
@@ -69,9 +79,7 @@ Item {
                 ctx.arc(cx, cy, r, root._rad(root.startAngle),
                         root._rad(root.startAngle + 360 * p), false)
                 ctx.stroke()
-                r -= root.strokeWidth + root.ringGap
-                if (r < root.strokeWidth)
-                    break
+                r -= stroke + gap
             }
         }
     }
@@ -87,37 +95,44 @@ Item {
         id: centerHole
         visible: root.showCenterLabel
         anchors.centerIn: parent
-        width: root.innerHoleRadius * 2
-        height: root.innerHoleRadius * 2
-        clip: true
+        width: root.innerHoleRadius * 2 * 0.92
+        height: root.innerHoleRadius * 2 * 0.92
 
         Column {
             anchors.centerIn: parent
-            width: parent.width - 4
-            spacing: 0
+            width: parent.width
+            spacing: 1
 
             Text {
                 width: parent.width
+                height: parent.parent.height * (root.centerLabel.length ? 0.58 : 0.8)
                 visible: root.centerValue.length > 0
                 text: root.centerValue
                 color: Md3Theme.colorScheme.colorOnSurface
                 horizontalAlignment: Text.AlignHCenter
-                elide: Text.ElideRight
-                maximumLineCount: 1
-                font.family: Md3Theme.typography.fontFamily
-                font.pixelSize: root._valuePx
+                verticalAlignment: Text.AlignVCenter
+                fontSizeMode: Text.Fit
+                minimumPixelSize: 9
+                font.pixelSize: 28
                 font.weight: Font.DemiBold
+                font.family: Md3Theme.typography.fontFamily
+                wrapMode: Text.NoWrap
+                elide: Text.ElideNone
             }
             Text {
                 width: parent.width
+                height: parent.parent.height * 0.32
                 visible: root.centerLabel.length > 0
                 text: root.centerLabel
                 color: Md3Theme.colorScheme.colorOnSurfaceVariant
                 horizontalAlignment: Text.AlignHCenter
-                elide: Text.ElideRight
-                maximumLineCount: 1
+                verticalAlignment: Text.AlignVCenter
+                fontSizeMode: Text.Fit
+                minimumPixelSize: 8
+                font.pixelSize: 14
                 font.family: Md3Theme.typography.fontFamily
-                font.pixelSize: root._labelPx
+                wrapMode: Text.NoWrap
+                elide: Text.ElideNone
             }
         }
     }

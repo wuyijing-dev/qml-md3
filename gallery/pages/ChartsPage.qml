@@ -60,7 +60,8 @@ Item {
                         size: 112
                     }
                     Md3MultiRingGauge {
-                        size: 120
+                        size: 132
+                        minCenterRatio: 0.42
                         centerValue: "81%"
                         centerLabel: qsTr("Multi")
                         rings: [
