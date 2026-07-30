@@ -202,6 +202,7 @@ Guide: [../layout.md](../layout.md)
 ## Window
 
 - [Md3ApplicationWindow](Md3ApplicationWindow.md)
+- [Md3TabWindow](Md3TabWindow.md)
 - [Md3CaptionButtons](Md3CaptionButtons.md)
 - [Md3DialogWindow](Md3DialogWindow.md) — Separate OS-level dialog window (QWidget-like multi-window), not an overlay.
 - [Md3PageHost](Md3PageHost.md)

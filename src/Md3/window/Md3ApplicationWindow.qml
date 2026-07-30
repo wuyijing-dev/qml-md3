@@ -117,20 +117,23 @@ Window {
     property alias performanceMonitor: perfMonitor
     property alias performancePanel: perfPanel
 
-    // --- Document tabs (under title bar; no tear-off window) ---
+    // --- Document tabs (under title bar; drag out → Md3TabWindow) ---
     /// Show Win11-style tab strip under the title bar.
     property bool documentTabsEnabled: false
-    /// Auto-handle activate / close / add / reorder + sync with currentIndex.
+    /// Auto-handle activate / close / add / reorder / tear-off + sync with currentIndex.
     property bool documentTabsManaged: true
+    /// Close this window when the last tab is closed (typical for torn-off windows).
     property bool documentTabsCloseWindowWhenEmpty: false
     property var documentTabs: []
     property int documentTabIndex: 0
     property bool documentTabsClosable: true
-    /// Tear-off to a separate window is disabled (no Md3TabWindow).
-    property bool documentTabsTearOff: false
+    /// Drag a tab outside the window to spawn a peer `Md3TabWindow`.
+    property bool documentTabsTearOff: true
     property bool documentTabsShowAdd: true
     property alias documentTabBar: docTabBar
     property bool _docTabSyncing: false
+    /// Keep tear-off windows alive (createObject parent is null).
+    property var _tornWindows: []
 
     /// App-top tool strip between tabs/titlebar and content.
     property alias toolBar: toolBarSlot.data
@@ -283,10 +286,82 @@ Window {
         _docTabSyncing = false
     }
 
-    /// Tear-off windows removed — signal only for apps that want custom handling.
+    /// Drag-out: remove tab from this window and open it in a new `Md3TabWindow`.
     function tearOffTab(index, globalX, globalY) {
-        documentTabTearOff(index, globalX !== undefined ? globalX : 0,
-                           globalY !== undefined ? globalY : 0)
+        if (!documentTabsTearOff)
+            return
+        if (!documentTabs || documentTabs.length <= 1
+                || index < 0 || index >= documentTabs.length)
+            return
+
+        _docTabSyncing = true
+        const tabs = documentTabs.slice()
+        const torn = tabs.splice(index, 1)[0]
+        documentTabs = tabs
+        documentTabIndex = Math.max(0, Math.min(
+            documentTabIndex === index
+                ? (index > 0 ? index - 1 : 0)
+                : (documentTabIndex > index ? documentTabIndex - 1 : documentTabIndex),
+            tabs.length - 1))
+        const t = tabs[documentTabIndex]
+        if (t && t.pageIndex !== undefined)
+            navigateTo(t.pageIndex)
+        if (t && t.title)
+            title = t.title
+        _docTabSyncing = false
+
+        const gx = globalX !== undefined ? globalX : root.x + 48
+        const gy = globalY !== undefined ? globalY : root.y + 48
+
+        const comp = Qt.createComponent(Qt.resolvedUrl("Md3TabWindow.qml"))
+        function spawn() {
+            const w = comp.createObject(null, {
+                catalog: root.destinations,
+                initialTabs: [torn],
+                x: Math.max(0, gx - 96),
+                y: Math.max(0, gy - 20),
+                width: Math.min(960, root.width),
+                height: Math.min(640, root.height),
+                windowIcon: root.windowIcon,
+                pageSourceBase: root.pageSourceBase,
+                systemBackdrop: root.systemBackdrop,
+                cornerRadius: root.cornerRadius,
+                railHeader: root.railHeader,
+                navigationRail: root.navigationRail,
+                documentTabsCloseWindowWhenEmpty: true,
+                documentTabsTearOff: true
+            })
+            if (!w) {
+                console.warn("Md3ApplicationWindow: tear-off createObject failed")
+                return
+            }
+            const kept = (root._tornWindows || []).slice()
+            kept.push(w)
+            root._tornWindows = kept
+            w.closing.connect(function () {
+                const next = []
+                const list = root._tornWindows || []
+                for (let i = 0; i < list.length; ++i) {
+                    if (list[i] !== w)
+                        next.push(list[i])
+                }
+                root._tornWindows = next
+            })
+        }
+        if (comp.status === Component.Ready) {
+            spawn()
+        } else if (comp.status === Component.Error) {
+            console.warn("Md3ApplicationWindow tear-off:", comp.errorString())
+        } else {
+            comp.statusChanged.connect(function () {
+                if (comp.status === Component.Ready)
+                    spawn()
+                else if (comp.status === Component.Error)
+                    console.warn("Md3ApplicationWindow tear-off:", comp.errorString())
+            })
+        }
+
+        documentTabTearOff(index, gx, gy)
     }
 
     function _managedSyncTabFromPage() {

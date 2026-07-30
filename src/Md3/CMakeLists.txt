@@ -195,6 +195,7 @@ qt_add_qml_module(Md3
         window/Md3PageHost.qml
         window/Md3WindowBody.qml
         window/Md3ApplicationWindow.qml
+        window/Md3TabWindow.qml
         window/Md3DialogWindow.qml
         layout/Md3AnimatedFlow.qml
         layout/Md3VStack.qml

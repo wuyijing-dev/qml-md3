@@ -84,7 +84,7 @@ import Md3
 | `documentTabs` | `var` | `[]` | read/write | `Md3ApplicationWindow` | — |
 | `documentTabIndex` | `int` | `0` | read/write | `Md3ApplicationWindow` | — |
 | `documentTabsClosable` | `bool` | `true` | read/write | `Md3ApplicationWindow` | — |
-| `documentTabsTearOff` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Tear-off to a separate window is disabled (no Md3TabWindow). |
+| `documentTabsTearOff` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Drag a tab outside the window to spawn a peer `Md3TabWindow`. |
 | `documentTabsShowAdd` | `bool` | `true` | read/write | `Md3ApplicationWindow` | — |
 | `documentTabBar` | `alias` | `docTabBar` | read/write | `Md3ApplicationWindow` | Alias → `docTabBar` |
 | `toolBar` | `alias` | `toolBarSlot.data` | read/write | `Md3ApplicationWindow` | App-top tool strip between tabs/titlebar and content. |
@@ -137,7 +137,7 @@ import Md3
 | `closeTab(index)` | `Md3ApplicationWindow` | — |
 | `moveTab(from, to)` | `Md3ApplicationWindow` | — |
 | `activateTab(index)` | `Md3ApplicationWindow` | — |
-| `tearOffTab(index, globalX, globalY)` | `Md3ApplicationWindow` | Tear-off windows removed — signal only for apps that want custom handling. |
+| `tearOffTab(index, globalX, globalY)` | `Md3ApplicationWindow` | Remove the tab and open it in a new `Md3TabWindow` (requires ≥2 tabs). |
 | `toggleThemeAt(x, y)` | `Md3ApplicationWindow` | Toggle theme with circular reveal from a point in chrome / contentItem coords. |
 | `toggleThemeFrom(item)` | `Md3ApplicationWindow` | Toggle theme revealing from the center of `item` (mapped into the window chrome). |
 | `openAbout()` | `Md3ApplicationWindow` | Open modeless About dialog (also used by Md3TitleBar info button). |

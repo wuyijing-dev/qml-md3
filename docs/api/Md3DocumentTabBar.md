@@ -19,7 +19,7 @@ import Md3
 | `currentIndex` | `int` | `0` | read/write | `Md3DocumentTabBar` | — |
 | `showAddButton` | `bool` | `true` | read/write | `Md3DocumentTabBar` | — |
 | `closable` | `bool` | `true` | read/write | `Md3DocumentTabBar` | — |
-| `tearOffEnabled` | `bool` | `false` | read/write | `Md3DocumentTabBar` | — |
+| `tearOffEnabled` | `bool` | `false` | read/write | `Md3DocumentTabBar` | When true, drag outside window emits `tabTearOff` (ApplicationWindow spawns `Md3TabWindow`). |
 | `reorderEnabled` | `bool` | `true` | read/write | `Md3DocumentTabBar` | — |
 | `tabHeight` | `real` | `32` | read/write | `Md3DocumentTabBar` | — |
 | `minTabWidth` | `real` | `120` | read/write | `Md3DocumentTabBar` | — |

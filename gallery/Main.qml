@@ -59,9 +59,9 @@ Md3ApplicationWindow {
             navWarmTimer.start()
     }
 
-    // Document tabs under the title bar (no browserChrome / no tear-off window)
+    // Document tabs under the title bar (drag out → peer Md3TabWindow)
     documentTabsEnabled: true
-    documentTabsTearOff: false
+    documentTabsTearOff: true
 
     // Library performance overlay — title-bar speed button; off by default (saves sampling RSS)
     showPerformanceButton: true
