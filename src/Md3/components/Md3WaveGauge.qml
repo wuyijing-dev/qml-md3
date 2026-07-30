@@ -29,9 +29,9 @@ Item {
     implicitWidth: size
     implicitHeight: size
 
-    property real _phase: 0
+    property real wavePhase: 0
 
-    NumberAnimation on _phase {
+    NumberAnimation on wavePhase {
         running: root.animated && root.visible
         from: 0
         to: Math.PI * 2
@@ -39,7 +39,7 @@ Item {
         loops: Animation.Infinite
     }
 
-    on_phaseChanged: canvas.requestPaint()
+    onWavePhaseChanged: canvas.requestPaint()
     onValueChanged: canvas.requestPaint()
     onWidthChanged: canvas.requestPaint()
     onHeightChanged: canvas.requestPaint()
@@ -73,8 +73,8 @@ Item {
             for (let i = 0; i <= steps; ++i) {
                 const t = i / steps
                 const x = cx - r + t * 2 * r
-                const y = levelY + Math.sin(t * Math.PI * 2 + root._phase) * amp
-                        + Math.sin(t * Math.PI * 4 - root._phase * 1.3) * (amp * 0.35)
+                const y = levelY + Math.sin(t * Math.PI * 2 + root.wavePhase) * amp
+                        + Math.sin(t * Math.PI * 4 - root.wavePhase * 1.3) * (amp * 0.35)
                 ctx.lineTo(x, y)
             }
             ctx.lineTo(cx + r, cy + r + 2)
@@ -89,7 +89,7 @@ Item {
             for (let i = 0; i <= steps; ++i) {
                 const t = i / steps
                 const x = cx - r + t * 2 * r
-                const y = levelY + 3 + Math.sin(t * Math.PI * 2 - root._phase * 0.8) * (amp * 0.6)
+                const y = levelY + 3 + Math.sin(t * Math.PI * 2 - root.wavePhase * 0.8) * (amp * 0.6)
                 ctx.lineTo(x, y)
             }
             ctx.lineTo(cx + r, cy + r + 2)
