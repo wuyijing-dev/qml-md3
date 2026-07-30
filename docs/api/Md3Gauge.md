@@ -17,6 +17,9 @@ Classic open-arc (horseshoe) KPI gauge.
 | `Md3HalfGauge` | `Md3HalfGauge.qml` | Semicircle |
 | `Md3WaveGauge` | `Md3WaveGauge.qml` | Liquid wave fill |
 | `Md3TickRingGauge` | `Md3TickRingGauge.qml` | Ring + radial ticks |
+| `Md3ArcBandGauge` | `Md3ArcBandGauge.qml` | Thick band + marker |
+| `Md3KnobGauge` | `Md3KnobGauge.qml` | Rotary knob |
+| `Md3CompassGauge` | `Md3CompassGauge.qml` | Compass heading |
 
 ## Properties
 

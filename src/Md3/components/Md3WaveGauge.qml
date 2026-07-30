@@ -1,6 +1,6 @@
 import QtQuick
 
-/// Circular gauge with animated liquid / wave fill level.
+/// Circular gauge with animated liquid / wave fill level (seamless loop).
 Item {
     id: root
 
@@ -17,6 +17,8 @@ Item {
     property bool animated: !Md3Theme.reduceMotion
     property real size: 140
     property real strokeWidth: 3
+    /// Radians advanced per second (wave travel speed).
+    property real waveSpeed: 2.2
 
     readonly property real progress: {
         const span = Math.max(1e-6, to - from)
@@ -31,15 +33,20 @@ Item {
 
     property real wavePhase: 0
 
-    NumberAnimation on wavePhase {
+    // Continuous phase — no Animation loops restart (that caused a visible hitch
+    // when secondary waves used non-integer phase multipliers).
+    FrameAnimation {
         running: root.animated && root.visible
-        from: 0
-        to: Math.PI * 2
-        duration: 2400
-        loops: Animation.Infinite
+        onTriggered: {
+            root.wavePhase += root.waveSpeed * frameTime
+            // Keep phase bounded; all wave terms use integer multiples of phase
+            // so wrapping by 2π is C∞ continuous for sin().
+            if (root.wavePhase > Math.PI * 2)
+                root.wavePhase -= Math.PI * 2
+            canvas.requestPaint()
+        }
     }
 
-    onWavePhaseChanged: canvas.requestPaint()
     onValueChanged: canvas.requestPaint()
     onWidthChanged: canvas.requestPaint()
     onHeightChanged: canvas.requestPaint()
@@ -53,6 +60,7 @@ Item {
             const cx = width / 2
             const cy = height / 2
             const r = Math.min(width, height) / 2 - root.strokeWidth - 1
+            const phase = root.wavePhase
 
             ctx.beginPath()
             ctx.arc(cx, cy, r, 0, Math.PI * 2)
@@ -66,15 +74,18 @@ Item {
 
             const levelY = cy + r - (2 * r * root.progress)
             const amp = 4 + 2 * (1 - Math.abs(root.progress - 0.5) * 2)
+            const steps = 40
+
+            // Primary wave: sin(2πt + φ) + 0.35·sin(4πt − 2φ) — period 2π in φ
             ctx.beginPath()
             ctx.moveTo(cx - r, cy + r + 2)
             ctx.lineTo(cx - r, levelY)
-            const steps = 32
             for (let i = 0; i <= steps; ++i) {
                 const t = i / steps
                 const x = cx - r + t * 2 * r
-                const y = levelY + Math.sin(t * Math.PI * 2 + root.wavePhase) * amp
-                        + Math.sin(t * Math.PI * 4 - root.wavePhase * 1.3) * (amp * 0.35)
+                const y = levelY
+                        + Math.sin(t * Math.PI * 2 + phase) * amp
+                        + Math.sin(t * Math.PI * 4 - phase * 2) * (amp * 0.35)
                 ctx.lineTo(x, y)
             }
             ctx.lineTo(cx + r, cy + r + 2)
@@ -82,14 +93,14 @@ Item {
             ctx.fillStyle = root.waveColor
             ctx.fill()
 
-            // Second quieter wave
+            // Secondary wave: sin(2πt − φ) — same period, phase-offset look
             ctx.beginPath()
             ctx.moveTo(cx - r, cy + r + 2)
             ctx.lineTo(cx - r, levelY + 3)
             for (let i = 0; i <= steps; ++i) {
                 const t = i / steps
                 const x = cx - r + t * 2 * r
-                const y = levelY + 3 + Math.sin(t * Math.PI * 2 - root.wavePhase * 0.8) * (amp * 0.6)
+                const y = levelY + 3 + Math.sin(t * Math.PI * 2 - phase) * (amp * 0.6)
                 ctx.lineTo(x, y)
             }
             ctx.lineTo(cx + r, cy + r + 2)

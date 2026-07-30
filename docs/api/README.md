@@ -54,10 +54,16 @@
 - [Md3HalfGauge](Md3HalfGauge.md) — Semicircle half-dial gauge.
 - [Md3WaveGauge](Md3WaveGauge.md) — Liquid wave fill circular gauge.
 - [Md3TickRingGauge](Md3TickRingGauge.md) — Ring gauge with radial ticks.
+- [Md3ArcBandGauge](Md3ArcBandGauge.md) — Thick arc band with end marker.
+- [Md3KnobGauge](Md3KnobGauge.md) — Rotary knob dial.
+- [Md3CompassGauge](Md3CompassGauge.md) — Compass heading dial.
 - [Md3HeatmapChart](Md3HeatmapChart.md) — Matrix or GitHub contribution heatmap.
 - [Md3RadarChart](Md3RadarChart.md) — Radar / spider chart.
 - [Md3FunnelChart](Md3FunnelChart.md) — Funnel / conversion chart.
 - [Md3RadialBarChart](Md3RadialBarChart.md) — Concentric radial bar chart.
+- [Md3AreaChart](Md3AreaChart.md) — Area / stacked area chart.
+- [Md3WaterfallChart](Md3WaterfallChart.md) — Waterfall contribution chart.
+- [Md3BulletChart](Md3BulletChart.md) — Bullet chart with qualitative ranges.
 - [Md3LineChart](Md3LineChart.md) — Line / area chart — QtQuick.Shapes. Extends Md3Chart. Supports X zoom/pan (`interactive`) and nearest-point probe (`showProbe`).
 - [Md3PieChart](Md3PieChart.md) — Pie / donut chart with hover probe (slice value + percent).
 - [Md3ScatterChart](Md3ScatterChart.md) — Scatter chart — X/Y points with zoom/pan/probe (parity with line chart ops).

@@ -10,8 +10,8 @@ Item {
         Md3Card {
             variant: Md3Card.Outlined
             width: root.width
-            implicitHeight: 520
-            height: 520
+            implicitHeight: 620
+            height: 620
             Column {
                 width: parent.width
                 spacing: 16
@@ -89,6 +89,23 @@ Item {
                         size: 112
                         valueColor: Md3Theme.colorScheme.secondary
                     }
+                    Md3ArcBandGauge {
+                        value: 82
+                        label: qsTr("Band")
+                        unit: "%"
+                        size: 112
+                    }
+                    Md3KnobGauge {
+                        value: 45
+                        label: qsTr("Knob")
+                        size: 112
+                        valueColor: Md3Theme.colorScheme.tertiary
+                    }
+                    Md3CompassGauge {
+                        value: 42
+                        label: qsTr("HDG")
+                        size: 112
+                    }
                 }
                 Row {
                     spacing: 16
@@ -114,7 +131,7 @@ Item {
         Md3Card {
             variant: Md3Card.Outlined
             width: root.width
-            height: 320
+            height: 560
             Column {
                 width: parent.width
                 spacing: 12
@@ -128,13 +145,13 @@ Item {
                     spacing: 12
                     Md3RadarChart {
                         width: Math.min(260, (parent.width - 24) / 3)
-                        height: 240
+                        height: 220
                         categories: [qsTr("Speed"), qsTr("Reliability"), qsTr("UX"), qsTr("Docs"), qsTr("A11y"), qsTr("Perf")]
                         values: [80, 92, 75, 68, 88, 70]
                     }
                     Md3FunnelChart {
                         width: Math.min(260, (parent.width - 24) / 3)
-                        height: 240
+                        height: 220
                         values: [
                             { label: qsTr("Visit"), value: 1200 },
                             { label: qsTr("Signup"), value: 640 },
@@ -144,7 +161,7 @@ Item {
                     }
                     Md3RadialBarChart {
                         width: Math.min(260, (parent.width - 24) / 3)
-                        height: 240
+                        height: 220
                         showLabels: true
                         values: [
                             { label: "A", value: 86 },
@@ -153,6 +170,52 @@ Item {
                             { label: "D", value: 32 }
                         ]
                     }
+                }
+                Text {
+                    text: qsTr("Area · Waterfall · Bullet")
+                    color: Md3Theme.colorScheme.colorOnSurface
+                    font.pixelSize: Md3Theme.typography.titleSmall.size
+                }
+                Row {
+                    width: parent.width
+                    spacing: 12
+                    Md3AreaChart {
+                        width: Math.min(300, (parent.width - 24) / 2)
+                        height: 160
+                        stacked: true
+                        values: [
+                            [12, 18, 15, 22, 28, 24, 31],
+                            [8, 10, 12, 9, 14, 11, 16]
+                        ]
+                    }
+                    Md3WaterfallChart {
+                        width: Math.min(300, (parent.width - 24) / 2)
+                        height: 160
+                        values: [
+                            { label: qsTr("Start"), value: 100 },
+                            { label: qsTr("+Sales"), value: 40 },
+                            { label: qsTr("-Cost"), value: -25 },
+                            { label: qsTr("+Other"), value: 15 },
+                            { label: qsTr("End"), value: 130, isTotal: true }
+                        ]
+                    }
+                }
+                Md3BulletChart {
+                    width: parent.width
+                    label: qsTr("Revenue vs target")
+                    unit: "k"
+                    value: 72
+                    comparative: 80
+                    to: 100
+                    ranges: [50, 75, 100]
+                }
+                Md3BulletChart {
+                    width: parent.width
+                    label: qsTr("Satisfaction")
+                    value: 88
+                    comparative: 85
+                    to: 100
+                    ranges: [60, 80, 100]
                 }
             }
         }
@@ -383,7 +446,7 @@ Item {
             }
             Md3DeferredSection {
                 id: stage2f
-                preferredHeight: 520
+                preferredHeight: 620
                 delayMs: 96
                 sourceComponent: root.kpiCard
             }
@@ -395,7 +458,7 @@ Item {
             }
             Md3DeferredSection {
                 id: stage2h
-                preferredHeight: 320
+                preferredHeight: 560
                 delayMs: 128
                 sourceComponent: root.extraChartsCard
             }
