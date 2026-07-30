@@ -31,7 +31,7 @@ Md3ApplicationWindow {
     pageSkeleton: true
     pageTransition: "fadeThrough"
     pageTransitionDuration: Md3Motion.short4
-    pagePadding: 20
+    pagePadding: Md3Theme.pagePadding
 
     destinations: root.catalog
 

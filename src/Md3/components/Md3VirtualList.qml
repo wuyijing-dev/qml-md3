@@ -35,6 +35,23 @@ Item {
         list.positionViewAtIndex(index, ListView.Contain)
     }
 
+    /// Opt-in sync: write only when the delegate declares the property (else ignore).
+    function _syncDelegate(item, index, modelData, isCurrent) {
+        if (!item)
+            return
+        _trySet(item, "listIndex", index)
+        _trySet(item, "modelData", modelData)
+        _trySet(item, "current", isCurrent)
+    }
+
+    function _trySet(obj, name, value) {
+        try {
+            obj[name] = value
+        } catch (e) {
+            // Delegate did not declare this property.
+        }
+    }
+
     Rectangle {
         anchors.fill: parent
         color: "transparent"
@@ -62,18 +79,22 @@ Item {
         visible: model && model.length > 0
 
         delegate: Loader {
+            id: rowLoader
             required property int index
             required property var modelData
             width: list.width
             height: root.itemHeight
+            // Exposed for delegate Components that bind `modelData` / `index` via Loader scope.
             sourceComponent: root.delegate !== null ? root.delegate : fallbackDelegate
-            onLoaded: {
-                if (!item)
-                    return
-                item.listIndex = index
-                item.modelData = modelData
-                item.current = ListView.isCurrentItem
+
+            function sync() {
+                root._syncDelegate(item, index, modelData, ListView.isCurrentItem)
             }
+
+            onLoaded: sync()
+            onIndexChanged: sync()
+            onModelDataChanged: sync()
+            ListView.onIsCurrentItemChanged: sync()
         }
 
         onCurrentIndexChanged: {
@@ -127,4 +148,3 @@ Item {
         }
     }
 }
-

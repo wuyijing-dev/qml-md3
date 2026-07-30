@@ -16,8 +16,8 @@ Item {
     property var selectedIndices: []
     property int sortColumn: -1
     property int sortOrder: Qt.AscendingOrder
-    property int density: Md3DataTable.Comfortable
-    property real rowHeight: density === Md3DataTable.Compact ? 40 : 52
+    property int density: Md3Theme.density
+    property real rowHeight: Md3Theme.tableRowHeight
     property real headerHeight: density === Md3DataTable.Compact ? 44 : 56
     property real bodyHeight: 280
     property bool loading: false
@@ -169,10 +169,6 @@ Item {
     width: parent ? parent.width : implicitWidth
     height: implicitHeight
 
-    onDensityChanged: {
-        rowHeight = density === Md3DataTable.Compact ? 40 : 52
-        headerHeight = density === Md3DataTable.Compact ? 44 : 56
-    }
     onFilterTextChanged: filterChanged()
     onColumnFiltersChanged: filterChanged()
     onCurrentPageChanged: {

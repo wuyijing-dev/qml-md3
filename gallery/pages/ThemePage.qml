@@ -335,7 +335,8 @@ Flickable {
         Text {
             Layout.fillWidth: true
             wrapMode: Text.Wrap
-            text: qsTr("舒适：默认桌面间距；紧凑：工具/宽表（spacing*、pagePadding、controlHeight）。")
+            text: qsTr("舒适：默认桌面间距；紧凑：页边距/分段控件/表格行高随 Md3Theme.density 变化（当前 pagePadding=%1、controlHeight=%2）。")
+                  .arg(Md3Theme.pagePadding).arg(Md3Theme.controlHeight)
             color: Md3Theme.colorScheme.colorOnSurfaceVariant
             font.family: Md3Theme.typography.fontFamily
             font.pixelSize: Md3Theme.typography.bodySmall.size

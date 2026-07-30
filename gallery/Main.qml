@@ -19,7 +19,7 @@ Md3ApplicationWindow {
     navigationRail: true
     railExpanded: false
     railHeader: qsTr("组件图库")
-    pagePadding: 20
+    pagePadding: Md3Theme.pagePadding
     pageSkeleton: true
     // Balanced: async + L2 warm-all, then raise L1/prefetch (trade some RAM for snappy switches).
     pageAsync: true

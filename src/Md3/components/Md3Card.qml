@@ -9,7 +9,7 @@ Item {
     property int variant: Md3Card.Elevated
     // Use Item.enabled (do not redeclare — Qt 6.11 warns on override)
     property bool clickable: false
-    property real padding: 16
+    property real padding: Md3Theme.spacingLg
     property int layoutMode: Md3ContainerBody.Fit
     /// Optional header — when set, users need not nest title Text manually.
     property string title: ""
@@ -170,10 +170,8 @@ Item {
                     id: bodySlot
                     width: parent.width
                     // Fill-anchored children cannot drive height via childrenRect (collapses
-                    // to 0 / binding loops). Use a stable fallback intrinsic, and only expand
-                    // when the card height is set externally (Layout/anchors).
+                    // to 0 / binding loops). Use a stable fallback intrinsic.
                     readonly property real fillFallback: 160
-                    readonly property real headerBlock: headerRow.visible ? (headerRow.height + 8) : 0
                     readonly property bool hasFillChild: {
                         void children.length
                         const kids = children
@@ -190,10 +188,11 @@ Item {
                         }
                         return false
                     }
-                    // Never read root.height here — it tracks implicitHeight which includes
-                    // this height, and that forms a binding loop (Qt warns on line height).
-                    height: hasFillChild ? fillFallback : Math.max(0, childrenRect.height)
-                    implicitHeight: hasFillChild ? fillFallback : Math.max(0, childrenRect.height)
+                    // Do NOT assign `height: childrenRect.height` — that feedback-loops on
+                    // Qt 6 when any descendant height depends on the parent. Column uses
+                    // implicitHeight when height is not explicitly set.
+                    implicitHeight: hasFillChild ? fillFallback
+                                                 : Math.max(0, childrenRect.height)
                     implicitWidth: childrenRect.width
                 }
             }

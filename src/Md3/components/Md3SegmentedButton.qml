@@ -11,10 +11,10 @@ Item {
 
     signal selectionChanged()
 
-    readonly property real segmentHeight: 40
+    readonly property real segmentHeight: Md3Theme.controlHeight
     readonly property real outerRadius: segmentHeight / 2
 
-    implicitHeight: 48
+    implicitHeight: Math.max(48, segmentHeight + 8)
     implicitWidth: row.implicitWidth
     height: implicitHeight
     width: implicitWidth

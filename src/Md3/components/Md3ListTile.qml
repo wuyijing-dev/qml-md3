@@ -34,7 +34,14 @@ Md3AbstractButton {
             return 2
         return 1
     }
-    readonly property real minH: lines === 1 ? 56 : (lines === 2 ? 72 : 88)
+    readonly property real minH: {
+        const compact = Md3Theme.densityCompact
+        if (lines === 1)
+            return compact ? 48 : 56
+        if (lines === 2)
+            return compact ? 64 : 72
+        return compact ? 80 : 88
+    }
     readonly property bool hasTrailingSlot: trailingSlot.children.length > 0
     readonly property bool hasLeadingSlot: leadingSlot.children.length > 0
     readonly property bool hasLeadingAvatar: leadingAvatar.length > 0

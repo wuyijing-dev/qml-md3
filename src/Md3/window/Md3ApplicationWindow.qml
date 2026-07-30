@@ -80,7 +80,7 @@ Window {
     property string pageCacheMode: "arc"
     property int pageCacheLimit: 1
     property int pageIdleTrimMs: 4000
-    property real pagePadding: 20
+    property real pagePadding: Md3Theme.pagePadding
     property bool pagePrefetch: false
     property bool pagePredictPrefetch: false
     property bool pageL2Cache: true

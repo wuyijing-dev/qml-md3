@@ -7,7 +7,7 @@ Item {
 
     property string title: ""
     property string subtitle: ""
-    property real spacing: 12
+    property real spacing: Md3Theme.spacingMd
     property real padding: 0
     property bool fillWidth: true
     default property alias content: body.data
