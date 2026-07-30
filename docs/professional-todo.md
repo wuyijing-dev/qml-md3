@@ -85,12 +85,12 @@
 
 ### 2.1 性能
 
-- [ ] `docs/performance.md` 增加「官方推荐配置」表（弱机/办公/高刷）
+- [x] `docs/performance.md` 增加「官方推荐配置」表（弱机/办公/高刷）
 - [x] 首启：空壳出窗 → 再暖页（已有方向）写成可复用 API / 文档样例
 - [x] 默认 **启用 qmlcachegen**（`-DMD3_QML_CACHEGEN=OFF` 可关，便于狂改 QML）
-- [ ] Charts：Live/Wave 默认档位与 CPU 预算文档化
-- [ ] Rail：拖动时禁止 hover 预编译（已部分做）补测试防回归
-- [ ] 大列表：强制推荐 `Md3VirtualList`；禁止层叠 `layer.enabled` 的检查清单
+- [x] Charts：Live/Wave 默认档位与 CPU 预算文档化
+- [x] Rail：拖动时禁止 hover 预编译（已部分做）补测试防回归
+- [x] 大列表：强制推荐 `Md3VirtualList`；禁止层叠 `layer.enabled` 的检查清单
 - [ ] 性能面板指标导出（便于 CI 对比）
 
 ### 2.2 平台矩阵

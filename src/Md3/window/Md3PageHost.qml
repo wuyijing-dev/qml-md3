@@ -1112,6 +1112,13 @@ Item {
             _hoverHint = -1
     }
 
+    /// Drop pending hover / predict warm work (e.g. rail flick started).
+    function clearAllPrefetchHints() {
+        _hoverHint = -1
+        if (hoverPrefetchTimer.running)
+            hoverPrefetchTimer.stop()
+    }
+
     function _finishTransition() {
         if (transitionTo >= 0)
             displayedIndex = transitionTo

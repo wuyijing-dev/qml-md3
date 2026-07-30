@@ -1,0 +1,53 @@
+site_name: QML MD3
+site_description: Material Design 3 component library for Qt Quick / QML
+site_url: https://wuyijing-dev.github.io/QML_MD3/
+repo_url: https://github.com/wuyijing-dev/QML_MD3
+repo_name: wuyijing-dev/QML_MD3
+
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  language: zh
+  palette:
+    - scheme: default
+      primary: deep purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - 首页: index.md
+  - 集成: integration.md
+  - 性能: performance.md
+  - 无障碍: a11y.md
+  - 国际化: i18n.md
+  - 打包: packaging.md
+  - Qt 版本矩阵: qt-version-matrix.md
+  - 实验性 API: experimental.md
+  - 文档托管: mkdocs-hosting.md
+  - API 索引: api/README.md

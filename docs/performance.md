@@ -183,6 +183,74 @@ Flickable {
 
 ---
 
+## Official device tiers（弱机 / 办公 / 高刷）
+
+`Md3Theme.effectsLevel`（0 流畅 / 1 均衡 / 2 画质）是 Live 图与 Wave 的**默认档位**。应用侧在设置页暴露三档即可；弱机默认 `0`，办公笔记本 `1`，高刷桌面可 `2`。
+
+| 场景 | `effectsLevel` | 页面壳推荐 | Live/Wave 默认 FPS |
+|------|----------------|------------|-------------------|
+| 弱机 / 集显 / 电池优先 | `0` | Profile A / E（`pageCacheLimit: 1`，关 predict） | **15** |
+| 办公本（默认） | `1` | Profile E+（暖机后 L1=6 + neighbor prefetch） | **24** |
+| 高刷 / 外接显卡 | `2` | Profile B 或 E+；可开 `pagePredictPrefetch` | **0**（跟显） |
+
+`reduceMotion: true` 时 `effectsLiveMotion` 为 false，Live / Wave 定时器全部停。
+
+---
+
+## Charts：Live / Wave 默认档位与 CPU 预算
+
+实现入口：
+
+| 控件 | 开关 | FPS 覆盖 | 主题门控 |
+|------|------|----------|----------|
+| `Md3LineChart`（及同类 live 图） | `live: true` | `liveFps`（0 = 用主题） | `Md3Theme.effectsLiveMotion` + `chartActive` |
+| `Md3WaveGauge` | `animated`（默认跟 `!reduceMotion`） | `animationFps`（0 = 用主题） | `effectsLiveMotion` + `effectivelyShown` |
+
+主题默认（`Md3Theme.qml`）：
+
+| `effectsLevel` | `effectsLiveFps` | 含义 |
+|----------------|------------------|------|
+| 0 Low | `15` | ~66 ms/帧，多块 Live 时仍可控 |
+| 1 Balanced | `24` | 办公默认；约每帧一次 `advanceLive` / `canvas.requestPaint` |
+| 2 High | `0` | `FrameAnimation` 跟显示器刷新（60/120/144） |
+
+### CPU 预算（经验值，单页同时可见）
+
+| 预算档 | 同时 Live 曲线 | 同时 Wave | 建议 |
+|--------|----------------|-----------|------|
+| 弱机 | ≤ 1 | ≤ 1 | `effectsLevel: 0`；屏外用 `Md3DeferredSection` / 卸 Loader |
+| 办公 | ≤ 2–3 | ≤ 2 | 默认；多余的关 `live` / `animated` 或降 `liveFps: 12` |
+| 高刷 | 按需 | 按需 | `effectsLevel: 2`；仍避免**不可见**控件继续跑（Wave 已 walk 父链 `visible`/`opacity`） |
+
+强制降载示例：
+
+```qml
+Md3LineChart {
+    live: true
+    liveFps: Md3Theme.effectsLow ? 10 : 0   // 显式封顶；0 = 跟主题
+}
+Md3WaveGauge {
+    animated: chartVisible                   // 页不可见时关掉
+    animationFps: 20                         // 覆盖主题
+}
+```
+
+---
+
+## Rail：拖动时禁止 hover 预编译
+
+`pagePredictPrefetch: true` 时，Rail 悬停会 `prefetchHint` → 延迟 L2 编译。**拖动 / 惯性滚动 Rail 时禁止**，否则会卡顿 flick。
+
+已实现（回归由 `scripts/checks/check_perf_guards.py` 锁定）：
+
+1. `Md3NavigationRail`：`onEntered` 仅在 `!scrolling` 时发 `destinationHovered`
+2. `Md3WindowBody`：收到 hover 时若 `rail.scrolling` 直接 return
+3. `onScrollingChanged` → `host.clearAllPrefetchHints()`（取消已排队的 Timer）
+
+消费方自定义 Rail 时请同样调用：拖动开始清 hint，悬停前查 `scrolling`。
+
+---
+
 ## Off-screen: don’t pay for effects
 
 1. **Long pages** — wrap below-the-fold blocks:
@@ -197,13 +265,54 @@ Md3DeferredSection {
 }
 ```
 
-2. **Large lists** — `Md3VirtualList` + row without `Md3Shadow` (`elevation: 0` / Flat card). Elevate only FABs, menus, sheets.
+2. **Large lists（强制推荐）** — 见下一节检查清单；行内无 `Md3Shadow`（`elevation: 0` / Flat）。Elevate 只留给 FAB、菜单、Sheet。
 
 3. **Custom chrome** — copy `Md3Ripple`’s pattern: `layer.enabled` only while animating; never leave `MultiEffect` on for every cell in a grid.
 
 4. **Liquid glass** — lower `quality`, `liveSampling: false` for static backdrops.
 
 Qt will skip *painting* many off-screen nodes; it will **not** free FBOs for Items that stay in the tree with layers on. Unload (`Loader.active = false`) is the real “不算特效”.
+
+---
+
+## 大列表检查清单：`Md3VirtualList` + 禁止层叠 `layer.enabled`
+
+**规则：** 模型行数 ≥ ~100，或行内有图标/徽章/多 Text 时，**用 `Md3VirtualList`（或自写 `ListView { reuseItems: true }`）**，不要用 `Repeater` / `Column` 全量实例化。
+
+### 必做
+
+- [ ] 列表根用 `Md3VirtualList`（`reuseItems` 已开）或等价虚拟化
+- [ ] 固定 `itemHeight`（或稳定高度），避免每行隐式高度抖动
+- [ ] `cacheBufferPx` 按需（默认 800）；弱机可降到 200–400
+- [ ] 行 delegate：**不要** `layer.enabled: true` / `MultiEffect` / 双模糊阴影常驻
+- [ ] 行 `elevation: 0`；需要分隔用 `Md3Divider` 或底边，不用每行 `Md3Shadow`
+- [ ] 行内动画（ripple）仅在进行中开 layer（对照 `Md3Ripple`）
+
+### 禁止
+
+- [ ] 禁止在虚拟列表 **每一行** 叠 `layer.enabled` + `layer.effect`
+- [ ] 禁止父级 `layer.enabled` 再包一整棵 ListView（整表一张 FBO，滚动更贵）
+- [ ] 禁止 `visible: false` 却保留带 layer 的行 Item 常驻（应靠复用/卸载）
+- [ ] 禁止在 delegate 里再嵌套大 `Repeater` 全量子树
+
+### 推荐写法
+
+```qml
+Md3VirtualList {
+    model: bigModel
+    itemHeight: 56
+    cacheBufferPx: Md3Theme.effectsLow ? 240 : 800
+    delegate: Component {
+        Md3ListTile {
+            // elevation stays 0; no layer.enabled here
+            text: modelData.title
+            onClicked: list.itemActivated(listIndex, modelData)
+        }
+    }
+}
+```
+
+静态守卫：`python scripts/checks/check_perf_guards.py`（Rail hover + 文档锚点）。
 
 ---
 

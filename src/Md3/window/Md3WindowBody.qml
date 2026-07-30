@@ -158,12 +158,17 @@ Item {
                 root.navigateTo(index)
             }
             onDestinationHovered: function (index) {
+                // Mirror rail: never queue L2 compile while the rail is flicking/dragging.
                 if (rail.scrolling)
                     return
                 host.prefetchHint(index)
             }
             onDestinationUnhovered: function (index) {
                 host.clearPrefetchHint(index)
+            }
+            onScrollingChanged: {
+                if (scrolling)
+                    host.clearAllPrefetchHints()
             }
             onExpandToggleClicked: root.railExpandRequested(!root.railExpanded)
         }
