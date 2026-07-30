@@ -9,7 +9,7 @@ Md3AbstractButton {
     property bool extended: true
 
     icon: "add"
-    text: "Create"
+    text: qsTr("Create")
     accessibleName: text
     cornerRadius: Md3Theme.shape.large
 

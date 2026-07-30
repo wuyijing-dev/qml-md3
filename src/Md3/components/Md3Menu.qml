@@ -312,6 +312,8 @@ Item {
         visible: root.open || panel.opacity > 0.01
                  || (root.childMenu && root.childMenu.open)
         focus: root.open && !root.isSubMenu
+        Accessible.role: Accessible.PopupMenu
+        Accessible.name: qsTr("Menu")
 
         Keys.onPressed: function (event) {
             if (!root.open)

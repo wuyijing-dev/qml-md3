@@ -5,7 +5,7 @@ Md3SelectionControl {
 
     property bool tristate: false
     property var checkState: checked ? Qt.Checked : Qt.Unchecked
-    accessibleName: text.length ? text : "Checkbox"
+    accessibleName: text.length ? text : qsTr("Checkbox")
     accessibleRole: Accessible.CheckBox
     labelRole: Md3Text.BodyLarge
     onActivated: cycle()

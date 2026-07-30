@@ -5,7 +5,7 @@ Item {
 
     property bool open: false
     property string title: ""
-    property string confirmText: "Save"
+    property string confirmText: qsTr("Save")
     property int layoutMode: Md3ContainerBody.Fit
     default property alias content: body.content
 
@@ -54,7 +54,7 @@ Item {
 
             Md3IconButton {
                 icon: "close"
-                accessibleName: "Close"
+                accessibleName: qsTr("Close")
                 anchors.verticalCenter: parent.verticalCenter
                 onClicked: {
                     root.open = false

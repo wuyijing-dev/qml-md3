@@ -1,0 +1,21 @@
+{
+  "root": "D:\\QML_MD3\\QML_MD3",
+  "count": 3,
+  "findings": [
+    {
+      "file": "src/Md3/components/Md3Breadcrumb.qml",
+      "line": 73,
+      "snippet": "text: \"…\""
+    },
+    {
+      "file": "src/Md3/components/Md3ContextMenuArea.qml",
+      "line": 14,
+      "snippet": "text: \"Refresh\""
+    },
+    {
+      "file": "src/Md3/components/Md3StatusBar.qml",
+      "line": 162,
+      "snippet": "text: \"·\""
+    }
+  ]
+}

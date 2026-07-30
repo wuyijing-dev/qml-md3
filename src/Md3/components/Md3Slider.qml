@@ -33,7 +33,7 @@ Item {
     /// Force tick dots; default = stepSize > 0
     property bool discrete: stepSize > 0
     property int maxTickCount: 24
-    property string accessibleName: label.length ? label : "Slider"
+    property string accessibleName: label.length ? label : qsTr("Slider")
 
     signal moved(real value)
 

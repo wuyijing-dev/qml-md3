@@ -31,15 +31,35 @@ QtObject {
 
     property string _announceText: ""
     property int _announceSerial: 0
+    /// "polite" | "assertive" — hint for live region urgency.
+    property string livePoliteness: "polite"
 
     /// Screen-reader live message (read via Accessible on the gallery/window live region).
     readonly property string liveMessage: _announceText
     readonly property int liveSerial: _announceSerial
 
+    /// Generic polite announcement (status / info).
     function announce(message) {
+        _announce(message, "polite")
+    }
+
+    /// Success feedback (form saved, copy done, …).
+    function announceSuccess(message) {
+        const msg = String(message || qsTr("完成"))
+        _announce(msg, "polite")
+    }
+
+    /// Error / validation failure — assertive so ATTs interrupt.
+    function announceError(message) {
+        const msg = String(message || qsTr("出错了"))
+        _announce(msg, "assertive")
+    }
+
+    function _announce(message, politeness) {
         const msg = String(message || "")
         if (!msg.length)
             return
+        livePoliteness = politeness || "polite"
         _announceText = ""
         _announceSerial++
         Qt.callLater(function () {
@@ -60,7 +80,6 @@ QtObject {
         Md3Theme.textScale = textScale
     }
 
-    // QtObject has no default property — keep Connections as an explicit property.
     readonly property Connections _themeSync: Connections {
         target: Md3Theme
         function onReduceMotionChanged() { root.reduceMotion = Md3Theme.reduceMotion }

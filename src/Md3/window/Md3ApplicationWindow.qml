@@ -1114,7 +1114,7 @@ Window {
                 z: 1300
             }
 
-            // Screen-reader live region for Md3Accessibility.announce()
+            // Screen-reader live region for Md3Accessibility.announce*()
             Text {
                 id: a11yLiveRegion
                 width: 1
@@ -1123,6 +1123,8 @@ Window {
                 Accessible.role: Accessible.StaticText
                 Accessible.name: Md3Accessibility.liveMessage
                 Accessible.ignored: Md3Accessibility.liveMessage.length === 0
+                // Force ATT re-read when serial bumps (esp. assertive errors).
+                property int _bump: Md3Accessibility.liveSerial
             }
 
             Md3HotReload {

@@ -4,7 +4,7 @@ Item {
     id: root
 
     property alias text: input.text
-    property string placeholderText: "Search"
+    property string placeholderText: qsTr("Search")
     // Use Item.enabled (do not redeclare)
     /// When set, click / focus opens this Md3SearchView (forwards `text`).
     property var searchView: null

@@ -7,7 +7,7 @@ Md3SelectionControl {
     property bool showIcon: false
     /// Visible label beside the switch — replaces Row { Switch; Text } glue.
     chromeWidth: 52
-    accessibleName: text.length ? text : "Switch"
+    accessibleName: text.length ? text : qsTr("Switch")
     accessibleRole: Accessible.CheckBox
     labelRole: Md3Text.BodyLarge
     onActivated: toggle()

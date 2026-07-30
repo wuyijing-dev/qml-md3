@@ -16,6 +16,7 @@ Md3AbstractButton {
     property color badgeLabelColor: Md3Theme.colorScheme.colorOnError
 
     icon: "favorite"
+    accessibleName: text.length ? text : (icon.length ? icon : qsTr("Icon button"))
 
     readonly property real circleSize: 40
     readonly property real circleRadius: circleSize / 2

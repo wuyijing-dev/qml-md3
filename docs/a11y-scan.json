@@ -1,0 +1,350 @@
+{
+  "root": "D:\\QML_MD3\\QML_MD3",
+  "count": 49,
+  "findings": [
+    {
+      "file": "src/Md3/components/Md3AvatarGroup.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3Banner.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3BottomAppBar.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3BottomSheet.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3Card.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3Carousel.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3ChartInteraction.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3ChipGroup.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3ColorPicker.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3CommandPalette.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3ContextMenuArea.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3DataTable.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3DateField.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3DatePicker.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3DateRangePicker.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3DocumentTabBar.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3DropdownMenu.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3EmptyState.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3ExpansionTile.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3FabMenu.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3FileDropZone.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3FullscreenDialog.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3InfoBar.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3KeySequenceField.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3LiquidGlass.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3LiquidGlassFusionPlayground.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3MenuBar.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3MenuItem.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3NavigationBar.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3NavigationDrawer.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3Pagination.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3PathField.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3ScrollBar.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3SearchBar.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3SearchView.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3SideSheet.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3Snackbar.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3SplitView.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3StatusBar.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3Stepper.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3TabBar.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3TimeField.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3TimePicker.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3Tooltip.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3TopAppBar.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3TreeView.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/components/Md3VirtualList.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/window/Md3DialogWindow.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    },
+    {
+      "file": "src/Md3/window/Md3TitleBar.qml",
+      "issues": [
+        "missing Accessible.name",
+        "missing Accessible.role"
+      ]
+    }
+  ],
+  "note": "Heuristic only — inherits Md3AbstractButton/SelectionControl are skipped."
+}

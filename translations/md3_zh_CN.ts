@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="zh_CN">
+<context>
+    <name></name>
+    <message>
+        <source>OK</source>
+        <translation>确定</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <source>Dialog</source>
+        <translation>对话框</translation>
+    </message>
+    <message>
+        <source>Menu</source>
+        <translation>菜单</translation>
+    </message>
+    <message>
+        <source>Icon button</source>
+        <translation>图标按钮</translation>
+    </message>
+    <message>
+        <source>Floating action button</source>
+        <translation>悬浮操作按钮</translation>
+    </message>
+    <message>
+        <source>完成</source>
+        <translation>完成</translation>
+    </message>
+    <message>
+        <source>出错了</source>
+        <translation>出错了</translation>
+    </message>
+    <message>
+        <source>Button</source>
+        <translation>按钮</translation>
+    </message>
+    <message>
+        <source>Switch</source>
+        <translation>开关</translation>
+    </message>
+    <message>
+        <source>Radio</source>
+        <translation>单选</translation>
+    </message>
+    <message>
+        <source>Checkbox</source>
+        <translation>复选框</translation>
+    </message>
+    <message>
+        <source>Create</source>
+        <translation>创建</translation>
+    </message>
+    <message>
+        <source>Select</source>
+        <translation>选择</translation>
+    </message>
+    <message>
+        <source>Slider</source>
+        <translation>滑块</translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation>搜索</translation>
+    </message>
+    <message>
+        <source>Range slider</source>
+        <translation>范围滑块</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>保存</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>关闭</translation>
+    </message>
+    <message>
+        <source>Option</source>
+        <translation>选项</translation>
+    </message>
+    <message>
+        <source>Text field</source>
+        <translation>文本框</translation>
+    </message>
+    <message>
+        <source>Selection control</source>
+        <translation>选择控件</translation>
+    </message>
+</context>
+</TS>

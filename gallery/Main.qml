@@ -337,6 +337,8 @@ Md3ApplicationWindow {
           skeletonLayout: "cards" },
         { title: qsTr("主题"), icon: "contrast", source: pageRoot + "ThemePage.qml",
           skeletonLayout: "page" },
+        { title: qsTr("无障碍"), icon: "accessibility_new", source: pageRoot + "AccessibilityPage.qml",
+          skeletonLayout: "page" },
         { title: qsTr("图表"), icon: "show_chart", source: pageRoot + "ChartsPage.qml", cacheCost: 3,
           skeletonBones: [
               { variant: "text", width: 0.3, height: 22 },

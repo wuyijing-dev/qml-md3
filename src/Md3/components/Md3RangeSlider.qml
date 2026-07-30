@@ -19,7 +19,7 @@ Item {
     property real handleWidth: 4
     /// Handle length across track — taller than track thickness
     property real handleHeight: trackHeight + 16
-    property string accessibleName: label.length ? label : "Range slider"
+    property string accessibleName: label.length ? label : qsTr("Range slider")
 
     signal rangeChanged(real first, real second)
 

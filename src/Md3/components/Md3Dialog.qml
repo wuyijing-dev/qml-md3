@@ -6,8 +6,8 @@ Item {
     property bool open: false
     property string title: ""
     property string text: ""
-    property string confirmText: "OK"
-    property string dismissText: "Cancel"
+    property string confirmText: qsTr("OK")
+    property string dismissText: qsTr("Cancel")
     property bool showDismiss: true
     /// Custom body between text and action buttons.
     default property alias content: bodySlot.data
@@ -19,6 +19,9 @@ Item {
     visible: open || scrim.opacity > 0
     z: 1000
     focus: open
+    Accessible.role: Accessible.Dialog
+    Accessible.name: title.length ? title : qsTr("Dialog")
+    Accessible.description: text
 
     function accept() {
         open = false

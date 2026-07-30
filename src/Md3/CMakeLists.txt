@@ -95,6 +95,23 @@ qt_add_resources(Md3 "md3_icons"
     FILES
         ${MD3_ICON_FILES}
 )
+
+# UI translations (.qm). Regenerate via lrelease — see docs/i18n.md.
+set(MD3_I18N_QM
+    i18n/md3_en.qm
+    i18n/md3_zh_CN.qm
+)
+foreach (_qm IN LISTS MD3_I18N_QM)
+    if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${_qm}")
+        # Touch empty placeholder so configure succeeds before first lrelease.
+        file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/${_qm}" "")
+    endif()
+endforeach()
+qt_add_resources(Md3 "md3_i18n"
+    PREFIX "/md3"
+    FILES
+        ${MD3_I18N_QM}
+)
 if (NOT TARGET Md3::Md3)
     add_library(Md3::Md3 ALIAS Md3)
 endif()
@@ -141,6 +158,8 @@ qt_add_qml_module(Md3
         diagnostics/md3inspector.cpp
         diagnostics/md3appsettings.h
         diagnostics/md3appsettings.cpp
+        diagnostics/md3i18n.h
+        diagnostics/md3i18n.cpp
         diagnostics/md3hotreload.h
         diagnostics/md3hotreload.cpp
     QML_FILES

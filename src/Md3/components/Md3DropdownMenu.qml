@@ -4,7 +4,7 @@ Item {
     id: root
 
     property string text: ""
-    property string label: "Select"
+    property string label: qsTr("Select")
     property string leadingIcon: ""
     property var model: []
     property int currentIndex: -1

@@ -63,21 +63,21 @@
 
 ### 1.1 Accessibility
 
-- [ ] 可交互控件强制：`Accessible.name` / `role` / `checkable|checked` 等
-- [ ] Gallery「无障碍审计」页：列出缺失 Accessible 的实例
-- [ ] 脚本或测试：扫 QML 中可点击 Item 无 Accessible 的情况
-- [ ] 焦点：`Md3FocusRing` 在键盘导航路径全覆盖
-- [ ] 对话框 / 菜单：焦点陷阱与 Esc 关闭一致
-- [ ] 读屏：`Md3Accessibility.announce` 用于错误/成功反馈有约定
-- [ ] 高对比 / 减弱动效：写入验收用例（Theme 页 + 自动化）
-- [ ] 文档：每个控件「键盘操作」小节（`docs/a11y.md`）
+- [x] 可交互控件强制：`Accessible.name` / `role` / `checkable|checked` 等
+- [x] Gallery「无障碍审计」页：列出缺失 Accessible 的实例
+- [x] 脚本或测试：扫 QML 中可点击 Item 无 Accessible 的情况
+- [x] 焦点：`Md3FocusRing` 在键盘导航路径全覆盖
+- [x] 对话框 / 菜单：焦点陷阱与 Esc 关闭一致
+- [x] 读屏：`Md3Accessibility.announce` 用于错误/成功反馈有约定
+- [x] 高对比 / 减弱动效：写入验收用例（Theme 页 + 自动化）
+- [x] 文档：每个控件「键盘操作」小节（`docs/a11y.md`）
 
 ### 1.2 i18n
 
-- [ ] 全库用户可见字符串 `qsTr` 覆盖率检查脚本
-- [ ] 提供示例 `md3_zh_CN.ts` / `md3_en.ts` 与加载说明
-- [ ] Gallery 语言切换演示
-- [ ] RTL（若目标市场需要）：镜像布局抽查清单
+- [x] 全库用户可见字符串 `qsTr` 覆盖率检查脚本
+- [x] 提供示例 `md3_zh_CN.ts` / `md3_en.ts` 与加载说明
+- [x] Gallery 语言切换演示
+- [x] RTL（若目标市场需要）：镜像布局抽查清单
 
 ---
 

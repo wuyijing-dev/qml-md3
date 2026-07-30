@@ -30,6 +30,12 @@ endif()
 # incorrectly resolves basenames under gallery/ on MSVC/Qt Creator.
 # Default window icons: qrc:/md3/icons/… via Md3AppIcons / Md3ApplicationWindow.
 
+qt_add_resources(appQML_MD3 "gallery_data"
+    PREFIX "/gallery"
+    FILES
+        data/a11y-scan.json
+)
+
 qt_add_qml_module(appQML_MD3
     URI Gallery
     VERSION 1.0
@@ -52,6 +58,7 @@ qt_add_qml_module(appQML_MD3
         pages/ExtrasPage.qml
         pages/MotionPage.qml
         pages/ThemePage.qml
+        pages/AccessibilityPage.qml
         pages/ChartsPage.qml
         pages/WindowPage.qml
         pages/scenes/LoginScene.qml

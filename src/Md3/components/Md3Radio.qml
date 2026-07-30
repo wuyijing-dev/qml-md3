@@ -5,7 +5,7 @@ Md3SelectionControl {
 
     property var group: null
     property var value: null
-    accessibleName: text.length ? text : "Radio"
+    accessibleName: text.length ? text : qsTr("Radio")
     accessibleRole: Accessible.RadioButton
     labelRole: Md3Text.BodyLarge
     onActivated: select()
