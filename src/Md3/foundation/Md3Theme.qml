@@ -38,22 +38,21 @@ QtObject {
     /// Prefer page / overlay transitions (identical across effects tiers; only reduceMotion kills them).
     readonly property bool effectsPageMotion: !reduceMotion
 
-    /// Ripple ink — always on for click feedback (unless reduceMotion). Tier only changes cost/strength.
-    readonly property bool effectsRipple: !reduceMotion
-    /// Rounded MultiEffect mask for ripple (均衡/画质). 流畅 uses cheap rectangular clip.
-    readonly property bool effectsRippleMasked: effectsLevel >= 1 && effectsRipple
-    /// Peak / hold opacity for ripple circle.
+    /// Ripple expand ink — 均衡/画质. 流畅 uses rounded press-flash instead (no mask FBO).
+    readonly property bool effectsRipple: effectsLevel >= 1 && !reduceMotion
+    /// Rounded MultiEffect mask for expand ink (only when effectsRipple).
+    readonly property bool effectsRippleMasked: effectsRipple
+    /// Peak / hold opacity for ripple / press-flash.
     readonly property real effectsRipplePeak: {
-        // 流畅 still needs a visible press flash; High is strongest.
-        const base = effectsLevel >= 2 ? 0.18 : (effectsLevel >= 1 ? 0.14 : 0.12)
-        return Math.max(0.04, Math.min(0.35, base * effectsIntensity))
+        const base = effectsLevel >= 2 ? 0.18 : (effectsLevel >= 1 ? 0.14 : 0.14)
+        return Math.max(0.06, Math.min(0.35, base * effectsIntensity))
     }
     readonly property real effectsRippleHold: effectsRipplePeak * 0.5
-    /// Expand factor for ripple diameter (slightly smaller on 流畅 = cheaper paint).
-    readonly property real effectsRippleSpread: effectsLevel >= 2 ? 2.2 : (effectsLevel >= 1 ? 2.0 : 1.7)
-    /// Hover / press state-layer strength — keep press readable on 流畅.
+    /// Expand factor for ink diameter.
+    readonly property real effectsRippleSpread: effectsLevel >= 2 ? 2.2 : 2.0
+    /// Hover / press state-layer strength.
     readonly property real effectsStateIntensity: {
-        const base = effectsLevel >= 2 ? 1.0 : (effectsLevel >= 1 ? 0.85 : 0.8)
+        const base = effectsLevel >= 2 ? 1.0 : (effectsLevel >= 1 ? 0.85 : 0.9)
         return Math.max(0.35, Math.min(1.4, base * effectsIntensity))
     }
 

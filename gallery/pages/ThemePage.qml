@@ -348,7 +348,7 @@ Flickable {
                 Text {
                     width: parent.width
                     wrapMode: Text.Wrap
-                    text: qsTr("三档过渡动画相同。流畅：轻量涟漪（无遮罩 FBO）+ 降帧 Live；均衡：圆角涟漪+阴影；画质：强涟漪与满帧 Live。强度调节涟漪/态层深浅。")
+                    text: qsTr("三档过渡相同。流畅：圆角按压闪（无涟漪遮罩 FBO）；均衡/画质：圆角遮罩涟漪。强度调节反馈深浅。")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.family: Md3Theme.typography.fontFamily
                     font.pixelSize: Md3Theme.typography.bodySmall.size

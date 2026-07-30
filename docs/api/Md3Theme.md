@@ -22,8 +22,8 @@ import Md3
 | `progressiveContent` | `bool` | `true` | read/write | `Md3Theme` | Within-page progressive load (Md3DeferredSection). Default on; set false to load everything immediately. |
 | `effectsLevel` | `int` | `1` | read/write | `Md3Theme` | Global effects budget: `0` 流畅 / `1` 均衡 / `2` 画质. Drives ripple, state layers, charts, shadows, glass. |
 | `effectsIntensity` | `real` | `1.0` | read/write | `Md3Theme` | Extra multiplier (0.35–1.35) on ripple / hover-press state opacity. |
-| `effectsRipple` | `bool` | — | readonly | `Md3Theme` | Ripple ink (on unless `reduceMotion`; all tiers keep click feedback). |
-| `effectsRippleMasked` | `bool` | — | readonly | `Md3Theme` | Rounded MultiEffect mask (Balanced+; Low uses cheap clip). |
+| `effectsRipple` | `bool` | — | readonly | `Md3Theme` | Expanding ink (Balanced+). Low uses rounded press-flash instead. |
+| `effectsRippleMasked` | `bool` | — | readonly | `Md3Theme` | Rounded MultiEffect mask for expanding ink. |
 | `effectsRipplePeak` / `effectsRippleHold` | `real` | — | readonly | `Md3Theme` | Ripple opacity envelope. |
 | `effectsRippleSpread` | `real` | — | readonly | `Md3Theme` | Ripple expand factor. |
 | `effectsStateIntensity` | `real` | — | readonly | `Md3Theme` | Hover/press state-layer scale. |

@@ -19,6 +19,7 @@ Item {
 
     /// Keep offscreen FBOs only while ink is visible / animating.
     property bool _layersArmed: false
+    readonly property bool useInkRipple: Md3Theme.effectsRipple
     readonly property bool useMaskedRipple: Md3Theme.effectsRippleMasked
     readonly property bool layersNeeded: useMaskedRipple && (_layersArmed
             || ripple.running
@@ -32,20 +33,31 @@ Item {
             return parent.radius
         return Math.min(width, height) / 2
     }
+    readonly property real _tl: topLeftRadius >= 0 ? topLeftRadius : resolvedClipRadius
+    readonly property real _tr: topRightRadius >= 0 ? topRightRadius : resolvedClipRadius
+    readonly property real _bl: bottomLeftRadius >= 0 ? bottomLeftRadius : resolvedClipRadius
+    readonly property real _br: bottomRightRadius >= 0 ? bottomRightRadius : resolvedClipRadius
 
     readonly property real _peak: Md3Theme.effectsRipplePeak
     readonly property real _hold: Md3Theme.effectsRippleHold
     readonly property real _spread: Md3Theme.effectsRippleSpread
 
     function pulse(x, y) {
-        if (!Md3Theme.effectsRipple) {
-            _releaseLayers()
+        // 流畅: rounded press flash (no MultiEffect FBO). 均衡/画质: masked ink.
+        if (!useInkRipple) {
+            if (Md3Theme.reduceMotion)
+                return
+            originX = x
+            originY = y
+            if (flashAnim.running)
+                flashAnim.stop()
+            flash.opacity = 0
+            flashAnim.start()
             return
         }
         originX = x
         originY = y
         _layersArmed = useMaskedRipple
-        // Interrupt in-flight ink: fade from current opacity, then expand again.
         if (ripple.running || interruptFade.running) {
             ripple.stop()
             interruptFade.stop()
@@ -63,12 +75,46 @@ Item {
         _layersArmed = false
     }
 
-    // Clip expanding ink to rounded container (Qt clip is rectangular only).
+    // Cheap rounded feedback for Low tier — Rectangle radii, no mask FBO.
+    Rectangle {
+        id: flash
+        anchors.fill: parent
+        topLeftRadius: root._tl
+        topRightRadius: root._tr
+        bottomLeftRadius: root._bl
+        bottomRightRadius: root._br
+        color: root.rippleColor
+        opacity: 0
+        visible: opacity > 0.01
+        z: 1
+
+        SequentialAnimation {
+            id: flashAnim
+            alwaysRunToEnd: false
+            NumberAnimation {
+                target: flash
+                property: "opacity"
+                to: Math.max(0.1, root._peak * 1.15)
+                duration: Md3Motion.short1
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.standard
+            }
+            NumberAnimation {
+                target: flash
+                property: "opacity"
+                to: 0
+                duration: Md3Motion.short4
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.standard
+            }
+        }
+    }
+
+    // Expanding ink — masked to rounded container on Balanced/High.
     Item {
         id: inkHost
         anchors.fill: parent
-        // Low tier: no MultiEffect mask FBO — rectangular clip only.
-        clip: !root.useMaskedRipple
+        visible: root.useInkRipple
         layer.enabled: root.layersNeeded
         layer.smooth: true
         layer.effect: MultiEffect {
@@ -151,11 +197,10 @@ Item {
         visible: false
         Rectangle {
             anchors.fill: parent
-            readonly property real base: root.resolvedClipRadius
-            topLeftRadius: root.topLeftRadius >= 0 ? root.topLeftRadius : base
-            topRightRadius: root.topRightRadius >= 0 ? root.topRightRadius : base
-            bottomLeftRadius: root.bottomLeftRadius >= 0 ? root.bottomLeftRadius : base
-            bottomRightRadius: root.bottomRightRadius >= 0 ? root.bottomRightRadius : base
+            topLeftRadius: root._tl
+            topRightRadius: root._tr
+            bottomLeftRadius: root._bl
+            bottomRightRadius: root._br
             color: "#ffffff"
         }
     }
