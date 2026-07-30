@@ -1,37 +1,35 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
 Md3Page {
     id: page
 
-    ColumnLayout {
+    Md3VStack {
         anchors.fill: parent
+        width: parent.width
         spacing: 20
 
-        Text {
+        Md3Text {
             text: "Menus & Options"
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.headlineMedium.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.HeadlineMedium
         }
 
-        Text {
-            Layout.fillWidth: true
+        Md3Text {
+            width: parent.width
             wrapMode: Text.Wrap
             text: qsTr("Keyboard: ↑↓ highlight · Enter/Space activate · Esc dismiss · → submenu · ← close submenu. Tables/trees: arrows · Home/End · PageUp/Down · focus ring when focused.")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.bodySmall.size
+            role: Md3Text.BodySmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
-        Text {
+        Md3Text {
             text: "Option dropdown (animated)"
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
         Md3Option {
-            Layout.preferredWidth: 320
+            width: 320
             label: "Theme option"
             leadingIcon: "settings"
             model: [
@@ -44,7 +42,7 @@ Md3Page {
         }
 
         Md3DropdownMenu {
-            Layout.preferredWidth: 320
+            width: 320
             label: "Language"
             model: [
                 { text: "English" },
@@ -54,14 +52,14 @@ Md3Page {
             ]
         }
 
-        Text {
+        Md3Text {
             text: "Menu bar (nested model)"
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
         Md3MenuBar {
-            Layout.fillWidth: true
+            width: parent.width
             model: [
                 {
                     text: "File",
@@ -115,16 +113,15 @@ Md3Page {
             }
         }
 
-        Text {
-            Layout.fillWidth: true
+        Md3Text {
+            width: parent.width
             wrapMode: Text.Wrap
             text: qsTr("Tip: Md3ContextMenuArea + Md3Menu enables page-level right-click menus (see Extras page).")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.bodySmall.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.BodySmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
-        Item { Layout.fillHeight: true }
+        Md3Spacer { expand: true }
     }
 
     // Model-driven context menu (less glue than hand-written MenuItems)

@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Dialogs
 import QtMultimedia
 import Md3
@@ -14,17 +13,16 @@ Md3Page {
         clip: true
         interactive: true
         boundsBehavior: Flickable.StopAtBounds
-        ColumnLayout {
+        Md3VStack {
             id: column
             width: root.width
             spacing: 16
-            Text {
+            Md3Text {
                 text: "Containment"
-                color: Md3Theme.colorScheme.colorOnSurface
-                font.pixelSize: Md3Theme.typography.headlineMedium.size
+                role: Md3Text.HeadlineMedium
             }
             Md3Text {
-                Layout.fillWidth: true
+                width: parent.width
                 text: qsTr("Md3 容器组件默认支持 `layoutMode`（Fit / Scroll）：内容可自适应高度，或在固定高度区域内滚动。`Md3AdaptiveContainer` 仍可用于独立列布局场景。")
                 role: Md3Text.BodyMedium
                 tone: Md3Text.OnSurfaceVariant
@@ -32,23 +30,22 @@ Md3Page {
             }
 
             Md3PageSection {
-                Layout.fillWidth: true
+                width: parent.width
                 title: qsTr("ScrollView")
                 subtitle: qsTr("Themed Md3ScrollBar overlays on a Flickable.")
 
                 Md3ScrollView {
                     width: parent.width
                     height: 160
-                    Column {
+                    Md3VStack {
                         width: parent.width
                         spacing: 8
                         Repeater {
                             model: 24
-                            Text {
+                            Md3Text {
                                 required property int index
                                 text: qsTr("Scrollable row %1").arg(index + 1)
-                                color: Md3Theme.colorScheme.colorOnSurface
-                                font.pixelSize: Md3Theme.typography.bodyMedium.size
+                                role: Md3Text.BodyMedium
                             }
                         }
                     }
@@ -56,7 +53,7 @@ Md3Page {
             }
 
             Md3PageSection {
-                Layout.fillWidth: true
+                width: parent.width
                 title: qsTr("布局组件（VStack / HStack / Flow / Grid）")
                 subtitle: qsTr("对齐、padding、expand spacer、Card.title 等 API 减少样板代码。")
 
@@ -101,13 +98,16 @@ Md3Page {
                     }
                 }
             }
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 240
+            Md3HStack {
+                id: cardRow
+                width: parent.width
+                height: 240
+                fillHeight: true
+                stretchChildren: true
                 spacing: 12
                 Md3Card {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
+                    width: (cardRow.width - cardRow.spacing) / 2
+                    height: cardRow.height
                     variant: Md3Card.Outlined
                     layoutMode: Md3ContainerBody.Fit
                     title: qsTr("Fit 模式")
@@ -123,12 +123,12 @@ Md3Page {
                     }
                 }
                 Md3Card {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
+                    width: (cardRow.width - cardRow.spacing) / 2
+                    height: cardRow.height
                     variant: Md3Card.Outlined
                     layoutMode: Md3ContainerBody.Scroll
                     title: qsTr("Scroll 模式")
-                    Column {
+                    Md3VStack {
                         width: parent.width
                         spacing: 12
                         Repeater {
@@ -144,7 +144,7 @@ Md3Page {
                 }
             }
             Md3AnimatedFlow {
-                Layout.fillWidth: true
+                width: parent.width
                 spacing: 12
                 rowSpacing: 12
                 Md3Card {
@@ -167,9 +167,8 @@ Md3Page {
                 }
             }
 
-            Column {
-                Layout.fillWidth: true
-                width: root.width
+            Md3VStack {
+                width: parent.width
                 Md3ListTile { title: "One line"; leadingIcon: "person"; trailingIcon: "chevron_right"; showDivider: true }
                 Md3ListTile { title: "Two line"; subtitle: "Supporting"; leadingIcon: "settings"; showDivider: true }
                 Md3ListTile { title: "Three line"; subtitle: "Subtitle"; supportingText: "Extra supporting text."; leadingIcon: "info" }
@@ -200,11 +199,11 @@ Md3Page {
                 variant: Md3Button.Outlined
                 onClicked: modelessDlg.openDialog(root.hostWindow())
             }
-            Text {
-                Layout.fillWidth: true
+            Md3Text {
+                width: parent.width
                 text: "Dialog window = separate OS window (like QWidget::QDialog). Pin button keeps it always-on-top."
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.bodySmall.size
+                role: Md3Text.BodySmall
+                tone: Md3Text.OnSurfaceVariant
                 wrapMode: Text.Wrap
             }
         }
@@ -247,7 +246,7 @@ Md3Page {
         onConfirmed: console.log("dialog window accepted")
         onDismissed: console.log("dialog window dismissed")
 
-        Column {
+        Md3VStack {
             anchors.fill: parent
             spacing: 12
             Md3TextField {
@@ -283,12 +282,11 @@ Md3Page {
         showPinButton: true
         dialogText: "Modeless secondary window — can stay open beside the main app."
 
-        Text {
+        Md3Text {
             anchors.fill: parent
             text: "Drag, resize, pin, or maximize like a normal tool window."
-            color: Md3Theme.colorScheme.colorOnSurface
             wrapMode: Text.Wrap
-            font.pixelSize: Md3Theme.typography.bodyMedium.size
+            role: Md3Text.BodyMedium
         }
     }
 }

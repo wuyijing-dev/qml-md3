@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
 Md3Page {
@@ -33,28 +32,27 @@ Md3Page {
         contentHeight: column.height
         clip: true
 
-        ColumnLayout {
+        Md3VStack {
             id: column
             width: flick.width
             spacing: 16
-            Text {
+            Md3Text {
                 text: "Enterprise extras"
-                color: Md3Theme.colorScheme.colorOnSurface
-                font.pixelSize: Md3Theme.typography.headlineMedium.size
+                role: Md3Text.HeadlineMedium
             }
             Md3Banner {
-                Layout.fillWidth: true
+                width: parent.width
                 text: "Your password expires in 3 days."
                 primaryAction: "Update"
                 secondaryAction: "Dismiss"
             }
 
-            Text {
+            Md3Text {
                 text: qsTr("Avatar")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelLarge.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
-            Row {
+            Md3HStack {
                 spacing: 12
                 Md3Avatar { initials: "AD"; sizePreset: Md3Avatar.Small }
                 Md3Avatar { initials: "ML"; sizePreset: Md3Avatar.Medium }
@@ -71,14 +69,14 @@ Md3Page {
                 }
             }
 
-            Text {
+            Md3Text {
                 text: qsTr("Empty state")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelLarge.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
             Md3EmptyState {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 220
+                width: parent.width
+                height: 220
                 icon: "search_off"
                 title: qsTr("No results")
                 body: qsTr("Try a different filter or clear your search.")
@@ -91,19 +89,19 @@ Md3Page {
                 Md3Button { text: "Hover me" }
             }
             Md3ExpansionTile {
-                Layout.fillWidth: true
+                width: parent.width
                 title: "Advanced"
                 subtitle: "More options"
-                Text {
+                Md3Text {
                     text: "Expanded content"
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    tone: Md3Text.OnSurfaceVariant
                     leftPadding: 16
                 }
             }
             Md3Stepper {
                 id: stepperDemo
-                Layout.fillWidth: true
-                Layout.preferredHeight: 220
+                width: parent.width
+                height: 220
                 currentStep: 0
                 model: [
                     { title: "Details" },
@@ -112,12 +110,12 @@ Md3Page {
                 ]
                 onFinished: Md3Notify.snackbar(qsTr("Stepper finished"))
                 Item {
-                    Column {
+                    Md3VStack {
                         anchors.centerIn: parent
                         spacing: 8
-                        Text {
+                        Md3Text {
                             text: qsTr("Enter details")
-                            color: Md3Theme.colorScheme.colorOnSurface
+                            role: Md3Text.BodyMedium
                         }
                         Md3TextField {
                             width: 240
@@ -127,30 +125,32 @@ Md3Page {
                     }
                 }
                 Item {
-                    Text {
+                    Md3Text {
                         anchors.centerIn: parent
                         text: qsTr("Review your choices")
-                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                        role: Md3Text.BodyMedium
+                        tone: Md3Text.OnSurfaceVariant
                     }
                 }
                 Item {
-                    Text {
+                    Md3Text {
                         anchors.centerIn: parent
                         text: qsTr("Confirm and finish")
-                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                        role: Md3Text.BodyMedium
+                        tone: Md3Text.OnSurfaceVariant
                     }
                 }
             }
 
-            Text {
+            Md3Text {
                 text: qsTr("Tree view")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelLarge.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
             Md3Card {
                 variant: Md3Card.Outlined
-                Layout.fillWidth: true
-                Layout.preferredHeight: 340
+                width: parent.width
+                height: 340
                 Md3TreeView {
                     id: treeDemo
                     anchors.fill: parent
@@ -195,14 +195,14 @@ Md3Page {
                 }
             }
 
-            Text {
+            Md3Text {
                 text: qsTr("Path field")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelLarge.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
             Md3PathField {
                 id: pathOpenDemo
-                Layout.fillWidth: true
+                width: parent.width
                 label: qsTr("Open file")
                 mode: Md3PathField.OpenFile
                 showBreadcrumb: true
@@ -220,28 +220,28 @@ Md3Page {
                 }
             }
             Md3PathField {
-                Layout.fillWidth: true
+                width: parent.width
                 label: qsTr("Open multiple files")
                 mode: Md3PathField.OpenFiles
                 dialogTitle: qsTr("Choose files")
             }
             Md3PathField {
-                Layout.fillWidth: true
+                width: parent.width
                 label: qsTr("Output folder")
                 mode: Md3PathField.Folder
                 showBreadcrumb: true
                 dialogTitle: qsTr("Choose a folder")
             }
 
-            Text {
+            Md3Text {
                 text: qsTr("File drop zone")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelLarge.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
             Md3FileDropZone {
                 id: dropDemo
-                Layout.fillWidth: true
-                Layout.preferredHeight: 280
+                width: parent.width
+                height: 280
                 tableBodyHeight: 180
                 acceptedExtensions: [".qml", ".json", ".md", ".txt", ".png", ".jpg", ".zip"]
                 onFilesDropped: function (items) {
@@ -252,15 +252,15 @@ Md3Page {
                 }
             }
 
-            Text {
+            Md3Text {
                 text: qsTr("Virtual list")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelLarge.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
             Md3Card {
                 variant: Md3Card.Outlined
-                Layout.fillWidth: true
-                Layout.preferredHeight: 260
+                width: parent.width
+                height: 260
                 padding: 8
                 Md3VirtualList {
                     id: virtualDemo
@@ -280,13 +280,13 @@ Md3Page {
                 }
             }
 
-            Text {
+            Md3Text {
                 text: qsTr("Data table")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelLarge.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
-            RowLayout {
-                Layout.fillWidth: true
+            Md3HStack {
+                width: parent.width
                 spacing: 8
                 Md3Button {
                     text: tableDemo.loading ? qsTr("Stop loading") : qsTr("Loading")
@@ -308,18 +308,18 @@ Md3Page {
                     enabled: tableDemo.selectedIndices.length > 0
                     onClicked: tableDemo.clearSelection()
                 }
-                Text {
-                    Layout.fillWidth: true
+                Md3Spacer { expand: true }
+                Md3Text {
                     text: qsTr("Frozen col · filter · ↑↓ Enter · double-click row")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.OnSurfaceVariant
                     elide: Text.ElideRight
                 }
             }
             Md3DataTable {
                 id: tableDemo
-                Layout.fillWidth: true
-                Layout.preferredHeight: 460
+                width: parent.width
+                height: 460
                 selectionEnabled: true
                 pagination: true
                 pageSize: 5
@@ -376,19 +376,18 @@ Md3Page {
             }
             Md3TextField {
                 id: statusFilter
-                Layout.fillWidth: true
+                width: parent.width
                 label: qsTr("Status column filter")
                 placeholderText: qsTr("e.g. Active")
                 onTextChanged: tableDemo.columnFilters = ({ status: text })
             }
 
-            Text {
+            Md3Text {
                 text: qsTr("Carousel")
-                color: Md3Theme.colorScheme.colorOnSurface
-                font.pixelSize: Md3Theme.typography.titleMedium.size
+                role: Md3Text.TitleMedium
             }
             Md3Carousel {
-                Layout.fillWidth: true
+                width: parent.width
                 itemHeight: 180
                 peekRatio: 0.14
                 autoPlay: true
@@ -412,30 +411,34 @@ Md3Page {
                 ]
             }
 
-            Text {
+            Md3Text {
                 text: qsTr("Skeleton")
-                color: Md3Theme.colorScheme.colorOnSurface
-                font.pixelSize: Md3Theme.typography.titleMedium.size
+                role: Md3Text.TitleMedium
             }
             Md3Card {
                 variant: Md3Card.Outlined
-                Layout.fillWidth: true
-                Layout.preferredHeight: 220
+                width: parent.width
+                height: 220
                 Md3SkeletonPane {
                     anchors.fill: parent
                     anchors.margins: 16
                     layout: "page"
                 }
             }
-            RowLayout {
-                Layout.fillWidth: true
+            Md3HStack {
+                id: skeletonRow
+                width: parent.width
                 spacing: 12
                 Md3Skeleton { variant: Md3Skeleton.Circular; width: 48; height: 48 }
-                Md3Skeleton { variant: Md3Skeleton.Text; Layout.fillWidth: true; height: 14 }
+                Md3Skeleton {
+                    variant: Md3Skeleton.Text
+                    width: Math.max(0, skeletonRow.width - 48 - 72 - skeletonRow.spacing * 2)
+                    height: 14
+                }
                 Md3Skeleton { variant: Md3Skeleton.Rounded; width: 72; height: 32 }
             }
 
-            Item { Layout.preferredHeight: 24; Layout.fillWidth: true }
+            Item { width: parent.width; height: 24 }
         }
     }
 

@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
 Md3Page {
@@ -24,19 +23,18 @@ Md3Page {
             clip: true
             boundsBehavior: Flickable.StopAtBounds
 
-            ColumnLayout {
+            Md3VStack {
                 id: column
                 width: flick.width
                 spacing: 16
 
-                Text {
+                Md3Text {
                     text: "Navigation"
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.pixelSize: Md3Theme.typography.headlineMedium.size
+                    role: Md3Text.HeadlineMedium
                 }
 
                 Md3TopAppBar {
-                    Layout.fillWidth: true
+                    width: parent.width
                     title: "Small app bar"
                     trailingIcons: [
                         { icon: "notifications", badgeText: "3" },
@@ -46,8 +44,8 @@ Md3Page {
                 }
 
                 Md3TabBar {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: implicitHeight
+                    width: parent.width
+                    height: implicitHeight
                     pageAreaHeight: 72
                     model: [
                         { text: "Tab one" },
@@ -56,43 +54,48 @@ Md3Page {
                     ]
                     Rectangle {
                         color: "transparent"
-                        Text {
+                        Md3Text {
                             anchors.centerIn: parent
                             text: qsTr("Page one — TabBar pages track currentIndex")
-                            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                            role: Md3Text.BodyMedium
+                            tone: Md3Text.OnSurfaceVariant
                         }
                     }
                     Rectangle {
                         color: "transparent"
-                        Text {
+                        Md3Text {
                             anchors.centerIn: parent
                             text: qsTr("Page two")
-                            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                            role: Md3Text.BodyMedium
+                            tone: Md3Text.OnSurfaceVariant
                         }
                     }
                     Rectangle {
                         color: "transparent"
-                        Text {
+                        Md3Text {
                             anchors.centerIn: parent
                             text: qsTr("Page three")
-                            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                            role: Md3Text.BodyMedium
+                            tone: Md3Text.OnSurfaceVariant
                         }
                     }
                 }
 
-                Text {
+                Md3Text {
                     text: qsTr("Navigation rail")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.OnSurfaceVariant
                 }
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 220
+                Md3HStack {
+                    id: railRow
+                    width: parent.width
+                    height: 220
+                    fillHeight: true
                     spacing: 12
 
                     Md3NavigationRail {
-                        Layout.fillHeight: true
+                        id: railDemo
                         expanded: railExpanded.checked
                         model: [
                             { icon: "home", label: "Home", badgeDot: true },
@@ -101,35 +104,35 @@ Md3Page {
                         ]
                     }
 
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+                    Md3VStack {
+                        width: Math.max(0, railRow.width - railDemo.width - railRow.spacing)
+                        height: railRow.height
                         spacing: 8
                         Md3Switch {
                             id: railExpanded
                             text: qsTr("Expand rail")
                         }
-                        Text {
-                            Layout.fillWidth: true
+                        Md3Text {
+                            width: parent.width
                             wrapMode: Text.Wrap
                             text: qsTr("Badges on destinations: badge / badgeDot / badgeText")
-                            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                            font.pixelSize: Md3Theme.typography.bodySmall.size
+                            role: Md3Text.BodySmall
+                            tone: Md3Text.OnSurfaceVariant
                         }
-                        Item { Layout.fillHeight: true }
+                        Md3Spacer { expand: true }
                     }
                 }
 
-                Text {
+                Md3Text {
                     text: qsTr("Scaffold shell (title + navModel)")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.OnSurfaceVariant
                 }
 
                 // Clipped demo host — Scaffold must not spill over siblings.
                 Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 220
+                    width: parent.width
+                    height: 220
                     radius: Md3Theme.shape.medium
                     color: Md3Theme.colorScheme.surfaceContainerLow
                     border.color: Md3Theme.colorScheme.outlineVariant
@@ -147,16 +150,17 @@ Md3Page {
                             { icon: "person", label: qsTr("Profile") }
                         ]
                         // No drawerModel here — page-level drawer demos the overlay.
-                        Text {
+                        Md3Text {
                             anchors.centerIn: parent
                             text: qsTr("Scaffold content")
-                            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                            role: Md3Text.BodyMedium
+                            tone: Md3Text.OnSurfaceVariant
                         }
                     }
                 }
 
                 Md3NavigationBar {
-                    Layout.fillWidth: true
+                    width: parent.width
                     model: [
                         { icon: "home", label: "Home", badgeDot: true },
                         { icon: "favorite", label: "Fav", badge: "9" },

@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
 Md3Page {
@@ -10,7 +9,7 @@ Md3Page {
         contentWidth: width
         contentHeight: col.height
         clip: true
-        Column {
+        Md3VStack {
             id: col
             width: parent.width
             spacing: 8
@@ -18,15 +17,13 @@ Md3Page {
             Md3ListTile { width: parent.width; title: "Dark theme"; trailingIcon: "settings"; showDivider: true
                 // demo: use switch via subtitle area — keep simple
             }
-            Row {
+            Md3HStack {
                 width: parent.width
                 leftPadding: 16
                 spacing: 12
-                Text {
+                Md3Text {
                     text: "Use dark theme"
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    anchors.verticalCenter: parent.verticalCenter
-                    font.pixelSize: Md3Theme.typography.bodyLarge.size
+                    role: Md3Text.BodyLarge
                 }
                 Md3Switch {
                     id: darkSwitch

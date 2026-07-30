@@ -1,5 +1,5 @@
 import QtQuick
-import QtQuick.Layouts
+import QtQuick.Layouts // keep QtQuick.Layouts for split-pane card fill layout
 import Md3
 
 Md3Page {
@@ -158,30 +158,31 @@ Md3Page {
         applyStatus(qsTr("Desktop patterns ready"))
     }
 
-    ColumnLayout {
+    Md3VStack {
         anchors.fill: parent
+        width: parent.width
         spacing: 12
 
-        Text {
+        Md3Text {
             text: qsTr("Desktop Patterns")
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.headlineMedium.size
+            role: Md3Text.HeadlineMedium
         }
 
-        Text {
-            Layout.fillWidth: true
+        Md3Text {
+            width: parent.width
             text: qsTr("TreeView + PathField + DataTable + StatusBar wired into a desktop file manager layout.")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            role: Md3Text.BodyMedium
+            tone: Md3Text.OnSurfaceVariant
             wrapMode: Text.WordWrap
         }
 
-        RowLayout {
-            Layout.fillWidth: true
+        Md3HStack {
+            width: parent.width
             spacing: 8
 
             Md3PathField {
                 id: pathField
-                Layout.fillWidth: true
+                width: Math.max(0, parent.width - reloadBtn.width - parent.spacing)
                 label: qsTr("Current path")
                 mode: Md3PathField.Folder
                 path: page.currentPath
@@ -204,6 +205,7 @@ Md3Page {
             }
 
             Md3Button {
+                id: reloadBtn
                 text: qsTr("Reload")
                 variant: Md3Button.Outlined
                 onClicked: {
@@ -214,9 +216,10 @@ Md3Page {
             }
         }
 
+        // keep QtQuick.Layouts for split-pane card fill layout
         RowLayout {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+            width: parent.width
+            height: Math.max(0, page.height - 120)
             spacing: 12
 
             Md3Card {
@@ -270,11 +273,10 @@ Md3Page {
                         Layout.fillWidth: true
                         spacing: 8
 
-                        Text {
+                        Md3Text {
                             Layout.fillWidth: true
                             text: qsTr("Files in %1").arg(page.currentPath)
-                            color: Md3Theme.colorScheme.colorOnSurface
-                            font.pixelSize: Md3Theme.typography.titleMedium.size
+                            role: Md3Text.TitleMedium
                             elide: Text.ElideMiddle
                         }
 

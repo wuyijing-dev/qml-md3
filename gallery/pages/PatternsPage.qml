@@ -1,12 +1,9 @@
 import QtQuick
-import QtQuick.Layouts
-import QtQuick.Window
 import Md3
 
 /// UX patterns: empty / loading / error / form submit gate / shortcuts.
-Item {
+Md3Page {
     id: page
-    anchors.fill: parent
 
     property bool _listLoading: false
     property bool _listError: false
@@ -49,28 +46,25 @@ Item {
         contentHeight: col.height
         clip: true
 
-        ColumnLayout {
+        Md3VStack {
             id: col
             width: flick.width
             spacing: Md3Theme.spacingXl
 
-            Text {
+            Md3Text {
                 text: qsTr("模式")
-                color: Md3Theme.colorScheme.colorOnSurface
-                font.pixelSize: Md3Theme.typography.headlineMedium.size
-                font.family: Md3Theme.typography.fontFamily
+                role: Md3Text.HeadlineMedium
             }
-            Text {
-                Layout.fillWidth: true
+            Md3Text {
+                width: parent.width
                 wrapMode: Text.Wrap
                 text: qsTr("空态 / 加载 / 错误、表单提交门控、快捷键约定。详见 docs/design-guidelines.md。")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.bodyMedium.size
-                font.family: Md3Theme.typography.fontFamily
+                role: Md3Text.BodyMedium
+                tone: Md3Text.OnSurfaceVariant
             }
 
             Md3PageSection {
-                Layout.fillWidth: true
+                width: parent.width
                 title: qsTr("空态 · 加载 · 错误")
                 subtitle: qsTr("同一列表容器三种状态切换")
 
@@ -154,8 +148,7 @@ Item {
             }
 
             Md3PageSection {
-                Layout.fillWidth: true
-                Layout.maximumWidth: 400
+                width: Math.min(parent.width, 400)
                 title: qsTr("表单提交门控")
                 subtitle: qsTr("enabled: form.canSubmit — 必填填齐且无错误才可提交")
 
@@ -198,17 +191,16 @@ Item {
                             onClicked: gateForm.clearErrors()
                         }
                     }
-                    Text {
+                    Md3Text {
                         text: qsTr("canSubmit=%1  hasErrors=%2").arg(gateForm.canSubmit).arg(gateForm.hasErrors)
-                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                        font.pixelSize: Md3Theme.typography.labelSmall.size
-                        font.family: Md3Theme.typography.fontFamily
+                        role: Md3Text.LabelSmall
+                        tone: Md3Text.OnSurfaceVariant
                     }
                 }
             }
 
             Md3PageSection {
-                Layout.fillWidth: true
+                width: parent.width
                 title: qsTr("快捷键与命令面板")
                 subtitle: qsTr("Gallery 全局 Ctrl+K；下方字段演示保留键冲突检测")
 
@@ -216,12 +208,12 @@ Item {
                     width: parent.width
                     spacing: Md3Theme.spacingMd
 
-                    Text {
+                    Md3Text {
                         width: parent.width
                         wrapMode: Text.Wrap
                         text: qsTr("按 Ctrl+K 打开命令面板，可跳转本页与其它目的地。自定义快捷键勿占用保留序列。")
-                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                        font.pixelSize: Md3Theme.typography.bodyMedium.size
+                        role: Md3Text.BodyMedium
+                        tone: Md3Text.OnSurfaceVariant
                     }
                     Md3KeySequenceField {
                         width: Math.min(parent.width, 360)
@@ -240,7 +232,7 @@ Item {
                 }
             }
 
-            Item { height: Md3Theme.spacingLg }
+            Item { width: parent.width; height: Md3Theme.spacingLg }
         }
     }
 
