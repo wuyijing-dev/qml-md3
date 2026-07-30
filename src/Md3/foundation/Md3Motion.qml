@@ -10,8 +10,9 @@ QtObject {
     /// Explicit binding — do not hide Md3Theme.reduceMotion only inside _scaled()
     /// (some QML engines won't re-eval token props when the flag flips).
     readonly property bool reduced: Md3Theme ? Md3Theme.reduceMotion : false
+    readonly property real effectsFactor: Md3Theme ? Md3Theme.effectsMotionFactor : 1.0
 
-    // Base durations × durationScale (or 1ms when reduced).
+    // Base durations × durationScale × effectsFactor (or 1ms when reduced).
     readonly property int short1: _scaled(50)
     readonly property int short2: _scaled(100)
     readonly property int short3: _scaled(150)
@@ -33,7 +34,8 @@ QtObject {
         if (root.reduced)
             return 1
         const s = durationScale > 0.05 ? durationScale : 1
-        return Math.max(1, Math.round(ms * s))
+        const tier = root.effectsFactor > 0.05 ? root.effectsFactor : 1
+        return Math.max(1, Math.round(ms * s * tier))
     }
 
     // Original M3 / Flutter easings

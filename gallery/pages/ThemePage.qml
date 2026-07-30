@@ -348,7 +348,7 @@ Flickable {
                 Text {
                     width: parent.width
                     wrapMode: Text.Wrap
-                    text: qsTr("流畅：少阴影/无惯性平滑；均衡：默认；画质：曲线平滑与满帧实时图。可按设备性能切换。")
+                    text: qsTr("流畅：弱涟漪/无阴影遮罩；均衡：默认涟漪与阴影；画质：强涟漪、平滑曲线与满帧实时图。下方可再调强度。")
                     color: Md3Theme.colorScheme.colorOnSurfaceVariant
                     font.family: Md3Theme.typography.fontFamily
                     font.pixelSize: Md3Theme.typography.bodySmall.size
@@ -374,6 +374,35 @@ Flickable {
             function onEffectsLevelChanged() {
                 if (effectsSeg.currentIndex !== Md3Theme.effectsLevel)
                     effectsSeg.currentIndex = Md3Theme.effectsLevel
+            }
+        }
+
+        RowLayout {
+            spacing: 12
+            Layout.fillWidth: true
+            Column {
+                Layout.fillWidth: true
+                spacing: 2
+                Text {
+                    text: qsTr("特效强度")
+                    color: Md3Theme.colorScheme.colorOnSurface
+                    font.family: Md3Theme.typography.fontFamily
+                    font.pixelSize: Md3Theme.typography.bodyLarge.size
+                }
+                Text {
+                    text: qsTr("涟漪与悬停态透明度 ×%1（叠加在特效等级之上）")
+                            .arg(Md3Theme.effectsIntensity.toFixed(2))
+                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                    font.family: Md3Theme.typography.fontFamily
+                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                }
+            }
+            Md3Slider {
+                Layout.preferredWidth: 160
+                from: 0.35
+                to: 1.35
+                value: Md3Theme.effectsIntensity
+                onMoved: function (v) { Md3Theme.setEffectsIntensity(v) }
             }
         }
 

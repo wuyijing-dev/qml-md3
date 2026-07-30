@@ -19,10 +19,11 @@ Item {
 
     /// Keep offscreen FBOs only while ink is visible / animating.
     property bool _layersArmed: false
-    readonly property bool layersNeeded: _layersArmed
+    readonly property bool useMaskedRipple: Md3Theme.effectsRippleMasked
+    readonly property bool layersNeeded: useMaskedRipple && (_layersArmed
             || ripple.running
             || interruptFade.running
-            || circle.opacity > 0.01
+            || circle.opacity > 0.01)
 
     readonly property real resolvedClipRadius: {
         if (clipRadius >= 0)
@@ -32,10 +33,18 @@ Item {
         return Math.min(width, height) / 2
     }
 
+    readonly property real _peak: Md3Theme.effectsRipplePeak
+    readonly property real _hold: Md3Theme.effectsRippleHold
+    readonly property real _spread: Md3Theme.effectsRippleSpread
+
     function pulse(x, y) {
+        if (!Md3Theme.effectsRipple) {
+            _releaseLayers()
+            return
+        }
         originX = x
         originY = y
-        _layersArmed = true
+        _layersArmed = useMaskedRipple
         // Interrupt in-flight ink: fade from current opacity, then expand again.
         if (ripple.running || interruptFade.running) {
             ripple.stop()
@@ -58,10 +67,12 @@ Item {
     Item {
         id: inkHost
         anchors.fill: parent
+        // Low tier: no MultiEffect mask FBO — rectangular clip only.
+        clip: !root.useMaskedRipple
         layer.enabled: root.layersNeeded
         layer.smooth: true
         layer.effect: MultiEffect {
-            maskEnabled: true
+            maskEnabled: root.useMaskedRipple
             maskSource: maskItem
         }
 
@@ -83,7 +94,7 @@ Item {
                         target: circle
                         property: "width"
                         from: 0
-                        to: Math.max(root.width, root.height) * 2.2
+                        to: Math.max(root.width, root.height) * root._spread
                         duration: Md3Motion.rippleDuration
                         easing.type: Easing.BezierSpline
                         easing.bezierCurve: Md3Motion.standardDecelerate
@@ -91,8 +102,8 @@ Item {
                     NumberAnimation {
                         target: circle
                         property: "opacity"
-                        from: 0.16
-                        to: 0.08
+                        from: root._peak
+                        to: root._hold
                         duration: Md3Motion.rippleDuration
                         easing.type: Easing.BezierSpline
                         easing.bezierCurve: Md3Motion.standard

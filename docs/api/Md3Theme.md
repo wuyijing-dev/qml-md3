@@ -20,7 +20,14 @@ import Md3
 | `highContrast` | `bool` | `false` | read/write | `Md3Theme` | — |
 | `reduceMotion` | `bool` | `false` | read/write | `Md3Theme` | Prefer near-instant motion for vestibular / a11y preferences. |
 | `progressiveContent` | `bool` | `true` | read/write | `Md3Theme` | Within-page progressive load (Md3DeferredSection). Default on; set false to load everything immediately. |
-| `effectsLevel` | `int` | `1` | read/write | `Md3Theme` | Global effects budget: `0` 流畅 / `1` 均衡 / `2` 画质. Drives chart smooth/inertia, live FPS, shadows, liquid-glass quality. |
+| `effectsLevel` | `int` | `1` | read/write | `Md3Theme` | Global effects budget: `0` 流畅 / `1` 均衡 / `2` 画质. Drives ripple, state layers, charts, shadows, glass. |
+| `effectsIntensity` | `real` | `1.0` | read/write | `Md3Theme` | Extra multiplier (0.35–1.35) on ripple / hover-press state opacity. |
+| `effectsRipple` | `bool` | — | readonly | `Md3Theme` | Ripple enabled (off when `reduceMotion`). |
+| `effectsRippleMasked` | `bool` | — | readonly | `Md3Theme` | Rounded MultiEffect mask for ripple (Balanced+). |
+| `effectsRipplePeak` / `effectsRippleHold` | `real` | — | readonly | `Md3Theme` | Ripple opacity envelope. |
+| `effectsRippleSpread` | `real` | — | readonly | `Md3Theme` | Ripple expand factor. |
+| `effectsStateIntensity` | `real` | — | readonly | `Md3Theme` | Hover/press state-layer scale. |
+| `effectsMotionFactor` | `real` | — | readonly | `Md3Theme` | Scales Md3Motion durations by tier. |
 | `effectsChartSmooth` | `bool` | — | readonly | `Md3Theme` | Catmull smoothing (High only). |
 | `effectsChartInertia` | `bool` | — | readonly | `Md3Theme` | Pan inertia (Balanced+). |
 | `effectsLiveMotion` | `bool` | — | readonly | `Md3Theme` | Live charts / wave animation (Balanced+). |
@@ -46,6 +53,7 @@ _None._
 |--------|------------|-------------|
 | `applySeed(c)` | `Md3Theme` | Rebuild the full MD3 role set from seed + dark (Material You–style). |
 | `setEffectsLevel(level)` | `Md3Theme` | Clamp and set `effectsLevel` to 0–2. |
+| `setEffectsIntensity(v)` | `Md3Theme` | Clamp and set `effectsIntensity` to 0.35–1.35. |
 | `effectsLevelLabel()` | `Md3Theme` | Localized label for the current effects level. |
 | `toggleDark()` | `Md3Theme` | — |
 | `scaled(px)` | `Md3Theme` | — |

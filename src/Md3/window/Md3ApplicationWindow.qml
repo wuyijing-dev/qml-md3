@@ -501,6 +501,7 @@ Window {
         function onHighContrastChanged() { root._scheduleSessionSave() }
         function onTextScaleChanged() { root._scheduleSessionSave() }
         function onEffectsLevelChanged() { root._scheduleSessionSave() }
+        function onEffectsIntensityChanged() { root._scheduleSessionSave() }
     }
 
     Connections {
@@ -534,6 +535,9 @@ Window {
         const fx = Number(Md3AppSettings.value("perf/effectsLevel", Md3Theme.effectsLevel))
         if (isFinite(fx))
             Md3Theme.setEffectsLevel(fx)
+        const fxi = Number(Md3AppSettings.value("perf/effectsIntensity", Md3Theme.effectsIntensity))
+        if (isFinite(fxi))
+            Md3Theme.setEffectsIntensity(fxi)
         Md3Accessibility.showFocusRings = _settingsBool("a11y/showFocusRings", Md3Accessibility.showFocusRings)
         if (Md3Theme.reduceMotion) {
             console.warn("Md3: reduceMotion is ON — Md3Motion durations collapse to ~1ms "
@@ -561,6 +565,7 @@ Window {
         Md3AppSettings.setValue("a11y/highContrast", Md3Theme.highContrast)
         Md3AppSettings.setValue("a11y/textScale", Md3Theme.textScale)
         Md3AppSettings.setValue("perf/effectsLevel", Md3Theme.effectsLevel)
+        Md3AppSettings.setValue("perf/effectsIntensity", Md3Theme.effectsIntensity)
         Md3AppSettings.setValue("a11y/showFocusRings", Md3Accessibility.showFocusRings)
         Md3AppSettings.setValue("shell/railExpanded", railExpanded)
         Md3AppSettings.setValue("shell/pageIndex", currentIndex)
