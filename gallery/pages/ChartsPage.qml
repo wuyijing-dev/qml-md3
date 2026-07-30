@@ -11,7 +11,7 @@ Item {
             width: root.width
             implicitHeight: 620
             height: 620
-            Column {
+            Md3VStack {
                 width: parent.width
                 spacing: 16
                 Md3Text {
@@ -130,14 +130,14 @@ Item {
             variant: Md3Card.Outlined
             width: root.width
             height: 560
-            Column {
+            Md3VStack {
                 width: parent.width
                 spacing: 12
                 Md3Text {
                     text: qsTr("Radar · Funnel · Radial bars")
                     role: Md3Text.TitleSmall
                 }
-                Row {
+                Md3HStack {
                     width: parent.width
                     spacing: 12
                     Md3RadarChart {
@@ -172,7 +172,7 @@ Item {
                     text: qsTr("Area · Waterfall · Bullet")
                     role: Md3Text.TitleSmall
                 }
-                Row {
+                Md3HStack {
                     width: parent.width
                     spacing: 12
                     Md3AreaChart {
@@ -222,7 +222,7 @@ Item {
             variant: Md3Card.Outlined
             width: root.width
             height: 220
-            Column {
+            Md3VStack {
                 width: parent.width
                 spacing: 8
                 Md3Text {
@@ -394,7 +394,7 @@ Item {
 
     Component {
         id: heroLiveBlock
-        Column {
+        Md3VStack {
             width: root.width
             spacing: 16
             Flow {
@@ -529,7 +529,7 @@ Item {
             variant: Md3Card.Outlined
             width: root.width
             height: 260
-            Column {
+            Md3VStack {
                 width: parent.width
                 spacing: 8
                 Md3HStack {
@@ -582,7 +582,7 @@ Item {
             variant: Md3Card.Outlined
             width: root.width
             height: 240
-            Column {
+            Md3VStack {
                 width: parent.width
                 spacing: 8
                 Md3HStack {
@@ -646,7 +646,7 @@ Item {
             variant: Md3Card.Elevated
             width: root.width
             height: 200
-            Column {
+            Md3VStack {
                 width: parent.width
                 spacing: 8
                 Md3Text {
@@ -676,7 +676,7 @@ Item {
             variant: Md3Card.Outlined
             width: root.width
             height: 240
-            Column {
+            Md3VStack {
                 width: parent.width
                 spacing: 8
                 Md3HStack {
@@ -716,7 +716,7 @@ Item {
             variant: Md3Card.Outlined
             width: root.width
             height: 240
-            Column {
+            Md3VStack {
                 width: parent.width
                 spacing: 8
                 Md3HStack {
@@ -753,7 +753,7 @@ Item {
             variant: Md3Card.Outlined
             width: root.width
             height: 320
-            Column {
+            Md3VStack {
                 width: parent.width
                 spacing: 8
                 Md3Text {

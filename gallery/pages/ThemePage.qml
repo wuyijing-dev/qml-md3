@@ -287,7 +287,7 @@ Flickable {
 
         Md3HStack {
             spacing: 12
-            Md3Text { text: qsTr("Text scale") }
+            Md3Text { text: qsTr("Text scale"); role: Md3Text.LabelLarge }
             Md3Button {
                 text: "100%"
                 variant: Md3Button.Text
@@ -351,7 +351,7 @@ Flickable {
         RowLayout {
             spacing: 12
             width: parent.width
-            Column {
+            Md3VStack {
                 Layout.fillWidth: true
                 spacing: 2
                 Md3Text {
@@ -393,7 +393,7 @@ Flickable {
         RowLayout {
             spacing: 12
             width: parent.width
-            Column {
+            Md3VStack {
                 Layout.fillWidth: true
                 spacing: 2
                 Md3Text {
@@ -420,7 +420,7 @@ Flickable {
         RowLayout {
             spacing: 12
             width: parent.width
-            Column {
+            Md3VStack {
                 Layout.fillWidth: true
                 spacing: 2
                 Md3Text {
@@ -449,7 +449,7 @@ Flickable {
         RowLayout {
             spacing: 12
             width: parent.width
-            Column {
+            Md3VStack {
                 Layout.fillWidth: true
                 spacing: 2
                 Md3Text {
@@ -475,7 +475,7 @@ Flickable {
 
         Md3HStack {
             width: parent.width
-            Md3Text { text: qsTr("高对比度") }
+            Md3Text { text: qsTr("高对比度"); role: Md3Text.BodyLarge }
             Md3Spacer { expand: true }
             Md3Switch {
                 checked: Md3Theme.highContrast
@@ -489,7 +489,7 @@ Flickable {
 
         Md3HStack {
             width: parent.width
-            Md3Text { text: qsTr("始终显示焦点环") }
+            Md3Text { text: qsTr("始终显示焦点环"); role: Md3Text.BodyLarge }
             Md3Spacer { expand: true }
             Md3Switch {
                 checked: Md3Accessibility.showFocusRings
@@ -502,7 +502,7 @@ Flickable {
 
         Md3HStack {
             spacing: 12
-            Md3Text { text: qsTr("RTL preview") }
+            Md3Text { text: qsTr("RTL preview"); role: Md3Text.BodyLarge }
             Md3Switch {
                 id: rtlSwitch
             }

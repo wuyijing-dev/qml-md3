@@ -2,7 +2,9 @@
 
 Prefer these component APIs over hand-rolled `Row`/`Column`/`Text` wrappers.
 
-See also [layout.md](layout.md).
+**Gallery and application UI** should use `Md3Text`, `Md3VStack` / `Md3HStack`, `Md3FlowLayout`, and `Md3PageSection`. Library control internals may still use Qt `Text`/`Column` — that is implementation, not app glue.
+
+See also [layout.md](layout.md) and [module-boundaries.md](module-boundaries.md).
 
 ## Selection controls
 

@@ -17,14 +17,15 @@ import Md3
 |----------|-------------|
 | `isItemShown(item)` | `item` and ancestors are visible with opacity > 0.01 |
 | `isWindowActive(win)` | `win` not Hidden/Minimized (missing win → false) |
-| `isSceneActive(item, win)` | Tree shown and window active — pass `Window.window` |
+| `isSceneActive(item, win)` | Tree shown and window active — pass `hostWindow` or `null`/`undefined` to resolve via `Md3OverlayHost` |
 | `isLiveMotionScene(item, win)` | Scene active and app not suspended/hidden |
 
 ## Example
 
 ```qml
+property var hostWindow: null
 readonly property bool chartActive: enabled
-        && Md3TreeVisibility.isLiveMotionScene(root, Window.window)
+        && Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
 ```
 
-See [module-boundaries.md](../module-boundaries.md).
+See [module-boundaries.md](../module-boundaries.md), [Md3OverlayHost](Md3OverlayHost.md).
