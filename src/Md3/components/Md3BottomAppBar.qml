@@ -10,7 +10,7 @@ Rectangle {
     signal actionClicked(int index)
     signal fabClicked()
 
-    Accessible.role: Accessible.Pane
+    Accessible.role: Accessible.ToolBar
     Accessible.name: qsTr("Bottom app bar")
 
     width: parent ? parent.width : 360

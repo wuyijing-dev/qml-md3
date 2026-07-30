@@ -71,7 +71,7 @@ Item {
                 Md3Text {
                     visible: crumbRow.collapsedGap
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "…"
+                    text: qsTr("…")
                     role: Md3Text.LabelLarge
                     tone: Md3Text.OnSurfaceVariant
                     font.pixelSize: root.fontSize

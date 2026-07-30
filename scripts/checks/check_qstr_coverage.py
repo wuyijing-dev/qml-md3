@@ -34,8 +34,50 @@ PROP = re.compile(
 )
 
 
+def _strip_qml_comments(text: str) -> str:
+    """Blank out // and /// line comments so doc examples are not scanned."""
+    out = []
+    for line in text.splitlines(keepends=True):
+        # Keep strings intact for simplicity: only strip when // is outside quotes (heuristic).
+        if "//" not in line:
+            out.append(line)
+            continue
+        in_str = False
+        quote = ""
+        i = 0
+        cut = len(line)
+        while i < len(line):
+            ch = line[i]
+            if in_str:
+                if ch == "\\" and i + 1 < len(line):
+                    i += 2
+                    continue
+                if ch == quote:
+                    in_str = False
+                i += 1
+                continue
+            if ch in "\"'":
+                in_str = True
+                quote = ch
+                i += 1
+                continue
+            if ch == "/" and i + 1 < len(line) and line[i + 1] == "/":
+                cut = i
+                break
+            i += 1
+        kept = line[:cut]
+        # Preserve newline
+        nl = "\n" if line.endswith("\n") else ""
+        if not kept.endswith("\n") and nl:
+            out.append(kept + (" " * max(0, len(line) - len(kept) - 1)) + nl)
+        else:
+            out.append(kept if kept.endswith("\n") else kept + nl)
+    return "".join(out)
+
+
 def scan_file(path: Path) -> list[dict]:
-    text = path.read_text(encoding="utf-8", errors="replace")
+    raw = path.read_text(encoding="utf-8", errors="replace")
+    text = _strip_qml_comments(raw)
     hits = []
     for m in PROP.finditer(text):
         val = m.group("val")
@@ -47,6 +89,8 @@ def scan_file(path: Path) -> list[dict]:
             continue
         if len(lit) <= 2 and lit.isascii():
             continue
+        line = raw.count("\n", 0, m.start()) + 1
+        # Map match position through stripped text approximately via line number on stripped
         line = text.count("\n", 0, m.start()) + 1
         hits.append({
             "file": str(path.relative_to(ROOT)).replace("\\", "/"),

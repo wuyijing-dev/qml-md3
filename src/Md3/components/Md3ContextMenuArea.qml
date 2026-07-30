@@ -12,7 +12,7 @@ import Md3
 /// }
 /// Md3Menu {
 ///     id: pageMenu
-///     Md3MenuItem { text: "Refresh" }
+///     Md3MenuItem { text: qsTr("Refresh") }
 /// }
 /// ```
 Item {

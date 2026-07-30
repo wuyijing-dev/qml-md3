@@ -210,9 +210,11 @@ Flickable {
         Md3Card {
             Layout.fillWidth: true
             title: qsTr("静态审计（脚本）")
-            subtitle: scanCount >= 0
-                      ? qsTr("快照：%1 个文件可能缺少 Accessible（启发式）").arg(scanCount)
-                      : qsTr("未加载 docs/a11y-scan.json 快照")
+            subtitle: scanCount < 0
+                      ? qsTr("未加载 docs/a11y-scan.json 快照")
+                      : (scanCount === 0
+                         ? qsTr("快照：0 — 严格扫描已通过（无缺失 Accessible.name/role）")
+                         : qsTr("快照：%1 个文件可能缺少 Accessible（启发式）").arg(scanCount))
             Column {
                 width: parent.width
                 spacing: 8
