@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
 Flickable {
@@ -8,26 +7,24 @@ Flickable {
     contentHeight: column.height
     clip: true
 
-    ColumnLayout {
+    Md3VStack {
         id: column
         width: root.width
         spacing: 20
 
-        Text {
+        Md3Text {
             text: "Common buttons"
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.headlineMedium.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.HeadlineMedium
         }
 
-        Text {
+        Md3Text {
             text: "Variants"
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
-        Flow {
-            Layout.fillWidth: true
+        Md3FlowLayout {
+            width: parent.width
             spacing: 12
             Md3Button { text: "Filled"; variant: Md3Button.Filled; icon: "add" }
             Md3Button { text: "Tonal"; variant: Md3Button.FilledTonal }
@@ -37,13 +34,13 @@ Flickable {
             Md3Button { text: "Disabled"; enabled: false }
         }
 
-        Text {
+        Md3Text {
             text: "Icon buttons"
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
-        Row {
+        Md3HStack {
             spacing: 8
             Md3IconButton { variant: Md3IconButton.Standard; icon: "settings" }
             Md3IconButton { variant: Md3IconButton.Filled; icon: "favorite" }
@@ -52,13 +49,13 @@ Flickable {
             Md3IconButton { enabled: false; icon: "delete" }
         }
 
-        Text {
+        Md3Text {
             text: "Toggle icon buttons"
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
-        Row {
+        Md3HStack {
             spacing: 8
             Md3ToggleIconButton { variant: Md3ToggleIconButton.Standard; icon: "favorite"; checked: true }
             Md3ToggleIconButton { variant: Md3ToggleIconButton.Filled; icon: "bookmark" }
@@ -67,14 +64,14 @@ Flickable {
             Md3ToggleIconButton { enabled: false; icon: "favorite"; checked: true }
         }
 
-        Text {
+        Md3Text {
             text: "Split button"
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
-        Flow {
-            Layout.fillWidth: true
+        Md3FlowLayout {
+            width: parent.width
             spacing: 12
             Md3SplitButton {
                 text: "Save"
@@ -106,10 +103,10 @@ Flickable {
             }
         }
 
-        Text {
+        Md3Text {
             text: "Standard button group"
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
         Md3ButtonGroup {
@@ -122,10 +119,10 @@ Flickable {
             ]
         }
 
-        Text {
+        Md3Text {
             text: "Connected button group"
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
         Md3ButtonGroup {
@@ -139,10 +136,10 @@ Flickable {
             ]
         }
 
-        Text {
+        Md3Text {
             text: "Segmented button"
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
         Md3SegmentedButton {

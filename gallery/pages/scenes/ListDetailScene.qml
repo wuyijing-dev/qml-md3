@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
 Md3SplitView {
@@ -13,8 +12,9 @@ Md3SplitView {
 
     Rectangle {
         color: Md3Theme.colorScheme.surfaceContainerLow
-        Column {
+        Md3VStack {
             anchors.fill: parent
+            spacing: 0
             Md3TopAppBar {
                 width: parent.width
                 title: qsTr("Inbox")
@@ -47,31 +47,27 @@ Md3SplitView {
 
     Rectangle {
         color: Md3Theme.colorScheme.surface
-        Column {
+        Md3VStack {
             anchors.fill: parent
             anchors.margins: 24
             spacing: 12
-            Text {
+            Md3Text {
                 text: qsTr("Detail")
-                color: Md3Theme.colorScheme.colorOnSurface
-                font.family: Md3Theme.typography.fontFamily
-                font.pixelSize: Md3Theme.typography.headlineSmall.size
+                role: Md3Text.HeadlineSmall
             }
-            Text {
+            Md3Text {
                 width: parent.width
                 wrapMode: Text.Wrap
                 text: root.detailText
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.family: Md3Theme.typography.fontFamily
-                font.pixelSize: Md3Theme.typography.bodyLarge.size
+                role: Md3Text.BodyLarge
+                tone: Md3Text.OnSurfaceVariant
             }
-            Text {
+            Md3Text {
                 width: parent.width
                 wrapMode: Text.Wrap
                 text: qsTr("Drag the divider to resize panes (Md3SplitView).")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.family: Md3Theme.typography.fontFamily
-                font.pixelSize: Md3Theme.typography.bodySmall.size
+                role: Md3Text.BodySmall
+                tone: Md3Text.OnSurfaceVariant
             }
         }
     }

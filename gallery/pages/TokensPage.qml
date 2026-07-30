@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
 Flickable {
@@ -9,25 +8,23 @@ Flickable {
     clip: true
     flickableDirection: Flickable.VerticalFlick
 
-    ColumnLayout {
+    Md3VStack {
         id: column
         width: root.width
         spacing: 24
 
-        Text {
+        Md3Text {
             text: "Design tokens"
-            color: Md3Theme.colorScheme.colorOnSurface
-            Component.onCompleted: Md3Theme.typography.applyTo(this, "headlineMedium")
+            role: Md3Text.HeadlineMedium
         }
 
-        Text {
+        Md3Text {
             text: "Color roles"
-            color: Md3Theme.colorScheme.colorOnSurface
-            Component.onCompleted: Md3Theme.typography.applyTo(this, "titleMedium")
+            role: Md3Text.TitleSmall
         }
 
-        Flow {
-            Layout.fillWidth: true
+        Md3FlowLayout {
+            width: parent.width
             spacing: 8
 
             Repeater {
@@ -50,49 +47,46 @@ Flickable {
                     color: modelData.c
                     border.width: 1
                     border.color: Md3Theme.colorScheme.outlineVariant
-                    Text {
+                    Md3Text {
                         anchors.centerIn: parent
                         text: modelData.name
-                        color: modelData.on
-                        font.pixelSize: 11
-                        Component.onCompleted: Md3Theme.typography.applyUiFont(this)
+                        role: Md3Text.LabelSmall
+                        tone: Md3Text.Custom
+                        customColor: modelData.on
                     }
                 }
             }
         }
 
-        Text {
+        Md3Text {
             text: "Typography"
-            color: Md3Theme.colorScheme.colorOnSurface
-            Component.onCompleted: Md3Theme.typography.applyTo(this, "titleMedium")
+            role: Md3Text.TitleSmall
         }
 
-        Column {
+        Md3VStack {
             spacing: 8
             Repeater {
                 model: [
-                    { role: "displaySmall", size: Md3Theme.typography.displaySmall.size },
-                    { role: "headlineSmall", size: Md3Theme.typography.headlineSmall.size },
-                    { role: "titleLarge", size: Md3Theme.typography.titleLarge.size },
-                    { role: "bodyLarge", size: Md3Theme.typography.bodyLarge.size },
-                    { role: "labelLarge", size: Md3Theme.typography.labelLarge.size }
+                    { role: Md3Text.DisplaySmall, label: "displaySmall" },
+                    { role: Md3Text.HeadlineSmall, label: "headlineSmall" },
+                    { role: Md3Text.TitleLarge, label: "titleLarge" },
+                    { role: Md3Text.BodyLarge, label: "bodyLarge" },
+                    { role: Md3Text.LabelLarge, label: "labelLarge" }
                 ]
-                delegate: Text {
+                delegate: Md3Text {
                     required property var modelData
-                    text: modelData.role + " — The quick brown fox"
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    Component.onCompleted: Md3Theme.typography.applyTo(this, modelData.role)
+                    text: modelData.label + " — The quick brown fox"
+                    role: modelData.role
                 }
             }
         }
 
-        Text {
+        Md3Text {
             text: "Shape scale"
-            color: Md3Theme.colorScheme.colorOnSurface
-            Component.onCompleted: Md3Theme.typography.applyTo(this, "titleMedium")
+            role: Md3Text.TitleSmall
         }
 
-        Row {
+        Md3HStack {
             spacing: 12
             Repeater {
                 model: [
@@ -108,12 +102,12 @@ Flickable {
                     height: 56
                     radius: modelData.r
                     color: Md3Theme.colorScheme.primaryContainer
-                    Text {
+                    Md3Text {
                         anchors.centerIn: parent
                         text: modelData.name
-                        color: Md3Theme.colorScheme.colorOnPrimaryContainer
-                        font.pixelSize: 12
-                        Component.onCompleted: Md3Theme.typography.applyUiFont(this)
+                        role: Md3Text.LabelSmall
+                        tone: Md3Text.Custom
+                        customColor: Md3Theme.colorScheme.colorOnPrimaryContainer
                     }
                 }
             }

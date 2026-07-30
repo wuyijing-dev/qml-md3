@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
 Md3Page {
@@ -32,7 +31,6 @@ Md3Page {
     }
 
     function _goCrumb(index) {
-        // index 0 = list root → pop entire stack
         const pops = Math.max(0, crumbModel.length - 1 - index)
         for (let i = 0; i < pops; ++i) {
             if (!goBack())
@@ -57,58 +55,64 @@ Md3Page {
         })
     }
 
-    ColumnLayout {
+    Md3VStack {
+        id: pageStack
         anchors.fill: parent
         spacing: 0
 
         Md3TopAppBar {
-            Layout.fillWidth: true
+            id: topBar
+            width: parent.width
             title: root.detailTitle
             leadingIcon: "arrow_back"
             size: Md3TopAppBar.Small
             onLeadingClicked: root.goBack()
         }
 
-        Md3Breadcrumb {
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            Layout.topMargin: 8
-            model: root.crumbModel
-            onCrumbClicked: function (index) { root._goCrumb(index) }
+        Item {
+            id: breadcrumbRow
+            width: parent.width
+            height: breadcrumb.implicitHeight + 8
+
+            Md3Breadcrumb {
+                id: breadcrumb
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
+                model: root.crumbModel
+                onCrumbClicked: function (index) { root._goCrumb(index) }
+            }
         }
 
         Rectangle {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+            width: parent.width
+            height: Math.max(0, root.height - topBar.implicitHeight - breadcrumbRow.height)
             color: Md3Theme.colorScheme.surface
 
-            Column {
+            Md3VStack {
                 anchors.fill: parent
                 anchors.margins: 24
                 spacing: 14
 
-                Text {
+                Md3Text {
                     text: qsTr("Depth: %1").arg(root.navDepth + 1)
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.OnSurfaceVariant
                 }
-                Text {
+                Md3Text {
                     text: root.detailTitle
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.headlineSmall.size
+                    role: Md3Text.HeadlineSmall
                 }
-                Text {
+                Md3Text {
                     width: parent.width
                     wrapMode: Text.Wrap
                     text: root.detailBody
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.bodyLarge.size
+                    role: Md3Text.BodyLarge
+                    tone: Md3Text.OnSurfaceVariant
                 }
-                Row {
+                Md3HStack {
                     spacing: 12
                     Md3Button {
                         text: qsTr("Back")

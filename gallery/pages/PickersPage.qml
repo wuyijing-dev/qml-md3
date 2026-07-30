@@ -1,8 +1,7 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
-Item {
+Md3Page {
     id: page
 
     Flickable {
@@ -12,25 +11,23 @@ Item {
         contentHeight: column.height
         clip: true
 
-        ColumnLayout {
+        Md3VStack {
             id: column
             width: flick.width
             spacing: 20
 
-            Text {
+            Md3Text {
                 text: qsTr("Pickers")
-                color: Md3Theme.colorScheme.colorOnSurface
-                font.pixelSize: Md3Theme.typography.headlineMedium.size
+                role: Md3Text.HeadlineMedium
             }
 
-            Text {
+            Md3Text {
                 text: qsTr("Docked date field")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelLarge.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
             Md3DateField {
-                Layout.maximumWidth: 320
-                Layout.fillWidth: true
+                width: Math.min(parent.width, 320)
                 label: qsTr("Birthday")
                 supportingText: qsTr("Tap calendar icon · min 2000-01-01")
                 minimumDate: new Date(2000, 0, 1)
@@ -40,14 +37,13 @@ Item {
                 }
             }
 
-            Text {
+            Md3Text {
                 text: qsTr("Inline date picker")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelLarge.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
             Md3DatePicker {
                 id: inlinePicker
-                Layout.alignment: Qt.AlignLeft
                 weekStartsOn: 1
                 minimumDate: new Date(2020, 0, 1)
                 maximumDate: new Date(2030, 11, 31)
@@ -60,24 +56,23 @@ Item {
                 onClicked: modalPicker.open = true
             }
 
-            Text {
+            Md3Text {
                 text: qsTr("Date range")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelLarge.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
             Md3DateRangePicker {
-                Layout.alignment: Qt.AlignLeft
                 weekStartsOn: 1
                 onAccepted: function (a, b) { console.log("range", a, b) }
             }
 
-            Text {
+            Md3Text {
                 text: qsTr("Time")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelLarge.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
             Md3TimeField {
-                Layout.preferredWidth: 200
+                width: 200
                 label: qsTr("Start time")
                 hour: 10
                 minute: 30
@@ -86,7 +81,6 @@ Item {
             }
             Md3TimePicker {
                 id: timePicker
-                Layout.alignment: Qt.AlignLeft
                 hour: 14
                 minute: 0
                 onAccepted: function (h, m) { console.log("time", h, m) }
@@ -98,7 +92,7 @@ Item {
                 onClicked: modalTime.open = true
             }
 
-            Item { Layout.preferredHeight: 48; Layout.fillWidth: true }
+            Item { width: parent.width; height: 48 }
         }
     }
 

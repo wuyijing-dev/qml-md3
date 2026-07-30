@@ -9,39 +9,37 @@ Flickable {
     clip: true
     flickableDirection: Flickable.VerticalFlick
 
-    ColumnLayout {
+    Md3VStack {
         id: column
         width: root.width
         spacing: 28
 
-        Text {
+        Md3Text {
             text: qsTr("动效")
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.headlineMedium.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.HeadlineMedium
         }
 
         Rectangle {
-            Layout.fillWidth: true
+            width: parent.width
             visible: Md3Theme.reduceMotion
             height: visible ? warnCol.implicitHeight + 24 : 0
             radius: Md3Theme.shape.medium
             color: Md3Theme.colorScheme.errorContainer
 
-            Column {
+            Md3VStack {
                 id: warnCol
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins: 12
                 spacing: 8
-                Text {
+                Md3Text {
                     width: parent.width
                     wrapMode: Text.Wrap
                     text: qsTr("「减弱动效」已开启：所有时长≈1ms，演示会瞬移并可能残影。请到「主题」页关闭。")
-                    color: Md3Theme.colorScheme.colorOnErrorContainer
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.bodyMedium.size
+                    role: Md3Text.BodyMedium
+                    tone: Md3Text.Custom
+                    customColor: Md3Theme.colorScheme.colorOnErrorContainer
                 }
                 Md3Button {
                     text: qsTr("关闭减弱动效")
@@ -50,8 +48,8 @@ Flickable {
             }
         }
 
-        Text {
-            Layout.fillWidth: true
+        Md3Text {
+            width: parent.width
             wrapMode: Text.Wrap
             text: qsTr("实际 token：medium4=%1ms，short4=%2ms，ripple=%3ms，scale=%4×%5")
                     .arg(Md3Motion.medium4)
@@ -59,21 +57,17 @@ Flickable {
                     .arg(Md3Motion.rippleDuration)
                     .arg(Md3Motion.durationScale.toFixed(1))
                     .arg(Md3Motion.reduced ? qsTr("（已减弱）") : "")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.bodyMedium.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.BodyMedium
+            tone: Md3Text.OnSurfaceVariant
         }
 
-        Text {
+        Md3Text {
             text: "emphasized · medium4"
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.titleMedium.size
-            font.family: Md3Theme.typography.fontFamily
-            font.weight: Font.Medium
+            role: Md3Text.TitleMedium
         }
 
         Item {
-            Layout.fillWidth: true
+            width: parent.width
             height: 72
             Rectangle {
                 id: box
@@ -84,7 +78,6 @@ Flickable {
                 y: 8
                 x: 0
 
-                // Restart when durations / reduceMotion change so we don't keep a 1ms loop.
                 SequentialAnimation on x {
                     id: boxAnim
                     loops: Animation.Infinite
@@ -118,7 +111,7 @@ Flickable {
             }
         }
 
-        RowLayout {
+        Md3HStack {
             spacing: 24
             Md3Switch { checked: true }
             Md3Switch { }
@@ -130,7 +123,8 @@ Flickable {
             columns: 4
             columnSpacing: 12
             rowSpacing: 8
-            Layout.fillWidth: true
+            width: parent.width
+
             Repeater {
                 model: [
                     "short2=" + Md3Motion.short2,
@@ -148,12 +142,10 @@ Flickable {
                     Layout.preferredHeight: 36
                     radius: Md3Theme.shape.extraSmall
                     color: Md3Theme.colorScheme.surfaceContainerHigh
-                    Text {
+                    Md3Text {
                         anchors.centerIn: parent
                         text: modelData
-                        color: Md3Theme.colorScheme.colorOnSurface
-                        font.pixelSize: 12
-                        font.family: Md3Theme.typography.fontFamily
+                        role: Md3Text.LabelSmall
                     }
                 }
             }

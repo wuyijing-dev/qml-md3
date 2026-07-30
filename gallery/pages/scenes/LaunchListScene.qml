@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
 Md3Page {
@@ -38,23 +37,26 @@ Md3Page {
         })
     }
 
-    ColumnLayout {
+    Md3VStack {
+        id: pageStack
         anchors.fill: parent
         spacing: 0
 
         Md3TopAppBar {
-            Layout.fillWidth: true
+            id: topBar
+            width: parent.width
             title: qsTr("Launch List")
             size: Md3TopAppBar.Small
         }
 
         Rectangle {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+            width: parent.width
+            height: Math.max(0, root.height - topBar.implicitHeight)
             color: Md3Theme.colorScheme.surfaceContainerLow
 
-            Column {
+            Md3VStack {
                 anchors.fill: parent
+                spacing: 0
 
                 Md3ListTile {
                     id: rowWelcome

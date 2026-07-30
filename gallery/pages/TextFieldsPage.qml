@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
 Flickable {
@@ -8,29 +7,25 @@ Flickable {
     contentHeight: column.height
     clip: true
 
-    ColumnLayout {
+    Md3VStack {
         id: column
         width: root.width
         spacing: 20
 
-        Text {
+        Md3Text {
             text: "Text fields"
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.headlineMedium.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.HeadlineMedium
         }
 
         Md3TextField {
-            Layout.fillWidth: true
-            Layout.maximumWidth: 360
+            width: Math.min(parent.width, 360)
             variant: Md3TextField.Filled
             label: "Filled"
             supportingText: "Supporting text"
         }
 
         Md3TextField {
-            Layout.fillWidth: true
-            Layout.maximumWidth: 360
+            width: Math.min(parent.width, 360)
             variant: Md3TextField.Outlined
             label: "Outlined"
             leadingIcon: "search"
@@ -38,14 +33,13 @@ Flickable {
             text: "Clear me"
         }
 
-        Text {
+        Md3Text {
             text: qsTr("Select")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.labelLarge.size
+            role: Md3Text.LabelLarge
+            tone: Md3Text.OnSurfaceVariant
         }
         Md3Select {
-            Layout.fillWidth: true
-            Layout.maximumWidth: 360
+            width: Math.min(parent.width, 360)
             label: qsTr("Role")
             placeholderText: qsTr("Choose a role")
             leadingIcon: "badge"
@@ -57,8 +51,7 @@ Flickable {
             supportingText: qsTr("Field-style ComboBox with label / helper")
         }
         Md3Select {
-            Layout.fillWidth: true
-            Layout.maximumWidth: 360
+            width: Math.min(parent.width, 360)
             variant: Md3Select.Filled
             label: qsTr("Priority")
             error: true
@@ -67,8 +60,7 @@ Flickable {
         }
 
         Md3Select {
-            Layout.fillWidth: true
-            Layout.maximumWidth: 360
+            width: Math.min(parent.width, 360)
             label: qsTr("Tags (multi + search)")
             placeholderText: qsTr("Pick tags")
             searchable: true
@@ -85,17 +77,17 @@ Flickable {
             supportingText: qsTr("Searchable multi-select")
         }
 
-        Text {
+        Md3Text {
             text: qsTr("Number field")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.labelLarge.size
+            role: Md3Text.LabelLarge
+            tone: Md3Text.OnSurfaceVariant
         }
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.maximumWidth: 360
+        Md3HStack {
+            id: numberRow
+            width: Math.min(column.width, 360)
             spacing: 12
             Md3NumberField {
-                Layout.fillWidth: true
+                width: Math.max(120, numberRow.width - 152)
                 label: qsTr("Quantity")
                 value: 3
                 from: 0
@@ -104,7 +96,7 @@ Flickable {
                 supportingText: qsTr("↑↓ or steppers")
             }
             Md3NumberField {
-                Layout.preferredWidth: 140
+                width: 140
                 variant: Md3NumberField.Filled
                 label: qsTr("Price")
                 value: 12.5
@@ -117,8 +109,7 @@ Flickable {
         }
 
         Md3TextField {
-            Layout.fillWidth: true
-            Layout.maximumWidth: 360
+            width: Math.min(parent.width, 360)
             variant: Md3TextField.Outlined
             label: "Error"
             error: true
@@ -127,23 +118,20 @@ Flickable {
         }
 
         Md3TextField {
-            Layout.fillWidth: true
-            Layout.maximumWidth: 360
+            width: Math.min(parent.width, 360)
             variant: Md3TextField.Filled
             label: "Password"
             password: true
         }
 
         Md3PasswordField {
-            Layout.fillWidth: true
-            Layout.maximumWidth: 360
+            width: Math.min(parent.width, 360)
             label: qsTr("Password (strength)")
             supportingText: qsTr("Built-in visibility toggle + strength meter")
         }
 
         Md3TagField {
-            Layout.fillWidth: true
-            Layout.maximumWidth: 480
+            width: Math.min(parent.width, 480)
             label: qsTr("Recipients")
             placeholderText: qsTr("Type and press Enter")
             tags: ["ada@example.com", "design"]
@@ -151,8 +139,7 @@ Flickable {
         }
 
         Md3TextField {
-            Layout.fillWidth: true
-            Layout.maximumWidth: 360
+            width: Math.min(parent.width, 360)
             variant: Md3TextField.Outlined
             label: qsTr("城市（AutoComplete）")
             supportingText: qsTr("↑↓ 选择 · Enter 确认 · Esc 关闭")
@@ -168,8 +155,7 @@ Flickable {
         }
 
         Md3PageSection {
-            Layout.fillWidth: true
-            Layout.maximumWidth: 360
+            width: Math.min(parent.width, 360)
             title: qsTr("Form (name + validate)")
             subtitle: qsTr("Fields with `name` get errors from Md3Form automatically.")
 
@@ -196,7 +182,7 @@ Flickable {
                     from: 1
                     to: 99
                 }
-                    Md3HStack {
+                Md3HStack {
                     spacing: 8
                     Md3Button {
                         text: qsTr("Submit")
@@ -217,14 +203,13 @@ Flickable {
             }
         }
 
-        Text {
+        Md3Text {
             text: qsTr("Key sequence")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.labelLarge.size
+            role: Md3Text.LabelLarge
+            tone: Md3Text.OnSurfaceVariant
         }
         Md3KeySequenceField {
-            Layout.fillWidth: true
-            Layout.maximumWidth: 360
+            width: Math.min(parent.width, 360)
             label: qsTr("Command palette")
             placeholderText: qsTr("Press shortcut")
             supportingText: qsTr("Esc/Backspace clears. Function keys can be used alone.")
@@ -232,8 +217,7 @@ Flickable {
             sequence: "Ctrl+K"
         }
         Md3KeySequenceField {
-            Layout.fillWidth: true
-            Layout.maximumWidth: 360
+            width: Math.min(parent.width, 360)
             label: qsTr("Refresh project")
             supportingText: qsTr("Requires modifier or F-key.")
             allowSingleKeyFunctionKeys: true

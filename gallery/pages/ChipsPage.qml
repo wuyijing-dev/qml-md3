@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
 Flickable {
@@ -8,31 +7,28 @@ Flickable {
     contentHeight: column.height
     clip: true
 
-    ColumnLayout {
+    Md3VStack {
         id: column
         width: root.width
         spacing: 16
 
-        Text {
+        Md3Text {
             text: "Chips"
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.headlineMedium.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.HeadlineMedium
         }
 
-        Text {
-            Layout.fillWidth: true
+        Md3Text {
+            width: parent.width
             wrapMode: Text.WordWrap
             text: "ChipGroup keeps chips as one layout unit — in Md3AnimatedFlow / title bar it moves with spatial easing when the row wraps."
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.bodyMedium.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.BodyMedium
+            tone: Md3Text.OnSurfaceVariant
         }
 
-        Text {
+        Md3Text {
             text: "Chip group (single)"
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
         }
         Md3ChipGroup {
             selectionMode: Md3ChipGroup.Single
@@ -44,10 +40,10 @@ Flickable {
             ]
         }
 
-        Text {
+        Md3Text {
             text: "Chip group (multiple)"
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
         }
         Md3ChipGroup {
             selectionMode: Md3ChipGroup.Multiple
@@ -60,13 +56,13 @@ Flickable {
             ]
         }
 
-        Text {
+        Md3Text {
             text: "Animated flow (resize window / narrow the pane)"
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
         }
         Md3AnimatedFlow {
-            Layout.fillWidth: true
+            width: parent.width
             spacing: 8
             rowSpacing: 8
             Md3ChipGroup {
@@ -96,13 +92,13 @@ Flickable {
             }
         }
 
-        Text {
+        Md3Text {
             text: "Loose chips"
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
         }
         Md3AnimatedFlow {
-            Layout.fillWidth: true
+            width: parent.width
             spacing: 8
             Md3AssistChip { text: "Assist"; icon: "edit" }
             Md3AssistChip { text: "Elevated assist"; elevated: true; icon: "add" }

@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
 Flickable {
@@ -8,19 +7,17 @@ Flickable {
     contentHeight: column.height
     clip: true
 
-    ColumnLayout {
+    Md3VStack {
         id: column
         width: root.width
         spacing: 20
 
-        Text {
+        Md3Text {
             text: qsTr("Selection")
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.headlineMedium.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.HeadlineMedium
         }
 
-        RowLayout {
+        Md3HStack {
             spacing: 8
             Md3Checkbox { text: qsTr("Checked"); checked: true }
             Md3Checkbox { text: qsTr("Unchecked") }
@@ -37,7 +34,7 @@ Flickable {
             ]
         }
 
-        RowLayout {
+        Md3HStack {
             spacing: 16
             Md3Switch { text: qsTr("Off") }
             Md3Switch { text: qsTr("On"); checked: true }
@@ -52,7 +49,7 @@ Flickable {
         }
 
         Md3Slider {
-            Layout.fillWidth: true
+            width: parent.width
             leadingIcon: "call"
             label: qsTr("Call volume")
             from: 0; to: 100; value: 75
@@ -60,7 +57,7 @@ Flickable {
             handleWidth: 10
         }
         Md3Slider {
-            Layout.fillWidth: true
+            width: parent.width
             leadingIcon: "alarm"
             label: qsTr("Alarm volume")
             from: 0; to: 100; value: 75; stepSize: 10; discrete: true
@@ -68,7 +65,7 @@ Flickable {
             handleWidth: 10
         }
         Md3Slider {
-            Layout.fillWidth: true
+            width: parent.width
             leadingIcon: "notifications"
             label: qsTr("Ring volume")
             from: 0; to: 100; value: 25
@@ -76,7 +73,7 @@ Flickable {
             handleWidth: 10
         }
         Md3Slider {
-            Layout.fillWidth: true
+            width: parent.width
             leadingIcon: "music_note"
             label: qsTr("Media volume")
             from: 0; to: 100; value: 28
@@ -85,7 +82,7 @@ Flickable {
         }
 
         Md3Slider {
-            Layout.fillWidth: true
+            width: parent.width
             label: qsTr("Discrete with bubble")
             showValue: true
             from: 0
@@ -97,7 +94,7 @@ Flickable {
         }
 
         Md3RangeSlider {
-            Layout.fillWidth: true
+            width: parent.width
             label: qsTr("Price range")
             showValue: true
             from: 0

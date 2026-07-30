@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
 Flickable {
@@ -8,26 +7,24 @@ Flickable {
     contentHeight: column.height
     clip: true
 
-    ColumnLayout {
+    Md3VStack {
         id: column
         width: root.width
         spacing: 24
 
-        Text {
+        Md3Text {
             text: "Floating action buttons"
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.headlineMedium.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.HeadlineMedium
         }
 
-        Text {
+        Md3Text {
             text: "Sizes × colors"
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
-        Flow {
-            Layout.fillWidth: true
+        Md3FlowLayout {
+            width: parent.width
             spacing: 8
             Md3Fab { size: Md3Fab.Small; colorRole: Md3Fab.Primary; icon: "add" }
             Md3Fab { size: Md3Fab.Regular; colorRole: Md3Fab.Primary; icon: "edit" }
@@ -38,15 +35,15 @@ Flickable {
             Md3Fab { enabled: false; icon: "add" }
         }
 
-        Text {
+        Md3Text {
             text: "FAB menu"
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
         Item {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 260
+            width: parent.width
+            height: 260
             clip: false
             Md3FabMenu {
                 anchors.right: parent.right
@@ -62,13 +59,13 @@ Flickable {
             }
         }
 
-        Text {
+        Md3Text {
             text: "Extended FAB"
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
-        Row {
+        Md3HStack {
             spacing: 16
             Md3ExtendedFab {
                 id: ext

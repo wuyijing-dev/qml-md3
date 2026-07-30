@@ -1,22 +1,22 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
-Item {
+Md3Page {
     id: root
-    ColumnLayout {
+
+    Md3VStack {
         anchors.fill: parent
         spacing: 16
-        Text {
+
+        Md3Text {
             text: "Search"
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.headlineMedium.size
+            role: Md3Text.HeadlineMedium
         }
         Md3SearchBar {
-            Layout.fillWidth: true
+            width: parent.width
             searchView: view
         }
-        Item { Layout.fillHeight: true }
+        Md3Spacer { expand: true }
     }
     Md3SearchView {
         id: view

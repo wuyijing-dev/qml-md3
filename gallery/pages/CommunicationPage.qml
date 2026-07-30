@@ -1,11 +1,8 @@
 import QtQuick
-import QtQuick.Layouts
-import QtQuick.Window
 import Md3
 
-Item {
+Md3Page {
     id: page
-    anchors.fill: parent
 
     Flickable {
         id: flick
@@ -14,24 +11,22 @@ Item {
         contentHeight: col.height
         clip: true
 
-        ColumnLayout {
+        Md3VStack {
             id: col
             width: flick.width
             spacing: 16
 
-            Text {
+            Md3Text {
                 text: "Communication"
-                color: Md3Theme.colorScheme.colorOnSurface
-                font.pixelSize: Md3Theme.typography.headlineMedium.size
-                font.family: Md3Theme.typography.fontFamily
+                role: Md3Text.HeadlineMedium
             }
 
-            Text {
+            Md3Text {
                 text: qsTr("Badges")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelMedium.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
-            Row {
+            Md3HStack {
                 spacing: 20
                 Md3IconButton { icon: "home"; badgeText: "3" }
                 Md3IconButton { icon: "favorite"; badgeDot: true }
@@ -49,20 +44,20 @@ Item {
                 }
             }
 
-            Text {
+            Md3Text {
                 text: "Linear"
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelMedium.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
-            Md3LinearProgressIndicator { Layout.fillWidth: true; value: 0.45 }
-            Md3LinearProgressIndicator { Layout.fillWidth: true; indeterminate: true }
+            Md3LinearProgressIndicator { width: parent.width; value: 0.45 }
+            Md3LinearProgressIndicator { width: parent.width; indeterminate: true }
 
-            Text {
+            Md3Text {
                 text: qsTr("Loading indicator")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelMedium.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
-            RowLayout {
+            Md3HStack {
                 spacing: 24
                 Md3LoadingIndicator { sizePreset: Md3LoadingIndicator.Small }
                 Md3LoadingIndicator { sizePreset: Md3LoadingIndicator.Medium; label: qsTr("Loading…") }
@@ -74,12 +69,12 @@ Item {
                 }
             }
 
-            Text {
+            Md3Text {
                 text: qsTr("Morph loading (expressive)")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelMedium.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
-            RowLayout {
+            Md3HStack {
                 spacing: 28
                 Md3MorphLoadingIndicator { sizePreset: Md3MorphLoadingIndicator.Small }
                 Md3MorphLoadingIndicator { }
@@ -95,49 +90,49 @@ Item {
                 }
             }
 
-            Text {
+            Md3Text {
                 text: "Linear wavy / soft / lively (Expressive)"
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelMedium.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
             Md3LinearProgressIndicator {
-                Layout.fillWidth: true
+                width: parent.width
                 style: Md3LinearProgressIndicator.Wavy
                 value: 0.55
             }
             Md3LinearProgressIndicator {
-                Layout.fillWidth: true
+                width: parent.width
                 style: Md3LinearProgressIndicator.Soft
                 value: 0.4
             }
             Md3LinearProgressIndicator {
-                Layout.fillWidth: true
+                width: parent.width
                 style: Md3LinearProgressIndicator.Lively
                 indeterminate: true
             }
             Md3LinearProgressIndicator {
-                Layout.fillWidth: true
+                width: parent.width
                 style: Md3LinearProgressIndicator.Wavy
                 indeterminate: true
             }
 
-            Text {
+            Md3Text {
                 text: "Circular"
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelMedium.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
-            RowLayout {
+            Md3HStack {
                 spacing: 24
                 Md3CircularProgressIndicator { }
                 Md3CircularProgressIndicator { indeterminate: false; value: 0.7 }
             }
 
-            Text {
+            Md3Text {
                 text: "Circular wavy / soft / lively"
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelMedium.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
-            RowLayout {
+            Md3HStack {
                 spacing: 24
                 Md3CircularProgressIndicator { style: Md3CircularProgressIndicator.Wavy }
                 Md3CircularProgressIndicator { style: Md3CircularProgressIndicator.Soft; indeterminate: false; value: 0.55 }
@@ -149,13 +144,13 @@ Item {
                 }
             }
 
-            Text {
+            Md3Text {
                 text: qsTr("Info bar (persistent)")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelMedium.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
             Md3InfoBar {
-                Layout.fillWidth: true
+                width: parent.width
                 severity: Md3InfoBar.Informational
                 title: qsTr("Sync available")
                 message: qsTr("A new device profile is ready to download.")
@@ -163,26 +158,26 @@ Item {
                 onActionClicked: Md3Notify.snackbar(qsTr("Opening sync…"))
             }
             Md3InfoBar {
-                Layout.fillWidth: true
+                width: parent.width
                 severity: Md3InfoBar.Warning
                 title: qsTr("Storage low")
                 message: qsTr("Free up space to keep uploads reliable.")
                 actionText: qsTr("Manage")
             }
             Md3InfoBar {
-                Layout.fillWidth: true
+                width: parent.width
                 severity: Md3InfoBar.Critical
                 message: qsTr("Connection lost — changes are queued offline.")
             }
 
-            Text {
+            Md3Text {
                 text: qsTr("Toast (multi + position) vs Snackbar (bottom queue)")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.labelMedium.size
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
             }
-            RowLayout {
+            Md3HStack {
                 spacing: 8
-                Layout.fillWidth: true
+                width: parent.width
                 Md3Button {
                     text: qsTr("Toast")
                     onClicked: Md3Notify.toast(qsTr("Copied to clipboard"), { severity: Md3Toast.Success })
@@ -203,7 +198,7 @@ Item {
                 }
             }
             Md3FlowLayout {
-                Layout.fillWidth: true
+                width: parent.width
                 spacing: 8
                 rowSpacing: 8
                 Md3Button {
