@@ -25,6 +25,11 @@ Item {
     signal filesDropped(var items)
     signal itemRemoved(int index, var item)
     signal clicked()
+    /// Fired when drops/browse picks are rejected (extension / empty). message is localized.
+    signal rejected(string message)
+    property string lastRejectMessage: ""
+    property string rejectExtensionText: qsTr("File type not allowed")
+    property bool announceRejections: true
 
     implicitWidth: 360
     implicitHeight: hasFiles && showTable ? (52 + 36 + tableBodyHeight + 24) : 180
@@ -110,10 +115,13 @@ Item {
             seen[String(paths[i]).toLowerCase()] = true
 
         const added = []
+        let rejectedCount = 0
         for (let i = 0; i < urls.length; ++i) {
             const path = _urlToLocal(urls[i])
-            if (!_acceptPath(path))
+            if (!_acceptPath(path)) {
+                rejectedCount++
                 continue
+            }
             const key = String(path).toLowerCase()
             if (seen[key])
                 continue
@@ -136,6 +144,13 @@ Item {
         droppedItems = items
         if (added.length > 0)
             filesDropped(added)
+        else if (rejectedCount > 0) {
+            lastRejectMessage = rejectExtensionText
+            rejected(rejectExtensionText)
+            if (announceRejections && typeof Md3Accessibility !== "undefined"
+                    && Md3Accessibility.announceError)
+                Md3Accessibility.announceError(rejectExtensionText)
+        }
     }
 
     function _openBrowse() {

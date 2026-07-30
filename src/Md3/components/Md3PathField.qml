@@ -32,6 +32,12 @@ Item {
     property var pathValidator: null // function(path) -> { valid: bool, message: string }
     property var existsProbe: null // function(path)->bool
     property var writableProbe: null // function(path)->bool
+    /// Localized when existsProbe fails (validateExists).
+    property string notFoundText: qsTr("Path does not exist")
+    /// Localized when writableProbe fails (validateWritable) — permission / ACL.
+    property string permissionDeniedText: qsTr("No write permission for this path")
+    /// Announce validation failures via Md3Accessibility (default on).
+    property bool announceValidationErrors: true
     property bool showBreadcrumb: false
     property bool acceptDrops: true
 
@@ -116,6 +122,10 @@ Item {
         field.error = !ok
         field.errorText = ok ? "" : msg
         validationChanged(ok, msg)
+        if (!ok && announceValidationErrors && msg.length
+                && typeof Md3Accessibility !== "undefined"
+                && Md3Accessibility.announceError)
+            Md3Accessibility.announceError(msg)
         return ok
     }
 
@@ -142,11 +152,11 @@ Item {
         }
         if (validateExists && existsProbe) {
             if (!existsProbe(p))
-                return qsTr("Path does not exist")
+                return notFoundText
         }
         if (validateWritable && writableProbe) {
             if (!writableProbe(p))
-                return qsTr("Path is not writable")
+                return permissionDeniedText
         }
         return ""
     }
