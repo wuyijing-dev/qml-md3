@@ -61,64 +61,58 @@ Flickable {
         }
     }
 
-    ColumnLayout {
+    Md3VStack {
         id: column
         width: root.width
         spacing: 16
 
-        Text {
+        Md3Text {
             text: qsTr("应用窗口")
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.headlineMedium.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.HeadlineMedium
         }
 
-        Text {
-            Layout.fillWidth: true
+        Md3Text {
+            width: parent.width
             wrapMode: Text.WordWrap
             text: qsTr("下方为通用设置；按系统切换标签页查看原生能力。当前运行：%1%2。")
                   .arg(Md3WindowCapabilities.platformId)
                   .arg(nativeHelper.wayland ? " · Wayland" : (nativeHelper.xcb ? " · X11" : ""))
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.bodyMedium.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.BodyMedium
+            tone: Md3Text.OnSurfaceVariant
         }
 
         // —— Shared ——
-        Text {
+        Md3Text {
             text: qsTr("通用")
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
         }
 
-        Text {
-            Layout.fillWidth: true
+        Md3Text {
+            width: parent.width
             wrapMode: Text.WordWrap
             text: qsTr("文档标签：标题栏下方开启 documentTabsEnabled。支持 + 新建 / 关闭 / 拖拽排序；拖出标签条可撕离为独立 Md3TabWindow（documentTabsTearOff）。")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.bodySmall.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.BodySmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
-        Text {
+        Md3Text {
             text: qsTr("图形后端（RHI）")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.labelLarge.size
+            role: Md3Text.LabelLarge
+            tone: Md3Text.OnSurfaceVariant
         }
-        Text {
-            Layout.fillWidth: true
+        Md3Text {
+            width: parent.width
             wrapMode: Text.WordWrap
             text: qsTr("%1 · 当前=%2 · 首选=%3%4")
                   .arg(Md3Graphics.platformName)
                   .arg(Md3Graphics.currentBackend)
                   .arg(Md3Graphics.preferredBackend)
                   .arg(Md3Graphics.restartRequired ? qsTr(" · 需重启生效") : "")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.bodySmall.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.BodySmall
+            tone: Md3Text.OnSurfaceVariant
         }
         Flow {
-            Layout.fillWidth: true
+            width: parent.width
             spacing: 8
             Repeater {
                 model: Md3Graphics.availableBackends
@@ -130,13 +124,13 @@ Flickable {
             }
         }
 
-        Text {
+        Md3Text {
             text: qsTr("页面转场")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.labelLarge.size
+            role: Md3Text.LabelLarge
+            tone: Md3Text.OnSurfaceVariant
         }
         Md3ButtonGroup {
-            Layout.fillWidth: true
+            width: parent.width
             layout: Md3ButtonGroup.Connected
             variant: Md3ButtonGroup.Outlined
             buttonHeight: 32
@@ -163,7 +157,7 @@ Flickable {
                 root.appWin.pageTransition = modes[index]
             }
         }
-        Row {
+        Md3HStack {
             spacing: 12
             Md3Switch {
                 checked: root.appWin ? root.appWin.pageSkeleton : true
@@ -172,20 +166,19 @@ Flickable {
                         root.appWin.pageSkeleton = on
                 }
             }
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
+            Md3Text {
                 text: qsTr("加载时显示骨架屏")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: 12
+                role: Md3Text.BodySmall
+                tone: Md3Text.OnSurfaceVariant
             }
         }
 
-        Text {
+        Md3Text {
             text: qsTr("Release 更新")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.labelLarge.size
+            role: Md3Text.LabelLarge
+            tone: Md3Text.OnSurfaceVariant
         }
-        Row {
+        Md3HStack {
             spacing: 12
             Md3Button {
                 text: releaseUpdater.checking ? qsTr("Checking…") : qsTr("Check GitHub Release")
@@ -206,8 +199,8 @@ Flickable {
                 onClicked: releaseUpdater.downloadTo(StandardPaths.writableLocation(StandardPaths.DownloadLocation))
             }
         }
-        Text {
-            Layout.fillWidth: true
+        Md3Text {
+            width: parent.width
             wrapMode: Text.WordWrap
             text: releaseUpdater.errorString.length
                   ? releaseUpdater.errorString
@@ -217,33 +210,28 @@ Flickable {
                            .arg(releaseUpdater.latestVersion)
                            .arg(releaseUpdater.hasUpdate ? qsTr("Update available") : qsTr("Up to date"))
                      : qsTr("Checks GitHub Release metadata and exposes a ZIP download URL."))
-            color: releaseUpdater.errorString.length
-                   ? Md3Theme.colorScheme.error
-                   : Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.bodySmall.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.BodySmall
+            tone: releaseUpdater.errorString.length ? Md3Text.Error : Md3Text.OnSurfaceVariant
         }
-        Text {
+        Md3Text {
             visible: releaseUpdater.downloading || releaseUpdater.downloadedFilePath.length > 0
-            Layout.fillWidth: true
+            width: parent.width
             wrapMode: Text.WordWrap
             text: releaseUpdater.downloading
                   ? qsTr("Download %1%").arg(Math.round(releaseUpdater.downloadProgress * 100))
                   : qsTr("Downloaded: %1").arg(releaseUpdater.downloadedFilePath)
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.bodySmall.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.BodySmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
         // —— Per-OS tabs ——
-        Text {
+        Md3Text {
             text: qsTr("平台原生")
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.titleSmall.size
+            role: Md3Text.TitleSmall
         }
 
         Md3TabBar {
-            Layout.fillWidth: true
+            width: parent.width
             currentIndex: root.platformTab
             model: [
                 { text: qsTr("Windows") },
@@ -255,44 +243,43 @@ Flickable {
             }
         }
 
-        Text {
+        Md3Text {
             visible: root.platformTab !== root.currentOsTab
-            Layout.fillWidth: true
+            width: parent.width
             wrapMode: Text.WordWrap
             text: qsTr("正在浏览其他系统标签；可操作控件仅对本机（%1）生效。")
                   .arg(Md3WindowCapabilities.platformId)
-            color: Md3Theme.colorScheme.tertiary
-            font.pixelSize: Md3Theme.typography.bodySmall.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.BodySmall
+            tone: Md3Text.Tertiary
         }
 
         StackLayout {
-            Layout.fillWidth: true
+            width: parent.width
             currentIndex: root.platformTab
 
             // ===== Windows =====
             ColumnLayout {
                 spacing: 12
 
-                Text {
+                Md3Text {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     text: qsTr("Windows 10/11 客户区：DWM 边框、任务栏进度与角标、跳转列表、缩略图工具栏、托盘、Peek/捕获。（系统背景材质已标记为不适合使用，Gallery 不再展示。）")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.bodyMedium.size
-                    font.family: Md3Theme.typography.fontFamily
+                    role: Md3Text.BodyMedium
+                    tone: Md3Text.OnSurfaceVariant
                 }
 
-                Text {
+                Md3Text {
                     visible: root.appWin && Md3WindowCapabilities.isWindows
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     text: qsTr("已绑定 — 边框=\"%1\"")
                           .arg(root.appWin ? root.appWin.nativeBorderColor : "")
-                    color: Md3Theme.colorScheme.primary
-                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.Primary
                 }
 
+                // keep QtQuick.Layouts for dense form alignment
                 RowLayout {
                     visible: Md3WindowCapabilities.isWindows && root.appWin
                     Layout.fillWidth: true
@@ -301,18 +288,17 @@ Flickable {
                         checked: root.appWin.syncImmersiveDarkMode
                         onToggled: function (isOn) { root.appWin.syncImmersiveDarkMode = isOn }
                     }
-                    Text {
+                    Md3Text {
                         Layout.fillWidth: true
                         text: qsTr("与主题同步沉浸式深色")
-                        color: Md3Theme.colorScheme.colorOnSurface
-                        font.pixelSize: Md3Theme.typography.bodyMedium.size
+                        role: Md3Text.BodyMedium
                     }
                 }
 
-                Text {
+                Md3Text {
                     text: qsTr("DWM 边框颜色")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.OnSurfaceVariant
                 }
                 Flow {
                     Layout.fillWidth: true
@@ -371,11 +357,12 @@ Flickable {
                     }
                 }
 
-                Text {
+                Md3Text {
                     text: qsTr("任务栏进度 / 角标")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.OnSurfaceVariant
                 }
+                // keep QtQuick.Layouts for dense form alignment
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 12
@@ -389,10 +376,10 @@ Flickable {
                                 root.appWin.setTaskbarProgress(winProgress.value)
                         }
                     }
-                    Text {
+                    Md3Text {
                         text: Math.round(winProgress.value * 100) + "%"
-                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                        font.pixelSize: 12
+                        role: Md3Text.BodySmall
+                        tone: Md3Text.OnSurfaceVariant
                     }
                 }
                 Flow {
@@ -429,26 +416,26 @@ Flickable {
                     }
                 }
 
-                Text {
+                Md3Text {
                     text: qsTr("Peek、捕获与外壳")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.OnSurfaceVariant
                 }
                 ColumnLayout {
                     spacing: 8
                     enabled: Md3WindowCapabilities.isWindows
+                    // keep QtQuick.Layouts for dense form alignment
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 12
                         Md3Switch {
                             onToggled: function (on) { if (root.appWin) root.appWin.setExcludedFromPeek(on) }
                         }
-                        Text {
+                        Md3Text {
                             Layout.fillWidth: true
                             wrapMode: Text.WordWrap
                             text: qsTr("从 Aero Peek 排除")
-                            color: Md3Theme.colorScheme.colorOnSurface
-                            font.pixelSize: Md3Theme.typography.bodyMedium.size
+                            role: Md3Text.BodyMedium
                         }
                     }
                     RowLayout {
@@ -457,11 +444,10 @@ Flickable {
                         Md3Switch {
                             onToggled: function (on) { if (root.appWin) root.appWin.setDisallowPeek(on) }
                         }
-                        Text {
+                        Md3Text {
                             Layout.fillWidth: true
                             text: qsTr("禁止 Peek 预览")
-                            color: Md3Theme.colorScheme.colorOnSurface
-                            font.pixelSize: Md3Theme.typography.bodyMedium.size
+                            role: Md3Text.BodyMedium
                         }
                     }
                     RowLayout {
@@ -470,11 +456,10 @@ Flickable {
                         Md3Switch {
                             onToggled: function (on) { if (root.appWin) root.appWin.setExcludeFromCapture(on) }
                         }
-                        Text {
+                        Md3Text {
                             Layout.fillWidth: true
                             text: qsTr("排除屏幕捕获")
-                            color: Md3Theme.colorScheme.colorOnSurface
-                            font.pixelSize: Md3Theme.typography.bodyMedium.size
+                            role: Md3Text.BodyMedium
                         }
                     }
                 }
@@ -543,16 +528,15 @@ Flickable {
             ColumnLayout {
                 spacing: 12
 
-                Text {
+                Md3Text {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     text: qsTr("Wayland 下「真模糊」需要合成器协议（Plasma + KF6WindowSystem + 开启 Blur 特效）。否则只会半透明。置顶/抢焦点也常被 Wayland 禁止——点按钮后看下方状态与桌面通知。")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.bodyMedium.size
-                    font.family: Md3Theme.typography.fontFamily
+                    role: Md3Text.BodyMedium
+                    tone: Md3Text.OnSurfaceVariant
                 }
 
-                Text {
+                Md3Text {
                     visible: root.appWin && Md3WindowCapabilities.isLinux
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
@@ -562,11 +546,11 @@ Flickable {
                                 ? root.appWin.windowNative.blurBehindAvailable()
                                 : nativeHelper.blurBehindAvailable()) ? qsTr("可用") : qsTr("不可用"))
                           .arg(nativeHelper.systemAccentColor())
-                    color: Md3Theme.colorScheme.primary
-                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.Primary
                 }
 
-                Text {
+                Md3Text {
                     visible: Md3WindowCapabilities.isLinux
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
@@ -574,11 +558,11 @@ Flickable {
                               (root.appWin && root.appWin.windowNative
                                ? root.appWin.windowNative.lastNativeStatus
                                : nativeHelper.lastNativeStatus) || qsTr("（点击下方按钮后显示）"))
-                    color: Md3Theme.colorScheme.tertiary
-                    font.pixelSize: Md3Theme.typography.bodySmall.size
-                    font.family: Md3Theme.typography.fontFamily
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.Tertiary
                 }
 
+                // keep QtQuick.Layouts for dense form alignment
                 RowLayout {
                     visible: Md3WindowCapabilities.isLinux && root.appWin
                     Layout.fillWidth: true
@@ -587,25 +571,24 @@ Flickable {
                         checked: root.appWin.syncImmersiveDarkMode
                         onToggled: function (isOn) { root.appWin.syncImmersiveDarkMode = isOn }
                     }
-                    Text {
+                    Md3Text {
                         Layout.fillWidth: true
                         text: qsTr("与主题同步配色方案")
-                        color: Md3Theme.colorScheme.colorOnSurface
-                        font.pixelSize: Md3Theme.typography.bodyMedium.size
+                        role: Md3Text.BodyMedium
                     }
                 }
 
-                Text {
+                Md3Text {
                     text: qsTr("窗口操作")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.OnSurfaceVariant
                 }
-                Text {
+                Md3Text {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     text: qsTr("「请求注意」请先切到其他窗口再点；「前置」在已聚焦时无变化；「允许空闲」需先成功「禁止休眠」。")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.OnSurfaceVariant
                 }
                 Flow {
                     Layout.fillWidth: true
@@ -677,11 +660,12 @@ Flickable {
                     }
                 }
 
-                Text {
+                Md3Text {
                     text: qsTr("Dock 进度 / 角标")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.OnSurfaceVariant
                 }
+                // keep QtQuick.Layouts for dense form alignment
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 12
@@ -695,10 +679,10 @@ Flickable {
                                 root.appWin.setTaskbarProgress(linuxProgress.value)
                         }
                     }
-                    Text {
+                    Md3Text {
                         text: Math.round(linuxProgress.value * 100) + "%"
-                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                        font.pixelSize: 12
+                        role: Md3Text.BodySmall
+                        tone: Md3Text.OnSurfaceVariant
                     }
                 }
                 Flow {
@@ -729,10 +713,10 @@ Flickable {
                     }
                 }
 
-                Text {
+                Md3Text {
                     text: qsTr("托盘 / 通知")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.labelLarge.size
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.OnSurfaceVariant
                 }
                 Flow {
                     Layout.fillWidth: true
@@ -774,13 +758,12 @@ Flickable {
                     }
                 }
 
-                Text {
+                Md3Text {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     text: qsTr("安装 resources/linux/appQML_MD3.desktop 以获得正确的 Wayland 任务栏图标（setDesktopFileName）。")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.bodySmall.size
-                    font.family: Md3Theme.typography.fontFamily
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.OnSurfaceVariant
                 }
             }
 
@@ -788,24 +771,24 @@ Flickable {
             ColumnLayout {
                 spacing: 12
 
-                Text {
+                Md3Text {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     text: qsTr("macOS：保留红绿灯留白、半透明背景钩子、配色/强调色。标题按钮保持系统原生。")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.bodyMedium.size
-                    font.family: Md3Theme.typography.fontFamily
+                    role: Md3Text.BodyMedium
+                    tone: Md3Text.OnSurfaceVariant
                 }
 
-                Text {
+                Md3Text {
                     visible: root.appWin && Md3WindowCapabilities.isMacOS
                     Layout.fillWidth: true
                     text: qsTr("已绑定 — 红绿灯留白=%1")
                           .arg(nativeHelper.trafficLightsInset)
-                    color: Md3Theme.colorScheme.primary
-                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.Primary
                 }
 
+                // keep QtQuick.Layouts for dense form alignment
                 RowLayout {
                     visible: Md3WindowCapabilities.isMacOS && root.appWin
                     Layout.fillWidth: true
@@ -814,11 +797,10 @@ Flickable {
                         checked: root.appWin.syncImmersiveDarkMode
                         onToggled: function (isOn) { root.appWin.syncImmersiveDarkMode = isOn }
                     }
-                    Text {
+                    Md3Text {
                         Layout.fillWidth: true
                         text: qsTr("与主题同步配色方案")
-                        color: Md3Theme.colorScheme.colorOnSurface
-                        font.pixelSize: Md3Theme.typography.bodyMedium.size
+                        role: Md3Text.BodyMedium
                     }
                 }
 
@@ -873,14 +855,13 @@ Flickable {
             }
         }
 
-        Text {
+        Md3Text {
             id: shellEventLabel
-            Layout.fillWidth: true
+            width: parent.width
             wrapMode: Text.WordWrap
             text: qsTr("外壳事件：—")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.bodySmall.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.BodySmall
+            tone: Md3Text.OnSurfaceVariant
         }
         Connections {
             target: root.appWin && root.appWin.windowNative ? root.appWin.windowNative : nativeHelper
@@ -895,8 +876,8 @@ Flickable {
             }
         }
 
-        Text {
-            Layout.fillWidth: true
+        Md3Text {
+            width: parent.width
             wrapMode: Text.WordWrap
             text: {
                 const win = root.appWin || Md3OverlayHost.resolveWindow(root.md3HostWindow, root)
@@ -908,9 +889,8 @@ Flickable {
                       .arg(Number(dpr).toFixed(2))
                       .arg(dpi)
             }
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.family: Md3Theme.typography.fontFamily
-            font.pixelSize: Md3Theme.typography.bodySmall.size
+            role: Md3Text.BodySmall
+            tone: Md3Text.OnSurfaceVariant
         }
     }
 }

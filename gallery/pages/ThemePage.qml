@@ -52,40 +52,38 @@ Flickable {
         Layout.preferredHeight: 56
         radius: Md3Theme.shape.medium
         color: roleColor
-        Text {
+        Md3Text {
             anchors.left: parent.left
             anchors.leftMargin: 12
             anchors.verticalCenter: parent.verticalCenter
             text: roleName
-            color: parent.labelColor
-            font.pixelSize: Md3Theme.typography.labelLarge.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.LabelLarge
+            tone: Md3Text.Custom
+            customColor: parent.labelColor
         }
     }
 
-    ColumnLayout {
+    Md3VStack {
         id: column
         width: root.width
         spacing: 20
 
-        Text {
+        Md3Text {
             text: qsTr("Theme")
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.headlineMedium.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.HeadlineMedium
         }
 
-        Text {
-            text: qsTr("Dynamic color from seed (Material You tonal roles)")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.bodyMedium.size
-            Layout.fillWidth: true
+        Md3Text {
+            width: parent.width
             wrapMode: Text.WordWrap
+            text: qsTr("Dynamic color from seed (Material You tonal roles)")
+            role: Md3Text.BodyMedium
+            tone: Md3Text.OnSurfaceVariant
         }
 
         Md3WindowHelper { id: winNative }
 
-        RowLayout {
+        Md3HStack {
             spacing: 12
             Md3Button {
                 id: themeSwitchBtn
@@ -112,15 +110,14 @@ Flickable {
             }
         }
 
-        Text {
+        Md3Text {
             text: qsTr("Live hue / chroma")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.labelLarge.size
+            role: Md3Text.LabelLarge
+            tone: Md3Text.OnSurfaceVariant
         }
 
         Md3ColorPicker {
-            Layout.fillWidth: true
-            Layout.maximumWidth: 360
+            width: Math.min(parent.width, 360)
             showApplySeed: true
             color: Md3Theme.seed
             onColorEdited: function (c) {
@@ -131,56 +128,40 @@ Flickable {
             }
         }
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 12
-            Text {
-                text: qsTr("Hue")
-                color: Md3Theme.colorScheme.colorOnSurface
-                font.family: Md3Theme.typography.fontFamily
-            }
-            Md3Slider {
-                id: hueSlider
-                Layout.fillWidth: true
-                from: 0
-                to: 1
-                value: Md3Theme.seed.hslHue
-                showStopIndicator: false
-                onMoved: function (v) {
-                    root.scheduleSeed(v, chromaSlider.value)
-                }
+        Md3Slider {
+            id: hueSlider
+            width: parent.width
+            label: qsTr("Hue")
+            from: 0
+            to: 1
+            value: Md3Theme.seed.hslHue
+            showStopIndicator: false
+            onMoved: function (v) {
+                root.scheduleSeed(v, chromaSlider.value)
             }
         }
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 12
-            Text {
-                text: qsTr("Chroma")
-                color: Md3Theme.colorScheme.colorOnSurface
-                font.family: Md3Theme.typography.fontFamily
-            }
-            Md3Slider {
-                id: chromaSlider
-                Layout.fillWidth: true
-                from: 0.15
-                to: 0.75
-                value: Math.max(0.15, Math.min(0.75, Md3Theme.seed.hslSaturation))
-                showStopIndicator: false
-                onMoved: function (v) {
-                    root.scheduleSeed(hueSlider.value, v)
-                }
+        Md3Slider {
+            id: chromaSlider
+            width: parent.width
+            label: qsTr("Chroma")
+            from: 0.15
+            to: 0.75
+            value: Math.max(0.15, Math.min(0.75, Md3Theme.seed.hslSaturation))
+            showStopIndicator: false
+            onMoved: function (v) {
+                root.scheduleSeed(hueSlider.value, v)
             }
         }
 
-        Text {
+        Md3Text {
             text: qsTr("Seed presets")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.labelLarge.size
+            role: Md3Text.LabelLarge
+            tone: Md3Text.OnSurfaceVariant
         }
 
         Flow {
-            Layout.fillWidth: true
+            width: parent.width
             spacing: 8
             Repeater {
                 model: [
@@ -201,14 +182,14 @@ Flickable {
             }
         }
 
-        Text {
+        Md3Text {
             text: qsTr("Live roles")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.labelLarge.size
+            role: Md3Text.LabelLarge
+            tone: Md3Text.OnSurfaceVariant
         }
 
         GridLayout {
-            Layout.fillWidth: true
+            width: parent.width
             columns: 2
             columnSpacing: 8
             rowSpacing: 8
@@ -265,13 +246,13 @@ Flickable {
             }
         }
 
-        Text {
+        Md3Text {
             text: qsTr("Controls on dynamic scheme")
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.labelLarge.size
+            role: Md3Text.LabelLarge
+            tone: Md3Text.OnSurfaceVariant
         }
 
-        RowLayout {
+        Md3HStack {
             spacing: 12
             Md3Button { text: qsTr("Filled") }
             Md3Button { text: qsTr("Tonal"); variant: Md3Button.FilledTonal }
@@ -279,7 +260,7 @@ Flickable {
             Md3Fab { icon: "add" }
         }
 
-        RowLayout {
+        Md3HStack {
             spacing: 16
             Md3Switch { }
             Md3Switch { checked: true }
@@ -291,7 +272,7 @@ Flickable {
         }
 
         Md3Slider {
-            Layout.fillWidth: true
+            width: parent.width
             from: 0
             to: 100
             value: 62
@@ -304,12 +285,9 @@ Flickable {
             selected: true
         }
 
-        RowLayout {
+        Md3HStack {
             spacing: 12
-            Text {
-                text: qsTr("Text scale")
-                color: Md3Theme.colorScheme.colorOnSurface
-            }
+            Md3Text { text: qsTr("Text scale") }
             Md3Button {
                 text: "100%"
                 variant: Md3Button.Text
@@ -327,25 +305,23 @@ Flickable {
             }
         }
 
-        Text {
+        Item { width: 1; height: 8 }
+
+        Md3Text {
             text: qsTr("Density")
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.titleMedium.size
-            font.family: Md3Theme.typography.fontFamily
-            Layout.topMargin: 8
+            role: Md3Text.TitleMedium
         }
-        Text {
-            Layout.fillWidth: true
+        Md3Text {
+            width: parent.width
             wrapMode: Text.Wrap
             text: qsTr("舒适：默认桌面间距；紧凑：页边距/分段控件/表格行高随 Md3Theme.density 变化（当前 pagePadding=%1、controlHeight=%2）。")
                   .arg(Md3Theme.pagePadding).arg(Md3Theme.controlHeight)
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.family: Md3Theme.typography.fontFamily
-            font.pixelSize: Md3Theme.typography.bodySmall.size
+            role: Md3Text.BodySmall
+            tone: Md3Text.OnSurfaceVariant
         }
         Md3SegmentedButton {
             id: densitySeg
-            Layout.fillWidth: true
+            width: parent.width
             model: [
                 { text: qsTr("舒适") },
                 { text: qsTr("紧凑") }
@@ -364,39 +340,36 @@ Flickable {
             }
         }
 
-        Text {
+        Item { width: 1; height: 8 }
+
+        Md3Text {
             text: qsTr("Accessibility")
-            color: Md3Theme.colorScheme.colorOnSurface
-            font.pixelSize: Md3Theme.typography.titleMedium.size
-            font.family: Md3Theme.typography.fontFamily
-            Layout.topMargin: 8
+            role: Md3Text.TitleMedium
         }
 
+        // keep QtQuick.Layouts for dense form alignment
         RowLayout {
             spacing: 12
-            Layout.fillWidth: true
+            width: parent.width
             Column {
                 Layout.fillWidth: true
                 spacing: 2
-                Text {
+                Md3Text {
                     text: qsTr("特效等级")
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.bodyLarge.size
+                    role: Md3Text.BodyLarge
                 }
-                Text {
+                Md3Text {
                     width: parent.width
                     wrapMode: Text.Wrap
                     text: qsTr("三档过渡相同。流畅：圆角按压闪（无涟漪遮罩 FBO）；均衡/画质：圆角遮罩涟漪。强度调节反馈深浅。")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.OnSurfaceVariant
                 }
             }
         }
         Md3SegmentedButton {
             id: effectsSeg
-            Layout.fillWidth: true
+            width: parent.width
             model: [
                 { text: qsTr("流畅") },
                 { text: qsTr("均衡") },
@@ -416,24 +389,22 @@ Flickable {
             }
         }
 
+        // keep QtQuick.Layouts for dense form alignment
         RowLayout {
             spacing: 12
-            Layout.fillWidth: true
+            width: parent.width
             Column {
                 Layout.fillWidth: true
                 spacing: 2
-                Text {
+                Md3Text {
                     text: qsTr("特效强度")
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.bodyLarge.size
+                    role: Md3Text.BodyLarge
                 }
-                Text {
+                Md3Text {
                     text: qsTr("涟漪与悬停态透明度 ×%1（叠加在特效等级之上）")
                             .arg(Md3Theme.effectsIntensity.toFixed(2))
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.OnSurfaceVariant
                 }
             }
             Md3Slider {
@@ -445,25 +416,23 @@ Flickable {
             }
         }
 
+        // keep QtQuick.Layouts for dense form alignment
         RowLayout {
             spacing: 12
-            Layout.fillWidth: true
+            width: parent.width
             Column {
                 Layout.fillWidth: true
                 spacing: 2
-                Text {
+                Md3Text {
                     text: qsTr("减弱动效")
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.bodyLarge.size
+                    role: Md3Text.BodyLarge
                 }
-                Text {
+                Md3Text {
                     width: parent.width
                     wrapMode: Text.Wrap
                     text: qsTr("开启后所有 Md3Motion 时长≈1ms（涟漪/切换/页面过渡都会瞬间完成）")
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.OnSurfaceVariant
                 }
             }
             Md3Switch {
@@ -476,24 +445,22 @@ Flickable {
             }
         }
 
+        // keep QtQuick.Layouts for dense form alignment
         RowLayout {
             spacing: 12
-            Layout.fillWidth: true
+            width: parent.width
             Column {
                 Layout.fillWidth: true
                 spacing: 2
-                Text {
+                Md3Text {
                     text: qsTr("动效倍速")
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.bodyLarge.size
+                    role: Md3Text.BodyLarge
                 }
-                Text {
+                Md3Text {
                     text: qsTr("当前 %1×（越大越慢；减弱动效开启时无效）")
                             .arg(Md3Motion.durationScale.toFixed(1))
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.family: Md3Theme.typography.fontFamily
-                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.OnSurfaceVariant
                 }
             }
             Md3Slider {
@@ -506,14 +473,10 @@ Flickable {
             }
         }
 
-        RowLayout {
-            spacing: 12
-            Layout.fillWidth: true
-            Text {
-                text: qsTr("高对比度")
-                color: Md3Theme.colorScheme.colorOnSurface
-                Layout.fillWidth: true
-            }
+        Md3HStack {
+            width: parent.width
+            Md3Text { text: qsTr("高对比度") }
+            Md3Spacer { expand: true }
             Md3Switch {
                 checked: Md3Theme.highContrast
                 accessibleName: qsTr("高对比度")
@@ -524,14 +487,10 @@ Flickable {
             }
         }
 
-        RowLayout {
-            spacing: 12
-            Layout.fillWidth: true
-            Text {
-                text: qsTr("始终显示焦点环")
-                color: Md3Theme.colorScheme.colorOnSurface
-                Layout.fillWidth: true
-            }
+        Md3HStack {
+            width: parent.width
+            Md3Text { text: qsTr("始终显示焦点环") }
+            Md3Spacer { expand: true }
             Md3Switch {
                 checked: Md3Accessibility.showFocusRings
                 accessibleName: qsTr("始终显示焦点环")
@@ -541,32 +500,28 @@ Flickable {
             }
         }
 
-        RowLayout {
+        Md3HStack {
             spacing: 12
-            Text {
-                text: qsTr("RTL preview")
-                color: Md3Theme.colorScheme.colorOnSurface
-            }
+            Md3Text { text: qsTr("RTL preview") }
             Md3Switch {
                 id: rtlSwitch
             }
-            Text {
+            Md3Text {
                 text: qsTr("LayoutMirroring on this page")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.bodySmall.size
+                role: Md3Text.BodySmall
+                tone: Md3Text.OnSurfaceVariant
             }
         }
 
-        Text {
-            Layout.fillWidth: true
+        Md3Text {
+            width: parent.width
             wrapMode: Text.WordWrap
             text: qsTr("seed=%1  dark=%2  primary=%3")
                   .arg(Md3Theme.seed)
                   .arg(Md3Theme.dark)
                   .arg(Md3Theme.colorScheme.primary)
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.bodySmall.size
-            font.family: Md3Theme.typography.fontFamily
+            role: Md3Text.BodySmall
+            tone: Md3Text.OnSurfaceVariant
         }
     }
 }

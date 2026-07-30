@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Md3
 
 /// Charts demo — hero chart sync; remaining cards via Md3DeferredSection (progressiveContent).
@@ -15,10 +14,9 @@ Item {
             Column {
                 width: parent.width
                 spacing: 16
-                Text {
+                Md3Text {
                     text: qsTr("圆形表盘")
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.pixelSize: Md3Theme.typography.titleSmall.size
+                    role: Md3Text.TitleSmall
                 }
                 Flow {
                     width: parent.width
@@ -108,13 +106,12 @@ Item {
                         size: 112
                     }
                 }
-                Row {
+                Md3HStack {
                     spacing: 16
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
+                    Md3Text {
                         text: qsTr("Requests / min")
-                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                        font.pixelSize: Md3Theme.typography.labelLarge.size
+                        role: Md3Text.LabelLarge
+                        tone: Md3Text.OnSurfaceVariant
                     }
                     Md3Sparkline {
                         width: 160
@@ -136,10 +133,9 @@ Item {
             Column {
                 width: parent.width
                 spacing: 12
-                Text {
+                Md3Text {
                     text: qsTr("Radar · Funnel · Radial bars")
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.pixelSize: Md3Theme.typography.titleSmall.size
+                    role: Md3Text.TitleSmall
                 }
                 Row {
                     width: parent.width
@@ -172,10 +168,9 @@ Item {
                         ]
                     }
                 }
-                Text {
+                Md3Text {
                     text: qsTr("Area · Waterfall · Bullet")
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.pixelSize: Md3Theme.typography.titleSmall.size
+                    role: Md3Text.TitleSmall
                 }
                 Row {
                     width: parent.width
@@ -230,10 +225,9 @@ Item {
             Column {
                 width: parent.width
                 spacing: 8
-                Text {
+                Md3Text {
                     text: qsTr("Contribution heatmap (GitHub)")
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.pixelSize: Md3Theme.typography.titleSmall.size
+                    role: Md3Text.TitleSmall
                 }
                 Md3HeatmapChart {
                     width: parent.width
@@ -287,27 +281,25 @@ Item {
             }
         }
 
-        ColumnLayout {
+        Md3VStack {
             id: column
-            width: root.width
+            width: flick.width
             spacing: 16
 
-            Text {
+            Md3Text {
                 text: qsTr("Charts")
-                color: Md3Theme.colorScheme.colorOnSurface
-                font.pixelSize: Md3Theme.typography.headlineMedium.size
+                role: Md3Text.HeadlineMedium
             }
-            Text {
-                Layout.fillWidth: true
+            Md3Text {
+                width: parent.width
                 text: qsTr("折线/柱/散点/饼 · 缩放平移探针 · Md3CodeBlock")
-                color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                font.pixelSize: Md3Theme.typography.bodyMedium.size
+                role: Md3Text.BodyMedium
+                tone: Md3Text.OnSurfaceVariant
                 wrapMode: Text.Wrap
             }
 
             // Shell-first: title shows immediately; live chart + toolbar incubate next frames.
             Md3DeferredSection {
-                Layout.fillWidth: true
                 preferredHeight: 280
                 delayMs: 0
                 asynchronous: true
@@ -316,7 +308,6 @@ Item {
 
             Md3DeferredSection {
                 id: stage1
-                Layout.fillWidth: true
                 preferredHeight: 280
                 delayMs: 1
                 asynchronous: true
@@ -541,14 +532,13 @@ Item {
             Column {
                 width: parent.width
                 spacing: 8
-                RowLayout {
+                Md3HStack {
                     width: parent.width
-                    Text {
-                        Layout.fillWidth: true
+                    Md3Text {
                         text: qsTr("Bar · stack / horizontal · zoom+probe")
-                        color: Md3Theme.colorScheme.colorOnSurface
-                        font.pixelSize: Md3Theme.typography.titleSmall.size
+                        role: Md3Text.TitleSmall
                     }
+                    Md3Spacer { expand: true }
                     Md3Button {
                         text: barChart.stacked ? qsTr("分组") : qsTr("堆叠")
                         variant: Md3Button.Outlined
@@ -595,14 +585,13 @@ Item {
             Column {
                 width: parent.width
                 spacing: 8
-                RowLayout {
+                Md3HStack {
                     width: parent.width
-                    Text {
-                        Layout.fillWidth: true
+                    Md3Text {
                         text: qsTr("Large series (Md3ChartData → line)")
-                        color: Md3Theme.colorScheme.colorOnSurface
-                        font.pixelSize: Md3Theme.typography.titleSmall.size
+                        role: Md3Text.TitleSmall
                     }
+                    Md3Spacer { expand: true }
                     Md3Button {
                         text: qsTr("清除")
                         variant: Md3Button.Outlined
@@ -620,14 +609,14 @@ Item {
                         }
                     }
                 }
-                Text {
+                Md3Text {
                     width: parent.width
                     visible: bigData.rawCount > 0
                     text: qsTr("原始 %1 → 绘制 %2")
                           .arg(bigData.rawCount)
                           .arg(bigData.pointCount)
-                    color: Md3Theme.colorScheme.colorOnSurfaceVariant
-                    font.pixelSize: Md3Theme.typography.bodySmall.size
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.OnSurfaceVariant
                 }
                 Md3ChartData { id: bigData }
                 Md3LineChart {
@@ -660,10 +649,9 @@ Item {
             Column {
                 width: parent.width
                 spacing: 8
-                Text {
+                Md3Text {
                     text: qsTr("Sparse line (smooth off)")
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.pixelSize: Md3Theme.typography.titleSmall.size
+                    role: Md3Text.TitleSmall
                 }
                 Md3LineChart {
                     width: parent.width
@@ -691,14 +679,13 @@ Item {
             Column {
                 width: parent.width
                 spacing: 8
-                RowLayout {
+                Md3HStack {
                     width: parent.width
-                    Text {
-                        Layout.fillWidth: true
+                    Md3Text {
                         text: qsTr("Scatter (Md3ScatterChart)")
-                        color: Md3Theme.colorScheme.colorOnSurface
-                        font.pixelSize: Md3Theme.typography.titleSmall.size
+                        role: Md3Text.TitleSmall
                     }
+                    Md3Spacer { expand: true }
                     Md3Button {
                         text: qsTr("重置")
                         variant: Md3Button.Outlined
@@ -732,14 +719,13 @@ Item {
             Column {
                 width: parent.width
                 spacing: 8
-                RowLayout {
+                Md3HStack {
                     width: parent.width
-                    Text {
-                        Layout.fillWidth: true
+                    Md3Text {
                         text: qsTr("Pie / Donut (Md3PieChart)")
-                        color: Md3Theme.colorScheme.colorOnSurface
-                        font.pixelSize: Md3Theme.typography.titleSmall.size
+                        role: Md3Text.TitleSmall
                     }
+                    Md3Spacer { expand: true }
                     Md3Button {
                         text: pie.innerRatio > 0.1 ? qsTr("饼图") : qsTr("环图")
                         variant: Md3Button.Outlined
@@ -770,10 +756,9 @@ Item {
             Column {
                 width: parent.width
                 spacing: 8
-                Text {
+                Md3Text {
                     text: qsTr("Code (Md3CodeBlock)")
-                    color: Md3Theme.colorScheme.colorOnSurface
-                    font.pixelSize: Md3Theme.typography.titleSmall.size
+                    role: Md3Text.TitleSmall
                 }
                 Md3CodeBlock {
                     width: parent.width
