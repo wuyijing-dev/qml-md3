@@ -59,7 +59,8 @@ Produces target **`Md3`** / **`Md3::Md3`** (static QML module `URI Md3`). Galler
 ### Linux — one-click package (shared by default + system install)
 
 ```bash
-./scripts/package-linux.sh
+python scripts/package.py          # interactive TUI
+./scripts/package-linux.sh         # legacy wrapper
 # stages dist/Md3, installs to /usr/local, runs ldconfig
 # static: SHARED=0 ./scripts/package-linux.sh
 # stage only: SKIP_SYSTEM_INSTALL=1 ./scripts/package-linux.sh
@@ -69,6 +70,7 @@ CMAKE_PREFIX_PATH=$HOME/Qt/6.10.2/gcc_64 ./scripts/package-linux.sh
 ### Windows — one-click package (shared by default + user install)
 
 ```powershell
+python scripts/package.py
 .\scripts\package-windows.ps1
 # installs to %LOCALAPPDATA%\Md3 by default
 .\scripts\package-windows.ps1 -CmakePrefixPath "D:\Qt\6.10.2\mingw_64"

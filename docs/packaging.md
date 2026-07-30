@@ -8,13 +8,17 @@ Default packaging mode is **shared** (`.so` / `.dll`). Use `SHARED=0` / `-Shared
 
 | Platform | Script | Default |
 |----------|--------|---------|
-| Linux | [`scripts/package-linux.sh`](../scripts/package-linux.sh) | shared → stage `dist/Md3/` + install `/usr/local` + tarball |
-| Windows | [`scripts/package-windows.ps1`](../scripts/package-windows.ps1) | shared → stage `dist/Md3/` + install `%LOCALAPPDATA%\Md3` + zip |
+| Linux | [`scripts/package.py`](package.py) (`package-linux.sh` wrapper) | shared → stage `dist/Md3/` + install `/usr/local` + tarball |
+| Windows | [`scripts/package.py`](package.py) (`package-windows.ps1` wrapper) | shared → stage `dist/Md3/` + install `%LOCALAPPDATA%\Md3` + zip |
 
 ### Linux
 
 ```bash
 cd /path/to/QML_MD3
+# Interactive TUI (recommended): auto-detect Qt, pick Debug/Release & shared/static
+python scripts/package.py
+
+# Legacy wrapper / env vars still work:
 ./scripts/package-linux.sh
 # shared (default): stages dist/Md3, installs to /usr/local, runs ldconfig
 # static only:
@@ -30,6 +34,10 @@ CMAKE_PREFIX_PATH=$HOME/Qt/6.10.2/gcc_64 ./scripts/package-linux.sh
 
 ```powershell
 cd D:\path\to\QML_MD3
+# Interactive TUI (recommended)
+python scripts/package.py
+
+# Legacy wrapper:
 .\scripts\package-windows.ps1 -CmakePrefixPath "D:\Qt\6.10.2\mingw_64"
 # static:
 .\scripts\package-windows.ps1 -Shared:$false

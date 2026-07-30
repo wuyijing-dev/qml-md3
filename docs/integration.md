@@ -40,7 +40,7 @@ See [qt-version-matrix.md](qt-version-matrix.md) for the current support scope.
 
 ## CMake — packaged `./Md3` (recommended for apps)
 
-1. Run `scripts/package-linux.sh` or `scripts/package-windows.ps1`  
+1. Run `python scripts/package.py` (or `scripts/package-linux.sh` / `scripts/package-windows.ps1`)  
    (default **shared**; stages `dist/Md3` and installs to `/usr/local` or `%LOCALAPPDATA%\Md3`)
 2. Copy `dist/Md3` beside your `CMakeLists.txt` as `./Md3`, **or** use the system install prefix
 3. In CMake:
