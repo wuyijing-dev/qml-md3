@@ -17,8 +17,8 @@ Item {
     property color waveColor: Qt.rgba(valueColor.r, valueColor.g, valueColor.b, 0.55)
     property bool showValue: true
     property bool animated: !Md3Theme.reduceMotion
-    /// Cap wave redraws (Canvas 2D is expensive at 60fps).
-    property int animationFps: 20
+    /// 0 = display refresh (full quality). >0 only if you explicitly want a cap.
+    property int animationFps: 0
     property real size: 140
     property real strokeWidth: 3
     /// Radians advanced per second (wave travel speed).
@@ -29,6 +29,8 @@ Item {
         return Math.max(0, Math.min(1, (value - from) / span))
     }
     readonly property string valueText: Number(value).toFixed(decimals) + (unit.length ? unit : "")
+
+    property var _flick: null
 
     /// Parent page slots hide via opacity/visible — child.visible stays true, so walk the tree.
     readonly property bool effectivelyShown: {
@@ -51,6 +53,20 @@ Item {
         return true
     }
 
+    /// Skip work while scrolled off-screen (same look when scrolled back).
+    readonly property bool inViewport: {
+        if (!effectivelyShown)
+            return false
+        const f = _flick
+        if (!f)
+            return true
+        const _cy = f.contentY
+        const _cx = f.contentX
+        const p = mapToItem(f, 0, 0)
+        return p.y < f.height && (p.y + height) > 0
+                && p.x < f.width && (p.x + width) > 0
+    }
+
     width: size
     height: size
     implicitWidth: size
@@ -58,18 +74,23 @@ Item {
 
     property real wavePhase: 0
 
-    // Throttled wave — not FrameAnimation (that kept Canvas at display refresh).
+    function _advance(dt) {
+        root.wavePhase += root.waveSpeed * dt
+        if (root.wavePhase > Math.PI * 2)
+            root.wavePhase -= Math.PI * 2
+        canvas.requestPaint()
+    }
+
+    // Full-rate when on screen; Timer path only if animationFps > 0.
+    FrameAnimation {
+        running: root.animated && root.inViewport && root.animationFps <= 0
+        onTriggered: root._advance(frameTime)
+    }
     Timer {
         interval: Math.max(16, Math.round(1000 / Math.max(1, root.animationFps)))
-        running: root.animated && root.effectivelyShown
+        running: root.animated && root.inViewport && root.animationFps > 0
         repeat: true
-        onTriggered: {
-            const dt = interval / 1000
-            root.wavePhase += root.waveSpeed * dt
-            if (root.wavePhase > Math.PI * 2)
-                root.wavePhase -= Math.PI * 2
-            canvas.requestPaint()
-        }
+        onTriggered: root._advance(interval / 1000)
     }
 
     onValueChanged: canvas.requestPaint()
@@ -82,6 +103,9 @@ Item {
     Canvas {
         id: canvas
         anchors.fill: parent
+        // FBO path is cheaper than Image-backed Canvas for steady redraws.
+        renderTarget: Canvas.FramebufferObject
+        renderStrategy: Canvas.Cooperative
         onPaint: {
             const ctx = getContext("2d")
             ctx.clearRect(0, 0, width, height)
@@ -104,7 +128,6 @@ Item {
             const amp = 4 + 2 * (1 - Math.abs(root.progress - 0.5) * 2)
             const steps = 40
 
-            // Primary wave: sin(2πt + φ) + 0.35·sin(4πt − 2φ) — period 2π in φ
             ctx.beginPath()
             ctx.moveTo(cx - r, cy + r + 2)
             ctx.lineTo(cx - r, levelY)
@@ -121,7 +144,6 @@ Item {
             ctx.fillStyle = root.waveColor
             ctx.fill()
 
-            // Secondary wave: sin(2πt − φ) — same period, phase-offset look
             ctx.beginPath()
             ctx.moveTo(cx - r, cy + r + 2)
             ctx.lineTo(cx - r, levelY + 3)
@@ -144,7 +166,6 @@ Item {
             ctx.strokeStyle = root.valueColor
             ctx.lineWidth = root.strokeWidth
             ctx.stroke()
-            // Outer silhouette so the dial doesn't sink into dark surfaces
             ctx.beginPath()
             ctx.arc(cx, cy, r + root.strokeWidth * 0.5, 0, Math.PI * 2)
             ctx.strokeStyle = Md3Theme.colorScheme.outlineVariant
@@ -176,5 +197,15 @@ Item {
         }
     }
 
-    Component.onCompleted: canvas.requestPaint()
+    Component.onCompleted: {
+        let p = parent
+        while (p) {
+            if (p.contentY !== undefined && p.moving !== undefined) {
+                _flick = p
+                break
+            }
+            p = p.parent
+        }
+        canvas.requestPaint()
+    }
 }

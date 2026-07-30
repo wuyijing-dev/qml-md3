@@ -90,8 +90,22 @@ Item {
         }
         return true
     }
+    property var _flick: null
+    /// Pause live work while scrolled out of the page Flickable (no visual downgrade on-screen).
+    readonly property bool inViewport: {
+        if (!effectivelyShown)
+            return false
+        const f = _flick
+        if (!f)
+            return true
+        const _cy = f.contentY
+        const _cx = f.contentX
+        const p = mapToItem(f, 0, 0)
+        return p.y < f.height && (p.y + height) > 0
+                && p.x < f.width && (p.x + width) > 0
+    }
     readonly property bool chartActive: !paused && !interactionBlocked && enabled
-                                        && effectivelyShown
+                                        && inViewport
 
     property int renderedPointCount: 0
 
@@ -395,5 +409,15 @@ Item {
     onAxisLabelColorChanged: themeDebounce.restart()
     onSurfaceColorChanged: themeDebounce.restart()
 
-    Component.onCompleted: rebuild()
+    Component.onCompleted: {
+        let p = parent
+        while (p) {
+            if (p.contentY !== undefined && p.moving !== undefined) {
+                _flick = p
+                break
+            }
+            p = p.parent
+        }
+        rebuild()
+    }
 }

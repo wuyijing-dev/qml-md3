@@ -10,8 +10,8 @@ Md3Chart {
     property int livePointCount: 48
     property real liveSpeed: 2.4
     property real livePhase: 0
-    /// Cap live rebuilds — full Shape rebuild at 60fps is the Charts-page CPU hog.
-    property int liveFps: 18
+    /// 0 = display refresh (full quality). Set >0 only to explicitly cap.
+    property int liveFps: 0
     /// Mutated in place — avoids allocating a new array every animation frame.
     property var liveBuffer: []
 
@@ -34,7 +34,49 @@ Md3Chart {
             const t = p + i * 0.22
             buf[i] = 50 + Math.sin(t) * 28 + Math.sin(t * 0.37) * 12
         }
-        rebuild()
+        // Fixed Y axis: skip range scan / theme resolve / samples rebuild every frame.
+        if (Number.isFinite(minY) && Number.isFinite(maxY))
+            _rebuildLiveFast()
+        else
+            rebuild()
+    }
+
+    function _rebuildLiveFast() {
+        const lo = minY
+        const hi = maxY
+        const span = Math.max(1e-6, hi - lo)
+        const yAt = v => plotTop + plotHeight * (1 - (v - lo) / span)
+        const buf = liveBuffer
+        const n = buf.length
+        if (n < 1)
+            return
+        const denom = Math.max(1, n - 1)
+        const pts = new Array(n)
+        for (let i = 0; i < n; ++i)
+            pts[i] = Qt.point(plotLeft + plotWidth * i / denom, yAt(buf[i]))
+        let area = []
+        if (showArea && n >= 2) {
+            area = pts.slice()
+            area.push(Qt.point(pts[n - 1].x, plotBottom))
+            area.push(Qt.point(pts[0].x, plotBottom))
+        }
+        const col = colorAt(0)
+        geom.rangeMin = lo
+        geom.rangeMax = hi
+        geom.span = span
+        geom.sampleCount = n
+        geom.seriesModel = [{
+            line: pts,
+            area: area,
+            color: col,
+            fill: resolvedFillColor(),
+            dots: false
+        }]
+        if (!geom.samples.length || geom.samples[0].nums !== buf)
+            geom.samples = [{ nums: buf, color: col, label: qsTr("S1") }]
+        renderedPointCount = n
+        if (probeActive)
+            _updateProbeAtPixel(probePixelX)
     }
 
     function _catmull(pts, seg) {
@@ -160,9 +202,13 @@ Md3Chart {
         property int sampleCount: 0
     }
 
+    FrameAnimation {
+        running: root.live && root.chartActive && root.liveFps <= 0
+        onTriggered: root.advanceLive(frameTime)
+    }
     Timer {
         interval: Math.max(16, Math.round(1000 / Math.max(1, root.liveFps)))
-        running: root.live && root.chartActive
+        running: root.live && root.chartActive && root.liveFps > 0
         repeat: true
         onTriggered: root.advanceLive(interval / 1000)
     }
