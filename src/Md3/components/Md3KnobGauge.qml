@@ -12,9 +12,9 @@ Item {
     property int decimals: 0
     property real startAngle: -135
     property real sweepAngle: 270
-    property color trackColor: Md3Theme.colorScheme.surfaceContainerHighest
+    property color trackColor: Md3Theme.colorScheme.gaugeTrack
     property color valueColor: Md3Theme.colorScheme.primary
-    property color knobColor: Md3Theme.colorScheme.surfaceContainerHigh
+    property color knobColor: Md3Theme.colorScheme.gaugeDial
     property bool showValue: true
     property real size: 140
 
@@ -63,8 +63,8 @@ Item {
             ctx.arc(cx, cy, r * 0.62, 0, Math.PI * 2)
             ctx.fillStyle = root.knobColor
             ctx.fill()
-            ctx.strokeStyle = Md3Theme.colorScheme.outlineVariant
-            ctx.lineWidth = 1
+            ctx.strokeStyle = Md3Theme.colorScheme.outline
+            ctx.lineWidth = 1.5
             ctx.stroke()
 
             const nr = r * 0.42
@@ -84,6 +84,8 @@ Item {
     }
 
     onValueChanged: canvas.requestPaint()
+    onKnobColorChanged: canvas.requestPaint()
+    onTrackColorChanged: canvas.requestPaint()
     onWidthChanged: canvas.requestPaint()
     onHeightChanged: canvas.requestPaint()
     Component.onCompleted: canvas.requestPaint()

@@ -81,4 +81,9 @@ QtObject {
     function disabledContainer() {
         return withOpacity(colorOnSurface, 0.12)
     }
+
+    /// Inactive gauge / chart track — readable on surface *and* surfaceContainer* in dark.
+    readonly property color gaugeTrack: withOpacity(colorOnSurface, dark ? 0.28 : 0.12)
+    /// Filled dial face (wave / compass / knob) — lifts above page/card surface.
+    readonly property color gaugeDial: dark ? surfaceBright : surfaceContainerHighest
 }

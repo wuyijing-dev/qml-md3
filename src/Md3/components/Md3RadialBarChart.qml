@@ -12,7 +12,7 @@ Item {
     property real barGap: 6
     property real startAngle: -90
     property real sweepAngle: 270
-    property color trackColor: Md3Theme.colorScheme.surfaceContainerHighest
+    property color trackColor: Md3Theme.colorScheme.gaugeTrack
     property bool showLabels: true
 
     implicitWidth: 280

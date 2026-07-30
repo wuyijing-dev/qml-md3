@@ -13,7 +13,7 @@ Item {
     property int dotCount: 24
     property real dotRadius: 4
     property real startAngle: -90
-    property color trackColor: Md3Theme.colorScheme.surfaceContainerHighest
+    property color trackColor: Md3Theme.colorScheme.gaugeTrack
     property color valueColor: Md3Theme.colorScheme.primary
     property bool showValue: true
     property real size: 140
@@ -55,6 +55,7 @@ Item {
     }
 
     onValueChanged: canvas.requestPaint()
+    onTrackColorChanged: canvas.requestPaint()
     onDotCountChanged: canvas.requestPaint()
     onWidthChanged: canvas.requestPaint()
     onHeightChanged: canvas.requestPaint()

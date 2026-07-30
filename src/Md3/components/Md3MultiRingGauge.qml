@@ -9,7 +9,7 @@ Item {
     property real strokeWidth: 10
     property real ringGap: 6
     property real startAngle: -90
-    property color trackColor: Md3Theme.colorScheme.surfaceContainerHighest
+    property color trackColor: Md3Theme.colorScheme.gaugeTrack
     property bool showCenterLabel: true
     property string centerLabel: ""
     property string centerValue: ""
@@ -85,6 +85,7 @@ Item {
     }
 
     onRingsChanged: canvas.requestPaint()
+    onTrackColorChanged: canvas.requestPaint()
     onWidthChanged: canvas.requestPaint()
     onHeightChanged: canvas.requestPaint()
     onStrokeWidthChanged: canvas.requestPaint()

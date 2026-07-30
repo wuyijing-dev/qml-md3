@@ -10,7 +10,8 @@ Item {
     property string label: ""
     property string unit: "°"
     property int decimals: 0
-    property color trackColor: Md3Theme.colorScheme.surfaceContainerHighest
+    property color trackColor: Md3Theme.colorScheme.gaugeTrack
+    property color dialColor: Md3Theme.colorScheme.gaugeDial
     property color valueColor: Md3Theme.colorScheme.error
     property color tickColor: Md3Theme.colorScheme.colorOnSurfaceVariant
     property bool showCardinals: true
@@ -48,10 +49,10 @@ Item {
 
             ctx.beginPath()
             ctx.arc(cx, cy, r, 0, Math.PI * 2)
-            ctx.fillStyle = root.trackColor
+            ctx.fillStyle = root.dialColor
             ctx.fill()
-            ctx.strokeStyle = Md3Theme.colorScheme.outlineVariant
-            ctx.lineWidth = 1
+            ctx.strokeStyle = Md3Theme.colorScheme.outline
+            ctx.lineWidth = 1.5
             ctx.stroke()
 
             for (let i = 0; i < 24; ++i) {
@@ -99,6 +100,8 @@ Item {
     }
 
     onValueChanged: canvas.requestPaint()
+    onDialColorChanged: canvas.requestPaint()
+    onTrackColorChanged: canvas.requestPaint()
     onWidthChanged: canvas.requestPaint()
     onHeightChanged: canvas.requestPaint()
     Component.onCompleted: canvas.requestPaint()

@@ -10,7 +10,8 @@ Item {
     property string label: ""
     property string unit: "%"
     property int decimals: 0
-    property color trackColor: Md3Theme.colorScheme.surfaceContainerHighest
+    property color trackColor: Md3Theme.colorScheme.gaugeTrack
+    property color dialColor: Md3Theme.colorScheme.gaugeDial
     property color valueColor: Md3Theme.colorScheme.primary
     property color waveColor: Qt.rgba(valueColor.r, valueColor.g, valueColor.b, 0.55)
     property bool showValue: true
@@ -48,6 +49,9 @@ Item {
     }
 
     onValueChanged: canvas.requestPaint()
+    onDialColorChanged: canvas.requestPaint()
+    onTrackColorChanged: canvas.requestPaint()
+    onValueColorChanged: canvas.requestPaint()
     onWidthChanged: canvas.requestPaint()
     onHeightChanged: canvas.requestPaint()
 
@@ -64,7 +68,7 @@ Item {
 
             ctx.beginPath()
             ctx.arc(cx, cy, r, 0, Math.PI * 2)
-            ctx.fillStyle = root.trackColor
+            ctx.fillStyle = root.dialColor
             ctx.fill()
 
             ctx.save()
@@ -115,6 +119,12 @@ Item {
             ctx.arc(cx, cy, r, 0, Math.PI * 2)
             ctx.strokeStyle = root.valueColor
             ctx.lineWidth = root.strokeWidth
+            ctx.stroke()
+            // Outer silhouette so the dial doesn't sink into dark surfaces
+            ctx.beginPath()
+            ctx.arc(cx, cy, r + root.strokeWidth * 0.5, 0, Math.PI * 2)
+            ctx.strokeStyle = Md3Theme.colorScheme.outlineVariant
+            ctx.lineWidth = 1
             ctx.stroke()
         }
     }

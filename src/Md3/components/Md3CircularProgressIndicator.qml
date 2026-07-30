@@ -150,7 +150,7 @@ Item {
 
         ShapePath {
             strokeWidth: root.contained ? root.trackLineWidth : root.strokeWidth
-            strokeColor: Md3Theme.colorScheme.surfaceContainerHighest
+            strokeColor: Md3Theme.colorScheme.gaugeTrack
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
             PathAngleArc {
@@ -187,7 +187,7 @@ Item {
 
         ShapePath {
             strokeWidth: root.trackLineWidth
-            strokeColor: Md3Theme.colorScheme.surfaceContainerHighest
+            strokeColor: Md3Theme.colorScheme.gaugeTrack
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin

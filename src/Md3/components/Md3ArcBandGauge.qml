@@ -14,7 +14,7 @@ Item {
     property real strokeWidth: 16
     property real startAngle: -210
     property real sweepAngle: 240
-    property color trackColor: Md3Theme.colorScheme.surfaceContainerHighest
+    property color trackColor: Md3Theme.colorScheme.gaugeTrack
     property color valueColor: Md3Theme.colorScheme.primary
     property color markerColor: Md3Theme.colorScheme.colorOnPrimary
     property bool showValue: true

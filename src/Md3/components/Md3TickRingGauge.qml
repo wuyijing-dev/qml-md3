@@ -13,7 +13,7 @@ Item {
     property int tickCount: 36
     property real strokeWidth: 8
     property real startAngle: -90
-    property color trackColor: Md3Theme.colorScheme.surfaceContainerHighest
+    property color trackColor: Md3Theme.colorScheme.gaugeTrack
     property color valueColor: Md3Theme.colorScheme.primary
     property color tickColor: Md3Theme.colorScheme.outlineVariant
     property bool showValue: true
@@ -71,6 +71,7 @@ Item {
     }
 
     onValueChanged: canvas.requestPaint()
+    onTrackColorChanged: canvas.requestPaint()
     onWidthChanged: canvas.requestPaint()
     onHeightChanged: canvas.requestPaint()
     Component.onCompleted: canvas.requestPaint()

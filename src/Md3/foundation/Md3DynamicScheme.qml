@@ -79,18 +79,20 @@ QtObject {
             scheme.errorContainer = hsl(hErr, 0.45, 0.30)
             scheme.colorOnErrorContainer = hsl(hErr, 0.40, 0.90)
 
+            scheme.dark = true
             scheme.surface = hsl(h, 0.08, 0.08)
             scheme.colorOnSurface = hsl(h, 0.06, 0.90)
             scheme.surfaceDim = hsl(h, 0.08, 0.08)
-            scheme.surfaceBright = hsl(h, 0.07, 0.24)
+            // Brighter dial / chrome steps so tracks don't sink into surface roles
+            scheme.surfaceBright = hsl(h, 0.07, 0.30)
             scheme.surfaceContainerLowest = hsl(h, 0.08, 0.05)
             scheme.surfaceContainerLow = hsl(h, 0.07, 0.12)
             scheme.surfaceContainer = hsl(h, 0.07, 0.14)
-            scheme.surfaceContainerHigh = hsl(h, 0.06, 0.18)
-            scheme.surfaceContainerHighest = hsl(h, 0.06, 0.22)
+            scheme.surfaceContainerHigh = hsl(h, 0.06, 0.19)
+            scheme.surfaceContainerHighest = hsl(h, 0.06, 0.26)
             scheme.colorOnSurfaceVariant = hsl(h, 0.08, 0.78)
-            scheme.outline = hsl(h, 0.08, 0.58)
-            scheme.outlineVariant = hsl(h, 0.08, 0.30)
+            scheme.outline = hsl(h, 0.08, 0.62)
+            scheme.outlineVariant = hsl(h, 0.08, 0.40)
             scheme.inverseSurface = hsl(h, 0.06, 0.90)
             scheme.colorOnInverseSurface = hsl(h, 0.07, 0.18)
             scheme.inversePrimary = hsl(h, seedChroma * 0.55, 0.40)
@@ -128,6 +130,7 @@ QtObject {
             scheme.errorContainer = hsl(hErr, 0.55, 0.90)
             scheme.colorOnErrorContainer = hsl(hErr, 0.55, 0.15)
 
+            scheme.dark = false
             scheme.surface = hsl(h, 0.20, 0.98)
             scheme.colorOnSurface = hsl(h, 0.08, 0.12)
             scheme.surfaceDim = hsl(h, 0.10, 0.87)

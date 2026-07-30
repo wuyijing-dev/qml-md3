@@ -124,7 +124,7 @@ Item {
         anchors.right: parent.right
         height: root.contained ? root.trackLineThickness : root.trackThickness
         radius: height / 2
-        color: Md3Theme.colorScheme.surfaceContainerHighest
+        color: Md3Theme.colorScheme.gaugeTrack
         visible: !root.isWavy
         clip: false
 
@@ -157,7 +157,7 @@ Item {
 
         ShapePath {
             strokeWidth: root.trackLineThickness
-            strokeColor: Md3Theme.colorScheme.surfaceContainerHighest
+            strokeColor: Md3Theme.colorScheme.gaugeTrack
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin
