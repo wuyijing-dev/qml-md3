@@ -8,9 +8,9 @@ Default packaging mode is **shared** (`.so` / `.dll`). Use `SHARED=0` / `-Shared
 
 | Platform | Script | Default |
 |----------|--------|---------|
-| All | [`scripts/packaging/cli.py`](../scripts/packaging/cli.py) | TUI/CLI package (shared → `dist/Md3/`) |
-| Linux | [`scripts/packaging/package-linux.sh`](../scripts/packaging/package-linux.sh) | wrapper → `cli.py` + install `/usr/local` + tarball |
-| Windows | [`scripts/packaging/package-windows.ps1`](../scripts/packaging/package-windows.ps1) | wrapper → `cli.py` + install `%LOCALAPPDATA%\Md3` + zip |
+| All | [`scripts/packaging/cli.py`](https://github.com/wuyijing-dev/QML_MD3/blob/main/scripts/packaging/cli.py) | TUI/CLI package (shared → `dist/Md3/`) |
+| Linux | [`scripts/packaging/package-linux.sh`](https://github.com/wuyijing-dev/QML_MD3/blob/main/scripts/packaging/package-linux.sh) | wrapper → `cli.py` + install `/usr/local` + tarball |
+| Windows | [`scripts/packaging/package-windows.ps1`](https://github.com/wuyijing-dev/QML_MD3/blob/main/scripts/packaging/package-windows.ps1) | wrapper → `cli.py` + install `%LOCALAPPDATA%\Md3` + zip |
 
 ### Linux
 

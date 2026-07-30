@@ -246,4 +246,4 @@ If the Linux app looks older than Windows after `git pull`:
 
 ## Versioning
 
-Semantic versioning. See [CHANGELOG.md](../CHANGELOG.md). See [docs/api](api/README.md) for the full control surface.
+Semantic versioning. See [CHANGELOG.md](https://github.com/wuyijing-dev/QML_MD3/blob/main/CHANGELOG.md). See [docs/api](api/README.md) for the full control surface.

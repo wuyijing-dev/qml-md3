@@ -120,5 +120,5 @@ Shadows use a **key + ambient** pair (`Md3Shadow` + `MultiEffect` blur) so eleva
 | standardDecelerate | 0.0, 0.0, 0.0, 1.0 |
 | standardAccelerate | 0.3, 0.0, 1.0, 1.0 |
 
-**Interactive UI** uses `SmoothedAnimation` + `Sync` (`smoothSnap*` / `smoothPanel*`) — see [md3/motion-non-linear.md](md3/motion-non-linear.md).
+**Interactive UI** uses `SmoothedAnimation` + `Sync` (`smoothSnap*` / `smoothPanel*`) — see [Md3Motion](api/Md3Motion.md).
 
