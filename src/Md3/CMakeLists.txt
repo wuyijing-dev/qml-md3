@@ -315,6 +315,7 @@ qt_add_qml_module(Md3
         components/Md3Snackbar.qml
         components/Md3TopAppBar.qml
         components/Md3BottomAppBar.qml
+        components/Md3AppToolBar.qml
         components/Md3NavigationBar.qml
         components/Md3NavigationRail.qml
         components/Md3NavigationDrawer.qml

@@ -91,6 +91,16 @@ Window {
     property bool pageAsync: false
     property bool pageWarmStart: false
     property url pageSourceBase: ""
+    /// When hotReload is on and the agent finds a disk `pages/` tree, use it as sourceBase.
+    property bool pageSourcePreferHotReload: true
+    /// After first show: raise L1/L2 + neighbor prefetch (Gallery-style snappy shell).
+    property bool pageNavWarm: false
+    property int pageNavWarmDelayMs: 80
+    property int pageNavWarmCacheLimit: 6
+    /// -1 → max(32, destinations.length)
+    property int pageNavWarmL2CacheLimit: -1
+    property bool pageNavWarmPrefetch: true
+    property bool _pageNavWarmDone: false
     property string pageTransition: "fade"
     property int pageTransitionDuration: 100
     property bool pageSkeleton: false
@@ -98,6 +108,22 @@ Window {
     property alias shellRail: windowBody.rail
     /// Within-page progressive sections (Md3DeferredSection). Default on.
     property bool progressiveContent: true
+
+    /// Effective pages root for PageHost (hot-reload disk path or `pageSourceBase`).
+    readonly property url resolvedPageSourceBase: {
+        if (pageSourcePreferHotReload && hotReload && hotReloadAgent) {
+            const d = String(hotReloadAgent.galleryPagesDir || "").trim()
+            if (d.length > 0) {
+                let p = d.replace(/\\/g, "/")
+                if (!p.endsWith("/"))
+                    p += "/"
+                if (p.indexOf("file:") === 0)
+                    return p
+                return (p.charAt(0) === "/" ? "file://" : "file:///") + p
+            }
+        }
+        return pageSourceBase
+    }
 
     /// Persist geometry / theme / shell via Md3AppSettings (QSettings).
     property bool persistSession: false
@@ -336,7 +362,7 @@ Window {
                 width: Math.min(960, root.width),
                 height: Math.min(640, root.height),
                 windowIcon: root.windowIcon,
-                pageSourceBase: root.pageSourceBase,
+                pageSourceBase: root.resolvedPageSourceBase,
                 systemBackdrop: root.systemBackdrop,
                 cornerRadius: root.cornerRadius,
                 railHeader: root.railHeader,
@@ -523,6 +549,32 @@ Window {
         aboutDialog.openDialog(root)
     }
 
+    /// Raise L1/L2 caches after shell paint (`pageNavWarm`).
+    function applyPageNavWarm() {
+        if (root._pageNavWarmDone || !root.pageNavWarm)
+            return
+        root._pageNavWarmDone = true
+        root.pageCacheLimit = root.pageNavWarmCacheLimit
+        root.pageL2CacheLimit = root.pageNavWarmL2CacheLimit >= 0
+                ? root.pageNavWarmL2CacheLimit
+                : Math.max(32, (root.destinations || []).length)
+        root.pagePrefetch = root.pageNavWarmPrefetch
+        root.pageL2Warm = true
+    }
+
+    function _schedulePageNavWarm() {
+        if (!root.pageNavWarm || root._pageNavWarmDone || pageNavWarmTimer.running)
+            return
+        pageNavWarmTimer.start()
+    }
+
+    Timer {
+        id: pageNavWarmTimer
+        interval: root.pageNavWarmDelayMs
+        repeat: false
+        onTriggered: root.applyPageNavWarm()
+    }
+
     /// Enqueue a snackbar on the window host. options: { actionText, dualLine, durationMs, id, priority }
     function showSnackbar(message, options) {
         return snackbarHost.show(message, options)
@@ -549,6 +601,7 @@ Window {
         if (root.persistSession)
             root.restoreSession()
         root._configureHotReload()
+        root._schedulePageNavWarm()
     }
 
     onClosing: function (close) {
@@ -721,11 +774,13 @@ Window {
             })
     }
     onVisibleChanged: {
-        if (visible)
+        if (visible) {
+            root._schedulePageNavWarm()
             Qt.callLater(function () {
                 root._applyWindowIcon()
                 root._syncWinNative()
             })
+        }
     }
     onSystemBackdropChanged: _syncWinNative()
     onNativeBorderColorChanged: _syncWinNative()
@@ -1164,7 +1219,7 @@ Window {
                     cacheLimit: root.pageCacheLimit
                     idleTrimMs: root.pageIdleTrimMs
                     contentPadding: root.pagePadding
-                    sourceBase: root.pageSourceBase
+                    sourceBase: root.resolvedPageSourceBase
                     asynchronous: root.pageAsync
                     prefetchNeighbors: root.pagePrefetch
                     predictPrefetch: root.pagePredictPrefetch

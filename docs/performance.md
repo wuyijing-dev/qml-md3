@@ -95,7 +95,7 @@ Gallery historically used `hotReload: true` for开发 — that **clears componen
 
 ### D. Fast first open + snappy switches（推荐 Gallery）
 
-Start like profile C (no warm / no prefetch). After the window is visible (~80ms), raise L1/L2 and enable neighbor prefetch — see `gallery/Main.qml` `navWarmTimer`.
+Start lean (`pageCacheLimit: 1`). After first show, `pageNavWarm: true` raises L1/L2 and neighbor prefetch:
 
 ```qml
 Md3ApplicationWindow {
@@ -104,22 +104,21 @@ Md3ApplicationWindow {
     pagePrefetch: false
     pagePredictPrefetch: false
     pageWarmStart: false
-    pageL2Warm: false
+    pageL2Warm: true
     pageSkeleton: true
+    pageNavWarm: true          // built-in deferred warm (~80ms)
+    // pageNavWarmCacheLimit: 6
+    // pageNavWarmL2CacheLimit: -1  // → max(32, destinations.length)
     hotReload: false
 
-    Timer {
-        interval: 80
-        running: parent.visible  // or start from onVisibleChanged
-        onTriggered: {
-            pageCacheLimit = 6
-            pageL2CacheLimit = 8
-            pagePrefetch = true
-            pagePredictPrefetch = true
-        }
-    }
+    pageSourceBase: Qt.resolvedUrl("./pages/")
+    destinations: [
+        { title: "Home", icon: "home", source: "HomePage.qml" }
+    ]
 }
 ```
+
+Relative `source` paths resolve via `resolvedPageSourceBase` (hot-reload disk tree when enabled).
 
 - 首启：不和邻居编译抢 CPU  
 - 切页：暖机后近似 Profile B  

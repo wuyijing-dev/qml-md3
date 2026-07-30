@@ -7,21 +7,19 @@ Md3ApplicationWindow {
     width: 1180
     height: 760
     title: qsTr("Md3 图库")
-    // windowIcon defaults to Md3AppIcons.window (bundled in the Md3 module)
     roundedCorners: true
     cornerRadius: Md3WindowCapabilities.windowCornerRadius
     syncImmersiveDarkMode: true
-    // Backdrop (Mica/Acrylic) marked unsuitable — keep disabled.
     systemBackdrop: 0
     nativeBorderColor: ""
 
-    pageSourceBase: Qt.resolvedUrl("./")
+    // Relative destination sources resolve against this (hot-reload overrides via library).
+    pageSourceBase: Qt.resolvedUrl("./pages/")
     navigationRail: true
     railExpanded: false
     railHeader: qsTr("组件图库")
     pagePadding: Md3Theme.pagePadding
     pageSkeleton: true
-    // Balanced: async + L2 warm-all, then raise L1/prefetch (trade some RAM for snappy switches).
     pageAsync: true
     pageCacheLimit: 1
     pageL2CacheLimit: 1
@@ -29,45 +27,17 @@ Md3ApplicationWindow {
     pagePredictPrefetch: false
     pageWarmStart: false
     pageL2Warm: true
-    // Don't idle-trim L1 back to 1 after a few seconds (that made switches feel cold again).
     pageIdleTrimMs: 90000
     pageLeaveSnapshot: false
+    pageNavWarm: true
     persistSession: true
     settingsOrganization: "QML_MD3"
     settingsApplication: "Gallery"
-    // Hot-reload clears QML caches and slows cold open — enable only while iterating QML.
     hotReload: false
 
-    property bool _navWarmReady: false
-
-    /// After shell paint: keep ~6 live pages + neighbor prefetch; L2 holds full catalog.
-    Timer {
-        id: navWarmTimer
-        interval: 80
-        repeat: false
-        onTriggered: {
-            if (window._navWarmReady)
-                return
-            window._navWarmReady = true
-            window.pageCacheLimit = 6
-            window.pageL2CacheLimit = Math.max(32, (window.destinations || []).length)
-            window.pagePrefetch = true
-            // Hover-predict while dragging the rail still janks — keep off.
-            window.pagePredictPrefetch = false
-            window.pageL2Warm = true
-        }
-    }
-
-    onVisibleChanged: {
-        if (visible && !_navWarmReady && !navWarmTimer.running)
-            navWarmTimer.start()
-    }
-
-    // Document tabs under the title bar (drag out → peer Md3TabWindow)
     documentTabsEnabled: true
     documentTabsTearOff: true
 
-    // Library performance overlay — title-bar speed button; off by default (saves sampling RSS)
     showPerformanceButton: true
     showPerformanceOverlay: false
     showAboutButton: true
@@ -77,7 +47,6 @@ Md3ApplicationWindow {
     aboutIcon: windowIcon
 
     Md3TrayHost {
-        id: trayHost
         hostWindow: window
         Md3MenuItem {
             text: qsTr("显示主窗口")
@@ -101,43 +70,25 @@ Md3ApplicationWindow {
     property bool galleryTableLoading: false
     property string galleryTreeSelection: ""
 
-    toolBar: Rectangle {
-        height: 44
-        color: Md3Theme.colorScheme.surfaceContainerLow
-
-        Md3Divider {
-            anchors.bottom: parent.bottom
-            width: parent.width
+    toolBar: Md3AppToolBar {
+        Md3Button {
+            text: qsTr("Reload")
+            variant: Md3Button.Text
+            onClicked: window.reloadCurrentPage()
         }
-
-        Row {
-            anchors.fill: parent
-            anchors.leftMargin: 12
-            anchors.rightMargin: 12
-            spacing: 8
-
-            Md3Button {
-                anchors.verticalCenter: parent.verticalCenter
-                text: qsTr("Reload")
-                variant: Md3Button.Text
-                onClicked: window.reloadCurrentPage()
-            }
-            Md3TextField {
-                anchors.verticalCenter: parent.verticalCenter
-                width: 320
-                label: qsTr("Quick path")
-                placeholderText: qsTr("Jump to desktop patterns")
-                onAccepted: {
-                    const t = text.trim().toLowerCase()
-                    if (t.indexOf("desktop") >= 0)
-                        window.openTab(12, false)
-                }
+        Md3TextField {
+            width: 320
+            label: qsTr("Quick path")
+            placeholderText: qsTr("Jump to desktop patterns")
+            onAccepted: {
+                const t = text.trim().toLowerCase()
+                if (t.indexOf("desktop") >= 0)
+                    window.openTab(12, false)
             }
         }
     }
 
     statusBar: Md3StatusBar {
-        id: appStatusBar
         text: {
             const d = window.destinations && window.destinations[window.currentIndex]
             return d && d.title ? qsTr("Page: %1").arg(d.title) : qsTr("Ready")
@@ -148,39 +99,18 @@ Md3ApplicationWindow {
                          ? qsTr("%1 selected in table").arg(window.galleryTableSelection) : "")
         leadingIcon: window.galleryTableLoading ? "hourglass_empty" : "info"
         progress: -1
-        Text {
+        Md3Text {
             visible: window.galleryTreeSelection.length > 0
             text: window.galleryTreeSelection
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.family: Md3Theme.typography.fontFamily
-            font.pixelSize: Md3Theme.typography.labelSmall.size
+            role: Md3Text.LabelSmall
+            tone: Md3Text.OnSurfaceVariant
         }
-        Text {
+        Md3Text {
             text: "UTF-8"
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.family: Md3Theme.typography.fontFamily
-            font.pixelSize: Md3Theme.typography.labelSmall.size
+            role: Md3Text.LabelSmall
+            tone: Md3Text.OnSurfaceVariant
         }
     }
-
-    // Dev: optional Md3HotReload gallery/pages path; else disk next to Main, else qrc.
-    property string pageRoot: {
-        if (hotReload && hotReloadAgent
-                && hotReloadAgent.galleryPagesDir
-                && String(hotReloadAgent.galleryPagesDir).length > 0) {
-            let p = String(hotReloadAgent.galleryPagesDir).replace(/\\/g, "/")
-            if (!p.endsWith("/"))
-                p += "/"
-            if (p.indexOf("file:") === 0)
-                return p
-            return (p.charAt(0) === "/" ? "file://" : "file:///") + p
-        }
-        const local = String(Qt.resolvedUrl("./pages/"))
-        if (local.indexOf("qrc:") === 0)
-            return "qrc:/qt/qml/Gallery/pages/"
-        return local
-    }
-    property int windowPageIndex: 21
 
     overlay: [
         Md3Tour {
@@ -277,8 +207,6 @@ Md3ApplicationWindow {
     Component.onCompleted: {
         Md3AppSettings.organization = settingsOrganization
         Md3AppSettings.application = settingsApplication
-        // Session restore can leave a11y/reduceMotion=true, which collapses every
-        // Md3Motion token to ~1ms (ripples/switch/page transitions look instant).
         Qt.callLater(function () {
             if (Md3Theme.reduceMotion) {
                 console.warn("Md3 Gallery: clearing stuck reduceMotion (was collapsing all motion to ~1ms)")
@@ -289,15 +217,12 @@ Md3ApplicationWindow {
         })
         if (!Md3AppSettings.value("tour/completed", false))
             Qt.callLater(function () { window.startTour() })
-        // Window may already be visible before this runs on some platforms.
-        if (visible && !_navWarmReady && !navWarmTimer.running)
-            navWarmTimer.start()
     }
 
     destinations: [
-        { title: qsTr("令牌"), icon: "palette", source: pageRoot + "TokensPage.qml",
+        { title: qsTr("令牌"), icon: "palette", source: "TokensPage.qml",
           skeletonLayout: "page" },
-        { title: qsTr("按钮"), icon: "smart_button", source: pageRoot + "ButtonsPage.qml",
+        { title: qsTr("按钮"), icon: "smart_button", source: "ButtonsPage.qml",
           skeletonBones: [
               { variant: "text", width: 0.35, height: 22 },
               { variant: "rounded", width: 1, height: 48 },
@@ -305,83 +230,82 @@ Md3ApplicationWindow {
               { variant: "rounded", width: 0.4, height: 40 },
               { variant: "rounded", width: 0.7, height: 56 }
           ] },
-        { title: qsTr("FAB"), icon: "add_circle", source: pageRoot + "FabPage.qml",
+        { title: qsTr("FAB"), icon: "add_circle", source: "FabPage.qml",
           skeletonBones: [
               { variant: "text", width: 0.3, height: 20 },
               { variant: "circular", width: 56, height: 56 },
               { variant: "rounded", width: 0.45, height: 56 }
           ] },
-        { title: qsTr("选择"), icon: "check_box", source: pageRoot + "SelectionPage.qml",
+        { title: qsTr("选择"), icon: "check_box", source: "SelectionPage.qml",
           skeletonLayout: "list" },
-        { title: qsTr("文本框"), icon: "edit", source: pageRoot + "TextFieldsPage.qml",
+        { title: qsTr("文本框"), icon: "edit", source: "TextFieldsPage.qml",
           skeletonBones: [
               { variant: "text", width: 0.28, height: 20 },
               { variant: "rounded", width: 0.7, height: 56 },
               { variant: "rounded", width: 0.7, height: 56 },
               { variant: "rounded", width: 0.7, height: 56 }
           ] },
-        { title: qsTr("芯片"), icon: "label", source: pageRoot + "ChipsPage.qml",
+        { title: qsTr("芯片"), icon: "label", source: "ChipsPage.qml",
           skeletonBones: [
               { variant: "text", width: 0.25, height: 18 },
               { variant: "rounded", width: 0.22, height: 32 },
               { variant: "rounded", width: 0.28, height: 32 },
               { variant: "rounded", width: 0.2, height: 32 }
           ] },
-        { title: qsTr("容器"), icon: "dashboard", source: pageRoot + "ContainmentPage.qml",
+        { title: qsTr("容器"), icon: "dashboard", source: "ContainmentPage.qml",
           skeletonLayout: "cards" },
-        { title: qsTr("反馈"), icon: "chat", source: pageRoot + "CommunicationPage.qml",
+        { title: qsTr("反馈"), icon: "chat", source: "CommunicationPage.qml",
           skeletonLayout: "page" },
-        { title: qsTr("模式"), icon: "design_services", source: pageRoot + "PatternsPage.qml",
+        { title: qsTr("模式"), icon: "design_services", source: "PatternsPage.qml",
           skeletonLayout: "page" },
-        { title: qsTr("导航"), icon: "menu", source: pageRoot + "NavigationPage.qml",
+        { title: qsTr("导航"), icon: "menu", source: "NavigationPage.qml",
           skeletonLayout: "list" },
-        { title: qsTr("菜单"), icon: "more_vert", source: pageRoot + "MenusPage.qml",
+        { title: qsTr("菜单"), icon: "more_vert", source: "MenusPage.qml",
           skeletonLayout: "list" },
-        { title: qsTr("选择器"), icon: "calendar_month", source: pageRoot + "PickersPage.qml",
+        { title: qsTr("选择器"), icon: "calendar_month", source: "PickersPage.qml",
           skeletonBones: [
               { variant: "text", width: 0.3, height: 20 },
               { variant: "rounded", width: 0.55, height: 280 }
           ] },
-        { title: qsTr("搜索"), icon: "search", source: pageRoot + "SearchPage.qml",
+        { title: qsTr("搜索"), icon: "search", source: "SearchPage.qml",
           skeletonBones: [
               { variant: "rounded", width: 1, height: 56 },
               { variant: "text", width: 0.8, height: 14 },
               { variant: "text", width: 0.65, height: 14 },
               { variant: "text", width: 0.7, height: 14 }
           ] },
-        { title: qsTr("桌面模式"), icon: "folder_managed", source: pageRoot + "DesktopPatternsPage.qml",
+        { title: qsTr("桌面模式"), icon: "folder_managed", source: "DesktopPatternsPage.qml",
           skeletonLayout: "page" },
-        { title: qsTr("扩展"), icon: "extension", source: pageRoot + "ExtrasPage.qml",
+        { title: qsTr("扩展"), icon: "extension", source: "ExtrasPage.qml",
           skeletonLayout: "page" },
-        { title: qsTr("动效"), icon: "animation", source: pageRoot + "MotionPage.qml",
+        { title: qsTr("动效"), icon: "animation", source: "MotionPage.qml",
           skeletonLayout: "cards" },
-        { title: qsTr("主题"), icon: "contrast", source: pageRoot + "ThemePage.qml",
+        { title: qsTr("主题"), icon: "contrast", source: "ThemePage.qml",
           skeletonLayout: "page" },
-        { title: qsTr("无障碍"), icon: "accessibility_new", source: pageRoot + "AccessibilityPage.qml",
+        { title: qsTr("无障碍"), icon: "accessibility_new", source: "AccessibilityPage.qml",
           skeletonLayout: "page" },
-        { title: qsTr("图表"), icon: "show_chart", source: pageRoot + "ChartsPage.qml", cacheCost: 3,
+        { title: qsTr("图表"), icon: "show_chart", source: "ChartsPage.qml", cacheCost: 3,
           skeletonBones: [
               { variant: "text", width: 0.3, height: 22 },
               { variant: "rounded", width: 1, height: 200 },
               { variant: "rounded", width: 1, height: 160 }
           ] },
-        { title: qsTr("场景：登录"), icon: "login", source: pageRoot + "scenes/LoginScene.qml", cacheCost: 2.5,
+        { title: qsTr("场景：登录"), icon: "login", source: "scenes/LoginScene.qml", cacheCost: 2.5,
           skeletonBones: [
               { variant: "circular", width: 64, height: 64 },
               { variant: "rounded", width: 0.7, height: 56 },
               { variant: "rounded", width: 0.7, height: 56 },
               { variant: "rounded", width: 0.45, height: 48 }
           ] },
-        { title: qsTr("场景：列表详情"), icon: "view_sidebar", source: pageRoot + "scenes/ListDetailScene.qml", cacheCost: 2.5,
+        { title: qsTr("场景：列表详情"), icon: "view_sidebar", source: "scenes/ListDetailScene.qml", cacheCost: 2.5,
           skeletonLayout: "list" },
-        { title: qsTr("场景：列表打开"), icon: "list_alt", source: pageRoot + "scenes/LaunchListScene.qml", cacheCost: 2.5,
+        { title: qsTr("场景：列表打开"), icon: "list_alt", source: "scenes/LaunchListScene.qml", cacheCost: 2.5,
           skeletonLayout: "list" },
-        { title: qsTr("场景：列表详情页"), icon: "description", source: pageRoot + "scenes/LaunchDetailScene.qml", cacheCost: 2.5,
+        { title: qsTr("场景：列表详情页"), icon: "description", source: "scenes/LaunchDetailScene.qml", cacheCost: 2.5,
           skeletonLayout: "page" },
-        // Pinned to rail footer
-        { title: qsTr("场景：设置"), icon: "settings", source: pageRoot + "scenes/SettingsScene.qml", cacheCost: 2.5, pin: "bottom",
+        { title: qsTr("场景：设置"), icon: "settings", source: "scenes/SettingsScene.qml", cacheCost: 2.5, pin: "bottom",
           skeletonLayout: "list" },
-        { title: qsTr("窗口"), icon: "web_asset", source: pageRoot + "WindowPage.qml", pin: "bottom",
+        { title: qsTr("窗口"), icon: "web_asset", source: "WindowPage.qml", pin: "bottom",
           skeletonLayout: "page" }
     ]
 
