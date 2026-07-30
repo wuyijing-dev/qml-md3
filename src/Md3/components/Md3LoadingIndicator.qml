@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Window
 import QtQuick.Shapes
 import Md3
 
@@ -15,6 +14,8 @@ Item {
     property string label: ""
     property color indicatorColor: Md3Theme.colorScheme.primary
     property color trackColor: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.primary, 0.2)
+    /// Optional Window for scene-active checks (else OverlayHost).
+    property var hostWindow: null
     property real strokeWidth: {
         switch (sizePreset) {
         case Md3LoadingIndicator.Small: return 3
@@ -41,7 +42,7 @@ Item {
     property real spinSpeed: Math.PI * 2 / (Md3Motion.progressSpin / 1000)
 
     function _refreshTreeShown() {
-        const ok = Md3TreeVisibility.isSceneActive(root, Window.window)
+        const ok = Md3TreeVisibility.isSceneActive(root, root.hostWindow)
         if (_treeShown !== ok)
             _treeShown = ok
     }

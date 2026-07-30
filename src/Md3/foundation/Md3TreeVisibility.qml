@@ -31,11 +31,15 @@ QtObject {
         return true
     }
 
-    /// Tree shown and `win` (pass `Window.window` from the caller) is active.
+    /// Tree shown and window active.
+    /// Pass explicit `win` / `hostWindow`, or `null`/`undefined` to resolve via Md3OverlayHost.
     function isSceneActive(item, win) {
         if (!isItemShown(item))
             return false
-        return isWindowActive(win)
+        const w = (win !== undefined && win !== null)
+                ? win
+                : Md3OverlayHost.resolveWindow(null, item)
+        return isWindowActive(w)
     }
 
     /// Scene active and application not suspended/hidden (for live timers / FrameAnimation).

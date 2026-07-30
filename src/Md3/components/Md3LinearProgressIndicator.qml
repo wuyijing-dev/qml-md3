@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Window
 import QtQuick.Shapes
 import Md3
 
@@ -12,6 +11,8 @@ Item {
     property real value: 0
     property bool indeterminate: false
     property int style: Md3LinearProgressIndicator.Standard
+    /// Optional Window for scene-active checks (else OverlayHost).
+    property var hostWindow: null
     property real wavelength: style === Md3LinearProgressIndicator.Lively ? 28
                             : (style === Md3LinearProgressIndicator.Soft ? 56 : 40)
     property real amplitude: {
@@ -55,7 +56,7 @@ Item {
     property real _waveAccum: 0
 
     function _refreshTreeShown() {
-        const ok = Md3TreeVisibility.isSceneActive(root, Window.window)
+        const ok = Md3TreeVisibility.isSceneActive(root, root.hostWindow)
         if (_treeShown !== ok)
             _treeShown = ok
     }

@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Window
 import Md3
 
 /// Base for all Md3 charts — shared plot metrics, theme resolve, pause/rebuild API.
@@ -64,13 +63,15 @@ Item {
     property bool gestureActive: false
     property real _panVelocity: 0
     property bool _viewDirty: false
+    /// Optional Window for live-motion checks (else OverlayHost).
+    property var hostWindow: null
     /// True while dragging or coasting — skip Catmull / async Shape to avoid release flicker.
     readonly property bool viewMoving: gestureActive || Math.abs(_panVelocity) > 1e-5
 
     property bool paused: false
     /// Page/window/app visibility — no per-scroll mapToItem (that starved the UI thread / rail).
     readonly property bool chartActive: !paused && enabled
-            && Md3TreeVisibility.isLiveMotionScene(root, Window.window)
+            && Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
 
     property int renderedPointCount: 0
 

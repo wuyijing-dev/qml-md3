@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Window
 import Md3
 
 /// Circular gauge with animated liquid / wave fill level (seamless loop).
@@ -24,6 +23,8 @@ Item {
     property real strokeWidth: 3
     /// Radians advanced per second (wave travel speed).
     property real waveSpeed: 2.2
+    /// Optional Window for live-motion checks (else OverlayHost).
+    property var hostWindow: null
 
     readonly property real progress: {
         const span = Math.max(1e-6, to - from)
@@ -31,7 +32,7 @@ Item {
     }
     readonly property string valueText: Number(value).toFixed(decimals) + (unit.length ? unit : "")
     readonly property int _effectiveFps: animationFps > 0 ? animationFps : Md3Theme.effectsLiveFps
-    readonly property bool effectivelyShown: Md3TreeVisibility.isLiveMotionScene(root, Window.window)
+    readonly property bool effectivelyShown: Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
 
     width: size
     height: size

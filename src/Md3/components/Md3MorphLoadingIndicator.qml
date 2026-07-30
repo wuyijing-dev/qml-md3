@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Window
 import QtQuick.Shapes
 import Md3
 
@@ -18,6 +17,8 @@ Item {
     property real morphPhase: 0
     property real spin: 0
     property int _morphBucket: -1
+    /// Optional Window for scene-active checks (else OverlayHost).
+    property var hostWindow: null
 
     readonly property real box: {
         switch (sizePreset) {
@@ -34,7 +35,7 @@ Item {
     height: box
 
     function _refreshTreeShown() {
-        const ok = Md3TreeVisibility.isSceneActive(root, Window.window)
+        const ok = Md3TreeVisibility.isSceneActive(root, root.hostWindow)
         if (_treeShown !== ok)
             _treeShown = ok
     }

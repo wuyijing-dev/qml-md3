@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Window
 import QtQuick.Shapes
 import Md3
 
@@ -12,6 +11,8 @@ Item {
     property real value: 0
     property bool indeterminate: true
     property int style: Md3CircularProgressIndicator.Standard
+    /// Optional Window for scene-active checks (else OverlayHost).
+    property var hostWindow: null
     property real strokeWidth: {
         switch (style) {
         case Md3CircularProgressIndicator.Lively: return 7
@@ -61,7 +62,7 @@ Item {
     property real _waveAccum: 0
 
     function _refreshTreeShown() {
-        const ok = Md3TreeVisibility.isSceneActive(root, Window.window)
+        const ok = Md3TreeVisibility.isSceneActive(root, root.hostWindow)
         if (_treeShown !== ok)
             _treeShown = ok
     }
