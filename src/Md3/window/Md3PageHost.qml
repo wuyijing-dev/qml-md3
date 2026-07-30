@@ -132,9 +132,12 @@ Item {
     property var routeParams: ({})
     property int sectionRootIndex: -1
     property var _lastNavOpts: ({})
+    /// Top-level rail / index switches (separate from pushRoute hierarchical stack).
+    property var browseHistory: []
+    property int browseHistoryLimit: 32
 
-    readonly property bool canGoBack: navStack.length > 0
-    readonly property int navDepth: navStack.length
+    readonly property bool canGoBack: navStack.length > 0 || browseHistory.length > 0
+    readonly property int navDepth: navStack.length + browseHistory.length
 
     function _clonePlainObject(obj) {
         if (!obj || typeof obj !== "object")
@@ -149,6 +152,22 @@ Item {
         navStack = []
         sectionRootIndex = -1
         routeParams = ({})
+    }
+
+    function resetBrowseHistory() {
+        browseHistory = []
+    }
+
+    function _pushBrowseHistory(fromIndex) {
+        if (fromIndex < 0 || !model || fromIndex >= model.length)
+            return
+        const hist = browseHistory.slice()
+        if (hist.length > 0 && hist[hist.length - 1] === fromIndex)
+            return
+        hist.push(fromIndex)
+        while (hist.length > browseHistoryLimit)
+            hist.shift()
+        browseHistory = hist
     }
 
     function pushRoute(index, params, opts) {
@@ -179,20 +198,28 @@ Item {
     }
 
     function goBack(opts) {
-        if (navStack.length === 0)
-            return false
-        const prev = navStack[navStack.length - 1]
-        navStack = navStack.slice(0, navStack.length - 1)
-        sectionRootIndex = navStack.length > 0 ? prev.sectionRoot : -1
-        routeParams = _clonePlainObject(prev.params)
-        const backOpts = Object.assign({}, opts || ({}), { _stackOp: true })
-        if (backOpts.transitionMode === undefined && backOpts.returnToSource === undefined) {
-            if (_isLaunchNav(prev.forwardOpts)) {
-                backOpts.transitionMode = "launch"
-                backOpts.returnToSource = true
+        // Hierarchical routes first (list→detail), then rail browse history.
+        if (navStack.length > 0) {
+            const prev = navStack[navStack.length - 1]
+            navStack = navStack.slice(0, navStack.length - 1)
+            sectionRootIndex = navStack.length > 0 ? prev.sectionRoot : -1
+            routeParams = _clonePlainObject(prev.params)
+            const backOpts = Object.assign({}, opts || ({}), { _stackOp: true })
+            if (backOpts.transitionMode === undefined && backOpts.returnToSource === undefined) {
+                if (_isLaunchNav(prev.forwardOpts)) {
+                    backOpts.transitionMode = "launch"
+                    backOpts.returnToSource = true
+                }
             }
+            navigateTo(prev.index, backOpts)
+            return true
         }
-        navigateTo(prev.index, backOpts)
+        if (browseHistory.length === 0)
+            return false
+        const prevIndex = browseHistory[browseHistory.length - 1]
+        browseHistory = browseHistory.slice(0, browseHistory.length - 1)
+        const browseOpts = Object.assign({}, opts || ({}), { _browseBack: true })
+        navigateTo(prevIndex, browseOpts)
         return true
     }
 
@@ -1278,6 +1305,9 @@ Item {
             resetNavStack()
             if (opts.params !== undefined)
                 routeParams = _clonePlainObject(opts.params)
+            // Record rail / top-level page switches for title-bar Back.
+            if (!opts._browseBack && currentIndex >= 0 && currentIndex !== index)
+                _pushBrowseHistory(currentIndex)
         }
         _lastNavOpts = opts
         _pendingNavOpts = opts
