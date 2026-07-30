@@ -127,28 +127,29 @@ Md3ApplicationWindow {
 
 ---
 
-### E. 冷开不卡 + 内存不炸（**当前 Gallery 默认**）
+### E. 冷开不卡 + 可控内存
 
-不要靠堆高 L1 活页换手感。优先：
+空壳 / async / L2 warm；L1 保持较小。
 
-1. **`MD3_QML_CACHEGEN=ON`（Release 默认；Debug 默认 OFF）** — 编译期 bytecode，几乎不占运行期 RSS  
-   - Qt Creator **Debug** kit：默认关，避免 qmlcachegen 并行生成/编译拖垮或误失败  
-   - 要测冷开性能：用 **Release / RelWithDebInfo**，或 `-DMD3_QML_CACHEGEN=ON` 后重配
-2. **`pageAsync: true`** — 冷开摊到多帧 + skeleton  
-3. **`pageL2Warm: true`** — 空闲后按帧 `_ensureL2` 全表 Component（**不**建 Item）  
-4. **小 L1 + 关 neighbor Item prefetch** — 最多少量活页  
-5. **页内空壳秒出** — 标题先画；图表/大表用 `Md3DeferredSection { asynchronous: true }`
+### E+（**当前 Gallery 默认**）— 可多占一点内存换切页手感
+
+在 E 基础上：
+
+- 暖机后 **`pageCacheLimit: 6`** + **`pagePrefetch: true`**（±1 邻居活页）
+- **`pageIdleTrimMs: 90000`** — 避免几秒无操作就把 L1 裁回 1
+- 仍关 `pagePredictPrefetch` / `pageWarmStart`（不全表常驻 Item）
 
 ```qml
 Md3ApplicationWindow {
     pageAsync: true
     pageSkeleton: true
-    pageL2Warm: true              // after ~900ms, compile all destination Components
-    pageCacheLimit: 1             // after warm → 3
-    pageL2CacheLimit: 32          // ≥ destinations.length while L2-warming
-    pagePrefetch: false
+    pageL2Warm: true
+    pageIdleTrimMs: 90000
+    pageCacheLimit: 1             // after warm → 6
+    pageL2CacheLimit: 32
+    pagePrefetch: false           // after warm → true
     pagePredictPrefetch: false
-    pageWarmStart: false          // never pre-create Items
+    pageWarmStart: false
     pageLeaveSnapshot: false
     hotReload: false
     progressiveContent: true
@@ -175,8 +176,8 @@ Flickable {
 |------|----------|-----|
 | qmlcachegen | ↑↑ | ≈0 |
 | pageAsync + skeleton | ↑（不假死） | ≈0 |
-| pageL2Warm（全表 Component） | 任意页首次明显更顺 | 低（无活页） |
-| L1=3 / 关 prefetch | 回访略快 | 可控 |
+| pageL2Warm（全表 Component） | 任意页首次更顺 | 低 |
+| L1=6 + prefetch（E+） | 近邻/回访明显快 | **中等**（可接受） |
 | L1=6+prefetch / warmStart | 回访很快 | **易炸** |
 | DeferredSection 空壳 | 首屏立刻 | ↓ |
 

@@ -21,15 +21,16 @@ Md3ApplicationWindow {
     railHeader: qsTr("组件图库")
     pagePadding: 20
     pageSkeleton: true
-    // Instant chrome + progressive body: async open, L2 warm-all (Components only), small L1.
+    // Balanced: async + L2 warm-all, then raise L1/prefetch (trade some RAM for snappy switches).
     pageAsync: true
     pageCacheLimit: 1
     pageL2CacheLimit: 1
     pagePrefetch: false
     pagePredictPrefetch: false
     pageWarmStart: false
-    // After shell up: pace-compile every destination Component (not live Items).
     pageL2Warm: true
+    // Don't idle-trim L1 back to 1 after a few seconds (that made switches feel cold again).
+    pageIdleTrimMs: 90000
     pageLeaveSnapshot: false
     persistSession: true
     settingsOrganization: "QML_MD3"
@@ -39,7 +40,7 @@ Md3ApplicationWindow {
 
     property bool _navWarmReady: false
 
-    /// After shell paint: modest L1 + room for full-catalog L2 (pageL2Warm).
+    /// After shell paint: keep ~6 live pages + neighbor prefetch; L2 holds full catalog.
     Timer {
         id: navWarmTimer
         interval: 80
@@ -48,10 +49,10 @@ Md3ApplicationWindow {
             if (window._navWarmReady)
                 return
             window._navWarmReady = true
-            window.pageCacheLimit = 3
-            // ≥ destination count so idle L2 warm is not trimmed away
+            window.pageCacheLimit = 6
             window.pageL2CacheLimit = Math.max(32, (window.destinations || []).length)
-            window.pagePrefetch = false
+            window.pagePrefetch = true
+            // Hover-predict while dragging the rail still janks — keep off.
             window.pagePredictPrefetch = false
             window.pageL2Warm = true
         }
