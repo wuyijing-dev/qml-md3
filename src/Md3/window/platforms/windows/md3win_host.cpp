@@ -80,19 +80,45 @@ void Md3WindowHelper::handleThumbBarClick(int buttonId)
 
 void Md3WindowHelper::handleTrayMessage(quintptr lParam)
 {
+#if defined(Q_OS_WIN)
+    // NOTIFYICON_VERSION_4 packs the event in LOWORD(lParam) (HIWORD = icon id).
+    // Classic (no SETVERSION) passes the message id in lParam directly — LOWORD still works.
+    const UINT event = LOWORD(static_cast<LPARAM>(lParam));
     int reason = TrayUnknown;
-    switch (lParam) {
-    case WM_LBUTTONUP: reason = TrayLeftClick; break;
-    case WM_LBUTTONDBLCLK: reason = TrayLeftDoubleClick; break;
-    case WM_RBUTTONUP: reason = TrayRightClick; break;
-    case WM_MBUTTONUP: reason = TrayMiddleClick; break;
-    case NIN_BALLOONSHOW: reason = TrayBalloonShown; break;
-    case NIN_BALLOONUSERCLICK: reason = TrayBalloonClicked; break;
+    switch (event) {
+    case NIN_SELECT:
+    case NIN_KEYSELECT:
+    case WM_LBUTTONUP:
+        reason = TrayLeftClick;
+        break;
+    case WM_LBUTTONDBLCLK:
+        reason = TrayLeftDoubleClick;
+        break;
+    case WM_CONTEXTMENU:
+    case WM_RBUTTONUP:
+        reason = TrayRightClick;
+        break;
+    case WM_MBUTTONUP:
+        reason = TrayMiddleClick;
+        break;
+    case NIN_BALLOONSHOW:
+        reason = TrayBalloonShown;
+        break;
+    case NIN_BALLOONUSERCLICK:
+        reason = TrayBalloonClicked;
+        break;
     case NIN_BALLOONTIMEOUT:
-    case NIN_BALLOONHIDE: reason = TrayBalloonTimeout; break;
-    default: break;
+    case NIN_BALLOONHIDE:
+        reason = TrayBalloonTimeout;
+        break;
+    default:
+        break;
     }
-    emit trayActivated(reason);
+    if (reason != TrayUnknown)
+        emit trayActivated(reason);
+#else
+    Q_UNUSED(lParam);
+#endif
 }
 
 void Md3WindowHelper::handleDpiChanged(QWindow *window)

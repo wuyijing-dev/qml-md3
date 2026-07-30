@@ -504,13 +504,30 @@ Flickable {
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
                         text: qsTr("显示托盘")
-                        onClicked: if (root.appWin) root.appWin.showSystemTrayIcon(Md3AppIcons.app16, qsTr("Md3 图库"))
+                        onClicked: {
+                            if (!root.appWin)
+                                return
+                            const ok = root.appWin.showSystemTrayIcon(Md3AppIcons.app16, qsTr("Md3 图库"))
+                            shellEventLabel.text = ok ? qsTr("外壳事件：托盘图标已显示（左键抬窗 / 右键菜单）")
+                                                     : qsTr("外壳事件：显示托盘失败")
+                        }
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
                         text: qsTr("气泡通知")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.showTrayNotification(qsTr("Md3 图库"), qsTr("托盘通知"), 4000)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows
+                        text: qsTr("隐藏托盘")
+                        variant: Md3Button.Text
+                        onClicked: {
+                            if (!root.appWin)
+                                return
+                            root.appWin.hideSystemTrayIcon()
+                            shellEventLabel.text = qsTr("外壳事件：托盘已隐藏")
+                        }
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
@@ -727,7 +744,13 @@ Flickable {
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux
                         text: qsTr("显示托盘")
-                        onClicked: if (root.appWin) root.appWin.showSystemTrayIcon(Md3AppIcons.app16, qsTr("Md3 图库"))
+                        onClicked: {
+                            if (!root.appWin)
+                                return
+                            const ok = root.appWin.showSystemTrayIcon(Md3AppIcons.app16, qsTr("Md3 图库"))
+                            shellEventLabel.text = ok ? qsTr("外壳事件：托盘图标已显示（左键抬窗 / 右键菜单）")
+                                                     : qsTr("外壳事件：显示托盘失败")
+                        }
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isLinux

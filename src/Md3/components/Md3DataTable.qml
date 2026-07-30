@@ -60,8 +60,11 @@ Item {
     signal pageRequested(int page, int sortColumn, int sortOrder)
     signal rowActionTriggered(int sourceIndex, var action)
     signal rowOrderChanged(int fromSourceIndex, int toSourceIndex)
+    signal exportRequested(string format, string payload)
 
     property var columnWidths: []
+    /// When set, columnWidths are loaded/saved via Md3AppSettings (JSON number array).
+    property string columnWidthsPersistKey: ""
     property int rowMenuSourceIndex: -1
     property int focusedPageRow: -1
     property int filterMenuColumnIndex: -1
@@ -192,6 +195,78 @@ Item {
         const arr = effectiveWidths.slice()
         arr[index] = Math.max(minW, w)
         columnWidths = arr
+        if (columnWidthsPersistKey.length)
+            Qt.callLater(saveColumnWidths)
+    }
+
+    function loadColumnWidths() {
+        if (!columnWidthsPersistKey.length)
+            return
+        const raw = Md3AppSettings.value(columnWidthsPersistKey, "")
+        if (!raw || !String(raw).length)
+            return
+        try {
+            const parsed = JSON.parse(String(raw))
+            if (parsed && parsed.length)
+                columnWidths = parsed
+        } catch (e) { /* ignore corrupt */ }
+    }
+
+    function saveColumnWidths() {
+        if (!columnWidthsPersistKey.length)
+            return
+        Md3AppSettings.setValue(columnWidthsPersistKey, JSON.stringify(effectiveWidths))
+        Md3AppSettings.sync()
+    }
+
+    /// CSV of visible (filtered) rows using column `role` / header. Does not write disk.
+    function exportCsv(includeHeader) {
+        const cols = columns || []
+        const entries = filteredEntries || []
+        const lines = []
+        if (includeHeader !== false) {
+            const headers = []
+            for (let i = 0; i < cols.length; ++i)
+                headers.push(_csvEscape(cols[i].title !== undefined ? cols[i].title
+                             : (cols[i].role !== undefined ? cols[i].role : ("c" + i))))
+            lines.push(headers.join(","))
+        }
+        for (let r = 0; r < entries.length; ++r) {
+            const row = entries[r].row
+            const cells = []
+            for (let c = 0; c < cols.length; ++c)
+                cells.push(_csvEscape(cellText(row, cols[c])))
+            lines.push(cells.join(","))
+        }
+        const payload = lines.join("\n")
+        exportRequested("csv", payload)
+        return payload
+    }
+
+    /// JSON array of row objects (filtered). Does not write disk.
+    function exportJson() {
+        const cols = columns || []
+        const entries = filteredEntries || []
+        const out = []
+        for (let r = 0; r < entries.length; ++r) {
+            const row = entries[r].row
+            const obj = {}
+            for (let c = 0; c < cols.length; ++c) {
+                const role = cols[c].role !== undefined ? String(cols[c].role) : ("c" + c)
+                obj[role] = cellText(row, cols[c])
+            }
+            out.push(obj)
+        }
+        const payload = JSON.stringify(out, null, 2)
+        exportRequested("json", payload)
+        return payload
+    }
+
+    function _csvEscape(v) {
+        const s = String(v === undefined || v === null ? "" : v)
+        if (/[",\n\r]/.test(s))
+            return "\"" + s.replace(/"/g, "\"\"") + "\""
+        return s
     }
 
     function cellText(rowData, colDef) {
@@ -403,7 +478,10 @@ Item {
     }
 
     onColumnsChanged: _syncWidthsFromColumns()
-    Component.onCompleted: _syncWidthsFromColumns()
+    Component.onCompleted: {
+        _syncWidthsFromColumns()
+        loadColumnWidths()
+    }
     onRowsChanged: {
         if (currentPage >= pageCount)
             currentPage = Math.max(0, pageCount - 1)
@@ -903,7 +981,7 @@ Item {
                             anchors.right: parent.right
                             width: 4
                             height: parent.height
-                            visible: hFlick.contentX > 0.5
+                            visible: bodyFlick.contentX > 0.5
                             gradient: Gradient {
                                 orientation: Gradient.Horizontal
                                 GradientStop { position: 0; color: "transparent" }
@@ -912,23 +990,26 @@ Item {
                         }
                     }
 
-                    // Scrollable region
-                    Flickable {
-                        id: hFlick
+                    // Scrollable region (H+V); sticky header tracks contentX
+                    Item {
+                        id: scrollPane
                         width: parent.width - frozenPane.width
                         height: parent.height
-                        contentWidth: Math.max(width, root.scrollColsWidth)
                         clip: true
-                        flickableDirection: Flickable.HorizontalFlick
-                        boundsBehavior: Flickable.StopAtBounds
-                        interactive: contentWidth > width + 1
 
-                        Column {
-                            width: Math.max(hFlick.width, root.scrollColsWidth)
+                        readonly property real _paneContentW: Math.max(width, root.scrollColsWidth)
+
+                        Item {
+                            id: scrollHeaderClip
+                            width: parent.width
+                            height: root.headerHeight
+                            clip: true
+                            z: 1
 
                             Rectangle {
                                 id: headerBar
-                                width: parent.width
+                                x: -bodyFlick.contentX
+                                width: scrollPane._paneContentW
                                 height: root.headerHeight
                                 color: Md3Theme.colorScheme.surfaceContainerLow
                                 Row {
@@ -959,97 +1040,107 @@ Item {
                                 }
                                 Md3Divider { anchors.bottom: parent.bottom; width: parent.width }
                             }
+                        }
 
-                            Flickable {
-                                id: bodyFlick
-                                width: parent.width
-                                height: root.bodyHeight
-                                clip: true
-                                contentWidth: width
-                                contentHeight: rowsCol.height
-                                boundsBehavior: Flickable.StopAtBounds
-                                interactive: !root.loading && root.pageEntries.length > 0
-                                flickableDirection: Flickable.VerticalFlick
-                                onContentYChanged: {
-                                    if (bodyFrozen.contentY !== contentY)
-                                        bodyFrozen.contentY = contentY
+                        Flickable {
+                            id: bodyFlick
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: scrollHeaderClip.bottom
+                            anchors.bottom: parent.bottom
+                            clip: true
+                            contentWidth: scrollPane._paneContentW
+                            contentHeight: rowsCol.height
+                            boundsBehavior: Flickable.StopAtBounds
+                            interactive: !root.loading && root.pageEntries.length > 0
+                            flickableDirection: {
+                                const h = contentWidth > width + 1
+                                const v = contentHeight > height + 1
+                                if (h && v)
+                                    return Flickable.HorizontalAndVerticalFlick
+                                if (h)
+                                    return Flickable.HorizontalFlick
+                                return Flickable.VerticalFlick
+                            }
+                            onContentYChanged: {
+                                if (bodyFrozen.contentY !== contentY)
+                                    bodyFrozen.contentY = contentY
+                            }
+
+                            Connections {
+                                target: bodyFrozen
+                                function onContentYChanged() {
+                                    if (bodyFlick.contentY !== bodyFrozen.contentY)
+                                        bodyFlick.contentY = bodyFrozen.contentY
                                 }
+                            }
 
-                                Connections {
-                                    target: bodyFrozen
-                                    function onContentYChanged() {
-                                        if (bodyFlick.contentY !== bodyFrozen.contentY)
-                                            bodyFlick.contentY = bodyFrozen.contentY
-                                    }
-                                }
-
-                                Column {
-                                    id: rowsCol
-                                    width: bodyFlick.width
-                                    Repeater {
-                                        model: root.loading ? 0 : root.pageEntries
-                                        delegate: Item {
-                                            id: scrollRowItem
-                                            required property int index
-                                            required property var modelData
-                                            width: rowsCol.width
-                                            height: root.rowHeight
-                                            Row {
-                                                anchors.fill: parent
-                                                anchors.leftMargin: 8
-                                                anchors.rightMargin: 8
-                                                Repeater {
-                                                    model: {
-                                                        const out = []
-                                                        for (let i = root.frozenCount; i < (root.columns || []).length; ++i)
-                                                            out.push(i)
-                                                        return out
-                                                    }
-                                                    delegate: DataCell {
-                                                        required property var modelData
-                                                        width: root.effectiveWidths[modelData] || 120
-                                                        height: parent.height
-                                                        rowData: scrollRowItem.modelData.row
-                                                        columnDef: root.columns[modelData]
-                                                        columnIndex: modelData
-                                                        sourceIndex: scrollRowItem.modelData.sourceIndex
-                                                    }
+                            Column {
+                                id: rowsCol
+                                width: scrollPane._paneContentW
+                                Repeater {
+                                    model: root.loading ? 0 : root.pageEntries
+                                    delegate: Item {
+                                        id: scrollRowItem
+                                        required property int index
+                                        required property var modelData
+                                        width: rowsCol.width
+                                        height: root.rowHeight
+                                        Row {
+                                            anchors.fill: parent
+                                            anchors.leftMargin: 8
+                                            anchors.rightMargin: 8
+                                            Repeater {
+                                                model: {
+                                                    const out = []
+                                                    for (let i = root.frozenCount; i < (root.columns || []).length; ++i)
+                                                        out.push(i)
+                                                    return out
                                                 }
-                                                Item {
-                                                    visible: root.actionsColWidth > 0
-                                                    width: 48
+                                                delegate: DataCell {
+                                                    required property var modelData
+                                                    width: root.effectiveWidths[modelData] || 120
                                                     height: parent.height
-                                                    Md3IconButton {
-                                                        id: scrollMoreBtn
-                                                        anchors.centerIn: parent
-                                                        icon: "more_vert"
-                                                        onClicked: root.openRowMenu(scrollRowItem.modelData.sourceIndex, scrollMoreBtn)
-                                                    }
+                                                    rowData: scrollRowItem.modelData.row
+                                                    columnDef: root.columns[modelData]
+                                                    columnIndex: modelData
+                                                    sourceIndex: scrollRowItem.modelData.sourceIndex
                                                 }
                                             }
-                                            MouseArea {
-                                                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                                                anchors.fill: parent
-                                                anchors.rightMargin: root.actionsColWidth
-                                                z: -1
-                                                onClicked: {
-                                                    root.focusedPageRow = scrollRowItem.index
-                                                    root.selectedRow = scrollRowItem.modelData.sourceIndex
-                                                    root.rowClicked(scrollRowItem.modelData.sourceIndex)
-                                                    tableFocus.forceActiveFocus()
-                                                }
-                                                onDoubleClicked: {
-                                                    root.rowDoubleClicked(scrollRowItem.modelData.sourceIndex)
-                                                    root.rowActivated(scrollRowItem.modelData.sourceIndex)
+                                            Item {
+                                                visible: root.actionsColWidth > 0
+                                                width: 48
+                                                height: parent.height
+                                                Md3IconButton {
+                                                    id: scrollMoreBtn
+                                                    anchors.centerIn: parent
+                                                    icon: "more_vert"
+                                                    onClicked: root.openRowMenu(scrollRowItem.modelData.sourceIndex, scrollMoreBtn)
                                                 }
                                             }
-                                            Rectangle {
-                                                anchors.bottom: parent.bottom
-                                                width: parent.width
-                                                height: 1
-                                                color: "transparent"
-                                                Md3Divider { anchors.fill: parent }
+                                        }
+                                        MouseArea {
+                                            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                            anchors.fill: parent
+                                            anchors.rightMargin: root.actionsColWidth
+                                            z: -1
+                                            onClicked: {
+                                                root.focusedPageRow = scrollRowItem.index
+                                                root.selectedRow = scrollRowItem.modelData.sourceIndex
+                                                root.rowClicked(scrollRowItem.modelData.sourceIndex)
+                                                tableFocus.forceActiveFocus()
                                             }
+                                            onDoubleClicked: {
+                                                root.rowDoubleClicked(scrollRowItem.modelData.sourceIndex)
+                                                root.rowActivated(scrollRowItem.modelData.sourceIndex)
+                                            }
+                                        }
+                                        Rectangle {
+                                            anchors.bottom: parent.bottom
+                                            width: parent.width
+                                            height: 1
+                                            color: "transparent"
+                                            Md3Divider { anchors.fill: parent }
                                         }
                                     }
                                 }
@@ -1060,9 +1151,34 @@ Item {
 
                 // Full-width rows when no frozen columns (simpler path)
                 Loader {
+                    id: freeLoader
                     anchors.fill: parent
                     active: root.frozenCount === 0
                     sourceComponent: freeTableComponent
+                }
+
+                Md3ScrollBar {
+                    id: tableVBar
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.topMargin: root.headerHeight
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: tableHBar.visible ? tableHBar.height : 0
+                    z: 5
+                    flickable: root.frozenCount > 0 ? bodyFlick : (freeLoader.item ? freeLoader.item.bodyFlickable : null)
+                    orientation: Qt.Vertical
+                }
+
+                Md3ScrollBar {
+                    id: tableHBar
+                    anchors.left: parent.left
+                    anchors.leftMargin: root.frozenCount > 0 ? frozenPane.width : 0
+                    anchors.right: parent.right
+                    anchors.rightMargin: tableVBar.visible ? tableVBar.width : 0
+                    anchors.bottom: parent.bottom
+                    z: 5
+                    flickable: root.frozenCount > 0 ? bodyFlick : (freeLoader.item ? freeLoader.item.bodyFlickable : null)
+                    orientation: Qt.Horizontal
                 }
 
                 Rectangle {
@@ -1122,71 +1238,87 @@ Item {
     Component {
         id: freeTableComponent
         Item {
-            Flickable {
-                id: freeHFlick
-                anchors.fill: parent
-                contentWidth: Math.max(width, root.tableContentWidth)
+            id: freeRoot
+            readonly property alias bodyFlickable: freeBody
+
+            readonly property real _contentW: Math.max(width, root.tableContentWidth)
+
+            Item {
+                id: freeHeaderClip
+                width: parent.width
+                height: root.headerHeight
                 clip: true
-                flickableDirection: Flickable.HorizontalFlick
-                boundsBehavior: Flickable.StopAtBounds
-                interactive: contentWidth > width + 1
-                Column {
-                    width: Math.max(freeHFlick.width, root.tableContentWidth)
-                    Rectangle {
-                        width: parent.width
-                        height: root.headerHeight
-                        color: Md3Theme.colorScheme.surfaceContainerLow
-                        Row {
-                            anchors.fill: parent
-                            anchors.leftMargin: 8
-                            anchors.rightMargin: 8
-                            Item {
-                                visible: root.selectionEnabled
-                                width: 48
-                                height: parent.height
-                                Md3Checkbox { anchors.centerIn: parent; tristate: true; checkState: root.headerCheckState }
-                                MouseArea {
-                                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                                    anchors.fill: parent
-                                    z: 1
-                                    onClicked: root.selectPage(root.headerCheckState !== Qt.Checked)
-                                }
+                z: 1
+
+                Rectangle {
+                    x: -freeBody.contentX
+                    width: freeRoot._contentW
+                    height: root.headerHeight
+                    color: Md3Theme.colorScheme.surfaceContainerLow
+                    Row {
+                        anchors.fill: parent
+                        anchors.leftMargin: 8
+                        anchors.rightMargin: 8
+                        Item {
+                            visible: root.selectionEnabled
+                            width: 48
+                            height: parent.height
+                            Md3Checkbox { anchors.centerIn: parent; tristate: true; checkState: root.headerCheckState }
+                            MouseArea {
+                                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                anchors.fill: parent
+                                z: 1
+                                onClicked: root.selectPage(root.headerCheckState !== Qt.Checked)
                             }
-                            Repeater {
-                                model: root.columns
-                                delegate: HeaderCell {
-                                    required property int index
-                                    required property var modelData
-                                    columnIndex: index
-                                    columnDef: modelData
-                                    width: root.effectiveWidths[index] || 120
-                                    height: root.headerHeight
-                                }
-                            }
-                            Item { visible: root.actionsColWidth > 0; width: 48; height: parent.height }
                         }
-                        Md3Divider { anchors.bottom: parent.bottom; width: parent.width }
-                    }
-                    Flickable {
-                        id: freeBody
-                        width: parent.width
-                        height: root.bodyHeight
-                        clip: true
-                        contentHeight: freeRows.height
-                        flickableDirection: Flickable.VerticalFlick
-                        Column {
-                            id: freeRows
-                            width: freeBody.width
-                            Repeater {
-                                model: root.loading ? 0 : root.pageEntries
-                                delegate: BodyRow {
-                                    required property int index
-                                    required property var modelData
-                                    width: freeRows.width
-                                    pageRowIndex: index
-                                    entry: modelData
-                                }
+                        Repeater {
+                            model: root.columns
+                            delegate: HeaderCell {
+                                required property int index
+                                required property var modelData
+                                columnIndex: index
+                                columnDef: modelData
+                                width: root.effectiveWidths[index] || 120
+                                height: root.headerHeight
                             }
+                        }
+                        Item { visible: root.actionsColWidth > 0; width: 48; height: parent.height }
+                    }
+                    Md3Divider { anchors.bottom: parent.bottom; width: parent.width }
+                }
+            }
+
+            Flickable {
+                id: freeBody
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: freeHeaderClip.bottom
+                anchors.bottom: parent.bottom
+                contentWidth: freeRoot._contentW
+                contentHeight: freeRows.height
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+                interactive: !root.loading && (contentWidth > width + 1 || contentHeight > height + 1)
+                flickableDirection: {
+                    const h = contentWidth > width + 1
+                    const v = contentHeight > height + 1
+                    if (h && v)
+                        return Flickable.HorizontalAndVerticalFlick
+                    if (h)
+                        return Flickable.HorizontalFlick
+                    return Flickable.VerticalFlick
+                }
+                Column {
+                    id: freeRows
+                    width: freeRoot._contentW
+                    Repeater {
+                        model: root.loading ? 0 : root.pageEntries
+                        delegate: BodyRow {
+                            required property int index
+                            required property var modelData
+                            width: freeRows.width
+                            pageRowIndex: index
+                            entry: modelData
                         }
                     }
                 }

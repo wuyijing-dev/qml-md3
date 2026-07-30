@@ -106,6 +106,12 @@
 #  ifndef THBN_CLICKED
 #    define THBN_CLICKED 0x1800
 #  endif
+#  ifndef NIN_SELECT
+#    define NIN_SELECT (WM_USER + 0)
+#  endif
+#  ifndef NIN_KEYSELECT
+#    define NIN_KEYSELECT (WM_USER + 1)
+#  endif
 #  ifndef NIN_BALLOONSHOW
 #    define NIN_BALLOONSHOW (WM_USER + 2)
 #  endif

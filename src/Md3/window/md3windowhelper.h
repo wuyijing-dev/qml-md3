@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QPointF>
 #include <QRectF>
 #include <QString>
 #include <QUrl>
@@ -145,6 +146,8 @@ public:
     Q_INVOKABLE bool showSystemTrayIcon(QObject *window, const QUrl &iconUrl, const QString &tooltip = QString());
     Q_INVOKABLE void hideSystemTrayIcon();
     Q_INVOKABLE bool showTrayNotification(const QString &title, const QString &body, int timeoutMs = 5000);
+    /// Global cursor position in screen pixels (for tray Md3Menu popup).
+    Q_INVOKABLE QPointF cursorScreenPos() const;
 
     Q_INVOKABLE void setAlwaysOnTop(QObject *window, bool onTop);
     Q_INVOKABLE void setWindowCloaked(QObject *window, bool cloaked);

@@ -85,6 +85,18 @@ bool Md3WinNativeFilter::nativeEventFilter(const QByteArray &eventType, void *me
         return false;
 
     Md3WinChromeState *st = stateForHwnd(quintptr(msg->hwnd));
+
+    // Tray callbacks must be handled even if chrome hit-test state is incomplete.
+    if (msg->message == kMd3TrayCallback) {
+        Md3WindowHelper *trayHelper = (st && st->helper) ? st->helper.data() : nullptr;
+        if (trayHelper) {
+            trayHelper->handleTrayMessage(quintptr(msg->lParam));
+            *result = 0;
+            return true;
+        }
+        return false;
+    }
+
     if (!st || !st->window)
         return false;
 
@@ -150,12 +162,6 @@ bool Md3WinNativeFilter::nativeEventFilter(const QByteArray &eventType, void *me
             *result = 0;
             return true;
         }
-    }
-
-    if (msg->message == kMd3TrayCallback && helper) {
-        helper->handleTrayMessage(quintptr(msg->lParam));
-        *result = 0;
-        return true;
     }
 
     if (msg->message == WM_DPICHANGED && helper) {

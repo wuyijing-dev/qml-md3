@@ -326,6 +326,7 @@ qt_add_qml_module(Md3
         components/Md3MenuDivider.qml
         components/Md3MenuBar.qml
         components/Md3ContextMenuArea.qml
+        components/Md3TrayHost.qml
         components/Md3DropdownMenu.qml
         components/Md3Option.qml
         components/Md3SearchBar.qml

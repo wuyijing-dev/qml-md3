@@ -44,7 +44,8 @@ Item {
 
         Item {
             id: contentHost
-            width: flick.width
+            width: root.fillContentWidth ? flick.width
+                                         : Math.max(flick.width, childrenRect.width)
             height: childrenRect.height
         }
     }

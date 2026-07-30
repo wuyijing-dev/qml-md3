@@ -8,6 +8,8 @@
 #include <QQuickWindow>
 #include <QScreen>
 #include <QWindow>
+#include <QCursor>
+#include <QPointF>
 
 Md3WindowHelper::Md3WindowHelper(QObject *parent)
     : QObject(parent)
@@ -212,6 +214,11 @@ void Md3WindowHelper::raiseWindow(QObject *window)
     qw->raise();
     qw->requestActivate();
 #endif
+}
+
+QPointF Md3WindowHelper::cursorScreenPos() const
+{
+    return QCursor::pos();
 }
 
 void Md3WindowHelper::reportNativeStatus(const QString &status)

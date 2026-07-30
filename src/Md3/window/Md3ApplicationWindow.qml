@@ -865,6 +865,10 @@ Window {
                                                  timeoutMs === undefined ? 5000 : timeoutMs)
     }
 
+    function cursorScreenPos() {
+        return windowHelper.cursorScreenPos()
+    }
+
     function setAlwaysOnTop(onTop) {
         root.pinned = !!onTop
         windowHelper.setAlwaysOnTop(root, root.pinned)

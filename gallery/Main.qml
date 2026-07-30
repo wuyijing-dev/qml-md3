@@ -76,6 +76,27 @@ Md3ApplicationWindow {
     aboutText: qsTr("Material Design 3 组件图库 — 演示窗口、导航与控件。")
     aboutIcon: windowIcon
 
+    Md3TrayHost {
+        id: trayHost
+        hostWindow: window
+        Md3MenuItem {
+            text: qsTr("显示主窗口")
+            icon: "open_in_new"
+            onClicked: window.raiseWindow()
+        }
+        Md3MenuItem {
+            text: qsTr("图库通知")
+            icon: "notifications"
+            onClicked: window.showTrayNotification(qsTr("Md3 图库"), qsTr("来自托盘菜单"), 4000)
+        }
+        Md3MenuDivider {}
+        Md3MenuItem {
+            text: qsTr("退出")
+            icon: "logout"
+            onClicked: Qt.quit()
+        }
+    }
+
     property int galleryTableSelection: 0
     property bool galleryTableLoading: false
     property string galleryTreeSelection: ""

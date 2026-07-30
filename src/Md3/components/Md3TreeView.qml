@@ -400,14 +400,34 @@ Item {
         anchors.bottom: parent.bottom
         anchors.top: parent.top
         anchors.topMargin: root._chromeH
-        contentWidth: width
+        anchors.rightMargin: vBar.visible ? vBar.width : 0
+        anchors.bottomMargin: hBar.visible ? hBar.height : 0
+        contentWidth: Math.max(width, col.width)
         contentHeight: col.height
         clip: true
         boundsBehavior: Flickable.StopAtBounds
+        flickableDirection: {
+            const h = contentWidth > width + 1
+            const v = contentHeight > height + 1
+            if (h && v)
+                return Flickable.HorizontalAndVerticalFlick
+            if (h)
+                return Flickable.HorizontalFlick
+            return Flickable.VerticalFlick
+        }
 
         Column {
             id: col
-            width: flick.width
+            width: {
+                let maxW = flick.width
+                const kids = children
+                for (let i = 0; i < kids.length; ++i) {
+                    const c = kids[i]
+                    if (c && c.visible !== false && c.implicitWidth > maxW)
+                        maxW = c.implicitWidth
+                }
+                return maxW
+            }
 
             Repeater {
                 model: root.flatRows
@@ -417,6 +437,7 @@ Item {
                     required property var modelData
                     width: col.width
                     height: root.rowHeight
+                    implicitWidth: rowInner.implicitWidth + 16
 
                     readonly property var node: modelData.node
                     readonly property int depth: modelData.depth
@@ -428,6 +449,16 @@ Item {
                     readonly property bool filterHit: {
                         const f = String(root.filterText || "").trim().toLowerCase()
                         return f.length > 0 && title.toLowerCase().indexOf(f) >= 0
+                    }
+
+                    Accessible.role: Accessible.TreeItem
+                    Accessible.name: title
+                    Accessible.checkable: root.checkEnabled
+                    Accessible.checked: root.checkEnabled && (row.node.checked === true
+                                        || row.node.checkState === Qt.Checked)
+                    Accessible.onPressAction: {
+                        root.selectedIndex = index
+                        root.activated(index, row.node)
                     }
 
                     // Tree connectors
@@ -454,9 +485,10 @@ Item {
                     }
 
                     Row {
-                        anchors.fill: parent
+                        id: rowInner
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.left: parent.left
                         anchors.leftMargin: 8 + row.depth * root.indent
-                        anchors.rightMargin: 8
                         spacing: 4
 
                         Md3Checkbox {
@@ -508,9 +540,7 @@ Item {
 
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
-                            width: Math.max(40, parent.width - (root.checkEnabled ? 120 : 88))
                             text: row.title
-                            elide: Text.ElideRight
                             color: row.filterHit ? Md3Theme.colorScheme.primary
                                   : (row.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
                                                   : Md3Theme.colorScheme.colorOnSurface)
@@ -550,5 +580,26 @@ Item {
                 }
             }
         }
+    }
+
+    Md3ScrollBar {
+        id: vBar
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.topMargin: root._chromeH
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: hBar.visible ? hBar.height : 0
+        flickable: flick
+        orientation: Qt.Vertical
+    }
+
+    Md3ScrollBar {
+        id: hBar
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.rightMargin: vBar.visible ? vBar.width : 0
+        anchors.bottom: parent.bottom
+        flickable: flick
+        orientation: Qt.Horizontal
     }
 }
