@@ -131,7 +131,9 @@ Md3ApplicationWindow {
 
 不要靠堆高 L1 活页换手感。优先：
 
-1. **`MD3_QML_CACHEGEN=ON`（CMake 默认）** — 编译期 bytecode，几乎不占运行期 RSS  
+1. **`MD3_QML_CACHEGEN=ON`（Release 默认；Debug 默认 OFF）** — 编译期 bytecode，几乎不占运行期 RSS  
+   - Qt Creator **Debug** kit：默认关，避免 qmlcachegen 并行生成/编译拖垮或误失败  
+   - 要测冷开性能：用 **Release / RelWithDebInfo**，或 `-DMD3_QML_CACHEGEN=ON` 后重配
 2. **`pageAsync: true`** — 冷开摊到多帧 + skeleton  
 3. **`pageL2Warm: true`** — 空闲后按帧 `_ensureL2` 全表 Component（**不**建 Item）  
 4. **小 L1 + 关 neighbor Item prefetch** — 最多少量活页  

@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
 |--------|---------|---------|
 | `MD3_BUILD_GALLERY` | ON if top-level, **OFF** if `add_subdirectory` | Build Gallery app |
 | `MD3_BUILD_SHARED` | OFF (scripts default ON) | Shared instead of static `Md3` |
-| `MD3_QML_CACHEGEN` | **ON** | qmlcachegen for faster cold page open; `-DOFF` while iterating QML |
+| `MD3_QML_CACHEGEN` | **ON** (Release); **OFF** (Debug) | qmlcachegen for faster cold open; Debug kits skip it for reliable builds |
 
 ## Docs
 
