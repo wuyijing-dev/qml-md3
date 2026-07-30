@@ -8,9 +8,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(cmake/Md3QtCompat.cmake)
 
 if (MD3_QT_MAJOR EQUAL 6)
-    md3_find_qt(Core Qml Quick QuickControls2 QuickEffects QuickShapesPrivate QuickDialogs2 Network)
-    # Stage 1 target: full path validated on 6.5+ (6.8 recommended baseline).
-    qt_standard_project_setup(REQUIRES 6.5)
+    # Required baseline for full library + Gallery.
+    md3_find_qt(Core Gui Qml Quick QuickControls2 Network)
+    md3_resolve_optional_qt_modules()
+    md3_setup_qt_qml_policies()
+    # Stage 1: full path validated on 6.5+ (6.8 recommended; 6.10+ preferred for public Effects).
+    if (COMMAND qt_standard_project_setup)
+        qt_standard_project_setup(REQUIRES 6.5)
+    endif()
 else()
     md3_find_qt(Quick QuickControls2 Network)
     message(STATUS "Md3: Qt5.15 compatibility mode (stage 1) enabled")

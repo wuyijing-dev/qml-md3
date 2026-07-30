@@ -8,7 +8,14 @@ endif()
 
 if (MD3_QT_MAJOR EQUAL 6)
     if (NOT TARGET Qt6::Quick)
-        md3_find_qt(Core Qml Quick QuickControls2 QuickEffects QuickShapesPrivate QuickDialogs2 Network)
+        md3_find_qt(Core Gui Qml Quick QuickControls2 Network)
+        md3_resolve_optional_qt_modules()
+        md3_setup_qt_qml_policies()
+    elseif (NOT DEFINED MD3_QT_HAS_EFFECTS)
+        md3_resolve_optional_qt_modules()
+        md3_setup_qt_qml_policies()
+    else()
+        md3_setup_qt_qml_policies()
     endif()
 else()
     if (NOT TARGET Qt5::Quick)
@@ -181,9 +188,7 @@ if (NOT MD3_QML_CACHEGEN)
     set(MD3_QML_NO_CACHEGEN NO_CACHEGEN)
 endif()
 message(STATUS "Md3 qmlcachegen: ${MD3_QML_CACHEGEN}")
-set(QT_KNOWN_POLICY_QTP0001 TRUE)
-set(QT_KNOWN_POLICY_QTP0004 TRUE)
-set(QT_KNOWN_POLICY_QTP0005 TRUE)
+md3_setup_qt_qml_policies()
 qt_add_qml_module(Md3
     URI Md3
     VERSION 1.0
@@ -390,8 +395,17 @@ qt_add_qml_module(Md3
 
 target_link_libraries(Md3
     PUBLIC Qt6::Quick
-    PRIVATE Qt6::QuickControls2 Qt6::QuickEffects Qt6::QuickShapesPrivate Qt6::QuickDialogs2 Qt6::Network
+    PRIVATE Qt6::QuickControls2 Qt6::Network
 )
+if (MD3_QT_EFFECTS_TARGET)
+    target_link_libraries(Md3 PRIVATE ${MD3_QT_EFFECTS_TARGET})
+endif()
+if (MD3_QT_SHAPES_TARGET)
+    target_link_libraries(Md3 PRIVATE ${MD3_QT_SHAPES_TARGET})
+endif()
+if (MD3_QT_DIALOGS2_TARGET)
+    target_link_libraries(Md3 PRIVATE ${MD3_QT_DIALOGS2_TARGET})
+endif()
 
 # Prebuilt Liquid Glass shaders (qsb). Avoids requiring fxc.exe / ShaderTools at build time.
 qt_add_resources(Md3 "md3_liquid_glass_shaders"
@@ -534,6 +548,10 @@ if (MD3_BUILD_SHARED)
 else()
     set(MD3_PACKAGE_SHARED 0)
 endif()
+# Effects/Shapes may be public or *Private depending on the Qt kit used to build.
+set(MD3_PACKAGE_EFFECTS_TARGET "${MD3_QT_EFFECTS_TARGET}")
+set(MD3_PACKAGE_SHAPES_TARGET "${MD3_QT_SHAPES_TARGET}")
+set(MD3_PACKAGE_DIALOGS2_TARGET "${MD3_QT_DIALOGS2_TARGET}")
 
 configure_package_config_file(
     ${MD3_ROOT}/cmake/Md3Config.cmake.in

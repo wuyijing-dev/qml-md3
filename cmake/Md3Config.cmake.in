@@ -1,7 +1,70 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
-find_dependency(Qt6 COMPONENTS Quick QuickControls2 QuickEffects QuickShapesPrivate REQUIRED)
+find_dependency(Qt6 COMPONENTS Quick QuickControls2 REQUIRED)
+
+# Prefer the same Effects/Shapes target the package was built against; fall back.
+set(_MD3_EFFECTS_WANT "@MD3_PACKAGE_EFFECTS_TARGET@")
+set(_MD3_SHAPES_WANT "@MD3_PACKAGE_SHAPES_TARGET@")
+set(_MD3_DIALOGS2_WANT "@MD3_PACKAGE_DIALOGS2_TARGET@")
+
+set(QT_NO_PRIVATE_MODULE_WARNING ON)
+
+macro(_md3_try_find_effects)
+    find_package(Qt6 QUIET COMPONENTS QuickEffects)
+    if (NOT TARGET Qt6::QuickEffects)
+        find_package(Qt6 QUIET COMPONENTS QuickEffectsPrivate)
+    endif()
+endmacro()
+macro(_md3_try_find_shapes)
+    find_package(Qt6 QUIET COMPONENTS QuickShapes)
+    if (NOT TARGET Qt6::QuickShapes)
+        find_package(Qt6 QUIET COMPONENTS QuickShapesPrivate)
+    endif()
+endmacro()
+
+_md3_try_find_effects()
+_md3_try_find_shapes()
+if (_MD3_DIALOGS2_WANT)
+    find_package(Qt6 QUIET COMPONENTS QuickDialogs2)
+endif()
+
+set(_MD3_EFFECTS_LINK "")
+if (_MD3_EFFECTS_WANT AND TARGET ${_MD3_EFFECTS_WANT})
+    set(_MD3_EFFECTS_LINK "${_MD3_EFFECTS_WANT}")
+elseif (TARGET Qt6::QuickEffects)
+    set(_MD3_EFFECTS_LINK "Qt6::QuickEffects")
+elseif (TARGET Qt6::QuickEffectsPrivate)
+    set(_MD3_EFFECTS_LINK "Qt6::QuickEffectsPrivate")
+endif()
+
+set(_MD3_SHAPES_LINK "")
+if (_MD3_SHAPES_WANT AND TARGET ${_MD3_SHAPES_WANT})
+    set(_MD3_SHAPES_LINK "${_MD3_SHAPES_WANT}")
+elseif (TARGET Qt6::QuickShapes)
+    set(_MD3_SHAPES_LINK "Qt6::QuickShapes")
+elseif (TARGET Qt6::QuickShapesPrivate)
+    set(_MD3_SHAPES_LINK "Qt6::QuickShapesPrivate")
+endif()
+
+set(_MD3_DIALOGS2_LINK "")
+if (_MD3_DIALOGS2_WANT AND TARGET ${_MD3_DIALOGS2_WANT})
+    set(_MD3_DIALOGS2_LINK "${_MD3_DIALOGS2_WANT}")
+elseif (TARGET Qt6::QuickDialogs2)
+    set(_MD3_DIALOGS2_LINK "Qt6::QuickDialogs2")
+endif()
+
+set(_MD3_QT_IFACE "Qt6::Quick;Qt6::QuickControls2")
+if (_MD3_EFFECTS_LINK)
+    string(APPEND _MD3_QT_IFACE ";${_MD3_EFFECTS_LINK}")
+endif()
+if (_MD3_SHAPES_LINK)
+    string(APPEND _MD3_QT_IFACE ";${_MD3_SHAPES_LINK}")
+endif()
+if (_MD3_DIALOGS2_LINK)
+    string(APPEND _MD3_QT_IFACE ";${_MD3_DIALOGS2_LINK}")
+endif()
+
 if (UNIX AND NOT APPLE)
     find_dependency(Qt6 COMPONENTS Widgets DBus REQUIRED)
 endif()
@@ -108,7 +171,7 @@ endif()
 if (_MD3_CORE_LIB STREQUAL "")
     set(${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE
         "Md3 package incomplete: no libMd3 under ${_MD3_LIBDIR}. "
-        "Rebuild with scripts/package-linux.sh or cmake --install.")
+        "Rebuild with python scripts/packaging/cli.py or cmake --install.")
     set(${CMAKE_FIND_PACKAGE_NAME}_FOUND FALSE)
     return()
 endif()
@@ -119,12 +182,12 @@ if (WIN32 AND _MD3_PACKAGE_SHARED AND _MD3_CORE_IMPLIB)
         message(FATAL_ERROR
             "Md3 package was built with MSVC (${_MD3_CORE_IMPLIB}) but you are using MinGW.\n"
             "Rebuild Md3 for MinGW, then replace Md3/ beside your project:\n"
-            "  scripts/package-windows.ps1 -CmakePrefixPath \"D:/Qt/<ver>/mingw_64\"")
+            "  python scripts/packaging/cli.py --qt-prefix \"D:/Qt/<ver>/mingw_64\" -y")
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND _MD3_CORE_IMPLIB MATCHES "\\.dll\\.a$")
         message(FATAL_ERROR
             "Md3 package was built with MinGW (${_MD3_CORE_IMPLIB}) but you are using MSVC.\n"
             "Rebuild Md3 for MSVC, then replace Md3/ beside your project:\n"
-            "  scripts/package-windows.ps1 -CmakePrefixPath \"D:/Qt/<ver>/msvc2022_64\"")
+            "  python scripts/packaging/cli.py --qt-prefix \"D:/Qt/<ver>/msvc2022_64\" -y")
     endif()
 endif()
 
@@ -134,7 +197,7 @@ if (NOT TARGET Md3::Md3)
         set_target_properties(Md3::Md3 PROPERTIES
             IMPORTED_LOCATION "${_MD3_CORE_LIB}"
             INTERFACE_INCLUDE_DIRECTORIES "${_MD3_INCLUDEDIR}/Md3;${_MD3_INCLUDEDIR}"
-            INTERFACE_LINK_LIBRARIES "Qt6::Quick;Qt6::QuickControls2;Qt6::QuickEffects;Qt6::QuickShapesPrivate"
+            INTERFACE_LINK_LIBRARIES "${_MD3_QT_IFACE}"
         )
         if (_MD3_CORE_IMPLIB)
             set_target_properties(Md3::Md3 PROPERTIES IMPORTED_IMPLIB "${_MD3_CORE_IMPLIB}")
@@ -153,7 +216,7 @@ if (NOT TARGET Md3::Md3)
         set_target_properties(Md3::Md3 PROPERTIES
             IMPORTED_LOCATION "${_MD3_CORE_LIB}"
             INTERFACE_INCLUDE_DIRECTORIES "${_MD3_INCLUDEDIR}/Md3;${_MD3_INCLUDEDIR}"
-            INTERFACE_LINK_LIBRARIES "Qt6::Quick;Qt6::QuickControls2;Qt6::QuickEffects;Qt6::QuickShapesPrivate"
+            INTERFACE_LINK_LIBRARIES "${_MD3_QT_IFACE}"
         )
     endif()
     if (UNIX AND NOT APPLE)

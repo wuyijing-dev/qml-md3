@@ -12,7 +12,11 @@ if (MD3_QT_MAJOR EQUAL 5)
     message(FATAL_ERROR "Gallery is stage2+ for Qt6 only. Use -DMD3_BUILD_GALLERY=OFF for Qt5.15 stage1.")
 endif()
 
-md3_find_qt(Core Qml Quick QuickControls2 QuickEffects Multimedia QuickDialogs2)
+md3_find_qt(Core Gui Qml Quick QuickControls2 Network)
+if (NOT DEFINED MD3_QT_HAS_EFFECTS)
+    md3_resolve_optional_qt_modules()
+endif()
+md3_setup_qt_qml_policies()
 if (UNIX AND NOT APPLE)
     # PerformanceMonitor / Linux chrome helpers need Widgets + DBus
     md3_find_qt(Widgets DBus)
@@ -50,9 +54,7 @@ qt_add_resources(appQML_MD3 "gallery_data"
         data/a11y-scan.json
 )
 
-set(QT_KNOWN_POLICY_QTP0001 TRUE)
-set(QT_KNOWN_POLICY_QTP0004 TRUE)
-set(QT_KNOWN_POLICY_QTP0005 TRUE)
+md3_setup_qt_qml_policies()
 qt_add_qml_module(appQML_MD3
     URI Gallery
     VERSION 1.0
@@ -96,7 +98,13 @@ target_include_directories(appQML_MD3 PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${MD3_ROOT}/src/Md3/window
 )
-target_link_libraries(appQML_MD3 PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::QuickEffects Qt6::Multimedia Md3)
+target_link_libraries(appQML_MD3 PRIVATE Qt6::Quick Qt6::QuickControls2 Md3)
+if (MD3_QT_EFFECTS_TARGET)
+    target_link_libraries(appQML_MD3 PRIVATE ${MD3_QT_EFFECTS_TARGET})
+endif()
+if (MD3_QT_MULTIMEDIA_TARGET)
+    target_link_libraries(appQML_MD3 PRIVATE ${MD3_QT_MULTIMEDIA_TARGET})
+endif()
 # Static QML module registration
 if (TARGET Md3plugin)
     target_link_libraries(appQML_MD3 PRIVATE Md3plugin)
