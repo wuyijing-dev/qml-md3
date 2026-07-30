@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Md3
 
 /// Within-page progressive load: placeholder first, then create `sourceComponent`.
 /// Honors Md3Theme.progressiveContent (default on). Set forceImmediate to always load now.

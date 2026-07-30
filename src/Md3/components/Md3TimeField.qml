@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import Md3
 
 /// Docked MD3 time field: text field + time picker popup (peer of Md3DateField).
 Item {

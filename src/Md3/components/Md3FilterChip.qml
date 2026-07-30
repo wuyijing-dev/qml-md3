@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Filter chip — selection is usually owned by the host (`selected:` binding).
 /// Does not auto-toggle; emit `clicked` and let the parent update `selected`.

@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 Md3SelectionControl {
     id: root

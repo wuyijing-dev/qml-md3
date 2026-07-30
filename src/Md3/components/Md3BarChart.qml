@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Vertical / horizontal / stacked bar chart — zoom/pan/probe like Md3LineChart.
 Md3Chart {

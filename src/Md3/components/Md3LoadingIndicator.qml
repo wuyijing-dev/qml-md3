@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Window
 import QtQuick.Shapes
+import Md3
 
 /// Material 3 Loading indicator — PathAngleArc updated in-place (no per-frame Shape rebuild).
 Item {

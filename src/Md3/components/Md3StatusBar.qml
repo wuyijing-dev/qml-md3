@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Desktop status bar — left / center / right zones, transient messages.
 Rectangle {

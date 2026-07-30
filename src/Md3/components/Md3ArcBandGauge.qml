@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
+import Md3
 
 /// Thick arc-band gauge with an end cap marker (dashboard KPI band).
 Item {

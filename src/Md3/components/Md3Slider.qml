@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /*
   Material 3 Expressive / Android volume-style slider:

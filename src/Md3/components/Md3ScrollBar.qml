@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Themed scrollbar attached to a Flickable (vertical or horizontal).
 Item {

@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Heatmap — matrix style or GitHub contribution calendar.
 Item {

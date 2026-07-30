@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Short-lived toast chip. Prefer Md3ToastHost / Md3Notify.toast for stacking & position.
 Item {

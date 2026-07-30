@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Wraps content and positions an Md3Badge (top-end by default).
 Item {

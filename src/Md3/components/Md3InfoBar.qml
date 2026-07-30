@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// WinUI-style in-page info bar — persistent until dismissed (unlike Snackbar).
 Rectangle {

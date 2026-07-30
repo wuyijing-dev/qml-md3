@@ -1,5 +1,6 @@
 pragma Singleton
 import QtQuick
+import Md3
 
 /// Shared Material Icons font faces — one FontLoader pair for the whole app (not per Md3Icon).
 QtObject {

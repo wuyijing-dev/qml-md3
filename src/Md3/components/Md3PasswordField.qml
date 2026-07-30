@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Password field with visibility toggle (via Md3TextField) and optional strength meter.
 Item {

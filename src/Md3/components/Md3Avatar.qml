@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Circular avatar: image, initials, or icon fallback.
 Item {

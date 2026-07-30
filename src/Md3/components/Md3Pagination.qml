@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Compact pagination bar for tables / lists.
 Item {

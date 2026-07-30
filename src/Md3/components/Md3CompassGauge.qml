@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Compass-style circular dial with heading needle (0–360°).
 Item {

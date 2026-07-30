@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Full-pane skeleton used by Md3PageHost while a destination loads.
 /// Prefer `bones` (per-page outline); otherwise fall back to `layout` presets.

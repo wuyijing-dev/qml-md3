@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Radial bar chart — each category as an arc bar on concentric tracks.
 Item {

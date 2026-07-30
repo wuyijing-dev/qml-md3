@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
+import Md3
 
 /// Classic horseshoe / arc KPI gauge (open bottom).
 Item {

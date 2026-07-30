@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// App shell: optional built-in TopAppBar / NavigationBar / Drawer from props,
 /// or custom slots (`appBar:`, `navigationBar:`, `drawer:`, `fab:`).

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import Md3
 
 /// Docked MD3 date field: text field + calendar popup (Material docked date picker).
 Item {

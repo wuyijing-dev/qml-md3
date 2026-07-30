@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import Md3
 
 /// Hierarchical tree: `{ title, icon?, children?, expanded?, checked?, data? }`.
 Item {

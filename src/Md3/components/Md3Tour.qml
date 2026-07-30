@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Window
 import QtQuick.Effects
+import Md3
 
 /// Guided tour overlay: rounded spotlight cutout + animated step transitions.
 Item {

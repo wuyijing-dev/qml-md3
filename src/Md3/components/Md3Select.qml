@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Field-style select (ComboBox): label, helper/error, menu — aligned with Md3TextField.
 /// Supports searchable filtering and multi-select.

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Md3
 
 /// Tab strip + optional content pages (WinUI Pivot-style). When `pages` has children,
 /// a StackLayout tracks `currentIndex` — no host sync glue.

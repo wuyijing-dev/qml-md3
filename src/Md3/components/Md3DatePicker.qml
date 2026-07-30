@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Material 3 date picker — calendar / input, year grid, min/max, today, week start.
 /// Inline by default. Set `modal: true` and `open` with anchors.fill on a host for dialog overlay.

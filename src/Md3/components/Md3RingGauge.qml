@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
+import Md3
 
 /// Full 360° ring / donut progress gauge.
 Item {

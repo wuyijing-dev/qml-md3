@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Md3
 
 // Material 3 hero / multi-browse carousel with peek of the next item.
 Item {

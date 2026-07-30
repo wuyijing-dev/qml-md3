@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Shared pressable base for Md3Button / IconButton / FAB / Chip.
 /// Subclasses set `contentColor`, `containerColor`, `cornerRadius`, `pressTarget`,

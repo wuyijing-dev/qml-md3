@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import Md3
 
 /// Enterprise data table: sort, filter, multi-select, pagination, frozen columns,
 /// column resize, custom cell delegate, keyboard nav, row reorder, server paging.

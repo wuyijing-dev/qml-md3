@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Funnel chart — stages as stacked trapezoids (conversion / pipeline).
 Item {

@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Thin virtualized list wrapper for large models with jump/scroll helpers.
 Item {

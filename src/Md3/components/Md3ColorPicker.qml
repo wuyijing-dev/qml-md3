@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Md3
 
 /// Compact HSL color picker for theme seed / design tools.
 Item {

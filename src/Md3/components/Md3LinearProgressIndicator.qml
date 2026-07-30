@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Window
 import QtQuick.Shapes
+import Md3
 
 /// Linear progress — Standard uses Rectangles; wavy uses sparse polylines + throttled rebuild.
 Item {

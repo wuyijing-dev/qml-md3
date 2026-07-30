@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Circular dots gauge — progress as filled dots around a ring.
 Item {

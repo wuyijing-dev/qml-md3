@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Dialogs
+import Md3
 
 /// Desktop file drop target with scrollable table preview of dropped files.
 Item {

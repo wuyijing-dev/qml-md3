@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import Md3
 
 /// Win11 Explorer / browser document tabs — reorder, close, tear-off, add pop-in.
 Item {

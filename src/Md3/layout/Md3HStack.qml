@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Horizontal stack with spacing, padding, alignment, and expanding spacers.
 Item {

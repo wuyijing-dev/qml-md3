@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Empty / no-results placeholder: icon, title, body, optional CTA.
 Item {

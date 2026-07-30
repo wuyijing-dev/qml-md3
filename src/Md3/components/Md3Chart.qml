@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import Md3
 
 /// Base for all Md3 charts — shared plot metrics, theme resolve, pause/rebuild API.
 Item {

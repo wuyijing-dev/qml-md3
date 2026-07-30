@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// MD3 skeleton bone — low-cost opacity pulse (avoids continuous sheen transforms).
 Item {

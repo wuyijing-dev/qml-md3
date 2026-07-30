@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Overlapping row of avatars. model: [{ source?, initials?, icon?, color? }, ...] or strings (initials).
 Item {

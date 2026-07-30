@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
+import Md3
 
 /// Pie / donut chart with hover probe (slice value + percent).
 Md3Chart {

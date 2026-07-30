@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Shared shell for selection controls such as Checkbox / Radio / Switch.
 /// Subclasses provide the left-side chrome and handle `onActivated`.

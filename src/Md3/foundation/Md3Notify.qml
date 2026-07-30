@@ -1,5 +1,6 @@
 pragma Singleton
 import QtQuick
+import Md3
 
 /// App-wide notify helpers. Hosts register from Md3ApplicationWindow automatically.
 QtObject {

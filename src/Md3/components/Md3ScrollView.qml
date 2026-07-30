@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Themed scroll view: Flickable + optional Md3ScrollBar overlays.
 Item {

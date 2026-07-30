@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 // Filter-chip group: single or multi select; moves as one unit in Md3AnimatedFlow
 Item {

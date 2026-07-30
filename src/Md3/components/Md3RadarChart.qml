@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Radar / spider chart — categories around a polygon, one or more series.
 Item {

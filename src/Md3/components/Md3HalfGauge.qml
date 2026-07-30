@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
+import Md3
 
 /// Semicircle / half-dial gauge (flat bottom).
 Item {

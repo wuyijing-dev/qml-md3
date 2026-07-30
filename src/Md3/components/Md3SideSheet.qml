@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Modal/standard side sheet — slides from start (left) or end (right).
 Item {

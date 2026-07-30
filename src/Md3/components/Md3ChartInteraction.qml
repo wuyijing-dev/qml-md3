@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Shared zoom/pan + inertia + probe tooltip for Md3Chart children.
 /// Host chart must implement `_updateProbeAtPixel(px)` (and optional `_updateProbeAtPos(x,y)`).

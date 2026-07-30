@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import Md3
 
 /// Transparent right-click host over a page / region.
 /// Left-clicks pass through; right-click opens `contextMenu` at the cursor.

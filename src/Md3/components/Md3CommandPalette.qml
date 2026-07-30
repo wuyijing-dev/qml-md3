@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Md3
 
 /// Spotlight-style command palette (Ctrl+K). model: [{ title, subtitle?, icon?, id? }]
 Item {

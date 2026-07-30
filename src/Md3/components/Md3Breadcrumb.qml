@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Horizontal breadcrumb trail. model: ["Home","Folder"] or [{ title, icon? }, ...]
 Item {

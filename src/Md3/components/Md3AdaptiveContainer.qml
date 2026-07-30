@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Standalone column-stacking adaptive container (gallery / direct use).
 /// Md3 container components embed `Md3ContainerBody` and expose `layoutMode` directly.

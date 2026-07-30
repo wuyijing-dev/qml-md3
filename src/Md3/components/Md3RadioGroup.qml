@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Model-driven radio row/column — no host QtObject + manual Md3Radio list.
 Item {

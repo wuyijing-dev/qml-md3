@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Performance HUD content. Host may dock it or open a separate dialog.
 Item {

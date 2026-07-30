@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
+import Md3
 
 /// Analog needle gauge with tick marks (speedometer-style).
 Item {

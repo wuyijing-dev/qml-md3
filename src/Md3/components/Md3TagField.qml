@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Multi-tag / chip input — Enter or comma commits; Backspace removes last tag.
 Item {

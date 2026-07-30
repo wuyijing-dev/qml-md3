@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Material Badge — numeric / dot / max-count, attach to any item via anchors.
 Item {

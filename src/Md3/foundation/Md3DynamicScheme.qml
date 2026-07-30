@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /*
   Material You–style dynamic scheme from a seed color.

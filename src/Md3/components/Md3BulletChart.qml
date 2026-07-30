@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Bullet chart — qualitative ranges + measure + comparative marker.
 Item {

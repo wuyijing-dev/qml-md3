@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Lightweight spacer. Use `size` for fixed gaps, or `expand: true` inside
 /// Md3HStack / Md3VStack to absorb remaining space (SwiftUI-style).

@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Read-only code block with lightweight syntax highlighting (QML / JS / C++ / JSON / plain).
 Item {

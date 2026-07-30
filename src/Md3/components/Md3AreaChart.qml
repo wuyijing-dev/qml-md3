@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Stacked / single area chart (filled series under a line).
 Item {

@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Material 3 time picker — dial / keyboard input, hour↔minute, AM/PM, 12h/24h, modal.
 Item {

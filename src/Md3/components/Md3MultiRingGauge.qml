@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Concentric multi-ring gauge — each ring is `{ value, from?, to?, color?, label? }`.
 Item {

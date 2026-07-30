@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Window-level toast host: stacked multi-toast with position + enter/exit animation.
 Item {

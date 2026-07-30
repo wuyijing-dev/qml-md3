@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import Md3
 
 /// Circular gauge with animated liquid / wave fill level (seamless loop).
 Item {

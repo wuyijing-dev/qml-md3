@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Flow layout: children reflow with spatial easing.
 /// Sizes use max(explicit, implicit) so callers need not mirror width/height into implicit*.

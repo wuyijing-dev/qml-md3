@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Waterfall chart — floating bars for stepwise +/− contributions to a total.
 Item {

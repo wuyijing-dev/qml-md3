@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Horizontal (or vertical) draggable split panes for list/detail layouts.
 Item {

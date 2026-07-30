@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Window-level snackbar queue: stacks up to maxVisible, then queues the rest.
 Item {

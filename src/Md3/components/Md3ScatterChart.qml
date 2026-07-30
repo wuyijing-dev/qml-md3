@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Scatter chart — X/Y points with zoom/pan/probe (parity with line chart ops).
 Md3Chart {

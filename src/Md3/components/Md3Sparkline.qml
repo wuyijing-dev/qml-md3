@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Lightweight sparkline for KPIs / lists — Canvas only (no Md3Chart overhead).
 Item {

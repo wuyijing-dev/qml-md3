@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Numeric spin field: TextField chrome + step buttons (form-friendly SpinBox).
 Item {

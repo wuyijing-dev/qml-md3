@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Effects
+import Md3
 
 Md3AbstractButton {
     id: root

@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Browser-like element picker overlay. Exclude the performance chrome via `excludeItem`.
 Item {

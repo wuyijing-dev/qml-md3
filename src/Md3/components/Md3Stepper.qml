@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Md3
 
 /// Step indicator + optional step body pages and Next/Back actions.
 Item {

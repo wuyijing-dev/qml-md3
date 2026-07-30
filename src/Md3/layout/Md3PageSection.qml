@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Page section: title + optional subtitle + content — cuts gallery/form glue.
 Item {

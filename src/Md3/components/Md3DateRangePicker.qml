@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Material 3 date range picker — shared chrome with Md3DatePicker (calendar/input/year/min-max).
 Item {

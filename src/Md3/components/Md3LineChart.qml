@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
+import Md3
 
 /// Line / area chart — QtQuick.Shapes. Extends Md3Chart.
 /// Supports X zoom/pan (`interactive`) and nearest-point probe (`showProbe`).

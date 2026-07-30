@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Segmented arc gauge — discrete wedges (battery / steps style).
 Item {

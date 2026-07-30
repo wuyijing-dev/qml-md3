@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Window
 import QtQuick.Shapes
+import Md3
 
 /// Circular progress — Standard animates PathAngleArc in-place; wavy uses sparse polyline.
 Item {

@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Vertical stack with spacing, padding, alignment, and optional child stretch.
 Item {

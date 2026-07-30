@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Fit / Scroll content host embedded by Md3 container components.
 Item {

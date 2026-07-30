@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Tick-ring gauge — circular progress with radial tick marks (no needle).
 Item {

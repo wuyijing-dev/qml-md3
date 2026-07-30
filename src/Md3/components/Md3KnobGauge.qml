@@ -1,4 +1,5 @@
 import QtQuick
+import Md3
 
 /// Rotary knob-style gauge (value as dial rotation with notch).
 Item {
