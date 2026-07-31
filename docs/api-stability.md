@@ -38,5 +38,5 @@ Generated property tables in `docs/api/` are regenerated from QML; do not treat 
 ## Versioning today
 
 - CMake `project(QML_MD3 VERSION 1.0.0)` is the package version.
-- Until the production P0 checklist is complete, treat published builds as **pre-production 1.0** (see CHANGELOG).
+- From **1.0.0** onward, Public API changes follow SemVer in this document (see CHANGELOG).
 - Do not rely on “1.0.0” meaning full multi-OS guarantees until [release-checklist.md](release-checklist.md) is satisfied for a tagged release.

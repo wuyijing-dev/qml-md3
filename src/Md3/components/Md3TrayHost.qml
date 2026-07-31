@@ -18,6 +18,10 @@ Item {
     width: 0
     height: 0
 
+    Accessible.role: Accessible.Grouping
+    Accessible.name: qsTr("System tray menu host")
+    Accessible.ignored: true
+
     /// Window that called `showSystemTrayIcon` (must expose `windowHelper`).
     property var hostWindow: null
     /// Show the app on left / double-click (default true).

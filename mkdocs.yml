@@ -63,6 +63,7 @@ nav:
   - 专题:
     - 性能: performance.md
     - 无障碍: a11y.md
+    - 无障碍抽检: a11y-spotcheck.md
     - 国际化: i18n.md
     - DataTable: datatable.md
     - Qt 版本矩阵: qt-version-matrix.md

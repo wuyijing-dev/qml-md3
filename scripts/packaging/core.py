@@ -129,8 +129,19 @@ def _find_vcvars64() -> Path | None:
 
 def _load_msvc_env(vcvars: Path) -> dict[str, str]:
     _info(f"Loading MSVC environment: {vcvars}")
-    cmd = f'"{vcvars}" >nul 2>&1 && set'
-    proc = subprocess.run(["cmd", "/c", cmd], capture_output=True, text=True)
+    # cmd.exe + quoted bat paths breaks under some VS 2022+/Python combos
+    # ("\"path\"" is treated as a literal). Prefer unquoted when possible;
+    # for spaces use cmd /s with an outer-quoted command string.
+    vc = str(vcvars)
+    if " " in vc:
+        cmd = f'""{vc}" >nul 2>&1 && set"'
+        proc = subprocess.run(["cmd", "/d", "/s", "/c", cmd], capture_output=True, text=True)
+    else:
+        proc = subprocess.run(
+            ["cmd", "/d", "/c", f"{vc} >nul 2>&1 && set"],
+            capture_output=True,
+            text=True,
+        )
     if proc.returncode != 0:
         _die("failed to load vcvars64.bat")
     env = os.environ.copy()
@@ -138,8 +149,15 @@ def _load_msvc_env(vcvars: Path) -> dict[str, str]:
         if "=" not in line:
             continue
         key, val = line.split("=", 1)
+        # Windows env is case-insensitive; vcvars prints "Path=" while
+        # os.environ often has "PATH" — keep a single entry.
+        for existing in list(env):
+            if existing.upper() == key.upper():
+                del env[existing]
+                break
         env[key] = val
-    if not shutil.which("cl", path=env.get("PATH", "")):
+    path_val = next((env[k] for k in env if k.upper() == "PATH"), "")
+    if not shutil.which("cl", path=path_val):
         _die("cl.exe still missing after vcvars64")
     return env
 

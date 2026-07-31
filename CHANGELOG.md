@@ -1,20 +1,17 @@
 # Changelog
 
-## 1.0.0 (pre-production)
+## 1.0.0
 
-> Not a fully signed-off production tag yet. Track remaining P0 items in
-> [docs/professional-todo.md](docs/professional-todo.md). Use
-> [docs/release-checklist.md](docs/release-checklist.md) before advertising a stable release.
-
-Desktop-focused Md3 QML component library (MIT).
+First production-ready tag for the desktop-focused Md3 QML component library (MIT).
 
 ### Engineering
 
-- Added root `LICENSE` (MIT) and `NOTICE` (fonts / icons / Qt).
-- Added `examples/hello-md3` consumer sample (`find_package` or in-tree).
-- Added GitHub Actions `build` workflow (library + examples + optional smoke).
+- Root `LICENSE` (MIT) and `NOTICE` (fonts / icons / Qt).
+- Consumer sample `examples/hello-md3` (`find_package` or in-tree); shared packages no longer require `Q_IMPORT_QML_PLUGIN`.
+- GitHub Actions `build` workflow (library + examples + optional smoke).
 - Document sync to QML_MD3_Document is **manual** (`workflow_dispatch` / `--push`).
-- Guides: quickstart, API stability / SemVer, release checklist.
+- Guides: quickstart, API stability / SemVer, release checklist, a11y spot-check.
+- Packaging: Windows `vcvars` Path merge fixed for VS 2022+ / VS 2026.
 
 ### Library highlights
 

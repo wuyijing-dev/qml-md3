@@ -25,7 +25,7 @@ Enterprise Material Design 3 component library for **Qt Quick / QML 6.8+**, visu
 | **Experimental** | No SemVer promise | [docs/experimental.md](docs/experimental.md) |
 | **License** | MIT | Fonts/icons: [NOTICE](NOTICE) |
 
-Status: **pre-production 1.0** until the P0 checklist in [docs/professional-todo.md](docs/professional-todo.md) is fully signed off and a release is tagged per [docs/release-checklist.md](docs/release-checklist.md).
+Status: **1.0.0** (Windows-focused production tag). P1 shell items (NavigationView / Flyout) and broader platform matrix remain in [docs/professional-todo.md](docs/professional-todo.md). Releases follow [docs/release-checklist.md](docs/release-checklist.md).
 
 ## Import
 
@@ -189,4 +189,4 @@ python scripts/docs/gen_api_docs.py
 
 ## Version
 
-`1.0.0` — **pre-production** desktop-focused release (see CHANGELOG).
+`1.0.0` — desktop-focused production release (see CHANGELOG).

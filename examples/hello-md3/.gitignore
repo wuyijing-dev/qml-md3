@@ -1,2 +1,4 @@
-# Ignore local package drop used by find_package demos
-examples/hello-md3/Md3/
+# Local find_package drop (copy of dist/Md3)
+/Md3/
+/build*/
+build/

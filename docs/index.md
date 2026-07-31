@@ -19,7 +19,7 @@ Material Design 3 组件库（Qt Quick / QML）。站点：[QML_MD3_Document](ht
 
 ## 专题
 
-- [性能](performance.md) · [无障碍](a11y.md) · [国际化](i18n.md)
+- [性能](performance.md) · [无障碍](a11y.md) · [无障碍抽检](a11y-spotcheck.md) · [国际化](i18n.md)
 - [DataTable](datatable.md) · [深链](routing.md) · [多文档](multi-document.md) · [托盘](tray.md)
 - [校验](validation.md) · [更新安全](release-updater.md)
 - [Qt 版本矩阵](qt-version-matrix.md) · [实验性 API](experimental.md)

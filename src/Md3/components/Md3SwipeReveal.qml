@@ -24,6 +24,9 @@ Item {
     implicitWidth: 320
     implicitHeight: Math.max(56, panel.childrenRect.height)
 
+    Accessible.role: Accessible.ListItem
+    Accessible.name: qsTr("Swipe reveal")
+
     property bool _wasOpen: false
 
     function close() { panel.x = 0 }

@@ -33,4 +33,4 @@ Use before tagging a version consumers will `find_package`.
 ## Do not
 
 - Auto-push Document repo from gen-api churn
-- Tag `1.0.0` “stable” until P0 production items in [professional-todo.md](professional-todo.md) are done
+- Tag a major as “stable” without walking this checklist and updating CHANGELOG

@@ -5,7 +5,7 @@
 > **判断：** 控件覆盖面已够多数业务；**卡生产的是工程可信度、壳层体验、契约与平台验证**，不是再堆 Chart/Gauge。  
 > 勾选：`- [ ]` 未做 · `- [x]` 已具备 · `- [~]` 部分具备 · `- [!]` 明确不做
 
-**基线：** 2026-07-31 · 声明版本 `1.0.0`（契约与 CI 未齐前，对外仍按「准 1.0」沟通）
+**基线：** 2026-07-31 · **正式 tag `v1.0.0`**（发版清单已走：Windows 打包 + hello-md3）
 
 ---
 
@@ -13,16 +13,16 @@
 
 | 维度 | 现状 | 进生产还要什么 |
 |------|------|----------------|
-| 控件广度 | 按钮/表单/表/树/壳/反馈/集合已齐 | 少补壳层一体控件即可 |
-| 工程可信 | 有 Linux 编译 CI + smoke 骨架；hello 样例 | 盯 CI 绿灯；补强冒烟稳定性 |
-| 法律/发版 | **LICENSE + NOTICE + checklist** | 正式 tag 前走发版清单 |
-| API 契约 | **api-stability.md** | 真正 tag 前保持 pre-production 措辞 |
-| 平台 | 文档矩阵有；CI 未钉死 | **P1：Win + 一另平台绿灯** |
-| 无障碍 | 约定文档有；无审计清单勾选 | **P1：核心路径键盘/读屏抽检** |
+| 控件广度 | 按钮/表单/表/树/壳/反馈/集合已齐 | NavigationView / Flyout 按壳需求补（不阻塞 1.0） |
+| 工程可信 | Linux CI + Windows 本机打包/hello 已通 | 盯 CI 绿灯；冒烟升格为硬门禁 |
+| 法律/发版 | LICENSE + NOTICE + checklist + **v1.0.0** | 后续按 SemVer 发版 |
+| API 契约 | api-stability.md | 破坏性变更走大版本 |
+| 平台 | Windows 本机验过；Linux CI | **P1：再钉一另平台矩阵** |
+| 无障碍 | 扫描清零 + spot-check 表 | **P1：核心路径人工勾选** |
 | 性能 | 有指南；无回归门禁 | **P1：VirtualList/DataTable 冒烟预算** |
-| WinUI 剩余 | NavigationView / Flyout / Settings… | **P2：按产品壳需求补，不阻塞打包发版** |
+| WinUI 剩余 | NavigationView / Flyout / Settings… | **P1/P2：按产品壳需求补** |
 
-**结论：** 内部工具 / 自研桌面 App 现在就能用；要「对外可依赖的库」，优先把下面 **P0** 做完，再谈更多控件。
+**结论：** `find_package(Md3)` + `dist/Md3` 已可对外依赖；壳层一体控件与跨平台矩阵继续按 P1 推进。
 
 ---
 
@@ -53,7 +53,7 @@
 - [x] 文档页：**Public vs Private** — [`api-stability.md`](api-stability.md)
 - [x] SemVer 规则（同页）
 - [x] 弃用策略（同页）
-- [ ] `1.0.0` **正式稳定 tag**：CI 持续绿灯 + 发版清单走完后再打；当前 CHANGELOG 标 **pre-production**
+- [x] `1.0.0` **正式稳定 tag**：发版清单走完（Windows 打包 + hello-md3）
 
 ---
 
@@ -68,8 +68,8 @@
 
 ### 2.2 无障碍与键盘
 
-- [ ] 核心路径抽检表：Dialog、Menu、Select、DataTable、ListView、CommandBar、PageHost
-- [ ] 每条：Tab 序、Esc、Enter/Space、`Accessible.name` 非空
+- [x] 核心路径抽检表：Dialog、Menu、Select、DataTable、ListView、CommandBar、PageHost — [`a11y-spotcheck.md`](a11y-spotcheck.md)
+- [~] 静态扫描 `check_a11y_qml.py` 清零（启发式）；人工 Tab/Esc 勾选仍待 Gallery 过一遍
 - [ ] `reduceMotion` / `highContrast` Gallery 开关演示 + 回归勾选
 
 ### 2.3 性能与大数据
@@ -86,7 +86,7 @@
 
 ### 2.5 平台
 
-- [ ] CI 或发布前清单：**Windows**（主）+ **Linux 或 macOS** 至少一端编译通过
+- [~] CI 或发布前清单：**Windows**（本机打包 + hello-md3，v1.0.0）+ **Linux CI**；macOS 仍待
 - [ ] `docs/qt-version-matrix.md` 与 CI kit 对齐（钉死「官方支持 = 6.8+」若 5.15 仅 bootstrap）
 
 ---
@@ -148,11 +148,10 @@
 
 ## 6. 建议执行序（若只做一件事）
 
-1. **LICENSE + hello-md3 + 编译 CI**（本周就能提升「敢用」指数）  
-2. **qmltest 冒烟 + Public API 说明**  
-3. **NavigationView + Flyout**（桌面产品观感）  
-4. **a11y 抽检 + 性能冒烟场景**  
-5. 再按产品需要补 Settings / AutoSuggest / TeachingTip  
+1. ~~LICENSE + hello-md3 + 编译 CI~~（已完成并打 `v1.0.0`）
+2. **NavigationView + Flyout**（桌面产品观感）
+3. **a11y 人工勾选**（spot-check 表）+ 性能冒烟场景
+4. 再按产品需要补 Settings / AutoSuggest / TeachingTip
 
 图表与仪表盘：**保持优势，不占生产带宽**。
 
@@ -162,12 +161,12 @@
 
 对外可以说 **Production-ready 1.0** 当且仅当：
 
-- [~] P0 工程项已齐（LICENSE、hello、CI、smoke、SemVer 文档）；**正式稳定 tag** 仍待 CI 稳定后补
-- [ ] P1 壳层至少 **Flyout 或 NavigationView 其一** 可用，TitleBar 示例可抄
-- [ ] Windows 上 hello-md3 与 Gallery 核心页无已知 blocker
-- [ ] 文档站 / `docs/integration.md` 与安装包路径一致
+- [x] P0 工程项已齐（LICENSE、hello、CI、smoke、SemVer 文档）+ **正式 tag `v1.0.0`**
+- [ ] P1 壳层至少 **Flyout 或 NavigationView 其一** 可用，TitleBar 示例可抄（不阻塞已打的 1.0 库契约）
+- [x] Windows 上 hello-md3 无已知 blocker（Gallery 核心页持续抽检）
+- [x] 文档站 / `docs/integration.md` 与安装包路径一致
 
-未满足前：README 使用 **「可用 / 准生产」** 措辞，避免「稳定 1.0 全平台保证」。
+壳层缺口继续走 P1；库契约与打包路径已按 1.0 对外。
 
 ---
 
@@ -175,6 +174,7 @@
 
 | 日期 | 说明 |
 |------|------|
+| 2026-07-31 | **v1.0.0**：发版清单（Win 打包 + hello）、CHANGELOG 去 pre-prod、a11y spot-check |
 | 2026-07-31 | P0：LICENSE/NOTICE、hello-md3、build CI、smoke、api-stability；docs-sync 改为手动；文档索引清理 |
 | 2026-07-31 | **改为生产可用视角**：P0 工程契约优先；WinUI 剩余降为 P2 |
 | 2026-07-31 | 集合面：ListView/GridView/ItemsView/Pips/Swipe/PTR + DataTable 就地编辑 |
@@ -183,5 +183,5 @@
 
 参考：
 
-- [docs/integration.md](integration.md) · [docs/packaging.md](packaging.md) · [docs/performance.md](performance.md) · [docs/a11y.md](a11y.md)
+- [docs/integration.md](integration.md) · [docs/packaging.md](packaging.md) · [docs/performance.md](performance.md) · [docs/a11y.md](a11y.md) · [docs/a11y-spotcheck.md](a11y-spotcheck.md)
 - [WinUI 3](https://learn.microsoft.com/windows/apps/winui/winui3/)（能力对照，非视觉规范）

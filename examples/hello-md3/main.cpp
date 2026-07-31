@@ -1,9 +1,10 @@
 #include "md3.h"
 
-#include <QtQml/qqmlextensionplugin.h>
-
-// Required for static Md3 packages; harmless with shared.
+#if !defined(MD3_SHARED)
+#  include <QtQml/qqmlextensionplugin.h>
+// Required for static Md3 packages (shared loads the QML plugin at runtime).
 Q_IMPORT_QML_PLUGIN(Md3Plugin)
+#endif
 
 int main(int argc, char *argv[])
 {
