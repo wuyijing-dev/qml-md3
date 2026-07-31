@@ -79,6 +79,23 @@ def doctor(*, md3_prefix: str | None = None) -> Tuple[int, List[str]]:
     except FileNotFoundError as exc:
         lines.append(f"FAIL prefix: {exc}")
         ok = False
+        prefix = None
+    else:
+        # C ABI (Rust / run-c)
+        try:
+            from .capi import load_md3_library
 
+            lib = load_md3_library(prefix)
+            has_run = hasattr(lib, "md3_run_qml_file")
+            has_ver = hasattr(lib, "md3_version_string")
+            if has_run and has_ver:
+                lines.append("OK  C ABI md3_run_qml_file / md3_version_string")
+            else:
+                lines.append("WARN Md3 loaded but C ABI symbols missing — rebuild shared Md3")
+        except Exception as exc:  # noqa: BLE001 — doctor should never crash
+            lines.append(f"WARN C ABI load: {exc}")
+
+    lines.append("INFO CLI: pip install -e ./python   then  md3qml doctor")
+    lines.append("INFO or:  python -m md3qml doctor")
     lines.append("OK  doctor finished" if ok else "FAIL doctor found blocking issues")
     return (0 if ok else 1), lines

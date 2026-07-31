@@ -1,5 +1,11 @@
-//! Minimal Md3 host: cargo run --example hello -- path/to/Main.qml
-//! Requires MD3_PREFIX pointing at a shared Md3 install (with Qt on PATH).
+//! Minimal Md3 host — mirrors examples/hello-pyside/main.py.
+//!
+//! ```text
+//! set MD3_PREFIX=%CD%\dist\Md3
+//! set QTDIR=D:\Qt\6.8.0\msvc2022_64   # same kit that built Md3
+//! set PATH=%QTDIR%\bin;%PATH%
+//! cargo run --manifest-path examples/hello-rust/Cargo.toml
+//! ```
 
 use std::env;
 use std::path::PathBuf;
@@ -9,10 +15,7 @@ fn main() {
     let qml = env::args()
         .nth(1)
         .map(PathBuf::from)
-        .unwrap_or_else(|| {
-            PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-                .join("../../examples/hello-rust/Main.qml")
-        });
+        .unwrap_or_else(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Main.qml"));
 
     if !qml.is_file() {
         eprintln!("QML not found: {}", qml.display());

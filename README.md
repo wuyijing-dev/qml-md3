@@ -171,7 +171,9 @@ Same C ABI as `md3qml run-c`. Details: **[docs/topics/rust.md](docs/topics/rust.
 
 ```powershell
 $env:MD3_PREFIX = "$PWD\dist\Md3"
-cargo run --manifest-path rust/md3qml/Cargo.toml --example hello -- examples/hello-rust/Main.qml
+$env:QTDIR = "D:\Qt\6.8.0\msvc2022_64"
+$env:PATH = "$env:QTDIR\bin;$env:PATH"
+cargo run --manifest-path examples/hello-rust/Cargo.toml
 ```
 
 ## Layout

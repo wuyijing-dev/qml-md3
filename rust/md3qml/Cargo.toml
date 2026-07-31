@@ -14,9 +14,3 @@ path = "src/lib.rs"
 
 [dependencies]
 libloading = "0.8"
-
-[dev-dependencies]
-
-[[example]]
-name = "hello"
-path = "examples/hello.rs"

@@ -1,24 +1,24 @@
 # md3qml (Rust)
 
-Thin host for the **shared Md3** QML module via the C ABI (`md3_capi.h`).
+Thin **library** host for the shared Md3 QML module via the C ABI (`md3_capi.h`).
+
+Runnable sample: [`examples/hello-rust`](../../examples/hello-rust/) (`src/main.rs` + `Main.qml`).
 
 ## Prerequisites
 
-1. Build Md3 shared (`BUILD_SHARED_LIBS=ON`) and install to a prefix.
-2. Set `MD3_PREFIX` to that prefix (`bin/Md3.dll` or `lib/libMd3.so`, plus `lib/qml`).
-3. Ensure the **same** Qt used to build Md3 is on `PATH` / `LD_LIBRARY_PATH`.
+1. Build Md3 shared (`BUILD_SHARED_LIBS` / `MD3_BUILD_SHARED=ON`) and install to a prefix.
+2. Set `MD3_PREFIX` (`bin/Md3.dll` or `lib/libMd3.so`, plus `lib/qml`).
+3. Same Qt used to build Md3 on `PATH` / `QTDIR` / `LD_LIBRARY_PATH`.
 
-## Run example
+## Use from your crate
 
-```bash
-export MD3_PREFIX=/path/to/prefix   # Windows: set MD3_PREFIX=...
-cargo run -p md3qml --example hello -- ../../examples/hello-rust/Main.qml
+```toml
+[dependencies]
+md3qml = { path = "../path/to/rust/md3qml" }
 ```
 
-From this directory:
-
-```bash
-cargo run --example hello
+```rust
+md3qml::run_qml_file(std::path::Path::new("Main.qml"), None, "My App")?;
 ```
 
 ## API

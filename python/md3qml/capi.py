@@ -55,18 +55,58 @@ def _lib_candidates(prefix: Path) -> List[Path]:
     return [p for p in out if p.is_file()]
 
 
+def _qt_bin_dirs() -> List[Path]:
+    """Windows: Qt bin dirs so Md3.dll can resolve Qt6*.dll (must match build kit)."""
+    out: List[Path] = []
+    seen: set[str] = set()
+
+    def add(p: Path) -> None:
+        p = p.resolve()
+        if p.is_dir() and str(p) not in seen:
+            seen.add(str(p))
+            out.append(p)
+
+    for key in ("QTDIR", "QT_DIR"):
+        raw = os.environ.get(key, "").strip()
+        if raw:
+            add(Path(raw) / "bin")
+    cpp = os.environ.get("CMAKE_PREFIX_PATH", "")
+    for part in cpp.split(os.pathsep):
+        if part.strip():
+            add(Path(part.strip()) / "bin")
+    for part in os.environ.get("PATH", "").split(os.pathsep):
+        if not part:
+            continue
+        p = Path(part)
+        if (p / "Qt6Core.dll").is_file() or (p / "Qt5Core.dll").is_file():
+            add(p)
+    return out
+
+
 def load_md3_library(prefix: Optional[PathLike] = None) -> ctypes.CDLL:
     root = resolve_md3_prefix(prefix)
     if sys.platform == "win32":
         bin_dir = root / "bin"
-        if bin_dir.is_dir() and hasattr(os, "add_dll_directory"):
-            os.add_dll_directory(str(bin_dir))
+        dirs = [bin_dir, *_qt_bin_dirs()] if bin_dir.is_dir() else _qt_bin_dirs()
+        path = os.environ.get("PATH", "")
+        for d in reversed(dirs):
+            if hasattr(os, "add_dll_directory"):
+                try:
+                    os.add_dll_directory(str(d))
+                except OSError:
+                    pass
+            if str(d) not in path.split(os.pathsep):
+                path = str(d) + os.pathsep + path
+        os.environ["PATH"] = path
     for cand in _lib_candidates(root):
         try:
             return ctypes.CDLL(str(cand))
         except OSError:
             continue
-    raise FileNotFoundError(f"Could not load libMd3 from {root}")
+    raise FileNotFoundError(
+        f"Could not load libMd3 from {root} "
+        "(set QTDIR to the Qt kit that built Md3, and rebuild if C ABI symbols are missing)"
+    )
 
 
 def run_qml_file_c(

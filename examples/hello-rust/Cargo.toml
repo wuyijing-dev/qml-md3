@@ -1,0 +1,13 @@
+[package]
+name = "hello-md3-rust"
+version = "1.0.0"
+edition = "2021"
+publish = false
+description = "Minimal Rust host for shared Md3 (examples/hello-rust)"
+
+[[bin]]
+name = "hello-md3-rust"
+path = "src/main.rs"
+
+[dependencies]
+md3qml = { path = "../../rust/md3qml" }

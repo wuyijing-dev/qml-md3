@@ -6,22 +6,23 @@ Host the **shared Md3 QML module** from Rust without rewriting components. Qt an
 
 | Path | Role |
 |------|------|
-| [`rust/md3qml`](../../rust/md3qml/) | `md3qml` crate (`libloading`) |
-| [`examples/hello-rust`](../../examples/hello-rust/) | Sample `Main.qml` |
+| [`rust/md3qml`](../../rust/md3qml/) | `md3qml` library crate |
+| [`examples/hello-rust`](../../examples/hello-rust/) | `src/main.rs` + `Main.qml` |
 | [`src/Md3/md3_capi.h`](../../src/Md3/md3_capi.h) | Stable C entry points |
 
 ## Prerequisites
 
 1. Build/install **shared** Md3 (`MD3_BUILD_SHARED=ON`) into a prefix.
 2. `MD3_PREFIX` → that prefix (`bin/Md3.dll` or `lib/libMd3.so`, plus `lib/qml`).
-3. Same Qt used to build Md3 on `PATH` / `LD_LIBRARY_PATH`.
+3. Same Qt used to build Md3 on `PATH` / `QTDIR` / `LD_LIBRARY_PATH`.
 
 ## Run
 
 ```powershell
 $env:MD3_PREFIX = "$PWD\dist\Md3"
-cd rust\md3qml
-cargo run --example hello -- ..\..\examples\hello-rust\Main.qml
+$env:QTDIR = "D:\Qt\6.8.0\msvc2022_64"   # kit that built Md3
+$env:PATH = "$env:QTDIR\bin;$env:PATH"
+cargo run --manifest-path examples/hello-rust/Cargo.toml
 ```
 
 ## C ABI (summary)
