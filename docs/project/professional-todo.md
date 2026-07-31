@@ -8,7 +8,7 @@
 
 1. [x] **WASM**：CMake 识别 Emscripten、mobile stub、文档；hello-md3 可编
 2. [x] **`Md3NavigationView`**：Auto / Left / LeftCompact / Top
-3. [ ] **`Md3Flyout`**：锚定、light-dismiss、Esc、焦点归还
+3. [x] **`Md3Flyout`**：锚定、light-dismiss、Esc、焦点归还
 4. [ ] a11y 人工抽检（`docs/topics/a11y-spotcheck.md`）+ IconButton 微动效
 5. [ ] VirtualList / DataTable 性能冒烟场景
 
@@ -16,7 +16,7 @@
 
 | 状态 | 项 |
 |------|----|
-| 已有 | Rail / Drawer / Bar / Scaffold / **NavigationView** |
-| 缺口 | Flyout、TitleBar 内容槽示例 |
+| 已有 | Rail / Drawer / Bar / Scaffold / NavigationView / **Flyout** |
+| 缺口 | TitleBar 内容槽示例 |
 
 参考：[wasm.md](../topics/wasm.md) · [quickstart](../getting-started/quickstart.md)

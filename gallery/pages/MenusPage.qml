@@ -114,6 +114,61 @@ Md3Page {
         }
 
         Md3Text {
+            text: qsTr("Flyout (anchor + light-dismiss + Esc)")
+            role: Md3Text.TitleSmall
+            tone: Md3Text.OnSurfaceVariant
+        }
+
+        Md3HStack {
+            spacing: 12
+            Md3Button {
+                id: flyoutBtn
+                text: qsTr("Open flyout")
+                onClicked: flyout.toggle(flyoutBtn)
+            }
+            Md3Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: flyout.open ? qsTr("Open — Esc or outside to dismiss") : qsTr("Closed")
+                role: Md3Text.BodySmall
+                tone: Md3Text.OnSurfaceVariant
+            }
+        }
+
+        Md3Flyout {
+            id: flyout
+            flyoutWidth: 260
+            Md3VStack {
+                width: parent.width
+                spacing: 8
+                Md3Text {
+                    text: qsTr("Quick actions")
+                    role: Md3Text.TitleSmall
+                }
+                Md3Button {
+                    width: parent.width
+                    text: qsTr("Share")
+                    variant: Md3Button.Text
+                    icon: "share"
+                    onClicked: flyout.dismiss()
+                }
+                Md3Button {
+                    width: parent.width
+                    text: qsTr("Copy link")
+                    variant: Md3Button.Text
+                    icon: "link"
+                    onClicked: flyout.dismiss()
+                }
+                Md3Button {
+                    width: parent.width
+                    text: qsTr("Delete")
+                    variant: Md3Button.Text
+                    icon: "delete"
+                    onClicked: flyout.dismiss()
+                }
+            }
+        }
+
+        Md3Text {
             width: parent.width
             wrapMode: Text.Wrap
             text: qsTr("Tip: Md3ContextMenuArea + Md3Menu enables page-level right-click menus (see Extras page).")

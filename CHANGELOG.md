@@ -5,6 +5,7 @@
 ### Library
 
 - **`Md3NavigationView`**: Auto / Left / LeftCompact / Top adaptive shell (Rail + Drawer + Bar); Gallery Navigation page demo.
+- **`Md3Flyout`**: anchored light-dismiss panel via OverlayHost; Esc + focus restore; Gallery Menus page demo.
 
 ### Platform
 
