@@ -29,4 +29,4 @@ python scripts/python/stage_native_for_wheel.py --prefix dist/Md3
 python scripts/python/build_wheel.py --out artifacts/wheels
 ```
 
-See [docs/topics/pyside.md](../docs/topics/pyside.md).
+See [docs/topics/pyside.md](../docs/topics/pyside.md). CLI: `info` · `doctor` · `run` · `run-c` · `fetch`. Rust twin: [docs/topics/rust.md](../docs/topics/rust.md).

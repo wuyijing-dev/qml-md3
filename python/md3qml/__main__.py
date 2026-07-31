@@ -31,6 +31,14 @@ def _cmd_info(_: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_doctor(args: argparse.Namespace) -> int:
+    from .doctor import doctor
+
+    code, lines = doctor(md3_prefix=args.md3_prefix)
+    print("\n".join(lines))
+    return code
+
+
 def _cmd_fetch(args: argparse.Namespace) -> int:
     from .fetch import fetch_md3_prefix
 
@@ -54,8 +62,22 @@ def _cmd_run(args: argparse.Namespace) -> int:
         binding=None if args.binding == "auto" else args.binding,
         require_qt6_for_md3=not args.allow_qt5,
         application_name=args.name,
+        module_uri=args.module or "",
+        module_component=args.component,
     )
+    if args.module:
+        return run(opts=opts)
     return run(args.qml, opts=opts)
+
+
+def _cmd_run_c(args: argparse.Namespace) -> int:
+    from .capi import CRunConfig, run_qml_file_c
+
+    cfg = CRunConfig(
+        application_name=args.name,
+        qml_import_path=args.qml_import or "",
+    )
+    return run_qml_file_c(args.qml, config=cfg, md3_prefix=args.md3_prefix)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -68,6 +90,10 @@ def main(argv: list[str] | None = None) -> int:
     p_info = sub.add_parser("info", help="Show binding and Md3 prefix resolution")
     p_info.set_defaults(func=_cmd_info)
 
+    p_doc = sub.add_parser("doctor", help="Diagnose PySide + Md3 shared prefix")
+    p_doc.add_argument("--md3-prefix", default=None)
+    p_doc.set_defaults(func=_cmd_doctor)
+
     p_fetch = sub.add_parser("fetch", help="Download a shared Md3 zip into a local prefix")
     p_fetch.add_argument("--dest", default="~/.md3/prefix", help="Extract directory")
     p_fetch.add_argument("--version", default="1.0.0", help="Release version (without v)")
@@ -75,15 +101,26 @@ def main(argv: list[str] | None = None) -> int:
     p_fetch.add_argument("--repo", default=None, help="GitHub owner/repo for release assets")
     p_fetch.set_defaults(func=_cmd_fetch)
 
-    p_run = sub.add_parser("run", help="Load a .qml file that imports Md3")
-    p_run.add_argument("qml", help="Path to Main.qml")
+    p_run = sub.add_parser("run", help="Load a .qml file (or --module) that imports Md3")
+    p_run.add_argument("qml", nargs="?", default=None, help="Path to Main.qml")
+    p_run.add_argument("--module", default=None, help="QML module URI (Qt6 loadFromModule)")
+    p_run.add_argument("--component", default="Main")
     p_run.add_argument("--md3-prefix", default=None)
     p_run.add_argument("--binding", choices=("auto", "PySide6", "PySide2"), default="auto")
     p_run.add_argument("--allow-qt5", action="store_true")
     p_run.add_argument("--name", default="Md3 App")
     p_run.set_defaults(func=_cmd_run)
 
+    p_c = sub.add_parser("run-c", help="Load via libMd3 C ABI (md3_run_qml_file)")
+    p_c.add_argument("qml", help="Path to Main.qml")
+    p_c.add_argument("--md3-prefix", default=None)
+    p_c.add_argument("--qml-import", default=None, help="Override lib/qml path")
+    p_c.add_argument("--name", default="Md3 App")
+    p_c.set_defaults(func=_cmd_run_c)
+
     args = parser.parse_args(argv)
+    if args.cmd == "run" and not args.qml and not args.module:
+        p_run.error("provide qml path or --module URI")
     return int(args.func(args))
 
 

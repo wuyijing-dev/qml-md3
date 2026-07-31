@@ -28,4 +28,4 @@ where = ["."]
 include = ["md3qml*"]
 
 [tool.setuptools.package-data]
-md3qml = ["_native/.gitkeep", "_native/**/*"]
+md3qml = ["py.typed", "_native/.gitkeep", "_native/**/*"]

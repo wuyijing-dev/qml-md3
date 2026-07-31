@@ -13,6 +13,7 @@
 #include <QFont>
 #include <QFontInfo>
 #include <QFile>
+#include <QFileInfo>
 #include <QUrl>
 #include <QDebug>
 #include <QSet>
@@ -279,6 +280,10 @@ int run(int argc, char **argv,
     if (QCoreApplication::instance()) {
         engine.addImportPath(QCoreApplication::applicationDirPath() + QStringLiteral("/qml"));
     }
+    for (const QString &p : opts.qmlImportPaths) {
+        if (!p.isEmpty())
+            engine.addImportPath(p);
+    }
     // Re-run after the engine exists so late-registered qml-module qrcs are seen.
     if (opts.loadFonts)
         loadFonts();
@@ -312,6 +317,47 @@ int run(int argc, char **argv,
         engine.load(QUrl(qrcMain));
 #endif
     }
+    if (engine.rootObjects().isEmpty())
+        return 1;
+    return app.exec();
+}
+
+int runQmlFile(int argc, char **argv, const QString &qmlFile, const RunOptions &opts)
+{
+    applyEarly(argc, argv, opts);
+
+#if defined(Q_OS_LINUX)
+    QApplication app(argc, argv);
+#else
+    QGuiApplication app(argc, argv);
+#endif
+
+    initialize(app, opts);
+
+    QQmlApplicationEngine engine;
+    if (QCoreApplication::instance()) {
+        engine.addImportPath(QCoreApplication::applicationDirPath() + QStringLiteral("/qml"));
+        const QFileInfo fi(qmlFile);
+        if (fi.exists())
+            engine.addImportPath(fi.absolutePath());
+    }
+    for (const QString &p : opts.qmlImportPaths) {
+        if (!p.isEmpty())
+            engine.addImportPath(p);
+    }
+    if (opts.loadFonts)
+        loadFonts();
+
+    QObject::connect(
+        &engine,
+        &QQmlApplicationEngine::objectCreationFailed,
+        &app,
+        []() { QCoreApplication::exit(-1); },
+        Qt::QueuedConnection);
+
+    engine.load(QUrl::fromLocalFile(qmlFile));
+    if (engine.rootObjects().isEmpty())
+        return 1;
     return app.exec();
 }
 

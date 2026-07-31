@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QString>
+#include <QStringList>
 #include <QtGlobal>
 
 class QCoreApplication;
@@ -30,6 +31,8 @@ struct RunOptions {
     bool alphaBuffer = true;
     /// XDG desktop id / Unity LauncherEntry path element (no spaces). Empty → derive from applicationName.
     QString desktopFileName;
+    /// Extra QML import roots (shared Md3 `lib/qml`, app `qml/`, …).
+    QStringList qmlImportPaths;
 #if defined(Q_OS_WIN)
     QString appUserModelId;
 #endif
@@ -55,6 +58,11 @@ MD3_API void initialize(QCoreApplication &app, const RunOptions &opts = {});
 MD3_API int run(int argc, char **argv,
         const QString &moduleUri,
         const QString &mainComponent = QStringLiteral("Main"),
+        const RunOptions &opts = {});
+
+/// Load a filesystem .qml entry (Python / Rust / C hosts). Adds opts.qmlImportPaths.
+MD3_API int runQmlFile(int argc, char **argv,
+        const QString &qmlFile,
         const RunOptions &opts = {});
 
 } // namespace Md3

@@ -22,6 +22,7 @@ Enterprise Material Design 3 component library for **Qt Quick / QML 6.8+**, visu
 | **OS** | Windows desktop | Linux / macOS best-effort; **WASM experimental** ([docs/topics/wasm.md](docs/topics/wasm.md)) |
 | **Qt** | 6.8+ full library | 5.15 = bootstrap only |
 | **Python** | **PySide6** + shared Md3 | PySide2 shim only until Qt5 stage-2 — [docs/topics/pyside.md](docs/topics/pyside.md) |
+| **Rust** | C ABI host (`rust/md3qml`) | Same `md3_capi` as Python `run-c` — [docs/topics/rust.md](docs/topics/rust.md) |
 | **API** | Types in `docs/api/` (non-experimental) | See [docs/getting-started/api-stability.md](docs/getting-started/api-stability.md) |
 | **Experimental** | No SemVer promise | [docs/topics/experimental.md](docs/topics/experimental.md) |
 | **License** | LGPL-3.0 **or** Commercial (+ certification) | [docs/licensing.md](docs/licensing.md) · fonts/icons: [NOTICE](NOTICE) |
@@ -155,11 +156,22 @@ python examples/hello-pyside/main.py
 |---------|--------|
 | `examples/hello-md3` | C++ / CMake |
 | `examples/hello-pyside` | PySide6 (+ PySide2 bootstrap API) |
+| `examples/hello-rust` | Rust + C ABI (`rust/md3qml`) |
+
 ```cpp
 #include "md3.h"
 int main(int argc, char *argv[]) {
     return Md3::run(argc, argv, "MyApp"); // loads MyApp/Main.qml
 }
+```
+
+### Use from Rust
+
+Same C ABI as `md3qml run-c`. Details: **[docs/topics/rust.md](docs/topics/rust.md)**.
+
+```powershell
+$env:MD3_PREFIX = "$PWD\dist\Md3"
+cargo run --manifest-path rust/md3qml/Cargo.toml --example hello -- examples/hello-rust/Main.qml
 ```
 
 ## Layout
@@ -169,6 +181,10 @@ int main(int argc, char *argv[]) {
 | `src/Md3/` | Library module (`URI Md3`) — `CMakeLists.txt` is self-contained |
 | `gallery/` | Optional component browser (`MD3_BUILD_GALLERY`) |
 | `examples/hello-md3/` | Minimal consumer (`MD3_BUILD_EXAMPLES`) |
+| `examples/hello-pyside/` | PySide host |
+| `examples/hello-rust/` | Rust C ABI host |
+| `python/md3qml/` | PyPI host package |
+| `rust/md3qml/` | Rust host crate |
 | `tests/smoke/` | qmltestrunner smoke (`MD3_BUILD_TESTS`) |
 | `cmake/` | `Md3Config.cmake` for `find_package` after install |
 | `docs/` | Guides + generated API |

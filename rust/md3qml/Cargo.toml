@@ -1,0 +1,22 @@
+[package]
+name = "md3qml"
+version = "1.0.0"
+edition = "2021"
+description = "Rust host for the shared Md3 QML module (C ABI)"
+license = "MIT"
+readme = "README.md"
+keywords = ["qml", "qt", "material-design", "md3"]
+categories = ["gui"]
+
+[lib]
+name = "md3qml"
+path = "src/lib.rs"
+
+[dependencies]
+libloading = "0.8"
+
+[dev-dependencies]
+
+[[example]]
+name = "hello"
+path = "examples/hello.rs"

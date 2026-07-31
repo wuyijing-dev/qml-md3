@@ -5,10 +5,9 @@ from __future__ import annotations
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Sequence, Union
+from typing import Any, Dict, List, Optional, Sequence
 
-from .binding import Binding, detect_binding, import_qt
-from .paths import PathLike, resolve_md3_prefix, setup_native_paths
+from .paths import PathLike
 
 
 @dataclass
@@ -19,6 +18,8 @@ class RunOptions:
     style: str = "Basic"
     alpha_buffer: bool = True
     desktop_file_name: str = ""
+    """Windows AppUserModelID (informational for PySide path; C ABI sets via Md3)."""
+    app_user_model_id: str = ""
     """Prefer PySide6 or PySide2 (None = auto)."""
     binding: Optional[str] = None
     """Shared Md3 install prefix (lib/qml). None = auto-discover / MD3_PREFIX."""
@@ -26,6 +27,11 @@ class RunOptions:
     """Require Qt6 / PySide6 when loading Md3 (default True)."""
     require_qt6_for_md3: bool = True
     extra_import_paths: Sequence[PathLike] = field(default_factory=list)
+    """Values exposed on the QML root context before load."""
+    context_properties: Dict[str, Any] = field(default_factory=dict)
+    """If set, use engine.loadFromModule(uri, component) instead of a file path."""
+    module_uri: str = ""
+    module_component: str = "Main"
 
 
 def _sanitize_desktop_id(name: str) -> str:
@@ -43,72 +49,33 @@ def _sanitize_desktop_id(name: str) -> str:
 
 
 def run(
-    qml: PathLike,
+    qml: Optional[PathLike] = None,
     *,
     argv: Optional[List[str]] = None,
     opts: Optional[RunOptions] = None,
 ) -> int:
     """
-    Bootstrap QGuiApplication + QQmlApplicationEngine and load a QML file.
+    Bootstrap QGuiApplication + QQmlApplicationEngine.
 
-    ``qml`` may be a .qml file path. The file should ``import Md3``.
+    Pass a ``.qml`` file path, or set ``opts.module_uri`` / ``module_component``.
     """
+    from .app import Md3Application
+
     opts = opts or RunOptions()
-    argv = list(sys.argv if argv is None else argv)
-    qml_path = Path(qml).resolve()
-    if not qml_path.is_file():
-        raise FileNotFoundError(f"QML entry not found: {qml_path}")
-
-    binding = detect_binding(opts.binding)
-    if opts.require_qt6_for_md3 and binding.qt_major < 6:
-        raise RuntimeError(
-            "The Md3 QML module is built for Qt 6 and must be loaded with PySide6.\n"
-            f"Detected {binding.name} (Qt {binding.qt_major}).\n"
-            "  pip install PySide6\n"
-            "PySide2 remains supported by this bootstrap API for future Qt5 stage-2 "
-            "packages; set RunOptions.require_qt6_for_md3=False only for non-Md3 QML."
-        )
-
-    prefix = resolve_md3_prefix(opts.md3_prefix, start=qml_path.parent)
-    import_paths = setup_native_paths(prefix, extra_import_paths=opts.extra_import_paths)
-    # App directory so local qmldir / siblings resolve if needed
-    import_paths.append(str(qml_path.parent))
-
-    binding, qt = import_qt(binding)
-
-    if opts.alpha_buffer:
-        qt.QQuickWindow.setDefaultAlphaBuffer(True)
-
-    app = qt.QGuiApplication(argv)
-    qt.QCoreApplication.setOrganizationName(opts.organization)
-    qt.QCoreApplication.setApplicationName(opts.application_name)
-    qt.QCoreApplication.setApplicationVersion(opts.application_version)
-
-    if opts.style:
-        qt.QQuickStyle.setStyle(opts.style)
-
-    desk = opts.desktop_file_name or opts.application_name
-    desk = _sanitize_desktop_id(desk)
-    # Qt6 API; ignore if missing on older bindings
-    set_desk = getattr(app, "setDesktopFileName", None)
-    if callable(set_desk):
-        set_desk(desk)
-
-    engine = qt.QQmlApplicationEngine()
-    for p in import_paths:
-        engine.addImportPath(p)
-
-    url = qt.QUrl.fromLocalFile(str(qml_path))
-    engine.load(url)
-    roots = engine.rootObjects()
-    if not roots:
+    app = Md3Application(opts, argv=argv)
+    if opts.module_uri:
+        app.prepare_imports(start=Path.cwd())
+        ok = app.load_module(opts.module_uri, opts.module_component or "Main")
+    else:
+        if qml is None:
+            raise ValueError("qml path is required unless opts.module_uri is set")
+        ok = app.load_file(qml)
+    if not ok:
         print(
-            "Failed to load QML. Check MD3_PREFIX, that Md3 was built shared against "
-            f"the same Qt major as {binding.name}, and that lib/qml/Md3 exists.",
+            "Failed to load QML. Check MD3_PREFIX / bundled _native and Qt ABI vs PySide.",
             file=sys.stderr,
         )
-        print(f"  binding={binding.name}  prefix={prefix}", file=sys.stderr)
-        print(f"  importPaths={import_paths}", file=sys.stderr)
+        print(f"  binding={app.binding.name}  prefix={app._prefix}", file=sys.stderr)
+        print(f"  importPaths={app._import_paths}", file=sys.stderr)
         return 1
-
-    return app.exec() if hasattr(app, "exec") else app.exec_()
+    return app.exec()

@@ -163,6 +163,8 @@ if (MD3_QT_MAJOR EQUAL 5)
     target_sources(Md3 PRIVATE
         md3.h
         md3.cpp
+        md3_capi.h
+        md3_capi.cpp
         window/md3graphics.h
         window/md3graphics_qt5_stub.cpp
     )
@@ -208,6 +210,8 @@ qt_add_qml_module(Md3
     SOURCES
         md3.h
         md3.cpp
+        md3_capi.h
+        md3_capi.cpp
         window/md3windowhelper.h
         window/md3windowhelper.cpp
         window/md3graphics.h
@@ -518,6 +522,7 @@ target_sources(Md3 PRIVATE ${MD3_PLATFORM_SOURCES})
 
 install(FILES
     md3.h
+    md3_capi.h
     window/md3windowhelper.h
     window/md3graphics.h
     charts/md3chartdata.h

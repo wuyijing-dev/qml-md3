@@ -84,17 +84,40 @@ $env:MD3_PREFIX = "$PWD\dist\Md3"
 md3qml run examples\hello-pyside\Main.qml
 ```
 
+## CLI
+
+```bash
+md3qml info
+md3qml doctor
+md3qml run path/to/Main.qml
+md3qml run --module MyApp --component Main   # Qt6 loadFromModule
+md3qml run-c path/to/Main.qml                # libMd3 C ABI (same as Rust)
+```
+
 ## Minimal API
 
 ```python
 from pathlib import Path
-from md3qml import RunOptions, run
+from md3qml import Md3Application, RunOptions, run
 
+# One-shot
 raise SystemExit(run(
     Path("Main.qml"),
-    opts=RunOptions(application_name="My App", binding="PySide6"),
+    opts=RunOptions(
+        application_name="My App",
+        binding="PySide6",
+        context_properties={"appVersion": "1.0.0"},
+    ),
 ))
+
+# Long-lived engine (context props / signals)
+app = Md3Application(RunOptions(application_name="My App"))
+app.set_context_property("bridge", my_qobject)
+assert app.load_file("Main.qml")
+raise SystemExit(app.exec())
 ```
+
+C ABI (ctypes, shared with Rust): `from md3qml import run_qml_file_c`.
 
 ## ABI matching
 
