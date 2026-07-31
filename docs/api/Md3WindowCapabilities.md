@@ -54,6 +54,7 @@ import Md3
 | `preferredAppMode` | `bool` | `platform.preferredAppMode` | readonly | `Md3WindowCapabilities` | — |
 | `windowCloak` | `bool` | `platform.windowCloak` | readonly | `Md3WindowCapabilities` | — |
 | `systemAccent` | `bool` | `platform.systemAccent` | readonly | `Md3WindowCapabilities` | — |
+| `idleInhibit` | `bool` | `platform.idleInhibit` | readonly | `Md3WindowCapabilities` | Prevent sleep / idle (Win + Linux) |
 
 ## Signals
 

@@ -31,4 +31,5 @@ QtObject {
     readonly property bool preferredAppMode: false
     readonly property bool windowCloak: false
     readonly property bool systemAccent: false
+    readonly property bool idleInhibit: false
 }

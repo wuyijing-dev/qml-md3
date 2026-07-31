@@ -61,4 +61,5 @@ QtObject {
     readonly property bool preferredAppMode: platform.preferredAppMode
     readonly property bool windowCloak: platform.windowCloak
     readonly property bool systemAccent: platform.systemAccent
+    readonly property bool idleInhibit: platform.idleInhibit
 }

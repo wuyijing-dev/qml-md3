@@ -109,6 +109,10 @@ public:
     Q_INVOKABLE void applyCornerPreference(QObject *window, bool rounded);
     Q_INVOKABLE void setMaximizeButtonRect(QObject *window, qreal x, qreal y, qreal w, qreal h);
     Q_INVOKABLE void clearMaximizeButtonRect(QObject *window);
+    /// Win11 snap: maximize-cell rect (logical). HTMAXBUTTON only while armed.
+    Q_INVOKABLE void setSnapMaximizeRect(QObject *window, qreal x, qreal y, qreal w, qreal h);
+    Q_INVOKABLE void clearSnapMaximizeRect(QObject *window);
+    Q_INVOKABLE void setSnapLayoutsArmed(QObject *window, bool armed);
     Q_INVOKABLE void setCaptionHitRect(QObject *window, qreal x, qreal y, qreal w, qreal h);
     Q_INVOKABLE void clearCaptionHitRect(QObject *window);
     Q_INVOKABLE bool setWindowIcon(QObject *window, const QUrl &iconUrl);

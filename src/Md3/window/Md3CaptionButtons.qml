@@ -23,6 +23,7 @@ Item {
     }
 
     readonly property alias maximizeButton: maxBtn
+    readonly property bool snapLayoutsEnabled: Md3WindowCapabilities.snapLayouts
 
     implicitWidth: row.implicitWidth
     implicitHeight: parent ? parent.height : 48
@@ -30,8 +31,7 @@ Item {
     width: implicitWidth
     visible: Md3WindowCapabilities.captionButtons
 
-    // Report the whole strip so native resize edges leave these pixels as HTCLIENT.
-    // Do not map the maximize cell to HTMAXBUTTON — that blocks QML hover/cursor/click.
+    // Whole strip stays HTCLIENT (resize edges skip it). Maximize cell uses delayed HTMAXBUTTON.
     function reportCaptionButtonsHitTest() {
         if (!root.targetWindow || !root.windowHelper || !root.visible)
             return
@@ -40,6 +40,27 @@ Item {
             return
         const p = root.mapToItem(host, 0, 0)
         root.windowHelper.setMaximizeButtonRect(root.targetWindow, p.x, p.y, root.width, root.height)
+        reportSnapMaximizeRect()
+    }
+
+    function reportSnapMaximizeRect() {
+        if (!root.targetWindow || !root.windowHelper || !maxBtn.visible)
+            return
+        const host = root.targetWindow.contentItem
+        if (!host)
+            return
+        const p = maxBtn.mapToItem(host, 0, 0)
+        root.windowHelper.setSnapMaximizeRect(root.targetWindow, p.x, p.y, maxBtn.width, maxBtn.height)
+    }
+
+    function armSnapLayouts(armed) {
+        if (!root.targetWindow || !root.windowHelper)
+            return
+        if (!root.snapLayoutsEnabled) {
+            root.windowHelper.setSnapLayoutsArmed(root.targetWindow, false)
+            return
+        }
+        root.windowHelper.setSnapLayoutsArmed(root.targetWindow, !!armed)
     }
 
     onWidthChanged: reportCaptionButtonsHitTest()
@@ -49,8 +70,11 @@ Item {
     onVisibleChanged: reportCaptionButtonsHitTest()
     Component.onCompleted: Qt.callLater(reportCaptionButtonsHitTest)
     Component.onDestruction: {
-        if (root.windowHelper && root.targetWindow)
+        if (root.windowHelper && root.targetWindow) {
+            root.windowHelper.setSnapLayoutsArmed(root.targetWindow, false)
+            root.windowHelper.clearSnapMaximizeRect(root.targetWindow)
             root.windowHelper.clearMaximizeButtonRect(root.targetWindow)
+        }
     }
 
     Connections {
@@ -58,6 +82,13 @@ Item {
         function onWidthChanged() { root.reportCaptionButtonsHitTest() }
         function onHeightChanged() { root.reportCaptionButtonsHitTest() }
         function onVisibilityChanged() { root.reportCaptionButtonsHitTest() }
+    }
+
+    Timer {
+        id: snapArmTimer
+        interval: 380
+        repeat: false
+        onTriggered: root.armSnapLayouts(true)
     }
 
     Row {
@@ -88,6 +119,17 @@ Item {
                 else
                     root.targetWindow.showMaximized()
             }
+            onHoverChanged: function (hovered) {
+                if (!root.snapLayoutsEnabled)
+                    return
+                if (hovered) {
+                    root.reportSnapMaximizeRect()
+                    snapArmTimer.restart()
+                } else {
+                    snapArmTimer.stop()
+                    root.armSnapLayouts(false)
+                }
+            }
             onWidthChanged: root.reportCaptionButtonsHitTest()
             onHeightChanged: root.reportCaptionButtonsHitTest()
             onXChanged: root.reportCaptionButtonsHitTest()
@@ -112,6 +154,7 @@ Item {
         property bool destructive: false
         property bool roundTopRight: false
         signal clicked()
+        signal hoverChanged(bool hovered)
 
         Accessible.name: accessibleName
         Accessible.role: Accessible.Button
@@ -153,6 +196,7 @@ Item {
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onClicked: btn.clicked()
+            onContainsMouseChanged: btn.hoverChanged(containsMouse)
         }
     }
 }

@@ -12,5 +12,6 @@ int main(int argc, char *argv[])
     opts.organization = QStringLiteral("QML_MD3");
     opts.applicationName = QStringLiteral("Hello Md3");
     opts.applicationVersion = QStringLiteral("1.0.0");
+    opts.desktopFileName = QStringLiteral("Hello_Md3");
     return Md3::run(argc, argv, QStringLiteral("HelloMd3"), QStringLiteral("Main"), opts);
 }

@@ -15,6 +15,9 @@ void Md3WindowHelper::bindWindow(QObject *) {}
 void Md3WindowHelper::unbindWindow(QObject *) {}
 void Md3WindowHelper::setMaximizeButtonRect(QObject *, qreal, qreal, qreal, qreal) {}
 void Md3WindowHelper::clearMaximizeButtonRect(QObject *) {}
+void Md3WindowHelper::setSnapMaximizeRect(QObject *, qreal, qreal, qreal, qreal) {}
+void Md3WindowHelper::clearSnapMaximizeRect(QObject *) {}
+void Md3WindowHelper::setSnapLayoutsArmed(QObject *, bool) {}
 void Md3WindowHelper::setCaptionHitRect(QObject *, qreal, qreal, qreal, qreal) {}
 void Md3WindowHelper::clearCaptionHitRect(QObject *) {}
 

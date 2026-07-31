@@ -30,7 +30,7 @@ Native window chrome / taskbar / tray / DPI helpers used by `Md3ApplicationWindo
 | `trafficLightsInset` | `real` | readonly | macOS traffic-lights inset |
 | `customChromeRecommended` | `bool` | readonly | Prefer custom title bar |
 | `captionButtonsRecommended` | `bool` | readonly | Prefer in-client caption buttons |
-| `snapLayoutsSupported` | `bool` | readonly | Windows snap layouts |
+| `snapLayoutsSupported` | `bool` | readonly | Windows snap layouts (delayed HTMAXBUTTON) |
 | `systemBackdropSupported` | `bool` | readonly | Mica/Acrylic etc. |
 | `systemMenuSupported` | `bool` | readonly | Native system menu |
 | `immersiveDarkModeSupported` | `bool` | readonly | Immersive dark title |
@@ -66,16 +66,18 @@ Native window chrome / taskbar / tray / DPI helpers used by `Md3ApplicationWindo
 |--------|-------------|
 | `bindWindow(window)` / `unbindWindow(window)` | Attach/detach native hooks |
 | `applyCornerPreference(window, rounded)` | Rounded corner preference |
-| `setMaximizeButtonRect(window, x, y, w, h)` / `clearMaximizeButtonRect(window)` | Maximize hit-test |
-| `setCaptionHitRect(window, x, y, w, h)` / `clearCaptionHitRect(window)` | Caption drag region |
+| `setMaximizeButtonRect` / `clearMaximizeButtonRect` | Caption-button strip (resize exclude; not HTMAXBUTTON) |
+| `setSnapMaximizeRect` / `clearSnapMaximizeRect` | Maximize cell for delayed snap |
+| `setSnapLayoutsArmed(window, armed)` | Arm/disarm Win11 `HTMAXBUTTON` |
+| `setCaptionHitRect` / `clearCaptionHitRect` | Caption drag region |
 | `setWindowIcon(window, iconUrl)` | Window icon |
 | `showSystemMenu(window, globalX, globalY)` | Native system menu |
 | `setImmersiveDarkMode(window, dark)` | Immersive dark |
 | `setSystemBackdrop(window, backdrop)` | `SystemBackdrop` |
 | `setBorderColor(window, cssColor)` | Border color |
 | `setCaptionTextColor(window, cssColor)` | Caption text color |
-| `flashTaskbar(window, flash = true)` | Flash taskbar |
-| `setAppUserModelId(appId)` | Windows AppUserModelID |
+| `flashTaskbar(window, flash = true)` | Flash taskbar / urgency |
+| `setAppUserModelId(appId)` | Windows AUMID / Linux `desktopFileName` |
 | `setTaskbarProgress(window, value, state)` / `clearTaskbarProgress(window)` | Progress |
 | `setTaskbarOverlayIcon(window, iconUrl, description)` / `clearTaskbarOverlayIcon(window)` | Overlay |
 | `setExcludedFromPeek` / `setDisallowPeek` / `setExcludeFromCapture` | Peek / capture |
@@ -89,12 +91,14 @@ Native window chrome / taskbar / tray / DPI helpers used by `Md3ApplicationWindo
 | `setPreferredAppMode(dark)` | Preferred mode |
 | `monitorCount()` / `moveToMonitor(window, index)` | Multi-monitor |
 | `registerApplicationRestart` / `unregisterApplicationRestart` | Restart manager |
-| `raiseWindow(window)` | Raise + activate |
-| `setDockBadge(count)` | Dock/taskbar badge |
-| `setIdleInhibit(inhibit, reason)` | Inhibit idle (Linux) |
-| `blurBehindAvailable()` / `openBlurSettings()` | Blur helpers |
+| `raiseWindow(window)` | Raise + activate (Wayland: token / KF6) |
+| `setDockBadge(count)` | Dock/taskbar badge (Win: badge + overlay fallback) |
+| `setIdleInhibit(inhibit, reason)` | Inhibit idle (Win + Linux) |
+| `blurBehindAvailable()` / `openBlurSettings()` | Blur helpers (Linux) |
 | `systemAccentColor()` / `wallpaperSeedColor()` | Material You seeds |
 | `devicePixelRatio(window)` / `windowDpi(window)` | DPI queries |
 | `setPersistentSceneGraph(window, persistent)` | Keep SG when hidden |
+
+Platform honesty matrix: [native-platforms.md](../topics/native-platforms.md).
 
 Prefer the high-level APIs on [Md3ApplicationWindow](Md3ApplicationWindow.md) when possible.

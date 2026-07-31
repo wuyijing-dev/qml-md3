@@ -1,6 +1,7 @@
 #include "md3windowhelper.h"
 #include "md3linux_p.h"
 
+#include <QCoreApplication>
 #include <QGuiApplication>
 #include <QHash>
 #include <QIcon>
@@ -51,10 +52,15 @@ void Md3WindowHelper::bindWindow(QObject *window)
     if (!qw)
         return;
     // Prefer explicit desktop id; never use display name (spaces break D-Bus paths).
-    if (!QGuiApplication::desktopFileName().isEmpty())
+    if (!QGuiApplication::desktopFileName().isEmpty()) {
         Md3Linux::setDesktopFileId(QGuiApplication::desktopFileName());
-    else
-        Md3Linux::setDesktopFileId(QStringLiteral("appQML_MD3"));
+    } else {
+        const QString fallback = QCoreApplication::applicationName().isEmpty()
+                ? QStringLiteral("appQML_MD3")
+                : QCoreApplication::applicationName().replace(QLatin1Char(' '), QLatin1Char('_'));
+        QGuiApplication::setDesktopFileName(fallback);
+        Md3Linux::setDesktopFileId(fallback);
+    }
     applyCornerPreference(qw, true);
     qw->requestActivate();
 }
@@ -63,6 +69,9 @@ void Md3WindowHelper::unbindWindow(QObject *) {}
 
 void Md3WindowHelper::setMaximizeButtonRect(QObject *, qreal, qreal, qreal, qreal) {}
 void Md3WindowHelper::clearMaximizeButtonRect(QObject *) {}
+void Md3WindowHelper::setSnapMaximizeRect(QObject *, qreal, qreal, qreal, qreal) {}
+void Md3WindowHelper::clearSnapMaximizeRect(QObject *) {}
+void Md3WindowHelper::setSnapLayoutsArmed(QObject *, bool) {}
 void Md3WindowHelper::setCaptionHitRect(QObject *, qreal, qreal, qreal, qreal) {}
 void Md3WindowHelper::clearCaptionHitRect(QObject *) {}
 

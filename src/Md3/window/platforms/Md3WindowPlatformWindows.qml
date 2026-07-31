@@ -12,9 +12,8 @@ QtObject {
     // Win11-style rounded frame when restored; 0 when maximized
     readonly property real windowCornerRadius: 12
     readonly property bool roundedCorners: true
-    // HTMAXBUTTON steals QML hover/cursor/click on the maximize button; keep false
-    // until we have a non-blocking snap-layout path.
-    readonly property bool snapLayouts: false
+    // Delayed HTMAXBUTTON: short hover keeps QML cursor/click; ~380ms arms Win11 snap flyout.
+    readonly property bool snapLayouts: true
     readonly property bool systemBackdrop: true // Mica / Acrylic / Tabbed (Win11+)
     readonly property bool systemMenu: true
     readonly property bool immersiveDarkMode: true
@@ -34,4 +33,5 @@ QtObject {
     readonly property bool preferredAppMode: true
     readonly property bool windowCloak: true
     readonly property bool systemAccent: true
+    readonly property bool idleInhibit: true // SetThreadExecutionState
 }

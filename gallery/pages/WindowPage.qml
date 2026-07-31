@@ -414,6 +414,58 @@ Flickable {
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.clearTaskbarOverlayIcon()
                     }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows
+                        text: qsTr("数字角标 3")
+                        onClicked: if (root.appWin) root.appWin.setDockBadge(3)
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows
+                        text: qsTr("清除数字角标")
+                        variant: Md3Button.Text
+                        onClicked: if (root.appWin) root.appWin.setDockBadge(0)
+                    }
+                }
+
+                Md3Text {
+                    text: qsTr("空闲抑制")
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.OnSurfaceVariant
+                }
+                Md3FlowLayout {
+                    width: parent.width
+                    spacing: 8
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows && Md3WindowCapabilities.idleInhibit
+                        text: qsTr("防止休眠")
+                        onClicked: {
+                            if (!root.appWin)
+                                return
+                            const ok = root.appWin.setIdleInhibit(true, qsTr("Md3 演示"))
+                            shellEventLabel.text = ok ? qsTr("外壳事件：已抑制空闲（系统+显示器）")
+                                                     : qsTr("外壳事件：空闲抑制失败")
+                        }
+                    }
+                    Md3Button {
+                        enabled: Md3WindowCapabilities.isWindows && Md3WindowCapabilities.idleInhibit
+                        text: qsTr("恢复空闲")
+                        variant: Md3Button.Outlined
+                        onClicked: {
+                            if (!root.appWin)
+                                return
+                            root.appWin.setIdleInhibit(false)
+                            shellEventLabel.text = qsTr("外壳事件：已恢复空闲计时")
+                        }
+                    }
+                }
+
+                Md3Text {
+                    visible: Md3WindowCapabilities.isWindows && Md3WindowCapabilities.snapLayouts
+                    text: qsTr("Snap Layouts：短按最大化按钮为普通最大化；悬停约 0.4s 后触发 Win11 贴靠面板。")
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.OnSurfaceVariant
+                    wrapMode: Text.WordWrap
+                    width: parent.width
                 }
 
                 Md3Text {
@@ -577,7 +629,7 @@ Flickable {
                 }
                 Md3Text {
                     wrapMode: Text.WordWrap
-                    text: qsTr("「请求注意」请先切到其他窗口再点；「前置」在已聚焦时无变化；「允许空闲」需先成功「禁止休眠」。")
+                    text: qsTr("「请求注意」请先切到其他窗口再点；「前置」在已聚焦时无变化；「允许空闲」需先成功「禁止休眠」。Wayland 下无 xdg-activation 令牌时「前置」常被合成器忽略（看 lastNativeStatus）。")
                     role: Md3Text.BodySmall
                     tone: Md3Text.OnSurfaceVariant
                 }

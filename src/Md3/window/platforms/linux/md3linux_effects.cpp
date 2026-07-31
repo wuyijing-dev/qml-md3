@@ -167,8 +167,21 @@ QString forceRaise(QWindow *window)
 
     if (window->windowStates() & Qt::WindowMinimized)
         window->showNormal();
+
+    // Consume a compositor-issued activation token when present (xdg-activation).
+    const QByteArray token = qgetenv("XDG_ACTIVATION_TOKEN");
+    if (!token.isEmpty()) {
+        window->setProperty("_q_waylandActivationToken", QString::fromUtf8(token));
+        qunsetenv("XDG_ACTIVATION_TOKEN");
+    }
+
     window->raise();
     window->requestActivate();
+
+#if defined(MD3_HAVE_KWINDOWSYSTEM)
+    // KF6 activates via xdg-activation when the compositor supports it.
+    KWindowSystem::activateWindow(window);
+#endif
 
 #if defined(MD3_USE_KX11EXTRAS)
     if (isXcbPlatform()) {
@@ -176,14 +189,22 @@ QString forceRaise(QWindow *window)
         return QStringLiteral("已调用 KX11Extras::forceActiveWindow / raise");
     }
 #elif defined(MD3_HAVE_KWINDOWSYSTEM)
-    KWindowSystem::forceActiveWindow(window->winId());
-    return QStringLiteral("已调用 forceActiveWindow / raise");
+    if (isXcbPlatform()) {
+        KWindowSystem::forceActiveWindow(window->winId());
+        return QStringLiteral("已调用 forceActiveWindow / raise");
+    }
 #endif
 
     if (QGuiApplication::platformName().contains(QLatin1String("wayland"), Qt::CaseInsensitive)) {
         if (window->isActive())
-            return QStringLiteral("窗口已在前台；Wayland 禁止抢焦点，故无可见变化");
+            return QStringLiteral("窗口已在前台；Wayland 禁止无令牌抢焦点");
+        if (!token.isEmpty())
+            return QStringLiteral("已 requestActivate（使用 XDG_ACTIVATION_TOKEN）");
+#if defined(MD3_HAVE_KWINDOWSYSTEM)
+        return QStringLiteral("已 KWindowSystem::activateWindow + requestActivate（Wayland 仍可能需用户手势）");
+#else
         return QStringLiteral("已 requestActivate（Wayland 无激活令牌时可能被忽略）");
+#endif
     }
     return QStringLiteral("已 raise + requestActivate");
 }

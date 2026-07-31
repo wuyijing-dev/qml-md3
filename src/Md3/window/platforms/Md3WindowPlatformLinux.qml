@@ -31,4 +31,5 @@ QtObject {
     readonly property bool preferredAppMode: true
     readonly property bool windowCloak: false
     readonly property bool systemAccent: true
+    readonly property bool idleInhibit: true // ScreenSaver / GNOME / portal
 }

@@ -1,6 +1,7 @@
 #include "md3win_p.h"
 
 #include <QGuiApplication>
+#include <QPainter>
 #include <QScreen>
 #include <cstring>
 
@@ -129,6 +130,17 @@ bool Md3WinNativeFilter::nativeEventFilter(const QByteArray &eventType, void *me
         return true;
     }
 
+    // When snap is armed, HTMAXBUTTON owns the maximize cell (Win11 flyout).
+    // QML cannot receive that click — toggle maximize/restore ourselves.
+    if (msg->message == WM_NCLBUTTONDOWN || msg->message == WM_NCLBUTTONDBLCLK) {
+        if (msg->wParam == HTMAXBUTTON) {
+            const WPARAM cmd = IsZoomed(msg->hwnd) ? SC_RESTORE : SC_MAXIMIZE;
+            ::SendMessageW(msg->hwnd, WM_SYSCOMMAND, cmd, 0);
+            *result = 0;
+            return true;
+        }
+    }
+
     if (msg->message == WM_NCHITTEST) {
         POINT pt{ GET_X_LPARAM(msg->lParam), GET_Y_LPARAM(msg->lParam) };
         ScreenToClient(msg->hwnd, &pt);
@@ -146,10 +158,11 @@ bool Md3WinNativeFilter::nativeEventFilter(const QByteArray &eventType, void *me
         const bool cornerR = local.x() >= ww - kCorner;
         const bool cornerT = local.y() <= kCorner;
         const bool cornerB = local.y() >= wh - kCorner;
-        // Caption buttons must stay HTCLIENT so QML gets hover cursor + clicks.
-        // Returning HTMAXBUTTON here made the maximize button look "dead".
         const bool inCaptionButtons = !st->captionButtons.isEmpty()
                 && st->captionButtons.contains(local);
+        const bool inSnapMax = st->snapArmed
+                && !st->maximizeButton.isEmpty()
+                && st->maximizeButton.contains(local);
 
         if (!(IsZoomed(msg->hwnd)) && !inCaptionButtons) {
             if (cornerT && cornerL) { *result = HTTOPLEFT; return true; }
@@ -160,6 +173,12 @@ bool Md3WinNativeFilter::nativeEventFilter(const QByteArray &eventType, void *me
             if (nearB) { *result = HTBOTTOM; return true; }
             if (nearL) { *result = HTLEFT; return true; }
             if (nearR) { *result = HTRIGHT; return true; }
+        }
+
+        // Delayed snap arm: only then claim HTMAXBUTTON (otherwise QML owns hover/click).
+        if (inSnapMax) {
+            *result = HTMAXBUTTON;
+            return true;
         }
 
         if (inCaptionButtons)
@@ -373,6 +392,31 @@ HICON md3CreateHIconFromImage(const QImage &src)
     if (hbmMask)
         DeleteObject(hbmMask);
     return hIcon;
+}
+
+QImage md3MakeBadgeOverlayImage(int count, qreal dpr)
+{
+    const int px = qMax(16, int(qRound(16.0 * qMax(qreal(1.0), dpr))));
+    QImage img(px, px, QImage::Format_ARGB32_Premultiplied);
+    img.fill(Qt::transparent);
+
+    QPainter p(&img);
+    p.setRenderHint(QPainter::Antialiasing, true);
+    p.setRenderHint(QPainter::TextAntialiasing, true);
+    const QRectF circle(0.5, 0.5, px - 1.0, px - 1.0);
+    p.setPen(Qt::NoPen);
+    p.setBrush(QColor(0xC4, 0x2B, 0x1C));
+    p.drawEllipse(circle);
+
+    const QString text = count > 99 ? QStringLiteral("99+") : QString::number(qMax(0, count));
+    QFont font(QStringLiteral("Segoe UI"));
+    font.setBold(true);
+    font.setPixelSize(count > 99 ? qMax(7, px * 5 / 11) : qMax(8, px * 6 / 11));
+    p.setFont(font);
+    p.setPen(Qt::white);
+    p.drawText(img.rect(), Qt::AlignCenter, text);
+    p.end();
+    return img;
 }
 
 HBITMAP md3CreateHBitmapFromImage(const QImage &src)

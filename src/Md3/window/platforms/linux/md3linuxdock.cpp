@@ -11,7 +11,9 @@ bool Md3WindowHelper::setAppUserModelId(const QString &appId)
     // Wayland/X11 equivalent: desktop file id → xdg app_id.
     if (appId.trimmed().isEmpty())
         return false;
-    Md3Linux::setDesktopFileId(appId);
+    const QString id = appId.trimmed();
+    QGuiApplication::setDesktopFileName(id);
+    Md3Linux::setDesktopFileId(id);
     return true;
 }
 

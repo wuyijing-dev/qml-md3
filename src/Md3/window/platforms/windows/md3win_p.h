@@ -148,8 +148,14 @@ struct Md3WinChromeState
     /// Caption min/max/close strip in QML logical coords (contentItem space).
     /// Used to keep OS resize hit-tests off the buttons so QML can own hover/click.
     QRectF captionButtons;
+    /// Maximize cell only — HTMAXBUTTON when snapArmed (delayed hover).
+    QRectF maximizeButton;
+    bool snapArmed = false;
     QRectF captionHit;
 };
+
+/// Paint a small numeric badge for ITaskbarList3::SetOverlayIcon.
+QImage md3MakeBadgeOverlayImage(int count, qreal dpr = 1.0);
 
 class Md3WinNativeFilter : public QAbstractNativeEventFilter
 {
