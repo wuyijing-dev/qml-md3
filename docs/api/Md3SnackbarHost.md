@@ -33,7 +33,7 @@ import Md3
 
 | Method | Defined in | Description |
 |--------|------------|-------------|
-| `show(message, options)` | `Md3SnackbarHost` | options: `{ actionText, dualLine, durationMs, id, priority }` — higher priority is dequeued first |
+| `show(message, options)` | `Md3SnackbarHost` | — |
 | `dismissAll()` | `Md3SnackbarHost` | — |
 
 ## Example

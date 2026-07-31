@@ -26,9 +26,8 @@ import Md3
 | `layout` | `int` | `Md3ButtonGroup.Standard` | read/write | `Md3ButtonGroup` | — |
 | `variant` | `int` | `Md3ButtonGroup.Outlined` | read/write | `Md3ButtonGroup` | — |
 | `model` | `var` | `[]` | read/write | `Md3ButtonGroup` | — |
-| `enabled` | `bool` | `true` | read/write | `Md3ButtonGroup` | — |
-| `currentIndex` | `int` | `-1` | read/write | `Md3ButtonGroup` | Highlighted segment |
-| `autoSelect` | `bool` | `true` | read/write | `Md3ButtonGroup` | Clicks update `currentIndex` |
+| `currentIndex` | `int` | `-1` | read/write | `Md3ButtonGroup` | — |
+| `autoSelect` | `bool` | `true` | read/write | `Md3ButtonGroup` | When true, clicks update `currentIndex` (no host `onClicked: currentIndex = index` glue). |
 | `spacing` | `real` | `8` | read/write | `Md3ButtonGroup` | — |
 | `buttonHeight` | `real` | `40` | read/write | `Md3ButtonGroup` | Compact title-bar / dense UIs: set e.g. 24–28 |
 | `iconSize` | `real` | `18` | read/write | `Md3ButtonGroup` | — |
@@ -60,6 +59,6 @@ Md3ButtonGroup {
     variant: Md3ButtonGroup.Outlined
     model: []
     currentIndex: -1
-    spacing: 8
+    autoSelect: true
 }
 ```

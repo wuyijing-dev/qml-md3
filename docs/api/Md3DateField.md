@@ -27,6 +27,7 @@ import Md3
 | `weekStartsOn` | `int` | `-1` | read/write | `Md3DateField` | — |
 | `controlEnabled` | `bool` | `true` | read/write | `Md3DateField` | — |
 | `accessibleName` | `string` | `""` | read/write | `Md3DateField` | — |
+| `overlayWindow` | `var` | `null` | read/write | `Md3DateField` | Optional explicit Window for overlay reparent (else Window.window). |
 | `pickerOpen` | `bool` | `host.visible` | readonly | `Md3DateField` | — |
 
 ## Signals

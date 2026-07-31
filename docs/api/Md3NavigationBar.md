@@ -13,7 +13,7 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `model` | `var` | `[]` | read/write | `Md3NavigationBar` | Destinations: `{ icon, label, badge?, badgeText?, badgeDot?, badgeMax? }` |
+| `model` | `var` | `[]` | read/write | `Md3NavigationBar` | — |
 | `currentIndex` | `int` | `0` | read/write | `Md3NavigationBar` | — |
 | `indicatorWidth` | `real` | `64` | readonly | `Md3NavigationBar` | — |
 | `indicatorHeight` | `real` | `32` | readonly | `Md3NavigationBar` | — |

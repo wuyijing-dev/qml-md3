@@ -17,8 +17,7 @@ import Md3
 | `currentIndex` | `int` | `0` | read/write | `Md3SegmentedButton` | — |
 | `multiSelect` | `bool` | `false` | read/write | `Md3SegmentedButton` | — |
 | `selectedIndices` | `var` | `[]` | read/write | `Md3SegmentedButton` | — |
-| `enabled` | `bool` | `true` | read/write | `Md3SegmentedButton` | — |
-| `segmentHeight` | `real` | `40` | readonly | `Md3SegmentedButton` | — |
+| `segmentHeight` | `real` | `Md3Theme.controlHeight` | readonly | `Md3SegmentedButton` | — |
 | `outerRadius` | `real` | `segmentHeight / 2` | readonly | `Md3SegmentedButton` | — |
 
 ## Signals

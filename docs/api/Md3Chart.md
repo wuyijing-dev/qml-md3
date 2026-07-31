@@ -27,6 +27,8 @@ import Md3
 | `surfaceColor` | `color` | `"transparent"` | read/write | `Md3Chart` | — |
 | `lineWidth` | `real` | `2.5` | read/write | `Md3Chart` | — |
 | `showArea` | `bool` | `true` | read/write | `Md3Chart` | — |
+| `areaOpacity` | `real` | `0.28` | read/write | `Md3Chart` | 0–1 multiplier on theme/default area fill (higher = stronger area emphasis). |
+| `areaEmphasis` | `bool` | `false` | read/write | `Md3Chart` | — |
 | `showDots` | `bool` | `false` | read/write | `Md3Chart` | — |
 | `showGrid` | `bool` | `true` | read/write | `Md3Chart` | — |
 | `showYLabels` | `bool` | `true` | read/write | `Md3Chart` | — |
@@ -49,16 +51,17 @@ import Md3
 | `viewStart` | `real` | `0` | read/write | `Md3Chart` | Visible window in normalized data space [0, 1]. |
 | `viewSpan` | `real` | `1` | read/write | `Md3Chart` | — |
 | `minViewSpan` | `real` | `0.04` | read/write | `Md3Chart` | — |
-| `panInertia` | `real` | `0.92` | read/write | `Md3Chart` | Inertia decay per second after pan release (0 = hard stop). |
+| `panInertia` | `real` | `Md3Theme.effectsChartInertia ? 0.92 : 0` | read/write | `Md3Chart` | Inertia decay per second after pan release (0 = hard stop). Overridden by effects level. |
 | `probeIndex` | `int` | `-1` | read/write | `Md3Chart` | — |
 | `probePixelX` | `real` | `0` | read/write | `Md3Chart` | — |
 | `probePixelY` | `real` | `0` | read/write | `Md3Chart` | — |
 | `probeActive` | `bool` | `false` | read/write | `Md3Chart` | — |
 | `probeSeries` | `var` | `[]` | read/write | `Md3Chart` | [{ label, value, color }] |
 | `gestureActive` | `bool` | `false` | read/write | `Md3Chart` | True while user is dragging / wheeling — charts should skip heavy work. |
+| `hostWindow` | `var` | `null` | read/write | `Md3Chart` | Optional Window for live-motion checks (else OverlayHost). |
+| `viewMoving` | `bool` | `gestureActive \|\| Math.abs(_panVelocity) > 1e-5` | readonly | `Md3Chart` | True while dragging or coasting — skip Catmull / async Shape to avoid release flicker. |
 | `paused` | `bool` | `false` | read/write | `Md3Chart` | — |
-| `interactionBlocked` | `bool` | `{…}` | readonly | `Md3Chart` | Only block when minimized/hidden — never for theme reveal. |
-| `chartActive` | `bool` | `!paused && !interactionBlocked && enabled` | readonly | `Md3Chart` | — |
+| `chartActive` | `bool` | `!paused && enabled` | readonly | `Md3Chart` | Page/window/app visibility — no per-scroll mapToItem (that starved the UI thread / rail). |
 | `renderedPointCount` | `int` | `0` | read/write | `Md3Chart` | — |
 | `plotLeft` | `real` | `contentPadding + labelWidth` | readonly | `Md3Chart` | — |
 | `plotRight` | `real` | `width - contentPadding` | readonly | `Md3Chart` | — |

@@ -18,7 +18,6 @@ import Md3
 | `colorRole` | `int` | `Md3Fab.Primary` | read/write | `Md3FabMenu` | — |
 | `icon` | `string` | `"add"` | read/write | `Md3FabMenu` | — |
 | `closeIcon` | `string` | `"close"` | read/write | `Md3FabMenu` | — |
-| `enabled` | `bool` | `true` | read/write | `Md3FabMenu` | — |
 | `actionGap` | `real` | `4` | read/write | `Md3FabMenu` | — |
 | `stackedModel` | `var` | `{…}` | readonly | `Md3FabMenu` | — |
 

@@ -17,6 +17,7 @@ import Md3
 | `accessibleName` | `string` | `icon` | read/write | `Md3TitleBarButton` | — |
 | `checked` | `bool` | `false` | read/write | `Md3TitleBarButton` | — |
 | `destructive` | `bool` | `false` | read/write | `Md3TitleBarButton` | — |
+| `enabled` | `bool` | `true` | read/write | `Md3TitleBarButton` | — |
 | `buttonWidth` | `real` | `40` | read/write | `Md3TitleBarButton` | — |
 | `buttonHeight` | `real` | `28` | read/write | `Md3TitleBarButton` | — |
 | `iconSize` | `real` | `14` | read/write | `Md3TitleBarButton` | — |

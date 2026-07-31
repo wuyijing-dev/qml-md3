@@ -25,7 +25,6 @@ import Md3
 | `selectedIndices` | `var` | `[]` | read/write | `Md3ChipGroup` | — |
 | `spacing` | `real` | `8` | read/write | `Md3ChipGroup` | — |
 | `elevated` | `bool` | `false` | read/write | `Md3ChipGroup` | — |
-| `enabled` | `bool` | `true` | read/write | `Md3ChipGroup` | — |
 | `chipHeight` | `real` | `32` | read/write | `Md3ChipGroup` | — |
 | `iconSize` | `real` | `18` | read/write | `Md3ChipGroup` | — |
 | `fontSize` | `real` | `Md3Theme.scaled(Md3Theme.typography.labelLarge.size)` | read/write | `Md3ChipGroup` | — |

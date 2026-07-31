@@ -1,41 +1,50 @@
 # Md3Page
 
+Base root for Md3PageHost destinations. Declares injectables that PageHost fills — prefer these over Window.window duck-typing.
+
 - **Source:** `src/Md3/window/Md3Page.qml`
-- **Kind:** base Item for PageHost destinations
+- **Extends:** `Item`
 
-Declares injectables filled by `Md3PageHost`. Prefer extending `Md3Page` over duck-typing `Window.window`.
+## Import
 
-## Injectables
+```qml
+import Md3
+```
 
-| Property | Type | Filled by PageHost |
-|----------|------|--------------------|
-| `md3HostWindow` | `var` | `Window.window` |
-| `md3RouteParams` | `var` | current route params |
-| `md3NavDepth` | `int` | stack depth |
-| `md3GoBack` | `var` (fn) | `pageHost.goBack` |
-| `md3PushRoute` | `var` (fn) | `pageHost.pushRoute` |
+## Properties
 
-Aliases: `routeParams`, `navDepth`.
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `md3HostWindow` | `var` | `null` | read/write | `Md3Page` | — |
+| `md3RouteParams` | `var` | `{…}` | read/write | `Md3Page` | — |
+| `md3NavDepth` | `int` | `0` | read/write | `Md3Page` | — |
+| `md3GoBack` | `var` | `null` | read/write | `Md3Page` | function (opts) → bool |
+| `md3PushRoute` | `var` | `null` | read/write | `Md3Page` | function (index, params, opts) → … |
+| `routeParams` | `var` | `md3RouteParams && typeof md3RouteParams === "object"` | readonly | `Md3Page` | — |
+| `navDepth` | `int` | `md3NavDepth` | readonly | `Md3Page` | — |
 
-## Helpers
+## Signals
 
-| Name | Role |
-|------|------|
-| `hostWindow()` | `md3HostWindow` or `Window.window` |
-| `goBack(opts)` | via inject or host window |
-| `pushRoute(index, params, opts)` | via inject or host window |
+_None._
+
+## Methods
+
+| Method | Defined in | Description |
+|--------|------------|-------------|
+| `hostWindow()` | `Md3Page` | — |
+| `goBack(opts)` | `Md3Page` | — |
+| `pushRoute(index, params, opts)` | `Md3Page` | — |
 
 ## Example
 
 ```qml
+import Md3
+
 Md3Page {
-    id: root
-    Md3TopAppBar {
-        title: qsTr("Detail")
-        leadingIcon: "arrow_back"
-        onLeadingClicked: root.goBack()
-    }
+    md3HostWindow: null
+    md3RouteParams: /* … */
+    md3NavDepth: 0
+    md3GoBack: null
+    md3PushRoute: null
 }
 ```
-
-See [module-boundaries.md](../module-boundaries.md), [routing.md](../routing.md).

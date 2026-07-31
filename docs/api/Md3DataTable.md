@@ -28,8 +28,8 @@ import Md3
 | `selectedIndices` | `var` | `[]` | read/write | `Md3DataTable` | — |
 | `sortColumn` | `int` | `-1` | read/write | `Md3DataTable` | — |
 | `sortOrder` | `int` | `Qt.AscendingOrder` | read/write | `Md3DataTable` | — |
-| `density` | `int` | `Md3DataTable.Comfortable` | read/write | `Md3DataTable` | — |
-| `rowHeight` | `real` | `density === Md3DataTable.Compact ? 40 : 52` | read/write | `Md3DataTable` | — |
+| `density` | `int` | `Md3Theme.density` | read/write | `Md3DataTable` | — |
+| `rowHeight` | `real` | `Md3Theme.tableRowHeight` | read/write | `Md3DataTable` | — |
 | `headerHeight` | `real` | `density === Md3DataTable.Compact ? 44 : 56` | read/write | `Md3DataTable` | — |
 | `bodyHeight` | `real` | `280` | read/write | `Md3DataTable` | — |
 | `loading` | `bool` | `false` | read/write | `Md3DataTable` | — |
@@ -47,6 +47,7 @@ import Md3
 | `columnFilters` | `var` | `{…}` | read/write | `Md3DataTable` | — |
 | `showFilterBar` | `bool` | `false` | read/write | `Md3DataTable` | — |
 | `filterPlaceholder` | `string` | `qsTr("Search table…")` | read/write | `Md3DataTable` | — |
+| `overlayWindow` | `var` | `null` | read/write | `Md3DataTable` | Optional explicit Window for row-action menu overlay. |
 | `serverSidePagination` | `bool` | `false` | read/write | `Md3DataTable` | — |
 | `serverTotalCount` | `int` | `0` | read/write | `Md3DataTable` | — |
 | `keyboardNavigationEnabled` | `bool` | `true` | read/write | `Md3DataTable` | — |
@@ -54,8 +55,9 @@ import Md3
 | `autoReorderRows` | `bool` | `true` | read/write | `Md3DataTable` | — |
 | `showColumnFilterIcons` | `bool` | `false` | read/write | `Md3DataTable` | — |
 | `rowActions` | `var` | `[]` | read/write | `Md3DataTable` | — |
-| `cellDelegate` | `Component` | `null` | read/write | `Md3DataTable` | Optional cell renderer. When null, `columns[].type` presets apply: `text`, `chip`, `avatar`, `check`. |
+| `cellDelegate` | `Component` | `null` | read/write | `Md3DataTable` | Optional cell renderer: set `rowData`, `columnDef`, `columnIndex`, `displayText`, `sourceIndex`. |
 | `columnWidths` | `var` | `[]` | read/write | `Md3DataTable` | — |
+| `columnWidthsPersistKey` | `string` | `""` | read/write | `Md3DataTable` | When set, columnWidths are loaded/saved via Md3AppSettings (JSON number array). |
 | `rowMenuSourceIndex` | `int` | `-1` | read/write | `Md3DataTable` | — |
 | `focusedPageRow` | `int` | `-1` | read/write | `Md3DataTable` | — |
 | `filterMenuColumnIndex` | `int` | `-1` | read/write | `Md3DataTable` | — |
@@ -89,12 +91,17 @@ import Md3
 | `pageRequested(int page, int sortColumn, int sortOrder)` | `Md3DataTable` | — |
 | `rowActionTriggered(int sourceIndex, var action)` | `Md3DataTable` | — |
 | `rowOrderChanged(int fromSourceIndex, int toSourceIndex)` | `Md3DataTable` | — |
+| `exportRequested(string format, string payload)` | `Md3DataTable` | — |
 
 ## Methods
 
 | Method | Defined in | Description |
 |--------|------------|-------------|
 | `setColumnWidth(index, w)` | `Md3DataTable` | — |
+| `loadColumnWidths()` | `Md3DataTable` | — |
+| `saveColumnWidths()` | `Md3DataTable` | — |
+| `exportCsv(includeHeader)` | `Md3DataTable` | CSV of visible (filtered) rows using column `role` / header. Does not write disk. |
+| `exportJson()` | `Md3DataTable` | JSON array of row objects (filtered). Does not write disk. |
 | `cellText(rowData, colDef)` | `Md3DataTable` | — |
 | `clearSelection()` | `Md3DataTable` | — |
 | `clearFilters()` | `Md3DataTable` | — |

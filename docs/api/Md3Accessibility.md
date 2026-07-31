@@ -20,6 +20,7 @@ import Md3
 | `highContrast` | `bool` | `Md3Theme.highContrast` | read/write | `Md3Accessibility` | Stronger outlines / surfaces (mirrors Md3Theme.highContrast). |
 | `showFocusRings` | `bool` | `true` | read/write | `Md3Accessibility` | Always show keyboard focus rings when true. |
 | `textScale` | `real` | `Md3Theme.textScale` | read/write | `Md3Accessibility` | Extra text scale convenience (delegates to Md3Theme.textScale). |
+| `livePoliteness` | `string` | `"polite"` | read/write | `Md3Accessibility` | "polite" \| "assertive" — hint for live region urgency. |
 | `liveMessage` | `string` | `_announceText` | readonly | `Md3Accessibility` | Screen-reader live message (read via Accessible on the gallery/window live region). |
 | `liveSerial` | `int` | `_announceSerial` | readonly | `Md3Accessibility` | — |
 
@@ -31,7 +32,9 @@ _None._
 
 | Method | Defined in | Description |
 |--------|------------|-------------|
-| `announce(message)` | `Md3Accessibility` | — |
+| `announce(message)` | `Md3Accessibility` | Generic polite announcement (status / info). |
+| `announceSuccess(message)` | `Md3Accessibility` | Success feedback (form saved, copy done, …). |
+| `announceError(message)` | `Md3Accessibility` | Error / validation failure — assertive so ATTs interrupt. |
 | `syncFromTheme()` | `Md3Accessibility` | — |
 | `applyToTheme()` | `Md3Accessibility` | — |
 

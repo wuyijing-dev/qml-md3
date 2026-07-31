@@ -1,5 +1,7 @@
 # Md3TabBar
 
+Tab strip + optional content pages (WinUI Pivot-style). When `pages` has children, a StackLayout tracks `currentIndex` — no host sync glue.
+
 - **Source:** `src/Md3/components/Md3TabBar.qml`
 - **Extends:** `Item`
 
@@ -22,8 +24,9 @@ import Md3
 | `variant` | `int` | `Md3TabBar.Primary` | read/write | `Md3TabBar` | — |
 | `model` | `var` | `[]` | read/write | `Md3TabBar` | — |
 | `currentIndex` | `int` | `0` | read/write | `Md3TabBar` | — |
-| `pages` | `alias` | `pageStack.data` | default read/write | `Md3TabBar` | Optional content pages; StackLayout tracks `currentIndex` |
-| `hasPages` | `bool` | — | readonly | `Md3TabBar` | — |
+| `pages` | `alias` | `pageStack.data` | default read/write | `Md3TabBar` | Content pages (synced with currentIndex). Prefer over external StackLayout. |
+| `pageAreaHeight` | `real` | `96` | read/write | `Md3TabBar` | Extra height for page area when `pages` are present (Layout / implicit). |
+| `hasPages` | `bool` | `pageStack.children.length > 0` | readonly | `Md3TabBar` | — |
 
 ## Signals
 
@@ -31,14 +34,19 @@ import Md3
 |--------|------------|-------------|
 | `currentIndexChangedByUser(int index)` | `Md3TabBar` | — |
 
+## Methods
+
+_None._
+
 ## Example
 
 ```qml
 import Md3
 
 Md3TabBar {
-    model: [{ text: "One" }, { text: "Two" }]
-    Item { /* page 0 */ }
-    Item { /* page 1 */ }
+    variant: Md3TabBar.Primary
+    model: []
+    currentIndex: 0
+    pageAreaHeight: 96
 }
 ```

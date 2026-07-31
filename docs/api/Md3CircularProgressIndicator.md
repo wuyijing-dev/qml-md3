@@ -24,12 +24,13 @@ import Md3
 | `value` | `real` | `0` | read/write | `Md3CircularProgressIndicator` | — |
 | `indeterminate` | `bool` | `true` | read/write | `Md3CircularProgressIndicator` | — |
 | `style` | `int` | `Md3CircularProgressIndicator.Standard` | read/write | `Md3CircularProgressIndicator` | — |
+| `hostWindow` | `var` | `null` | read/write | `Md3CircularProgressIndicator` | Optional Window for scene-active checks (else OverlayHost). |
 | `strokeWidth` | `real` | `{…}` | read/write | `Md3CircularProgressIndicator` | — |
 | `size` | `real` | `style === Md3CircularProgressIndicator.Standard ? 48 : 52` | read/write | `Md3CircularProgressIndicator` | — |
 | `amplitude` | `real` | `{…}` | read/write | `Md3CircularProgressIndicator` | — |
 | `waveCount` | `int` | `{…}` | read/write | `Md3CircularProgressIndicator` | — |
 | `wavePhase` | `real` | `0` | read/write | `Md3CircularProgressIndicator` | — |
-| `arcRotation` | `real` | `-Math.PI / 2` | read/write | `Md3CircularProgressIndicator` | Arc start angle in radians (not Item.rotation) |
+| `arcRotation` | `real` | `-Math.PI / 2` | read/write | `Md3CircularProgressIndicator` | Arc start angle in radians (not Item.rotation). |
 | `sweep` | `real` | `Math.PI * 0.55` | read/write | `Md3CircularProgressIndicator` | — |
 | `waveSpeed` | `real` | `Math.PI * 2 / 1.8` | read/write | `Md3CircularProgressIndicator` | — |
 | `spinSpeed` | `real` | `Math.PI * 2 / (Md3Motion.progressSpin / 1000)` | read/write | `Md3CircularProgressIndicator` | — |
@@ -64,7 +65,7 @@ Md3CircularProgressIndicator {
     value: 0
     indeterminate: true
     style: Md3CircularProgressIndicator.Standard
+    hostWindow: null
     strokeWidth: /* … */
-    size: style === Md3CircularProgressIndicator.Standard ? 48 : 52
 }
 ```

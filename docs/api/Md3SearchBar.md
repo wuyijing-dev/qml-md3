@@ -14,8 +14,8 @@ import Md3
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
 | `text` | `alias` | `input.text` | read/write | `Md3SearchBar` | Alias → `input.text` |
-| `placeholderText` | `string` | `"Search"` | read/write | `Md3SearchBar` | — |
-| `searchView` | `var` | `null` | read/write | `Md3SearchBar` | Opens this `Md3SearchView` on click |
+| `placeholderText` | `string` | `qsTr("Search")` | read/write | `Md3SearchBar` | — |
+| `searchView` | `var` | `null` | read/write | `Md3SearchBar` | When set, click / focus opens this Md3SearchView (forwards `text`). |
 
 ## Signals
 
@@ -36,10 +36,7 @@ import Md3
 import Md3
 
 Md3SearchBar {
-    searchView: view
-}
-Md3SearchView {
-    id: view
-    suggestions: ["Material Design"]
+    placeholderText: qsTr("Search")
+    searchView: null
 }
 ```

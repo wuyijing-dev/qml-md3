@@ -1,9 +1,10 @@
 # Md3TreeVisibility
 
-Singleton helpers for ancestor / window visibility (PageHost hides cached pages via opacity).
+Shared ancestor / window visibility checks (PageHost hides pages via opacity). Prefer this over duplicating `while (parent)` walks in components.
 
 - **Source:** `src/Md3/foundation/Md3TreeVisibility.qml`
-- **Type:** Singleton
+- **Extends:** `QtObject`
+- **Singleton:** `true` (`pragma Singleton`)
 
 ## Import
 
@@ -11,21 +12,28 @@ Singleton helpers for ancestor / window visibility (PageHost hides cached pages 
 import Md3
 ```
 
-## API
+## Properties
 
-| Function | Description |
-|----------|-------------|
-| `isItemShown(item)` | `item` and ancestors are visible with opacity > 0.01 |
-| `isWindowActive(win)` | `win` not Hidden/Minimized (missing win → false) |
-| `isSceneActive(item, win)` | Tree shown and window active — pass `hostWindow` or `null`/`undefined` to resolve via `Md3OverlayHost` |
-| `isLiveMotionScene(item, win)` | Scene active and app not suspended/hidden |
+_None._
+
+## Signals
+
+_None._
+
+## Methods
+
+| Method | Defined in | Description |
+|--------|------------|-------------|
+| `isItemShown(item)` | `Md3TreeVisibility` | Walk `item` and ancestors: all must be visible with opacity > 0.01. |
+| `isWindowActive(win)` | `Md3TreeVisibility` | Window is mapped and not minimized/hidden. Missing window → inactive. |
+| `isSceneActive(item, win)` | `Md3TreeVisibility` | Tree shown and window active. Pass explicit `win` / `hostWindow`, or `null`/`undefined` to resolve via Md3OverlayHost. |
+| `isLiveMotionScene(item, win)` | `Md3TreeVisibility` | Scene active and application not suspended/hidden (for live timers / FrameAnimation). |
 
 ## Example
 
 ```qml
-property var hostWindow: null
-readonly property bool chartActive: enabled
-        && Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
-```
+import Md3
 
-See [module-boundaries.md](../module-boundaries.md), [Md3OverlayHost](Md3OverlayHost.md).
+// Singleton — use as `Md3TreeVisibility.…`
+console.log(Md3TreeVisibility)
+```

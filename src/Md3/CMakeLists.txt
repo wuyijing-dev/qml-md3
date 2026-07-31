@@ -268,8 +268,14 @@ qt_add_qml_module(Md3
         layout/Md3PageSection.qml
         components/Md3Button.qml
         components/Md3IconButton.qml
+        components/Md3ToggleButton.qml
         components/Md3ToggleIconButton.qml
         components/Md3SplitButton.qml
+        components/Md3DropDownButton.qml
+        components/Md3Hyperlink.qml
+        components/Md3AppBarButton.qml
+        components/Md3AppBarToggleButton.qml
+        components/Md3CommandBar.qml
         components/Md3ButtonGroup.qml
         components/Md3Fab.qml
         components/Md3FabMenu.qml

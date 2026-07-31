@@ -1,26 +1,42 @@
 # Md3Spacer
 
-Fixed gap or expanding filler for `Md3HStack` / `Md3VStack`.
+Lightweight spacer. Use `size` for fixed gaps, or `expand: true` inside Md3HStack / Md3VStack to absorb remaining space (SwiftUI-style).
 
 - **Source:** `src/Md3/layout/Md3Spacer.qml`
+- **Extends:** `Item`
+
+## Import
+
+```qml
+import Md3
+```
 
 ## Properties
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `size` | real | `0` | Sets both spacerWidth and spacerHeight |
-| `spacerWidth` | real | `size` | Fixed width when not expanding |
-| `spacerHeight` | real | `size` | Fixed height when not expanding |
-| `expand` | bool | `false` | Fill leftover space in parent stack |
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `size` | `real` | `0` | read/write | `Md3Spacer` | — |
+| `spacerWidth` | `real` | `size` | read/write | `Md3Spacer` | — |
+| `spacerHeight` | `real` | `size` | read/write | `Md3Spacer` | — |
+| `expand` | `bool` | `false` | read/write | `Md3Spacer` | When true, parent Md3HStack/Md3VStack stretches this item to fill leftover space. |
+
+## Signals
+
+_None._
+
+## Methods
+
+_None._
 
 ## Example
 
 ```qml
-Md3HStack {
-    Md3Button { text: "Left" }
-    Md3Spacer { size: 24 }
-    Md3Button { text: "Mid" }
-    Md3Spacer { expand: true }
-    Md3Button { text: "Right" }
+import Md3
+
+Md3Spacer {
+    size: 0
+    spacerWidth: size
+    spacerHeight: size
+    expand: false
 }
 ```

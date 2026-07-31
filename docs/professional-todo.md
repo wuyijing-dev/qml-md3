@@ -34,13 +34,12 @@
 | WinUI | Md3 | 状态 | 缺口 / 下一步 |
 |-------|-----|------|----------------|
 | Button | `Md3Button` | [x] | — |
-| ToggleButton | `Md3ToggleIconButton` / Switch | [~] | 补齐 **文本 ToggleButton**（Filled/Outline） |
+| ToggleButton | `Md3ToggleButton` + `Md3ToggleIconButton` | [x] | 文本 Filled/Outlined；图标仍用 ToggleIconButton |
 | SplitButton | `Md3SplitButton` | [x] | — |
-| DropDownButton | `Md3DropdownMenu` + Button | [~] | 一等控件 `Md3DropDownButton`（chevron 一体） |
-| HyperlinkButton | — | [ ] | `Md3Hyperlink` / `Md3LinkButton` |
-| AppBarButton / CommandBar | `Md3AppToolBar` / TopAppBar trailing | [~] | **CommandBar** 溢出菜单 + 主次命令槽 |
-| AppBarToggleButton | — | [ ] | 工具栏内 togglable 项 |
-| RatingControl | — | [ ] | `Md3Rating`（星级） |
+| DropDownButton | `Md3DropDownButton` | [x] | 整钮开菜单 + chevron；与 Split 主操作分离 |
+| HyperlinkButton | `Md3Hyperlink` | [x] | 可选 `url` → `Qt.openUrlExternally` |
+| AppBarButton / CommandBar | `Md3AppBarButton` / `Md3CommandBar` | [x] | 主命令槽 + `overflowModel` 次命令 |
+| AppBarToggleButton | `Md3AppBarToggleButton` | [x] | `checkable` 工具栏项 |
 
 ### 1.2 输入与选择
 
@@ -128,7 +127,7 @@
 
 - [ ] `Md3NavigationView`（或增强 Scaffold）：`paneDisplayMode` = Left / LeftCompact / Top；自动折叠阈值
 - [ ] `Md3Flyout`：锚定控件、light-dismiss、Esc、焦点归还
-- [ ] `Md3DropDownButton` / `Md3Hyperlink`
+- [x] `Md3DropDownButton` / `Md3Hyperlink`
 - [ ] TitleBar **内容槽**（搜索框、账号头像）官方示例
 - [ ] Gallery：对照 WinUI「Navigation / Window」页信息架构
 
@@ -151,7 +150,7 @@
 ### W4 — 教学与命令面（1–2 周）
 
 - [ ] `Md3TeachingTip`
-- [ ] CommandBar + overflow
+- [x] CommandBar + overflow（`Md3CommandBar` / `Md3AppBarButton`）
 - [ ] CommandBarFlyout（文本选区场景可后置）
 - [ ] Tour / TeachingTip 与 InfoBar 层级规范一页
 

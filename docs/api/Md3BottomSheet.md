@@ -1,27 +1,49 @@
 # Md3BottomSheet
 
 - **Source:** `src/Md3/components/Md3BottomSheet.qml`
+- **Extends:** `Item`
+
+## Import
+
+```qml
+import Md3
+```
 
 ## Properties
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `open` / `modal` | bool | `false` / `true` | — |
-| `layoutMode` | int | `Fit` | Fit / Scroll body |
-| `title` / `text` | string | `""` | Optional header copy |
-| `confirmText` / `dismissText` | string | `""` | Action buttons (hidden when empty) |
-| `content` | alias | default | Custom body |
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `open` | `bool` | `false` | read/write | `Md3BottomSheet` | — |
+| `modal` | `bool` | `true` | read/write | `Md3BottomSheet` | — |
+| `layoutMode` | `int` | `Md3ContainerBody.Fit` | read/write | `Md3BottomSheet` | — |
+| `title` | `string` | `""` | read/write | `Md3BottomSheet` | — |
+| `text` | `string` | `""` | read/write | `Md3BottomSheet` | — |
+| `confirmText` | `string` | `""` | read/write | `Md3BottomSheet` | — |
+| `dismissText` | `string` | `""` | read/write | `Md3BottomSheet` | — |
+| `content` | `alias` | `bodySlot.data` | default read/write | `Md3BottomSheet` | Default property → `bodySlot.data` |
+| `maxSheetHeight` | `real` | `parent ? parent.height * 0.6 : 480` | readonly | `Md3BottomSheet` | — |
 
 ## Signals
 
-`dismissed()`, `confirmed()`
+| Signal | Defined in | Description |
+|--------|------------|-------------|
+| `dismissed()` | `Md3BottomSheet` | — |
+| `confirmed()` | `Md3BottomSheet` | — |
+
+## Methods
+
+_None._
 
 ## Example
 
 ```qml
+import Md3
+
 Md3BottomSheet {
-    title: qsTr("Options")
-    text: qsTr("Choose an action")
-    confirmText: qsTr("Done")
+    open: false
+    modal: true
+    layoutMode: Md3ContainerBody.Fit
+    title: ""
+    text: ""
 }
 ```

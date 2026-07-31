@@ -16,11 +16,11 @@ import Md3
 | `text` | `string` | `""` | read/write | `Md3MenuItem` | — |
 | `icon` | `string` | `""` | read/write | `Md3MenuItem` | — |
 | `trailingIcon` | `string` | `""` | read/write | `Md3MenuItem` | — |
-| `enabled` | `bool` | `true` | read/write | `Md3MenuItem` | — |
 | `destructive` | `bool` | `false` | read/write | `Md3MenuItem` | — |
 | `selected` | `bool` | `false` | read/write | `Md3MenuItem` | — |
 | `showCheck` | `bool` | `false` | read/write | `Md3MenuItem` | — |
 | `leadingCheck` | `bool` | `true` | read/write | `Md3MenuItem` | — |
+| `highlighted` | `bool` | `false` | read/write | `Md3MenuItem` | Keyboard highlight from parent Md3Menu. |
 | `submenu` | `var` | `null` | read/write | `Md3MenuItem` | Nested cascading menu (Md3Menu). Hover / click opens it to the side. Use `var` so inline / sibling menus assign reliably across Loaders. |
 | `hasSubMenu` | `bool` | `submenu !== null && submenu !== undefined` | readonly | `Md3MenuItem` | — |
 | `itemRadius` | `real` | `Md3Theme.shape.large` | readonly | `Md3MenuItem` | — |

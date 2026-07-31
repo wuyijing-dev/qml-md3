@@ -23,6 +23,7 @@ import Md3
 | `livePointCount` | `int` | `48` | read/write | `Md3LineChart` | — |
 | `liveSpeed` | `real` | `2.4` | read/write | `Md3LineChart` | — |
 | `livePhase` | `real` | `0` | read/write | `Md3LineChart` | — |
+| `liveFps` | `int` | `0` | read/write | `Md3LineChart` | 0 = display refresh (full quality). Set >0 only to explicitly cap. |
 | `liveBuffer` | `var` | `[]` | read/write | `Md3LineChart` | Mutated in place — avoids allocating a new array every animation frame. |
 | `values` | `var` | `[]` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `series` | `var` | `[]` | read/write | [`Md3Chart`](Md3Chart.md) | — |
@@ -36,6 +37,8 @@ import Md3
 | `surfaceColor` | `color` | `"transparent"` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `lineWidth` | `real` | `2.5` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `showArea` | `bool` | `true` | read/write | [`Md3Chart`](Md3Chart.md) | — |
+| `areaOpacity` | `real` | `0.28` | read/write | [`Md3Chart`](Md3Chart.md) | 0–1 multiplier on theme/default area fill (higher = stronger area emphasis). |
+| `areaEmphasis` | `bool` | `false` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `showDots` | `bool` | `false` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `showGrid` | `bool` | `true` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `showYLabels` | `bool` | `true` | read/write | [`Md3Chart`](Md3Chart.md) | — |
@@ -58,16 +61,17 @@ import Md3
 | `viewStart` | `real` | `0` | read/write | [`Md3Chart`](Md3Chart.md) | Visible window in normalized data space [0, 1]. |
 | `viewSpan` | `real` | `1` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `minViewSpan` | `real` | `0.04` | read/write | [`Md3Chart`](Md3Chart.md) | — |
-| `panInertia` | `real` | `0.92` | read/write | [`Md3Chart`](Md3Chart.md) | Inertia decay per second after pan release (0 = hard stop). |
+| `panInertia` | `real` | `Md3Theme.effectsChartInertia ? 0.92 : 0` | read/write | [`Md3Chart`](Md3Chart.md) | Inertia decay per second after pan release (0 = hard stop). Overridden by effects level. |
 | `probeIndex` | `int` | `-1` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `probePixelX` | `real` | `0` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `probePixelY` | `real` | `0` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `probeActive` | `bool` | `false` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `probeSeries` | `var` | `[]` | read/write | [`Md3Chart`](Md3Chart.md) | [{ label, value, color }] |
 | `gestureActive` | `bool` | `false` | read/write | [`Md3Chart`](Md3Chart.md) | True while user is dragging / wheeling — charts should skip heavy work. |
+| `hostWindow` | `var` | `null` | read/write | [`Md3Chart`](Md3Chart.md) | Optional Window for live-motion checks (else OverlayHost). |
+| `viewMoving` | `bool` | `gestureActive \|\| Math.abs(_panVelocity) > 1e-5` | readonly | [`Md3Chart`](Md3Chart.md) | True while dragging or coasting — skip Catmull / async Shape to avoid release flicker. |
 | `paused` | `bool` | `false` | read/write | [`Md3Chart`](Md3Chart.md) | — |
-| `interactionBlocked` | `bool` | `{…}` | readonly | [`Md3Chart`](Md3Chart.md) | Only block when minimized/hidden — never for theme reveal. |
-| `chartActive` | `bool` | `!paused && !interactionBlocked && enabled` | readonly | [`Md3Chart`](Md3Chart.md) | — |
+| `chartActive` | `bool` | `!paused && enabled` | readonly | [`Md3Chart`](Md3Chart.md) | Page/window/app visibility — no per-scroll mapToItem (that starved the UI thread / rail). |
 | `renderedPointCount` | `int` | `0` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `plotLeft` | `real` | `contentPadding + labelWidth` | readonly | [`Md3Chart`](Md3Chart.md) | — |
 | `plotRight` | `real` | `width - contentPadding` | readonly | [`Md3Chart`](Md3Chart.md) | — |
@@ -128,6 +132,6 @@ Md3LineChart {
     livePointCount: 48
     liveSpeed: 2.4
     livePhase: 0
-    liveBuffer: []
+    liveFps: 0
 }
 ```

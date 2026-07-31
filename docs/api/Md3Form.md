@@ -1,59 +1,59 @@
 # Md3Form
 
-Container that syncs `values` / `errors` onto named fields (`name` on TextField / Select / NumberField).
-Built-in vertical stack — direct children need no wrapping `Md3VStack`.
-
 - **Source:** `src/Md3/components/Md3Form.qml`
+- **Extends:** `Item`
+
+## Import
+
+```qml
+import Md3
+```
 
 ## Properties
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `errors` | var | `{}` | name → message |
-| `values` | var | `{}` | name → value (from syncValues) |
-| `requiredFields` | var | `[]` | Default list for validate() |
-| `spacing` | real | `Md3Theme.spacingMd` | Between stacked children |
-| `fillFields` | bool | `true` | Stretch children to form width |
-| `liveGate` | bool | `true` | Poll fields so `canSubmit` updates while typing |
-| `hasErrors` | bool | `false` | Any non-empty `errors` entry |
-| `requiredSatisfied` | bool | `true` | All required fields non-empty |
-| `canSubmit` | bool | `true` | `requiredSatisfied && !hasErrors` |
-| `layoutMode` | int | `Fit` | — |
-| `content` | alias | default | Fields |
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `errors` | `var` | `{…}` | read/write | `Md3Form` | — |
+| `values` | `var` | `{…}` | read/write | `Md3Form` | — |
+| `layoutMode` | `int` | `Md3ContainerBody.Fit` | read/write | `Md3Form` | — |
+| `requiredFields` | `var` | `[]` | read/write | `Md3Form` | Optional required field names used by validate() when no list is passed. |
+| `spacing` | `real` | `Md3Theme.spacingMd` | read/write | `Md3Form` | Vertical spacing between direct field children (built-in stack — no Md3VStack glue). |
+| `fillFields` | `bool` | `true` | read/write | `Md3Form` | Stretch direct children to form width. |
+| `liveGate` | `bool` | `true` | read/write | `Md3Form` | Poll named fields so `canSubmit` / `hasErrors` stay fresh while typing. |
+| `hasErrors` | `bool` | `false` | read/write | `Md3Form` | True when any entry in `errors` is a non-empty string. |
+| `canSubmit` | `bool` | `true` | read/write | `Md3Form` | True when required fields are non-empty and `hasErrors` is false (does not run validators). |
+| `requiredSatisfied` | `bool` | `true` | read/write | `Md3Form` | True when every `requiredFields` entry has a non-empty value. |
+| `content` | `alias` | `formStack.data` | default read/write | `Md3Form` | Default property → `formStack.data` |
 
 ## Signals
 
-| Signal | Description |
-|--------|-------------|
-| `submitted(var values)` | After successful `submit()` |
+| Signal | Defined in | Description |
+|--------|------------|-------------|
+| `submitted(var values)` | `Md3Form` | — |
 
 ## Methods
 
-| Method | Description |
-|--------|-------------|
-| `setError(name, message)` | Set one error and apply to fields |
-| `clearErrors()` | Clear all |
-| `errorFor(name)` | Lookup |
-| `syncValues()` | Read named fields into `values` |
-| `collectFields()` | List items with `name` |
-| `refreshGate()` | Recompute `canSubmit` / `hasErrors` |
-| `validate(required?)` | Required check + auto `errorText` |
-| `submit()` | `validate()` then emit `submitted` |
+| Method | Defined in | Description |
+|--------|------------|-------------|
+| `setError(name, message)` | `Md3Form` | — |
+| `clearErrors()` | `Md3Form` | — |
+| `errorFor(name)` | `Md3Form` | — |
+| `collectFields()` | `Md3Form` | — |
+| `syncValues()` | `Md3Form` | — |
+| `refreshGate()` | `Md3Form` | Refresh `hasErrors` / `requiredSatisfied` / `canSubmit` from current fields + `errors`. |
+| `validate(required)` | `Md3Form` | — |
+| `submit()` | `Md3Form` | Run `validate()`; on success emit `submitted(values)` and return true. |
 
 ## Example
 
 ```qml
+import Md3
+
 Md3Form {
-    id: form
-    requiredFields: ["email"]
-    Md3TextField { name: "email"; label: qsTr("Email") }
-    Md3Button {
-        text: qsTr("Save")
-        enabled: form.canSubmit
-        onClicked: form.submit()
-    }
-    onSubmitted: (values) => { /* … */ }
+    errors: /* … */
+    values: /* … */
+    layoutMode: Md3ContainerBody.Fit
+    requiredFields: []
+    spacing: Md3Theme.spacingMd
 }
 ```
-
-See also: [design-guidelines.md](../design-guidelines.md) § 表单.

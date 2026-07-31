@@ -45,6 +45,9 @@ import Md3
 | `pathValidator` | `var` | `null` | read/write | `Md3PathField` | — |
 | `existsProbe` | `var` | `null` | read/write | `Md3PathField` | — |
 | `writableProbe` | `var` | `null` | read/write | `Md3PathField` | — |
+| `notFoundText` | `string` | `qsTr("Path does not exist")` | read/write | `Md3PathField` | Localized when existsProbe fails (validateExists). |
+| `permissionDeniedText` | `string` | `qsTr("No write permission for this path")` | read/write | `Md3PathField` | Localized when writableProbe fails (validateWritable) — permission / ACL. |
+| `announceValidationErrors` | `bool` | `true` | read/write | `Md3PathField` | Announce validation failures via Md3Accessibility (default on). |
 | `showBreadcrumb` | `bool` | `false` | read/write | `Md3PathField` | — |
 | `acceptDrops` | `bool` | `true` | read/write | `Md3PathField` | — |
 | `multiMode` | `bool` | `mode === Md3PathField.OpenFiles` | readonly | `Md3PathField` | — |

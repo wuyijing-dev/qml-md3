@@ -32,6 +32,7 @@ import Md3
 | `containerColor` | `color` | `Md3Theme.colorScheme.primaryContainer` | read/write | `Md3MorphLoadingIndicator` | — |
 | `morphPhase` | `real` | `0` | read/write | `Md3MorphLoadingIndicator` | — |
 | `spin` | `real` | `0` | read/write | `Md3MorphLoadingIndicator` | — |
+| `hostWindow` | `var` | `null` | read/write | `Md3MorphLoadingIndicator` | Optional Window for scene-active checks (else OverlayHost). |
 | `box` | `real` | `{…}` | readonly | `Md3MorphLoadingIndicator` | — |
 | `sceneActive` | `bool` | `enabled && _treeShown && indeterminate` | readonly | `Md3MorphLoadingIndicator` | — |
 

@@ -45,7 +45,8 @@ import Md3
 | `dismissText` | `string` | `qsTr("Cancel")` | read/write | `Md3DialogWindow` | — |
 | `showDismiss` | `bool` | `true` | read/write | `Md3DialogWindow` | — |
 | `dialogText` | `string` | `""` | read/write | `Md3DialogWindow` | — |
-| `content` | `alias` | `customContent.data` | default read/write | `Md3DialogWindow` | Default property → `customContent.data` |
+| `layoutMode` | `int` | `Md3ContainerBody.Fit` | read/write | `Md3DialogWindow` | — |
+| `content` | `alias` | `customContent.content` | default read/write | `Md3DialogWindow` | Default property → `customContent.content` |
 | `footer` | `alias` | `footerSlot.data` | read/write | `Md3DialogWindow` | Alias → `footerSlot.data` |
 | `isMaximizedLike` | `bool` | `visibility === Window.Maximized` | readonly | `Md3DialogWindow` | — |
 | `effectiveRadius` | `real` | `{…}` | readonly | `Md3DialogWindow` | — |

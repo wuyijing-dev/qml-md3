@@ -1,36 +1,56 @@
 # Md3ToastHost
 
+Window-level toast host: stacked multi-toast with position + enter/exit animation.
+
 - **Source:** `src/Md3/components/Md3ToastHost.qml`
+- **Extends:** `Item`
 
-Window-level multi-toast host. Registers with `Md3Notify`. Supports stacking (up to `maxVisible`) with enter/move animation and five screen positions.
+## Import
 
-## Position
+```qml
+import Md3
+```
 
-| Enum | Also as string |
-|------|----------------|
-| `Md3ToastHost.TopCenter` | `"topCenter"` |
-| `Md3ToastHost.TopRight` | `"topRight"` |
-| `Md3ToastHost.TopLeft` | `"topLeft"` |
-| `Md3ToastHost.BottomRight` | `"bottomRight"` |
-| `Md3ToastHost.BottomLeft` | `"bottomLeft"` |
+## Enums
+
+### `Md3ToastHost.Position`
+
+`Md3ToastHost.TopCenter`, `Md3ToastHost.TopRight`, `Md3ToastHost.TopLeft`, `Md3ToastHost.BottomRight`, `Md3ToastHost.BottomLeft`
 
 ## Properties
 
-`position`, `maxVisible` (default 4), `spacing`, `defaultDurationMs`, `edgeMargin`, `sideMargin`, `dodgeTop`, `dodgeBottom`
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `position` | `int` | `Md3ToastHost.TopCenter` | read/write | `Md3ToastHost` | — |
+| `maxVisible` | `int` | `4` | read/write | `Md3ToastHost` | — |
+| `spacing` | `int` | `8` | read/write | `Md3ToastHost` | — |
+| `defaultDurationMs` | `int` | `2200` | read/write | `Md3ToastHost` | — |
+| `edgeMargin` | `real` | `16` | read/write | `Md3ToastHost` | — |
+| `sideMargin` | `real` | `16` | read/write | `Md3ToastHost` | — |
+| `dodgeBottom` | `real` | `0` | read/write | `Md3ToastHost` | — |
+| `dodgeTop` | `real` | `0` | read/write | `Md3ToastHost` | — |
 
-## Usage
+## Signals
+
+_None._
+
+## Methods
+
+| Method | Defined in | Description |
+|--------|------------|-------------|
+| `show(message, options)` | `Md3ToastHost` | — |
+| `dismissAll()` | `Md3ToastHost` | — |
+
+## Example
 
 ```qml
-Md3Notify.toast(qsTr("Saved"), {
-    severity: Md3Toast.Success,
-    position: Md3ToastHost.TopRight,
-    durationMs: 2500
-})
+import Md3
 
-// Queue several — they stack until maxVisible, then wait
-Md3Notify.toast(qsTr("One"))
-Md3Notify.toast(qsTr("Two"))
-Md3Notify.toast(qsTr("Three"))
+Md3ToastHost {
+    position: Md3ToastHost.TopCenter
+    maxVisible: 4
+    spacing: 8
+    defaultDurationMs: 2200
+    edgeMargin: 16
+}
 ```
-
-`show(message, options)` returns a toast id. `dismissAll()` clears the stack and queue.

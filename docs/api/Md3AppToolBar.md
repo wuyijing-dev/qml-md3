@@ -1,6 +1,6 @@
 # Md3AppToolBar
 
-Compact desktop tool strip for `Md3ApplicationWindow.toolBar`.
+Compact app tool strip for `Md3ApplicationWindow.toolBar` (desktop chrome).
 
 - **Source:** `src/Md3/components/Md3AppToolBar.qml`
 - **Extends:** `Rectangle`
@@ -13,28 +13,32 @@ import Md3
 
 ## Properties
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `barHeight` | real | `44` | Strip height |
-| `contentSpacing` | real | `8` | `Md3HStack` spacing |
-| `horizontalPadding` | real | `12` | Left/right padding |
-| `showDivider` | bool | `true` | Bottom hairline |
-| `content` | alias | — | Children (default property) |
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `barHeight` | `real` | `44` | read/write | `Md3AppToolBar` | — |
+| `contentSpacing` | `real` | `8` | read/write | `Md3AppToolBar` | — |
+| `horizontalPadding` | `real` | `12` | read/write | `Md3AppToolBar` | — |
+| `showDivider` | `bool` | `true` | read/write | `Md3AppToolBar` | — |
+| `content` | `alias` | `stack.content` | read/write | `Md3AppToolBar` | Alias → `stack.content` |
+| `data` | `alias` | `stack.content` | default read/write | `Md3AppToolBar` | Default property → `stack.content` |
+
+## Signals
+
+_None._
+
+## Methods
+
+_None._
 
 ## Example
 
 ```qml
-Md3ApplicationWindow {
-    toolBar: Md3AppToolBar {
-        Md3Button {
-            text: qsTr("Reload")
-            variant: Md3Button.Text
-            onClicked: reloadCurrentPage()
-        }
-        Md3TextField {
-            width: 280
-            label: qsTr("Jump")
-        }
-    }
+import Md3
+
+Md3AppToolBar {
+    barHeight: 44
+    contentSpacing: 8
+    horizontalPadding: 12
+    showDivider: true
 }
 ```

@@ -1,25 +1,39 @@
 # Md3OverlayHost
 
+Resolve overlay parents / popup coordinates without each control re-implementing Window.window. Prefer explicit `win` (`hostWindow` / `overlayWindow`); fall back to `Window.window` of `anchor`.
+
 - **Source:** `src/Md3/foundation/Md3OverlayHost.qml`
-- **Kind:** singleton (`pragma Singleton`)
+- **Extends:** `QtObject`
+- **Singleton:** `true` (`pragma Singleton`)
 
-Resolve overlay parents and popup coordinates without each control re-implementing `Window.window`.
+## Import
 
-## Functions
+```qml
+import Md3
+```
 
-| Name | Role |
-|------|------|
-| `resolveWindow(win, anchor)` | Prefer explicit `win`; else `anchor.Window.window` |
-| `contentItem(win, anchor)` | Top-level contentItem for popup reparent |
-| `mapToOverlay(fromItem, x, y, win)` | Map local point into overlay content coordinates |
-| `ensureHostParent(host, win, anchor, zOrder)` | Reparent `host` to fill overlay contentItem |
+## Properties
 
-## Usage
+_None._
 
-Controls may expose optional `overlayWindow`. Wired into:
+## Signals
 
-`Md3Menu`, `Md3MenuBar`, `Md3MenuItem`, `Md3ContextMenuArea`, `Md3DateField`, `Md3TimeField`,
-`Md3Select`, `Md3DropdownMenu`, `Md3SplitButton`, `Md3DataTable`, `Md3TreeView`, `Md3TextField` (autocomplete),
-`Md3TrayHost`, `Md3DocumentTabBar`, `Md3NavigationRail` (`resolveWindow` / `hostWindow`).
+_None._
 
-See [module-boundaries.md](../module-boundaries.md).
+## Methods
+
+| Method | Defined in | Description |
+|--------|------------|-------------|
+| `resolveWindow(win, anchor)` | `Md3OverlayHost` | — |
+| `contentItem(win, anchor)` | `Md3OverlayHost` | Top-level contentItem for popup reparenting. |
+| `mapToOverlay(fromItem, x, y, win)` | `Md3OverlayHost` | Map local point on `fromItem` into overlay content coordinates. |
+| `ensureHostParent(host, win, anchor, zOrder)` | `Md3OverlayHost` | Reparent `host` to fill the overlay contentItem (menus / pickers). |
+
+## Example
+
+```qml
+import Md3
+
+// Singleton — use as `Md3OverlayHost.…`
+console.log(Md3OverlayHost)
+```

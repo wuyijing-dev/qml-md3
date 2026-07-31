@@ -27,11 +27,12 @@ import Md3
 | `label` | `string` | `""` | read/write | `Md3LoadingIndicator` | — |
 | `indicatorColor` | `color` | `Md3Theme.colorScheme.primary` | read/write | `Md3LoadingIndicator` | — |
 | `trackColor` | `color` | `Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.primary, 0.2)` | read/write | `Md3LoadingIndicator` | — |
+| `hostWindow` | `var` | `null` | read/write | `Md3LoadingIndicator` | Optional Window for scene-active checks (else OverlayHost). |
 | `strokeWidth` | `real` | `{…}` | read/write | `Md3LoadingIndicator` | — |
 | `indicatorSize` | `real` | `{…}` | read/write | `Md3LoadingIndicator` | — |
 | `sceneActive` | `bool` | `enabled && _treeShown` | readonly | `Md3LoadingIndicator` | — |
 | `radius` | `real` | `indicatorSize / 2 - strokeWidth` | readonly | `Md3LoadingIndicator` | — |
-| `arcRotation` | `real` | `-Math.PI / 2` | read/write | `Md3LoadingIndicator` | Arc start angle in radians (not Item.rotation) |
+| `arcRotation` | `real` | `-Math.PI / 2` | read/write | `Md3LoadingIndicator` | Arc start angle in radians (not Item.rotation). |
 | `sweep` | `real` | `Math.PI * 0.65` | read/write | `Md3LoadingIndicator` | — |
 | `sweepDir` | `real` | `1` | read/write | `Md3LoadingIndicator` | — |
 | `spinSpeed` | `real` | `Math.PI * 2 / (Md3Motion.progressSpin / 1000)` | read/write | `Md3LoadingIndicator` | — |

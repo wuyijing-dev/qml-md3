@@ -19,7 +19,6 @@ import Md3
 | `currentPage` | `int` | `0` | read/write | `Md3Pagination` | — |
 | `totalCount` | `int` | `-1` | read/write | `Md3Pagination` | — |
 | `pageSize` | `int` | `10` | read/write | `Md3Pagination` | — |
-| `enabled` | `bool` | `true` | read/write | `Md3Pagination` | — |
 | `showTotal` | `bool` | `true` | read/write | `Md3Pagination` | — |
 | `safePageCount` | `int` | `Math.max(1, pageCount)` | readonly | `Md3Pagination` | — |
 | `safePage` | `int` | `Math.max(0, Math.min(currentPage, safePageCount - 1))` | readonly | `Md3Pagination` | — |

@@ -1,13 +1,17 @@
 # Md3Button
 
 - **Source:** `src/Md3/components/Md3Button.qml`
-- **Extends:** `Item`
+- **Extends:** `Md3AbstractButton`
 
 ## Import
 
 ```qml
 import Md3
 ```
+
+## Inheritance
+
+[`Md3Button`](Md3Button.md) → [`Md3AbstractButton`](Md3AbstractButton.md)
 
 ## Enums
 
@@ -25,29 +29,40 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `variant` | `int` | `Md3Button.Filled` | read/write | `Md3Button` | — |
 | `size` | `int` | `Md3Button.Small` | read/write | `Md3Button` | — |
-| `text` | `string` | `""` | read/write | `Md3Button` | — |
-| `icon` | `string` | `""` | read/write | `Md3Button` | — |
-| `enabled` | `bool` | `true` | read/write | `Md3Button` | — |
-| `accessibleName` | `string` | `text` | read/write | `Md3Button` | — |
-| `visualFocus` | `bool` | `false` | read/write | `Md3Button` | — |
 | `h` | `real` | `{…}` | readonly | `Md3Button` | — |
 | `padH` | `real` | `size === Md3Button.ExtraSmall ? 12 : (size === Md3Button.Large ? 24 : 16)` | readonly | `Md3Button` | — |
-| `corner` | `real` | `{…}` | readonly | `Md3Button` | — |
 | `elev` | `real` | `variant === Md3Button.Elevated ? (hovered \|\| pressed ? 2 : 1) : 0` | readonly | `Md3Button` | — |
-| `containerColor` | `color` | `{…}` | readonly | `Md3Button` | — |
-| `contentColor` | `color` | `{…}` | readonly | `Md3Button` | — |
-| `hovered` | `bool` | `mouse.containsMouse` | readonly | `Md3Button` | — |
-| `pressed` | `bool` | `mouse.pressed` | readonly | `Md3Button` | — |
+| `text` | `string` | `""` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `icon` | `string` | `""` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `accessibleName` | `string` | `text.length ? text : (icon.length ? icon : qsTr("Button"))` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `accessibleRole` | `int` | `Accessible.Button` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `visualFocus` | `bool` | `false` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | Keyboard focus ring — set true on Tab / arrow keys; cleared on mouse click. |
+| `contentColor` | `color` | `Md3Theme.colorScheme.colorOnSurface` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `containerColor` | `color` | `"transparent"` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `cornerRadius` | `real` | `0` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `pressTarget` | `Item` | `root` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | Coordinate space for pressFeedback (usually the painted background item). |
+| `checkable` | `bool` | `false` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | When true, Space/Enter/click toggle `checked` before emitting clicked. |
+| `checked` | `bool` | `false` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `pressEnabled` | `bool` | `true` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | When false, the built-in MouseArea ignores presses (custom hit areas). |
+| `pressRightMargin` | `real` | `0` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `pressLeftMargin` | `real` | `0` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `hovered` | `bool` | `mouse.containsMouse` | readonly | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `pressed` | `bool` | `mouse.pressed` | readonly | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
 
 ## Signals
 
 | Signal | Defined in | Description |
 |--------|------------|-------------|
-| `clicked()` | `Md3Button` | — |
+| `clicked()` | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `toggled(bool checked)` | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `pressFeedback(real x, real y)` | [`Md3AbstractButton`](Md3AbstractButton.md) | Map click into `pressTarget` so subclasses can `ripple.pulse(x, y)`. |
 
 ## Methods
 
-_None._
+| Method | Defined in | Description |
+|--------|------------|-------------|
+| `activate(fromKeyboard)` | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `markKeyboardFocus()` | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
 
 ## Example
 
@@ -59,6 +74,6 @@ Md3Button {
     size: Md3Button.Small
     text: ""
     icon: ""
-    accessibleName: text
+    accessibleName: text.length ? text : (icon.length ? icon : qsTr("Button"))
 }
 ```

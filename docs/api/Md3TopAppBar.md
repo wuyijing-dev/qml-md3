@@ -23,7 +23,7 @@ import Md3
 | `title` | `string` | `""` | read/write | `Md3TopAppBar` | — |
 | `leadingIcon` | `string` | `"menu"` | read/write | `Md3TopAppBar` | — |
 | `showLeading` | `bool` | `true` | read/write | `Md3TopAppBar` | — |
-| `trailingIcons` | `var` | `[]` | read/write | `Md3TopAppBar` | Strings or `{ icon, badge?, badgeText?, badgeDot?, badgeMax? }` |
+| `trailingIcons` | `var` | `[]` | read/write | `Md3TopAppBar` | — |
 | `barHeight` | `real` | `{…}` | readonly | `Md3TopAppBar` | — |
 
 ## Signals

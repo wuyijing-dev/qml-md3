@@ -30,13 +30,14 @@ import Md3
 | `supportingText` | `string` | `""` | read/write | `Md3Select` | — |
 | `errorText` | `string` | `""` | read/write | `Md3Select` | — |
 | `error` | `bool` | `false` | read/write | `Md3Select` | — |
-| `enabled` | `bool` | `true` | read/write | `Md3Select` | — |
+| `name` | `string` | `""` | read/write | `Md3Select` | Form field key for Md3Form.validate / error auto-wiring. |
 | `leadingIcon` | `string` | `""` | read/write | `Md3Select` | — |
 | `accessibleName` | `string` | `""` | read/write | `Md3Select` | — |
 | `searchable` | `bool` | `false` | read/write | `Md3Select` | — |
 | `multiSelect` | `bool` | `false` | read/write | `Md3Select` | — |
 | `searchPlaceholder` | `string` | `qsTr("Search")` | read/write | `Md3Select` | — |
 | `suggestionLimit` | `int` | `0` | read/write | `Md3Select` | — |
+| `overlayWindow` | `var` | `null` | read/write | `Md3Select` | Optional explicit Window for menu overlay. |
 | `hasError` | `bool` | `error \|\| errorText.length > 0` | readonly | `Md3Select` | — |
 | `helper` | `string` | `hasError ? (errorText.length ? errorText : supportingText) : supportingText` | readonly | `Md3Select` | — |
 | `activeColor` | `color` | `hasError ? Md3Theme.colorScheme.error : Md3Theme.colorScheme.primary` | readonly | `Md3Select` | — |

@@ -1,6 +1,6 @@
 # Md3ContextMenuArea
 
-Transparent right-click host over a page / region. Left-clicks pass through; right-click opens `contextMenu` at the cursor.  ```qml Md3ContextMenuArea { anchors.fill: parent contextMenu: pageMenu } Md3Menu { id: pageMenu Md3MenuItem { text: "Refresh" } } ```
+Transparent right-click host over a page / region. Left-clicks pass through; right-click opens `contextMenu` at the cursor.  ```qml Md3ContextMenuArea { anchors.fill: parent contextMenu: pageMenu } Md3Menu { id: pageMenu Md3MenuItem { text: qsTr("Refresh") } } ```
 
 - **Source:** `src/Md3/components/Md3ContextMenuArea.qml`
 - **Extends:** `Item`
@@ -15,9 +15,9 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `enabled` | `bool` | `true` | read/write | `Md3ContextMenuArea` | — |
 | `contextMenu` | `var` | `null` | read/write | `Md3ContextMenuArea` | Target Md3Menu (required for a useful menu). |
 | `menuWidth` | `real` | `0` | read/write | `Md3ContextMenuArea` | — |
+| `overlayWindow` | `var` | `null` | read/write | `Md3ContextMenuArea` | Optional explicit Window for overlay mapping (else Window.window). |
 
 ## Signals
 
@@ -42,5 +42,6 @@ import Md3
 Md3ContextMenuArea {
     contextMenu: null
     menuWidth: 0
+    overlayWindow: null
 }
 ```

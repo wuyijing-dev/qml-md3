@@ -14,6 +14,7 @@ import Md3
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
 | `model` | `var` | `[]` | read/write | `Md3MenuBar` | [{ text, icon?, items?: [...] }] — use `items` (not `children`; that clashes with Item) |
+| `overlayWindow` | `var` | `null` | read/write | `Md3MenuBar` | Optional explicit Window for menu overlay (else Window.window). |
 
 ## Signals
 
@@ -32,5 +33,6 @@ import Md3
 
 Md3MenuBar {
     model: []
+    overlayWindow: null
 }
 ```

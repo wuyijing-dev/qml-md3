@@ -1,36 +1,58 @@
 # Md3Card
 
 - **Source:** `src/Md3/components/Md3Card.qml`
+- **Extends:** `Item`
+
+## Import
+
+```qml
+import Md3
+```
 
 ## Enums
 
-`Elevated`, `Filled`, `Outlined`
+### `Md3Card.Variant`
+
+`Md3Card.Elevated`, `Md3Card.Filled`, `Md3Card.Outlined`
 
 ## Properties
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `variant` | int | `Elevated` | Surface style |
-| `clickable` | bool | `false` | Emits `clicked` |
-| `padding` | real | `16` | Content inset |
-| `layoutMode` | int | `Fit` | Fit or Scroll body |
-| `title` / `subtitle` | string | `""` | Optional header |
-| `headerTrailing` | alias | — | Custom trailing header slot |
-| `actions` | var | `[]` | `[{ text, icon?, variant? }]` header buttons |
-| `content` | alias | default | Body under the header |
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `variant` | `int` | `Md3Card.Elevated` | read/write | `Md3Card` | — |
+| `clickable` | `bool` | `false` | read/write | `Md3Card` | — |
+| `padding` | `real` | `Md3Theme.spacingLg` | read/write | `Md3Card` | — |
+| `layoutMode` | `int` | `Md3ContainerBody.Fit` | read/write | `Md3Card` | — |
+| `title` | `string` | `""` | read/write | `Md3Card` | Optional header — when set, users need not nest title Text manually. |
+| `subtitle` | `string` | `""` | read/write | `Md3Card` | — |
+| `headerTrailing` | `alias` | `headerTrailingSlot.data` | read/write | `Md3Card` | Trailing controls in the header row (e.g. Md3Button). |
+| `actions` | `var` | `[]` | read/write | `Md3Card` | [{ text, icon?, variant? }] — compact header actions without Row glue. |
+| `content` | `alias` | `bodySlot.data` | default read/write | `Md3Card` | Default property → `bodySlot.data` |
+| `elev` | `real` | `variant === Md3Card.Elevated ? 1 : 0` | readonly | `Md3Card` | — |
+| `hasHeader` | `bool` | `title.length > 0 \|\| subtitle.length > 0` | readonly | `Md3Card` | — |
+| `containerColor` | `color` | `{…}` | readonly | `Md3Card` | — |
 
 ## Signals
 
-`clicked()`, `actionClicked(int index)`
+| Signal | Defined in | Description |
+|--------|------------|-------------|
+| `clicked()` | `Md3Card` | — |
+| `actionClicked(int index)` | `Md3Card` | — |
+
+## Methods
+
+_None._
 
 ## Example
 
 ```qml
+import Md3
+
 Md3Card {
-    title: qsTr("Storage")
-    subtitle: qsTr("Local cache")
-    actions: [{ text: qsTr("Reset"), variant: "outlined" }]
-    onActionClicked: (i) => console.log(i)
-    Md3Switch { text: qsTr("Enabled") }
+    variant: Md3Card.Elevated
+    clickable: false
+    padding: Md3Theme.spacingLg
+    layoutMode: Md3ContainerBody.Fit
+    title: ""
 }
 ```

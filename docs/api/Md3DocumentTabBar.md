@@ -19,7 +19,7 @@ import Md3
 | `currentIndex` | `int` | `0` | read/write | `Md3DocumentTabBar` | — |
 | `showAddButton` | `bool` | `true` | read/write | `Md3DocumentTabBar` | — |
 | `closable` | `bool` | `true` | read/write | `Md3DocumentTabBar` | — |
-| `tearOffEnabled` | `bool` | `false` | read/write | `Md3DocumentTabBar` | When true, drag outside window emits `tabTearOff` (ApplicationWindow spawns `Md3TabWindow`). |
+| `tearOffEnabled` | `bool` | `false` | read/write | `Md3DocumentTabBar` | — |
 | `reorderEnabled` | `bool` | `true` | read/write | `Md3DocumentTabBar` | — |
 | `tabHeight` | `real` | `32` | read/write | `Md3DocumentTabBar` | — |
 | `minTabWidth` | `real` | `120` | read/write | `Md3DocumentTabBar` | — |
@@ -27,6 +27,8 @@ import Md3
 | `dragThreshold` | `real` | `8` | read/write | `Md3DocumentTabBar` | — |
 | `tearOffSlop` | `real` | `28` | read/write | `Md3DocumentTabBar` | — |
 | `animateAdd` | `bool` | `true` | read/write | `Md3DocumentTabBar` | Play pop-in when a tab is appended |
+| `unifiedWithTitleBar` | `bool` | `false` | read/write | `Md3DocumentTabBar` | When true, bar fill is transparent so a parent chrome strip paints title+tabs as one. |
+| `hostWindow` | `var` | `null` | read/write | `Md3DocumentTabBar` | Optional Window for backdrop tint / tear-off bounds (else Window.window). |
 | `barColor` | `color` | `{…}` | readonly | `Md3DocumentTabBar` | — |
 | `tabSelected` | `color` | `{…}` | readonly | `Md3DocumentTabBar` | — |
 | `tabHover` | `color` | `Md3Theme.colorScheme.withOpacity( Md3Theme.colorScheme.colorOnSurface, 0.05)` | readonly | `Md3DocumentTabBar` | — |

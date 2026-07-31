@@ -1,13 +1,17 @@
 # Md3Fab
 
 - **Source:** `src/Md3/components/Md3Fab.qml`
-- **Extends:** `Item`
+- **Extends:** `Md3AbstractButton`
 
 ## Import
 
 ```qml
 import Md3
 ```
+
+## Inheritance
+
+[`Md3Fab`](Md3Fab.md) → [`Md3AbstractButton`](Md3AbstractButton.md)
 
 ## Enums
 
@@ -25,31 +29,43 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `size` | `int` | `Md3Fab.Regular` | read/write | `Md3Fab` | — |
 | `colorRole` | `int` | `Md3Fab.Primary` | read/write | `Md3Fab` | — |
-| `icon` | `string` | `"add"` | read/write | `Md3Fab` | — |
-| `iconRotation` | `real` | `0` | read/write | `Md3Fab` | Degrees applied to the glyph (FAB menu uses 45° when open). |
-| `enabled` | `bool` | `true` | read/write | `Md3Fab` | — |
-| `accessibleName` | `string` | `"Floating action button"` | read/write | `Md3Fab` | — |
+| `iconRotation` | `real` | `0` | read/write | `Md3Fab` | — |
 | `tooltip` | `string` | `""` | read/write | `Md3Fab` | — |
-| `fabSize` | `real` | `{…}` | readonly | `Md3Fab` | — |
-| `corner` | `real` | `{…}` | readonly | `Md3Fab` | — |
-| `iconSize` | `real` | `size === Md3Fab.Large ? 36 : 24` | readonly | `Md3Fab` | — |
 | `shadowPad` | `real` | `28` | read/write | `Md3Fab` | — |
-| `containerColor` | `color` | `{…}` | readonly | `Md3Fab` | — |
-| `contentColor` | `color` | `{…}` | readonly | `Md3Fab` | — |
-| `hovered` | `bool` | `mouse.containsMouse` | readonly | `Md3Fab` | — |
-| `pressed` | `bool` | `mouse.pressed` | readonly | `Md3Fab` | — |
-| `focused` | `bool` | `activeFocus` | readonly | `Md3Fab` | — |
+| `fabSize` | `real` | `{…}` | readonly | `Md3Fab` | — |
+| `iconSize` | `real` | `size === Md3Fab.Large ? 36 : 24` | readonly | `Md3Fab` | — |
 | `elev` | `real` | `{…}` | readonly | `Md3Fab` | — |
+| `text` | `string` | `""` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `icon` | `string` | `""` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `accessibleName` | `string` | `text.length ? text : (icon.length ? icon : qsTr("Button"))` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `accessibleRole` | `int` | `Accessible.Button` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `visualFocus` | `bool` | `false` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | Keyboard focus ring — set true on Tab / arrow keys; cleared on mouse click. |
+| `contentColor` | `color` | `Md3Theme.colorScheme.colorOnSurface` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `containerColor` | `color` | `"transparent"` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `cornerRadius` | `real` | `0` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `pressTarget` | `Item` | `root` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | Coordinate space for pressFeedback (usually the painted background item). |
+| `checkable` | `bool` | `false` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | When true, Space/Enter/click toggle `checked` before emitting clicked. |
+| `checked` | `bool` | `false` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `pressEnabled` | `bool` | `true` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | When false, the built-in MouseArea ignores presses (custom hit areas). |
+| `pressRightMargin` | `real` | `0` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `pressLeftMargin` | `real` | `0` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `hovered` | `bool` | `mouse.containsMouse` | readonly | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `pressed` | `bool` | `mouse.pressed` | readonly | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
 
 ## Signals
 
 | Signal | Defined in | Description |
 |--------|------------|-------------|
-| `clicked()` | `Md3Fab` | — |
+| `clicked()` | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `toggled(bool checked)` | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `pressFeedback(real x, real y)` | [`Md3AbstractButton`](Md3AbstractButton.md) | Map click into `pressTarget` so subclasses can `ripple.pulse(x, y)`. |
 
 ## Methods
 
-_None._
+| Method | Defined in | Description |
+|--------|------------|-------------|
+| `activate(fromKeyboard)` | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
+| `markKeyboardFocus()` | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
 
 ## Example
 
@@ -59,8 +75,8 @@ import Md3
 Md3Fab {
     size: Md3Fab.Regular
     colorRole: Md3Fab.Primary
-    icon: "add"
     iconRotation: 0
-    accessibleName: "Floating action button"
+    tooltip: ""
+    shadowPad: 28
 }
 ```

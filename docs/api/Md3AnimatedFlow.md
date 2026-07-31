@@ -1,6 +1,6 @@
 # Md3AnimatedFlow
 
-Flow layout with optional motion. Child size = `max(explicit, implicit)` so fixed `width`/`height` cards do not need mirrored `implicit*` glue.
+Flow layout: children reflow with spatial easing. Sizes use max(explicit, implicit) so callers need not mirror width/height into implicit*.
 
 - **Source:** `src/Md3/layout/Md3AnimatedFlow.qml`
 - **Extends:** `Item`
@@ -15,37 +15,50 @@ import Md3
 
 ### `Md3AnimatedFlow.Alignment`
 
-`Start`, `Center`, `End` — horizontal alignment of each wrapped row.
+`Md3AnimatedFlow.Start`, `Md3AnimatedFlow.Center`, `Md3AnimatedFlow.End`
 
 ## Properties
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `content` | alias | default | Children |
-| `spacing` | real | `8` | Horizontal gap |
-| `rowSpacing` | real | `8` | Vertical gap between rows |
-| `padding` | real | `0` | Uniform padding |
-| `leftPadding` / `rightPadding` / `topPadding` / `bottomPadding` | real | `padding` | Edge padding |
-| `animate` | bool | `true` | Animate child moves |
-| `moveDuration` | int | `Md3Motion.spatialDuration` | — |
-| `moveEasing` | var | `Md3Motion.spatialDefault` | — |
-| `fillWidth` | bool | `true` | Stretch to parent width |
-| `alignment` | int | `Start` | Row alignment |
-| `rowCount` / `wrapped` / `contentWidth` / `contentHeight` | readonly | — | Metrics |
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `content` | `alias` | `host.data` | default read/write | `Md3AnimatedFlow` | Default property → `host.data` |
+| `spacing` | `real` | `8` | read/write | `Md3AnimatedFlow` | — |
+| `rowSpacing` | `real` | `8` | read/write | `Md3AnimatedFlow` | — |
+| `padding` | `real` | `0` | read/write | `Md3AnimatedFlow` | — |
+| `leftPadding` | `real` | `padding` | read/write | `Md3AnimatedFlow` | — |
+| `rightPadding` | `real` | `padding` | read/write | `Md3AnimatedFlow` | — |
+| `topPadding` | `real` | `padding` | read/write | `Md3AnimatedFlow` | — |
+| `bottomPadding` | `real` | `padding` | read/write | `Md3AnimatedFlow` | — |
+| `animate` | `bool` | `true` | read/write | `Md3AnimatedFlow` | — |
+| `moveDuration` | `int` | `Md3Motion.spatialDuration` | read/write | `Md3AnimatedFlow` | — |
+| `moveEasing` | `var` | `Md3Motion.spatialDefault` | read/write | `Md3AnimatedFlow` | — |
+| `fillWidth` | `bool` | `true` | read/write | `Md3AnimatedFlow` | — |
+| `alignment` | `int` | `Md3AnimatedFlow.Start` | read/write | `Md3AnimatedFlow` | — |
+| `rowCount` | `int` | `_rowCount` | readonly | `Md3AnimatedFlow` | — |
+| `wrapped` | `bool` | `_rowCount > 1` | readonly | `Md3AnimatedFlow` | — |
+| `contentHeight` | `real` | `_contentHeight` | readonly | `Md3AnimatedFlow` | — |
+| `contentWidth` | `real` | `_contentWidth` | readonly | `Md3AnimatedFlow` | — |
+
+## Signals
+
+_None._
 
 ## Methods
 
-| Method | Description |
-|--------|-------------|
-| `relayout()` | Recompute placement |
+| Method | Defined in | Description |
+|--------|------------|-------------|
+| `relayout()` | `Md3AnimatedFlow` | — |
 
 ## Example
 
 ```qml
+import Md3
+
 Md3AnimatedFlow {
-    spacing: 12
-    rowSpacing: 12
-    Md3Card { title: "A"; width: 180; height: 100 }
-    Md3Card { title: "B"; width: 180; height: 100 }
+    spacing: 8
+    rowSpacing: 8
+    padding: 0
+    leftPadding: padding
+    rightPadding: padding
 }
 ```

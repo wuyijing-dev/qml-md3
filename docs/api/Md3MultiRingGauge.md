@@ -1,27 +1,50 @@
 # Md3MultiRingGauge
 
-- **Source:** `src/Md3/components/Md3MultiRingGauge.qml`
+Concentric multi-ring gauge — each ring is `{ value, from?, to?, color?, label? }`.
 
-Concentric rings — each ring is an independent progress value.
+- **Source:** `src/Md3/components/Md3MultiRingGauge.qml`
+- **Extends:** `Item`
+
+## Import
+
+```qml
+import Md3
+```
 
 ## Properties
 
-| Name | Type | Default |
-|------|------|---------|
-| `rings` | `var` | `[]` — `[{ value, from?, to?, color?, label? }]` |
-| `strokeWidth` / `ringGap` | `real` | `10` / `6` |
-| `centerValue` / `centerLabel` | `string` | |
-| `size` | `real` | `160` |
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `rings` | `var` | `[]` | read/write | `Md3MultiRingGauge` | [{ value, from, to, color, label, unit }] |
+| `strokeWidth` | `real` | `10` | read/write | `Md3MultiRingGauge` | — |
+| `ringGap` | `real` | `6` | read/write | `Md3MultiRingGauge` | — |
+| `startAngle` | `real` | `-90` | read/write | `Md3MultiRingGauge` | — |
+| `trackColor` | `color` | `Md3Theme.colorScheme.gaugeTrack` | read/write | `Md3MultiRingGauge` | — |
+| `showCenterLabel` | `bool` | `true` | read/write | `Md3MultiRingGauge` | — |
+| `centerLabel` | `string` | `""` | read/write | `Md3MultiRingGauge` | — |
+| `centerValue` | `string` | `""` | read/write | `Md3MultiRingGauge` | — |
+| `size` | `real` | `160` | read/write | `Md3MultiRingGauge` | — |
+| `minCenterRatio` | `real` | `0.40` | read/write | `Md3MultiRingGauge` | Minimum center hole as a fraction of diameter (keeps text readable). |
+| `innerHoleRadius` | `real` | `Math.max(22, _dialR * minCenterRatio)` | readonly | `Md3MultiRingGauge` | Guaranteed readable hole; rings auto-thin to leave this clear. |
+
+## Signals
+
+_None._
+
+## Methods
+
+_None._
+
+## Example
 
 ```qml
+import Md3
+
 Md3MultiRingGauge {
-    size: 140
-    centerValue: "81%"
-    centerLabel: qsTr("Health")
-    rings: [
-        { value: 81, color: Md3Theme.colorScheme.primary },
-        { value: 64, color: Md3Theme.colorScheme.tertiary },
-        { value: 42, color: Md3Theme.colorScheme.secondary }
-    ]
+    rings: []
+    strokeWidth: 10
+    ringGap: 6
+    startAngle: -90
+    trackColor: Md3Theme.colorScheme.gaugeTrack
 }
 ```

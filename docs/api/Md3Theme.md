@@ -20,27 +20,34 @@ import Md3
 | `highContrast` | `bool` | `false` | read/write | `Md3Theme` | — |
 | `reduceMotion` | `bool` | `false` | read/write | `Md3Theme` | Prefer near-instant motion for vestibular / a11y preferences. |
 | `progressiveContent` | `bool` | `true` | read/write | `Md3Theme` | Within-page progressive load (Md3DeferredSection). Default on; set false to load everything immediately. |
-| `density` | `int` | `0` | read/write | `Md3Theme` | `0` Comfortable / `1` Compact — drives spacing* / pagePadding / controlHeight. |
-| `densityCompact` | `bool` | — | readonly | `Md3Theme` | `density >= 1`. |
-| `spacingXs` … `spacingXl` | `real` | — | readonly | `Md3Theme` | Density-aware spacing scale (4 → 24 / tighter when compact). |
-| `pagePadding` | `real` | — | readonly | `Md3Theme` | Page inset hint (20 / 12). |
-| `controlHeight` | `real` | — | readonly | `Md3Theme` | Control height hint (40 / 36). |
-| `tableRowHeight` | `real` | — | readonly | `Md3Theme` | Table row hint (52 / 40). |
-| `effectsLevel` | `int` | `1` | read/write | `Md3Theme` | Global effects budget: `0` 流畅 / `1` 均衡 / `2` 画质. Drives ripple, state layers, charts, shadows, glass. |
-| `effectsIntensity` | `real` | `1.0` | read/write | `Md3Theme` | Extra multiplier (0.35–1.35) on ripple / hover-press state opacity. |
-| `effectsRipple` | `bool` | — | readonly | `Md3Theme` | Expanding ink (Balanced+). Low uses rounded press-flash instead. |
-| `effectsRippleMasked` | `bool` | — | readonly | `Md3Theme` | Rounded MultiEffect mask for expanding ink. |
-| `effectsRipplePeak` / `effectsRippleHold` | `real` | — | readonly | `Md3Theme` | Ripple opacity envelope. |
-| `effectsRippleSpread` | `real` | — | readonly | `Md3Theme` | Ripple expand factor. |
-| `effectsStateIntensity` | `real` | — | readonly | `Md3Theme` | Hover/press state-layer scale. |
-| `effectsPageMotion` | `bool` | — | readonly | `Md3Theme` | Page/UI transitions (same across tiers; off only for `reduceMotion`). |
-| `effectsChartSmooth` | `bool` | — | readonly | `Md3Theme` | Catmull smoothing (High only). |
-| `effectsChartInertia` | `bool` | — | readonly | `Md3Theme` | Pan inertia (Balanced+). |
-| `effectsLiveMotion` | `bool` | — | readonly | `Md3Theme` | Live charts / wave animation (Balanced+). |
-| `effectsLiveFps` | `int` | — | readonly | `Md3Theme` | `0` = display refresh; otherwise FPS cap. |
-| `effectsShadows` | `bool` | — | readonly | `Md3Theme` | Elevation shadows enabled. |
-| `effectsMaxElevation` | `real` | — | readonly | `Md3Theme` | Cap for shadow elevation. |
-| `effectsGlassQuality` | `int` | — | readonly | `Md3Theme` | Liquid-glass quality 0–2. |
+| `density` | `int` | `0` | read/write | `Md3Theme` | Desktop UI density: `0` Comfortable (默认) / `1` Compact（工具/数据密集）。 Aligns with `Md3DataTable.Density`; drives spacing* / pagePadding / controlHeight hints. |
+| `densityCompact` | `bool` | `density >= 1` | readonly | `Md3Theme` | — |
+| `spacingXs` | `real` | `4` | readonly | `Md3Theme` | 4 / 4 dp |
+| `spacingSm` | `real` | `densityCompact ? 6 : 8` | readonly | `Md3Theme` | 8 → 6 |
+| `spacingMd` | `real` | `densityCompact ? 8 : 12` | readonly | `Md3Theme` | 12 → 8（表单、区块内） |
+| `spacingLg` | `real` | `densityCompact ? 12 : 16` | readonly | `Md3Theme` | 16 → 12 |
+| `spacingXl` | `real` | `densityCompact ? 16 : 24` | readonly | `Md3Theme` | 24 → 16（区块之间） |
+| `pagePadding` | `real` | `densityCompact ? 12 : 20` | readonly | `Md3Theme` | Window / page content inset hint（`Md3ApplicationWindow.pagePadding` 可绑此值） |
+| `controlHeight` | `real` | `densityCompact ? 36 : 40` | readonly | `Md3Theme` | Default control row height hint（按钮/字段外壳；控件可自有高度） |
+| `tableRowHeight` | `real` | `densityCompact ? 40 : 52` | readonly | `Md3Theme` | Data table row height hint（与 Md3DataTable Comfortable/Compact 对齐） |
+| `effectsLevel` | `int` | `1` | read/write | `Md3Theme` | Global visual-effects budget for device adaptation. 0 = Low (流畅), 1 = Balanced (均衡), 2 = High (画质). |
+| `effectsIntensity` | `real` | `1.0` | read/write | `Md3Theme` | Extra intensity on interaction ink / state layers (0.35–1.35). Multiplies tier defaults. |
+| `effectsLow` | `bool` | `effectsLevel <= 0` | readonly | `Md3Theme` | — |
+| `effectsHigh` | `bool` | `effectsLevel >= 2` | readonly | `Md3Theme` | — |
+| `effectsChartSmooth` | `bool` | `effectsLevel >= 2 && !reduceMotion` | readonly | `Md3Theme` | Chart Catmull smoothing (expensive on pan settle). |
+| `effectsChartInertia` | `bool` | `effectsLevel >= 1 && !reduceMotion` | readonly | `Md3Theme` | Chart pan inertia after drag release. |
+| `effectsLiveMotion` | `bool` | `!reduceMotion` | readonly | `Md3Theme` | Live chart / wave continuous animation (all tiers; FPS capped on lower tiers). |
+| `effectsLiveFps` | `int` | `effectsLevel >= 2 ? 0 : (effectsLevel >= 1 ? 24 : 15)` | readonly | `Md3Theme` | 0 = display refresh; >0 caps live charts / wave. |
+| `effectsShadows` | `bool` | `effectsLevel >= 1` | readonly | `Md3Theme` | Soft dual-blur elevation shadows (MultiEffect FBOs). |
+| `effectsMaxElevation` | `real` | `effectsLevel >= 2 ? 12 : (effectsLevel >= 1 ? 3 : 0)` | readonly | `Md3Theme` | Max elevation applied when shadows are on (High keeps full). |
+| `effectsGlassQuality` | `int` | `Math.max(0, Math.min(2, effectsLevel))` | readonly | `Md3Theme` | Liquid-glass quality hint: 0 low / 1 mid / 2 high. |
+| `effectsPageMotion` | `bool` | `!reduceMotion` | readonly | `Md3Theme` | Prefer page / overlay transitions (identical across effects tiers; only reduceMotion kills them). |
+| `effectsRipple` | `bool` | `effectsLevel >= 1 && !reduceMotion` | readonly | `Md3Theme` | Ripple expand ink — 均衡/画质. 流畅 uses rounded press-flash instead (no mask FBO). |
+| `effectsRippleMasked` | `bool` | `effectsRipple` | readonly | `Md3Theme` | Rounded MultiEffect mask for expand ink (only when effectsRipple). |
+| `effectsRipplePeak` | `real` | `{…}` | readonly | `Md3Theme` | Peak / hold opacity for ripple / press-flash. |
+| `effectsRippleHold` | `real` | `effectsRipplePeak * 0.5` | readonly | `Md3Theme` | — |
+| `effectsRippleSpread` | `real` | `effectsLevel >= 2 ? 2.2 : 2.0` | readonly | `Md3Theme` | Expand factor for ink diameter. |
+| `effectsStateIntensity` | `real` | `{…}` | readonly | `Md3Theme` | Hover / press state-layer strength. |
 | `colorScheme` | `Md3ColorScheme` | `{…}` | read/write | `Md3Theme` | — |
 | `dynamicScheme` | `Md3DynamicScheme` | `{…}` | read/write | `Md3Theme` | — |
 | `typography` | `Md3Typography` | `{…}` | read/write | `Md3Theme` | — |
@@ -57,12 +64,12 @@ _None._
 
 | Method | Defined in | Description |
 |--------|------------|-------------|
+| `setEffectsLevel(level)` | `Md3Theme` | — |
+| `setEffectsIntensity(v)` | `Md3Theme` | — |
+| `setDensity(level)` | `Md3Theme` | — |
+| `densityLabel()` | `Md3Theme` | — |
+| `effectsLevelLabel()` | `Md3Theme` | — |
 | `applySeed(c)` | `Md3Theme` | Rebuild the full MD3 role set from seed + dark (Material You–style). |
-| `setEffectsLevel(level)` | `Md3Theme` | Clamp and set `effectsLevel` to 0–2. |
-| `setEffectsIntensity(v)` | `Md3Theme` | Clamp and set `effectsIntensity` to 0.35–1.35. |
-| `setDensity(level)` | `Md3Theme` | Clamp and set `density` to 0–1. |
-| `densityLabel()` | `Md3Theme` | Localized 舒适 / 紧凑. |
-| `effectsLevelLabel()` | `Md3Theme` | Localized label for the current effects level. |
 | `toggleDark()` | `Md3Theme` | — |
 | `scaled(px)` | `Md3Theme` | — |
 

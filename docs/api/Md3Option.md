@@ -18,11 +18,11 @@ import Md3
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
 | `text` | `string` | `""` | read/write | [`Md3DropdownMenu`](Md3DropdownMenu.md) | — |
-| `label` | `string` | `"Select"` | read/write | [`Md3DropdownMenu`](Md3DropdownMenu.md) | — |
+| `label` | `string` | `qsTr("Select")` | read/write | [`Md3DropdownMenu`](Md3DropdownMenu.md) | — |
 | `leadingIcon` | `string` | `""` | read/write | [`Md3DropdownMenu`](Md3DropdownMenu.md) | — |
 | `model` | `var` | `[]` | read/write | [`Md3DropdownMenu`](Md3DropdownMenu.md) | — |
 | `currentIndex` | `int` | `-1` | read/write | [`Md3DropdownMenu`](Md3DropdownMenu.md) | — |
-| `enabled` | `bool` | `true` | read/write | [`Md3DropdownMenu`](Md3DropdownMenu.md) | — |
+| `overlayWindow` | `var` | `null` | read/write | [`Md3DropdownMenu`](Md3DropdownMenu.md) | Optional explicit Window for menu overlay. |
 | `open` | `bool` | `menu.open` | readonly | [`Md3DropdownMenu`](Md3DropdownMenu.md) | — |
 | `displayText` | `string` | `{…}` | readonly | [`Md3DropdownMenu`](Md3DropdownMenu.md) | — |
 
@@ -48,7 +48,7 @@ import Md3
 
 Md3Option {
     text: ""
-    label: "Select"
+    label: qsTr("Select")
     leadingIcon: ""
     model: []
     currentIndex: -1

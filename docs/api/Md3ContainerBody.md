@@ -1,33 +1,53 @@
 # Md3ContainerBody
 
-Fit / Scroll content host embedded by Md3 containers. Prefer setting `layoutMode` on the parent container (`Md3Card`, sheets, …) instead of nesting this manually.
+Fit / Scroll content host embedded by Md3 container components.
 
 - **Source:** `src/Md3/components/Md3ContainerBody.qml`
+- **Extends:** `Item`
+
+## Import
+
+```qml
+import Md3
+```
 
 ## Enums
 
-### `LayoutMode`
+### `Md3ContainerBody.LayoutMode`
 
-`Fit`, `Scroll`
+`Md3ContainerBody.Fit`, `Md3ContainerBody.Scroll`
 
 ## Properties
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `layoutMode` | int | `Fit` | Fit grows with content; Scroll enables internal flick |
-| `padding` | real | `0` | Inner padding |
-| `clipContent` | bool | `true` | Clip flickable |
-| `fitFallbackHeight` | real | `320` | Used when a fill-anchored child would create a height loop |
-| `content` | alias | default | Children |
-| `contentImplicitWidth` / `contentImplicitHeight` | readonly | — | Measured content size |
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `layoutMode` | `int` | `Md3ContainerBody.Fit` | read/write | `Md3ContainerBody` | — |
+| `padding` | `real` | `0` | read/write | `Md3ContainerBody` | — |
+| `clipContent` | `bool` | `true` | read/write | `Md3ContainerBody` | — |
+| `fitFallbackHeight` | `real` | `320` | read/write | `Md3ContainerBody` | — |
+| `content` | `alias` | `contentHost.data` | default read/write | `Md3ContainerBody` | Default property → `contentHost.data` |
+| `contentHost` | `alias` | `contentHost` | read/write | `Md3ContainerBody` | Alias → `contentHost` |
+| `contentImplicitWidth` | `real` | `contentHost.childrenRect.width` | readonly | `Md3ContainerBody` | — |
+| `hasParentFillChild` | `bool` | `_hasParentFillChild()` | readonly | `Md3ContainerBody` | — |
+| `contentImplicitHeight` | `real` | `_measureContentHeight()` | readonly | `Md3ContainerBody` | — |
+
+## Signals
+
+_None._
+
+## Methods
+
+_None._
 
 ## Example
 
-Usually via parent:
-
 ```qml
-Md3Card {
-    layoutMode: Md3ContainerBody.Scroll
-    /* content */
+import Md3
+
+Md3ContainerBody {
+    layoutMode: Md3ContainerBody.Fit
+    padding: 0
+    clipContent: true
+    fitFallbackHeight: 320
 }
 ```

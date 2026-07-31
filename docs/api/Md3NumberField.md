@@ -31,7 +31,7 @@ import Md3
 | `supportingText` | `string` | `""` | read/write | `Md3NumberField` | — |
 | `errorText` | `string` | `""` | read/write | `Md3NumberField` | — |
 | `error` | `bool` | `false` | read/write | `Md3NumberField` | — |
-| `enabled` | `bool` | `true` | read/write | `Md3NumberField` | — |
+| `name` | `string` | `""` | read/write | `Md3NumberField` | Form field key for Md3Form.validate / error auto-wiring. |
 | `prefix` | `string` | `""` | read/write | `Md3NumberField` | — |
 | `suffix` | `string` | `""` | read/write | `Md3NumberField` | — |
 | `accessibleName` | `string` | `""` | read/write | `Md3NumberField` | — |

@@ -23,12 +23,13 @@ import Md3
 | `checkEnabled` | `bool` | `false` | read/write | `Md3TreeView` | — |
 | `triStateCheck` | `bool` | `true` | read/write | `Md3TreeView` | — |
 | `filterText` | `string` | `""` | read/write | `Md3TreeView` | — |
-| `showFilter` | `bool` | `false` | read/write | `Md3TreeView` | Built-in filter field |
+| `showFilter` | `bool` | `false` | read/write | `Md3TreeView` | Built-in filter field (no external TextField sync glue). |
 | `filterPlaceholder` | `string` | `qsTr("Filter")` | read/write | `Md3TreeView` | — |
 | `filterLabel` | `string` | `qsTr("Filter")` | read/write | `Md3TreeView` | — |
-| `showExpandControls` | `bool` | `false` | read/write | `Md3TreeView` | Expand/Collapse all buttons |
+| `showExpandControls` | `bool` | `false` | read/write | `Md3TreeView` | Expand all / Collapse all buttons beside the filter. |
 | `lazyLoad` | `bool` | `false` | read/write | `Md3TreeView` | — |
 | `contextMenu` | `var` | `null` | read/write | `Md3TreeView` | — |
+| `overlayWindow` | `var` | `null` | read/write | `Md3TreeView` | Optional explicit Window for context-menu overlay coords. |
 | `flatRows` | `var` | `{…}` | readonly | `Md3TreeView` | — |
 
 ## Signals

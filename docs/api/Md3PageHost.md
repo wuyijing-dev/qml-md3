@@ -35,7 +35,7 @@ import Md3
 | `prefetchNeighbors` | `bool` | `false` | read/write | `Md3PageHost` | — |
 | `l2Components` | `bool` | `true` | read/write | `Md3PageHost` | — |
 | `l2CacheLimit` | `int` | `1` | read/write | `Md3PageHost` | Few compiled Components — enough for back/forward, not every destination |
-| `l2WarmIdle` | `bool` | `false` | read/write | `Md3PageHost` | If true, only warm L2 for current ±1 + Markov (never full destination list) |
+| `l2WarmIdle` | `bool` | `false` | read/write | `Md3PageHost` | If true, after idle delay pace-compile every destination Component (L2 only). |
 | `predictPrefetch` | `bool` | `false` | read/write | `Md3PageHost` | — |
 | `leaveSnapshot` | `bool` | `false` | read/write | `Md3PageHost` | Off by default: ShaderEffectSource holds a full-size GPU texture |
 | `leaveSnapOpacity` | `real` | `0` | read/write | `Md3PageHost` | — |
@@ -69,8 +69,10 @@ import Md3
 | `navStack` | `var` | `[]` | read/write | `Md3PageHost` | — |
 | `routeParams` | `var` | `{…}` | read/write | `Md3PageHost` | — |
 | `sectionRootIndex` | `int` | `-1` | read/write | `Md3PageHost` | — |
-| `canGoBack` | `bool` | `navStack.length > 0` | readonly | `Md3PageHost` | — |
-| `navDepth` | `int` | `navStack.length` | readonly | `Md3PageHost` | — |
+| `browseHistory` | `var` | `[]` | read/write | `Md3PageHost` | Top-level rail / index switches (separate from pushRoute hierarchical stack). |
+| `browseHistoryLimit` | `int` | `32` | read/write | `Md3PageHost` | — |
+| `canGoBack` | `bool` | `navStack.length > 0 \|\| browseHistory.length > 0` | readonly | `Md3PageHost` | — |
+| `navDepth` | `int` | `navStack.length + browseHistory.length` | readonly | `Md3PageHost` | — |
 | `transitioning` | `bool` | `false` | read/write | `Md3PageHost` | — |
 | `transitionFrom` | `int` | `-1` | read/write | `Md3PageHost` | — |
 | `transitionTo` | `int` | `-1` | read/write | `Md3PageHost` | — |
@@ -98,6 +100,7 @@ _None._
 | Method | Defined in | Description |
 |--------|------------|-------------|
 | `resetNavStack()` | `Md3PageHost` | — |
+| `resetBrowseHistory()` | `Md3PageHost` | — |
 | `pushRoute(index, params, opts)` | `Md3PageHost` | — |
 | `replaceRoute(index, params, opts)` | `Md3PageHost` | — |
 | `goBack(opts)` | `Md3PageHost` | — |
@@ -107,6 +110,7 @@ _None._
 | `noteActivity()` | `Md3PageHost` | — |
 | `prefetchHint(index)` | `Md3PageHost` | — |
 | `clearPrefetchHint(index)` | `Md3PageHost` | — |
+| `clearAllPrefetchHints()` | `Md3PageHost` | Drop pending hover / predict warm work (e.g. rail flick started). |
 | `navigateTo(index, opts)` | `Md3PageHost` | — |
 
 ## Example

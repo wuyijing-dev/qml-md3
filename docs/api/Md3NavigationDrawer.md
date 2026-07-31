@@ -15,7 +15,7 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `open` | `bool` | `false` | read/write | `Md3NavigationDrawer` | — |
 | `modal` | `bool` | `true` | read/write | `Md3NavigationDrawer` | — |
-| `model` | `var` | `[]` | read/write | `Md3NavigationDrawer` | Destinations: `{ icon, label, badge?, badgeText?, badgeDot?, badgeMax? }` |
+| `model` | `var` | `[]` | read/write | `Md3NavigationDrawer` | — |
 | `currentIndex` | `int` | `0` | read/write | `Md3NavigationDrawer` | — |
 | `title` | `string` | `""` | read/write | `Md3NavigationDrawer` | — |
 | `drawerWidth` | `real` | `360` | read/write | `Md3NavigationDrawer` | — |

@@ -23,8 +23,8 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `value` | `real` | `0` | read/write | `Md3LinearProgressIndicator` | — |
 | `indeterminate` | `bool` | `false` | read/write | `Md3LinearProgressIndicator` | — |
-| `enabled` | `bool` | `true` | read/write | `Md3LinearProgressIndicator` | — |
 | `style` | `int` | `Md3LinearProgressIndicator.Standard` | read/write | `Md3LinearProgressIndicator` | — |
+| `hostWindow` | `var` | `null` | read/write | `Md3LinearProgressIndicator` | Optional Window for scene-active checks (else OverlayHost). |
 | `wavelength` | `real` | `style === Md3LinearProgressIndicator.Lively ? 28` | read/write | `Md3LinearProgressIndicator` | — |
 | `amplitude` | `real` | `{…}` | read/write | `Md3LinearProgressIndicator` | — |
 | `trackThickness` | `real` | `{…}` | read/write | `Md3LinearProgressIndicator` | — |
@@ -59,7 +59,7 @@ Md3LinearProgressIndicator {
     value: 0
     indeterminate: false
     style: Md3LinearProgressIndicator.Standard
+    hostWindow: null
     wavelength: style === Md3LinearProgressIndicator.Lively ? 28
-    amplitude: /* … */
 }
 ```

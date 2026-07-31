@@ -26,7 +26,7 @@ import Md3
 | `supportingText` | `string` | `""` | read/write | `Md3TextField` | — |
 | `errorText` | `string` | `""` | read/write | `Md3TextField` | — |
 | `error` | `bool` | `false` | read/write | `Md3TextField` | — |
-| `enabled` | `bool` | `true` | read/write | `Md3TextField` | — |
+| `name` | `string` | `""` | read/write | `Md3TextField` | Form field key for Md3Form.validate / error auto-wiring. |
 | `multiline` | `bool` | `false` | read/write | `Md3TextField` | — |
 | `maximumLineCount` | `int` | `multiline ? 4 : 1` | read/write | `Md3TextField` | — |
 | `leadingIcon` | `string` | `""` | read/write | `Md3TextField` | — |
@@ -41,6 +41,7 @@ import Md3
 | `suggestionIndex` | `int` | `-1` | read/write | `Md3TextField` | Keyboard highlight in the suggestion list (-1 = none). |
 | `accessibleName` | `string` | `""` | read/write | `Md3TextField` | — |
 | `accessibleDescription` | `string` | `""` | read/write | `Md3TextField` | — |
+| `overlayWindow` | `var` | `null` | read/write | `Md3TextField` | Optional explicit Window for autocomplete overlay reparent. |
 | `focused` | `bool` | `input.activeFocus` | readonly | `Md3TextField` | — |
 | `floated` | `bool` | `focused \|\| text.length > 0` | readonly | `Md3TextField` | — |
 | `hasError` | `bool` | `error \|\| errorText.length > 0` | readonly | `Md3TextField` | — |

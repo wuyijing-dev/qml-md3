@@ -19,10 +19,9 @@ import Md3
 | `subtitle` | `string` | `""` | read/write | `Md3TitleBar` | Deprecated — Win title bars are single-line; kept for API compat, not shown |
 | `leadingIcon` | `string` | `""` | read/write | `Md3TitleBar` | — |
 | `showLeading` | `bool` | `leadingIcon.length > 0` | read/write | `Md3TitleBar` | — |
-| `showBackButton` | `bool` | `false` | read/write | `Md3TitleBar` | Page-stack back (left of icon/title) |
+| `showBackButton` | `bool` | `false` | read/write | `Md3TitleBar` | Page-stack back (left of icon/title). Typical with navigation rail shells. |
 | `backEnabled` | `bool` | `true` | read/write | `Md3TitleBar` | — |
 | `backIcon` | `string` | `"arrow_back"` | read/write | `Md3TitleBar` | — |
-| `unifiedChrome` | `bool` | `false` | read/write | `Md3TitleBar` | Transparent fill; parent paints title+tabs strip |
 | `showTitle` | `bool` | `true` | read/write | `Md3TitleBar` | — |
 | `showAppIcon` | `bool` | `true` | read/write | `Md3TitleBar` | — |
 | `showThemeToggle` | `bool` | `true` | read/write | `Md3TitleBar` | — |
@@ -45,6 +44,7 @@ import Md3
 | `nativeCaptionHit` | `bool` | `Md3WindowCapabilities.captionHitTest` | read/write | `Md3TitleBar` | — |
 | `leadingInset` | `real` | `Md3WindowCapabilities.trafficLightsInset` | read/write | `Md3TitleBar` | — |
 | `cornerRadius` | `real` | `0` | read/write | `Md3TitleBar` | — |
+| `unifiedChrome` | `bool` | `false` | read/write | `Md3TitleBar` | When true, fill is transparent so a parent chrome strip paints title+tabs as one. |
 | `appIcon` | `url` | `""` | read/write | `Md3TitleBar` | Window / taskbar icon (qrc or file). Synced from Md3ApplicationWindow.windowIcon when bound. |
 | `preferredHeight` | `real` | `28` | read/write | `Md3TitleBar` | — |
 | `compactHeight` | `real` | `28` | read/write | `Md3TitleBar` | — |
@@ -71,7 +71,7 @@ import Md3
 | Signal | Defined in | Description |
 |--------|------------|-------------|
 | `leadingClicked()` | `Md3TitleBar` | — |
-| `backClicked()` | `Md3TitleBar` | Page-stack back |
+| `backClicked()` | `Md3TitleBar` | — |
 | `themeToggled()` | `Md3TitleBar` | — |
 | `performanceClicked()` | `Md3TitleBar` | — |
 | `tourClicked()` | `Md3TitleBar` | — |

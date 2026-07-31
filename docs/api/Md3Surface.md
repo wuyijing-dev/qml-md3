@@ -18,6 +18,7 @@ import Md3
 | `radius` | `real` | `Md3Theme.shape.medium` | read/write | `Md3Surface` | — |
 | `clipContent` | `bool` | `true` | read/write | `Md3Surface` | — |
 | `tintColor` | `color` | `Md3Theme.colorScheme.surfaceTint` | read/write | `Md3Surface` | — |
+| `layoutMode` | `int` | `Md3ContainerBody.Fit` | read/write | `Md3Surface` | — |
 
 ## Signals
 
