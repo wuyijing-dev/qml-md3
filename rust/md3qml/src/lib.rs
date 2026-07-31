@@ -301,10 +301,11 @@ pub fn run_qml_file(
             )
         })?;
         let code = run(1, argv_ptrs.as_mut_ptr(), qml_c.as_ptr(), &cfg);
-        // Keep owned data + library alive for the duration of the Qt event loop return.
-        let _keep = (
-            &mut prog, &org, &name, &ver, &style, &desk, &import, &qml_c, lib,
-        );
+        // Md3 pulls in Qt; FreeLibrary after QGuiApplication tears down often AVs on Windows.
+        // Keep the module mapped until process exit (normal for dynamically hosted Qt).
+        std::mem::forget(run);
+        std::mem::forget(lib);
+        let _keep = (&mut prog, &org, &name, &ver, &style, &desk, &import, &qml_c);
         Ok(code)
     }
 }
