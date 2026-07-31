@@ -467,17 +467,29 @@ Item {
 
     function _resolveNavMode(opts) {
         const o = opts || ({})
+        let mode = pageTransition
         if (o.returnToSource) {
             if (o.transitionMode !== undefined && o.transitionMode !== null
                     && String(o.transitionMode).length > 0
                     && String(o.transitionMode) !== "launch")
-                return String(o.transitionMode)
-            return pageTransition === "launch" ? "slide" : pageTransition
+                mode = String(o.transitionMode)
+            else
+                mode = pageTransition === "launch" ? "slide" : pageTransition
+        } else if (o.transitionMode !== undefined && o.transitionMode !== null
+                   && String(o.transitionMode).length > 0) {
+            mode = String(o.transitionMode)
         }
-        if (o.transitionMode !== undefined && o.transitionMode !== null
-                && String(o.transitionMode).length > 0)
-            return String(o.transitionMode)
-        return pageTransition
+        // Instant path: explicit none, reduceMotion, or zero-duration non-launch
+        // (duration 0 + fade still ran pageAnim with t=0 → one blank frame).
+        if (mode === "none")
+            return "none"
+        if (Md3Theme && Md3Theme.reduceMotion)
+            return "none"
+        if (Md3Theme && Md3Theme.effectsPageMotion === false)
+            return "none"
+        if (mode !== "launch" && pageTransitionDuration <= 0)
+            return "none"
+        return mode
     }
 
     function _isLaunchNav(opts) {
@@ -1298,10 +1310,16 @@ Item {
         if (mode === "none" || fromIndex === toIndex) {
             displayedIndex = toIndex
             transitioning = false
-            transitionModeActive = pageTransition
+            transitionFrom = -1
+            transitionTo = -1
+            transitionModeActive = "none"
             transitionProgress = 1
+            launchReturning = false
+            generation++
+            _pendingNavOpts = ({})
             _dismissLeaveSnapshot(true)
             _evict()
+            Qt.callLater(_prefetchSmart, displayedIndex)
             return
         }
         // fromIndex < 0 → enter-only (initial / no previous page)
@@ -1735,8 +1753,14 @@ Item {
             }
 
             opacity: {
+                // Instant swap: never interpolate (avoids t=0 blank frame).
+                if (mode === "none" || !root.transitioning) {
+                    if (isDisplayed)
+                        return 1
+                    return 0
+                }
                 if (mode === "slide") {
-                    if (isEntering || isLeaving || (isDisplayed && !root.transitioning))
+                    if (isEntering || isLeaving || isDisplayed)
                         return 1
                     return 0
                 }
@@ -1754,7 +1778,7 @@ Item {
                         return t < 0.35 ? (1 - t / 0.35) : 0
                     return 1 - t
                 }
-                if (isDisplayed && !root.transitioning)
+                if (isDisplayed)
                     return 1
                 return 0
             }

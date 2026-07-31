@@ -24,6 +24,9 @@ Item {
     property int alignment: Md3VStack.Start
     default property alias content: contentCol.data
 
+    property bool _applying: false
+    property int _layoutGen: 0
+
     implicitWidth: Math.max(1, contentCol.implicitWidth + leftPadding + rightPadding)
     implicitHeight: contentCol.implicitHeight + topPadding + bottomPadding
 
@@ -36,16 +39,39 @@ Item {
                               : implicitWidth
         spacing: root.spacing
 
-        onChildrenChanged: Qt.callLater(root._applyChildHints)
-        onWidthChanged: Qt.callLater(root._applyChildHints)
+        onChildrenChanged: root._scheduleLayout()
+        onWidthChanged: root._scheduleLayout()
     }
 
-    onAlignmentChanged: Qt.callLater(_applyChildHints)
-    onStretchChildrenChanged: Qt.callLater(_applyChildHints)
-    onFillWidthChanged: Qt.callLater(_applyChildHints)
-    Component.onCompleted: Qt.callLater(_applyChildHints)
+    onAlignmentChanged: _scheduleLayout()
+    onStretchChildrenChanged: _scheduleLayout()
+    onFillWidthChanged: _scheduleLayout()
+    onHeightChanged: _scheduleLayout()
+    Component.onCompleted: _scheduleLayout()
+
+    function _scheduleLayout() {
+        const gen = ++_layoutGen
+        Qt.callLater(function () {
+            if (gen !== root._layoutGen)
+                return
+            root._applyChildHints()
+        })
+    }
+
+    function _setReal(item, prop, value) {
+        if (!item)
+            return
+        const cur = item[prop]
+        if (typeof cur === "number" && Math.abs(cur - value) < 0.5)
+            return
+        item[prop] = value
+    }
 
     function _applyChildHints() {
+        if (_applying)
+            return
+        _applying = true
+
         const kids = contentCol.children
         const avail = contentCol.width
         for (let i = 0; i < kids.length; ++i) {
@@ -57,20 +83,22 @@ Item {
             if (c.expand === true) {
                 const used = contentCol.implicitHeight - (c.height || c.implicitHeight || 0)
                 const remain = Math.max(0, root.height - root.topPadding - root.bottomPadding - used)
-                c.height = remain
-                c.width = avail
+                _setReal(c, "height", remain)
+                _setReal(c, "width", avail)
                 continue
             }
 
             if (root.stretchChildren && root.fillWidth && avail > 0)
-                c.width = avail
+                _setReal(c, "width", avail)
 
             if (root.alignment === Md3VStack.Center && avail > 0)
-                c.x = Math.max(0, (avail - c.width) * 0.5)
+                _setReal(c, "x", Math.max(0, (avail - c.width) * 0.5))
             else if (root.alignment === Md3VStack.End && avail > 0)
-                c.x = Math.max(0, avail - c.width)
+                _setReal(c, "x", Math.max(0, avail - c.width))
             else
-                c.x = 0
+                _setReal(c, "x", 0)
         }
+
+        _applying = false
     }
 }
