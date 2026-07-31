@@ -10,6 +10,14 @@ from typing import Iterable, List, Optional, Union
 PathLike = Union[str, Path]
 
 
+def bundled_prefix() -> Optional[Path]:
+    """Prefix shipped inside the wheel at md3qml/_native (platform wheels)."""
+    p = Path(__file__).resolve().parent / "_native"
+    if (p / "lib" / "qml").is_dir():
+        return p
+    return None
+
+
 def _candidates_from_env() -> List[Path]:
     out: List[Path] = []
     for key in ("MD3_PREFIX", "MD3_ROOT", "MD3_HOME"):
@@ -41,12 +49,16 @@ def resolve_md3_prefix(
     """
     Resolve the shared Md3 package root (contains lib/qml[/Md3] and bin/ on Windows).
 
-    Search order: explicit arg → MD3_PREFIX/MD3_ROOT → walk up from start/cwd for dist/Md3.
+    Search order:
+      explicit → MD3_PREFIX → wheel-bundled md3qml/_native → walk up for dist/Md3
     """
     tried: List[Path] = []
     if explicit:
         tried.append(Path(explicit))
     tried.extend(_candidates_from_env())
+    bundled = bundled_prefix()
+    if bundled:
+        tried.append(bundled)
     root = Path(start) if start else Path.cwd()
     tried.extend(_walk_up_looking_for_dist(root))
 
@@ -57,9 +69,10 @@ def resolve_md3_prefix(
             return p
 
     hint = (
-        "Build a shared package matching your PySide Qt kit, then set MD3_PREFIX:\n"
-        "  python scripts/packaging/cli.py --shared -y\n"
-        "  set MD3_PREFIX=D:\\QML_MD3\\QML_MD3\\dist\\Md3"
+        "Install options (pick one):\n"
+        "  1) pip install a platform wheel that vendors Md3 under md3qml/_native\n"
+        "  2) md3qml fetch --dest %USERPROFILE%\\.md3\\prefix\n"
+        "  3) set MD3_PREFIX to a shared package from scripts/packaging/cli.py\n"
     )
     raise FileNotFoundError(
         "Could not find Md3 shared prefix (expected lib/qml).\n"
@@ -101,10 +114,8 @@ def setup_native_paths(prefix: PathLike, *, extra_import_paths: Optional[Iterabl
         for p in extra_import_paths:
             imports.append(str(Path(p).resolve()))
 
-    # Help tools that only read the env var (qmlscene, some IDEs).
     existing = os.environ.get("QML2_IMPORT_PATH", "")
     merged = os.pathsep.join([*imports, *([existing] if existing else [])])
-    # de-dupe preserving order
     seen = set()
     parts = []
     for part in merged.split(os.pathsep):

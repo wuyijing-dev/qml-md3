@@ -1,13 +1,16 @@
 """Bootstrap helpers to load the packaged Md3 QML module from PySide6 / PySide2."""
 
 from .binding import Binding, detect_binding, import_qt
-from .paths import resolve_md3_prefix, setup_native_paths
+from .fetch import fetch_md3_prefix
+from .paths import bundled_prefix, resolve_md3_prefix, setup_native_paths
 from .run import RunOptions, run
 
 __all__ = [
     "Binding",
     "RunOptions",
+    "bundled_prefix",
     "detect_binding",
+    "fetch_md3_prefix",
     "import_qt",
     "resolve_md3_prefix",
     "run",
