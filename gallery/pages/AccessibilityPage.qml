@@ -11,23 +11,37 @@ Flickable {
     property int scanCount: -1
 
     function refreshScanHint() {
-        const xhr = new XMLHttpRequest()
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState !== XMLHttpRequest.DONE)
+        const urls = [
+            "qrc:/gallery/data/a11y-scan.json",
+            Qt.resolvedUrl("../../data/a11y-scan.json") // file-based / Python gallery
+        ]
+        let i = 0
+        function tryNext() {
+            if (i >= urls.length)
                 return
-            if (xhr.status !== 200 && xhr.status !== 0)
-                return
-            try {
-                const data = JSON.parse(xhr.responseText)
-                scanCount = data.count !== undefined ? data.count : (data.findings || []).length
-                scanFindings = data.findings || []
-            } catch (e) {
-                scanCount = -1
-                scanFindings = []
+            const url = urls[i++]
+            const xhr = new XMLHttpRequest()
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState !== XMLHttpRequest.DONE)
+                    return
+                if (xhr.status !== 200 && xhr.status !== 0) {
+                    tryNext()
+                    return
+                }
+                try {
+                    const data = JSON.parse(xhr.responseText)
+                    scanCount = data.count !== undefined ? data.count : (data.findings || []).length
+                    scanFindings = data.findings || []
+                } catch (e) {
+                    scanCount = -1
+                    scanFindings = []
+                    tryNext()
+                }
             }
+            xhr.open("GET", url)
+            xhr.send()
         }
-        xhr.open("GET", "qrc:/gallery/data/a11y-scan.json")
-        xhr.send()
+        tryNext()
     }
 
     Component.onCompleted: refreshScanHint()

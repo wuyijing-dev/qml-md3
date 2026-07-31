@@ -68,6 +68,21 @@ raise SystemExit(app.exec())
 ```
 
 `WindowHelper` methods use snake_case; pass `window=` or rely on the default root after load.
+
+## Gallery via Python
+
+Same QML as the C++ Gallery (`gallery/Main.qml`), hosted by PySide:
+
+```bash
+md3qml gallery --auto-fetch
+# or: python examples/gallery-pyside/main.py
+```
+
+```python
+from md3qml import run_gallery
+raise SystemExit(run_gallery(auto_fetch=True))
+```
+
 ## What to publish on PyPI
 
 Md3 cannot be “just QML source” on pip: users need `Md3.dll` / `libMd3.so` + `lib/qml/Md3` built against the **same Qt major** as PySide. Three practical products:

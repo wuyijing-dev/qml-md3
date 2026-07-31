@@ -70,6 +70,24 @@ assert app.load_file("Main.qml")
 raise SystemExit(app.exec())
 ```
 
-CLI: `info` · `doctor` · `install` · `fetch` · `run` · `run-c`.
+CLI: `info` · `doctor` · `install` · `fetch` · `run` · `run-c` · `gallery`.
+
+## Gallery (same QML as C++)
+
+Uses the checkout’s `gallery/Main.qml` + `pages/` (no separate Gallery qml module build):
+
+```bash
+# from repo root, with MD3_PREFIX pointing at shared Md3 (or --auto-fetch)
+md3qml gallery
+# or
+python examples/gallery-pyside/main.py --auto-fetch
+```
+
+```python
+from md3qml import run_gallery
+raise SystemExit(run_gallery(auto_fetch=True))
+```
+
+Override location with `--gallery` / `MD3_GALLERY` if needed.
 
 See [docs/topics/pyside.md](../docs/topics/pyside.md).

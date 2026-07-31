@@ -19,6 +19,7 @@ def _cmd_info(_: argparse.Namespace) -> int:
     print("Network install today:")
     print('  pip install "git+https://github.com/wuyijing-dev/QML_MD3.git#subdirectory=python[pyside6]"')
     print("  md3qml install   # fetch shared Md3 zip from GitHub Releases")
+    print("  md3qml gallery   # run repo gallery/Main.qml (needs checkout + MD3_PREFIX)")
     try:
         b = detect_binding()
         print(f"binding: {b.name} (Qt {b.qt_major})")
@@ -125,6 +126,20 @@ def _cmd_run_c(args: argparse.Namespace) -> int:
     return run_qml_file_c(args.qml, config=cfg, md3_prefix=args.md3_prefix)
 
 
+def _cmd_gallery(args: argparse.Namespace) -> int:
+    from .gallery import run_gallery
+
+    return run_gallery(
+        gallery_dir=args.gallery,
+        md3_prefix=args.md3_prefix,
+        binding=None if args.binding == "auto" else args.binding,
+        auto_fetch=args.auto_fetch,
+        fetch_version=args.fetch_version,
+        fetch_dest=args.fetch_dest,
+        fetch_url=args.fetch_url,
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="md3qml",
@@ -185,6 +200,27 @@ def main(argv: list[str] | None = None) -> int:
     p_c.add_argument("--qml-import", default=None, help="Override lib/qml path")
     p_c.add_argument("--name", default="Md3 App")
     p_c.set_defaults(func=_cmd_run_c)
+
+    p_gal = sub.add_parser(
+        "gallery",
+        help="Run the in-repo Gallery (gallery/Main.qml) via PySide + shared Md3",
+    )
+    p_gal.add_argument(
+        "--gallery",
+        default=None,
+        help="Path to gallery/ (or Main.qml's folder). Default: MD3_GALLERY or repo walk-up",
+    )
+    p_gal.add_argument("--md3-prefix", default=None)
+    p_gal.add_argument("--binding", choices=("auto", "PySide6", "PySide2"), default="auto")
+    p_gal.add_argument(
+        "--auto-fetch",
+        action="store_true",
+        help="If MD3_PREFIX missing, download shared zip automatically",
+    )
+    p_gal.add_argument("--fetch-version", default="1.0.0")
+    p_gal.add_argument("--fetch-dest", default="~/.md3/prefix")
+    p_gal.add_argument("--fetch-url", default=None)
+    p_gal.set_defaults(func=_cmd_gallery)
 
     args = parser.parse_args(argv)
     if args.cmd == "run" and not args.qml and not args.module:
