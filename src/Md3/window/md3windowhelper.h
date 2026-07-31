@@ -185,6 +185,36 @@ public:
     /// When false, QQuickWindow may release the scene graph while not visible (saves GPU memory).
     Q_INVOKABLE void setPersistentSceneGraph(QObject *window, bool persistent);
 
+    // --- Portable system wrappers (OS shell / Android intents) ---
+
+    /// Open URL or local path with the OS default handler.
+    Q_INVOKABLE bool openUrl(const QUrl &url);
+    /// Reveal a file in the folder UI (Explorer / Finder / file manager). Directories open in place.
+    Q_INVOKABLE bool revealInFolder(const QUrl &pathOrUrl);
+    /// System beep / alert sound.
+    Q_INVOKABLE void beep();
+    /// Center window on its current screen's available geometry.
+    Q_INVOKABLE bool centerOnScreen(QObject *window);
+    /// Window opacity 0..1 (compositor may ignore).
+    Q_INVOKABLE bool setWindowOpacity(QObject *window, qreal opacity);
+    /// Show/hide from taskbar / dock / overview (best-effort; Win + some X11).
+    Q_INVOKABLE bool setVisibleInTaskbar(QObject *window, bool visible);
+    /// Minimize / maximize / restore / toggle fullscreen helpers.
+    Q_INVOKABLE void minimizeWindow(QObject *window);
+    Q_INVOKABLE void maximizeWindow(QObject *window);
+    Q_INVOKABLE void restoreWindow(QObject *window);
+    Q_INVOKABLE void setFullScreen(QObject *window, bool fullScreen);
+    /// True when styleHints color scheme is dark.
+    Q_INVOKABLE bool systemColorSchemeDark() const;
+    /// Share plain text (Android ACTION_SEND; elsewhere copies to clipboard).
+    Q_INVOKABLE bool shareText(const QString &text, const QString &title = QString());
+    /// Haptic / vibration (Android); desktop falls back to beep when ms > 0.
+    Q_INVOKABLE bool vibrate(int durationMs = 40);
+    /// Android immersive / sticky fullscreen system UI; no-op elsewhere.
+    Q_INVOKABLE bool setImmersiveSystemUi(bool immersive);
+    /// Request attention (alias of flashTaskbar where available).
+    Q_INVOKABLE void requestAttention(QObject *window, bool on = true);
+
     QString lastNativeStatus() const { return m_lastNativeStatus; }
 
 signals:

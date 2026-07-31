@@ -83,6 +83,99 @@ Flickable {
             tone: Md3Text.OnSurfaceVariant
         }
 
+        Md3Text {
+            text: qsTr("系统封装")
+            role: Md3Text.TitleSmall
+        }
+        Md3Text {
+            width: parent.width
+            wrapMode: Text.WordWrap
+            text: qsTr("跨平台系统能力：打开 URL、资源管理器定位、分享/剪贴板、振动、沉浸式系统栏、任务栏可见性、居中/透明度等。状态见 lastNativeStatus。")
+            role: Md3Text.BodySmall
+            tone: Md3Text.OnSurfaceVariant
+        }
+        Md3FlowLayout {
+            width: parent.width
+            spacing: 8
+            Md3Button {
+                enabled: Md3WindowCapabilities.systemOpen && !!root.appWin
+                text: qsTr("打开官网")
+                onClicked: if (root.appWin) root.appWin.openUrl("https://github.com/wuyijing-dev/QML_MD3")
+            }
+            Md3Button {
+                enabled: Md3WindowCapabilities.revealInFolder && !!root.appWin
+                text: qsTr("定位本程序目录")
+                variant: Md3Button.Outlined
+                onClicked: {
+                    if (!root.appWin)
+                        return
+                    root.appWin.revealInFolder(Qt.application.arguments[0]
+                                               ? ("file:///" + Qt.application.arguments[0].replace(/\\/g, "/"))
+                                               : "")
+                }
+            }
+            Md3Button {
+                enabled: !!root.appWin
+                text: qsTr("提示音")
+                variant: Md3Button.Text
+                onClicked: if (root.appWin) root.appWin.beep()
+            }
+            Md3Button {
+                enabled: !!root.appWin
+                text: qsTr("窗口居中")
+                onClicked: if (root.appWin) root.appWin.centerOnScreen()
+            }
+            Md3Button {
+                enabled: Md3WindowCapabilities.shareText && !!root.appWin
+                text: qsTr("分享/复制文本")
+                onClicked: if (root.appWin) root.appWin.shareText(qsTr("来自 Md3 Gallery 的系统分享测试"), qsTr("Md3"))
+            }
+            Md3Button {
+                enabled: Md3WindowCapabilities.vibrate && !!root.appWin
+                text: qsTr("振动")
+                onClicked: if (root.appWin) root.appWin.vibrate(50)
+            }
+            Md3Button {
+                enabled: Md3WindowCapabilities.immersiveSystemUi && !!root.appWin
+                text: qsTr("沉浸式 UI")
+                onClicked: if (root.appWin) root.appWin.setImmersiveSystemUi(true)
+            }
+            Md3Button {
+                enabled: Md3WindowCapabilities.immersiveSystemUi && !!root.appWin
+                text: qsTr("恢复系统栏")
+                variant: Md3Button.Outlined
+                onClicked: if (root.appWin) root.appWin.setImmersiveSystemUi(false)
+            }
+            Md3Button {
+                enabled: Md3WindowCapabilities.skipTaskbar && !!root.appWin
+                text: qsTr("隐藏任务栏按钮")
+                variant: Md3Button.Outlined
+                onClicked: if (root.appWin) root.appWin.setVisibleInTaskbar(false)
+            }
+            Md3Button {
+                enabled: Md3WindowCapabilities.skipTaskbar && !!root.appWin
+                text: qsTr("显示任务栏按钮")
+                onClicked: if (root.appWin) root.appWin.setVisibleInTaskbar(true)
+            }
+            Md3Button {
+                enabled: !!root.appWin
+                text: qsTr("请求注意")
+                onClicked: if (root.appWin) root.appWin.requestAttention(true)
+            }
+        }
+        Md3Text {
+            width: parent.width
+            visible: !!root.appWin
+            wrapMode: Text.WordWrap
+            text: qsTr("原生反馈：%1 · 系统深色=%2")
+                  .arg((root.appWin && root.appWin.windowNative
+                        ? root.appWin.windowNative.lastNativeStatus
+                        : "") || qsTr("（点击上方按钮后显示）"))
+                  .arg(root.appWin && root.appWin.systemColorSchemeDark() ? qsTr("是") : qsTr("否"))
+            role: Md3Text.BodySmall
+            tone: Md3Text.Tertiary
+        }
+
         // —— Shared ——
         Md3Text {
             text: qsTr("通用")

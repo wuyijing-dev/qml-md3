@@ -87,18 +87,19 @@ Native window chrome / taskbar / tray / DPI helpers used by `Md3ApplicationWindo
 | `setForceIconicRepresentation` / `setIconicThumbnail` / `clearIconicThumbnail` | Iconic thumb |
 | `setThumbnailClip` / `clearThumbnailClip` / `setThumbnailTooltip` | Live preview |
 | `showSystemTrayIcon` / `hideSystemTrayIcon` / `showTrayNotification` | Tray |
-| `setAlwaysOnTop(window, onTop)` | Always on top |
-| `setWindowCloaked(window, cloaked)` | Cloak |
-| `setPreferredAppMode(dark)` | Preferred mode |
-| `monitorCount()` / `moveToMonitor(window, index)` | Multi-monitor |
-| `registerApplicationRestart` / `unregisterApplicationRestart` | Restart manager |
-| `raiseWindow(window)` | Raise + activate (Wayland: token / KF6) |
-| `setDockBadge(count)` | Dock/taskbar badge (Win: badge + overlay fallback) |
-| `setIdleInhibit(inhibit, reason)` | Inhibit idle (Win + Linux) |
-| `blurBehindAvailable()` / `openBlurSettings()` | Blur helpers (Linux) |
-| `systemAccentColor()` / `wallpaperSeedColor()` | Material You seeds |
-| `devicePixelRatio(window)` / `windowDpi(window)` | DPI queries |
-| `setPersistentSceneGraph(window, persistent)` | Keep SG when hidden |
+| `cursorScreenPos()` | Global cursor |
+| `setAlwaysOnTop` / `setWindowCloaked` / `setPreferredAppMode` | Window / app mode |
+| `monitorCount` / `moveToMonitor` | Multi-monitor |
+| `registerApplicationRestart` / `unregisterApplicationRestart` | Restart registration |
+| `raiseWindow` / `requestAttention` | Raise / urgency |
+| `setDockBadge` / `setIdleInhibit` | Badge / idle inhibit |
+| `blurBehindAvailable` / `openBlurSettings` | Compositor blur |
+| `systemAccentColor` / `wallpaperSeedColor` / `systemColorSchemeDark` | System colors |
+| `devicePixelRatio` / `windowDpi` / `setPersistentSceneGraph` | DPI / scene graph |
+| `openUrl` / `revealInFolder` / `beep` | OS shell open / reveal / beep |
+| `centerOnScreen` / `setWindowOpacity` / `setVisibleInTaskbar` | Geometry / taskbar |
+| `minimizeWindow` / `maximizeWindow` / `restoreWindow` / `setFullScreen` | Window state |
+| `shareText` / `vibrate` / `setImmersiveSystemUi` | Share / haptic / immersive UI |
 
 Platform honesty matrix: [native-platforms.md](../topics/native-platforms.md).
 

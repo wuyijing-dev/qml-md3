@@ -11,3 +11,7 @@ console.log(Md3WindowCapabilities.platformId)    // bag id (wayland/x11/android/
 ```
 
 Native APIs remain on `Md3WindowHelper` / `Md3ApplicationWindow.windowNative`.
+
+## System wrappers
+
+Also see [native-platforms.md](../topics/native-platforms.md) for `openUrl`, `revealInFolder`, `shareText`, `vibrate`, `setImmersiveSystemUi`, `setVisibleInTaskbar`, etc.

@@ -102,4 +102,10 @@ QtObject {
     readonly property bool windowCloak: platform.windowCloak
     readonly property bool systemAccent: platform.systemAccent
     readonly property bool idleInhibit: platform.idleInhibit
+    readonly property bool systemOpen: platform.systemOpen
+    readonly property bool revealInFolder: platform.revealInFolder
+    readonly property bool shareText: platform.shareText
+    readonly property bool vibrate: platform.vibrate
+    readonly property bool immersiveSystemUi: platform.immersiveSystemUi
+    readonly property bool skipTaskbar: platform.skipTaskbar
 }

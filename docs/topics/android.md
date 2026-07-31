@@ -11,6 +11,10 @@ Md3 on Android uses **system window chrome** (no CSD / Snap / tray). `Md3WindowH
 | `setDockBadge` | `QGuiApplication::setBadgeNumber` (Qt 6.5+; OEM may ignore) |
 | `setAlwaysOnTop` | `Qt::WindowStaysOnTopHint` (often ignored by OEMs) |
 | `raiseWindow` | Qt `raise` + `requestActivate` (Activity focus rules apply) |
+| `shareText` | `Intent.ACTION_SEND` text/plain chooser |
+| `vibrate` | `Vibrator` / `VibrationEffect.createOneShot` |
+| `setImmersiveSystemUi` | DecorView immersive sticky + hide nav/status |
+| `openUrl` / `revealInFolder` | `QDesktopServices` / file VIEW (storage permissions apply) |
 
 Everything else (Snap, tray, jump list, Mica, taskbar progress) stays unavailable — see [native-platforms.md](native-platforms.md).
 

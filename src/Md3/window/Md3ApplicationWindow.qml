@@ -956,6 +956,66 @@ Window {
         return windowHelper.setIdleInhibit(!!inhibit, reason || "")
     }
 
+    function openUrl(url) {
+        return windowHelper.openUrl(url)
+    }
+
+    function revealInFolder(pathOrUrl) {
+        return windowHelper.revealInFolder(pathOrUrl)
+    }
+
+    function beep() {
+        windowHelper.beep()
+    }
+
+    function centerOnScreen() {
+        return windowHelper.centerOnScreen(root)
+    }
+
+    function setWindowOpacity(opacity) {
+        return windowHelper.setWindowOpacity(root, opacity)
+    }
+
+    function setVisibleInTaskbar(visible) {
+        return windowHelper.setVisibleInTaskbar(root, !!visible)
+    }
+
+    function minimizeWindow() {
+        windowHelper.minimizeWindow(root)
+    }
+
+    function maximizeWindow() {
+        windowHelper.maximizeWindow(root)
+    }
+
+    function restoreWindow() {
+        windowHelper.restoreWindow(root)
+    }
+
+    function setFullScreen(fullScreen) {
+        windowHelper.setFullScreen(root, !!fullScreen)
+    }
+
+    function systemColorSchemeDark() {
+        return windowHelper.systemColorSchemeDark()
+    }
+
+    function shareText(text, title) {
+        return windowHelper.shareText(text || "", title || "")
+    }
+
+    function vibrate(durationMs) {
+        return windowHelper.vibrate(durationMs === undefined ? 40 : durationMs)
+    }
+
+    function setImmersiveSystemUi(immersive) {
+        return windowHelper.setImmersiveSystemUi(!!immersive)
+    }
+
+    function requestAttention(on) {
+        windowHelper.requestAttention(root, on === undefined ? true : !!on)
+    }
+
     function openBlurSettings() {
         return windowHelper.openBlurSettings()
     }

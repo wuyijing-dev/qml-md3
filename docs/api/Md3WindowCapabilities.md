@@ -63,6 +63,12 @@ import Md3
 | `windowCloak` | `bool` | `platform.windowCloak` | readonly | `Md3WindowCapabilities` | — |
 | `systemAccent` | `bool` | `platform.systemAccent` | readonly | `Md3WindowCapabilities` | — |
 | `idleInhibit` | `bool` | `platform.idleInhibit` | readonly | `Md3WindowCapabilities` | Prevent sleep / idle (Win + Linux) |
+| `systemOpen` | `bool` | `platform.systemOpen` | readonly | `Md3WindowCapabilities` | `openUrl` |
+| `revealInFolder` | `bool` | `platform.revealInFolder` | readonly | `Md3WindowCapabilities` | Reveal path in folder UI |
+| `shareText` | `bool` | `platform.shareText` | readonly | `Md3WindowCapabilities` | Share / clipboard |
+| `vibrate` | `bool` | `platform.vibrate` | readonly | `Md3WindowCapabilities` | Android haptic |
+| `immersiveSystemUi` | `bool` | `platform.immersiveSystemUi` | readonly | `Md3WindowCapabilities` | Android immersive bars |
+| `skipTaskbar` | `bool` | `platform.skipTaskbar` | readonly | `Md3WindowCapabilities` | Hide taskbar/dock button |
 
 ## Signals
 

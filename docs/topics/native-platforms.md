@@ -35,6 +35,30 @@ C++: `Md3WindowHelper::displayServer()` mirrors the same probe; `platformId()` s
 | Always on top | Yes | Compositor-dependent | KeepAbove (KF) | Qt flag (OEM-dependent) |
 | Exclude from capture | `WDA_EXCLUDEFROMCAPTURE` | — | — | `FLAG_SECURE` |
 | App id | AppUserModelID | `desktopFileName` → xdg `app_id` | Same | — |
+| `openUrl` / `revealInFolder` | Shell / Explorer select | xdg-open / file manager | Same | VIEW intent (best-effort) |
+| `shareText` | Clipboard fallback | Clipboard | Clipboard | `ACTION_SEND` chooser |
+| `vibrate` | Beep fallback | Beep | Beep | `Vibrator` / `VibrationEffect` |
+| `setImmersiveSystemUi` | — | — | — | Immersive sticky flags |
+| `setVisibleInTaskbar` | `WS_EX_TOOLWINDOW` | Qt::Tool hint | Same | — |
+| `centerOnScreen` / opacity / min·max·fullscreen | Qt | Qt | Qt | Qt |
+| `requestAttention` | Taskbar flash | Urgent / alert | Same | `alert` |
+
+## System wrappers (QML)
+
+Prefer `Md3ApplicationWindow` helpers (they forward to `windowNative`):
+
+```qml
+app.openUrl("https://example.com")
+app.revealInFolder("file:///C:/path/to/file.txt")
+app.shareText("hello")
+app.vibrate(40)                 // Android
+app.setImmersiveSystemUi(true)  // Android
+app.setVisibleInTaskbar(false)
+app.centerOnScreen()
+app.requestAttention()
+```
+
+Capability flags: `Md3WindowCapabilities.systemOpen` / `revealInFolder` / `shareText` / `vibrate` / `immersiveSystemUi` / `skipTaskbar`.
 
 ## Snap Layouts (Windows)
 

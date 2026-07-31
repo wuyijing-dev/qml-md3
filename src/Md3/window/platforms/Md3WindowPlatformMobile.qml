@@ -32,4 +32,10 @@ QtObject {
     readonly property bool windowCloak: false
     readonly property bool systemAccent: false
     readonly property bool idleInhibit: false
+    readonly property bool systemOpen: true
+    readonly property bool revealInFolder: false
+    readonly property bool shareText: true
+    readonly property bool vibrate: false
+    readonly property bool immersiveSystemUi: false
+    readonly property bool skipTaskbar: false
 }
