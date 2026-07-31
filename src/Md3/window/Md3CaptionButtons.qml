@@ -30,21 +30,24 @@ Item {
     width: implicitWidth
     visible: Md3WindowCapabilities.captionButtons
 
-    function reportMaximizeHitTest() {
-        if (!root.targetWindow || !root.windowHelper || !maxBtn.visible)
+    // Report the whole strip so native resize edges leave these pixels as HTCLIENT.
+    // Do not map the maximize cell to HTMAXBUTTON — that blocks QML hover/cursor/click.
+    function reportCaptionButtonsHitTest() {
+        if (!root.targetWindow || !root.windowHelper || !root.visible)
             return
         const host = root.targetWindow.contentItem
         if (!host)
             return
-        const p = maxBtn.mapToItem(host, 0, 0)
-        root.windowHelper.setMaximizeButtonRect(root.targetWindow, p.x, p.y, maxBtn.width, maxBtn.height)
+        const p = root.mapToItem(host, 0, 0)
+        root.windowHelper.setMaximizeButtonRect(root.targetWindow, p.x, p.y, root.width, root.height)
     }
 
-    onWidthChanged: reportMaximizeHitTest()
-    onHeightChanged: reportMaximizeHitTest()
-    onXChanged: reportMaximizeHitTest()
-    onYChanged: reportMaximizeHitTest()
-    Component.onCompleted: Qt.callLater(reportMaximizeHitTest)
+    onWidthChanged: reportCaptionButtonsHitTest()
+    onHeightChanged: reportCaptionButtonsHitTest()
+    onXChanged: reportCaptionButtonsHitTest()
+    onYChanged: reportCaptionButtonsHitTest()
+    onVisibleChanged: reportCaptionButtonsHitTest()
+    Component.onCompleted: Qt.callLater(reportCaptionButtonsHitTest)
     Component.onDestruction: {
         if (root.windowHelper && root.targetWindow)
             root.windowHelper.clearMaximizeButtonRect(root.targetWindow)
@@ -52,9 +55,9 @@ Item {
 
     Connections {
         target: root.targetWindow
-        function onWidthChanged() { root.reportMaximizeHitTest() }
-        function onHeightChanged() { root.reportMaximizeHitTest() }
-        function onVisibilityChanged() { root.reportMaximizeHitTest() }
+        function onWidthChanged() { root.reportCaptionButtonsHitTest() }
+        function onHeightChanged() { root.reportCaptionButtonsHitTest() }
+        function onVisibilityChanged() { root.reportCaptionButtonsHitTest() }
     }
 
     Row {
@@ -77,7 +80,6 @@ Item {
             height: parent.height
             iconName: root.maximized ? "filter_none" : "crop_square"
             accessibleName: root.maximized ? qsTr("Restore") : qsTr("Maximize")
-            // Win11 snap: HTMAXBUTTON owns hover flyout; QML click remains fallback if OS does not claim
             onClicked: {
                 if (!root.targetWindow)
                     return
@@ -86,10 +88,10 @@ Item {
                 else
                     root.targetWindow.showMaximized()
             }
-            onWidthChanged: root.reportMaximizeHitTest()
-            onHeightChanged: root.reportMaximizeHitTest()
-            onXChanged: root.reportMaximizeHitTest()
-            onYChanged: root.reportMaximizeHitTest()
+            onWidthChanged: root.reportCaptionButtonsHitTest()
+            onHeightChanged: root.reportCaptionButtonsHitTest()
+            onXChanged: root.reportCaptionButtonsHitTest()
+            onYChanged: root.reportCaptionButtonsHitTest()
         }
         CaptionButton {
             visible: root.showClose
@@ -150,12 +152,7 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            // When snap layouts claim HTMAXBUTTON, OS may swallow events; still wire click for other platforms
             onClicked: btn.clicked()
-            onContainsMouseChanged: {
-                if (btn === maxBtn)
-                    root.reportMaximizeHitTest()
-            }
         }
     }
 }

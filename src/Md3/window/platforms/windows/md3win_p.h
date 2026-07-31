@@ -145,7 +145,9 @@ struct Md3WinChromeState
 {
     QPointer<QWindow> window;
     QPointer<Md3WindowHelper> helper;
-    QRectF maximizeButton;
+    /// Caption min/max/close strip in QML logical coords (contentItem space).
+    /// Used to keep OS resize hit-tests off the buttons so QML can own hover/click.
+    QRectF captionButtons;
     QRectF captionHit;
 };
 

@@ -195,6 +195,9 @@ Rectangle {
         return iconW + textW
     }
 
+    /// Trailing chrome width so shell resize edges can leave caption buttons alone
+    readonly property real rightChromeWidth: rightChrome.width
+
     color: {
         if (root.unifiedChrome)
             return "transparent"

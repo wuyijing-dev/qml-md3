@@ -472,6 +472,16 @@ Window {
     readonly property real edge: 6
     readonly property bool canResize: customChrome && Md3WindowCapabilities.systemResize
                                       && !isMaximizedLike
+    /// Keep QML resize grips off the title-bar caption strip (min/max/close).
+    readonly property real chromeTopReserve: (showTitleBar && customChrome) ? chromeHost.height : 0
+    readonly property real chromeRightReserve: {
+        if (!showTitleBar || !customChrome)
+            return 0
+        const tb = titleBarLoader.item
+        if (tb && tb.rightChromeWidth !== undefined)
+            return Math.max(tb.rightChromeWidth + 8, edge * 2)
+        return 160
+    }
 
     function _themeRevealMaxRadius(ox, oy) {
         const w = chrome.width
@@ -1656,6 +1666,7 @@ Window {
     ResizeEdge {
         anchors.left: parent.left
         anchors.top: parent.top
+        anchors.topMargin: root.chromeTopReserve
         anchors.bottom: parent.bottom
         width: root.edge
         edges: Qt.LeftEdge
@@ -1664,6 +1675,7 @@ Window {
     ResizeEdge {
         anchors.right: parent.right
         anchors.top: parent.top
+        anchors.topMargin: root.chromeTopReserve
         anchors.bottom: parent.bottom
         width: root.edge
         edges: Qt.RightEdge
@@ -1672,6 +1684,7 @@ Window {
     ResizeEdge {
         anchors.left: parent.left
         anchors.right: parent.right
+        anchors.rightMargin: root.chromeRightReserve
         anchors.top: parent.top
         height: root.edge
         edges: Qt.TopEdge
@@ -1695,10 +1708,14 @@ Window {
         cursorShape: Qt.SizeFDiagCursor
     }
     ResizeEdge {
+        // With a custom title bar, the OS/QML caption strip owns the top-right;
+        // keep the diagonal grip below chrome so close/maximize stay clickable.
         anchors.right: parent.right
         anchors.top: parent.top
+        anchors.topMargin: root.chromeTopReserve > 0 ? Math.max(0, root.chromeTopReserve - root.edge) : 0
         width: root.edge * 2
         height: root.edge * 2
+        enabled: root.canResize && root.chromeTopReserve === 0
         edges: Qt.RightEdge | Qt.TopEdge
         cursorShape: Qt.SizeBDiagCursor
     }

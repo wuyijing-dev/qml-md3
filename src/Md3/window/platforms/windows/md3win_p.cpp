@@ -129,17 +129,6 @@ bool Md3WinNativeFilter::nativeEventFilter(const QByteArray &eventType, void *me
         return true;
     }
 
-    // HTMAXBUTTON enables Win11 snap-layout hover, but Qt often never delivers
-    // the click to DefWindowProc — handle maximize/restore ourselves.
-    if (msg->message == WM_NCLBUTTONDOWN || msg->message == WM_NCLBUTTONDBLCLK) {
-        if (msg->wParam == HTMAXBUTTON) {
-            const WPARAM cmd = IsZoomed(msg->hwnd) ? SC_RESTORE : SC_MAXIMIZE;
-            ::SendMessageW(msg->hwnd, WM_SYSCOMMAND, cmd, 0);
-            *result = 0;
-            return true;
-        }
-    }
-
     if (msg->message == WM_NCHITTEST) {
         POINT pt{ GET_X_LPARAM(msg->lParam), GET_Y_LPARAM(msg->lParam) };
         ScreenToClient(msg->hwnd, &pt);
@@ -157,8 +146,12 @@ bool Md3WinNativeFilter::nativeEventFilter(const QByteArray &eventType, void *me
         const bool cornerR = local.x() >= ww - kCorner;
         const bool cornerT = local.y() <= kCorner;
         const bool cornerB = local.y() >= wh - kCorner;
+        // Caption buttons must stay HTCLIENT so QML gets hover cursor + clicks.
+        // Returning HTMAXBUTTON here made the maximize button look "dead".
+        const bool inCaptionButtons = !st->captionButtons.isEmpty()
+                && st->captionButtons.contains(local);
 
-        if (!(IsZoomed(msg->hwnd))) {
+        if (!(IsZoomed(msg->hwnd)) && !inCaptionButtons) {
             if (cornerT && cornerL) { *result = HTTOPLEFT; return true; }
             if (cornerT && cornerR) { *result = HTTOPRIGHT; return true; }
             if (cornerB && cornerL) { *result = HTBOTTOMLEFT; return true; }
@@ -169,10 +162,9 @@ bool Md3WinNativeFilter::nativeEventFilter(const QByteArray &eventType, void *me
             if (nearR) { *result = HTRIGHT; return true; }
         }
 
-        if (!st->maximizeButton.isEmpty() && st->maximizeButton.contains(local)) {
-            *result = HTMAXBUTTON;
-            return true;
-        }
+        if (inCaptionButtons)
+            return false;
+
         if (!st->captionHit.isEmpty() && st->captionHit.contains(local)) {
             *result = HTCAPTION;
             return true;

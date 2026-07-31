@@ -35,13 +35,15 @@ void Md3WindowHelper::unbindWindow(QObject *window)
 
 void Md3WindowHelper::setMaximizeButtonRect(QObject *window, qreal x, qreal y, qreal w, qreal h)
 {
+    // Historical name: stores the whole caption-button strip so WM_NCHITTEST
+    // resize edges do not steal QML hover/click (do not map to HTMAXBUTTON).
     auto *qw = qobject_cast<QWindow *>(window);
     if (!qw)
         return;
     auto *filter = Md3WinNativeFilter::instance();
     filter->registerWindow(qw, this);
     if (Md3WinChromeState *st = filter->stateForWindow(qw))
-        st->maximizeButton = QRectF(x, y, w, h);
+        st->captionButtons = QRectF(x, y, w, h);
 }
 
 void Md3WindowHelper::clearMaximizeButtonRect(QObject *window)
@@ -50,7 +52,7 @@ void Md3WindowHelper::clearMaximizeButtonRect(QObject *window)
     if (!qw)
         return;
     if (Md3WinChromeState *st = Md3WinNativeFilter::instance()->stateForWindow(qw))
-        st->maximizeButton = QRectF();
+        st->captionButtons = QRectF();
 }
 
 void Md3WindowHelper::setCaptionHitRect(QObject *window, qreal x, qreal y, qreal w, qreal h)
