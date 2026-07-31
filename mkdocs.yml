@@ -71,6 +71,7 @@ nav:
     - 国际化: topics/i18n.md
     - DataTable: topics/datatable.md
     - Qt 版本矩阵: topics/qt-version-matrix.md
+    - Qt 6.5–6.10 UI 差异: topics/qt65-610-ui-diffs.md
     - WebAssembly: topics/wasm.md
     - 原生窗口平台: topics/native-platforms.md
     - Android: topics/android.md

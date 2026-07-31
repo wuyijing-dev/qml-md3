@@ -15,7 +15,11 @@ Item {
     implicitWidth: Math.max(280, stack.implicitWidth + padding * 2)
     implicitHeight: stack.implicitHeight + padding * 2
     width: fillWidth && parent ? parent.width : implicitWidth
-    height: implicitHeight
+    readonly property Md3HeightSync _heightSync: Md3HeightSync {
+        target: root
+        enabled: !root.anchors.fill
+        policy: Md3HeightSync.AtLeastImplicit
+    }
 
     Md3VStack {
         id: stack

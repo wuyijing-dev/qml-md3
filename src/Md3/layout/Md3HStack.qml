@@ -29,9 +29,11 @@ Item {
 
     implicitWidth: leftPadding + rightPadding + contentHost._laidOutWidth
     implicitHeight: Math.max(1, topPadding + bottomPadding + contentHost._laidOutHeight)
-    // Qt 6.8 Column positions by height (not implicitHeight) — without this, rows overlap.
-    // fillHeight users must set an explicit height or anchors (overrides this binding).
-    height: implicitHeight
+    readonly property Md3HeightSync _heightSync: Md3HeightSync {
+        target: root
+        enabled: !root.anchors.fill
+        policy: Md3HeightSync.AtLeastImplicit
+    }
 
     Timer {
         id: layoutTimer
@@ -90,17 +92,11 @@ Item {
     }
 
     function _childPreferredWidth(c) {
-        // Never force 0 — that stacked every icon at x=0 in an older layout pass.
-        const w = Number(c.width) || 0
-        const iw = Number(c.implicitWidth) || 0
-        return Math.max(w, iw, 0)
+        return Md3QtCompat.preferredWidth(c)
     }
 
     function _childPreferredHeight(c) {
-        // Prefer implicitHeight: nested Md3VStack often has height 0 until this shell syncs.
-        const ih = Number(c.implicitHeight) || 0
-        const h = Number(c.height) || 0
-        return Math.max(ih, h, 0)
+        return Md3QtCompat.preferredHeight(c)
     }
 
     function _applyLayout() {

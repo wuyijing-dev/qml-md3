@@ -36,7 +36,11 @@ Item {
     implicitWidth: Math.max(1, host.implicitWidth + leftPadding + rightPadding)
     implicitHeight: _contentHeight + topPadding + bottomPadding
     width: parent ? parent.width : implicitWidth
-    height: implicitHeight
+    readonly property Md3HeightSync _heightSync: Md3HeightSync {
+        target: root
+        enabled: !root.anchors.fill
+        policy: Md3HeightSync.AtLeastImplicit
+    }
 
     Item {
         id: host
@@ -49,8 +53,8 @@ Item {
     }
 
     function _itemSize(item) {
-        let w = Math.max(item.width || 0, item.implicitWidth || 0)
-        let h = Math.max(item.height || 0, item.implicitHeight || 0)
+        let w = Md3QtCompat.preferredWidth(item)
+        let h = Md3QtCompat.preferredHeight(item)
         if (root.minCellHeight > 0)
             h = Math.max(h, root.minCellHeight)
         return Qt.size(Math.max(1, w), Math.max(1, h))

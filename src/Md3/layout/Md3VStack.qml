@@ -28,8 +28,6 @@ Item {
 
     implicitWidth: Math.max(1, contentCol.implicitWidth + leftPadding + rightPadding)
     implicitHeight: contentCol.implicitHeight + topPadding + bottomPadding
-    // Qt 6.8: Column / Flickable.contentHeight use height, not implicitHeight.
-    // Without this, Gallery pages (contentHeight: column.height) collapse and rows overlap.
     // Expand spacers need an externally sized height (anchors.fill / explicit height).
     readonly property bool _hasExpandChild: {
         void contentCol.children.length
@@ -41,12 +39,11 @@ Item {
         }
         return false
     }
-    Binding {
+    // Named property: default alias sends bare children into contentCol.
+    readonly property Md3HeightSync _heightSync: Md3HeightSync {
         target: root
-        property: "height"
-        value: root.implicitHeight
-        when: !root._hasExpandChild && !root.anchors.fill
-        restoreMode: Binding.RestoreNone
+        enabled: !root._hasExpandChild && !root.anchors.fill
+        policy: Md3HeightSync.AtLeastImplicit
     }
 
     Timer {

@@ -135,7 +135,6 @@ endif()
 set_source_files_properties(
     foundation/Md3Theme.qml
     foundation/Md3Adaptive.qml
-    foundation/Md3QtCompat.qml
     foundation/Md3Motion.qml
     foundation/Md3Accessibility.qml
     foundation/Md3IconFonts.qml
@@ -188,10 +187,13 @@ qt_add_qml_module(Md3
         diagnostics/md3i18n.cpp
         diagnostics/md3hotreload.h
         diagnostics/md3hotreload.cpp
+        foundation/md3qtcompat.h
+        foundation/md3qtcompat.cpp
+        layout/md3heightsync.h
+        layout/md3heightsync.cpp
     QML_FILES
         foundation/Md3Theme.qml
         foundation/Md3Adaptive.qml
-        foundation/Md3QtCompat.qml
         foundation/Md3Motion.qml
         foundation/Md3Accessibility.qml
         foundation/Md3IconFonts.qml
@@ -418,11 +420,15 @@ target_include_directories(Md3
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/window>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/charts>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/diagnostics>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/foundation>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/layout>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Md3>
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/window
         ${CMAKE_CURRENT_SOURCE_DIR}/charts
         ${CMAKE_CURRENT_SOURCE_DIR}/diagnostics
+        ${CMAKE_CURRENT_SOURCE_DIR}/foundation
+        ${CMAKE_CURRENT_SOURCE_DIR}/layout
 )
 
 set(MD3_PLATFORM_SOURCES)

@@ -204,14 +204,10 @@ Item {
                     // Width is always parent-driven; never bind implicitWidth to width/childrenRect.
                     implicitWidth: 1
                     implicitHeight: hasFillChild ? fillFallback : contentHeight
-                    // Qt 6.8 Column ignores implicitHeight — without this, fill children get height 0
-                    // and top+bottom anchors collapse on top of each other.
-                    Binding {
+                    readonly property Md3HeightSync _heightSync: Md3HeightSync {
                         target: bodySlot
-                        property: "height"
-                        value: bodySlot.implicitHeight
-                        when: !bodySlot.hasFillChild
-                        restoreMode: Binding.RestoreNone
+                        enabled: !bodySlot.hasFillChild
+                        policy: Md3HeightSync.Exact
                     }
 
                     function _syncFromChildrenRect() {

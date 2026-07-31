@@ -1,6 +1,8 @@
 # Qt Version Matrix
 
-Md3 targets **Qt 6.5+ only**. Qt 5.15 support has been removed. Kit differences (Effects/Shapes link targets, a few font APIs) are isolated in `cmake/Md3QtCompat.cmake` and the `Md3QtCompat` QML singleton so **6.5 / 6.8 / 6.10 execute the same product behavior**.
+Md3 targets **Qt 6.5+ only**. Qt 5.15 support has been removed. Kit differences (Effects/Shapes link targets, a few font APIs) are isolated in `cmake/Md3QtCompat.cmake` and the C++ `Md3QtCompat` / `Md3HeightSync` types so **6.5 / 6.8 / 6.10 execute the same product behavior**.
+
+UI 属性/布局差异清单（编写时查阅）：[qt65-610-ui-diffs.md](qt65-610-ui-diffs.md)。
 
 ## Supported targets
 
@@ -18,10 +20,10 @@ Md3 targets **Qt 6.5+ only**. Qt 5.15 support has been removed. Kit differences 
 |-------|---------------------|-----------------|
 | CMake link | Effects/Shapes **public** (6.10+) vs **Private** (6.5/6.8) | `md3_resolve_optional_qt_modules()` tries public then Private |
 | C++ features | e.g. Han font fallback API (6.8+) | `MD3_QT_AT_LEAST_68` / `MD3_QT_AT_LEAST_610` from `md3_apply_qt_compat_definitions()` |
-| QML layout | Column/Flickable height vs implicitHeight | Always **strict height sync** (`Md3VStack`/`Md3HStack`/`Md3Card` …); see `Md3QtCompat.strictColumnHeight` |
+| QML layout geometry | Column/Flickable use `height` (6.8+) vs implicit-friendly kits | **C++** `Md3HeightSync` + `Md3QtCompat` prescribe one policy (`AtLeastImplicit` / `Exact`) on layout shells |
 | DataTable sizing | height ↔ bodyHeight loops | Never bind `bodyHeight` to `height`; use `_resolvedBodyHeight` |
 
-Do **not** write kit-specific Gallery pages. Prefer the strict path everywhere so 6.10 does not “accidentally” hide bugs that break 6.5/6.8.
+Do **not** write kit-specific Gallery pages or version `if` in QML for layout. Geometry rules live in C++ so 6.10 cannot mask bugs that break 6.5/6.8.
 
 ## CMake switches
 

@@ -18,13 +18,13 @@
 
 ### Qt6 height policy (6.5 / 6.8 / 6.10)
 
-Md3 always uses the **strict** path so kits match (`Md3QtCompat.strictColumnHeight`):
+Prescribed in **C++** (`Md3QtCompat` + `Md3HeightSync`), not per-kit QML:
 
-`Column` / `Flickable.contentHeight` use **`height`**, not `implicitHeight` alone. Layout shells (`Md3VStack` / `Md3HStack` / `Md3PageSection` / `Md3GridLayout`) and most controls sync `height` from intrinsic size.
+- Layout shells raise `height` to at least `implicitHeight` (`Md3HeightSync.AtLeastImplicit`).
+- Card body slots use `Exact` so `Column` sees a real `height`.
+- Measure children with `Md3QtCompat.preferredHeight` / `preferredWidth`.
 
-`Md3Card` body slot must expose a real `height` (and `expand` when content uses `anchors.fill`).
-
-Prefer `contentHeight: column.implicitHeight` in Flickables. Do not bind `bodyHeight` to `height` on `Md3DataTable`.
+`Column` / `Flickable.contentHeight` consume **`height`**. Prefer `contentHeight: column.implicitHeight` in Flickables. Do not bind `bodyHeight` to `height` on `Md3DataTable`.
 
 ## Before / after
 
