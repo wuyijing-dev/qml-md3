@@ -6,7 +6,7 @@ import Md3
 Flickable {
     id: root
     contentWidth: width
-    contentHeight: column.height
+    contentHeight: column.implicitHeight
     clip: true
 
     /// Injected by Md3PageHost; fallback Window.window (ApplicationWindow is the Window).

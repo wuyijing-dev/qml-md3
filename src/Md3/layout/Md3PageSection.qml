@@ -15,6 +15,7 @@ Item {
     implicitWidth: Math.max(280, stack.implicitWidth + padding * 2)
     implicitHeight: stack.implicitHeight + padding * 2
     width: fillWidth && parent ? parent.width : implicitWidth
+    height: implicitHeight
 
     Md3VStack {
         id: stack

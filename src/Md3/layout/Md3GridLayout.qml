@@ -36,6 +36,7 @@ Item {
     implicitWidth: Math.max(1, host.implicitWidth + leftPadding + rightPadding)
     implicitHeight: _contentHeight + topPadding + bottomPadding
     width: parent ? parent.width : implicitWidth
+    height: implicitHeight
 
     Item {
         id: host

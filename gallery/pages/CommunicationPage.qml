@@ -8,7 +8,7 @@ Md3Page {
         id: flick
         anchors.fill: parent
         contentWidth: width
-        contentHeight: col.height
+        contentHeight: col.implicitHeight
         clip: true
 
         Md3VStack {

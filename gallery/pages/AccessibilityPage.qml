@@ -4,7 +4,7 @@ import Md3
 Flickable {
     id: root
     contentWidth: width
-    contentHeight: col.height
+    contentHeight: col.implicitHeight
     clip: true
 
     property var scanFindings: []

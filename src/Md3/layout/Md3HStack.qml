@@ -97,9 +97,10 @@ Item {
     }
 
     function _childPreferredHeight(c) {
-        const h = Number(c.height) || 0
+        // Prefer implicitHeight: nested Md3VStack often has height 0 until this shell syncs.
         const ih = Number(c.implicitHeight) || 0
-        return Math.max(h, ih, 0)
+        const h = Number(c.height) || 0
+        return Math.max(ih, h, 0)
     }
 
     function _applyLayout() {

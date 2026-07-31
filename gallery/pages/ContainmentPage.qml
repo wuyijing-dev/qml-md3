@@ -9,7 +9,7 @@ Md3Page {
     Flickable {
         anchors.fill: parent
         contentWidth: width
-        contentHeight: column.height
+        contentHeight: column.implicitHeight
         clip: true
         interactive: true
         boundsBehavior: Flickable.StopAtBounds

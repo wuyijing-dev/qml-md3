@@ -261,7 +261,7 @@ Item {
         id: flick
         anchors.fill: parent
         contentWidth: width
-        contentHeight: column.height
+        contentHeight: column.implicitHeight
         clip: true
         // Pull deferred sections in early when user scrolls
         onContentYChanged: {

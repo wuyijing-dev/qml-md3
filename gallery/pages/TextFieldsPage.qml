@@ -4,7 +4,7 @@ import Md3
 Flickable {
     id: root
     contentWidth: width
-    contentHeight: column.height
+    contentHeight: column.implicitHeight
     clip: true
 
     Md3VStack {

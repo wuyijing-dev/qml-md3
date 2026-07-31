@@ -16,6 +16,10 @@
 | Fit vs scroll body | `layoutMode: Md3ContainerBody.Fit` / `.Scroll` on Card/Form/Sheet |
 | Window size / chrome | `Md3Adaptive` + `Md3ApplicationWindow.adaptiveChrome` — see [window-appearance.md](window-appearance.md) |
 
+### Qt 6.8 height note
+
+`Column` / `Flickable.contentHeight` use **`height`**, not `implicitHeight`. Layout shells (`Md3VStack` / `Md3HStack` / `Md3PageSection` / `Md3GridLayout`) sync `height` from intrinsic size so rows do not collapse. Prefer `contentHeight: column.implicitHeight` in Flickables. Do not bind `bodyHeight` to `height` on `Md3DataTable`.
+
 ## Before / after
 
 ### Card header
