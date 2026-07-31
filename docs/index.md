@@ -9,6 +9,7 @@ Enterprise Material Design 3 组件库（Qt Quick / QML）。
 - [集成](integration.md) — `find_package(Md3)`、链接与启动
 - [性能](performance.md) — 页面缓存、Live/Wave 预算、VirtualList 检查清单
 - [设计与模式](design-guidelines.md) — 变体、密度、Sheet/Dialog、表单与空态
+- [按钮与命令条](buttons-commands.md) — Toggle / DropDown / Hyperlink / CommandBar（WinUI 对照）
 - [模块边界](module-boundaries.md) — foundation → components → window；页面注入 vs parent 走查
 - [校验 API](validation.md) · [反馈](feedback.md) · [托盘](tray.md)
 - [DataTable](datatable.md) · [深链](routing.md) · [多文档](multi-document.md) · [更新安全](release-updater.md)

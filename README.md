@@ -161,6 +161,7 @@ int main(int argc, char *argv[]) {
 - [docs/integration.md](docs/integration.md) — CMake + `Md3::run`
 - [docs/qt-version-matrix.md](docs/qt-version-matrix.md) — Qt 5.15 / 6.5 / 6.8 stage matrix
 - [docs/design-guidelines.md](docs/design-guidelines.md) — 变体 / 密度 / Sheet·Dialog / 表单与空态
+- [docs/buttons-commands.md](docs/buttons-commands.md) — Toggle / DropDown / Hyperlink / CommandBar（WinUI 对照）
 - [docs/performance.md](docs/performance.md) — first paint / page cache / memory tradeoffs
 - [docs/mkdocs-hosting.md](docs/mkdocs-hosting.md) — MkDocs → 专用仓 [QML_MD3_Document](https://github.com/wuyijing-dev/QML_MD3_Document) / Pages
 - [docs/consumer-app-main-qml.md](docs/consumer-app-main-qml.md) — fix consumer app `Main.qml` / qrc load failures

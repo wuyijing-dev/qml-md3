@@ -8,13 +8,18 @@
 |------|------|------|
 | 页内主操作（唯一） | `Md3Button` **Filled** | 同一行多个 Filled |
 | 次要 / 并行操作 | **Outlined** 或 **Text** | 与 Filled 同等视觉权重 |
+| 开关状态（文案） | `Md3ToggleButton` | 普通 Button 自管 checked |
 | 工具栏图标操作 | `Md3IconButton` / `Md3ToggleIconButton` | 长文案塞进 IconButton |
+| 整钮菜单 / 主操作+菜单 | `Md3DropDownButton` / `Md3SplitButton` | 两个按钮硬拼 |
+| 行内链接 | `Md3Hyperlink` | Text Button 冒充链接 |
+| 窗顶命令条（含溢出） | `Md3CommandBar` + `Md3AppBarButton` | 次要命令全堆主栏 |
+| 窗顶简单自定义条 | `Md3AppToolBar` | 需要 Secondary/overflow 仍用它 |
 | 列表行操作 | Text / Icon，或行尾 `Md3IconButton` | 行内大 Filled |
 | 悬浮主创建 | `Md3Fab` / `Md3ExtendedFab` | 一页多个 FAB |
 | 筛选 / 选择标签 | `Md3FilterChip` / `Md3AssistChip` | 用 Button 冒充 Chip |
 | 危险操作 | 文案明确 + 确认 Dialog；按钮可用 error 色容器 | 仅靠红色图标无确认 |
 
-同一视觉层级只保留 **一个** 高强调按钮。
+同一视觉层级只保留 **一个** 高强调按钮。按钮族详细对照见 [buttons-commands.md](buttons-commands.md)。
 
 ## 密度与桌面间距
 

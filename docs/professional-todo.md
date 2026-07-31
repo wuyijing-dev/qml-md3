@@ -197,6 +197,7 @@
 
 | 日期 | 说明 |
 |------|------|
+| 2026-07-31 | 按钮/命令条：`docs/buttons-commands.md` + `docs/api-manual` WinUI 附录 |
 | 2026-07-31 | 废除旧「专业库堆栈」TODO；改为 WinUI 3 能力对标稿 |
 
 参考：

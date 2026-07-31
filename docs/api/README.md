@@ -4,7 +4,9 @@
 
 由 `scripts/docs/gen_api_docs.py` 从 QML 源码生成；改完控件后请重跑该脚本。
 
-集成与 C++ 启动：[../integration.md](../integration.md) · 主题令牌：[../tokens.md](../tokens.md)
+集成与 C++ 启动：[../integration.md](../integration.md) · 主题令牌：[../tokens.md](../tokens.md) · 按钮与命令：[../buttons-commands.md](../buttons-commands.md)
+
+手写附录（WinUI 对照等）放在 [`docs/api-manual/`](../api-manual/)；重新生成时会自动拼接到对应 API 页末尾。
 
 ## C++ / native
 
@@ -26,11 +28,13 @@
 - [Md3ButtonGroup](Md3ButtonGroup.md)
 - [Md3Checkbox](Md3Checkbox.md)
 - [Md3ChipGroup](Md3ChipGroup.md)
+- [Md3CommandBar](Md3CommandBar.md) — Desktop command strip with primary actions and a secondary overflow menu (WinUI CommandBar PrimaryCommands / SecondaryCommands).
 - [Md3DropDownButton](Md3DropDownButton.md) — Single-piece button that opens a menu (WinUI DropDownButton). Unlike Md3SplitButton, the whole control opens the menu — no primary action.
 - [Md3ExtendedFab](Md3ExtendedFab.md)
 - [Md3Fab](Md3Fab.md)
 - [Md3FabMenu](Md3FabMenu.md)
 - [Md3FilterChip](Md3FilterChip.md) — Filter chip — selection is usually owned by the host (`selected:` binding). Does not auto-toggle; emit `clicked` and let the parent update `selected`.
+- [Md3Hyperlink](Md3Hyperlink.md) — Text hyperlink / WinUI HyperlinkButton. Optional `url` opens externally on click.
 - [Md3IconButton](Md3IconButton.md)
 - [Md3InputChip](Md3InputChip.md)
 - [Md3Radio](Md3Radio.md)
@@ -65,7 +69,6 @@
 - [Md3AdaptiveContainer](Md3AdaptiveContainer.md) — Standalone column-stacking adaptive container (gallery / direct use). Md3 container components embed `Md3ContainerBody` and expose `layoutMode` directly.
 - [Md3AppToolBar](Md3AppToolBar.md) — Compact app tool strip for `Md3ApplicationWindow.toolBar` (desktop chrome).
 - [Md3ArcBandGauge](Md3ArcBandGauge.md) — Thick arc-band gauge with an end cap marker (dashboard KPI band).
-- [Md3CommandBar](Md3CommandBar.md) — Desktop command strip with primary actions and a secondary overflow menu (WinUI CommandBar PrimaryCommands / SecondaryCommands).
 - [Md3CompassGauge](Md3CompassGauge.md) — Compass-style circular dial with heading needle (0–360°).
 - [Md3ContainerBody](Md3ContainerBody.md) — Fit / Scroll content host embedded by Md3 container components.
 - [Md3DeferredSection](Md3DeferredSection.md) — Within-page progressive load: placeholder first, then create `sourceComponent`. Honors Md3Theme.progressiveContent (default on). Set forceImmediate to always load now.
@@ -73,7 +76,6 @@
 - [Md3FileDropZone](Md3FileDropZone.md) — Desktop file drop target with scrollable table preview of dropped files.
 - [Md3Gauge](Md3Gauge.md) — Classic horseshoe / arc KPI gauge (open bottom).
 - [Md3HalfGauge](Md3HalfGauge.md) — Semicircle / half-dial gauge (flat bottom).
-- [Md3Hyperlink](Md3Hyperlink.md) — Text hyperlink / WinUI HyperlinkButton. Optional `url` opens externally on click.
 - [Md3InfoBar](Md3InfoBar.md) — WinUI-style in-page info bar — persistent until dismissed (unlike Snackbar).
 - [Md3KeySequenceField](Md3KeySequenceField.md) — Desktop shortcut capture field: captures a single chord like Ctrl+K / Shift+Enter.
 - [Md3KnobGauge](Md3KnobGauge.md) — Rotary knob-style gauge (value as dial rotation with notch).

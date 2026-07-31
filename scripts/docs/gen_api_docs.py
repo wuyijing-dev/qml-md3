@@ -13,6 +13,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "src" / "Md3"
 OUT = ROOT / "docs" / "api"
+# Hand-written appendices (WinUI notes, richer examples). Survives regen.
+MANUAL = ROOT / "docs" / "api-manual"
 
 # Paths relative to SRC that are public API surface
 SCAN_DIRS = [
@@ -558,6 +560,8 @@ def category_of(path: str, name: str = "") -> str:
                 "Segmented",
                 "Toggle",
                 "SplitButton",
+                "Hyperlink",
+                "CommandBar",
             )
         ):
             return "Actions & selection"
@@ -647,9 +651,13 @@ def main() -> None:
         old.unlink()
 
     for name, info in sorted(infos.items()):
-        (OUT / f"{name}.md").write_text(
-            render(info, infos, inheritance), encoding="utf-8"
-        )
+        body = render(info, infos, inheritance)
+        manual = MANUAL / f"{name}.md"
+        if manual.is_file():
+            extra = manual.read_text(encoding="utf-8").strip()
+            if extra:
+                body = body.rstrip() + "\n\n" + extra + "\n"
+        (OUT / f"{name}.md").write_text(body, encoding="utf-8")
 
     by_cat: dict[str, list[str]] = {}
     for name, info in infos.items():
@@ -662,7 +670,9 @@ def main() -> None:
         "",
         "由 `scripts/docs/gen_api_docs.py` 从 QML 源码生成；改完控件后请重跑该脚本。",
         "",
-        "集成与 C++ 启动：[../integration.md](../integration.md) · 主题令牌：[../tokens.md](../tokens.md)",
+        "集成与 C++ 启动：[../integration.md](../integration.md) · 主题令牌：[../tokens.md](../tokens.md) · 按钮与命令：[../buttons-commands.md](../buttons-commands.md)",
+        "",
+        "手写附录（WinUI 对照等）放在 [`docs/api-manual/`](../api-manual/)；重新生成时会自动拼接到对应 API 页末尾。",
         "",
         "## C++ / native",
         "",
