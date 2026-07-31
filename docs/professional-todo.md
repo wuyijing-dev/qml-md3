@@ -1,208 +1,186 @@
-# QML MD3 — WinUI 3 功能对标 TODO
+# QML MD3 — 生产可用 TODO
 
-> **对标目标：** [WinUI 3 / Windows App SDK](https://learn.microsoft.com/windows/apps/winui/winui3/) 桌面控件与 Fluent 模式（参考 WinUI 3 Gallery）。  
-> **视觉语言：** 仍走 Material Design 3；本文件只谈 **能力面 / 交互模式 / 桌面壳**，不做 Fluent 换皮。  
-> **原则：** 生产桌面高频优先；WinUI 专属（WebView2 / Ink / Map）可标「可选」或「不跟」。  
-> 勾选：`- [ ]` 未做 · `- [x]` 已有可用等价（名称可不同）· `- [~]` 部分覆盖
+> **目标：** 让外部团队敢在真实桌面产品里 `find_package(Md3)` 并长期依赖。  
+> **视觉：** Material Design 3；WinUI 仅作能力对照，不是 Fluent 换皮。  
+> **判断：** 控件覆盖面已够多数业务；**卡生产的是工程可信度、壳层体验、契约与平台验证**，不是再堆 Chart/Gauge。  
+> 勾选：`- [ ]` 未做 · `- [x]` 已具备 · `- [~]` 部分具备 · `- [!]` 明确不做
 
-**基线日期：** 2026-07-31 · 库版本 `1.0.0`
-
----
-
-## 0. 对标说明
-
-| WinUI 概念 | Md3 近似 |
-|------------|----------|
-| `NavigationView` | `Md3NavigationRail` + `Md3NavigationDrawer` + `Md3PageHost` / `Md3Scaffold` |
-| `TitleBar` + caption | `Md3TitleBar` + `Md3CaptionButtons` + `Md3ApplicationWindow` |
-| `TabView` | `Md3DocumentTabBar` + `Md3TabWindow`（撕离） |
-| `ContentDialog` / `Flyout` | `Md3Dialog` / `Md3FullscreenDialog` / `Md3Menu` / `Md3SideSheet` |
-| `InfoBar` / `TeachingTip` | `Md3InfoBar` / `Md3Banner` / `Md3Tour` / `Md3Snackbar`·`Md3Toast` |
-| `ItemsRepeater` / `ListView` | `Md3VirtualList` / `Md3ListTile` |
-| `TreeView` | `Md3TreeView` |
-| `DataGrid`（社区/Toolkit） | `Md3DataTable` |
-| Mica / Acrylic | `systemBackdrop` / 液态玻璃（实验）— 能力有，策略见 `docs/experimental.md` |
-
-**明确不跟（或极低优先）：** `WebView2`、`MapControl`、`InkCanvas`/`InkToolbar`、`MediaPlayerElement` 完整壳、商店 Inking 栈。
+**基线：** 2026-07-31 · 声明版本 `1.0.0`（契约与 CI 未齐前，对外仍按「准 1.0」沟通）
 
 ---
 
-## 1. 对标矩阵（WinUI → Md3）
+## 0. 生产判断（先看这段）
 
-### 1.1 按钮与命令
+| 维度 | 现状 | 进生产还要什么 |
+|------|------|----------------|
+| 控件广度 | 按钮/表单/表/树/壳/反馈/集合已齐 | 少补壳层一体控件即可 |
+| 工程可信 | 几乎无编译 CI、无 qmltest | **P0：CI + hello 样例** |
+| 法律/发版 | CHANGELOG 有；**无根目录 LICENSE** | **P0：许可证 + 发版 checklist** |
+| API 契约 | 生成文档全；破坏性变更无流程 | **P0：公开 API / SemVer 规则** |
+| 平台 | 文档矩阵有；CI 未钉死 | **P1：Win + 一另平台绿灯** |
+| 无障碍 | 约定文档有；无审计清单勾选 | **P1：核心路径键盘/读屏抽检** |
+| 性能 | 有指南；无回归门禁 | **P1：VirtualList/DataTable 冒烟预算** |
+| WinUI 剩余 | NavigationView / Flyout / Settings… | **P2：按产品壳需求补，不阻塞打包发版** |
 
-| WinUI | Md3 | 状态 | 缺口 / 下一步 |
-|-------|-----|------|----------------|
-| Button | `Md3Button` | [x] | — |
-| ToggleButton | `Md3ToggleButton` + `Md3ToggleIconButton` | [x] | 文本 Filled/Outlined；图标仍用 ToggleIconButton |
-| SplitButton | `Md3SplitButton` | [x] | — |
-| DropDownButton | `Md3DropDownButton` | [x] | 整钮开菜单 + chevron；与 Split 主操作分离 |
-| HyperlinkButton | `Md3Hyperlink` | [x] | 可选 `url` → `Qt.openUrlExternally` |
-| AppBarButton / CommandBar | `Md3AppBarButton` / `Md3CommandBar` | [x] | 主命令槽 + `overflowModel` 次命令 |
-| AppBarToggleButton | `Md3AppBarToggleButton` | [x] | `checkable` 工具栏项 |
-
-### 1.2 输入与选择
-
-| WinUI | Md3 | 状态 | 缺口 / 下一步 |
-|-------|-----|------|----------------|
-| TextBox | `Md3TextField` | [x] | — |
-| PasswordBox | `Md3PasswordField` | [x] | — |
-| NumberBox | `Md3NumberField` | [x] | 对齐 WinUI：spin、validation mode |
-| AutoSuggestBox | TextField autocomplete / Search | [~] | 统一 **AutoSuggest** API（querySubmitted / suggestionChosen） |
-| RichEditBox | — | [ ] | 可选：轻量 `Md3RichText` 或明确不做 |
-| ComboBox | `Md3Select` / `Md3Option` | [x] | editable ComboBox 模式 |
-| CheckBox | `Md3Checkbox` | [x] | — |
-| RadioButtons | `Md3Radio` + `Md3RadioGroup` | [x] | — |
-| ToggleSwitch | `Md3Switch` | [x] | — |
-| Slider | `Md3Slider` / `Md3RangeSlider` | [x] | — |
-| ColorPicker | `Md3ColorPicker` | [x] | — |
-| CalendarView | DatePicker 内嵌 | [~] | 独立 **日历视图**（多选日期） |
-| CalendarDatePicker | `Md3DateField` / `Md3DatePicker` | [x] | — |
-| DatePicker | `Md3DateField` | [x] | — |
-| TimePicker | `Md3TimeField` / `Md3TimePicker` | [x] | — |
-| PersonPicture | `Md3Avatar` / Group | [x] | — |
-
-### 1.3 集合与数据
-
-| WinUI | Md3 | 状态 | 缺口 / 下一步 |
-|-------|-----|------|----------------|
-| ListView | `Md3ListView` (+ VirtualList / ListTile) | [x] | 分组头、单/多选、空态；Swipe 见 `Md3SwipeReveal` |
-| GridView | `Md3GridView` | [x] | 虚拟化网格 + selection |
-| ItemsView | `Md3ItemsView` | [x] | Stack / Grid 布局策略（waterfall 可后置） |
-| ItemsRepeater | `Md3VirtualList` | [x] | 轻量原语；带分组/多选用 ListView |
-| TreeView | `Md3TreeView` | [x] | 拖放节点、多列树（可选增强） |
-| FlipView | `Md3Carousel` `mode: Flip` | [x] | 单页翻转 + `Md3PipsPager` |
-| PipsPager | `Md3PipsPager` | [x] | Dot / Pill |
-| SemanticZoom | — | [ ] | **不做**（桌面低频） |
-| AnnotatedScrollBar | `Md3ScrollBar.annotations` | [x] | 字母索引 gutter + 拖动提示 |
-| Pull-to-refresh | `Md3PullToRefresh` | [x] | 绑 Flickable；桌面可选 |
-| Swipe | `Md3SwipeReveal` | [x] | 列表项左滑露出操作 |
-| DataGrid（Toolkit） | `Md3DataTable` | [x] | `editable` 列 + F2/双击就地编辑 |
-
-### 1.4 导航与窗口壳（桌面核心）
-
-| WinUI | Md3 | 状态 | 缺口 / 下一步 |
-|-------|-----|------|----------------|
-| NavigationView | Rail + Drawer + PageHost | [~] | **一体 NavigationView**（顶/左模式、页脚、自动 pane） |
-| BreadcrumbBar | `Md3Breadcrumb` | [x] | — |
-| TabView | `Md3DocumentTabBar` + TabWindow | [x] | Tab 预览、拖入合并 |
-| TitleBar | `Md3TitleBar` | [x] | 与内容区交互控件混排（Win11 式） |
-| MenuBar | `Md3MenuBar` | [x] | — |
-| SplitView | `Md3SplitView` | [x] | — |
-| SelectorBar / Segmented | `Md3SegmentedButton` | [x] | — |
-| Frame / 页面栈 | `Md3PageHost` + `Md3Page` | [x] | 深链适配文档已有；补 Gallery 对照 WinUI Frame |
-| 多窗口 | `Md3DialogWindow` / TabWindow | [x] | — |
-
-### 1.5 对话框、浮层与反馈
-
-| WinUI | Md3 | 状态 | 缺口 / 下一步 |
-|-------|-----|------|----------------|
-| ContentDialog | `Md3Dialog` | [x] | — |
-| Flyout | Menu / SideSheet / 自定义 Popup | [~] | 轻量 **`Md3Flyout`**（锚定 + light-dismiss） |
-| MenuFlyout | `Md3Menu` | [x] | — |
-| CommandBarFlyout | — | [ ] | 选区工具条浮层（文本/图片编辑场景） |
-| TeachingTip | `Md3Tour` / Tooltip | [~] | 单点 **TeachingTip**（箭头锚定 + 步骤可选） |
-| InfoBar | `Md3InfoBar` / Banner | [x] | — |
-| InfoBadge | IconButton badge / `Md3Badge` | [x] | — |
-| ProgressBar | `Md3LinearProgressIndicator` | [x] | — |
-| ProgressRing | `Md3CircularProgressIndicator` / Loading | [x] | — |
-| ToolTip | `Md3Tooltip` | [x] | — |
-| Expander | `Md3ExpansionTile` | [x] | SettingsExpander 式分组 |
-
-### 1.6 媒体 / 系统 / 实验（策略）
-
-| WinUI | Md3 策略 | 状态 |
-|-------|----------|------|
-| WebView2 | 不入库；消费方自嵌 | [ ] 文档「边界」一节 |
-| Ink* | 不跟 | [ ] 写入不做清单 |
-| MapControl | 不跟 | [ ] |
-| MediaPlayerElement | 可选薄封装或示例 | [ ] |
-| Mica/Acrylic | backdrop API 已有 | [~] Gallery 默认策略与 Win11 对齐文档 |
+**结论：** 内部工具 / 自研桌面 App 现在就能用；要「对外可依赖的库」，优先把下面 **P0** 做完，再谈更多控件。
 
 ---
 
-## 2. 功能迭代路线（按 WinUI Gallery 场景）
+## 1. P0 — 没有这些，不敢说「生产库」（1–2 周）
 
-### W1 — 桌面壳对齐（2–3 周）
+### 1.1 法律与发版
 
-- [ ] `Md3NavigationView`（或增强 Scaffold）：`paneDisplayMode` = Left / LeftCompact / Top；自动折叠阈值
-- [ ] `Md3Flyout`：锚定控件、light-dismiss、Esc、焦点归还
-- [x] `Md3DropDownButton` / `Md3Hyperlink`
-- [ ] TitleBar **内容槽**（搜索框、账号头像）官方示例
-- [ ] Gallery：对照 WinUI「Navigation / Window」页信息架构
+- [ ] 根目录 **`LICENSE`**（建议 MIT 或与 Qt 消费方友好的许可证；写清字体/图标二次许可）
+- [ ] **`NOTICE` / 第三方归因**（Material Icons、若有 KF 等）
+- [ ] 发版 checklist：`CHANGELOG` 条目、版本号、`find_package` 安装包、Gallery 冒烟、文档站同步
+- [ ] README「支持范围」：Qt 最低版本、官方仅保证的 OS、实验 API 指向 `docs/experimental.md`
 
-### W2 — 集合与编辑（3–4 周）
+### 1.2 消费方证明
 
-- [x] `Md3ListView`：多选、分组、空态、键盘多选
-- [x] `Md3GridView`：虚拟化网格选择
-- [x] `Md3PipsPager` + Carousel/Flip 指示对齐
-- [x] DataTable：**单元格就地编辑**、剪贴板导出钩子 Gallery 演示
-- [ ] TreeView：拖放排序（可选）
+- [ ] **`examples/hello-md3`**：干净工程 `find_package(Md3)` → 一窗 + Theme + Button + Dialog
+- [ ] 文档一条龙：从 zip/`dist/Md3` 到跑起来 ≤ 10 分钟（Windows 为主，附 Linux）
+- [ ] 明确 **static vs shared** 推荐默认（与 `docs/packaging.md` 一致，加故障对照）
 
-### W3 — 输入与设置页模式（2 周）
+### 1.3 CI 与测试底线
 
-- [ ] AutoSuggest 统一信号（对齐 AutoSuggestBox）
+- [ ] GitHub Actions：**配置 + 编译库**（至少 Windows 或 Linux 一条；Gallery 可选矩阵）
+- [ ] **qmltest / 冒烟**：Theme 单例、Button 点击、Dialog Esc、PageHost 推页（5–15 个用例即可）
+- [ ] PR 门禁：编译失败不可合；文档-only 可跳过重构建（可选）
+- [ ] `tests/baselines`：选定 3–5 个控件做视觉基线流程（可先手工，后自动化）
+
+### 1.4 API 契约
+
+- [ ] 文档页：**Public vs Private**（`private/`、playground、实验件不进 SemVer 承诺）
+- [ ] SemVer 规则：何为 breaking（删属性 / 改枚举序 / 改默认交互）
+- [ ] 弃用策略：`/// @deprecated` + Gallery 警告 + 至少一个次版本过渡
+- [ ] `1.0.0` 真正 tag：上述 P0 勾完再打；在此之前 CHANGELOG 标 Pre-production
+
+---
+
+## 2. P1 — 真产品会踩的坑（2–4 周）
+
+### 2.1 桌面壳（用户第一眼）
+
+- [ ] **`Md3NavigationView`**（或 Scaffold 增强）：`paneDisplayMode` Left / LeftCompact / Top；断点自动折叠
+- [ ] **`Md3Flyout`**：锚定、light-dismiss、Esc、焦点归还（别再只靠 Menu/SideSheet 拼）
+- [ ] TitleBar **内容槽**官方示例（搜索、账号）
+- [ ] Gallery：Navigation / Window 信息架构一页说清
+
+### 2.2 无障碍与键盘
+
+- [ ] 核心路径抽检表：Dialog、Menu、Select、DataTable、ListView、CommandBar、PageHost
+- [ ] 每条：Tab 序、Esc、Enter/Space、`Accessible.name` 非空
+- [ ] `reduceMotion` / `highContrast` Gallery 开关演示 + 回归勾选
+
+### 2.3 性能与大数据
+
+- [ ] VirtualList **5k+**、DataTable **分页/冻结列** Gallery 固定场景 + 文档预算（见 `performance.md`）
+- [ ] Overlay/Menu 泄漏与重复 `popup` 压力：开关 100 次不涨句柄（手工或脚本）
+- [ ] 默认 Gallery「无感打开」配置写入消费方推荐（已有 Profile F，升格为 integration 默认建议）
+
+### 2.4 国际化与主题
+
+- [ ] 库内 `qsTr` 覆盖审计；至少 **en + zh_CN** 打包进模块
+- [ ] 动态换肤 / 种子色切换：无闪白、无丢弹层宿主
+- [ ] 高 DPI / 混缩放：Win11 125%–150% 抽检 TitleBar 与焦点环
+
+### 2.5 平台
+
+- [ ] CI 或发布前清单：**Windows**（主）+ **Linux 或 macOS** 至少一端编译通过
+- [ ] `docs/qt-version-matrix.md` 与 CI kit 对齐（钉死「官方支持 = 6.8+」若 5.15 仅 bootstrap）
+
+---
+
+## 3. P2 — 产品完整度（按业务选做）
+
+### 3.1 输入与设置
+
+- [ ] AutoSuggest 统一信号（`querySubmitted` / `suggestionChosen`）
 - [ ] `Md3Rating`
-- [ ] `Md3SettingsSection` / SettingsExpander 模式（WinUI Settings 页）
-- [ ] CalendarView 多选 / 黑名单日期
-- [ ] NumberBox spin + 校验模式对齐文档
+- [ ] `Md3SettingsSection` / SettingsExpander 模式
+- [ ] NumberField spin + validation mode 文档化
+- [ ] CalendarView 多选（若日历产品需要）
+- [ ] Select **editable** Combo 模式
 
-### W4 — 教学与命令面（1–2 周）
+### 3.2 反馈与教学
 
-- [ ] `Md3TeachingTip`
-- [x] CommandBar + overflow（`Md3CommandBar` / `Md3AppBarButton`）
-- [ ] CommandBarFlyout（文本选区场景可后置）
-- [ ] Tour / TeachingTip 与 InfoBar 层级规范一页
+- [ ] `Md3TeachingTip`（单点锚定；与 Tour/InfoBar 分层写进 `feedback.md`）
+- [ ] CommandBarFlyout（选区工具条，可后置）
 
-### W5 — 工程对等 WinUI Gallery（持续）
+### 3.3 集合增强（可选）
 
-- [ ] `examples/hello-md3`（find_package + 一窗）
-- [ ] Gallery 按 WinUI 分类重排导航（Basics / Collections / Dialogs / Navigation / Media）
-- [ ] 每个对标控件：Gallery 页 + `docs/api` + 「WinUI 对照」小节
-- [ ] 最小 CI：编译库 + qmltest 冒烟
-- [ ] LICENSE / SemVer / 发版 checklist（交付可信）
+- [ ] TreeView 拖放排序 / 多列树
+- [ ] ItemsView waterfall
+- [ ] ListView 与 Swipe 更紧的合成示例（Gallery 场景页）
 
----
+### 3.4 明确不做 / 边界文档
 
-## 3. 本季度建议优先级（执行序）
-
-1. **W1 壳与 Flyout / NavigationView** — 桌面产品第一眼像「系统应用」  
-2. **W2 ListView / GridView / Pips** — 数据应用刚需  
-3. **W5 hello + CI** — 敢被依赖  
-4. **W3 Settings / Rating / AutoSuggest** — 设置页与表单  
-5. **W4 TeachingTip / CommandBar** — 打磨  
-
-图表 / 仪表盘已超出 WinUI 默认面，**保持优势，不占用对标带宽**（除非 WinUI Gallery 场景需要）。
+- [!] SemanticZoom
+- [!] WebView2 / Ink / Map 入库
+- [ ] `docs` 增加 **「库边界」**：媒体、浏览器、地图由消费方自嵌；图表为增值非 WinUI 对等物
 
 ---
 
-## 4. 验收标准（对标完成定义）
+## 4. P3 — 锦上添花（不阻塞发版）
 
-对每个标为「要做」的 WinUI 控件：
-
-1. Gallery 有可点示例（含键盘路径）  
-2. `docs/api/Md3Xxx.md` 有属性表 + **WinUI 对照名**  
-3. 焦点 / Esc / 读屏名不低于现有 Md3 控件基线  
-4. 不强制视觉 Fluent；交互语义可对照 WinUI 文档  
-
-整库「WinUI 桌面高频对齐」完成线：
-
-- [ ] W1–W4 主控件全 `[x]` 或明确 `[ ] 不做`  
-- [ ] Gallery 导航可按 WinUI 分类浏览  
-- [ ] 对外 quickstart + 冒烟 CI 绿灯  
+- [ ] Gallery 按 Basics / Collections / Dialogs / Navigation 重排
+- [ ] 每控件 API 页统一「WinUI 对照」附录（`api-manual` 继续扩）
+- [ ] 视觉回归 CI（baselines PNG）
+- [ ] 设计令牌导出（JSON / CSS 变量）供非 Qt 设计稿对齐
+- [ ] 贡献指南 `CONTRIBUTING.md`（qmllint、文档生成、提交约定）
 
 ---
 
-## 5. 变更记录
+## 5. WinUI 能力快照（已齐 / 剩余）
+
+> 详细矩阵历史见 Git；此处只保留**还影响生产壳**的剩余项。
+
+| 状态 | 项 |
+|------|----|
+| 已齐（可依赖） | Button 族、CommandBar、表单主控件、List/Grid/Items、Carousel Flip、Pips、Swipe、PTR、AnnotatedScrollbar、DataTable 编辑、Tree、Tab/多窗、Dialog/Menu/InfoBar… |
+| 壳层缺口 | NavigationView 一体、Flyout、TitleBar 内容槽示例 |
+| 设置/表单缺口 | AutoSuggest 统一 API、Settings 分区、Rating |
+| 不做 | SemanticZoom、WebView2、Ink、Map |
+
+路线图遗留（原 W1–W5）并入上文 P0–P2，不再单独按「对标周」排期。
+
+---
+
+## 6. 建议执行序（若只做一件事）
+
+1. **LICENSE + hello-md3 + 编译 CI**（本周就能提升「敢用」指数）  
+2. **qmltest 冒烟 + Public API 说明**  
+3. **NavigationView + Flyout**（桌面产品观感）  
+4. **a11y 抽检 + 性能冒烟场景**  
+5. 再按产品需要补 Settings / AutoSuggest / TeachingTip  
+
+图表与仪表盘：**保持优势，不占生产带宽**。
+
+---
+
+## 7. 「生产可用」完成定义
+
+对外可以说 **Production-ready 1.0** 当且仅当：
+
+- [ ] P0 全部勾选（许可证、hello、CI 编译、冒烟测试、SemVer/公开 API 说明、正式 tag）
+- [ ] P1 壳层至少 **Flyout 或 NavigationView 其一** 可用，TitleBar 示例可抄
+- [ ] Windows 上 hello-md3 与 Gallery 核心页无已知 blocker
+- [ ] 文档站 / `docs/integration.md` 与安装包路径一致
+
+未满足前：README 使用 **「可用 / 准生产」** 措辞，避免「稳定 1.0 全平台保证」。
+
+---
+
+## 8. 变更记录
 
 | 日期 | 说明 |
 |------|------|
+| 2026-07-31 | **改为生产可用视角**：P0 工程契约优先；WinUI 剩余降为 P2；保留壳层为 P1 |
 | 2026-07-31 | 集合面：ListView/GridView/ItemsView/Pips/Swipe/PTR + DataTable 就地编辑 |
-| 2026-07-31 | 按钮/命令条：`docs/buttons-commands.md` + `docs/api-manual` WinUI 附录 |
-| 2026-07-31 | 废除旧「专业库堆栈」TODO；改为 WinUI 3 能力对标稿 |
+| 2026-07-31 | 按钮/命令条文档与 api-manual |
+| 2026-07-31 | 初版 WinUI 3 能力对标稿 |
 
 参考：
 
-- [Windows controls and patterns](https://learn.microsoft.com/windows/apps/design/controls/)  
-- [WinUI 3](https://learn.microsoft.com/windows/apps/winui/winui3/)  
-- [WinUI Gallery](https://github.com/microsoft/WinUI-Gallery)
+- [docs/integration.md](integration.md) · [docs/packaging.md](packaging.md) · [docs/performance.md](performance.md) · [docs/a11y.md](a11y.md)
+- [WinUI 3](https://learn.microsoft.com/windows/apps/winui/winui3/)（能力对照，非视觉规范）
