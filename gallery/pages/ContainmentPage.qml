@@ -65,7 +65,7 @@ Md3Page {
                         anchors.fill: parent
                         anchors.rightMargin: 28
                         contentWidth: width
-                        contentHeight: annotatedCol.height
+                        contentHeight: annotatedCol.implicitHeight
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds
                         Md3VStack {
