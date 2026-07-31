@@ -67,9 +67,7 @@ Md3 cannot be “just QML source” on pip: users need `Md3.dll` / `libMd3.so` +
 | **B. Platform wheels** (`md3qml` + `_native/`) | `pip install md3qml[pyside6]` only | Best UX when CI publishes |
 | **C. Two packages** | `md3qml` + `md3qml-bin-*` | Clear split; more release work |
 
-**Recommended:** ship **B** via [`.github/workflows/pyside-wheels.yml`](../../.github/workflows/pyside-wheels.yml) and set repo secret `PYPI_API_TOKEN` on GitHub Release.
-
-Do **not** vendor full Qt inside the wheel — PySide already provides it.
+**Recommended:** keep **git install + `md3qml install/fetch`** until you explicitly decide to publish platform wheels / PyPI. Do **not** vendor full Qt inside any wheel — PySide already provides it.
 
 ## Fastest user install (when platform wheels exist)
 
