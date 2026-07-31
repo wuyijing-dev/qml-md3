@@ -21,14 +21,40 @@ Flickable {
     readonly property int currentOsTab: {
         if (Md3WindowCapabilities.isWindows)
             return 0
-        if (Md3WindowCapabilities.isLinux)
+        if (Md3WindowCapabilities.isWayland)
             return 1
-        if (Md3WindowCapabilities.isMacOS)
+        if (Md3WindowCapabilities.isX11)
             return 2
+        if (Md3WindowCapabilities.isLinux)
+            return 1 // generic Linux → Wayland tab as default browse target
+        if (Md3WindowCapabilities.isMacOS)
+            return 3
+        if (Md3WindowCapabilities.isAndroid)
+            return 4
         return 0
     }
 
+    /// Tabs: 0 Windows · 1 Wayland · 2 X11 · 3 macOS · 4 Android
     property int platformTab: currentOsTab
+
+    readonly property bool linuxDesktopActive: platformTab === 1 || platformTab === 2
+    /// Ops only when viewing the tab that matches this machine's display server.
+    readonly property bool linuxOpsEnabled: {
+        if (platformTab === 1)
+            return Md3WindowCapabilities.isWayland
+        if (platformTab === 2)
+            return Md3WindowCapabilities.isX11
+        return false
+    }
+    readonly property bool androidOpsEnabled: platformTab === 4 && Md3WindowCapabilities.isAndroid
+
+    readonly property var platformTabLabels: [
+        qsTr("Windows"),
+        qsTr("Wayland"),
+        qsTr("X11"),
+        qsTr("macOS"),
+        qsTr("Android")
+    ]
 
     Md3WindowHelper { id: nativeHelper }
     Md3ReleaseUpdater {
@@ -330,8 +356,10 @@ Flickable {
             currentIndex: root.platformTab
             model: [
                 { text: qsTr("Windows") },
-                { text: qsTr("Linux") },
-                { text: qsTr("macOS") }
+                { text: qsTr("Wayland") },
+                { text: qsTr("X11") },
+                { text: qsTr("macOS") },
+                { text: qsTr("Android") }
             ]
             onCurrentIndexChangedByUser: function (index) {
                 root.platformTab = index
@@ -342,8 +370,9 @@ Flickable {
             visible: root.platformTab !== root.currentOsTab
             width: parent.width
             wrapMode: Text.WordWrap
-            text: qsTr("正在浏览其他系统标签；可操作控件仅对本机（%1）生效。")
+            text: qsTr("正在浏览其他平台标签；可操作控件仅对本机（%1 / %2）生效。")
                   .arg(Md3WindowCapabilities.platformId)
+                  .arg(Md3WindowCapabilities.displayServer)
             role: Md3Text.BodySmall
             tone: Md3Text.Tertiary
         }
@@ -352,7 +381,7 @@ Flickable {
             id: platformHost
             width: parent.width
             height: {
-                const panes = [paneWindows, paneLinux, paneMac]
+                const panes = [paneWindows, paneLinuxDesktop, paneLinuxDesktop, paneMac, paneAndroid]
                 const p = panes[root.platformTab]
                 return p ? p.implicitHeight : 0
             }
@@ -367,7 +396,7 @@ Flickable {
                 Md3Text {
                     width: parent.width
                     wrapMode: Text.WordWrap
-                    text: qsTr("Windows 10/11 客户区：DWM 边框、任务栏进度与角标、跳转列表、缩略图工具栏、托盘、Peek/捕获。（系统背景材质已标记为不适合使用，Gallery 不再展示。）")
+                    text: qsTr("Windows 10/11 客户区（能力袋 id=windows）：DWM 边框、任务栏进度与角标、跳转列表、缩略图工具栏、托盘、Peek/捕获、延迟 Snap Layouts。（系统背景材质已标记为不适合使用，Gallery 不再展示。）")
                     role: Md3Text.BodyMedium
                     tone: Md3Text.OnSurfaceVariant
                 }
@@ -678,30 +707,30 @@ Flickable {
                 }
             }
 
-            // ===== Linux =====
+            // ===== Wayland / X11 (shared FreeDesktop stack; tab selects honesty notes) =====
             Md3VStack {
-                id: paneLinux
+                id: paneLinuxDesktop
                 width: parent.width
-                visible: root.platformTab === 1
+                visible: root.linuxDesktopActive
                 spacing: 12
 
                 Md3Text {
+                    width: parent.width
                     wrapMode: Text.WordWrap
-                    text: Md3WindowCapabilities.isX11
-                          ? qsTr("X11 下可用 KX11Extras KeepAbove / forceActiveWindow（装 KF 时）；模糊走 KWin atom。合成器策略仍可能覆盖置顶。")
-                          : qsTr("Wayland 下「真模糊」需要合成器协议（Plasma + KF6WindowSystem + 开启 Blur 特效）。否则只会半透明。置顶/抢焦点也常被 Wayland 禁止——点按钮后看下方状态与桌面通知。")
+                    text: root.platformTab === 2
+                          ? qsTr("X11（xcb）：CSD 客户区、KX11Extras KeepAbove / forceActiveWindow（装 KF 时）、KWin blur atom、StatusNotifier 托盘、LauncherEntry 进度/角标、空闲抑制。合成器仍可能覆盖置顶。")
+                          : qsTr("Wayland：CSD、xdg-activation 前置、KF6 模糊协议（需合成器开启 Blur）、托盘 portal、LauncherEntry。无令牌时「前置」常被忽略；fractional scale 更可靠。")
                     role: Md3Text.BodyMedium
                     tone: Md3Text.OnSurfaceVariant
                 }
 
                 Md3Text {
                     width: parent.width
-                    visible: root.appWin && Md3WindowCapabilities.isLinux
+                    visible: root.appWin && root.linuxOpsEnabled
                     wrapMode: Text.WordWrap
-                    text: qsTr("已绑定 — 显示服务器=%1 Wayland=%2 X11=%3 模糊协议=%4 强调色=%5")
+                    text: qsTr("已绑定 — 显示服务器=%1 · 能力袋=%2 · 模糊=%3 · 强调色=%4")
                           .arg(Md3WindowCapabilities.displayServer)
-                          .arg(Md3WindowCapabilities.isWayland ? qsTr("是") : qsTr("否"))
-                          .arg(Md3WindowCapabilities.isX11 ? qsTr("是") : qsTr("否"))
+                          .arg(Md3WindowCapabilities.platformId)
                           .arg((root.appWin.windowNative
                                 ? root.appWin.windowNative.blurBehindAvailable()
                                 : nativeHelper.blurBehindAvailable()) ? qsTr("可用") : qsTr("不可用"))
@@ -712,7 +741,7 @@ Flickable {
 
                 Md3Text {
                     width: parent.width
-                    visible: Md3WindowCapabilities.isLinux
+                    visible: root.linuxOpsEnabled
                     wrapMode: Text.WordWrap
                     text: qsTr("原生反馈：%1").arg(
                               (root.appWin && root.appWin.windowNative
@@ -722,14 +751,14 @@ Flickable {
                     tone: Md3Text.Tertiary
                 }
                 Md3HStack {
-                    visible: Md3WindowCapabilities.isLinux && root.appWin
+                    visible: root.linuxOpsEnabled && root.appWin
                     spacing: 12
                     Md3Switch {
                         checked: root.appWin.syncImmersiveDarkMode
                         onToggled: function (isOn) { root.appWin.syncImmersiveDarkMode = isOn }
                     }
                     Md3Text {
-                    width: parent.width
+                        width: parent.width
                         text: qsTr("与主题同步配色方案")
                         role: Md3Text.BodyMedium
                     }
@@ -741,27 +770,30 @@ Flickable {
                     tone: Md3Text.OnSurfaceVariant
                 }
                 Md3Text {
+                    width: parent.width
                     wrapMode: Text.WordWrap
-                    text: qsTr("「请求注意」请先切到其他窗口再点；「前置」在已聚焦时无变化；「允许空闲」需先成功「禁止休眠」。Wayland 下无 xdg-activation 令牌时「前置」常被合成器忽略（看 lastNativeStatus）。")
+                    text: root.platformTab === 2
+                          ? qsTr("X11：「请求注意」请先切到其他窗口；「前置」可用 forceActiveWindow（KF）。「允许空闲」需先成功「禁止休眠」。")
+                          : qsTr("Wayland：「请求注意」请先切窗；无 xdg-activation 令牌时「前置」常被忽略（看 lastNativeStatus）。「允许空闲」需先成功「禁止休眠」。")
                     role: Md3Text.BodySmall
                     tone: Md3Text.OnSurfaceVariant
                 }
                 Md3FlowLayout {
-            width: parent.width
+                    width: parent.width
                     spacing: 8
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("请求注意")
                         onClicked: if (root.appWin) root.appWin.flashTaskbar(true)
                     }
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("停止")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.flashTaskbar(false)
                     }
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("系统菜单…")
                         variant: Md3Button.Outlined
                         onClicked: {
@@ -775,44 +807,50 @@ Flickable {
                         }
                     }
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("前置激活")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.raiseWindow()
                     }
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("窗口置顶")
                         onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(true)
                     }
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("取消置顶")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(false)
                     }
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("禁止休眠/锁屏")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.setIdleInhibit(true, qsTr("Md3 演示"))
                     }
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("允许空闲")
                         variant: Md3Button.Text
                         onClicked: if (root.appWin) root.appWin.setIdleInhibit(false)
                     }
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("偏好深色")
                         onClicked: if (root.appWin) root.appWin.setPreferredAppMode(true)
                     }
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("偏好浅色")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.setPreferredAppMode(false)
+                    }
+                    Md3Button {
+                        enabled: root.linuxOpsEnabled
+                        text: qsTr("打开模糊设置")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.openBlurSettings()
                     }
                 }
 
@@ -823,7 +861,7 @@ Flickable {
                 }
                 Md3HStack {
                     spacing: 12
-                    enabled: Md3WindowCapabilities.isLinux
+                    enabled: root.linuxOpsEnabled
                     Md3Slider {
                         id: linuxProgress
                         from: 0; to: 1; value: 0.35
@@ -839,27 +877,27 @@ Flickable {
                     }
                 }
                 Md3FlowLayout {
-            width: parent.width
+                    width: parent.width
                     spacing: 8
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("不确定进度")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.setTaskbarProgress(0, Md3WindowHelper.ProgressIndeterminate)
                     }
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("清除进度")
                         variant: Md3Button.Text
                         onClicked: if (root.appWin) root.appWin.clearTaskbarProgress()
                     }
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("角标 3")
                         onClicked: if (root.appWin) root.appWin.setDockBadge(3)
                     }
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("清除角标")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.setDockBadge(0)
@@ -872,10 +910,10 @@ Flickable {
                     tone: Md3Text.OnSurfaceVariant
                 }
                 Md3FlowLayout {
-            width: parent.width
+                    width: parent.width
                     spacing: 8
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("显示托盘")
                         onClicked: {
                             if (!root.appWin)
@@ -886,19 +924,19 @@ Flickable {
                         }
                     }
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("发送通知")
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.showTrayNotification(qsTr("Md3 图库"), qsTr("桌面通知"), 4000)
                     }
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("隐藏托盘")
                         variant: Md3Button.Text
                         onClicked: if (root.appWin) root.appWin.hideSystemTrayIcon()
                     }
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isLinux
+                        enabled: root.linuxOpsEnabled
                         text: qsTr("下一显示器")
                         variant: Md3Button.Outlined
                         onClicked: {
@@ -912,8 +950,11 @@ Flickable {
                 }
 
                 Md3Text {
+                    width: parent.width
                     wrapMode: Text.WordWrap
-                    text: qsTr("安装 resources/linux/appQML_MD3.desktop 以获得正确的 Wayland 任务栏图标（setDesktopFileName）。")
+                    text: root.platformTab === 2
+                          ? qsTr("X11 能力袋 id=x11。桌面文件仍建议安装以便任务栏匹配。")
+                          : qsTr("Wayland 能力袋 id=wayland。安装 resources/linux/appQML_MD3.desktop 以获得正确的任务栏图标（desktopFileName → xdg app_id）。")
                     role: Md3Text.BodySmall
                     tone: Md3Text.OnSurfaceVariant
                 }
@@ -923,13 +964,13 @@ Flickable {
             Md3VStack {
                 id: paneMac
                 width: parent.width
-                visible: root.platformTab === 2
+                visible: root.platformTab === 3
                 spacing: 12
 
                 Md3Text {
                     width: parent.width
                     wrapMode: Text.WordWrap
-                    text: qsTr("macOS：保留红绿灯留白、半透明背景钩子、配色/强调色。标题按钮保持系统原生。")
+                    text: qsTr("macOS：保留红绿灯留白、半透明背景钩子、配色/强调色。标题按钮保持系统原生。能力袋 id=macos。")
                     role: Md3Text.BodyMedium
                     tone: Md3Text.OnSurfaceVariant
                 }
@@ -1003,6 +1044,153 @@ Flickable {
                     }
                 }
             }
+
+            // ===== Android =====
+            Md3VStack {
+                id: paneAndroid
+                width: parent.width
+                visible: root.platformTab === 4
+                spacing: 12
+
+                Md3Text {
+                    width: parent.width
+                    wrapMode: Text.WordWrap
+                    text: qsTr("Android：系统标题栏（无 CSD / Snap / 托盘）。能力袋 id=android。原生 hooks：息屏抑制 FLAG_KEEP_SCREEN_ON、防截屏 FLAG_SECURE、启动器角标 setBadgeNumber、沉浸式系统栏、分享 Intent、振动。OEM 可能忽略置顶。")
+                    role: Md3Text.BodyMedium
+                    tone: Md3Text.OnSurfaceVariant
+                }
+
+                Md3Text {
+                    width: parent.width
+                    visible: root.androidOpsEnabled && root.appWin
+                    wrapMode: Text.WordWrap
+                    text: qsTr("已绑定 — displayServer=%1 · idleInhibit=%2 · excludeFromCapture=%3 · vibrate=%4 · immersive=%5")
+                          .arg(Md3WindowCapabilities.displayServer)
+                          .arg(Md3WindowCapabilities.idleInhibit ? qsTr("是") : qsTr("否"))
+                          .arg(Md3WindowCapabilities.excludeFromCapture ? qsTr("是") : qsTr("否"))
+                          .arg(Md3WindowCapabilities.vibrate ? qsTr("是") : qsTr("否"))
+                          .arg(Md3WindowCapabilities.immersiveSystemUi ? qsTr("是") : qsTr("否"))
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.Primary
+                }
+
+                Md3Text {
+                    width: parent.width
+                    visible: root.androidOpsEnabled
+                    wrapMode: Text.WordWrap
+                    text: qsTr("原生反馈：%1").arg(
+                              (root.appWin && root.appWin.windowNative
+                               ? root.appWin.windowNative.lastNativeStatus
+                               : nativeHelper.lastNativeStatus) || qsTr("（点击下方按钮后显示）"))
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.Tertiary
+                }
+
+                Md3Text {
+                    text: qsTr("屏幕 / 安全")
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.OnSurfaceVariant
+                }
+                Md3FlowLayout {
+                    width: parent.width
+                    spacing: 8
+                    Md3Button {
+                        enabled: root.androidOpsEnabled
+                        text: qsTr("保持亮屏")
+                        onClicked: {
+                            if (!root.appWin) return
+                            const ok = root.appWin.setIdleInhibit(true, qsTr("Md3 演示"))
+                            shellEventLabel.text = ok ? qsTr("外壳事件：FLAG_KEEP_SCREEN_ON")
+                                                     : qsTr("外壳事件：息屏抑制失败")
+                        }
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled
+                        text: qsTr("恢复息屏")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.setIdleInhibit(false)
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled
+                        text: qsTr("防截屏 ON")
+                        onClicked: if (root.appWin) root.appWin.setExcludeFromCapture(true)
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled
+                        text: qsTr("防截屏 OFF")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.setExcludeFromCapture(false)
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.immersiveSystemUi
+                        text: qsTr("沉浸式 UI")
+                        onClicked: if (root.appWin) root.appWin.setImmersiveSystemUi(true)
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.immersiveSystemUi
+                        text: qsTr("恢复系统栏")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.setImmersiveSystemUi(false)
+                    }
+                }
+
+                Md3Text {
+                    text: qsTr("角标 / 分享 / 振动")
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.OnSurfaceVariant
+                }
+                Md3FlowLayout {
+                    width: parent.width
+                    spacing: 8
+                    Md3Button {
+                        enabled: root.androidOpsEnabled
+                        text: qsTr("角标 3")
+                        onClicked: if (root.appWin) root.appWin.setDockBadge(3)
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled
+                        text: qsTr("清除角标")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.setDockBadge(0)
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.shareText
+                        text: qsTr("系统分享")
+                        onClicked: if (root.appWin) root.appWin.shareText(qsTr("来自 Md3 Gallery"), qsTr("Md3"))
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.vibrate
+                        text: qsTr("振动")
+                        onClicked: if (root.appWin) root.appWin.vibrate(50)
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled
+                        text: qsTr("尝试置顶")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(true)
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled
+                        text: qsTr("取消置顶")
+                        variant: Md3Button.Text
+                        onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(false)
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled
+                        text: qsTr("前置 Activity")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.raiseWindow()
+                    }
+                }
+
+                Md3Text {
+                    width: parent.width
+                    wrapMode: Text.WordWrap
+                    text: qsTr("详见 docs/topics/android.md。桌面端浏览本标签时按钮禁用；真机/模拟器上 CMake 需 MD3_IS_ANDROID。")
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.OnSurfaceVariant
+                }
+            }
         }
 
         Md3Text {
@@ -1027,15 +1215,17 @@ Flickable {
         }
 
         Md3Text {
-                    width: parent.width
+            width: parent.width
             wrapMode: Text.WordWrap
             text: {
                 const win = root.appWin || Md3OverlayHost.resolveWindow(root.md3HostWindow, root)
                 const dpr = root.appWin ? root.appWin.windowDpr : nativeHelper.devicePixelRatio(win)
                 const dpi = root.appWin ? root.appWin.windowDpi : nativeHelper.windowDpi(win)
-                return qsTr("运行环境=%1  标签=%2  dpr=%3  dpi=%4")
+                const tab = root.platformTabLabels[root.platformTab] || "?"
+                return qsTr("运行环境=%1  显示服务器=%2  标签=%3  dpr=%4  dpi=%5")
                       .arg(Md3WindowCapabilities.platformId)
-                      .arg([qsTr("Windows"), qsTr("Linux"), qsTr("macOS")][root.platformTab])
+                      .arg(Md3WindowCapabilities.displayServer)
+                      .arg(tab)
                       .arg(Number(dpr).toFixed(2))
                       .arg(dpi)
             }
