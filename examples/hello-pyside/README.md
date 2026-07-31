@@ -4,12 +4,11 @@ Run the shared **Md3** QML module from Python — no Shiboken / C++ wrappers.
 
 ## Requirements
 
-1. **PySide6** (Qt 6) — recommended and required for `import Md3` today  
+1. **PySide6** (Qt 6.5+) — required for `import Md3`  
 2. A **shared** Md3 package built against a Qt kit ABI-compatible with that PySide wheel  
 3. Python 3.9+
 
-PySide2 is supported by the `md3qml` bootstrap API for symmetry, but the Md3 QML
-plugin is Qt 6-only until Qt 5 stage-2 lands. See [docs/topics/pyside.md](../../docs/topics/pyside.md).
+PySide2 / Qt 5 is not supported. See [docs/topics/pyside.md](../../docs/topics/pyside.md).
 
 ## Package Md3 (shared)
 

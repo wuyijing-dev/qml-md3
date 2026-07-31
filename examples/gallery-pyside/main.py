@@ -23,7 +23,7 @@ def main(argv: list[str] | None = None) -> int:
         help="Gallery directory (contains Main.qml)",
     )
     parser.add_argument("--md3-prefix", default=None)
-    parser.add_argument("--binding", choices=("PySide6", "PySide2", "auto"), default="auto")
+    parser.add_argument("--binding", choices=("PySide6", "auto"), default="auto")
     parser.add_argument(
         "--auto-fetch",
         action="store_true",

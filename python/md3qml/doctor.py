@@ -21,11 +21,8 @@ def doctor(*, md3_prefix: str | None = None) -> Tuple[int, List[str]]:
     try:
         b = detect_binding()
         lines.append(f"OK  binding={b.name} qt_major={b.qt_major}")
-        if b.qt_major < 6:
-            lines.append("WARN Md3 QML module requires Qt 6 / PySide6 today")
-            ok = False
     except ImportError as exc:
-        lines.append(f"FAIL no PySide6/PySide2: {exc}")
+        lines.append(f"FAIL no PySide6: {exc}")
         return 1, lines
 
     bundled = bundled_prefix()

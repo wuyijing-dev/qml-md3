@@ -1,4 +1,4 @@
-"""Bootstrap helpers to load the packaged Md3 QML module from PySide6 / PySide2."""
+"""Bootstrap helpers to load the packaged Md3 QML module from PySide6."""
 
 from .app import Md3Application
 from .binding import Binding, detect_binding, import_qt

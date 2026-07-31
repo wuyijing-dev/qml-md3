@@ -1,4 +1,4 @@
-"""Discover installed Qt kits for CMake (Qt5/Qt6)."""
+"""Discover installed Qt6 kits for CMake (6.5+)."""
 
 from __future__ import annotations
 
@@ -46,12 +46,11 @@ def _run_text(cmd: list[str]) -> str | None:
 
 
 def _major_from_prefix(prefix: Path) -> int | None:
-    for major in (6, 5):
-        if (prefix / f"lib/cmake/Qt{major}/Qt{major}Config.cmake").is_file():
-            return major
-        alt = prefix / f"lib/x86_64-linux-gnu/cmake/Qt{major}/Qt{major}Config.cmake"
-        if alt.is_file():
-            return major
+    if (prefix / "lib/cmake/Qt6/Qt6Config.cmake").is_file():
+        return 6
+    alt = prefix / "lib/x86_64-linux-gnu/cmake/Qt6/Qt6Config.cmake"
+    if alt.is_file():
+        return 6
     return None
 
 
@@ -123,8 +122,7 @@ def _scan_roots() -> Iterable[Path]:
     for root in roots:
         if not root.is_dir():
             continue
-        if (root / "lib/cmake/Qt6/Qt6Config.cmake").is_file() or (
-            root / "lib/cmake/Qt5/Qt5Config.cmake").is_file():
+        if (root / "lib/cmake/Qt6/Qt6Config.cmake").is_file():
             yield root
             continue
         if root.name in kits or root.match("gcc_*") or root.match("msvc*"):
@@ -166,14 +164,30 @@ def discover_qt_kits() -> list[QtKit]:
             found[str(kit.prefix)] = kit
 
     kits = list(found.values())
-    kits.sort(key=lambda k: (k.major, k.version, k.kit), reverse=True)
+    kits.sort(key=lambda k: (k.major, _version_tuple(k.version), k.kit), reverse=True)
     return kits
 
 
+def _version_tuple(version: str) -> tuple[int, int, int]:
+    parts = []
+    for chunk in version.split("."):
+        try:
+            parts.append(int(chunk))
+        except ValueError:
+            parts.append(0)
+    while len(parts) < 3:
+        parts.append(0)
+    return parts[0], parts[1], parts[2]
+
+
 def pick_default_kit(kits: list[QtKit]) -> QtKit | None:
+    """Prefer newest Qt6 ≥ 6.5; fall back to any Qt6 kit."""
     if not kits:
         return None
-    for kit in kits:
-        if kit.major == 6:
-            return kit
-    return kits[0]
+    qt6 = [k for k in kits if k.major == 6]
+    if not qt6:
+        return None
+    recent = [k for k in qt6 if _version_tuple(k.version) >= (6, 5, 0)]
+    pool = recent or qt6
+    pool.sort(key=lambda k: (_version_tuple(k.version), k.kit), reverse=True)
+    return pool[0]

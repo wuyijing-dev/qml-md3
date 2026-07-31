@@ -16,11 +16,13 @@
 | Fit vs scroll body | `layoutMode: Md3ContainerBody.Fit` / `.Scroll` on Card/Form/Sheet |
 | Window size / chrome | `Md3Adaptive` + `Md3ApplicationWindow.adaptiveChrome` — see [window-appearance.md](window-appearance.md) |
 
-### Qt 6.8 height note
+### Qt6 height policy (6.5 / 6.8 / 6.10)
 
-`Column` / `Flickable.contentHeight` use **`height`**, not `implicitHeight`. Layout shells (`Md3VStack` / `Md3HStack` / `Md3PageSection` / `Md3GridLayout`) and most controls sync `height` from intrinsic size so rows do not collapse.
+Md3 always uses the **strict** path so kits match (`Md3QtCompat.strictColumnHeight`):
 
-`Md3Card` body slot must also expose a real `height` (and `expand` when content uses `anchors.fill`); otherwise fill children get a zero-height parent and top/bottom anchors pile up on Qt 6.8.
+`Column` / `Flickable.contentHeight` use **`height`**, not `implicitHeight` alone. Layout shells (`Md3VStack` / `Md3HStack` / `Md3PageSection` / `Md3GridLayout`) and most controls sync `height` from intrinsic size.
+
+`Md3Card` body slot must expose a real `height` (and `expand` when content uses `anchors.fill`).
 
 Prefer `contentHeight: column.implicitHeight` in Flickables. Do not bind `bodyHeight` to `height` on `Md3DataTable`.
 

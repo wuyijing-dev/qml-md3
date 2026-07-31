@@ -1,4 +1,4 @@
-"""Detect PySide6 (Qt6) or PySide2 (Qt5) and expose a uniform Qt surface."""
+"""Detect PySide6 (Qt6) and expose a uniform Qt surface."""
 
 from __future__ import annotations
 
@@ -19,42 +19,34 @@ class Binding:
 
     @property
     def is_pyside2(self) -> bool:
-        return self.qt_major == 5
+        return False
 
 
 def detect_binding(prefer: Optional[str] = None) -> Binding:
     """
-    Resolve a Qt for Python binding.
+    Resolve Qt for Python. Md3 requires **PySide6** (Qt 6.5+).
 
-    prefer: \"PySide6\" | \"PySide2\" | None (try 6 then 2)
+    ``prefer`` may be ``\"PySide6\"`` / ``\"6\"`` / ``None``. PySide2 is not supported.
     """
-    order = []
     if prefer:
         p = prefer.strip().lower().replace("-", "")
-        if p in ("pyside6", "6", "qt6"):
-            order = ["PySide6", "PySide2"]
-        elif p in ("pyside2", "5", "qt5"):
-            order = ["PySide2", "PySide6"]
-        else:
-            raise ValueError(f"Unknown binding prefer={prefer!r}; use PySide6 or PySide2")
-    else:
-        order = ["PySide6", "PySide2"]
+        if p in ("pyside2", "5", "qt5"):
+            raise ImportError(
+                "PySide2 / Qt5 is not supported. Install PySide6 (Qt 6.5+):\n"
+                "  pip install PySide6"
+            )
+        if p not in ("pyside6", "6", "qt6", "auto", ""):
+            raise ValueError(f"Unknown binding prefer={prefer!r}; use PySide6")
 
-    errors = []
-    for name in order:
-        try:
-            mod = __import__(name)
-            major = 6 if name == "PySide6" else 5
-            return Binding(name=name, qt_major=major, module=mod)
-        except ImportError as exc:
-            errors.append(f"{name}: {exc}")
-
-    raise ImportError(
-        "Neither PySide6 nor PySide2 is installed.\n"
-        "  pip install PySide6          # recommended — matches Md3 Qt6 module\n"
-        "  pip install PySide2          # Qt5 only; Md3 QML module needs Qt6 today\n"
-        + "\n".join(errors)
-    )
+    try:
+        mod = __import__("PySide6")
+        return Binding(name="PySide6", qt_major=6, module=mod)
+    except ImportError as exc:
+        raise ImportError(
+            "PySide6 is required for Md3.\n"
+            "  pip install PySide6\n"
+            f"({exc})"
+        ) from exc
 
 
 def import_qt(binding: Optional[Binding] = None) -> Tuple[Binding, Any]:
@@ -83,7 +75,6 @@ def import_qt(binding: Optional[Binding] = None) -> Tuple[Binding, Any]:
     try:
         qt.QQuickStyle = import_module(f"{name}.QtQuickControls2").QQuickStyle
     except ImportError:
-        # Older wheels may expose style via QtQuick.Controls
         qt.QQuickStyle = import_module(f"{name}.QtQuick.Controls").QQuickStyle
 
     return binding, qt

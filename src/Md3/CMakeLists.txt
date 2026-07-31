@@ -9,21 +9,15 @@ if (NOT DEFINED MD3_IS_WASM)
     include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/Md3Platform.cmake)
 endif()
 
-if (MD3_QT_MAJOR EQUAL 6)
-    if (NOT TARGET Qt6::Quick)
-        md3_find_qt(Core Gui Qml Quick QuickControls2 Network)
-        md3_resolve_optional_qt_modules()
-        md3_setup_qt_qml_policies()
-    elseif (NOT DEFINED MD3_QT_HAS_EFFECTS)
-        md3_resolve_optional_qt_modules()
-        md3_setup_qt_qml_policies()
-    else()
-        md3_setup_qt_qml_policies()
-    endif()
+if (NOT TARGET Qt6::Quick)
+    md3_find_qt(Core Gui Qml Quick QuickControls2 Network)
+    md3_resolve_optional_qt_modules()
+    md3_setup_qt_qml_policies()
+elseif (NOT DEFINED MD3_QT_HAS_EFFECTS)
+    md3_resolve_optional_qt_modules()
+    md3_setup_qt_qml_policies()
 else()
-    if (NOT TARGET Qt5::Quick)
-        md3_find_qt(Quick QuickControls2 Network)
-    endif()
+    md3_setup_qt_qml_policies()
 endif()
 
 include(GNUInstallDirs)
@@ -91,49 +85,32 @@ foreach (_md3_icon_name IN LISTS MD3_ICON_NAMES)
 endforeach()
 
 option(MD3_BUILD_SHARED "Build Md3 as a shared library" OFF)
-if (MD3_QT_MAJOR EQUAL 6)
-    if (MD3_BUILD_SHARED)
-        qt_add_library(Md3 SHARED)
-        target_compile_definitions(Md3 PRIVATE MD3_BUILD_SHARED)
-        target_compile_definitions(Md3 PUBLIC MD3_SHARED)
-    else()
-        qt_add_library(Md3 STATIC)
-    endif()
+if (MD3_BUILD_SHARED)
+    qt_add_library(Md3 SHARED)
+    target_compile_definitions(Md3 PRIVATE MD3_BUILD_SHARED)
+    target_compile_definitions(Md3 PUBLIC MD3_SHARED)
 else()
-    if (MD3_BUILD_SHARED)
-        add_library(Md3 SHARED)
-        target_compile_definitions(Md3 PRIVATE MD3_BUILD_SHARED)
-        target_compile_definitions(Md3 PUBLIC MD3_SHARED)
-    else()
-        add_library(Md3 STATIC)
-    endif()
+    qt_add_library(Md3 STATIC)
 endif()
+md3_apply_qt_compat_definitions(Md3)
 
 # Dedicated font qrc (not only via qt_add_qml_module). Static MSVC links can drop
 # qml-module resource inits; Q_INIT_RESOURCE(md3_fonts) in loadFonts() is reliable.
 # Paths: :/md3/fonts/resources/fonts/HarmonyOS_SansSC_Regular.ttf …
 # (Avoid BASE=: Qt Creator MSVC finalize resolves basenames under src/Md3/.)
-if (MD3_QT_MAJOR EQUAL 6)
-    qt_add_resources(Md3 "md3_fonts"
-        PREFIX "/md3/fonts"
-        BIG_RESOURCES
-        FILES
-            ${MD3_FONT_FILES}
-    )
-else()
-    message(STATUS "Md3 Qt5.15 stage1: skipping embedded font qrc")
-endif()
+qt_add_resources(Md3 "md3_fonts"
+    PREFIX "/md3/fonts"
+    BIG_RESOURCES
+    FILES
+        ${MD3_FONT_FILES}
+)
 
 # Paths: :/md3/icons/app-icon.png …
-if (MD3_QT_MAJOR EQUAL 6)
-    qt_add_resources(Md3 "md3_icons"
-        PREFIX "/md3"
-        FILES
-            ${MD3_ICON_FILES}
-    )
-else()
-    message(STATUS "Md3 Qt5.15 stage1: skipping embedded icon qrc")
-endif()
+qt_add_resources(Md3 "md3_icons"
+    PREFIX "/md3"
+    FILES
+        ${MD3_ICON_FILES}
+)
 
 # UI translations (.qm). Regenerate via lrelease — see docs/i18n.md.
 set(MD3_I18N_QM
@@ -146,39 +123,19 @@ foreach (_qm IN LISTS MD3_I18N_QM)
         file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/${_qm}" "")
     endif()
 endforeach()
-if (MD3_QT_MAJOR EQUAL 6)
-    qt_add_resources(Md3 "md3_i18n"
-        PREFIX "/md3"
-        FILES
-            ${MD3_I18N_QM}
-    )
-else()
-    message(STATUS "Md3 Qt5.15 stage1: skipping embedded i18n qrc")
-endif()
+qt_add_resources(Md3 "md3_i18n"
+    PREFIX "/md3"
+    FILES
+        ${MD3_I18N_QM}
+)
 if (NOT TARGET Md3::Md3)
     add_library(Md3::Md3 ALIAS Md3)
-endif()
-
-if (MD3_QT_MAJOR EQUAL 5)
-    target_sources(Md3 PRIVATE
-        md3.h
-        md3.cpp
-        md3_capi.h
-        md3_capi.cpp
-        window/md3graphics.h
-        window/md3graphics_qt5_stub.cpp
-    )
-    target_link_libraries(Md3
-        PUBLIC Qt5::Quick
-        PRIVATE Qt5::QuickControls2 Qt5::Network
-    )
-    message(STATUS "Md3 Qt5.15 stage1: built bootstrap-only library (no qt_add_qml_module/Gallery)")
-    return()
 endif()
 
 set_source_files_properties(
     foundation/Md3Theme.qml
     foundation/Md3Adaptive.qml
+    foundation/Md3QtCompat.qml
     foundation/Md3Motion.qml
     foundation/Md3Accessibility.qml
     foundation/Md3IconFonts.qml
@@ -234,6 +191,7 @@ qt_add_qml_module(Md3
     QML_FILES
         foundation/Md3Theme.qml
         foundation/Md3Adaptive.qml
+        foundation/Md3QtCompat.qml
         foundation/Md3Motion.qml
         foundation/Md3Accessibility.qml
         foundation/Md3IconFonts.qml

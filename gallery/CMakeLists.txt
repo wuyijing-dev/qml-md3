@@ -8,10 +8,6 @@ if (NOT DEFINED MD3_QT_MAJOR)
     include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/Md3QtCompat.cmake)
 endif()
 
-if (MD3_QT_MAJOR EQUAL 5)
-    message(FATAL_ERROR "Gallery is stage2+ for Qt6 only. Use -DMD3_BUILD_GALLERY=OFF for Qt5.15 stage1.")
-endif()
-
 if (NOT DEFINED MD3_IS_WASM)
     include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/Md3Platform.cmake)
 endif()

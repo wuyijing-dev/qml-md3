@@ -102,7 +102,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
     opts = RunOptions(
         md3_prefix=args.md3_prefix,
         binding=None if args.binding == "auto" else args.binding,
-        require_qt6_for_md3=not args.allow_qt5,
+        require_qt6_for_md3=True,
         application_name=args.name,
         module_uri=args.module or "",
         module_component=args.component,
@@ -143,7 +143,7 @@ def _cmd_gallery(args: argparse.Namespace) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="md3qml",
-        description="Host the shared Md3 QML module from PySide6 (or PySide2 bootstrap).",
+        description="Host the shared Md3 QML module from PySide6 (Qt 6.5+).",
     )
     sub = parser.add_subparsers(dest="cmd", required=True)
 
@@ -181,8 +181,7 @@ def main(argv: list[str] | None = None) -> int:
     p_run.add_argument("--module", default=None, help="QML module URI (Qt6 loadFromModule)")
     p_run.add_argument("--component", default="Main")
     p_run.add_argument("--md3-prefix", default=None)
-    p_run.add_argument("--binding", choices=("auto", "PySide6", "PySide2"), default="auto")
-    p_run.add_argument("--allow-qt5", action="store_true")
+    p_run.add_argument("--binding", choices=("auto", "PySide6"), default="auto")
     p_run.add_argument("--name", default="Md3 App")
     p_run.add_argument(
         "--auto-fetch",
@@ -211,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
         help="Path to gallery/ (or Main.qml's folder). Default: MD3_GALLERY or repo walk-up",
     )
     p_gal.add_argument("--md3-prefix", default=None)
-    p_gal.add_argument("--binding", choices=("auto", "PySide6", "PySide2"), default="auto")
+    p_gal.add_argument("--binding", choices=("auto", "PySide6"), default="auto")
     p_gal.add_argument(
         "--auto-fetch",
         action="store_true",

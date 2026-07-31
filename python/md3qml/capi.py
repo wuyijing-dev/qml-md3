@@ -78,7 +78,7 @@ def _qt_bin_dirs() -> List[Path]:
         if not part:
             continue
         p = Path(part)
-        if (p / "Qt6Core.dll").is_file() or (p / "Qt5Core.dll").is_file():
+        if (p / "Qt6Core.dll").is_file():
             add(p)
     return out
 

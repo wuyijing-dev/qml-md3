@@ -1,3 +1,0 @@
-# API-compatible bootstrap only. Full `import Md3` needs a Qt 5 stage-2 module
-# (not shipped yet). Prefer requirements-pyside6.txt.
-PySide2>=5.15

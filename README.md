@@ -1,6 +1,6 @@
 # QML MD3
 
-Enterprise Material Design 3 component library for **Qt Quick / QML 6.8+**, visually and temporally aligned with **Flutter Material 3**.
+Enterprise Material Design 3 component library for **Qt Quick / QML 6.5+** (recommended 6.8 / 6.10), visually and temporally aligned with **Flutter Material 3**.
 
 ## Goals
 
@@ -11,7 +11,7 @@ Enterprise Material Design 3 component library for **Qt Quick / QML 6.8+**, visu
 
 ## Requirements
 
-- Qt **6.8+** recommended (developed against Qt 6.10+; 6.5 stage-1 — see [docs/qt-version-matrix.md](docs/topics/qt-version-matrix.md))
+- Qt **6.5+** (recommended **6.8 / 6.10**; see [docs/topics/qt-version-matrix.md](docs/topics/qt-version-matrix.md))
 - CMake 3.16+
 - C++17
 
@@ -20,7 +20,7 @@ Enterprise Material Design 3 component library for **Qt Quick / QML 6.8+**, visu
 | | Official focus | Notes |
 |--|----------------|-------|
 | **OS** | Windows desktop | Linux / macOS best-effort; **WASM** / **Android** experimental ([wasm.md](docs/topics/wasm.md), [android.md](docs/topics/android.md)) |
-| **Qt** | 6.8+ full library | 5.15 = bootstrap only |
+| **Qt** | 6.5+ (6.8 / 6.10) | Qt 5.15 **removed**; kit diffs isolated in `Md3QtCompat` |
 | **Python** | **PySide6** + shared Md3 | PyPI `md3qml` **not published yet** — use git install + `md3qml install` ([pyside.md](docs/topics/pyside.md)) |
 | **Rust** | C ABI host (`rust/md3qml`) | Same `md3_capi` as Python `run-c` — [docs/topics/rust.md](docs/topics/rust.md) |
 | **API** | Types in `docs/api/` (non-experimental) | See [docs/getting-started/api-stability.md](docs/getting-started/api-stability.md) |
@@ -155,7 +155,8 @@ python examples/hello-pyside/main.py
 | Example | Stack |
 |---------|--------|
 | `examples/hello-md3` | C++ / CMake |
-| `examples/hello-pyside` | PySide6 (+ PySide2 bootstrap API) |
+| `examples/hello-pyside` | PySide6 host |
+| `examples/gallery-pyside` | PySide6 Gallery (`gallery/Main.qml`) |
 | `examples/hello-rust` | Rust + C ABI (`rust/md3qml`) |
 
 ```cpp
@@ -201,7 +202,8 @@ cargo run --manifest-path examples/hello-rust/Cargo.toml
 | `MD3_BUILD_TESTS` | OFF | Register qml smoke tests |
 | `MD3_BUILD_SHARED` | OFF (scripts default ON) | Shared instead of static `Md3` |
 | `MD3_QML_CACHEGEN` | **ON** | qmlcachegen; `-DOFF` when iterating QML without clean rebuild |
-| `MD3_QT_VERSION` | `AUTO` | Qt major: `AUTO` / `5` / `6` |
+| `MD3_QT_VERSION` | `6` | Qt6 only (`AUTO`≡6; `5` rejected) |
+| `MD3_QT_MIN_VERSION` | `6.5.0` | Minimum Qt6 |
 
 ## Docs
 

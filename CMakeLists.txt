@@ -8,18 +8,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(cmake/Md3QtCompat.cmake)
 include(cmake/Md3Platform.cmake)
 
-if (MD3_QT_MAJOR EQUAL 6)
-    # Required baseline for full library + Gallery.
-    md3_find_qt(Core Gui Qml Quick QuickControls2 Network)
-    md3_resolve_optional_qt_modules()
-    md3_setup_qt_qml_policies()
-    # Stage 1: full path validated on 6.5+ (6.8 recommended; 6.10+ preferred for public Effects).
-    if (COMMAND qt_standard_project_setup)
-        qt_standard_project_setup(REQUIRES 6.5)
-    endif()
-else()
-    md3_find_qt(Quick QuickControls2 Network)
-    message(STATUS "Md3: Qt5.15 compatibility mode (stage 1) enabled")
+# Required baseline for full library + Gallery (Qt 6.5+; see docs/topics/qt-version-matrix.md).
+md3_find_qt(Core Gui Qml Quick QuickControls2 Network)
+md3_resolve_optional_qt_modules()
+md3_setup_qt_qml_policies()
+if (COMMAND qt_standard_project_setup)
+    qt_standard_project_setup(REQUIRES 6.5)
 endif()
 
 # Top-level repo build → Gallery ON by default (OFF on WASM — browser demo is optional).
@@ -42,12 +36,6 @@ option(MD3_QML_CACHEGEN "Compile QML with qmlcachegen (faster cold open)" ON)
 # WASM: prefer static; Gallery stays opt-in (large download).
 if (MD3_IS_WASM)
     set(MD3_BUILD_SHARED OFF CACHE BOOL "Build Md3 as a shared library" FORCE)
-endif()
-
-if (MD3_QT_MAJOR EQUAL 5)
-    # Stage 1: Qt5 branch compiles the core bootstrap library only.
-    set(MD3_BUILD_GALLERY OFF CACHE BOOL "" FORCE)
-    set(MD3_QML_CACHEGEN OFF CACHE BOOL "" FORCE)
 endif()
 
 # ----- Library (URI Md3) — always built -----

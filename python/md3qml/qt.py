@@ -16,7 +16,7 @@ _binding: Optional[Binding] = None
 
 
 def use_binding(prefer: Optional[str] = None) -> Binding:
-    """Select PySide6 / PySide2 before importing Qt symbols."""
+    """Select PySide6 before importing Qt symbols."""
     global _binding
     _binding = detect_binding(prefer)
     return _binding

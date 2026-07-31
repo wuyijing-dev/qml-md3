@@ -1,63 +1,65 @@
-# Qt Version Matrix (Stage 1+)
+# Qt Version Matrix
 
-Multi-version support for Md3 across Qt kits on the same machine.
+Md3 targets **Qt 6.5+ only**. Qt 5.15 support has been removed. Kit differences (Effects/Shapes link targets, a few font APIs) are isolated in `cmake/Md3QtCompat.cmake` and the `Md3QtCompat` QML singleton so **6.5 / 6.8 / 6.10 execute the same product behavior**.
 
-## Supported Targets
+## Supported targets
 
-| Qt | Status | Scope |
-|---|---|---|
-| 5.15.x | Stage 1 | **Core bootstrap library only** (`Md3::run`, fonts init). No Gallery / no `qt_add_qml_module`. |
-| 6.5.x | Stage 1 | Full library + Gallery. Links `QuickEffectsPrivate` / `QuickShapesPrivate` (no public Effects CMake target). |
-| 6.8.x | Stage 1 | Full library + Gallery. Same Private Effects/Shapes as 6.5. **Recommended baseline.** Layout shells sync `height`←`implicitHeight` (`Md3VStack`/`Md3HStack`/…); Flickables should use `contentHeight: column.implicitHeight`. Avoid `Md3DataTable` `bodyHeight: f(height)`. |
-| 6.10+ / 6.11 | Stage 1 | Full library + Gallery. Prefers public `Qt6::QuickEffects` / `Qt6::QuickShapes` when present. Column stacking more forgiving of implicit-only heights. |
-| 6.8+ **WASM** | Experimental | Library + hello via Qt for WebAssembly. See [wasm.md](wasm.md). Gallery opt-in. |
+| Qt | Status | Notes |
+|----|--------|-------|
+| **6.5.x** | Supported | Full library + Gallery. Links `QuickEffectsPrivate` / `QuickShapesPrivate` when public targets are absent. |
+| **6.8.x** | **Recommended baseline** | Same Private Effects/Shapes pattern as 6.5 on many kits. |
+| **6.10+ / 6.11** | Supported | Prefers public `Qt6::QuickEffects` / `Qt6::QuickShapes` when present. |
+| **6.8+ WASM** | Experimental | See [wasm.md](wasm.md). |
+| 5.15.x | **Removed** | Configure fails if `MD3_QT_VERSION=5`. |
 
-## CMake Compatibility Notes
+## Isolation scheme (keep results consistent)
 
-- `md3_find_qt` is a **macro** (not a function) so `QT_KNOWN_POLICY_QTP000*` from `Qt6Qml` stay visible. Using a function caused `QTP0005 is not a known Qt policy` under Qt Creator.
-- Optional modules are resolved with fallbacks:
-  - Effects: `QuickEffects` → `QuickEffectsPrivate`
-  - Shapes: `QuickShapes` → `QuickShapesPrivate`
-  - Gallery Multimedia: optional (kit may omit it)
-- Policies `QTP0001` / `QTP0004` / `QTP0005` are set to **NEW** via `md3_setup_qt_qml_policies()`.
-- Private-module header warning is suppressed with `QT_NO_PRIVATE_MODULE_WARNING`.
+| Layer | What differs by kit | How Md3 unifies |
+|-------|---------------------|-----------------|
+| CMake link | Effects/Shapes **public** (6.10+) vs **Private** (6.5/6.8) | `md3_resolve_optional_qt_modules()` tries public then Private |
+| C++ features | e.g. Han font fallback API (6.8+) | `MD3_QT_AT_LEAST_68` / `MD3_QT_AT_LEAST_610` from `md3_apply_qt_compat_definitions()` |
+| QML layout | Column/Flickable height vs implicitHeight | Always **strict height sync** (`Md3VStack`/`Md3HStack`/`Md3Card` …); see `Md3QtCompat.strictColumnHeight` |
+| DataTable sizing | height ↔ bodyHeight loops | Never bind `bodyHeight` to `height`; use `_resolvedBodyHeight` |
 
-## CMake Switches
+Do **not** write kit-specific Gallery pages. Prefer the strict path everywhere so 6.10 does not “accidentally” hide bugs that break 6.5/6.8.
 
-- `-DMD3_QT_VERSION=AUTO|5|6` — `AUTO` picks Qt6 first, then Qt5
-- `-DMD3_BUILD_GALLERY=ON|OFF` — OFF required on Qt5 stage 1
-- `-DMD3_QML_CACHEGEN=ON|OFF` — Qt6 QML module bytecode
+## CMake switches
 
-## Example Configure Commands
+- `-DMD3_QT_MIN_VERSION=6.5.0` — minimum (default)
+- `-DMD3_QT_VERSION=6` or `AUTO` — Qt6 only (`5` is rejected)
+- `-DMD3_BUILD_GALLERY=ON|OFF`
+- `-DMD3_QML_CACHEGEN=ON|OFF`
 
-### Qt 6.11 / 6.10 (public Effects)
+## Example configure
+
+### Qt 6.10 / 6.11
 
 ```powershell
-cmake -S . -B build-qt611 -G Ninja `
-  -DCMAKE_PREFIX_PATH="D:/Qt/6.11.0/msvc2022_64" `
-  -DMD3_QT_VERSION=6 -DMD3_BUILD_GALLERY=ON
-cmake --build build-qt611
+cmake -S . -B build-qt610 -G Ninja `
+  -DCMAKE_PREFIX_PATH="D:/Qt/6.10.2/msvc2022_64" `
+  -DMD3_BUILD_GALLERY=ON
+cmake --build build-qt610
 ```
 
-### Qt 6.8 (EffectsPrivate)
+### Qt 6.8
 
 ```powershell
 cmake -S . -B build-qt68 -G Ninja `
   -DCMAKE_PREFIX_PATH="D:/Qt/6.8.0/msvc2022_64" `
-  -DMD3_QT_VERSION=6 -DMD3_BUILD_GALLERY=ON
+  -DMD3_BUILD_GALLERY=ON
 cmake --build build-qt68
 ```
 
-### Qt 5.15 (stage 1 minimal)
+### Qt 6.5
 
 ```powershell
-cmake -S . -B build-qt515 -G Ninja `
-  -DCMAKE_PREFIX_PATH="D:/Qt/5.15.2/msvc2019_64" `
-  -DMD3_QT_VERSION=5 -DMD3_BUILD_GALLERY=OFF
-cmake --build build-qt515
+cmake -S . -B build-qt65 -G Ninja `
+  -DCMAKE_PREFIX_PATH="D:/Qt/6.5.3/msvc2019_64" `
+  -DMD3_BUILD_GALLERY=ON
+cmake --build build-qt65
 ```
 
-Or use the packaging TUI (auto-detect kits):
+Or use the packaging TUI:
 
 ```powershell
 python scripts/packaging/cli.py --list-qt
@@ -66,6 +68,4 @@ python scripts/packaging/cli.py
 
 ## Kit install tips (Windows)
 
-If configure fails with missing `QuickEffects` on 6.8/6.5, open Qt Maintenance Tool and ensure **Qt Quick Effects** / declarative extras are installed for that kit. On 6.5/6.8 the CMake package name is often `QuickEffectsPrivate` even when `qml/QtQuick/Effects` exists — Md3 handles that automatically.
-
-`Error reading …/modules/Core.json: Could not determine target architecture` from Qt Creator is a kit metadata warning (e.g. mixing 6.5 kits in the IDE); it does not block a correctly-prefixed CMake configure.
+If configure fails with missing `QuickEffects` on 6.5/6.8, install **Qt Quick Effects** for that kit. The CMake package name is often `QuickEffectsPrivate` even when `qml/QtQuick/Effects` exists — Md3 picks it up automatically.

@@ -20,7 +20,7 @@ class RunOptions:
     desktop_file_name: str = ""
     """Windows AppUserModelID (informational for PySide path; C ABI sets via Md3)."""
     app_user_model_id: str = ""
-    """Prefer PySide6 or PySide2 (None = auto)."""
+    """Prefer PySide6 (None = auto)."""
     binding: Optional[str] = None
     """Shared Md3 install prefix (lib/qml). None = auto-discover / MD3_PREFIX."""
     md3_prefix: Optional[PathLike] = None
