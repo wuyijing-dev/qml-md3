@@ -56,6 +56,8 @@ import Md3
 | `showColumnFilterIcons` | `bool` | `false` | read/write | `Md3DataTable` | — |
 | `rowActions` | `var` | `[]` | read/write | `Md3DataTable` | — |
 | `cellDelegate` | `Component` | `null` | read/write | `Md3DataTable` | Optional cell renderer: set `rowData`, `columnDef`, `columnIndex`, `displayText`, `sourceIndex`. |
+| `editingSourceIndex` | `int` | `-1` | read/write | `Md3DataTable` | In-cell edit target (−1 = none). Column must set `editable: true`. |
+| `editingColumnIndex` | `int` | `-1` | read/write | `Md3DataTable` | — |
 | `columnWidths` | `var` | `[]` | read/write | `Md3DataTable` | — |
 | `columnWidthsPersistKey` | `string` | `""` | read/write | `Md3DataTable` | When set, columnWidths are loaded/saved via Md3AppSettings (JSON number array). |
 | `rowMenuSourceIndex` | `int` | `-1` | read/write | `Md3DataTable` | — |
@@ -92,6 +94,7 @@ import Md3
 | `rowActionTriggered(int sourceIndex, var action)` | `Md3DataTable` | — |
 | `rowOrderChanged(int fromSourceIndex, int toSourceIndex)` | `Md3DataTable` | — |
 | `exportRequested(string format, string payload)` | `Md3DataTable` | — |
+| `cellEdited(int sourceIndex, string role, var newValue, var oldValue)` | `Md3DataTable` | Emitted after a successful in-cell edit commit. |
 
 ## Methods
 
@@ -103,6 +106,9 @@ import Md3
 | `exportCsv(includeHeader)` | `Md3DataTable` | CSV of visible (filtered) rows using column `role` / header. Does not write disk. |
 | `exportJson()` | `Md3DataTable` | JSON array of row objects (filtered). Does not write disk. |
 | `cellText(rowData, colDef)` | `Md3DataTable` | — |
+| `beginCellEdit(sourceIndex, columnIndex)` | `Md3DataTable` | — |
+| `cancelCellEdit()` | `Md3DataTable` | — |
+| `commitCellEdit(newValue)` | `Md3DataTable` | — |
 | `clearSelection()` | `Md3DataTable` | — |
 | `clearFilters()` | `Md3DataTable` | — |
 | `toggleSort(columnIndex)` | `Md3DataTable` | — |
@@ -125,4 +131,14 @@ Md3DataTable {
     selectionEnabled: false
     selectedIndices: []
 }
+```
+
+## 就地编辑
+
+列定义 `editable: true`（文本列）。双击行或 **F2** 进入编辑；`cellEdited(sourceIndex, role, newValue, oldValue)`。
+
+```qml
+columns: [
+    { title: "Notes", role: "notes", width: 160, editable: true }
+]
 ```

@@ -49,6 +49,9 @@ Item {
     property var rowActions: []
     /// Optional cell renderer: set `rowData`, `columnDef`, `columnIndex`, `displayText`, `sourceIndex`.
     property Component cellDelegate: null
+    /// In-cell edit target (−1 = none). Column must set `editable: true`.
+    property int editingSourceIndex: -1
+    property int editingColumnIndex: -1
 
     signal rowClicked(int sourceIndex)
     signal rowDoubleClicked(int sourceIndex)
@@ -62,6 +65,8 @@ Item {
     signal rowActionTriggered(int sourceIndex, var action)
     signal rowOrderChanged(int fromSourceIndex, int toSourceIndex)
     signal exportRequested(string format, string payload)
+    /// Emitted after a successful in-cell edit commit.
+    signal cellEdited(int sourceIndex, string role, var newValue, var oldValue)
 
     property var columnWidths: []
     /// When set, columnWidths are loaded/saved via Md3AppSettings (JSON number array).
@@ -274,6 +279,47 @@ Item {
         const role = colDef && colDef.role
         return rowData && role !== undefined && rowData[role] !== undefined
                 ? String(rowData[role]) : ""
+    }
+
+    function beginCellEdit(sourceIndex, columnIndex) {
+        const cols = columns || []
+        if (sourceIndex < 0 || columnIndex < 0 || columnIndex >= cols.length)
+            return
+        const col = cols[columnIndex]
+        if (!col || col.editable !== true)
+            return
+        editingSourceIndex = sourceIndex
+        editingColumnIndex = columnIndex
+    }
+
+    function cancelCellEdit() {
+        editingSourceIndex = -1
+        editingColumnIndex = -1
+    }
+
+    function commitCellEdit(newValue) {
+        if (editingSourceIndex < 0 || editingColumnIndex < 0)
+            return
+        const cols = columns || []
+        const col = cols[editingColumnIndex]
+        if (!col || col.role === undefined) {
+            cancelCellEdit()
+            return
+        }
+        const role = String(col.role)
+        const rowsCopy = (rows || []).slice()
+        if (editingSourceIndex >= rowsCopy.length) {
+            cancelCellEdit()
+            return
+        }
+        const row = Object.assign({}, rowsCopy[editingSourceIndex])
+        const oldValue = row[role]
+        row[role] = newValue
+        rowsCopy[editingSourceIndex] = row
+        rows = rowsCopy
+        const src = editingSourceIndex
+        cancelCellEdit()
+        cellEdited(src, role, newValue, oldValue)
     }
 
     function _rowMatchesFilter(row) {
@@ -573,6 +619,10 @@ Item {
             return t.length ? t : "text"
         }
         readonly property bool useBuiltin: root.cellDelegate === null
+        readonly property bool editable: columnDef && columnDef.editable === true
+        readonly property bool editing: editable
+                && root.editingSourceIndex === sourceIndex
+                && root.editingColumnIndex === columnIndex
 
         Loader {
             anchors.fill: parent
@@ -594,12 +644,51 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width
             leftPadding: 8
-            visible: cellHost.useBuiltin && cellHost.cellType === "text"
+            visible: cellHost.useBuiltin && cellHost.cellType === "text" && !cellHost.editing
             text: cellHost.displayText
             color: Md3Theme.colorScheme.colorOnSurface
             font.family: Md3Theme.typography.fontFamily
             font.pixelSize: Md3Theme.typography.bodyMedium.size
             elide: Text.ElideRight
+        }
+
+        TextInput {
+            id: cellEditor
+            anchors.fill: parent
+            anchors.margins: 4
+            leftPadding: 8
+            rightPadding: 8
+            verticalAlignment: TextInput.AlignVCenter
+            visible: cellHost.useBuiltin && cellHost.editing
+            color: Md3Theme.colorScheme.colorOnSurface
+            font.family: Md3Theme.typography.fontFamily
+            font.pixelSize: Md3Theme.typography.bodyMedium.size
+            selectByMouse: true
+            clip: true
+
+            Rectangle {
+                anchors.fill: parent
+                z: -1
+                radius: Md3Theme.shape.extraSmall
+                color: Md3Theme.colorScheme.surfaceContainerHighest
+                border.width: 1
+                border.color: Md3Theme.colorScheme.primary
+            }
+
+            onVisibleChanged: {
+                if (visible) {
+                    text = cellHost.displayText
+                    forceActiveFocus()
+                    selectAll()
+                }
+            }
+            Keys.onReturnPressed: root.commitCellEdit(text)
+            Keys.onEnterPressed: root.commitCellEdit(text)
+            Keys.onEscapePressed: root.cancelCellEdit()
+            onEditingFinished: {
+                if (cellHost.editing)
+                    root.commitCellEdit(text)
+            }
         }
 
         // type: "chip" — optional chipIcon / chipIconMap / chipIconRole
@@ -751,6 +840,13 @@ Item {
                 tableFocus.forceActiveFocus()
             }
             onDoubleClicked: {
+                const cols = root.columns || []
+                for (let i = 0; i < cols.length; ++i) {
+                    if (cols[i] && cols[i].editable === true) {
+                        root.beginCellEdit(bodyRow.sourceIndex, i)
+                        return
+                    }
+                }
                 root.rowDoubleClicked(bodyRow.sourceIndex)
                 root.rowActivated(bodyRow.sourceIndex)
             }
@@ -809,6 +905,28 @@ Item {
             case Qt.Key_Enter:
                 root._activateFocusedRow()
                 event.accepted = true
+                break
+            case Qt.Key_F2: {
+                if (root.focusedPageRow >= 0) {
+                    const e = root.pageEntries[root.focusedPageRow]
+                    const cols = root.columns || []
+                    if (e) {
+                        for (let i = 0; i < cols.length; ++i) {
+                            if (cols[i] && cols[i].editable === true) {
+                                root.beginCellEdit(e.sourceIndex, i)
+                                event.accepted = true
+                                break
+                            }
+                        }
+                    }
+                }
+                break
+            }
+            case Qt.Key_Escape:
+                if (root.editingSourceIndex >= 0) {
+                    root.cancelCellEdit()
+                    event.accepted = true
+                }
                 break
             case Qt.Key_Space:
                 if (root.selectionEnabled && root.focusedPageRow >= 0) {
@@ -1130,8 +1248,16 @@ Item {
                                                 tableFocus.forceActiveFocus()
                                             }
                                             onDoubleClicked: {
-                                                root.rowDoubleClicked(scrollRowItem.modelData.sourceIndex)
-                                                root.rowActivated(scrollRowItem.modelData.sourceIndex)
+                                                const cols = root.columns || []
+                                                const src = scrollRowItem.modelData.sourceIndex
+                                                for (let i = 0; i < cols.length; ++i) {
+                                                    if (cols[i] && cols[i].editable === true) {
+                                                        root.beginCellEdit(src, i)
+                                                        return
+                                                    }
+                                                }
+                                                root.rowDoubleClicked(src)
+                                                root.rowActivated(src)
                                             }
                                         }
                                         Rectangle {

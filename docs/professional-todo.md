@@ -66,18 +66,18 @@
 
 | WinUI | Md3 | 状态 | 缺口 / 下一步 |
 |-------|-----|------|----------------|
-| ListView | `Md3VirtualList` + `Md3ListTile` | [~] | 分组头、多选模式、swipe |
-| GridView | `Md3GridLayout` + cards | [~] | 数据驱动 **GridView**（虚拟化 + selection） |
-| ItemsView | — | [ ] | 统一 Items 布局策略（stack/grid/waterfall） |
-| ItemsRepeater | VirtualList 底层 | [~] | 公开更原语的 repeater API（若需要） |
-| TreeView | `Md3TreeView` | [x] | 拖放节点、多列树 |
-| FlipView | `Md3Carousel` | [~] | 单页翻转 + 指示点对齐 Pips |
-| PipsPager | — | [ ] | `Md3PipsPager` |
-| SemanticZoom | — | [ ] | 可选（桌面低频） |
-| AnnotatedScrollBar | `Md3ScrollBar` | [~] | 标注刻度 / 字母索引 |
-| Pull-to-refresh | — | [ ] | 触摸场景；桌面可降优先 |
-| Swipe | — | [ ] | 列表项滑动操作 |
-| DataGrid（Toolkit） | `Md3DataTable` | [x] | 单元格编辑、冻结列 UX 再对齐 |
+| ListView | `Md3ListView` (+ VirtualList / ListTile) | [x] | 分组头、单/多选、空态；Swipe 见 `Md3SwipeReveal` |
+| GridView | `Md3GridView` | [x] | 虚拟化网格 + selection |
+| ItemsView | `Md3ItemsView` | [x] | Stack / Grid 布局策略（waterfall 可后置） |
+| ItemsRepeater | `Md3VirtualList` | [x] | 轻量原语；带分组/多选用 ListView |
+| TreeView | `Md3TreeView` | [x] | 拖放节点、多列树（可选增强） |
+| FlipView | `Md3Carousel` `mode: Flip` | [x] | 单页翻转 + `Md3PipsPager` |
+| PipsPager | `Md3PipsPager` | [x] | Dot / Pill |
+| SemanticZoom | — | [ ] | **不做**（桌面低频） |
+| AnnotatedScrollBar | `Md3ScrollBar.annotations` | [x] | 字母索引 gutter + 拖动提示 |
+| Pull-to-refresh | `Md3PullToRefresh` | [x] | 绑 Flickable；桌面可选 |
+| Swipe | `Md3SwipeReveal` | [x] | 列表项左滑露出操作 |
+| DataGrid（Toolkit） | `Md3DataTable` | [x] | `editable` 列 + F2/双击就地编辑 |
 
 ### 1.4 导航与窗口壳（桌面核心）
 
@@ -133,10 +133,10 @@
 
 ### W2 — 集合与编辑（3–4 周）
 
-- [ ] `Md3ListView`：多选、分组、空态、键盘多选
-- [ ] `Md3GridView`：虚拟化网格选择
-- [ ] `Md3PipsPager` + Carousel/Flip 指示对齐
-- [ ] DataTable：**单元格就地编辑**、剪贴板导出钩子 Gallery 演示
+- [x] `Md3ListView`：多选、分组、空态、键盘多选
+- [x] `Md3GridView`：虚拟化网格选择
+- [x] `Md3PipsPager` + Carousel/Flip 指示对齐
+- [x] DataTable：**单元格就地编辑**、剪贴板导出钩子 Gallery 演示
 - [ ] TreeView：拖放排序（可选）
 
 ### W3 — 输入与设置页模式（2 周）
@@ -197,6 +197,7 @@
 
 | 日期 | 说明 |
 |------|------|
+| 2026-07-31 | 集合面：ListView/GridView/ItemsView/Pips/Swipe/PTR + DataTable 就地编辑 |
 | 2026-07-31 | 按钮/命令条：`docs/buttons-commands.md` + `docs/api-manual` WinUI 附录 |
 | 2026-07-31 | 废除旧「专业库堆栈」TODO；改为 WinUI 3 能力对标稿 |
 

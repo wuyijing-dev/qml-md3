@@ -358,6 +358,12 @@ qt_add_qml_module(Md3
         components/Md3FileDropZone.qml
         components/Md3ReleaseUpdater.qml
         components/Md3VirtualList.qml
+        components/Md3ListView.qml
+        components/Md3GridView.qml
+        components/Md3ItemsView.qml
+        components/Md3PipsPager.qml
+        components/Md3SwipeReveal.qml
+        components/Md3PullToRefresh.qml
         components/Md3Pagination.qml
         components/Md3Stepper.qml
         components/Md3Banner.qml

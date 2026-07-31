@@ -17,7 +17,7 @@
 - [Md3AppSettings](Md3AppSettings.md) — QSettings facade
 - [Md3HotReload](Md3HotReload.md) — QML hot reload watcher
 
-**QML types:** 171
+**QML types:** 177
 
 ## Actions & selection
 
@@ -75,8 +75,10 @@
 - [Md3DotsGauge](Md3DotsGauge.md) — Circular dots gauge — progress as filled dots around a ring.
 - [Md3FileDropZone](Md3FileDropZone.md) — Desktop file drop target with scrollable table preview of dropped files.
 - [Md3Gauge](Md3Gauge.md) — Classic horseshoe / arc KPI gauge (open bottom).
+- [Md3GridView](Md3GridView.md) — Data-driven virtualized grid with selection (WinUI GridView).
 - [Md3HalfGauge](Md3HalfGauge.md) — Semicircle / half-dial gauge (flat bottom).
 - [Md3InfoBar](Md3InfoBar.md) — WinUI-style in-page info bar — persistent until dismissed (unlike Snackbar).
+- [Md3ItemsView](Md3ItemsView.md) — Unified items host with stack or grid layout strategy (WinUI ItemsView-lite).
 - [Md3KeySequenceField](Md3KeySequenceField.md) — Desktop shortcut capture field: captures a single chord like Ctrl+K / Shift+Enter.
 - [Md3KnobGauge](Md3KnobGauge.md) — Rotary knob-style gauge (value as dial rotation with notch).
 - [Md3LiquidGlass](Md3LiquidGlass.md) — EXPERIMENTAL: Liquid Glass API may change without compatibility guarantees. Draggable Liquid Glass — regional backdrop sample (not full-scene blur).
@@ -87,13 +89,16 @@
 - [Md3Pagination](Md3Pagination.md) — Compact pagination bar for tables / lists.
 - [Md3PasswordField](Md3PasswordField.md) — Password field with visibility toggle (via Md3TextField) and optional strength meter.
 - [Md3PathField](Md3PathField.md) — Path field — open/save file, multi-file, or folder; recent paths, validation, drop, breadcrumb.
+- [Md3PipsPager](Md3PipsPager.md) — Page indicator / WinUI PipsPager — dots or pills bound to a page count.
+- [Md3PullToRefresh](Md3PullToRefresh.md) — Pull-to-refresh host for a Flickable (touch / trackpad; desktop optional).
 - [Md3ReleaseUpdater](Md3ReleaseUpdater.md) — GitHub Release update client: metadata check, ZIP download, and archive extract. NOTE: This is non-visual (0x0) but uses `Item` so it can safely host the C++ backend instance.
 - [Md3RingGauge](Md3RingGauge.md) — Full 360° ring / donut progress gauge.
-- [Md3ScrollBar](Md3ScrollBar.md) — Themed scrollbar attached to a Flickable (vertical or horizontal).
+- [Md3ScrollBar](Md3ScrollBar.md) — Themed scrollbar attached to a Flickable (vertical or horizontal). Optional `annotations` enable WinUI AnnotatedScrollBar-style letter/tick labels.
 - [Md3ScrollView](Md3ScrollView.md) — Themed scroll view: Flickable + optional Md3ScrollBar overlays.
 - [Md3SegmentGauge](Md3SegmentGauge.md) — Segmented arc gauge — discrete wedges (battery / steps style).
 - [Md3Sparkline](Md3Sparkline.md) — Lightweight sparkline for KPIs / lists — Canvas only (no Md3Chart overhead).
 - [Md3StatusBar](Md3StatusBar.md) — Desktop status bar — left / center / right zones, transient messages.
+- [Md3SwipeReveal](Md3SwipeReveal.md) — Swipe-to-reveal trailing actions behind content (WinUI SwipeControl-lite).
 - [Md3TagField](Md3TagField.md) — Multi-tag / chip input — Enter or comma commits; Backspace removes last tag.
 - [Md3Text](Md3Text.md)
 - [Md3TickRingGauge](Md3TickRingGauge.md) — Tick-ring gauge — circular progress with radial tick marks (no needle).
@@ -184,13 +189,14 @@
 - [Md3DataTable](Md3DataTable.md) — Enterprise data table: sort, filter, multi-select, pagination, frozen columns, column resize, custom cell delegate, keyboard nav, row reorder, server paging.
 - [Md3DocumentTabBar](Md3DocumentTabBar.md) — Win11 Explorer / browser document tabs — reorder, close, tear-off, add pop-in.
 - [Md3ListTile](Md3ListTile.md)
+- [Md3ListView](Md3ListView.md) — WinUI-style list: virtualization, section headers, single/multi selection.
 - [Md3NavigationBar](Md3NavigationBar.md)
 - [Md3NavigationDrawer](Md3NavigationDrawer.md)
 - [Md3NavigationRail](Md3NavigationRail.md)
 - [Md3Scaffold](Md3Scaffold.md) — App shell: optional built-in TopAppBar / NavigationBar / Drawer from props, or custom slots (`appBar:`, `navigationBar:`, `drawer:`, `fab:`).
 - [Md3TabBar](Md3TabBar.md) — Tab strip + optional content pages (WinUI Pivot-style). When `pages` has children, a StackLayout tracks `currentIndex` — no host sync glue.
 - [Md3TopAppBar](Md3TopAppBar.md)
-- [Md3VirtualList](Md3VirtualList.md) — Thin virtualized list wrapper for large models with jump/scroll helpers.
+- [Md3VirtualList](Md3VirtualList.md) — Thin virtualized list wrapper for large models with jump/scroll helpers. Prefer Md3ListView when you need section headers or multi-select; this type remains the lightweight ItemsRepeater-style primitive.
 
 ## Primitives
 

@@ -6,13 +6,17 @@ import Md3
 Item {
     id: root
 
+    enum Mode { MultiBrowse, Flip }
+
     property var model: [] // [{ title, subtitle?, color?, source? }]
     property int currentIndex: 0
+    property int mode: Md3Carousel.MultiBrowse
     property real itemHeight: 168
-    /// Fraction of next item visible (peek). 0 = full-bleed page.
+    /// Fraction of next item visible (peek). Ignored in Flip mode.
     property real peekRatio: 0.12
     property real spacing: 12
     property bool showIndicators: true
+    property int indicatorStyle: Md3PipsPager.Pill
     property bool autoPlay: false
     property int autoPlayInterval: 4000
     property bool wrap: true
@@ -30,7 +34,9 @@ Item {
     Accessible.role: Accessible.List
     Accessible.name: qsTr("Carousel")
 
-    readonly property real pageWidth: Math.max(120, width * (1 - peekRatio) - spacing)
+    readonly property real _peek: mode === Md3Carousel.Flip ? 0 : peekRatio
+    readonly property real _spacing: mode === Md3Carousel.Flip ? 0 : spacing
+    readonly property real pageWidth: Math.max(120, width * (1 - _peek) - _spacing)
 
     onCurrentIndexChanged: {
         if (view.currentIndex !== currentIndex && currentIndex >= 0
@@ -64,11 +70,11 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: root.itemHeight + root.shadowPad * 2
             orientation: ListView.Horizontal
-            spacing: root.spacing
+            spacing: root._spacing
             // Keep horizontal clip; vertical shadow bleed stays inside preferredHeight.
             clip: true
             model: root.model
-            snapMode: ListView.SnapToItem
+            snapMode: ListView.SnapOneItem
             highlightRangeMode: ListView.StrictlyEnforceRange
             preferredHighlightBegin: 0
             preferredHighlightEnd: root.pageWidth
@@ -76,8 +82,8 @@ Item {
             highlightMoveVelocity: -1
             boundsBehavior: Flickable.StopAtBounds
             currentIndex: root.currentIndex
-            displayMarginBeginning: root.shadowPad
-            displayMarginEnd: root.shadowPad
+            displayMarginBeginning: root.mode === Md3Carousel.Flip ? 0 : root.shadowPad
+            displayMarginEnd: root.mode === Md3Carousel.Flip ? 0 : root.shadowPad
 
             onCurrentIndexChanged: {
                 if (root.currentIndex !== currentIndex) {
@@ -91,13 +97,13 @@ Item {
                 required property int index
                 required property var modelData
                 width: root.pageWidth
-                height: root.itemHeight + root.shadowPad * 2
+                height: root.itemHeight + (root.mode === Md3Carousel.Flip ? 0 : root.shadowPad * 2)
 
                 readonly property bool selected: ListView.isCurrentItem
-                readonly property real elev: selected ? 2 : 1
+                readonly property real elev: root.mode === Md3Carousel.Flip ? 0 : (selected ? 2 : 1)
 
                 // Soft approach — no opacity dimming (reads as a fake shadow).
-                scale: selected ? 1 : 0.985
+                scale: root.mode === Md3Carousel.Flip ? 1 : (selected ? 1 : 0.985)
                 transformOrigin: Item.Center
                 Behavior on scale {
                     NumberAnimation {
@@ -111,18 +117,19 @@ Item {
                 Item {
                     id: cardHost
                     anchors.fill: parent
-                    anchors.margins: root.shadowPad
+                    anchors.margins: root.mode === Md3Carousel.Flip ? 0 : root.shadowPad
 
                     Md3Shadow {
                         anchors.fill: card
                         elevation: delegateRoot.elev
                         cornerRadius: card.radius
+                        visible: root.mode !== Md3Carousel.Flip
                     }
 
                     Rectangle {
                         id: card
                         anchors.fill: parent
-                        radius: Md3Theme.shape.extraLarge
+                        radius: root.mode === Md3Carousel.Flip ? 0 : Md3Theme.shape.extraLarge
                         color: {
                             if (delegateRoot.modelData.color !== undefined)
                                 return delegateRoot.modelData.color
@@ -198,35 +205,13 @@ Item {
             }
         }
 
-        Row {
+        Md3PipsPager {
             Layout.alignment: Qt.AlignHCenter
-            spacing: 8
             visible: root.showIndicators && root.model && root.model.length > 1
-
-            Repeater {
-                model: root.model ? root.model.length : 0
-                delegate: Rectangle {
-                    required property int index
-                    width: root.currentIndex === index ? 18 : 8
-                    height: 8
-                    radius: 4
-                    color: root.currentIndex === index
-                           ? Md3Theme.colorScheme.primary
-                           : Md3Theme.colorScheme.outlineVariant
-                    Behavior on width {
-                        NumberAnimation {
-                            duration: Md3Motion.spatialSnapDuration
-                            easing.type: Easing.BezierSpline
-                            easing.bezierCurve: Md3Motion.emphasized
-                        }
-                    }
-                    MouseArea {
-                        anchors.fill: parent
-                        anchors.margins: -6
-                        onClicked: root.goTo(index)
-                    }
-                }
-            }
+            count: root.model ? root.model.length : 0
+            currentIndex: root.currentIndex
+            style: root.indicatorStyle
+            onIndexRequested: function (index) { root.goTo(index) }
         }
     }
 

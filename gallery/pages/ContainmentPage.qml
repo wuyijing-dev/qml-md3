@@ -54,6 +54,49 @@ Md3Page {
 
             Md3PageSection {
                 width: parent.width
+                title: qsTr("Annotated scroll bar")
+                subtitle: qsTr("Letter index gutter (WinUI AnnotatedScrollBar).")
+
+                Item {
+                    width: parent.width
+                    height: 200
+                    Flickable {
+                        id: annotatedFlick
+                        anchors.fill: parent
+                        anchors.rightMargin: 28
+                        contentWidth: width
+                        contentHeight: annotatedCol.height
+                        clip: true
+                        boundsBehavior: Flickable.StopAtBounds
+                        Md3VStack {
+                            id: annotatedCol
+                            width: annotatedFlick.width
+                            spacing: 4
+                            Repeater {
+                                model: 40
+                                Md3Text {
+                                    required property int index
+                                    text: qsTr("%1 — Item %2")
+                                        .arg(String.fromCharCode(65 + (index % 26)))
+                                        .arg(index + 1)
+                                    role: Md3Text.BodyMedium
+                                }
+                            }
+                        }
+                    }
+                    Md3ScrollBar {
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        flickable: annotatedFlick
+                        autoHide: false
+                        annotations: ["A", "E", "I", "M", "Q", "U", "Y"]
+                    }
+                }
+            }
+
+            Md3PageSection {
+                width: parent.width
                 title: qsTr("布局组件（VStack / HStack / Flow / Grid）")
                 subtitle: qsTr("对齐、padding、expand spacer、Card.title 等 API 减少样板代码。")
 

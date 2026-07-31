@@ -281,6 +281,118 @@ Md3Page {
             }
 
             Md3Text {
+                text: qsTr("ListView — groups + multi-select")
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
+            }
+            Md3Card {
+                variant: Md3Card.Outlined
+                width: parent.width
+                height: 280
+                padding: 0
+                Md3ListView {
+                    anchors.fill: parent
+                    anchors.margins: 4
+                    itemHeight: 52
+                    sectionRole: "group"
+                    selectionMode: Md3ListView.Multiple
+                    model: [
+                        { title: "Ada", subtitle: "Admin", group: "A" },
+                        { title: "Alan", subtitle: "Editor", group: "A" },
+                        { title: "Barbara", subtitle: "Editor", group: "B" },
+                        { title: "Grace", subtitle: "Viewer", group: "G" },
+                        { title: "Linus", subtitle: "Admin", group: "L" },
+                        { title: "Margaret", subtitle: "Lead", group: "M" }
+                    ]
+                    onSelectionChanged: {
+                        const w = _galleryWindow()
+                        if (w)
+                            w.showStatusMessage(qsTr("%1 selected").arg(selectedIndices.length))
+                    }
+                }
+            }
+
+            Md3Text {
+                text: qsTr("GridView + ItemsView")
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
+            }
+            Md3SegmentedButton {
+                id: itemsLayout
+                model: [{ text: qsTr("Stack") }, { text: qsTr("Grid") }]
+                currentIndex: 1
+            }
+            Md3Card {
+                variant: Md3Card.Outlined
+                width: parent.width
+                height: 260
+                padding: 8
+                Md3ItemsView {
+                    anchors.fill: parent
+                    layout: itemsLayout.currentIndex === 0 ? Md3ItemsView.Stack : Md3ItemsView.Grid
+                    cellWidth: 120
+                    cellHeight: 110
+                    selectionMode: Md3ListView.Single
+                    model: [
+                        { title: "Photos", icon: "photo" },
+                        { title: "Music", icon: "music_note" },
+                        { title: "Files", icon: "folder" },
+                        { title: "Mail", icon: "mail" },
+                        { title: "Maps", icon: "map" },
+                        { title: "Settings", icon: "settings" }
+                    ]
+                }
+            }
+
+            Md3Text {
+                text: qsTr("Swipe actions")
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
+            }
+            Md3Card {
+                variant: Md3Card.Outlined
+                width: parent.width
+                padding: 0
+                Md3VStack {
+                    width: parent.width
+                    spacing: 0
+                    Md3SwipeReveal {
+                        width: parent.width
+                        height: 56
+                        trailingActions: [
+                            { icon: "archive", label: qsTr("Archive") },
+                            { icon: "delete", label: qsTr("Delete"), destructive: true }
+                        ]
+                        onActionTriggered: function (i) {
+                            const w = _galleryWindow()
+                            if (w)
+                                w.showStatusMessage(qsTr("Swipe action %1").arg(i))
+                        }
+                        Md3ListTile {
+                            anchors.fill: parent
+                            title: qsTr("Inbox message")
+                            subtitle: qsTr("Swipe left for actions")
+                            leadingIcon: "mail"
+                            showDivider: true
+                        }
+                    }
+                    Md3SwipeReveal {
+                        width: parent.width
+                        height: 56
+                        trailingActions: [
+                            { icon: "flag", label: qsTr("Flag") }
+                        ]
+                        Md3ListTile {
+                            anchors.fill: parent
+                            title: qsTr("Another item")
+                            subtitle: qsTr("Drag sideways")
+                            leadingIcon: "inbox"
+                        }
+                    }
+                }
+            }
+
+            Md3Text {
                 text: qsTr("Data table")
                 role: Md3Text.LabelLarge
                 tone: Md3Text.OnSurfaceVariant
@@ -310,7 +422,7 @@ Md3Page {
                 }
                 Md3Spacer { expand: true }
                 Md3Text {
-                    text: qsTr("Frozen col · filter · ↑↓ Enter · double-click row")
+                    text: qsTr("Frozen · filter · F2 / double-click edit Notes")
                     role: Md3Text.BodySmall
                     tone: Md3Text.OnSurfaceVariant
                     elide: Text.ElideRight
@@ -331,7 +443,7 @@ Md3Page {
                 columnFilters: ({ status: statusFilter.text })
                 columns: [
                     { title: "Name", role: "name", width: 140, type: "avatar" },
-                    { title: "Role", role: "role", width: 120 },
+                    { title: "Role", role: "role", width: 120, editable: true },
                     {
                         title: "Status", role: "status", width: 120, type: "chip",
                         chipIconMap: { "Active": "check_circle", "Away": "schedule" }
@@ -339,7 +451,7 @@ Md3Page {
                     { title: "OK", role: "ok", width: 64, type: "check" },
                     { title: "Score", role: "score", width: 80 },
                     { title: "Team", role: "team", width: 120 },
-                    { title: "Notes", role: "notes", width: 160 }
+                    { title: "Notes", role: "notes", width: 160, editable: true }
                 ]
                 rows: [
                     { name: "Ada", role: "Admin", status: "Active", ok: true, score: 98, team: "Platform", notes: "Core owner" },
@@ -365,6 +477,11 @@ Md3Page {
                 emptyActionText: qsTr("Reload sample")
                 onEmptyActionClicked: console.log("reload")
                 onSelectionChanged: _syncGalleryStatus()
+                onCellEdited: function (sourceIndex, role, newValue) {
+                    const w = _galleryWindow()
+                    if (w)
+                        w.showStatusMessage(qsTr("Edited %1 → %2").arg(role).arg(newValue))
+                }
                 onRowDoubleClicked: function (sourceIndex) {
                     const w = _galleryWindow()
                     if (w)
@@ -409,6 +526,29 @@ Md3Page {
                         color: Md3Theme.colorScheme.tertiary
                     }
                 ]
+            }
+
+            Md3Text {
+                text: qsTr("FlipView + PipsPager")
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
+            }
+            Md3Carousel {
+                width: parent.width
+                mode: Md3Carousel.Flip
+                itemHeight: 160
+                autoPlay: false
+                model: [
+                    { title: qsTr("Page 1"), subtitle: qsTr("Full-bleed flip"), color: Md3Theme.colorScheme.primaryContainer },
+                    { title: qsTr("Page 2"), subtitle: qsTr("Snap one item"), color: Md3Theme.colorScheme.secondaryContainer },
+                    { title: qsTr("Page 3"), subtitle: qsTr("Pips below"), color: Md3Theme.colorScheme.tertiaryContainer }
+                ]
+            }
+            Md3PipsPager {
+                anchors.horizontalCenter: parent.horizontalCenter
+                count: 5
+                currentIndex: 2
+                style: Md3PipsPager.Dot
             }
 
             Md3Text {

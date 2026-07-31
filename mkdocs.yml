@@ -50,6 +50,7 @@ nav:
   - 性能: performance.md
   - 设计与模式: design-guidelines.md
   - 按钮与命令条: buttons-commands.md
+  - 集合与列表: collections.md
   - 模块边界: module-boundaries.md
   - 校验 API: validation.md
   - 反馈层级: feedback.md

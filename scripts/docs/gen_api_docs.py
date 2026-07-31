@@ -565,7 +565,7 @@ def category_of(path: str, name: str = "") -> str:
             )
         ):
             return "Actions & selection"
-        if any(x in n for x in ("TextField", "Search", "Form", "Date", "Time", "CommandPalette", "Select", "ColorPicker")):
+        if any(x in n for x in ("TextField", "Search", "Form", "Date", "Time", "CommandPalette", "Select", "ColorPicker", "TagField", "Password", "Number", "Path", "KeySequence")):
             return "Input"
         if any(
             x in n
@@ -574,7 +574,6 @@ def category_of(path: str, name: str = "") -> str:
                 "Tab",
                 "AppBar",
                 "Drawer",
-                "List",
                 "Rail",
                 "Document",
                 "Breadcrumb",
@@ -582,6 +581,23 @@ def category_of(path: str, name: str = "") -> str:
             )
         ):
             return "Navigation"
+        if any(
+            x in n
+            for x in (
+                "ListView",
+                "GridView",
+                "ItemsView",
+                "VirtualList",
+                "TreeView",
+                "DataTable",
+                "Carousel",
+                "PipsPager",
+                "Swipe",
+                "PullToRefresh",
+                "Pagination",
+            )
+        ):
+            return "Collections"
         if any(
             x in n
             for x in (

@@ -1,6 +1,6 @@
 # Md3VirtualList
 
-Thin virtualized list wrapper for large models with jump/scroll helpers.
+Thin virtualized list wrapper for large models with jump/scroll helpers. Prefer Md3ListView when you need section headers or multi-select; this type remains the lightweight ItemsRepeater-style primitive.
 
 - **Source:** `src/Md3/components/Md3VirtualList.qml`
 - **Extends:** `Item`
