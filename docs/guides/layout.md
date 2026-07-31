@@ -14,6 +14,7 @@
 | Push content apart | `Md3Spacer { expand: true }` |
 | Card with header | `Md3Card { title: "..."; subtitle: "..." }` |
 | Fit vs scroll body | `layoutMode: Md3ContainerBody.Fit` / `.Scroll` on Card/Form/Sheet |
+| Window size / chrome | `Md3Adaptive` + `Md3ApplicationWindow.adaptiveChrome` — see [window-appearance.md](window-appearance.md) |
 
 ## Before / after
 

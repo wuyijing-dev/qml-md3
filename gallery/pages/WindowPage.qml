@@ -110,6 +110,52 @@ Flickable {
         }
 
         Md3Text {
+            text: qsTr("自适应（MD3 窗口类）")
+            role: Md3Text.TitleSmall
+        }
+        Md3Text {
+            width: parent.width
+            wrapMode: Text.WordWrap
+            text: {
+                if (!root.appWin)
+                    return qsTr("未绑定 ApplicationWindow。")
+                const w = root.appWin
+                return qsTr("宽度类 %1 · 设备 %2 · 外观 %3 · CSD %4 · 紧凑标题栏 %5 · 导航%6")
+                      .arg(w.widthClassName !== undefined ? w.widthClassName
+                           : Md3Adaptive.widthClassName(Md3Adaptive.widthClassFor(w.width)))
+                      .arg(w.deviceClassName !== undefined ? w.deviceClassName
+                           : Md3Adaptive.deviceClassName(Md3Adaptive.deviceClassFor(w.width, w.height)))
+                      .arg(w.windowAppearanceName !== undefined ? w.windowAppearanceName
+                           : Md3Adaptive.windowAppearanceName(Md3Adaptive.windowAppearanceFor(w.width, w.height)))
+                      .arg(w.useCustomChrome !== undefined
+                           ? (w.useCustomChrome ? qsTr("开") : qsTr("关"))
+                           : (Md3Adaptive.useCustomChrome(w.width, w.height) ? qsTr("开") : qsTr("关")))
+                      .arg(w.preferCompactTitleBar ? qsTr("是") : qsTr("否"))
+                      .arg(w.preferNavigationBar ? qsTr("底栏") : qsTr("轨道"))
+            }
+            role: Md3Text.BodySmall
+            tone: Md3Text.OnSurfaceVariant
+        }
+        Md3FlowLayout {
+            width: parent.width
+            spacing: 8
+            Md3Button {
+                enabled: !!root.appWin && root.appWin.adaptiveChrome !== undefined
+                text: qsTr("切换自适应外观")
+                variant: Md3Button.Outlined
+                onClicked: {
+                    if (root.appWin && root.appWin.adaptiveChrome !== undefined)
+                        root.appWin.adaptiveChrome = !root.appWin.adaptiveChrome
+                }
+            }
+            Md3AssistChip {
+                text: root.appWin && root.appWin.adaptiveChrome !== undefined
+                      ? (root.appWin.adaptiveChrome ? qsTr("adaptiveChrome: on") : qsTr("adaptiveChrome: off"))
+                      : qsTr("adaptiveChrome: —")
+            }
+        }
+
+        Md3Text {
             text: qsTr("系统封装")
             role: Md3Text.TitleSmall
         }

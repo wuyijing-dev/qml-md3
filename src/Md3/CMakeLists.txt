@@ -178,6 +178,7 @@ endif()
 
 set_source_files_properties(
     foundation/Md3Theme.qml
+    foundation/Md3Adaptive.qml
     foundation/Md3Motion.qml
     foundation/Md3Accessibility.qml
     foundation/Md3IconFonts.qml
@@ -232,6 +233,7 @@ qt_add_qml_module(Md3
         diagnostics/md3hotreload.cpp
     QML_FILES
         foundation/Md3Theme.qml
+        foundation/Md3Adaptive.qml
         foundation/Md3Motion.qml
         foundation/Md3Accessibility.qml
         foundation/Md3IconFonts.qml

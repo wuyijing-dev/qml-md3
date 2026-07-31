@@ -26,7 +26,7 @@ Material Design 3 组件库（Qt Quick / QML）。站点：[QML_MD3_Document](ht
 ## 设计与模式
 
 - [设计指南](guides/design-guidelines.md) · [按钮与命令](guides/buttons-commands.md) · [集合与列表](guides/collections.md)
-- [布局](guides/layout.md) · [少写胶水](guides/glue-less-api.md) · [反馈层级](guides/feedback.md)
+- [布局](guides/layout.md) · [窗口外观（自适应）](guides/window-appearance.md) · [少写胶水](guides/glue-less-api.md) · [反馈层级](guides/feedback.md)
 - [模块边界](guides/module-boundaries.md) · [令牌](guides/tokens.md)
 
 ## 专题

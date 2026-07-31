@@ -28,8 +28,9 @@ Item {
     property bool drawerOpen: false
     property var hostWindow: null
 
-    property real compactBreakpoint: 600
-    property real expandedBreakpoint: 840
+    /// Aligned with Md3Adaptive / Material WindowSizeClass (compact < 600, medium < 840).
+    property real compactBreakpoint: Md3Adaptive.navigationCompactBreakpoint
+    property real expandedBreakpoint: Md3Adaptive.navigationExpandedBreakpoint
 
     default property alias content: contentHost.data
 

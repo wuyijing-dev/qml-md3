@@ -43,6 +43,10 @@ C++: `Md3WindowHelper::displayServer()` mirrors the same probe; `platformId()` s
 | `centerOnScreen` / opacity / min·max·fullscreen | Qt | Qt | Qt | Qt |
 | `requestAttention` | Taskbar flash | Urgent / alert | Same | `alert` |
 
+## Adaptive window chrome
+
+See [Window appearance](../guides/window-appearance.md). `Md3Adaptive` + `Md3ApplicationWindow.adaptiveChrome` pick System / CompactChrome / DesktopChrome from size class and mobile vs desktop.
+
 ## System wrappers (QML)
 
 Prefer `Md3ApplicationWindow` helpers (they forward to `windowNative`):

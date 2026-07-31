@@ -8,6 +8,30 @@ Window {
 
     property bool customChrome: Md3WindowCapabilities.customChrome
     property bool showTitleBar: true
+    /// When true (default), chrome follows MD3 size class + mobile/desktop policy (Md3Adaptive).
+    property bool adaptiveChrome: true
+    readonly property int widthClass: Md3Adaptive.widthClassFor(width)
+    readonly property int heightClass: Md3Adaptive.heightClassFor(height)
+    readonly property int deviceClass: Md3Adaptive.deviceClassFor(width, height)
+    readonly property int windowAppearance: Md3Adaptive.windowAppearanceFor(width, height)
+    readonly property string widthClassName: Md3Adaptive.widthClassName(widthClass)
+    readonly property string deviceClassName: Md3Adaptive.deviceClassName(deviceClass)
+    readonly property string windowAppearanceName: Md3Adaptive.windowAppearanceName(windowAppearance)
+    /// Effective CSD flag after adaptive policy (use this instead of raw customChrome for chrome layout).
+    readonly property bool useCustomChrome: {
+        if (!customChrome)
+            return false
+        if (!adaptiveChrome)
+            return Md3WindowCapabilities.customChrome
+        return Md3Adaptive.useCustomChrome(width, height)
+    }
+    readonly property bool preferCompactTitleBar: adaptiveChrome
+                                                  && Md3Adaptive.preferCompactTitleBar(width, height)
+    readonly property bool preferCaptionButtons: adaptiveChrome
+                                                 ? Md3Adaptive.preferCaptionButtons(width, height)
+                                                 : Md3WindowCapabilities.captionButtons
+    readonly property bool preferNavigationBar: Md3Adaptive.preferNavigationBar(width, height)
+    readonly property bool preferNavigationRail: Md3Adaptive.preferNavigationRail(width, height)
     property bool roundedCorners: Md3WindowCapabilities.roundedCorners
     // Platform default; set 0 to disable client rounding
     property real cornerRadius: Md3WindowCapabilities.windowCornerRadius
@@ -443,21 +467,20 @@ Window {
     readonly property bool isMaximizedLike: visibility === Window.Maximized
                                             || visibility === Window.FullScreen
     readonly property real effectiveRadius: {
-        if (!customChrome || !roundedCorners || isMaximizedLike)
+        if (!useCustomChrome || !roundedCorners || isMaximizedLike)
             return 0
         return Math.max(0, cornerRadius)
     }
-    readonly property bool useTransparentFrame: customChrome && Md3WindowCapabilities.customChrome
-                                                 && effectiveRadius > 0
+    readonly property bool useTransparentFrame: useCustomChrome && effectiveRadius > 0
 
     // Always transparent with custom chrome so DWM materials / rounded corners can show
-    color: (customChrome && Md3WindowCapabilities.customChrome) || usesSystemBackdrop
+    color: useCustomChrome || usesSystemBackdrop
            ? "transparent" : Md3Theme.colorScheme.surface
     visible: true
 
     flags: {
         let f = Qt.Window
-        if (root.customChrome && Md3WindowCapabilities.customChrome)
+        if (root.useCustomChrome)
             f |= Qt.FramelessWindowHint
         return f
     }
@@ -470,12 +493,12 @@ Window {
 
     readonly property real chromeTop: chromeHost.height
     readonly property real edge: 6
-    readonly property bool canResize: customChrome && Md3WindowCapabilities.systemResize
+    readonly property bool canResize: useCustomChrome && Md3WindowCapabilities.systemResize
                                       && !isMaximizedLike
     /// Keep QML resize grips off the title-bar caption strip (min/max/close).
-    readonly property real chromeTopReserve: (showTitleBar && customChrome) ? chromeHost.height : 0
+    readonly property real chromeTopReserve: (showTitleBar && useCustomChrome) ? chromeHost.height : 0
     readonly property real chromeRightReserve: {
-        if (!showTitleBar || !customChrome)
+        if (!showTitleBar || !useCustomChrome)
             return 0
         const tb = titleBarLoader.item
         if (tb && tb.rightChromeWidth !== undefined)
@@ -1086,7 +1109,7 @@ Window {
                 radius: root.usesSystemBackdrop ? 0 : root.effectiveRadius
                 color: root.usesSystemBackdrop
                        ? Qt.alpha(Md3Theme.colorScheme.surface, root.backdropTint)
-                       : (root.customChrome ? Qt.alpha(Md3Theme.colorScheme.surface, 0.98)
+                       : (root.useCustomChrome ? Qt.alpha(Md3Theme.colorScheme.surface, 0.98)
                                             : Md3Theme.colorScheme.surface)
                 // Full-window wash stacks with PageHost — keep it off unless tint > 0.
                 visible: !root.usesSystemBackdrop || root.backdropTint > 0.001
@@ -1124,7 +1147,7 @@ Window {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
-                    active: root.showTitleBar && root.customChrome
+                    active: root.showTitleBar && root.useCustomChrome
                     height: active && item ? item.height : 0
                     sourceComponent: root.titleBar !== null ? root.titleBar : defaultTitleBar
                     onLoaded: {
@@ -1136,6 +1159,10 @@ Window {
                             item.windowHelper = root.windowNative
                         if (item.cornerRadius !== undefined)
                             item.cornerRadius = Qt.binding(function () { return root.effectiveRadius })
+                        if (item.compact !== undefined)
+                            item.compact = Qt.binding(function () { return root.preferCompactTitleBar })
+                        if (item.showCaptionButtons !== undefined)
+                            item.showCaptionButtons = Qt.binding(function () { return root.preferCaptionButtons })
                         if (item.title !== undefined && root.title.length > 0
                                 && (!item.title || item.title.length === 0))
                             item.title = root.title
@@ -1186,8 +1213,10 @@ Window {
                         targetWindow: root
                         windowHelper: root.windowNative
                         cornerRadius: root.effectiveRadius
+                        compact: root.preferCompactTitleBar
+                        showCaptionButtons: root.preferCaptionButtons
                         preferredHeight: 28
-                        barHeight: 28
+                        barHeight: compact ? compactHeight : 28
                         unifiedChrome: root.unifiedTitleChrome
                         showBackButton: root.showTitleBackButton
                         backEnabled: root.canGoBack

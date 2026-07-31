@@ -42,6 +42,8 @@ Rectangle {
     property bool showMinimize: true
     property bool showMaximize: true
     property bool showClose: true
+    /// Master switch for min/max/close (adaptive desktop vs system chrome).
+    property bool showCaptionButtons: true
     property bool dragEnabled: Md3WindowCapabilities.systemMove
     property bool nativeCaptionHit: Md3WindowCapabilities.captionHitTest
     property real leadingInset: Md3WindowCapabilities.trafficLightsInset
@@ -53,7 +55,7 @@ Rectangle {
     property url appIcon: ""
 
     property real preferredHeight: 28
-    property real compactHeight: 28
+    property real compactHeight: 24
     property bool compact: false
     property real barHeight: -1
     property real padding: 6
@@ -463,6 +465,7 @@ Rectangle {
 
             Md3CaptionButtons {
                 id: caption
+                visible: root.showCaptionButtons
                 height: root.baseHeight
                 targetWindow: root.targetWindow
                 windowHelper: root.windowHelper
