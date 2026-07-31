@@ -1,5 +1,9 @@
 # DataTable：列宽、导出与大数据
 
+## Sizing (Qt 6.8+)
+
+Prefer explicit `height` or top+bottom `anchors`. Do **not** write `bodyHeight: height - N` while the table also drives `height` from `implicitHeight` — that is a binding loop on Qt 6.8 (6.10 may hide it). When height is set externally, the table fills the body via `_resolvedBodyHeight`.
+
 ## 列宽持久化
 
 ```qml

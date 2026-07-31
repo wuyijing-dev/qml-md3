@@ -316,7 +316,8 @@ Md3Page {
                         selectionEnabled: true
                         pagination: true
                         pageSize: page.serverPageSize
-                        bodyHeight: Math.max(240, height - 120)
+                        // body fills leftover height via Md3DataTable._resolvedBodyHeight (avoid height↔bodyHeight loop on Qt 6.8)
+                        bodyHeight: 240
                         showFilterBar: true
                         showColumnFilterIcons: true
                         filterPlaceholder: qsTr("Search files in current folder")

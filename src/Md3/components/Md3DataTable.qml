@@ -174,9 +174,22 @@ Item {
     }
 
     implicitWidth: 480
-    implicitHeight: (showFilterBar ? 56 : 0) + headerHeight + bodyHeight + (pagination ? 48 : 0)
+    /// Chrome outside the scrollable body (filter + header + pager).
+    readonly property real _chromeHeight: (showFilterBar ? 56 : 0) + headerHeight
+                                          + (pagination ? 48 : 0)
+    implicitHeight: _chromeHeight + bodyHeight
     width: parent ? parent.width : implicitWidth
-    height: implicitHeight
+    // Do not bind height↔implicitHeight↔bodyHeight (Qt 6.8 Binding loop when callers
+    // set bodyHeight from height, or combine anchors.fill with height: implicitHeight).
+    // Prefer leftover space when height is set by anchors / explicit height.
+    readonly property real _resolvedBodyHeight: {
+        const avail = height - _chromeHeight
+        if (height > _chromeHeight + 1)
+            return Math.max(40, avail)
+        return Math.max(40, bodyHeight)
+    }
+    // No height: implicitHeight — that loops with bodyHeight: f(height) and fights
+    // top+bottom anchors on Qt 6.8. Callers set height or vertical anchors.
 
     onFilterTextChanged: filterChanged()
     onColumnFiltersChanged: filterChanged()
@@ -945,11 +958,11 @@ Item {
                 event.accepted = true
                 break
             case Qt.Key_PageUp:
-                root._moveFocus(-Math.max(1, Math.floor(root.bodyHeight / root.rowHeight) - 1))
+                root._moveFocus(-Math.max(1, Math.floor(root._resolvedBodyHeight / root.rowHeight) - 1))
                 event.accepted = true
                 break
             case Qt.Key_PageDown:
-                root._moveFocus(Math.max(1, Math.floor(root.bodyHeight / root.rowHeight) - 1))
+                root._moveFocus(Math.max(1, Math.floor(root._resolvedBodyHeight / root.rowHeight) - 1))
                 event.accepted = true
                 break
             }
@@ -986,7 +999,7 @@ Item {
             Item {
                 id: tableStack
                 width: parent.width
-                height: root.headerHeight + root.bodyHeight
+                height: root.headerHeight + root._resolvedBodyHeight
                 clip: true
 
                 Row {
@@ -1043,7 +1056,7 @@ Item {
                         Flickable {
                             id: bodyFrozen
                             width: parent.width
-                            height: root.bodyHeight
+                            height: root._resolvedBodyHeight
                             clip: true
                             contentHeight: frozenRows.height
                             boundsBehavior: Flickable.StopAtBounds
@@ -1329,7 +1342,7 @@ Item {
                     anchors.top: parent.top
                     anchors.topMargin: root.headerHeight
                     width: Math.min(parent.width - 24, 360)
-                    height: root.bodyHeight
+                    height: root._resolvedBodyHeight
                     z: 4
                     visible: !root.loading && root.totalCount === 0
                     icon: root.emptyIcon

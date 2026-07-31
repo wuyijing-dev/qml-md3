@@ -29,6 +29,9 @@ Item {
 
     implicitWidth: leftPadding + rightPadding + contentHost._laidOutWidth
     implicitHeight: Math.max(1, topPadding + bottomPadding + contentHost._laidOutHeight)
+    // Qt 6.8 Column positions by height (not implicitHeight) — without this, rows overlap.
+    // fillHeight users must set an explicit height or anchors (overrides this binding).
+    height: implicitHeight
 
     Timer {
         id: layoutTimer

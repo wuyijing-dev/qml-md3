@@ -8,8 +8,8 @@ Multi-version support for Md3 across Qt kits on the same machine.
 |---|---|---|
 | 5.15.x | Stage 1 | **Core bootstrap library only** (`Md3::run`, fonts init). No Gallery / no `qt_add_qml_module`. |
 | 6.5.x | Stage 1 | Full library + Gallery. Links `QuickEffectsPrivate` / `QuickShapesPrivate` (no public Effects CMake target). |
-| 6.8.x | Stage 1 | Full library + Gallery. Same Private Effects/Shapes as 6.5. **Recommended baseline.** |
-| 6.10+ / 6.11 | Stage 1 | Full library + Gallery. Prefers public `Qt6::QuickEffects` / `Qt6::QuickShapes` when present. |
+| 6.8.x | Stage 1 | Full library + Gallery. Same Private Effects/Shapes as 6.5. **Recommended baseline.** Layout: `Md3HStack` must drive `height` from `implicitHeight` (Column ignores implicit-only on 6.8); avoid `Md3DataTable` `bodyHeight: f(height)` with `height: implicitHeight` (binding loop). |
+| 6.10+ / 6.11 | Stage 1 | Full library + Gallery. Prefers public `Qt6::QuickEffects` / `Qt6::QuickShapes` when present. Column stacking more forgiving of implicit-only heights. |
 | 6.8+ **WASM** | Experimental | Library + hello via Qt for WebAssembly. See [wasm.md](wasm.md). Gallery opt-in. |
 
 ## CMake Compatibility Notes
