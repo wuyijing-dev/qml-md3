@@ -99,4 +99,8 @@ coverage/
 /build-cmake-*/
 /build-compat-*/
 /dist/
+/artifacts/
+/build-wheel/
+/python/md3qml/_native/**
+!/python/md3qml/_native/.gitkeep
 

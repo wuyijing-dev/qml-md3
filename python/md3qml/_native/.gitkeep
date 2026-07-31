@@ -1,4 +1,5 @@
 # Placeholder so setuptools can include the package data directory in sdists.
-# Platform wheels copy shared Md3 into this folder as:
+# Platform wheels (CI: .github/workflows/pyside-wheels.yml) copy shared Md3 here:
 #   md3qml/_native/bin/...
 #   md3qml/_native/lib/qml/Md3/...
+# Local: python scripts/python/stage_native_for_wheel.py --prefix dist/Md3

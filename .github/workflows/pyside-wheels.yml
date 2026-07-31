@@ -1,0 +1,205 @@
+name: pyside-wheels
+
+# Build shared Md3 → stage into md3qml/_native → platform wheels (+ fetch zip).
+# Artifacts: *.whl and Md3-*-shared-*.zip for md3qml fetch / PyPI.
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+  release:
+    types: [published]
+
+concurrency:
+  group: pyside-wheels-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  QT_VERSION: "6.8.3"
+  # Keep in sync with Qt above when publishing platform wheels.
+  PYSIDE6_PIN: "PySide6==6.8.3"
+  MD3_VERSION: "1.0.0"
+
+jobs:
+  wheel:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            qt_host: windows
+            qt_arch: win64_msvc2022_64
+            qt_target: desktop
+            artifact: windows-x64
+          - os: ubuntu-22.04
+            qt_host: linux
+            qt_arch: linux_gcc_64
+            qt_target: desktop
+            artifact: linux-x64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version from tag
+        id: ver
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${MD3_VERSION}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Linux build deps
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libgl1-mesa-dev libxkbcommon-dev \
+            libxcb-cursor0 libxcb-cursor-dev libxcb-xinerama0 libxcb-icccm4 \
+            libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-shape0 \
+            patchelf
+
+      - name: Install Ninja (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ninja -y
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        if: runner.os == 'Windows'
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: ${{ matrix.qt_host }}
+          target: ${{ matrix.qt_target }}
+          arch: ${{ matrix.qt_arch }}
+          cache: true
+
+      - name: Configure shared Md3
+        shell: bash
+        run: |
+          cmake -S . -B build-wheel -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DMD3_BUILD_SHARED=ON \
+            -DMD3_BUILD_GALLERY=OFF \
+            -DMD3_BUILD_EXAMPLES=OFF \
+            -DMD3_BUILD_TESTS=OFF \
+            -DMD3_QML_CACHEGEN=ON
+
+      - name: Build & install to dist/Md3
+        shell: bash
+        run: |
+          cmake --build build-wheel --parallel
+          cmake --install build-wheel --prefix dist/Md3
+
+      - name: Stage md3qml/_native
+        shell: bash
+        run: python scripts/python/stage_native_for_wheel.py --prefix dist/Md3
+
+      - name: Sync md3qml version with tag
+        shell: bash
+        run: |
+          VER="${{ steps.ver.outputs.version }}"
+          python - <<'PY'
+          from pathlib import Path
+          import os, re
+          ver = os.environ["VER"]
+          path = Path("python/pyproject.toml")
+          text = path.read_text(encoding="utf-8")
+          text2, n = re.subn(r'(?m)^version = "[^"]*"', f'version = "{ver}"', text, count=1)
+          if n != 1:
+              raise SystemExit("failed to patch version in pyproject.toml")
+          path.write_text(text2, encoding="utf-8")
+          init = Path("python/md3qml/__init__.py")
+          it = init.read_text(encoding="utf-8")
+          it2, n = re.subn(r'__version__ = "[^"]*"', f'__version__ = "{ver}"', it, count=1)
+          if n != 1:
+              raise SystemExit("failed to patch __version__")
+          init.write_text(it2, encoding="utf-8")
+          print("version ->", ver)
+          PY
+        env:
+          VER: ${{ steps.ver.outputs.version }}
+
+      - name: Build wheel + fetch zip
+        shell: bash
+        run: |
+          python scripts/python/build_wheel.py \
+            --out artifacts/wheels \
+            --version "${{ steps.ver.outputs.version }}"
+
+      - name: Smoke import (optional PySide)
+        shell: bash
+        run: |
+          python -m pip install -U pip
+          python -m pip install "${{ env.PYSIDE6_PIN }}" || python -m pip install "PySide6>=6.8,<6.9"
+          shopt -s nullglob
+          wheels=(artifacts/wheels/*.whl)
+          if [ ${#wheels[@]} -eq 0 ]; then
+            echo "no wheels produced" >&2
+            exit 1
+          fi
+          python -m pip install "${wheels[@]}"
+          python -c "from md3qml.paths import bundled_prefix; p=bundled_prefix(); assert p and (p/'lib'/'qml').is_dir(), p; print('bundled', p)"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: md3qml-${{ matrix.artifact }}
+          path: |
+            artifacts/wheels/*.whl
+            artifacts/wheels/*.zip
+          if-no-files-found: error
+
+  publish-release:
+    needs: wheel
+    if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist-out
+          merge-multiple: true
+
+      - name: List artifacts
+        run: find dist-out -type f | sort
+
+      - name: Upload to GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist-out/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to GitHub Release (tag push)
+        if: github.event_name != 'release' && startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: dist-out/**
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish wheels to PyPI
+        if: github.event_name == 'release'
+        continue-on-error: true
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          if [ -z "${TWINE_PASSWORD}" ]; then
+            echo "PYPI_API_TOKEN secret not set — skip PyPI upload"
+            exit 0
+          fi
+          python -m pip install -U twine
+          twine upload dist-out/*.whl --skip-existing

@@ -19,41 +19,35 @@ Md3 cannot be “just QML source” on pip: users need `Md3.dll` / `libMd3.so` +
 | **B. Platform wheels** (`md3qml` + `_native/`) | `pip install md3qml[pyside6]` only | Best UX; build win/linux/mac wheels per PySide Qt line |
 | **C. Two packages** | `pip install md3qml md3qml-bin-windows` | Clear split; more release work |
 
-**Recommended:** ship **A** immediately; add **B** when CI can build shared Md3 against the Qt kit bundled with a pinned `PySide6==x.y.z`.
+**Recommended:** use **B** via Actions `pyside-wheels` (or local `stage_native` + `build_wheel`); keep **A** (`md3qml fetch`) for mirrors / custom builds.
 
 Do **not** vendor full Qt inside the wheel — PySide already provides it. Only ship Md3 shared libs + QML.
 
-## Fastest user install (today)
-
-```bash
-pip install "md3qml[pyside6]"
-md3qml fetch --version 1.0.0 --dest ~/.md3/prefix
-export MD3_PREFIX=$HOME/.md3/prefix   # Windows: set MD3_PREFIX=%USERPROFILE%\.md3\prefix
-md3qml run path/to/Main.qml
-```
-
-Release assets should be named:
-
-```text
-Md3-1.0.0-shared-windows-x64.zip
-Md3-1.0.0-shared-linux-x64.zip
-Md3-1.0.0-shared-macos-x64.zip
-```
-
-Zip layout: `lib/qml/Md3/…` and on Windows `bin/Md3.dll`, `bin/Md3plugin.dll` (or top-level `Md3/` with the same). Override URL with `MD3_FETCH_URL`.
-
 ## Fastest user install (platform wheel)
 
-Build shared Md3, copy into `python/md3qml/_native/`, then:
+CI workflow [`.github/workflows/pyside-wheels.yml`](../../.github/workflows/pyside-wheels.yml):
 
-```bash
-cd python
-python -m build --wheel
-# tag wheel with win_amd64 / manylinux / macosx matching the PySide pin
-twine upload dist/*
+1. Build **shared** Md3 (Qt 6.8.3, Gallery off)  
+2. `python scripts/python/stage_native_for_wheel.py` → `python/md3qml/_native/`  
+3. `python scripts/python/build_wheel.py` → `win_amd64` / manylinux (Qt libs excluded) + fetch zip  
+
+Triggers: `workflow_dispatch`, tag `v*`, GitHub Release. Artifacts upload to the Release; optional PyPI via secret `PYPI_API_TOKEN`.
+
+Local:
+
+```powershell
+cmake -S . -B build-wheel -G Ninja -DCMAKE_BUILD_TYPE=Release `
+  -DMD3_BUILD_SHARED=ON -DMD3_BUILD_GALLERY=OFF
+cmake --build build-wheel --parallel
+cmake --install build-wheel --prefix dist/Md3
+python scripts/python/stage_native_for_wheel.py --prefix dist/Md3
+python scripts/python/build_wheel.py --out artifacts/wheels --version 1.0.0
+pip install artifacts/wheels/md3qml-*.whl
+pip install "PySide6==6.8.3"   # match CI Qt line
+md3qml info
 ```
 
-Users:
+Users (after wheels are on PyPI / Release):
 
 ```bash
 pip install "md3qml[pyside6]"
@@ -62,6 +56,25 @@ md3qml run app/Main.qml
 ```
 
 No `MD3_PREFIX` needed when `_native/lib/qml` is present.
+
+## Fastest user install (pure-Python + fetch)
+
+```bash
+pip install "md3qml[pyside6]"
+md3qml fetch --version 1.0.0 --dest ~/.md3/prefix
+export MD3_PREFIX=$HOME/.md3/prefix
+md3qml run path/to/Main.qml
+```
+
+Release assets from the same CI job:
+
+```text
+Md3-1.0.0-shared-windows-x64.zip
+Md3-1.0.0-shared-linux-x64.zip
+```
+
+Override URL with `MD3_FETCH_URL`.
+
 
 ## Develop from the repo
 
@@ -88,7 +101,7 @@ raise SystemExit(run(
 `Md3plugin` must load against PySide’s Qt. Pin both sides together, e.g. document:
 
 ```text
-PySide6==6.10.2  ↔  Md3 shared built with Qt 6.10.2
+CI wheels: PySide6==6.8.3  ↔  Md3 shared built with Qt 6.8.3
 ```
 
 Mismatch → “plugin cannot be loaded”. Prefer packaging Md3 with the same kit major.minor as the PySide pin used in CI.

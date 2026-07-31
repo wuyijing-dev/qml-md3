@@ -17,6 +17,7 @@ Use before tagging a version consumers will `find_package`.
 - [ ] Package: `python scripts/packaging/cli.py` → `dist/Md3/`
 - [ ] Copy `dist/Md3` into `examples/hello-md3/Md3` **or** point `CMAKE_PREFIX_PATH` and run hello
 - [ ] Gallery smoke (optional but recommended): open Buttons / Extras / Dialogs pages
+- [ ] **PySide wheels** (optional): run Actions **pyside-wheels** (`workflow_dispatch` or tag `v*`) → attach `*.whl` + `Md3-*-shared-*.zip` to the GitHub Release; set `PYPI_API_TOKEN` to publish
 
 ## Docs
 

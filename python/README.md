@@ -2,31 +2,31 @@
 
 Thin Python host for the **shared** Md3 QML module. Qt itself comes from **PySide6**.
 
-## Fast install (recommended path once platform wheels exist)
+## Fast install (platform wheels from CI)
 
 ```bash
 pip install "md3qml[pyside6]"
-# If the wheel vendors md3qml/_native — you are done.
 md3qml info
 md3qml run path/to/Main.qml
 ```
 
-## Fast install (pure-Python wheel + fetch binaries)
+Wheels are built by `.github/workflows/pyside-wheels.yml` (shared Md3 → `_native` → `win_amd64` / manylinux).
+
+## Fast install (fetch zip)
 
 ```bash
 pip install "md3qml[pyside6]"
 md3qml fetch --version 1.0.0 --dest ~/.md3/prefix
-export MD3_PREFIX=~/.md3/prefix   # Windows: set MD3_PREFIX=%USERPROFILE%\.md3\prefix
-md3qml run examples/hello-pyside/Main.qml
+export MD3_PREFIX=~/.md3/prefix
+md3qml run path/to/Main.qml
 ```
-
-Upload release zips named `Md3-{ver}-shared-{windows-x64|linux-x64|macos-x64}.zip`
-(contents: `lib/qml`, Windows also `bin/`).
 
 ## Develop from this repo
 
 ```bash
 pip install -e "./python[pyside6]"
+python scripts/python/stage_native_for_wheel.py --prefix dist/Md3
+python scripts/python/build_wheel.py --out artifacts/wheels
 ```
 
 See [docs/topics/pyside.md](../docs/topics/pyside.md).
