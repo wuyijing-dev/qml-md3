@@ -33,6 +33,7 @@ Item {
 
     implicitWidth: 360
     implicitHeight: hasFiles && showTable ? (52 + 36 + tableBodyHeight + 24) : 180
+    height: implicitHeight
 
     readonly property bool hasFiles: droppedItems && droppedItems.length > 0
     readonly property string summaryText: {

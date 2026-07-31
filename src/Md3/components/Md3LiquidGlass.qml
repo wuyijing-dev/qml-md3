@@ -77,6 +77,7 @@ Item {
 
     implicitWidth: 280
     implicitHeight: 168
+    height: implicitHeight
     z: dragging ? 20 : 1
     clip: false
 

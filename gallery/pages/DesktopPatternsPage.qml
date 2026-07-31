@@ -255,13 +255,12 @@ Md3Page {
 
             Md3Card {
                 variant: Md3Card.Outlined
-                Item {
-                    anchors.fill: parent
-                    anchors.margins: 8
+                Md3VStack {
+                    width: parent.width
+                    spacing: 8
 
                     Md3HStack {
                         id: filesHeader
-                        anchors.top: parent.top
                         width: parent.width
                         spacing: 8
                         Md3Text {
@@ -281,8 +280,6 @@ Md3Page {
 
                     Md3HStack {
                         id: filesFilters
-                        anchors.top: filesHeader.bottom
-                        anchors.topMargin: 8
                         width: parent.width
                         spacing: 8
                         Md3TextField {
@@ -308,15 +305,12 @@ Md3Page {
 
                     Md3DataTable {
                         id: fileTable
-                        anchors.top: filesFilters.bottom
-                        anchors.topMargin: 8
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
+                        width: parent.width
+                        // Prefer leftover card height; minimum body when card is auto-sized.
+                        height: Math.max(280, page.height - 280)
                         selectionEnabled: true
                         pagination: true
                         pageSize: page.serverPageSize
-                        // body fills leftover height via Md3DataTable._resolvedBodyHeight (avoid height↔bodyHeight loop on Qt 6.8)
                         bodyHeight: 240
                         showFilterBar: true
                         showColumnFilterIcons: true

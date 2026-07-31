@@ -30,6 +30,7 @@ Item {
 
     implicitWidth: 360
     implicitHeight: scrollable ? Math.min(maxHeight, chrome.implicitHeight)
+    height: implicitHeight
                                : chrome.implicitHeight
 
     function _escapeHtml(s) {

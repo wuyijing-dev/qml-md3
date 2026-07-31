@@ -13,6 +13,7 @@ Item {
 
     implicitWidth: 48
     implicitHeight: 48
+    height: implicitHeight
 
     Md3Shadow {
         anchors.fill: parent

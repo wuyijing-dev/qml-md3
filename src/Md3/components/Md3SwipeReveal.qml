@@ -23,6 +23,7 @@ Item {
     clip: true
     implicitWidth: 320
     implicitHeight: Math.max(56, panel.childrenRect.height)
+    height: implicitHeight
 
     Accessible.role: Accessible.ListItem
     Accessible.name: qsTr("Swipe reveal")

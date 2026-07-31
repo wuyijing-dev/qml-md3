@@ -23,6 +23,7 @@ Item {
 
     implicitWidth: 360
     implicitHeight: hasPages ? (48 + pageAreaHeight) : 48
+    height: implicitHeight
     // Do not bind height to parent.height — that fights ColumnLayout and overlaps siblings.
     width: parent && parent.width > 0 ? parent.width : implicitWidth
 

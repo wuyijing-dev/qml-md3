@@ -19,6 +19,7 @@ Item {
 
     implicitWidth: 280
     implicitHeight: col.implicitHeight
+    height: implicitHeight
 
     Accessible.role: Accessible.ComboBox
     Accessible.name: qsTr("Color picker")

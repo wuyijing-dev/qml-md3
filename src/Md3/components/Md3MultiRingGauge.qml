@@ -22,6 +22,7 @@ Item {
     height: size
     implicitWidth: size
     implicitHeight: size
+    height: implicitHeight
 
     readonly property int _ringCount: rings && rings.length ? rings.length : 0
     readonly property real _dialR: Math.min(width, height) / 2

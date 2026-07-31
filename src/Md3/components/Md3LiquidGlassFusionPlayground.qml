@@ -21,6 +21,7 @@ Item {
 
     implicitWidth: 720
     implicitHeight: 420
+    height: implicitHeight
     clip: true
 
     Accessible.role: Accessible.Pane

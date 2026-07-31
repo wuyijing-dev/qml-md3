@@ -28,6 +28,7 @@ Item {
 
     implicitWidth: 120
     implicitHeight: 36
+    height: implicitHeight
 
     Canvas {
         id: canvas

@@ -27,6 +27,7 @@ Item {
 
     implicitWidth: pixelSize
     implicitHeight: pixelSize
+    height: implicitHeight
     width: pixelSize
     height: pixelSize
 

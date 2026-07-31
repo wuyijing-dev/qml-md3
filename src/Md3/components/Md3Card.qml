@@ -105,7 +105,16 @@ Item {
     }
 
             Md3VStack {
+                id: cardStack
                 width: parent.width
+                // Explicit height when card is sized (SplitView / anchors); else intrinsic.
+                // Required so bodySlot.expand can consume leftover on Qt 6.8.
+                height: {
+                    const h = parent.height
+                    if (h > 1 && Math.abs(h - implicitHeight) > 1.5)
+                        return h
+                    return implicitHeight
+                }
                 spacing: 8
                 fillWidth: true
 
@@ -189,10 +198,21 @@ Item {
                         }
                         return false
                     }
+                    /// VStack expand: fill leftover when card is explicitly sized.
+                    property bool expand: hasFillChild
 
                     // Width is always parent-driven; never bind implicitWidth to width/childrenRect.
                     implicitWidth: 1
                     implicitHeight: hasFillChild ? fillFallback : contentHeight
+                    // Qt 6.8 Column ignores implicitHeight — without this, fill children get height 0
+                    // and top+bottom anchors collapse on top of each other.
+                    Binding {
+                        target: bodySlot
+                        property: "height"
+                        value: bodySlot.implicitHeight
+                        when: !bodySlot.hasFillChild
+                        restoreMode: Binding.RestoreNone
+                    }
 
                     function _syncFromChildrenRect() {
                         if (_measureGuard || hasFillChild)

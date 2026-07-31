@@ -80,6 +80,7 @@ Item {
 
     implicitWidth: 280
     implicitHeight: 160
+    height: implicitHeight
 
     readonly property real plotLeft: contentPadding + labelWidth
     readonly property real plotRight: width - contentPadding
