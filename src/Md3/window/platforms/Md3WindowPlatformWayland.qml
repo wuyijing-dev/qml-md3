@@ -1,9 +1,8 @@
 import QtQuick
 
 QtObject {
-    // Generic Linux fallback when QPA is neither wayland nor xcb/x11.
-    // Prefer Md3WindowPlatformWayland / Md3WindowPlatformX11 via Md3WindowCapabilities.
-    readonly property string id: "linux"
+    // Wayland — CSD + FreeDesktop; raise/focus often needs xdg-activation token.
+    readonly property string id: "wayland"
     readonly property bool customChrome: true
     readonly property bool captionButtons: true
     readonly property real trafficLightsInset: 0
@@ -13,20 +12,20 @@ QtObject {
     readonly property real windowCornerRadius: 12
     readonly property bool roundedCorners: true
     readonly property bool snapLayouts: false
-    readonly property bool systemBackdrop: true // alpha + compositor blur hints
+    readonly property bool systemBackdrop: true // KF6 blur protocol when available
     readonly property bool systemMenu: true
     readonly property bool immersiveDarkMode: true
     readonly property bool captionHitTest: true // QML CSD
-    readonly property bool taskbarProgress: true // Unity LauncherEntry (Plasma etc.)
+    readonly property bool taskbarProgress: true // Unity LauncherEntry / Plasma
     readonly property bool taskbarOverlay: false
     readonly property bool peekControl: false
     readonly property bool excludeFromCapture: false
     readonly property bool jumpList: false
     readonly property bool thumbBar: false
     readonly property bool iconicThumbnail: false
-    readonly property bool systemTray: true // StatusNotifier / tray portal
-    readonly property bool perMonitorDpiV2: true
-    readonly property bool alwaysOnTop: true
+    readonly property bool systemTray: true // StatusNotifier / portal
+    readonly property bool perMonitorDpiV2: true // Wayland fractional scale
+    readonly property bool alwaysOnTop: true // compositor may ignore
     readonly property bool thumbnailClip: false
     readonly property bool applicationRestart: false
     readonly property bool preferredAppMode: true

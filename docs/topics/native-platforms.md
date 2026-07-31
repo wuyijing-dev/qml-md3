@@ -1,25 +1,40 @@
-# Native window platforms (Windows / Wayland / X11)
+# Native window platforms (Windows / Wayland / X11 / Android)
 
-Honest availability for `Md3WindowHelper` / `Md3WindowCapabilities`. “Yes” means the helper implements a real path; compositor policy may still ignore (especially Wayland focus).
+Honest availability for `Md3WindowHelper` / `Md3WindowCapabilities`. “Yes” means the helper implements a real path; compositor / OEM policy may still ignore (especially Wayland focus and Android launchers).
 
-| Capability | Windows | Wayland | X11 |
-|------------|---------|---------|-----|
-| Custom CSD / caption buttons | Yes | Yes (CSD) | Yes (CSD) |
-| System move / resize | Yes | Yes (Qt) | Yes |
-| Win11 Snap Layouts | Yes (delayed HTMAXBUTTON ~380ms) | — | — |
-| HTCAPTION drag region | Yes | QML drag | QML drag |
-| Immersive / color scheme | DWM dark | Qt styleHints | Qt styleHints |
-| System backdrop (Mica/Acrylic) | API only — unsuitable under Qt Quick | Blur hint (KF6) | Blur / atom (KF6) |
-| Taskbar / dock progress | ITaskbarList3 | Unity LauncherEntry | LauncherEntry |
-| Numeric dock badge | `setBadgeNumber` + overlay icon | LauncherEntry count | LauncherEntry count |
-| Taskbar overlay glyph | Yes | No (use badge) | No |
-| Jump list / thumb bar / iconic | Yes | — | — |
-| System tray | Yes | StatusNotifier / portal | Yes |
-| Idle inhibit | `SetThreadExecutionState` | ScreenSaver / GNOME / portal | Same |
-| Raise / activate | Yes | Token / KF6; often needs gesture | forceActiveWindow |
-| Always on top | Yes | Compositor-dependent | KeepAbove (KF) |
-| Exclude from capture | `WDA_EXCLUDEFROMCAPTURE` | — | — |
-| App id | AppUserModelID | `desktopFileName` → xdg `app_id` | Same |
+## Auto detection (QML)
+
+`Md3WindowCapabilities` probes QPA at runtime (`Md3WindowHelper.wayland` / `xcb`):
+
+| Property | Meaning |
+|----------|---------|
+| `isAndroid` | `Qt.platform.os === "android"` → Android capability bag + JNI hooks |
+| `isLinux` | Desktop Linux OS |
+| `isWayland` / `isX11` | Linux display server (`platformName` contains wayland / xcb\|x11) |
+| `displayServer` | `"wayland"` \| `"x11"` \| `"android"` \| … |
+| `platformId` | Active bag id: `"wayland"` / `"x11"` / `"android"` / … (generic `"linux"` only if neither QPA matches) |
+| `platform` | Selected bag (`wayland` / `x11` / `android` / …) |
+
+C++: `Md3WindowHelper::displayServer()` mirrors the same probe; `platformId()` stays OS-level (`"linux"` / `"android"` / …) so callers that branch on OS keep working. Prefer Capabilities `platformId` / `displayServer` for UI honesty.
+
+| Capability | Windows | Wayland | X11 | Android |
+|------------|---------|---------|-----|---------|
+| Custom CSD / caption buttons | Yes | Yes (CSD) | Yes (CSD) | No (system chrome) |
+| System move / resize | Yes | Yes (Qt) | Yes | — |
+| Win11 Snap Layouts | Yes (delayed HTMAXBUTTON ~380ms) | — | — | — |
+| HTCAPTION drag region | Yes | QML drag | QML drag | — |
+| Immersive / color scheme | DWM dark | Qt styleHints | Qt styleHints | — |
+| System backdrop (Mica/Acrylic) | API only — unsuitable under Qt Quick | Blur hint (KF6) | Blur / atom (KF6) | — |
+| Taskbar / dock progress | ITaskbarList3 | Unity LauncherEntry | LauncherEntry | — |
+| Numeric dock badge | `setBadgeNumber` + overlay icon | LauncherEntry count | LauncherEntry count | `setBadgeNumber` |
+| Taskbar overlay glyph | Yes | No (use badge) | No | — |
+| Jump list / thumb bar / iconic | Yes | — | — | — |
+| System tray | Yes | StatusNotifier / portal | Yes | — |
+| Idle inhibit | `SetThreadExecutionState` | ScreenSaver / GNOME / portal | Same | `FLAG_KEEP_SCREEN_ON` |
+| Raise / activate | Yes | Token / KF6; often needs gesture | forceActiveWindow | Qt raise (Activity rules) |
+| Always on top | Yes | Compositor-dependent | KeepAbove (KF) | Qt flag (OEM-dependent) |
+| Exclude from capture | `WDA_EXCLUDEFROMCAPTURE` | — | — | `FLAG_SECURE` |
+| App id | AppUserModelID | `desktopFileName` → xdg `app_id` | Same | — |
 
 ## Snap Layouts (Windows)
 
@@ -29,6 +44,10 @@ Short hover keeps QML hand cursor and click-to-maximize. After ~380ms hover on t
 
 Set `QGuiApplication::desktopFileName` (or `Md3::RunOptions::desktopFileName` / `setAppUserModelId` on Linux). If the process was started with `XDG_ACTIVATION_TOKEN`, `raiseWindow` consumes it. Without a token, expect `lastNativeStatus` to explain that focus was ignored.
 
+## Android
+
+See [android.md](android.md). CMake sets `MD3_IS_ANDROID` so the kit does not pull Linux DBus sources. `platformId()` prefers Android over Linux when both macros are defined.
+
 ## Gallery
 
-`gallery/pages/WindowPage.qml` — Windows / Linux / macOS tabs exercise the APIs above.
+`gallery/pages/WindowPage.qml` — Windows / Linux (Wayland·X11 auto) / macOS / Android capability notes exercise the APIs above.

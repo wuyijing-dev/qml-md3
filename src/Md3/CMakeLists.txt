@@ -258,6 +258,9 @@ qt_add_qml_module(Md3
         window/platforms/Md3WindowPlatformWindows.qml
         window/platforms/Md3WindowPlatformMacOS.qml
         window/platforms/Md3WindowPlatformLinux.qml
+        window/platforms/Md3WindowPlatformWayland.qml
+        window/platforms/Md3WindowPlatformX11.qml
+        window/platforms/Md3WindowPlatformAndroid.qml
         window/platforms/Md3WindowPlatformMobile.qml
         window/Md3CaptionButtons.qml
         window/Md3TitleBarButton.qml
@@ -463,12 +466,17 @@ target_include_directories(Md3
 )
 
 set(MD3_PLATFORM_SOURCES)
-# Emscripten reports as UNIX — detect WASM first and use mobile stubs (no DBus/Widgets).
+# Emscripten / Android report as UNIX — peel them off before Linux DBus/Widgets.
 if (MD3_IS_WASM)
     list(APPEND MD3_PLATFORM_SOURCES
         window/platforms/mobile/md3mobilenative.cpp
     )
     target_compile_definitions(Md3 PUBLIC MD3_PLATFORM_WASM=1)
+elseif (MD3_IS_ANDROID)
+    list(APPEND MD3_PLATFORM_SOURCES
+        window/platforms/android/md3androidnative.cpp
+    )
+    target_compile_definitions(Md3 PUBLIC MD3_PLATFORM_ANDROID=1)
 elseif (WIN32)
     list(APPEND MD3_PLATFORM_SOURCES
         window/platforms/windows/md3win_p.h

@@ -18,11 +18,19 @@ import Md3
 | `isWindows` | `bool` | `os === "windows"` | readonly | `Md3WindowCapabilities` | — |
 | `isMacOS` | `bool` | `os === "osx" \|\| os === "macos"` | readonly | `Md3WindowCapabilities` | — |
 | `isLinux` | `bool` | `os === "linux"` | readonly | `Md3WindowCapabilities` | — |
+| `isAndroid` | `bool` | `os === "android"` | readonly | `Md3WindowCapabilities` | — |
+| `isWasm` | `bool` | `os === "wasm" \|\| …` | readonly | `Md3WindowCapabilities` | — |
 | `isMobile` | `bool` | `os === "android" \|\| os === "ios"` | readonly | `Md3WindowCapabilities` | — |
-| `isDesktop` | `bool` | `!isMobile` | readonly | `Md3WindowCapabilities` | — |
+| `isDesktop` | `bool` | `!isMobile && !isWasm` | readonly | `Md3WindowCapabilities` | — |
+| `isWayland` | `bool` | Linux + QPA wayland | readonly | `Md3WindowCapabilities` | Auto |
+| `isX11` | `bool` | Linux + QPA xcb/x11 | readonly | `Md3WindowCapabilities` | Auto |
+| `displayServer` | `string` | `"wayland"` / `"x11"` / … | readonly | `Md3WindowCapabilities` | Auto |
 | `windows` | `Md3WindowPlatformWindows` | `{…}` | read/write | `Md3WindowCapabilities` | — |
 | `macOS` | `Md3WindowPlatformMacOS` | `{…}` | read/write | `Md3WindowCapabilities` | — |
-| `linux` | `Md3WindowPlatformLinux` | `{…}` | read/write | `Md3WindowCapabilities` | — |
+| `linux` | `Md3WindowPlatformLinux` | `{…}` | read/write | `Md3WindowCapabilities` | Fallback bag |
+| `wayland` | `Md3WindowPlatformWayland` | `{…}` | read/write | `Md3WindowCapabilities` | — |
+| `x11` | `Md3WindowPlatformX11` | `{…}` | read/write | `Md3WindowCapabilities` | — |
+| `android` | `Md3WindowPlatformAndroid` | `{…}` | read/write | `Md3WindowCapabilities` | — |
 | `mobile` | `Md3WindowPlatformMobile` | `{…}` | read/write | `Md3WindowCapabilities` | — |
 | `platform` | `var` | `{…}` | readonly | `Md3WindowCapabilities` | — |
 | `platformId` | `string` | `platform.id` | readonly | `Md3WindowCapabilities` | — |

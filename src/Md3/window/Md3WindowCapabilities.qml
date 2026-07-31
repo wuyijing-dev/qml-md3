@@ -5,19 +5,52 @@ import Md3
 QtObject {
     id: root
 
+    /// Runtime QPA probe (wayland / xcb) for Linux display-server selection.
+    readonly property Md3WindowHelper _native: Md3WindowHelper {}
+
     readonly property string os: Qt.platform.os
     readonly property bool isWindows: os === "windows"
     readonly property bool isMacOS: os === "osx" || os === "macos"
     readonly property bool isLinux: os === "linux"
+    readonly property bool isAndroid: os === "android"
     readonly property bool isWasm: os === "wasm" || os === "emscripten"
     readonly property bool isMobile: os === "android" || os === "ios"
     /// Browser / WASM uses the mobile capability bag (system chrome, no CSD/tray).
     readonly property bool isDesktop: !isMobile && !isWasm
 
+    /// Auto-detected on Linux via QGuiApplication::platformName().
+    readonly property bool isWayland: isLinux && _native.wayland
+    readonly property bool isX11: isLinux && _native.xcb
+
+    /// "wayland" | "x11" | "android" | "windows" | "macos" | "wasm" | "ios" | "linux" | "unknown"
+    readonly property string displayServer: {
+        if (isAndroid)
+            return "android"
+        if (isWindows)
+            return "windows"
+        if (isMacOS)
+            return "macos"
+        if (isWasm)
+            return "wasm"
+        if (os === "ios")
+            return "ios"
+        if (isLinux) {
+            if (_native.wayland)
+                return "wayland"
+            if (_native.xcb)
+                return "x11"
+            return "linux"
+        }
+        return "unknown"
+    }
+
     // Per-platform bags as properties (QtObject has no default property for children)
     property Md3WindowPlatformWindows windows: Md3WindowPlatformWindows {}
     property Md3WindowPlatformMacOS macOS: Md3WindowPlatformMacOS {}
     property Md3WindowPlatformLinux linux: Md3WindowPlatformLinux {}
+    property Md3WindowPlatformWayland wayland: Md3WindowPlatformWayland {}
+    property Md3WindowPlatformX11 x11: Md3WindowPlatformX11 {}
+    property Md3WindowPlatformAndroid android: Md3WindowPlatformAndroid {}
     property Md3WindowPlatformMobile mobile: Md3WindowPlatformMobile {}
 
     readonly property var platform: {
@@ -25,9 +58,16 @@ QtObject {
             return windows
         if (isMacOS)
             return macOS
-        if (isLinux)
+        if (isAndroid)
+            return android
+        if (isLinux) {
+            if (_native.wayland)
+                return wayland
+            if (_native.xcb)
+                return x11
             return linux
-        // wasm / android / ios / unknown → mobile stubs
+        }
+        // wasm / ios / unknown → mobile stubs
         return mobile
     }
 

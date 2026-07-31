@@ -75,7 +75,10 @@ Flickable {
             wrapMode: Text.WordWrap
             text: qsTr("下方为通用设置；按系统切换标签页查看原生能力。当前运行：%1%2。")
                   .arg(Md3WindowCapabilities.platformId)
-                  .arg(nativeHelper.wayland ? " · Wayland" : (nativeHelper.xcb ? " · X11" : ""))
+                  .arg(Md3WindowCapabilities.isLinux
+                       ? (Md3WindowCapabilities.isWayland ? " · Wayland"
+                          : (Md3WindowCapabilities.isX11 ? " · X11" : ""))
+                       : (Md3WindowCapabilities.isAndroid ? " · Android" : ""))
             role: Md3Text.BodyMedium
             tone: Md3Text.OnSurfaceVariant
         }
@@ -416,11 +419,15 @@ Flickable {
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
+                                   || Md3WindowCapabilities.isAndroid
+                                   || Md3WindowCapabilities.isLinux
                         text: qsTr("数字角标 3")
                         onClicked: if (root.appWin) root.appWin.setDockBadge(3)
                     }
                     Md3Button {
                         enabled: Md3WindowCapabilities.isWindows
+                                   || Md3WindowCapabilities.isAndroid
+                                   || Md3WindowCapabilities.isLinux
                         text: qsTr("清除数字角标")
                         variant: Md3Button.Text
                         onClicked: if (root.appWin) root.appWin.setDockBadge(0)
@@ -436,18 +443,18 @@ Flickable {
                     width: parent.width
                     spacing: 8
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows && Md3WindowCapabilities.idleInhibit
+                        enabled: Md3WindowCapabilities.idleInhibit
                         text: qsTr("防止休眠")
                         onClicked: {
                             if (!root.appWin)
                                 return
                             const ok = root.appWin.setIdleInhibit(true, qsTr("Md3 演示"))
-                            shellEventLabel.text = ok ? qsTr("外壳事件：已抑制空闲（系统+显示器）")
+                            shellEventLabel.text = ok ? qsTr("外壳事件：已抑制空闲")
                                                      : qsTr("外壳事件：空闲抑制失败")
                         }
                     }
                     Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows && Md3WindowCapabilities.idleInhibit
+                        enabled: Md3WindowCapabilities.idleInhibit
                         text: qsTr("恢复空闲")
                         variant: Md3Button.Outlined
                         onClicked: {
@@ -457,6 +464,15 @@ Flickable {
                             shellEventLabel.text = qsTr("外壳事件：已恢复空闲计时")
                         }
                     }
+                }
+
+                Md3Text {
+                    visible: Md3WindowCapabilities.isAndroid
+                    text: qsTr("Android：系统标题栏；息屏抑制=FLAG_KEEP_SCREEN_ON；防截屏=FLAG_SECURE；角标=setBadgeNumber。")
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.OnSurfaceVariant
+                    wrapMode: Text.WordWrap
+                    width: parent.width
                 }
 
                 Md3Text {
@@ -578,7 +594,9 @@ Flickable {
 
                 Md3Text {
                     wrapMode: Text.WordWrap
-                    text: qsTr("Wayland 下「真模糊」需要合成器协议（Plasma + KF6WindowSystem + 开启 Blur 特效）。否则只会半透明。置顶/抢焦点也常被 Wayland 禁止——点按钮后看下方状态与桌面通知。")
+                    text: Md3WindowCapabilities.isX11
+                          ? qsTr("X11 下可用 KX11Extras KeepAbove / forceActiveWindow（装 KF 时）；模糊走 KWin atom。合成器策略仍可能覆盖置顶。")
+                          : qsTr("Wayland 下「真模糊」需要合成器协议（Plasma + KF6WindowSystem + 开启 Blur 特效）。否则只会半透明。置顶/抢焦点也常被 Wayland 禁止——点按钮后看下方状态与桌面通知。")
                     role: Md3Text.BodyMedium
                     tone: Md3Text.OnSurfaceVariant
                 }
@@ -587,8 +605,10 @@ Flickable {
                     width: parent.width
                     visible: root.appWin && Md3WindowCapabilities.isLinux
                     wrapMode: Text.WordWrap
-                    text: qsTr("已绑定 — Wayland=%1 模糊协议=%2 强调色=%3")
-                          .arg(nativeHelper.wayland ? qsTr("是") : qsTr("否"))
+                    text: qsTr("已绑定 — 显示服务器=%1 Wayland=%2 X11=%3 模糊协议=%4 强调色=%5")
+                          .arg(Md3WindowCapabilities.displayServer)
+                          .arg(Md3WindowCapabilities.isWayland ? qsTr("是") : qsTr("否"))
+                          .arg(Md3WindowCapabilities.isX11 ? qsTr("是") : qsTr("否"))
                           .arg((root.appWin.windowNative
                                 ? root.appWin.windowNative.blurBehindAvailable()
                                 : nativeHelper.blurBehindAvailable()) ? qsTr("可用") : qsTr("不可用"))

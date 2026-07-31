@@ -1,12 +1,55 @@
 #include "md3windowhelper.h"
 
+#include <QtGlobal>
 #include <QGuiApplication>
 #include <QIcon>
 #include <QScreen>
 #include <QStyleHints>
 #include <QWindow>
 
-// iOS / WASM / other — compiled when not Win/Apple/Unix desktop/Android.
+#if defined(Q_OS_ANDROID)
+#  include <QJniObject>
+#  include <QNativeInterface>
+#endif
+
+// Android — system chrome; keep-screen-on, FLAG_SECURE, launcher badge.
+
+namespace {
+
+#if defined(Q_OS_ANDROID)
+constexpr jint kFlagKeepScreenOn = 0x00000080; // WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+constexpr jint kFlagSecure = 0x00002000;       // WindowManager.LayoutParams.FLAG_SECURE
+
+bool applyWindowFlag(jint flag, bool enable, QString *error)
+{
+    const QJniObject activity = QNativeInterface::QAndroidApplication::context();
+    if (!activity.isValid()) {
+        if (error)
+            *error = QStringLiteral("无有效 Android Context/Activity");
+        return false;
+    }
+    const QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+    if (!window.isValid()) {
+        if (error)
+            *error = QStringLiteral("Context.getWindow() 失败（需 Activity）");
+        return false;
+    }
+    if (enable)
+        window.callMethod<void>("addFlags", "(I)V", flag);
+    else
+        window.callMethod<void>("clearFlags", "(I)V", flag);
+    return true;
+}
+
+template<typename Fn>
+void runOnUiThread(Fn &&fn)
+{
+    auto future = QNativeInterface::QAndroidApplication::runOnAndroidMainThread(std::forward<Fn>(fn));
+    future.waitForFinished();
+}
+#endif
+
+} // namespace
 
 void Md3WindowHelper::shutdownNative() {}
 
@@ -27,7 +70,25 @@ void Md3WindowHelper::setBorderColor(QObject *, const QString &) {}
 void Md3WindowHelper::setCaptionTextColor(QObject *, const QString &) {}
 void Md3WindowHelper::setExcludedFromPeek(QObject *, bool) {}
 void Md3WindowHelper::setDisallowPeek(QObject *, bool) {}
-void Md3WindowHelper::setExcludeFromCapture(QObject *, bool) {}
+
+void Md3WindowHelper::setExcludeFromCapture(QObject *, bool exclude)
+{
+#if defined(Q_OS_ANDROID)
+    QString err;
+    bool ok = false;
+    runOnUiThread([&]() {
+        ok = applyWindowFlag(kFlagSecure, exclude, &err);
+    });
+    if (ok) {
+        reportNativeStatus(exclude ? QStringLiteral("已启用 FLAG_SECURE（防截屏/录屏）")
+                                   : QStringLiteral("已清除 FLAG_SECURE"));
+    } else {
+        reportNativeStatus(err.isEmpty() ? QStringLiteral("FLAG_SECURE 失败") : err);
+    }
+#else
+    Q_UNUSED(exclude);
+#endif
+}
 
 void Md3WindowHelper::setAlwaysOnTop(QObject *window, bool onTop)
 {
@@ -105,7 +166,43 @@ bool Md3WindowHelper::showSystemTrayIcon(QObject *, const QUrl &, const QString 
 void Md3WindowHelper::hideSystemTrayIcon() {}
 bool Md3WindowHelper::showTrayNotification(const QString &, const QString &, int) { return false; }
 
-bool Md3WindowHelper::setDockBadge(int) { return false; }
-bool Md3WindowHelper::setIdleInhibit(bool, const QString &) { return false; }
+bool Md3WindowHelper::setDockBadge(int count)
+{
+    count = qMax(0, count);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    if (auto *app = qGuiApp) {
+        app->setBadgeNumber(count);
+        reportNativeStatus(count > 0
+                                   ? QStringLiteral("已设置启动器角标（setBadgeNumber）")
+                                   : QStringLiteral("已清除启动器角标"));
+        return true;
+    }
+#endif
+    reportNativeStatus(QStringLiteral("当前 Qt 无 setBadgeNumber，角标不可用"));
+    return false;
+}
+
+bool Md3WindowHelper::setIdleInhibit(bool inhibit, const QString &reason)
+{
+    Q_UNUSED(reason);
+#if defined(Q_OS_ANDROID)
+    QString err;
+    bool ok = false;
+    runOnUiThread([&]() {
+        ok = applyWindowFlag(kFlagKeepScreenOn, inhibit, &err);
+    });
+    if (ok) {
+        reportNativeStatus(inhibit ? QStringLiteral("已保持屏幕常亮（FLAG_KEEP_SCREEN_ON）")
+                                   : QStringLiteral("已恢复系统息屏策略"));
+        return true;
+    }
+    reportNativeStatus(err.isEmpty() ? QStringLiteral("息屏抑制失败") : err);
+    return false;
+#else
+    Q_UNUSED(inhibit);
+    return false;
+#endif
+}
+
 bool Md3WindowHelper::blurBehindAvailable() const { return false; }
 bool Md3WindowHelper::openBlurSettings() { return false; }

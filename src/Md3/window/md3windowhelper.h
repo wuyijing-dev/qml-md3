@@ -20,6 +20,8 @@ class Md3WindowHelper : public QObject
     Q_PROPERTY(QString platformId READ platformId CONSTANT)
     Q_PROPERTY(bool wayland READ wayland CONSTANT)
     Q_PROPERTY(bool xcb READ xcb CONSTANT)
+    /// Auto-detected display server: "wayland" | "x11" | else same as platformId.
+    Q_PROPERTY(QString displayServer READ displayServer CONSTANT)
     Q_PROPERTY(qreal trafficLightsInset READ trafficLightsInset CONSTANT)
     Q_PROPERTY(bool customChromeRecommended READ customChromeRecommended CONSTANT)
     Q_PROPERTY(bool captionButtonsRecommended READ captionButtonsRecommended CONSTANT)
@@ -81,6 +83,7 @@ public:
     QString platformId() const;
     bool wayland() const;
     bool xcb() const;
+    QString displayServer() const;
     qreal trafficLightsInset() const;
     bool customChromeRecommended() const;
     bool captionButtonsRecommended() const;

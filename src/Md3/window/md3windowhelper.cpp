@@ -1,6 +1,6 @@
 #include "md3windowhelper.h"
 
-#if defined(Q_OS_LINUX)
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
 #  include "md3linux_p.h"
 #endif
 
@@ -25,16 +25,16 @@ QString Md3WindowHelper::platformId() const
 {
 #if defined(Q_OS_WASM) || defined(MD3_PLATFORM_WASM)
     return QStringLiteral("wasm");
+#elif defined(Q_OS_ANDROID) || defined(MD3_PLATFORM_ANDROID)
+    return QStringLiteral("android");
+#elif defined(Q_OS_IOS)
+    return QStringLiteral("ios");
 #elif defined(Q_OS_WIN)
     return QStringLiteral("windows");
 #elif defined(Q_OS_MACOS)
     return QStringLiteral("macos");
 #elif defined(Q_OS_LINUX)
     return QStringLiteral("linux");
-#elif defined(Q_OS_ANDROID)
-    return QStringLiteral("android");
-#elif defined(Q_OS_IOS)
-    return QStringLiteral("ios");
 #else
     return QStringLiteral("unknown");
 #endif
@@ -51,6 +51,17 @@ bool Md3WindowHelper::xcb() const
     const QString platform = QGuiApplication::platformName();
     return platform.contains(QLatin1String("xcb"), Qt::CaseInsensitive)
            || platform.contains(QLatin1String("x11"), Qt::CaseInsensitive);
+}
+
+QString Md3WindowHelper::displayServer() const
+{
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+    if (wayland())
+        return QStringLiteral("wayland");
+    if (xcb())
+        return QStringLiteral("x11");
+#endif
+    return platformId();
 }
 
 qreal Md3WindowHelper::trafficLightsInset() const
@@ -133,7 +144,7 @@ MD3_WIN_OR_LINUX_CAP(systemTraySupported)
 
 bool Md3WindowHelper::systemBackdropSupported() const
 {
-#if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
     return true;
 #else
     return false;
@@ -142,7 +153,7 @@ bool Md3WindowHelper::systemBackdropSupported() const
 
 bool Md3WindowHelper::immersiveDarkModeSupported() const
 {
-#if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
     return true;
 #else
     return false;
@@ -151,16 +162,17 @@ bool Md3WindowHelper::immersiveDarkModeSupported() const
 
 bool Md3WindowHelper::alwaysOnTopSupported() const
 {
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+#if defined(Q_OS_IOS)
     return false;
 #else
+    // Android: Qt::WindowStaysOnTopHint (OEM may still ignore).
     return true;
 #endif
 }
 
 bool Md3WindowHelper::preferredAppModeSupported() const
 {
-#if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
     return true;
 #else
     return false;
@@ -169,7 +181,7 @@ bool Md3WindowHelper::preferredAppModeSupported() const
 
 bool Md3WindowHelper::systemAccentSupported() const
 {
-#if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
     return true;
 #else
     return false;
@@ -208,7 +220,7 @@ void Md3WindowHelper::raiseWindow(QObject *window)
     auto *qw = qobject_cast<QWindow *>(window);
     if (!qw)
         return;
-#if defined(Q_OS_LINUX)
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     reportNativeStatus(Md3Linux::forceRaise(qw));
 #else
     if (qw->windowStates() & Qt::WindowMinimized)

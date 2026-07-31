@@ -24,9 +24,10 @@ Native window chrome / taskbar / tray / DPI helpers used by `Md3ApplicationWindo
 
 | Name | Type | Access | Description |
 |------|------|--------|-------------|
-| `platformId` | `string` | readonly | Platform id string |
+| `platformId` | `string` | readonly | OS-level id (`linux` / `android` / …); use `displayServer` for Wayland vs X11 |
 | `wayland` | `bool` | readonly | Running on Wayland |
-| `xcb` | `bool` | readonly | Running on X11 |
+| `xcb` | `bool` | readonly | Running on X11 (xcb) |
+| `displayServer` | `string` | readonly | `"wayland"` / `"x11"` on Linux; otherwise same as `platformId` |
 | `trafficLightsInset` | `real` | readonly | macOS traffic-lights inset |
 | `customChromeRecommended` | `bool` | readonly | Prefer custom title bar |
 | `captionButtonsRecommended` | `bool` | readonly | Prefer in-client caption buttons |

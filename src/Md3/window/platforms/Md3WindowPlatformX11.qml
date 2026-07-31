@@ -1,9 +1,8 @@
 import QtQuick
 
 QtObject {
-    // Generic Linux fallback when QPA is neither wayland nor xcb/x11.
-    // Prefer Md3WindowPlatformWayland / Md3WindowPlatformX11 via Md3WindowCapabilities.
-    readonly property string id: "linux"
+    // X11 (xcb) — CSD + FreeDesktop; KeepAbove / forceActiveWindow via KF when available.
+    readonly property string id: "x11"
     readonly property bool customChrome: true
     readonly property bool captionButtons: true
     readonly property real trafficLightsInset: 0
@@ -13,20 +12,20 @@ QtObject {
     readonly property real windowCornerRadius: 12
     readonly property bool roundedCorners: true
     readonly property bool snapLayouts: false
-    readonly property bool systemBackdrop: true // alpha + compositor blur hints
+    readonly property bool systemBackdrop: true // KWin blur atom / KF when available
     readonly property bool systemMenu: true
     readonly property bool immersiveDarkMode: true
     readonly property bool captionHitTest: true // QML CSD
-    readonly property bool taskbarProgress: true // Unity LauncherEntry (Plasma etc.)
+    readonly property bool taskbarProgress: true // Unity LauncherEntry / Plasma
     readonly property bool taskbarOverlay: false
     readonly property bool peekControl: false
     readonly property bool excludeFromCapture: false
     readonly property bool jumpList: false
     readonly property bool thumbBar: false
     readonly property bool iconicThumbnail: false
-    readonly property bool systemTray: true // StatusNotifier / tray portal
-    readonly property bool perMonitorDpiV2: true
-    readonly property bool alwaysOnTop: true
+    readonly property bool systemTray: true // StatusNotifier / XEmbed tray
+    readonly property bool perMonitorDpiV2: true // XRandR / Qt screen DPI
+    readonly property bool alwaysOnTop: true // KX11Extras KeepAbove when available
     readonly property bool thumbnailClip: false
     readonly property bool applicationRestart: false
     readonly property bool preferredAppMode: true

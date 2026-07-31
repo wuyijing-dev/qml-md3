@@ -72,6 +72,7 @@ nav:
     - Qt 版本矩阵: topics/qt-version-matrix.md
     - WebAssembly: topics/wasm.md
     - 原生窗口平台: topics/native-platforms.md
+    - Android: topics/android.md
     - PySide: topics/pyside.md
     - Rust: topics/rust.md
     - 实验性 API: topics/experimental.md
