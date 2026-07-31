@@ -17,16 +17,36 @@
 #include <QUrl>
 #include <QWindow>
 
+#include <cstdio>
+
 #if defined(Q_OS_WIN)
+#  ifndef NOMINMAX
+#    define NOMINMAX
+#  endif
+#  include <windows.h>
 #  include <shellapi.h>
 #  include <shlobj.h>
-#  include <windows.h>
 #endif
 
 #if defined(Q_OS_ANDROID)
 #  include <QJniObject>
 #  include <QNativeInterface>
 #endif
+
+namespace {
+
+void md3SystemBeep()
+{
+#if defined(Q_OS_WIN)
+    MessageBeep(MB_OK);
+#else
+    // Qt Widgets' QApplication::beep() is unavailable in this Gui/Quick module.
+    fputc('\a', stderr);
+    fflush(stderr);
+#endif
+}
+
+} // namespace
 
 Md3WindowHelper::Md3WindowHelper(QObject *parent)
     : QObject(parent)
@@ -343,7 +363,7 @@ bool Md3WindowHelper::revealInFolder(const QUrl &pathOrUrl)
 
 void Md3WindowHelper::beep()
 {
-    QGuiApplication::beep();
+    md3SystemBeep();
     reportNativeStatus(QStringLiteral("系统提示音"));
 }
 
@@ -534,7 +554,7 @@ bool Md3WindowHelper::vibrate(int durationMs)
     return true;
 #else
     if (durationMs > 0)
-        QGuiApplication::beep();
+        md3SystemBeep();
     reportNativeStatus(QStringLiteral("非 Android：振动回退为提示音"));
     return durationMs > 0;
 #endif
