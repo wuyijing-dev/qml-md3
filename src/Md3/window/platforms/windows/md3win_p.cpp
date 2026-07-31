@@ -105,15 +105,39 @@ bool Md3WinNativeFilter::nativeEventFilter(const QByteArray &eventType, void *me
 
     if (msg->message == WM_NCCALCSIZE && msg->wParam == TRUE) {
         auto *params = reinterpret_cast<NCCALCSIZE_PARAMS *>(msg->lParam);
-        if (IsZoomed(msg->hwnd)) {
-            MONITORINFO mi{};
-            mi.cbSize = sizeof(mi);
-            const HMONITOR mon = MonitorFromWindow(msg->hwnd, MONITOR_DEFAULTTONEAREST);
-            if (GetMonitorInfoW(mon, &mi))
+        // Frameless: claim full client. When maximizing, clamp to the monitor
+        // work area so the window does not cover the taskbar. IsZoomed can still
+        // be false during the maximize transition while rgrc already fills the
+        // monitor — treat that as maximized too (unless true fullscreen).
+        MONITORINFO mi{};
+        mi.cbSize = sizeof(mi);
+        const HMONITOR mon = MonitorFromWindow(msg->hwnd, MONITOR_DEFAULTTONEAREST);
+        if (GetMonitorInfoW(mon, &mi)) {
+            const RECT &proposed = params->rgrc[0];
+            const bool zoomed = IsZoomed(msg->hwnd) != FALSE;
+            const bool qtFullscreen = window->windowStates().testFlag(Qt::WindowFullScreen);
+            const bool qtMaximized = window->windowStates().testFlag(Qt::WindowMaximized);
+            const bool fillsMonitor =
+                    proposed.left <= mi.rcMonitor.left + 2
+                    && proposed.top <= mi.rcMonitor.top + 2
+                    && proposed.right >= mi.rcMonitor.right - 2
+                    && proposed.bottom >= mi.rcMonitor.bottom - 2;
+            if (!qtFullscreen && (zoomed || qtMaximized || fillsMonitor))
                 params->rgrc[0] = mi.rcWork;
         }
         *result = 0;
         return true;
+    }
+
+    // HTMAXBUTTON enables Win11 snap-layout hover, but Qt often never delivers
+    // the click to DefWindowProc — handle maximize/restore ourselves.
+    if (msg->message == WM_NCLBUTTONDOWN || msg->message == WM_NCLBUTTONDBLCLK) {
+        if (msg->wParam == HTMAXBUTTON) {
+            const WPARAM cmd = IsZoomed(msg->hwnd) ? SC_RESTORE : SC_MAXIMIZE;
+            ::SendMessageW(msg->hwnd, WM_SYSCOMMAND, cmd, 0);
+            *result = 0;
+            return true;
+        }
     }
 
     if (msg->message == WM_NCHITTEST) {
