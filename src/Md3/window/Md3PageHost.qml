@@ -487,6 +487,7 @@ Item {
             return "none"
         if (Md3Theme && Md3Theme.effectsPageMotion === false)
             return "none"
+        // duration 0 ⇒ instant (avoids fade at t=0 blank frame)
         if (mode !== "launch" && pageTransitionDuration <= 0)
             return "none"
         return mode

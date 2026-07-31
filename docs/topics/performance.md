@@ -151,10 +151,12 @@ Md3ApplicationWindow {
 }
 ```
 
+Gallery 默认用短 **fade**（仍无骨架、同步首屏）；要完全无动画时再设 `pageTransition: "none"`。
+
 | 现象 | 原因 | 处理 |
 |------|------|------|
 | 切页闪骨架 | `pageSkeleton: true` | 设 `false` |
-| 切页白一下再出内容 | `pageAsync: true` 且无骨架；或 `pageTransitionDuration: 0` 却仍用 fade（旧实现会闪一帧 t=0） | `pageAsync: false`；无动画请用 `pageTransition: "none"`（Host 在 duration≤0 / reduceMotion 时也会强制 instant） |
+| 切页白一下再出内容 | `pageAsync: true` 且无骨架；或 `pageTransitionDuration: 0` 却仍用 fade（会闪一帧 t=0） | `pageAsync: false`；无动画用 `pageTransition: "none"`（或 duration≤0，Host 会强制 instant） |
 | 回访仍慢 | `pageCacheLimit: 1` 被 idle trim | `pageCacheLimit ≥ 4` + `pageIdleTrimMs` 加大 |
 | 冷启卡住 | `pageWarmStart: true` / 重页同步 | 关 warmStart；重页用 `Md3DeferredSection` |
 | 页内仍 “Loading” | DataTable `loading` / 业务态 | 与 PageHost 无关，别和骨架混为一谈 |

@@ -25,10 +25,16 @@ Item {
     default property alias content: contentCol.data
 
     property bool _applying: false
-    property int _layoutGen: 0
 
     implicitWidth: Math.max(1, contentCol.implicitWidth + leftPadding + rightPadding)
     implicitHeight: contentCol.implicitHeight + topPadding + bottomPadding
+
+    Timer {
+        id: layoutTimer
+        interval: 0
+        repeat: false
+        onTriggered: root._applyChildHints()
+    }
 
     Column {
         id: contentCol
@@ -48,14 +54,12 @@ Item {
     onFillWidthChanged: _scheduleLayout()
     onHeightChanged: _scheduleLayout()
     Component.onCompleted: _scheduleLayout()
+    Component.onDestruction: layoutTimer.stop()
 
     function _scheduleLayout() {
-        const gen = ++_layoutGen
-        Qt.callLater(function () {
-            if (gen !== root._layoutGen)
-                return
-            root._applyChildHints()
-        })
+        if (!layoutTimer)
+            return
+        layoutTimer.restart()
     }
 
     function _setReal(item, prop, value) {
@@ -68,7 +72,7 @@ Item {
     }
 
     function _applyChildHints() {
-        if (_applying)
+        if (_applying || !contentCol)
             return
         _applying = true
 
@@ -79,7 +83,6 @@ Item {
             if (!c || c.visible === false)
                 continue
 
-            // Expanding spacer: take remaining vertical room when parent has explicit height.
             if (c.expand === true) {
                 const used = contentCol.implicitHeight - (c.height || c.implicitHeight || 0)
                 const remain = Math.max(0, root.height - root.topPadding - root.bottomPadding - used)

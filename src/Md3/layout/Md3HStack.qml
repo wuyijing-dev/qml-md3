@@ -26,10 +26,18 @@ Item {
     default property alias content: contentHost.data
 
     property bool _applying: false
-    property int _layoutGen: 0
 
     implicitWidth: contentHost.implicitWidth + leftPadding + rightPadding
     implicitHeight: Math.max(1, contentHost.implicitHeight + topPadding + bottomPadding)
+
+    // Coalesce layout on a Timer — Qt.callLater closures can run after teardown
+    // ("_applyChildHints is not a function" / invalid VME context on page swap).
+    Timer {
+        id: layoutTimer
+        interval: 0
+        repeat: false
+        onTriggered: root._applyChildHints()
+    }
 
     Item {
         id: contentHost
@@ -44,10 +52,7 @@ Item {
         property real implicitWidth: 0
         property real implicitHeight: 0
 
-        onChildrenChanged: {
-            root._hookChildSizeSignals()
-            root._scheduleLayout()
-        }
+        onChildrenChanged: root._scheduleLayout()
         onWidthChanged: root._scheduleLayout()
         onHeightChanged: root._scheduleLayout()
     }
@@ -56,39 +61,13 @@ Item {
     onAlignmentChanged: _scheduleLayout()
     onStretchChildrenChanged: _scheduleLayout()
     onFillHeightChanged: _scheduleLayout()
-    Component.onCompleted: {
-        _hookChildSizeSignals()
-        _scheduleLayout()
-    }
+    Component.onCompleted: _scheduleLayout()
+    Component.onDestruction: layoutTimer.stop()
 
-    function _hookChildSizeSignals() {
-        const kids = contentHost.children
-        for (let i = 0; i < kids.length; ++i) {
-            const c = kids[i]
-            if (!c)
-                continue
-            // Disconnect first to avoid stacking handlers on repeated childrenChanged.
-            try {
-                c.implicitWidthChanged.disconnect(root._scheduleLayout)
-            } catch (e) { /* not connected */ }
-            try {
-                c.implicitHeightChanged.disconnect(root._scheduleLayout)
-            } catch (e2) { /* not connected */ }
-            try {
-                c.visibleChanged.disconnect(root._scheduleLayout)
-            } catch (e3) { /* not connected */ }
-            c.implicitWidthChanged.connect(root._scheduleLayout)
-            c.implicitHeightChanged.connect(root._scheduleLayout)
-            c.visibleChanged.connect(root._scheduleLayout)
-        }
-    }
     function _scheduleLayout() {
-        const gen = ++_layoutGen
-        Qt.callLater(function () {
-            if (gen !== root._layoutGen)
-                return
-            root._applyChildHints()
-        })
+        if (!layoutTimer)
+            return
+        layoutTimer.restart()
     }
 
     function _setReal(item, prop, value) {
@@ -101,7 +80,7 @@ Item {
     }
 
     function _applyChildHints() {
-        if (_applying)
+        if (_applying || !contentHost)
             return
         _applying = true
 
