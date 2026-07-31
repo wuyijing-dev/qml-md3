@@ -30,7 +30,6 @@ Item {
     height: size * 0.62
     implicitWidth: size
     implicitHeight: size * 0.62
-    height: implicitHeight
 
     Shape {
         anchors.fill: parent

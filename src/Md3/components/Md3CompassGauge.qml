@@ -32,7 +32,6 @@ Item {
     height: size + _captionH
     implicitWidth: size
     implicitHeight: size + _captionH
-    height: implicitHeight
 
     function _rad(deg) { return deg * Math.PI / 180 }
 

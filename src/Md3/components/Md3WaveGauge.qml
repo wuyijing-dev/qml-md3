@@ -38,7 +38,6 @@ Item {
     height: size
     implicitWidth: size
     implicitHeight: size
-    height: implicitHeight
 
     property real wavePhase: 0
 

@@ -50,7 +50,6 @@ Item {
 
     implicitWidth: 400
     implicitHeight: headerLoader.height
-    height: implicitHeight
                      + (hasPages ? Math.max(120, stepStack.implicitHeight) : 0)
                      + (showActions && hasPages ? 56 : 0)
     width: parent ? parent.width : implicitWidth
