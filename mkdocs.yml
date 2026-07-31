@@ -70,6 +70,7 @@ nav:
     - 国际化: topics/i18n.md
     - DataTable: topics/datatable.md
     - Qt 版本矩阵: topics/qt-version-matrix.md
+    - WebAssembly: topics/wasm.md
     - 实验性 API: topics/experimental.md
     - 文档托管: topics/mkdocs-hosting.md
   - API 索引: api/README.md

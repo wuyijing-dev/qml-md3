@@ -1,5 +1,6 @@
 # Build trees (Qt Creator / CMake / Ninja / MSVC / MinGW)
 /build/
+/build-wasm/
 /out/
 /cmake-build-*/
 /_build/

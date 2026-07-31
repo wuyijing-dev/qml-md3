@@ -9,8 +9,10 @@ QtObject {
     readonly property bool isWindows: os === "windows"
     readonly property bool isMacOS: os === "osx" || os === "macos"
     readonly property bool isLinux: os === "linux"
+    readonly property bool isWasm: os === "wasm" || os === "emscripten"
     readonly property bool isMobile: os === "android" || os === "ios"
-    readonly property bool isDesktop: !isMobile
+    /// Browser / WASM uses the mobile capability bag (system chrome, no CSD/tray).
+    readonly property bool isDesktop: !isMobile && !isWasm
 
     // Per-platform bags as properties (QtObject has no default property for children)
     property Md3WindowPlatformWindows windows: Md3WindowPlatformWindows {}
@@ -25,6 +27,7 @@ QtObject {
             return macOS
         if (isLinux)
             return linux
+        // wasm / android / ios / unknown → mobile stubs
         return mobile
     }
 

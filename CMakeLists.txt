@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(cmake/Md3QtCompat.cmake)
+include(cmake/Md3Platform.cmake)
 
 if (MD3_QT_MAJOR EQUAL 6)
     # Required baseline for full library + Gallery.
@@ -21,10 +22,13 @@ else()
     message(STATUS "Md3: Qt5.15 compatibility mode (stage 1) enabled")
 endif()
 
-# Top-level repo build → Gallery ON by default.
+# Top-level repo build → Gallery ON by default (OFF on WASM — browser demo is optional).
 # add_subdirectory(this-repo) from another project → Gallery OFF (library only).
 set(_md3_gallery_default ON)
 if (NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    set(_md3_gallery_default OFF)
+endif()
+if (MD3_IS_WASM)
     set(_md3_gallery_default OFF)
 endif()
 option(MD3_BUILD_GALLERY "Build the Md3 Gallery demo application" ${_md3_gallery_default})
@@ -34,6 +38,11 @@ option(MD3_BUILD_TESTS "Build qml smoke tests" OFF)
 # qmlcachegen: faster cold page open (bytecode in binary). Default ON for all configs.
 # Turn OFF only while iterating QML without clean rebuilds: -DMD3_QML_CACHEGEN=OFF
 option(MD3_QML_CACHEGEN "Compile QML with qmlcachegen (faster cold open)" ON)
+
+# WASM: prefer static; Gallery stays opt-in (large download).
+if (MD3_IS_WASM)
+    set(MD3_BUILD_SHARED OFF CACHE BOOL "Build Md3 as a shared library" FORCE)
+endif()
 
 if (MD3_QT_MAJOR EQUAL 5)
     # Stage 1: Qt5 branch compiles the core bootstrap library only.

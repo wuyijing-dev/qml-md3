@@ -5,6 +5,9 @@
 if (NOT DEFINED MD3_QT_MAJOR)
     include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/Md3QtCompat.cmake)
 endif()
+if (NOT DEFINED MD3_IS_WASM)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/Md3Platform.cmake)
+endif()
 
 if (MD3_QT_MAJOR EQUAL 6)
     if (NOT TARGET Qt6::Quick)
@@ -332,6 +335,7 @@ qt_add_qml_module(Md3
         components/Md3NavigationBar.qml
         components/Md3NavigationRail.qml
         components/Md3NavigationDrawer.qml
+        components/Md3NavigationView.qml
         components/Md3TabBar.qml
         components/Md3DocumentTabBar.qml
         components/Md3Scaffold.qml
@@ -454,7 +458,13 @@ target_include_directories(Md3
 )
 
 set(MD3_PLATFORM_SOURCES)
-if (WIN32)
+# Emscripten reports as UNIX — detect WASM first and use mobile stubs (no DBus/Widgets).
+if (MD3_IS_WASM)
+    list(APPEND MD3_PLATFORM_SOURCES
+        window/platforms/mobile/md3mobilenative.cpp
+    )
+    target_compile_definitions(Md3 PUBLIC MD3_PLATFORM_WASM=1)
+elseif (WIN32)
     list(APPEND MD3_PLATFORM_SOURCES
         window/platforms/windows/md3win_p.h
         window/platforms/windows/md3win_p.cpp
@@ -557,7 +567,10 @@ include(CMakePackageConfigHelpers)
 
 # Consumers of a static package must also link KF WindowSystem when we built with it
 set(MD3_PACKAGE_NEEDS_KWINDOWSYSTEM 0)
-if (UNIX AND NOT APPLE)
+set(MD3_PACKAGE_IS_WASM 0)
+if (MD3_IS_WASM)
+    set(MD3_PACKAGE_IS_WASM 1)
+elseif (UNIX AND NOT APPLE)
     if (KF6WindowSystem_FOUND OR KF5WindowSystem_FOUND)
         set(MD3_PACKAGE_NEEDS_KWINDOWSYSTEM 1)
     endif()

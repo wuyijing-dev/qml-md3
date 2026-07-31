@@ -65,14 +65,16 @@ if (_MD3_DIALOGS2_LINK)
     string(APPEND _MD3_QT_IFACE ";${_MD3_DIALOGS2_LINK}")
 endif()
 
-if (UNIX AND NOT APPLE)
-    find_dependency(Qt6 COMPONENTS Widgets DBus REQUIRED)
-endif()
-
 # Recorded at package time
 set(_MD3_NEEDS_KWINDOWSYSTEM @MD3_PACKAGE_NEEDS_KWINDOWSYSTEM@)
+set(_MD3_PACKAGE_IS_WASM @MD3_PACKAGE_IS_WASM@)
 set(_MD3_PACKAGE_SHARED @MD3_PACKAGE_SHARED@)
 set(Md3_SHARED ${_MD3_PACKAGE_SHARED})
+
+# Desktop Linux only — WASM packages use mobile stubs (no DBus/Widgets).
+if (UNIX AND NOT APPLE AND NOT _MD3_PACKAGE_IS_WASM)
+    find_dependency(Qt6 COMPONENTS Widgets DBus REQUIRED)
+endif()
 
 set(_MD3_PREFIX "${PACKAGE_PREFIX_DIR}")
 set(_MD3_LIBDIR "${_MD3_PREFIX}/@CMAKE_INSTALL_LIBDIR@")
@@ -219,7 +221,7 @@ if (NOT TARGET Md3::Md3)
             INTERFACE_LINK_LIBRARIES "${_MD3_QT_IFACE}"
         )
     endif()
-    if (UNIX AND NOT APPLE)
+    if (UNIX AND NOT APPLE AND NOT _MD3_PACKAGE_IS_WASM)
         set_property(TARGET Md3::Md3 APPEND PROPERTY
             INTERFACE_LINK_LIBRARIES Qt6::Widgets Qt6::DBus)
         if (_MD3_NEEDS_KWINDOWSYSTEM)

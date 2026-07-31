@@ -10,6 +10,7 @@ Multi-version support for Md3 across Qt kits on the same machine.
 | 6.5.x | Stage 1 | Full library + Gallery. Links `QuickEffectsPrivate` / `QuickShapesPrivate` (no public Effects CMake target). |
 | 6.8.x | Stage 1 | Full library + Gallery. Same Private Effects/Shapes as 6.5. **Recommended baseline.** |
 | 6.10+ / 6.11 | Stage 1 | Full library + Gallery. Prefers public `Qt6::QuickEffects` / `Qt6::QuickShapes` when present. |
+| 6.8+ **WASM** | Experimental | Library + hello via Qt for WebAssembly. See [wasm.md](wasm.md). Gallery opt-in. |
 
 ## CMake Compatibility Notes
 

@@ -121,7 +121,9 @@ Md3PerformanceMonitor::~Md3PerformanceMonitor()
 
 QString Md3PerformanceMonitor::platformId() const
 {
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WASM) || defined(MD3_PLATFORM_WASM)
+    return QStringLiteral("wasm");
+#elif defined(Q_OS_WIN)
     return QStringLiteral("windows");
 #elif defined(Q_OS_LINUX)
     return QStringLiteral("linux");

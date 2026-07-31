@@ -23,7 +23,9 @@ Md3WindowHelper::~Md3WindowHelper()
 
 QString Md3WindowHelper::platformId() const
 {
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WASM) || defined(MD3_PLATFORM_WASM)
+    return QStringLiteral("wasm");
+#elif defined(Q_OS_WIN)
     return QStringLiteral("windows");
 #elif defined(Q_OS_MACOS)
     return QStringLiteral("macos");

@@ -325,6 +325,12 @@ void Md3ReleaseUpdaterNative::finishExtractProcess(int exitCode, const QString &
 
 void Md3ReleaseUpdaterNative::extractTo(const QString &directoryPath)
 {
+#if defined(Q_OS_WASM) || defined(MD3_PLATFORM_WASM)
+    Q_UNUSED(directoryPath);
+    setErrorString(tr("Archive extract is not supported on WebAssembly"));
+    emit checkFailed(m_errorString);
+    return;
+#else
     if (m_downloadedFilePath.isEmpty()) {
         setErrorString(tr("No downloaded archive to extract"));
         emit checkFailed(m_errorString);
@@ -385,6 +391,7 @@ void Md3ReleaseUpdaterNative::extractTo(const QString &directoryPath)
         proc->deleteLater();
         finishExtractProcess(exitCode, dir.absolutePath(), stdErr);
     });
+#endif
 }
 
 void Md3ReleaseUpdaterNative::downloadAndExtract(const QString &downloadDirectory, const QString &extractDirectory)

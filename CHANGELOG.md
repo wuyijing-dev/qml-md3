@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Library
+
+- **`Md3NavigationView`**: Auto / Left / LeftCompact / Top adaptive shell (Rail + Drawer + Bar); Gallery Navigation page demo.
+
+### Platform
+
+- **WebAssembly**: detect Emscripten before UNIX desktop path; mobile native stubs; no DBus/Widgets; hello-md3 builds with Qt 6.10.2 wasm_singlethread. See `docs/topics/wasm.md`.
+
 ### Licensing
 
 - Switched to **Qt-style dual licensing**: LGPL-3.0 **or** Commercial (support / vendor certification). See `LICENSE`, `LICENSES/`, `docs/licensing.md`.
