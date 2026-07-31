@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence
 
@@ -16,14 +17,23 @@ class Md3Application:
 
     Typical use::
 
-        app = Md3Application(opts)
+        from md3qml import Md3Application, RunOptions
+        from md3qml.qt import QObject, Signal, Slot
+
+        class Host(QObject):
+            ping = Signal(str)
+
+            @Slot(str)
+            def log(self, text: str) -> None:
+                print(text)
+
+        app = Md3Application(RunOptions(application_name="My App", auto_fetch=True))
+        app.set_context_property("host", Host())
         app.load_file("Main.qml")
         raise SystemExit(app.exec())
     """
 
     def __init__(self, opts: Optional[RunOptions] = None, argv: Optional[List[str]] = None) -> None:
-        import sys
-
         self.opts = opts or RunOptions()
         self.argv = list(sys.argv if argv is None else argv)
         self.binding: Binding = detect_binding(self.opts.binding)
@@ -59,9 +69,46 @@ class Md3Application:
         self._prefix: Optional[Path] = None
         self._import_paths: List[str] = []
         self._context: Dict[str, Any] = dict(self.opts.context_properties)
+        self._warnings: List[str] = []
+
+        # Surface QML errors to Python (PySide6).
+        warn = getattr(self.engine, "warnings", None)
+        if warn is not None and hasattr(warn, "connect"):
+            warn.connect(self._on_engine_warnings)
+        failed = getattr(self.engine, "objectCreationFailed", None)
+        if failed is not None and hasattr(failed, "connect"):
+            failed.connect(self._on_object_creation_failed)
+
+    def _on_engine_warnings(self, warnings: Any) -> None:
+        for w in warnings or []:
+            text = str(getattr(w, "toString", lambda: w)())
+            self._warnings.append(text)
+            print(f"md3qml QML: {text}", file=sys.stderr)
+
+    def _on_object_creation_failed(self, url: Any) -> None:
+        msg = f"objectCreationFailed: {url}"
+        self._warnings.append(msg)
+        print(f"md3qml: {msg}", file=sys.stderr)
+
+    @property
+    def warnings(self) -> List[str]:
+        return list(self._warnings)
+
+    @property
+    def prefix(self) -> Optional[Path]:
+        return self._prefix
+
+    @property
+    def import_paths(self) -> List[str]:
+        return list(self._import_paths)
 
     def prepare_imports(self, *, start: Optional[PathLike] = None) -> Path:
-        prefix = resolve_md3_prefix(self.opts.md3_prefix, start=start)
+        try:
+            prefix = resolve_md3_prefix(self.opts.md3_prefix, start=start)
+        except FileNotFoundError:
+            if not self.opts.auto_fetch:
+                raise
+            prefix = self._auto_fetch_prefix()
         self._prefix = prefix
         paths = setup_native_paths(prefix, extra_import_paths=self.opts.extra_import_paths)
         self._import_paths = list(paths)
@@ -69,10 +116,30 @@ class Md3Application:
             self.engine.addImportPath(p)
         return prefix
 
+    def _auto_fetch_prefix(self) -> Path:
+        from .fetch import fetch_md3_prefix
+
+        dest = Path(self.opts.fetch_dest).expanduser()
+        print(f"md3qml: auto-fetching shared Md3 → {dest}", file=sys.stderr)
+        prefix = fetch_md3_prefix(
+            dest,
+            version=self.opts.fetch_version,
+            url=self.opts.fetch_url,
+        )
+        # So subsequent resolve works without re-download preference
+        import os
+
+        os.environ.setdefault("MD3_PREFIX", str(prefix))
+        return prefix
+
     def set_context_property(self, name: str, value: Any) -> None:
         self._context[name] = value
         ctx = self.engine.rootContext()
         ctx.setContextProperty(name, value)
+
+    def set_context_properties(self, mapping: Dict[str, Any]) -> None:
+        for name, value in mapping.items():
+            self.set_context_property(name, value)
 
     def _apply_context(self) -> None:
         ctx = self.engine.rootContext()
@@ -91,6 +158,24 @@ class Md3Application:
         self.engine.load(url)
         return bool(self.engine.rootObjects())
 
+    def load_data(self, qml_source: str, *, name: str = "inline.qml") -> bool:
+        """Load QML from a string (useful for tests / generated UI)."""
+        if self._prefix is None:
+            self.prepare_imports()
+        self._apply_context()
+        data = qml_source.encode("utf-8")
+        url = self._qt.QUrl(name)
+        load_data = getattr(self.engine, "loadData", None)
+        if callable(load_data):
+            load_data(data, url)
+        else:
+            import tempfile
+
+            tmp = Path(tempfile.gettempdir()) / f"md3qml-{name}"
+            tmp.write_text(qml_source, encoding="utf-8")
+            self.engine.load(self._qt.QUrl.fromLocalFile(str(tmp)))
+        return bool(self.engine.rootObjects())
+
     def load_module(self, uri: str, component: str = "Main") -> bool:
         if self._prefix is None:
             self.prepare_imports()
@@ -104,9 +189,22 @@ class Md3Application:
     def root_objects(self) -> Sequence[Any]:
         return self.engine.rootObjects()
 
+    def root_object(self, index: int = 0) -> Any:
+        from .bridge import root_object
+
+        return root_object(self, index)
+
+    def invoke(self, method: str, *args: Any, root_index: int = 0) -> Any:
+        from .bridge import invoke, root_object
+
+        return invoke(root_object(self, root_index), method, *args)
+
     def exec(self) -> int:
         app = self.app
         return app.exec() if hasattr(app, "exec") else app.exec_()
+
+    def quit(self) -> None:
+        self.app.quit()
 
     def on_quit(self, callback: Callable[[], None]) -> None:
         self.app.aboutToQuit.connect(callback)

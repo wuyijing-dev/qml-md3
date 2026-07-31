@@ -32,6 +32,11 @@ class RunOptions:
     """If set, use engine.loadFromModule(uri, component) instead of a file path."""
     module_uri: str = ""
     module_component: str = "Main"
+    """When prefix is missing, download a shared zip via md3qml.fetch (network)."""
+    auto_fetch: bool = False
+    fetch_version: str = "1.0.0"
+    fetch_dest: str = "~/.md3/prefix"
+    fetch_url: Optional[str] = None
 
 
 def _sanitize_desktop_id(name: str) -> str:

@@ -7,7 +7,7 @@ import os
 import sys
 import zipfile
 from pathlib import Path
-from typing import Optional
+from typing import Iterable, List, Optional
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -15,25 +15,54 @@ from urllib.request import Request, urlopen
 _DEFAULT_REPO = "wuyijing-dev/QML_MD3"
 
 
-def _platform_tag() -> str:
+def _platform_tags() -> List[str]:
     if sys.platform == "win32":
-        return "windows-x64"
+        # Prefer packaging/cli Release names first (v1.0.0: Md3-windows-AMD64-shared.zip).
+        return ["windows-AMD64", "windows-x64", "win64", "windows"]
     if sys.platform == "darwin":
-        return "macos-x64" if sys.platform == "darwin" else "macos"
-    return "linux-x64"
+        machine = os.uname().machine if hasattr(os, "uname") else ""
+        if machine in ("arm64", "aarch64"):
+            return ["macos-arm64", "macos-x64", "darwin"]
+        return ["macos-x64", "macos-arm64", "darwin"]
+    return ["linux-x64", "linux-AMD64", "linux"]
 
 
-def default_asset_url(version: str, *, repo: Optional[str] = None) -> str:
+def candidate_asset_urls(version: str, *, repo: Optional[str] = None) -> List[str]:
     """
-    Conventional release asset name:
+    Possible GitHub Release asset URLs (tried in order).
 
-      Md3-{version}-shared-{platform}.zip
-      e.g. Md3-1.0.0-shared-windows-x64.zip
+    Matches both packaging naming ``Md3-windows-AMD64-shared.zip`` (v1.0.0 Release)
+    and CI naming ``Md3-{ver}-shared-windows-x64.zip``.
     """
     repo = repo or os.environ.get("MD3_GITHUB_REPO", _DEFAULT_REPO)
     ver = version.lstrip("v")
-    asset = f"Md3-{ver}-shared-{_platform_tag()}.zip"
-    return f"https://github.com/{repo}/releases/download/v{ver}/{asset}"
+    base = f"https://github.com/{repo}/releases/download/v{ver}"
+    urls: List[str] = []
+    for tag in _platform_tags():
+        # Packaging / scripts/packaging zip names
+        urls.append(f"{base}/Md3-{tag}-shared.zip")
+        # CI pyside-wheels / build_wheel fetch zip names
+        urls.append(f"{base}/Md3-{ver}-shared-{tag}.zip")
+        urls.append(f"{base}/Md3-{ver}-shared-{tag.replace('AMD64', 'x64')}.zip")
+    # De-dupe preserve order
+    seen = set()
+    out: List[str] = []
+    for u in urls:
+        if u not in seen:
+            seen.add(u)
+            out.append(u)
+    return out
+
+
+def default_asset_url(version: str, *, repo: Optional[str] = None) -> str:
+    """First conventional URL (may 404 — prefer :func:`fetch_md3_prefix` which tries all)."""
+    return candidate_asset_urls(version, repo=repo)[0]
+
+
+def _download(url: str) -> bytes:
+    req = Request(url, headers={"User-Agent": "md3qml-fetch/1.0"})
+    with urlopen(req, timeout=180) as resp:
+        return resp.read()
 
 
 def fetch_md3_prefix(
@@ -51,39 +80,61 @@ def fetch_md3_prefix(
     dest = Path(dest).expanduser().resolve()
     dest.mkdir(parents=True, exist_ok=True)
 
-    url = (
-        url
-        or os.environ.get("MD3_FETCH_URL")
-        or os.environ.get("MD3_WHEEL_URL")
-        or default_asset_url(version, repo=repo)
-    )
+    env_url = os.environ.get("MD3_FETCH_URL") or os.environ.get("MD3_WHEEL_URL")
+    urls: Iterable[str]
+    if url or env_url:
+        urls = [url or env_url]  # type: ignore[list-item]
+    else:
+        urls = candidate_asset_urls(version, repo=repo)
 
-    req = Request(url, headers={"User-Agent": "md3qml-fetch/1.0"})
-    try:
-        with urlopen(req, timeout=120) as resp:
-            data = resp.read()
-    except HTTPError as exc:
+    data: Optional[bytes] = None
+    used = ""
+    errors: List[str] = []
+    for candidate in urls:
+        try:
+            data = _download(candidate)
+            used = candidate
+            break
+        except HTTPError as exc:
+            errors.append(f"HTTP {exc.code} {candidate}")
+        except URLError as exc:
+            errors.append(f"{exc} {candidate}")
+
+    if data is None:
         raise FileNotFoundError(
-            f"Download failed HTTP {exc.code}: {url}\n"
-            "Upload a shared package zip on GitHub Releases, or pass --url / MD3_FETCH_URL."
-        ) from exc
-    except URLError as exc:
-        raise FileNotFoundError(f"Download failed: {url}\n{exc}") from exc
+            "Could not download a shared Md3 zip.\n"
+            "Tried:\n  - "
+            + "\n  - ".join(errors)
+            + "\nUpload a shared package on GitHub Releases, or pass --url / MD3_FETCH_URL.\n"
+            "Note: PyPI does not yet host md3qml wheels; use git install + fetch, or a local dist/Md3."
+        )
 
     with zipfile.ZipFile(io.BytesIO(data)) as zf:
         zf.extractall(dest)
 
     # Zip may contain top-level "Md3/" or flat lib/
     if (dest / "lib" / "qml").is_dir():
-        return dest
-    nested = dest / "Md3"
-    if (nested / "lib" / "qml").is_dir():
-        return nested
-    for child in dest.iterdir():
-        if child.is_dir() and (child / "lib" / "qml").is_dir():
-            return child
+        prefix = dest
+    else:
+        nested = dest / "Md3"
+        if (nested / "lib" / "qml").is_dir():
+            prefix = nested
+        else:
+            prefix = None
+            for child in dest.iterdir():
+                if child.is_dir() and (child / "lib" / "qml").is_dir():
+                    prefix = child
+                    break
+            if prefix is None:
+                raise FileNotFoundError(
+                    f"Extracted {used} into {dest} but lib/qml was not found. "
+                    "Check the zip layout (expect lib/qml or Md3/lib/qml)."
+                )
 
-    raise FileNotFoundError(
-        f"Extracted {url} into {dest} but lib/qml was not found. "
-        "Check the zip layout (expect lib/qml or Md3/lib/qml)."
-    )
+    # Soft marker for tooling
+    marker = prefix / ".md3qml-fetch-url"
+    try:
+        marker.write_text(used + "\n", encoding="utf-8")
+    except OSError:
+        pass
+    return prefix

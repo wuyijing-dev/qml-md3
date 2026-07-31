@@ -1,6 +1,27 @@
 # PySide6 / PySide2 + pip
 
-Use the **packaged shared Md3 QML module** from Python. Components stay QML; Python only hosts `QQmlApplicationEngine`. Qt comes from **PySide**, not from Md3.
+Use the **packaged shared Md3 QML module** from Python. Components stay QML; Python hosts `QQmlApplicationEngine`. Qt comes from **PySide**, not from Md3.
+
+## Can you `pip install` from the network today?
+
+**PyPI: not publishing for now** (intentional). `pip install md3qml` → 404.
+
+| Source | Works? | Notes |
+|--------|--------|-------|
+| `pip install md3qml` (PyPI) | **No** | Not published; deferred |
+| `pip install "git+https://github.com/wuyijing-dev/QML_MD3.git#subdirectory=python[pyside6]"` | **Yes** | Pure-Python host |
+| Platform wheels on GitHub Release | **Not yet** | Shared zip only on v1.0.0 |
+| `md3qml install` / `fetch` | **Yes** | Downloads shared zip from Releases |
+
+Until PyPI publish (`PYPI_API_TOKEN` + Release upload), use **git install + fetch**:
+
+```bash
+pip install "git+https://github.com/wuyijing-dev/QML_MD3.git#subdirectory=python[pyside6]"
+md3qml install --with-pyside6
+export MD3_PREFIX="$HOME/.md3/prefix"   # path printed by install
+md3qml doctor
+md3qml run examples/hello-pyside/Main.qml --auto-fetch
+```
 
 ## Support matrix
 
@@ -9,72 +30,54 @@ Use the **packaged shared Md3 QML module** from Python. Components stay QML; Pyt
 | **PySide6** | 6.5+ | **Yes** | Matching shared Md3 build |
 | **PySide2** | 5.15 | Bootstrap API only | No full Md3 QML on Qt5 yet ([qt-version-matrix.md](qt-version-matrix.md)) |
 
+## Stronger Python API
+
+| Module | Role |
+|--------|------|
+| `md3qml.qt` | Uniform `QtCore` / `QObject` / `Signal` / `Slot` from detected PySide |
+| `md3qml.bridge` | `connect_signal` / `invoke` / `find_child` / `root_object` |
+| `Md3Application` | Long-lived engine, context props, `load_file` / `load_data` / `load_module`, `auto_fetch`, QML warnings |
+| `RunOptions.auto_fetch` | Download shared zip when prefix missing |
+| CLI `md3qml install` | Fetch natives (+ optional `pip install PySide6`) |
+
+```python
+from md3qml import Md3Application, RunOptions
+from md3qml.qt import QObject, Signal, Slot
+
+class Host(QObject):
+    ping = Signal(str)
+
+    @Slot(str)
+    def log(self, text: str) -> None:
+        print(text)
+
+app = Md3Application(RunOptions(auto_fetch=True, application_name="Demo"))
+app.set_context_property("host", Host())
+app.load_file("Main.qml")
+raise SystemExit(app.exec())
+```
+
 ## What to publish on PyPI
 
 Md3 cannot be “just QML source” on pip: users need `Md3.dll` / `libMd3.so` + `lib/qml/Md3` built against the **same Qt major** as PySide. Three practical products:
 
 | Product | Install | Trade-off |
 |---------|---------|-----------|
-| **A. Pure Python `md3qml`** | `pip install md3qml[pyside6]` then `md3qml fetch` or `MD3_PREFIX` | Smallest wheel; one extra step for natives |
-| **B. Platform wheels** (`md3qml` + `_native/`) | `pip install md3qml[pyside6]` only | Best UX; build win/linux/mac wheels per PySide Qt line |
-| **C. Two packages** | `pip install md3qml md3qml-bin-windows` | Clear split; more release work |
+| **A. Pure Python `md3qml`** | git / future PyPI + `md3qml fetch` | Smallest; extra native step |
+| **B. Platform wheels** (`md3qml` + `_native/`) | `pip install md3qml[pyside6]` only | Best UX when CI publishes |
+| **C. Two packages** | `md3qml` + `md3qml-bin-*` | Clear split; more release work |
 
-**Recommended:** use **B** via Actions `pyside-wheels` (or local `stage_native` + `build_wheel`); keep **A** (`md3qml fetch`) for mirrors / custom builds.
+**Recommended:** ship **B** via [`.github/workflows/pyside-wheels.yml`](../../.github/workflows/pyside-wheels.yml) and set repo secret `PYPI_API_TOKEN` on GitHub Release.
 
-Do **not** vendor full Qt inside the wheel — PySide already provides it. Only ship Md3 shared libs + QML.
+Do **not** vendor full Qt inside the wheel — PySide already provides it.
 
-## Fastest user install (platform wheel)
-
-CI workflow [`.github/workflows/pyside-wheels.yml`](../../.github/workflows/pyside-wheels.yml):
-
-1. Build **shared** Md3 (Qt 6.8.3, Gallery off)  
-2. `python scripts/python/stage_native_for_wheel.py` → `python/md3qml/_native/`  
-3. `python scripts/python/build_wheel.py` → `win_amd64` / manylinux (Qt libs excluded) + fetch zip  
-
-Triggers: `workflow_dispatch`, tag `v*`, GitHub Release. Artifacts upload to the Release; optional PyPI via secret `PYPI_API_TOKEN`.
-
-Local:
-
-```powershell
-cmake -S . -B build-wheel -G Ninja -DCMAKE_BUILD_TYPE=Release `
-  -DMD3_BUILD_SHARED=ON -DMD3_BUILD_GALLERY=OFF
-cmake --build build-wheel --parallel
-cmake --install build-wheel --prefix dist/Md3
-python scripts/python/stage_native_for_wheel.py --prefix dist/Md3
-python scripts/python/build_wheel.py --out artifacts/wheels --version 1.0.0
-pip install artifacts/wheels/md3qml-*.whl
-pip install "PySide6==6.8.3"   # match CI Qt line
-md3qml info
-```
-
-Users (after wheels are on PyPI / Release):
+## Fastest user install (when platform wheels exist)
 
 ```bash
 pip install "md3qml[pyside6]"
 md3qml info    # shows bundled _native
 md3qml run app/Main.qml
 ```
-
-No `MD3_PREFIX` needed when `_native/lib/qml` is present.
-
-## Fastest user install (pure-Python + fetch)
-
-```bash
-pip install "md3qml[pyside6]"
-md3qml fetch --version 1.0.0 --dest ~/.md3/prefix
-export MD3_PREFIX=$HOME/.md3/prefix
-md3qml run path/to/Main.qml
-```
-
-Release assets from the same CI job:
-
-```text
-Md3-1.0.0-shared-windows-x64.zip
-Md3-1.0.0-shared-linux-x64.zip
-```
-
-Override URL with `MD3_FETCH_URL`.
-
 
 ## Develop from the repo
 
@@ -89,45 +92,21 @@ md3qml run examples\hello-pyside\Main.qml
 ```bash
 md3qml info
 md3qml doctor
-md3qml run path/to/Main.qml
-md3qml run --module MyApp --component Main   # Qt6 loadFromModule
-md3qml run-c path/to/Main.qml                # libMd3 C ABI (same as Rust)
+md3qml install [--with-pyside6]
+md3qml fetch --version 1.0.0
+md3qml run path/to/Main.qml [--auto-fetch]
+md3qml run-c path/to/Main.qml
 ```
-
-## Minimal API
-
-```python
-from pathlib import Path
-from md3qml import Md3Application, RunOptions, run
-
-# One-shot
-raise SystemExit(run(
-    Path("Main.qml"),
-    opts=RunOptions(
-        application_name="My App",
-        binding="PySide6",
-        context_properties={"appVersion": "1.0.0"},
-    ),
-))
-
-# Long-lived engine (context props / signals)
-app = Md3Application(RunOptions(application_name="My App"))
-app.set_context_property("bridge", my_qobject)
-assert app.load_file("Main.qml")
-raise SystemExit(app.exec())
-```
-
-C ABI (ctypes, shared with Rust): `from md3qml import run_qml_file_c`.
 
 ## ABI matching
 
-`Md3plugin` must load against PySide’s Qt. Pin both sides together, e.g. document:
+`Md3plugin` must load against PySide’s Qt. Pin both sides together when using CI wheels:
 
 ```text
 CI wheels: PySide6==6.8.3  ↔  Md3 shared built with Qt 6.8.3
 ```
 
-Mismatch → “plugin cannot be loaded”. Prefer packaging Md3 with the same kit major.minor as the PySide pin used in CI.
+Mismatch → “plugin cannot be loaded”.
 
 ## Example
 

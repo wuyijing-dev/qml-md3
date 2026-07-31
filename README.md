@@ -21,7 +21,7 @@ Enterprise Material Design 3 component library for **Qt Quick / QML 6.8+**, visu
 |--|----------------|-------|
 | **OS** | Windows desktop | Linux / macOS best-effort; **WASM** / **Android** experimental ([wasm.md](docs/topics/wasm.md), [android.md](docs/topics/android.md)) |
 | **Qt** | 6.8+ full library | 5.15 = bootstrap only |
-| **Python** | **PySide6** + shared Md3 | PySide2 shim only until Qt5 stage-2 — [docs/topics/pyside.md](docs/topics/pyside.md) |
+| **Python** | **PySide6** + shared Md3 | PyPI `md3qml` **not published yet** — use git install + `md3qml install` ([pyside.md](docs/topics/pyside.md)) |
 | **Rust** | C ABI host (`rust/md3qml`) | Same `md3_capi` as Python `run-c` — [docs/topics/rust.md](docs/topics/rust.md) |
 | **API** | Types in `docs/api/` (non-experimental) | See [docs/getting-started/api-stability.md](docs/getting-started/api-stability.md) |
 | **Experimental** | No SemVer promise | [docs/topics/experimental.md](docs/topics/experimental.md) |
