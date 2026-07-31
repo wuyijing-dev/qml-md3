@@ -10,10 +10,11 @@ Md3ApplicationWindow {
 
     Md3Page {
         anchors.fill: parent
-        Md3Label {
+
+        Md3Text {
             anchors.centerIn: parent
             text: qsTr("Hello from Rust (C ABI)")
-            typography: Md3.Typography.TitleLarge
+            role: Md3Text.HeadlineSmall
         }
     }
 }

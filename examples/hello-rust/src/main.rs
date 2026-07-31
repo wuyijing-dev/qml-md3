@@ -2,7 +2,7 @@
 //!
 //! ```text
 //! set MD3_PREFIX=%CD%\dist\Md3
-//! set QTDIR=D:\Qt\6.8.0\msvc2022_64   # same kit that built Md3
+//! set QTDIR=D:\Qt\6.8.0\msvc2022_64
 //! set PATH=%QTDIR%\bin;%PATH%
 //! cargo run --manifest-path examples/hello-rust/Cargo.toml
 //! ```
@@ -22,12 +22,7 @@ fn main() {
         process::exit(2);
     }
 
-    match md3qml::version_string(None) {
-        Ok(v) if !v.is_empty() => eprintln!("Md3 C ABI version: {v}"),
-        Ok(_) => {}
-        Err(e) => eprintln!("warning: {e}"),
-    }
-
+    // Do not probe/unload Md3 before run — keep one LoadLibrary for the Qt lifetime.
     match md3qml::run_qml_file(&qml, None, "Hello Rust Md3") {
         Ok(code) => process::exit(code),
         Err(e) => {
