@@ -72,6 +72,7 @@ nav:
     - Qt 版本矩阵: topics/qt-version-matrix.md
     - WebAssembly: topics/wasm.md
     - 原生窗口平台: topics/native-platforms.md
+    - PySide: topics/pyside.md
     - 实验性 API: topics/experimental.md
     - 文档托管: topics/mkdocs-hosting.md
   - API 索引: api/README.md

@@ -10,8 +10,9 @@
 2. [x] **`Md3NavigationView`**：Auto / Left / LeftCompact / Top
 3. [x] **`Md3Flyout`**：锚定、light-dismiss、Esc、焦点归还
 4. [x] **原生 Win / Wayland**：空闲抑制、数字角标、延迟 Snap、xdg 激活/`app_id`；见 [native-platforms.md](../topics/native-platforms.md)
-5. [ ] a11y 人工抽检（`docs/topics/a11y-spotcheck.md`）+ IconButton 微动效
-6. [ ] VirtualList / DataTable 性能冒烟场景
+5. [x] **PySide6 / PySide2**：`python/md3qml` 宿主 + [hello-pyside](../../examples/hello-pyside/)（Md3 QML 需 PySide6）；见 [pyside.md](../topics/pyside.md)
+6. [ ] a11y 人工抽检（`docs/topics/a11y-spotcheck.md`）+ IconButton 微动效
+7. [ ] VirtualList / DataTable 性能冒烟场景
 
 ## 壳层对照
 

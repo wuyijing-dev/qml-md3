@@ -1,0 +1,2 @@
+# Recommended — matches the Qt 6 Md3 shared package
+PySide6>=6.5

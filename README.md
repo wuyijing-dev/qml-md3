@@ -21,6 +21,7 @@ Enterprise Material Design 3 component library for **Qt Quick / QML 6.8+**, visu
 |--|----------------|-------|
 | **OS** | Windows desktop | Linux / macOS best-effort; **WASM experimental** ([docs/topics/wasm.md](docs/topics/wasm.md)) |
 | **Qt** | 6.8+ full library | 5.15 = bootstrap only |
+| **Python** | **PySide6** + shared Md3 | PySide2 shim only until Qt5 stage-2 — [docs/topics/pyside.md](docs/topics/pyside.md) |
 | **API** | Types in `docs/api/` (non-experimental) | See [docs/getting-started/api-stability.md](docs/getting-started/api-stability.md) |
 | **Experimental** | No SemVer promise | [docs/topics/experimental.md](docs/topics/experimental.md) |
 | **License** | LGPL-3.0 **or** Commercial (+ certification) | [docs/licensing.md](docs/licensing.md) · fonts/icons: [NOTICE](NOTICE) |
@@ -137,6 +138,23 @@ import Md3
 Md3Button { text: "OK" }
 ```
 
+### Use from Python (PySide6)
+
+Shared Md3 package + `QQmlApplicationEngine` (no Shiboken). Details: **[docs/topics/pyside.md](docs/topics/pyside.md)**.
+
+```powershell
+pip install -r examples/hello-pyside/requirements-pyside6.txt
+python scripts/packaging/cli.py --shared -y   # → dist/Md3
+$env:MD3_PREFIX = "$PWD\dist\Md3"
+python examples/hello-pyside/main.py
+```
+
+### Examples
+
+| Example | Stack |
+|---------|--------|
+| `examples/hello-md3` | C++ / CMake |
+| `examples/hello-pyside` | PySide6 (+ PySide2 bootstrap API) |
 ```cpp
 #include "md3.h"
 int main(int argc, char *argv[]) {
