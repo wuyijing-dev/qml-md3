@@ -63,6 +63,6 @@ Troubleshooting: [packaging.md](packaging.md) · full integration: [integration.
 
 ## Support scope (short)
 
-- **Qt:** 6.8+ recommended (6.5 stage-1; see [qt-version-matrix.md](qt-version-matrix.md))
+- **Qt:** 6.8+ recommended (6.5 stage-1; see [qt-version-matrix.md](../topics/qt-version-matrix.md))
 - **OS:** Windows primary; Linux/macOS best-effort until CI matrix expands
-- **Experimental:** [experimental.md](experimental.md) — no SemVer promise
+- **Experimental:** [experimental.md](../topics/experimental.md) — no SemVer promise

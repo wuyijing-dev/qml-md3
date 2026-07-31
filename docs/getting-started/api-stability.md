@@ -8,7 +8,7 @@ How we treat the Md3 public surface so apps can upgrade safely.
 |---------|----------------|----------|
 | **Public** | Yes | `import Md3` types under `components/`, `layout/`, `window/`, `foundation/` singletons documented in `docs/api/` |
 | **Private / internal** | No | `src/Md3/private/`, platform helpers, `*Playground*`, undocumented internals |
-| **Experimental** | No (may break anytime) | Types / APIs listed in [experimental.md](experimental.md) (e.g. liquid glass playground) |
+| **Experimental** | No (may break anytime) | Types / APIs listed in [experimental.md](../topics/experimental.md) (e.g. liquid glass playground) |
 
 Hand-written usage notes live in [`api-manual/`](api-manual/) and survive `gen_api_docs.py`.
 Generated property tables in `docs/api/` are regenerated from QML; do not treat wording churn there as an API break.

@@ -32,13 +32,13 @@
 
 - [x] 根目录 **`LICENSE`**（MIT）
 - [x] **`NOTICE` / 第三方归因**（Material Icons、HarmonyOS Sans、Qt）
-- [x] 发版 checklist：[`docs/release-checklist.md`](release-checklist.md)
-- [x] README「支持范围」+ 实验 API 指向 `docs/experimental.md`
+- [x] 发版 checklist：[`docs/getting-started/release-checklist.md`](../getting-started/release-checklist.md)
+- [x] README「支持范围」+ 实验 API 指向 `docs/topics/experimental.md`
 
 ### 1.2 消费方证明
 
 - [x] **`examples/hello-md3`**：`find_package` / in-tree → 一窗 + Theme + Button + Dialog
-- [x] 文档一条龙：[`docs/quickstart.md`](quickstart.md)
+- [x] 文档一条龙：[`docs/getting-started/quickstart.md`](../getting-started/quickstart.md)
 - [x] **static vs shared** 推荐默认 + 故障对照（`packaging.md`）
 
 ### 1.3 CI 与测试底线
@@ -50,7 +50,7 @@
 
 ### 1.4 API 契约
 
-- [x] 文档页：**Public vs Private** — [`api-stability.md`](api-stability.md)
+- [x] 文档页：**Public vs Private** — [`api-stability.md`](../getting-started/api-stability.md)
 - [x] SemVer 规则（同页）
 - [x] 弃用策略（同页）
 - [x] `1.0.0` **正式稳定 tag**：发版清单走完（Windows 打包 + hello-md3）
@@ -68,7 +68,7 @@
 
 ### 2.2 无障碍与键盘
 
-- [x] 核心路径抽检表：Dialog、Menu、Select、DataTable、ListView、CommandBar、PageHost — [`a11y-spotcheck.md`](a11y-spotcheck.md)
+- [x] 核心路径抽检表：Dialog、Menu、Select、DataTable、ListView、CommandBar、PageHost — [`a11y-spotcheck.md`](../topics/a11y-spotcheck.md)
 - [~] 静态扫描 `check_a11y_qml.py` 清零（启发式）；人工 Tab/Esc 勾选仍待 Gallery 过一遍
 - [ ] `reduceMotion` / `highContrast` Gallery 开关演示 + 回归勾选
 
@@ -183,5 +183,5 @@
 
 参考：
 
-- [docs/integration.md](integration.md) · [docs/packaging.md](packaging.md) · [docs/performance.md](performance.md) · [docs/a11y.md](a11y.md) · [docs/a11y-spotcheck.md](a11y-spotcheck.md)
+- [docs/integration.md](../getting-started/integration.md) · [docs/packaging.md](../getting-started/packaging.md) · [docs/performance.md](../topics/performance.md) · [docs/a11y.md](../topics/a11y.md) · [docs/a11y-spotcheck.md](../topics/a11y-spotcheck.md)
 - [WinUI 3](https://learn.microsoft.com/windows/apps/winui/winui3/)（能力对照，非视觉规范）

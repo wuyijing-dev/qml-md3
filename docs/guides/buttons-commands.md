@@ -119,4 +119,4 @@ Md3ApplicationWindow {
 | AppBar | [Md3AppBarButton](api/Md3AppBarButton.md) | [api-manual](api-manual/Md3AppBarButton.md) |
 | AppBar Toggle | [Md3AppBarToggleButton](api/Md3AppBarToggleButton.md) | [api-manual](api-manual/Md3AppBarToggleButton.md) |
 
-`python scripts/docs/gen_api_docs.py` 会把 `docs/api-manual/<Type>.md` 拼到对应 API 页末尾。
+`python tools/gen_api_docs.py` 会把 `docs/api-manual/<Type>.md` 拼到对应 API 页末尾。

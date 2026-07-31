@@ -2,9 +2,9 @@
 """Sync QML_MD3/docs into the dedicated QML_MD3_Document MkDocs repo.
 
 Usage:
-  python scripts/docs/sync_document_repo.py
-  python scripts/docs/sync_document_repo.py --dest ../QML_MD3_Document
-  python scripts/docs/sync_document_repo.py --dest ../QML_MD3_Document --push
+  python tools/sync_document_repo.py
+  python tools/sync_document_repo.py --dest ../QML_MD3_Document
+  python tools/sync_document_repo.py --dest ../QML_MD3_Document --push
 
 Default --dest is ../QML_MD3_Document relative to the library repo root.
 
@@ -20,7 +20,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 SRC_DOCS = ROOT / "docs"
 DEFAULT_DEST = ROOT.parent / "QML_MD3_Document"
 

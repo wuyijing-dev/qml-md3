@@ -8,7 +8,7 @@ while allowing qsTr("…"), properties bound to identifiers, and empty strings.
 
 Usage:
   python scripts/checks/check_qstr_coverage.py
-  python scripts/checks/check_qstr_coverage.py --json docs/i18n-scan.json
+  python scripts/checks/check_qstr_coverage.py --json scripts/checks/out/i18n-scan.json
 """
 from __future__ import annotations
 

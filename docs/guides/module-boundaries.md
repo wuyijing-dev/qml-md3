@@ -33,6 +33,6 @@ Helpers on `Md3Page`: `hostWindow()`, `goBack()`, `pushRoute()`.
 
 **App / Gallery UI** should prefer `Md3Text`, `Md3VStack` / `Md3HStack`, `Md3PageSection`, and `Md3Page` over bare `Text` / `ColumnLayout` / `Row`. Control **implementations** may keep Qt primitives (`Text`, `Column`) as drawing details.
 
-App-layer routing stays outside PageHost core (thin adapters only) — see [routing.md](routing.md).
+App-layer routing stays outside PageHost core (thin adapters only) — see [routing.md](../topics/routing.md).
 
 Less layout / control glue: [glue-less-api.md](glue-less-api.md), [layout.md](layout.md).

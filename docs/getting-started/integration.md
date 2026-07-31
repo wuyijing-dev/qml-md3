@@ -4,10 +4,10 @@ Md3 is a **standalone QML library** (`URI Md3`). The Gallery demo is optional an
 
 For **prebuilt folder + same-directory layout**, see **[packaging.md](packaging.md)** first.
 
-For **writing less layout glue** (stacks, flow, grid, Card.title, layoutMode), see **[layout.md](layout.md)**.
+For **writing less layout glue** (stacks, flow, grid, Card.title, layoutMode), see **[layout.md](../guides/layout.md)**.
 
-For **selection / list / sheet / dialog shortcuts**, see **[glue-less-api.md](glue-less-api.md)**.  
-For **first paint / page cache / memory tradeoffs**, see **[performance.md](performance.md)**.
+For **selection / list / sheet / dialog shortcuts**, see **[glue-less-api.md](../guides/glue-less-api.md)**.  
+For **first paint / page cache / memory tradeoffs**, see **[performance.md](../topics/performance.md)**.
 
 ## CMake — subdirectory (dev / from sources)
 
@@ -36,7 +36,7 @@ set(MD3_QT_VERSION AUTO CACHE STRING "")  # AUTO / 5 / 6
 - `6`: full Md3 + Gallery path
 - `5`: **stage 1 minimal bootstrap only**; use `MD3_BUILD_GALLERY=OFF`
 
-See [qt-version-matrix.md](qt-version-matrix.md) for the current support scope.
+See [qt-version-matrix.md](../topics/qt-version-matrix.md) for the current support scope.
 
 ## CMake — packaged `./Md3` (recommended for apps)
 
@@ -141,7 +141,7 @@ If you load QML modules from the filesystem instead:
 export QML_IMPORT_PATH=/path/to/Md3/lib/qml
 ```
 
-For shared-package consumer apps on Windows, also add the executable directory and deploy `qml/Md3` beside the exe (see [consumer-app-main-qml.md](consumer-app-main-qml.md)).
+For shared-package consumer apps on Windows, also add the executable directory and deploy `qml/Md3` beside the exe (see [consumer-app-main-qml.md](../topics/consumer-app-main-qml.md)).
 
 ---
 
@@ -161,7 +161,7 @@ Fix (summary):
 4. Deploy shared `Md3.dll` + `qml/Md3/` next to the executable
 5. Set `visible: true` on `Md3ApplicationWindow`
 
-Full walkthrough and copy-paste templates: **[consumer-app-main-qml.md](consumer-app-main-qml.md)**.  
+Full walkthrough and copy-paste templates: **[consumer-app-main-qml.md](../topics/consumer-app-main-qml.md)**.  
 Reference implementation: sibling project `auto_deploy_Qt`.
 
 ## Theme

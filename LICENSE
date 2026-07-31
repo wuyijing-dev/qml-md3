@@ -1,21 +1,19 @@
-MIT License
+QML MD3 Dual Licensing
+=======================
 
-Copyright (c) 2024-2026 QML MD3 contributors
+QML MD3 is available under a Qt-style dual-licensing model. For each product
+(application, device, or redistribution), choose **one**:
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. Open Source — GNU Lesser General Public License version 3
+   See: LICENSES/LGPL-3.0-only.txt
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+2. Commercial — QML MD3 Commercial License
+   See: LICENSES/Commercial.md
+   (proprietary use without LGPL obligations; support; vendor certification)
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+You may not mix the open-source and commercial options for the same product
+without a written agreement.
+
+Copyright (c) 2024-2026 QML MD3 contributors / copyright holders.
+
+Third-party fonts and icons remain under their own terms — see NOTICE.

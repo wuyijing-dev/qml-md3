@@ -4,4 +4,4 @@
 |-------|-----|
 | SwipeControl | `Md3SwipeReveal` |
 
-`trailingActions: [{ icon, label?, destructive? }]`；子项为前景内容。详见 [collections.md](../collections.md)。
+`trailingActions: [{ icon, label?, destructive? }]`；子项为前景内容。详见 [collections.md](../guides/collections.md)。

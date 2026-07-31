@@ -6,12 +6,12 @@ Enterprise Material Design 3 component library for **Qt Quick / QML 6.8+**, visu
 
 - Pixel- and motion-accurate MD3 controls matching Flutter Material defaults
 - Design tokens first: color roles, typography, shape, elevation, state layers, motion
-- Per-control API docs under `docs/api/` (regenerate with `scripts/docs/gen_api_docs.py`)
+- Per-control API docs under `docs/api/` (regenerate with `tools/gen_api_docs.py`)
 - Distributable QML module URI: `Md3`
 
 ## Requirements
 
-- Qt **6.8+** recommended (developed against Qt 6.10+; 6.5 stage-1 — see [docs/qt-version-matrix.md](docs/qt-version-matrix.md))
+- Qt **6.8+** recommended (developed against Qt 6.10+; 6.5 stage-1 — see [docs/qt-version-matrix.md](docs/topics/qt-version-matrix.md))
 - CMake 3.16+
 - C++17
 
@@ -21,11 +21,11 @@ Enterprise Material Design 3 component library for **Qt Quick / QML 6.8+**, visu
 |--|----------------|-------|
 | **OS** | Windows desktop | Linux / macOS best-effort until CI expands |
 | **Qt** | 6.8+ full library | 5.15 = bootstrap only |
-| **API** | Types in `docs/api/` (non-experimental) | See [docs/api-stability.md](docs/api-stability.md) |
-| **Experimental** | No SemVer promise | [docs/experimental.md](docs/experimental.md) |
-| **License** | MIT | Fonts/icons: [NOTICE](NOTICE) |
+| **API** | Types in `docs/api/` (non-experimental) | See [docs/getting-started/api-stability.md](docs/getting-started/api-stability.md) |
+| **Experimental** | No SemVer promise | [docs/topics/experimental.md](docs/topics/experimental.md) |
+| **License** | LGPL-3.0 **or** Commercial (+ certification) | [docs/licensing.md](docs/licensing.md) · fonts/icons: [NOTICE](NOTICE) |
 
-Status: **1.0.0** (Windows-focused production tag). P1 shell items (NavigationView / Flyout) and broader platform matrix remain in [docs/professional-todo.md](docs/professional-todo.md). Releases follow [docs/release-checklist.md](docs/release-checklist.md).
+Status: **1.0.0** (Windows-focused production tag). P1 shell items (NavigationView / Flyout) and broader platform matrix remain in [docs/project/professional-todo.md](docs/project/professional-todo.md). Releases follow [docs/getting-started/release-checklist.md](docs/getting-started/release-checklist.md).
 
 ## Import
 
@@ -53,8 +53,8 @@ Rectangle {
 
 ## Build
 
-完整打包与「同目录 `./Md3`」约定见 **[docs/packaging.md](docs/packaging.md)**。  
-接入方式总览见 **[docs/integration.md](docs/integration.md)**。
+完整打包与「同目录 `./Md3`」约定见 **[docs/packaging.md](docs/getting-started/packaging.md)**。  
+接入方式总览见 **[docs/integration.md](docs/getting-started/integration.md)**。
 
 ### Library only (no Gallery)
 
@@ -169,12 +169,12 @@ int main(int argc, char *argv[]) {
 
 ## Docs
 
-- [docs/quickstart.md](docs/quickstart.md) — **≤10 min**
-- [docs/professional-todo.md](docs/professional-todo.md) — production TODO
-- [docs/api-stability.md](docs/api-stability.md) — SemVer / public API
-- [docs/release-checklist.md](docs/release-checklist.md)
+- [docs/getting-started/quickstart.md](docs/getting-started/quickstart.md) — **≤10 min**
+- [docs/project/professional-todo.md](docs/project/professional-todo.md) — production TODO
+- [docs/getting-started/api-stability.md](docs/getting-started/api-stability.md) — SemVer / public API
+- [docs/getting-started/release-checklist.md](docs/getting-started/release-checklist.md)
 - [docs/api/README.md](docs/api/README.md) — control API index
-- [docs/packaging.md](docs/packaging.md) · [docs/integration.md](docs/integration.md)
+- [docs/packaging.md](docs/getting-started/packaging.md) · [docs/integration.md](docs/getting-started/integration.md)
 - [docs/index.md](docs/index.md) — full guide map
 - [LICENSE](LICENSE) · [NOTICE](NOTICE) · [CHANGELOG.md](CHANGELOG.md)
 
@@ -183,7 +183,7 @@ Sibling: [QML_Md3_Generation](https://github.com/wuyijing-dev/QML_Md3_Generation
 Regenerate API property tables **locally** after editing controls (do not auto-push Document repo):
 
 ```powershell
-python scripts/docs/gen_api_docs.py
+python tools/gen_api_docs.py
 # Commit docs/api only when intentionally shipping API docs.
 ```
 

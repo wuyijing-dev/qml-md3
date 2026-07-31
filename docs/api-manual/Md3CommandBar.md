@@ -23,4 +23,4 @@ Md3CommandBar {
 }
 ```
 
-适合 `Md3ApplicationWindow.toolBar`。详见 [buttons-commands.md](../buttons-commands.md)。
+适合 `Md3ApplicationWindow.toolBar`。详见 [buttons-commands.md](../guides/buttons-commands.md)。

@@ -1,12 +1,24 @@
 # Changelog
 
+## Unreleased
+
+### Licensing
+
+- Switched to **Qt-style dual licensing**: LGPL-3.0 **or** Commercial (support / vendor certification). See `LICENSE`, `LICENSES/`, `docs/licensing.md`.
+- Historical MIT-tagged artifacts keep the license shipped with that tag.
+
+### Docs
+
+- Reorganized `docs/` into `getting-started/`, `guides/`, `topics/`, `project/` (scan JSON moved to `scripts/checks/out/`).
+- Moved API doc tools from `scripts/docs/` → `tools/` (`gen_api_docs.py`, `sync_document_repo.py`).
+
 ## 1.0.0
 
-First production-ready tag for the desktop-focused Md3 QML component library (MIT).
+First production-ready tag for the desktop-focused Md3 QML component library (MIT at tag time).
 
 ### Engineering
 
-- Root `LICENSE` (MIT) and `NOTICE` (fonts / icons / Qt).
+- Root `LICENSE` (MIT at the time) and `NOTICE` (fonts / icons / Qt).
 - Consumer sample `examples/hello-md3` (`find_package` or in-tree); shared packages no longer require `Q_IMPORT_QML_PLUGIN`.
 - GitHub Actions `build` workflow (library + examples + optional smoke).
 - Document sync to QML_MD3_Document is **manual** (`workflow_dispatch` / `--push`).

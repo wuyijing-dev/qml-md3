@@ -48,7 +48,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          python scripts/docs/sync_document_repo.py \
+          python tools/sync_document_repo.py \
             --dest "$HOME/QML_MD3_Document" \
             --push \
             --message "Sync docs from QML_MD3@${GITHUB_SHA:0:7}"

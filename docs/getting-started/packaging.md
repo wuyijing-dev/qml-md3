@@ -151,7 +151,7 @@ cmake -S . -B build -G Ninja -DMD3_ROOT=/path/to/QML_MD3
 
 | Symptom | Fix |
 |---------|-----|
-| `qrc:/qt/qml/YourApp/qml/Main.qml: No such file or directory` | Consumer app QML alias/prefix wrong. Use `RESOURCE_PREFIX /qt/qml`, `QT_RESOURCE_ALIAS Main.qml`, `loadFromModule`. See [consumer-app-main-qml.md](consumer-app-main-qml.md) |
+| `qrc:/qt/qml/YourApp/qml/Main.qml: No such file or directory` | Consumer app QML alias/prefix wrong. Use `RESOURCE_PREFIX /qt/qml`, `QT_RESOURCE_ALIAS Main.qml`, `loadFromModule`. See [consumer-app-main-qml.md](../topics/consumer-app-main-qml.md) |
 | App starts then exits immediately (Qt Creator: terminated abnormally) | Set `visible: true` on root `Md3ApplicationWindow`; deploy `Md3.dll` + `qml/Md3/` beside exe |
 | `module "Md3" is not installed` | Static: `Q_IMPORT_QML_PLUGIN(Md3Plugin)` + whole-archive / `Md3::QmlPlugin`. Shared: DLLs on PATH / `ldconfig` / `QML_IMPORT_PATH` |
 | `undefined reference` to `qml_register_types_Md3` / `qInitResources_*` | Static link order: plugin before Md3; use `WHOLE_ARCHIVE`. **Re-run** package script after pulling |

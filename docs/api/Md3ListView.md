@@ -82,4 +82,4 @@ Md3ListView {
 - `selectionMode`：`None` / `Single` / `Multiple`
 - Ctrl/Shift 点击、Ctrl+A、Space
 
-详见 [collections.md](../collections.md)。
+详见 [collections.md](../guides/collections.md)。

@@ -55,6 +55,6 @@ Md3Notify.snackbar(qsTr("Draft saved"), { actionText: qsTr("Undo"), priority: 0 
 | 焦点 | 不抢 | 系统策略 |
 | 用途 | 操作结果、轻量 Undo | 后台完成、需离开应用仍可见 |
 
-托盘菜单用组件库：`Md3TrayHost` + `Md3Menu`（[tray.md](tray.md)）。
+托盘菜单用组件库：`Md3TrayHost` + `Md3Menu`（[tray.md](../topics/tray.md)）。
 
 `Md3ApplicationWindow` 自动注册 snackbar + toast hosts。

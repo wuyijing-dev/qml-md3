@@ -39,4 +39,4 @@ Md3ApplicationWindow {
 
 ## 与 Md3Notify
 
-托盘气球 = **系统通知**；应用内 Toast/Snackbar = **Md3Notify**。见 [feedback.md](feedback.md)。
+托盘气球 = **系统通知**；应用内 Toast/Snackbar = **Md3Notify**。见 [feedback.md](../guides/feedback.md)。

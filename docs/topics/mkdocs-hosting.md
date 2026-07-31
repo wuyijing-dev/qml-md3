@@ -16,10 +16,10 @@
 
 ```bash
 # 默认目标：与本仓同级的 ../QML_MD3_Document
-python scripts/docs/sync_document_repo.py
+python tools/sync_document_repo.py
 
 # 或指定路径 / 直接 push
-python scripts/docs/sync_document_repo.py --dest D:/QML_MD3/QML_MD3_Document --push
+python tools/sync_document_repo.py --dest D:/QML_MD3/QML_MD3_Document --push
 ```
 
 3. Document 仓的 Actions 自动 `mkdocs build` 并部署 Pages
@@ -29,8 +29,8 @@ CI：本库 `.github/workflows/docs-sync.yml` 仅 **`workflow_dispatch` 手动�
 本地默认同步**不推送**；确认后再加 `--push`：
 
 ```bash
-python scripts/docs/sync_document_repo.py
-python scripts/docs/sync_document_repo.py --push
+python tools/sync_document_repo.py
+python tools/sync_document_repo.py --push
 ```
 
 `gen_api_docs.py` 只写本仓 `docs/api/`；**不要**在每次重生后自动 push Document 仓。
@@ -60,6 +60,6 @@ mkdocs build             # 输出 ./site
 
 ## 维护注意
 
-- API 页：`python scripts/docs/gen_api_docs.py`（在本库）→ 再 `sync_document_repo.py`
-- `docs/professional-todo.md` 为内部清单，默认不进 MkDocs `nav`
+- API 页：`python tools/gen_api_docs.py`（在本库）→ 再 `sync_document_repo.py`
+- `docs/project/professional-todo.md` 为内部清单，默认不进 MkDocs `nav`
 - Document 仓 `mkdocs build --strict` 会把断链当错误

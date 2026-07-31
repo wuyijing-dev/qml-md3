@@ -217,7 +217,7 @@ qml/
     ...
 ```
 
-If `Md3.dll` or `qml/Md3/` is missing, enable `md3_deploy_shared_runtime` in CMake (see [packaging.md](packaging.md)).
+If `Md3.dll` or `qml/Md3/` is missing, enable `md3_deploy_shared_runtime` in CMake (see [packaging.md](../getting-started/packaging.md)).
 
 **Debug vs Release:** packaged Md3 may only ship Release `Md3.dll`. For Debug Kit builds, either:
 
@@ -242,6 +242,6 @@ If `Md3.dll` or `qml/Md3/` is missing, enable `md3_deploy_shared_runtime` in CMa
 
 ## Related
 
-- [integration.md](integration.md) — `find_package(Md3)` and linking
-- [packaging.md](packaging.md) — build `dist/Md3` and deploy shared runtime
+- [integration.md](../getting-started/integration.md) — `find_package(Md3)` and linking
+- [packaging.md](../getting-started/packaging.md) — build `dist/Md3` and deploy shared runtime
 - [api/Md3ApplicationWindow.md](api/Md3ApplicationWindow.md) — window shell API

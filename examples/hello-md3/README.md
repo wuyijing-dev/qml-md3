@@ -23,4 +23,4 @@ cmake -S . -B build -DCMAKE_PREFIX_PATH="D:/Qt/6.10.2/mingw_64"
 cmake --build build
 ```
 
-See [docs/quickstart.md](../../docs/quickstart.md).
+See [docs/getting-started/quickstart.md](../../docs/getting-started/quickstart.md).

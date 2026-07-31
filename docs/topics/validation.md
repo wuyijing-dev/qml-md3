@@ -51,4 +51,4 @@ Md3Form {
 
 - 路径：`Md3PathField`（`notFoundText` / `permissionDeniedText`）
 - 日期：`Md3DateField`（`Qt.locale()` + `dateFormat`）见 [datetime.md](datetime.md)
-- 设计模式：[design-guidelines.md](design-guidelines.md)
+- 设计模式：[design-guidelines.md](../guides/design-guidelines.md)

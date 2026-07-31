@@ -2,7 +2,7 @@
 
 Manual keyboard / AT checklist for release candidates. Run after UI changes to Dialog, Menu, Select, DataTable, ListView, CommandBar, or PageHost.
 
-Static heuristic: `python scripts/checks/check_a11y_qml.py --json docs/a11y-scan.json`
+Static heuristic: `python scripts/checks/check_a11y_qml.py --json scripts/checks/out/a11y-scan.json`
 
 ## Matrix
 

@@ -3,7 +3,7 @@
 
 Usage:
   python scripts/checks/check_a11y_qml.py
-  python scripts/checks/check_a11y_qml.py --json docs/a11y-scan.json
+  python scripts/checks/check_a11y_qml.py --json scripts/checks/out/a11y-scan.json
 
 Exit 0 always (report); use --strict to exit 1 when findings > 0.
 """

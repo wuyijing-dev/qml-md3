@@ -48,4 +48,4 @@ engine.loadFromModule("MyApp", "Main");
 return app.exec();
 ```
 
-See also: [Md3Graphics](Md3Graphics.md), [../integration.md](../integration.md)
+See also: [Md3Graphics](Md3Graphics.md), [../integration.md](../getting-started/integration.md)

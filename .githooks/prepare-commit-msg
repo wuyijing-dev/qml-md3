@@ -1,0 +1,9 @@
+#!/bin/sh
+# Remove Cursor co-author trailers before the commit is finalized.
+DIR=$(dirname "$0")
+if command -v python >/dev/null 2>&1; then
+  python "$DIR/prepare-commit-msg.py" "$1"
+elif command -v python3 >/dev/null 2>&1; then
+  python3 "$DIR/prepare-commit-msg.py" "$1"
+fi
+exit 0

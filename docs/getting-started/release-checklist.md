@@ -7,7 +7,7 @@ Use before tagging a version consumers will `find_package`.
 - [ ] `CHANGELOG.md` has a section for this version (features / fixes / breaking)
 - [ ] Version in root `CMakeLists.txt` `project(QML_MD3 VERSION …)` matches tag
 - [ ] [api-stability.md](api-stability.md): no unannounced Public API breaks
-- [ ] Experimental APIs still pointed at [experimental.md](experimental.md)
+- [ ] Experimental APIs still pointed at [experimental.md](../topics/experimental.md)
 - [ ] `LICENSE` + `NOTICE` present and font/icon notes still accurate
 
 ## Build & package
@@ -21,7 +21,7 @@ Use before tagging a version consumers will `find_package`.
 ## Docs
 
 - [ ] Guide pages updated if behavior changed (`integration`, `quickstart`, `packaging`)
-- [ ] If API surface changed: run `python scripts/docs/gen_api_docs.py` **and** intentionally commit `docs/api/`
+- [ ] If API surface changed: run `python tools/gen_api_docs.py` **and** intentionally commit `docs/api/`
 - [ ] Document site sync is **manual** (`workflow_dispatch` or local `--push`) — not on every API regen
 
 ## Tag & announce
