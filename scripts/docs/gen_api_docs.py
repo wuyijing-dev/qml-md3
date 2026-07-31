@@ -713,6 +713,8 @@ def main() -> None:
 
     (OUT / "README.md").write_text("\n".join(index) + "\n", encoding="utf-8")
     print(f"Wrote {len(infos)} API docs → {OUT}")
+    print("Note: local only — do not auto-commit/push Document repo; "
+          "commit docs/api only when intentionally shipping API docs.")
 
 
 if __name__ == "__main__":

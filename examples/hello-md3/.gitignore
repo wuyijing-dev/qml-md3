@@ -1,0 +1,2 @@
+# Ignore local package drop used by find_package demos
+examples/hello-md3/Md3/

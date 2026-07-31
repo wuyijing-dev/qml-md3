@@ -11,9 +11,21 @@ Enterprise Material Design 3 component library for **Qt Quick / QML 6.8+**, visu
 
 ## Requirements
 
-- Qt **6.8+** (developed against Qt 6.10.2)
+- Qt **6.8+** recommended (developed against Qt 6.10+; 6.5 stage-1 — see [docs/qt-version-matrix.md](docs/qt-version-matrix.md))
 - CMake 3.16+
 - C++17
+
+## Support scope
+
+| | Official focus | Notes |
+|--|----------------|-------|
+| **OS** | Windows desktop | Linux / macOS best-effort until CI expands |
+| **Qt** | 6.8+ full library | 5.15 = bootstrap only |
+| **API** | Types in `docs/api/` (non-experimental) | See [docs/api-stability.md](docs/api-stability.md) |
+| **Experimental** | No SemVer promise | [docs/experimental.md](docs/experimental.md) |
+| **License** | MIT | Fonts/icons: [NOTICE](NOTICE) |
+
+Status: **pre-production 1.0** until the P0 checklist in [docs/professional-todo.md](docs/professional-todo.md) is fully signed off and a release is tagged per [docs/release-checklist.md](docs/release-checklist.md).
 
 ## Import
 
@@ -137,48 +149,44 @@ int main(int argc, char *argv[]) {
 | Path | Role |
 |------|------|
 | `src/Md3/` | Library module (`URI Md3`) — `CMakeLists.txt` is self-contained |
-| `gallery/` | Optional component browser (gated by `MD3_BUILD_GALLERY`) |
+| `gallery/` | Optional component browser (`MD3_BUILD_GALLERY`) |
+| `examples/hello-md3/` | Minimal consumer (`MD3_BUILD_EXAMPLES`) |
+| `tests/smoke/` | qmltestrunner smoke (`MD3_BUILD_TESTS`) |
 | `cmake/` | `Md3Config.cmake` for `find_package` after install |
-| `docs/` | Architecture, tokens, per-component specs |
-| `resources/fonts/` | HarmonyOS Sans SC Regular (+ optional Medium/Bold) + Material Icons |
+| `docs/` | Guides + generated API |
+| `src/Md3/resources/fonts/` | HarmonyOS Sans SC + Material Icons |
 
 ## CMake options
 
 | Option | Default | Meaning |
 |--------|---------|---------|
 | `MD3_BUILD_GALLERY` | ON if top-level, **OFF** if `add_subdirectory` | Build Gallery app |
+| `MD3_BUILD_EXAMPLES` | OFF | Build `examples/hello-md3` |
+| `MD3_BUILD_TESTS` | OFF | Register qml smoke tests |
 | `MD3_BUILD_SHARED` | OFF (scripts default ON) | Shared instead of static `Md3` |
-| `MD3_QML_CACHEGEN` | **ON** | qmlcachegen for faster cold open; `-DOFF` only when iterating QML without clean rebuild |
-| `MD3_QT_VERSION` | `AUTO` | Qt major selector: `AUTO` / `5` / `6` |
+| `MD3_QML_CACHEGEN` | **ON** | qmlcachegen; `-DOFF` when iterating QML without clean rebuild |
+| `MD3_QT_VERSION` | `AUTO` | Qt major: `AUTO` / `5` / `6` |
 
 ## Docs
 
-- [docs/professional-todo.md](docs/professional-todo.md) — **专业组件库完整 TODO**（治理 / CI / 测试 / a11y / 发版）
-- [docs/a11y.md](docs/a11y.md) — 无障碍约定、键盘操作、验收与扫描脚本
-- [docs/i18n.md](docs/i18n.md) — `qsTr` / `Md3I18n` / `.ts`→`.qm` 工作流
-- [docs/api/README.md](docs/api/README.md) — **完整控件 API**（一控件一文档，含全部属性/信号/方法）
-- [docs/packaging.md](docs/packaging.md) — **预编译包（默认 shared）/ 系统安装 / 同目录 `Md3/`**
-- [docs/integration.md](docs/integration.md) — CMake + `Md3::run`
-- [docs/qt-version-matrix.md](docs/qt-version-matrix.md) — Qt 5.15 / 6.5 / 6.8 stage matrix
-- [docs/design-guidelines.md](docs/design-guidelines.md) — 变体 / 密度 / Sheet·Dialog / 表单与空态
-- [docs/buttons-commands.md](docs/buttons-commands.md) — Toggle / DropDown / Hyperlink / CommandBar（WinUI 对照）
-- [docs/collections.md](docs/collections.md) — ListView / GridView / Flip / Swipe / 就地编辑
-- [docs/performance.md](docs/performance.md) — first paint / page cache / memory tradeoffs
-- [docs/mkdocs-hosting.md](docs/mkdocs-hosting.md) — MkDocs → 专用仓 [QML_MD3_Document](https://github.com/wuyijing-dev/QML_MD3_Document) / Pages
-- [docs/consumer-app-main-qml.md](docs/consumer-app-main-qml.md) — fix consumer app `Main.qml` / qrc load failures
-- [docs/tokens.md](docs/tokens.md) — 主题令牌
-- [CHANGELOG.md](CHANGELOG.md)
+- [docs/quickstart.md](docs/quickstart.md) — **≤10 min**
+- [docs/professional-todo.md](docs/professional-todo.md) — production TODO
+- [docs/api-stability.md](docs/api-stability.md) — SemVer / public API
+- [docs/release-checklist.md](docs/release-checklist.md)
+- [docs/api/README.md](docs/api/README.md) — control API index
+- [docs/packaging.md](docs/packaging.md) · [docs/integration.md](docs/integration.md)
+- [docs/index.md](docs/index.md) — full guide map
+- [LICENSE](LICENSE) · [NOTICE](NOTICE) · [CHANGELOG.md](CHANGELOG.md)
 
-Sibling tools:
+Sibling: [QML_Md3_Generation](https://github.com/wuyijing-dev/QML_Md3_Generation) — project wizard.
 
-- [QML_Md3_Generation](https://github.com/wuyijing-dev/QML_Md3_Generation) — **QML 新建工程向导**（同目录 `Md3/` 包）
-
-Regenerate QML API pages after editing controls:
+Regenerate API property tables **locally** after editing controls (do not auto-push Document repo):
 
 ```powershell
 python scripts/docs/gen_api_docs.py
+# Commit docs/api only when intentionally shipping API docs.
 ```
 
 ## Version
 
-`1.0.0` — first stable desktop-focused Md3 component library release.
+`1.0.0` — **pre-production** desktop-focused release (see CHANGELOG).

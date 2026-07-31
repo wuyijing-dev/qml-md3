@@ -1,15 +1,9 @@
 name: docs-sync
 
-# Push markdown from this library into wuyijing-dev/QML_MD3_Document.
+# Manual sync only — do not push Document repo on every docs/api regen.
 # Requires repository secret DOCUMENT_SYNC_TOKEN (PAT with Contents:write on Document).
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "docs/**"
-      - "scripts/docs/sync_document_repo.py"
-      - ".github/workflows/docs-sync.yml"
   workflow_dispatch:
 
 permissions:
@@ -34,13 +28,13 @@ jobs:
         run: |
           if [ -z "${{ secrets.DOCUMENT_SYNC_TOKEN }}" ]; then
             echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::DOCUMENT_SYNC_TOKEN not set; skip remote sync. Run: python scripts/docs/sync_document_repo.py --push"
+            echo "::error::DOCUMENT_SYNC_TOKEN not set"
+            exit 1
           else
             echo "present=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Clone document repo
-        if: steps.token.outputs.present == 'true'
         env:
           DOCUMENT_SYNC_TOKEN: ${{ secrets.DOCUMENT_SYNC_TOKEN }}
         run: |
@@ -49,7 +43,6 @@ jobs:
             "$HOME/QML_MD3_Document"
 
       - name: Sync docs and push
-        if: steps.token.outputs.present == 'true'
         env:
           DOCUMENT_SYNC_TOKEN: ${{ secrets.DOCUMENT_SYNC_TOKEN }}
         run: |

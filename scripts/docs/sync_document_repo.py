@@ -3,10 +3,13 @@
 
 Usage:
   python scripts/docs/sync_document_repo.py
+  python scripts/docs/sync_document_repo.py --dest ../QML_MD3_Document
   python scripts/docs/sync_document_repo.py --dest ../QML_MD3_Document --push
-  python scripts/docs/sync_document_repo.py --dest https://github.com/wuyijing-dev/QML_MD3_Document.git --push
 
 Default --dest is ../QML_MD3_Document relative to the library repo root.
+
+Push is opt-in (--push). CI docs-sync is workflow_dispatch only — do not
+wire gen_api_docs to an automatic Document push.
 """
 from __future__ import annotations
 

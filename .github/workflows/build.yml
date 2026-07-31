@@ -1,0 +1,56 @@
+name: build
+
+# Compile the Md3 library (no Gallery). Optional smoke tests when Qt provides qmltestrunner.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/api/**"
+      - "docs/api-manual/**"
+      - "**.md"
+      - "!README.md"
+      - "!CHANGELOG.md"
+      - ".github/workflows/docs-sync.yml"
+  pull_request:
+    paths-ignore:
+      - "docs/api/**"
+      - "docs/api-manual/**"
+      - "**.md"
+      - "!README.md"
+      - "!CHANGELOG.md"
+      - ".github/workflows/docs-sync.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  library-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.8.3"
+          modules: "qtdeclarative"
+          cache: true
+
+      - name: Configure (library + examples + tests)
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DMD3_BUILD_GALLERY=OFF \
+            -DMD3_BUILD_EXAMPLES=ON \
+            -DMD3_BUILD_TESTS=ON \
+            -DMD3_QML_CACHEGEN=OFF
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Smoke tests
+        run: ctest --test-dir build --output-on-failure
+        continue-on-error: true

@@ -163,7 +163,19 @@ cmake -S . -B build -G Ninja -DMD3_ROOT=/path/to/QML_MD3
 | CMake looks under `build/Md3` | Wrong — put `Md3/` next to **source** `CMakeLists.txt` |
 | `cmake --build` → missing `CMakeCache.txt` | Run `cmake -S . -B build` first |
 
+## Shared vs static (defaults)
+
+| | **Shared (package scripts default)** | **Static** |
+|--|--------------------------------------|------------|
+| How | `cli.py` / `package-*.ps1` default | `--static` / `SHARED=0` |
+| Deploy | Ship `bin/*.dll` or `lib/*.so*` | One binary; larger link |
+| `main.cpp` | `Q_IMPORT_QML_PLUGIN` optional but OK | **Required** or plugin discarded |
+| Prefer when | Normal desktop apps | Locked-down / single-file deploy |
+
+Quickstart: [quickstart.md](quickstart.md).
+
 ## Related
 
+- [quickstart.md](quickstart.md) — ≤10 min path
 - [integration.md](integration.md) — subdirectory vs package
 - [Md3 Create README](https://github.com/wuyijing-dev/QML_Md3_Generation) — wizard build steps

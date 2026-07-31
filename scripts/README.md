@@ -6,7 +6,7 @@
 |-----------|---------|-------|
 | [`packaging/`](packaging/) | Qt 探测、CMake 打包、TUI | `python scripts/packaging/cli.py` |
 | [`checks/`](checks/) | 静态检查（a11y / qsTr） | `python scripts/checks/check_*.py` |
-| [`docs/`](docs/) | API 文档生成 | `python scripts/docs/gen_api_docs.py` |
+| [`docs/`](docs/) | API 文档生成（本地）；Document 同步需显式 `--push` | `python scripts/docs/gen_api_docs.py` |
 | [`assets/`](assets/) | 字体等资源下载 | `powershell -File scripts/assets/download-fonts.ps1` |
 
 ## packaging/
@@ -38,7 +38,12 @@ python scripts/checks/check_qstr_coverage.py --json docs/i18n-scan.json
 ## docs/
 
 ```bash
+# Regenerate docs/api/*.md locally (merges docs/api-manual appendices).
 python scripts/docs/gen_api_docs.py
+# Do not auto-push the Document repo after regen.
+
+python scripts/docs/sync_document_repo.py          # copy only
+python scripts/docs/sync_document_repo.py --push   # explicit push only
 ```
 
 ## assets/

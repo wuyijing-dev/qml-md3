@@ -14,3 +14,9 @@ When a coding task is finished and there are meaningful file changes:
 4. After a successful commit, **try `git push`** to `origin` when the branch tracks a remote. If the network fails, report that the commit is local and push can be retried later—do not block on push.
 5. Skip empty commits when there is nothing to commit. If the only change is the rule/docs the user did not ask to commit as part of the task, still include related project fixes from that same turn.
 6. Do not push `--force` to main/master.
+
+## Docs / codegen exceptions (do not auto-push)
+
+7. **Do not** commit or push changes that are *only* regenerated `docs/api/*.md` from `scripts/docs/gen_api_docs.py`, unless the user explicitly asked to regenerate and publish API docs.
+8. **Do not** run `scripts/docs/sync_document_repo.py --push` (or otherwise push the Document repo) unless the user explicitly asks.
+9. Prefer keeping hand-written notes in `docs/api-manual/` and guide pages (`docs/*.md` outside `api/`); regenerate API tables locally when needed, and include them in a commit only when shipping a intentional docs/API release.

@@ -24,7 +24,16 @@ python scripts/docs/sync_document_repo.py --dest D:/QML_MD3/QML_MD3_Document --p
 
 3. Document 仓的 Actions 自动 `mkdocs build` 并部署 Pages
 
-CI：本库 `.github/workflows/docs-sync.yml` 在 `docs/**` 变更时可自动同步（需配置 secret `DOCUMENT_SYNC_TOKEN`，见下）。
+CI：本库 `.github/workflows/docs-sync.yml` 仅 **`workflow_dispatch` 手动触发**（避免 `gen_api_docs` 刷屏推送 Document 仓）。需配置 secret `DOCUMENT_SYNC_TOKEN`。
+
+本地默认同步**不推送**；确认后再加 `--push`：
+
+```bash
+python scripts/docs/sync_document_repo.py
+python scripts/docs/sync_document_repo.py --push
+```
+
+`gen_api_docs.py` 只写本仓 `docs/api/`；**不要**在每次重生后自动 push Document 仓。
 
 ## Document 仓本地预览
 

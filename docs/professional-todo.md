@@ -14,9 +14,9 @@
 | 维度 | 现状 | 进生产还要什么 |
 |------|------|----------------|
 | 控件广度 | 按钮/表单/表/树/壳/反馈/集合已齐 | 少补壳层一体控件即可 |
-| 工程可信 | 几乎无编译 CI、无 qmltest | **P0：CI + hello 样例** |
-| 法律/发版 | CHANGELOG 有；**无根目录 LICENSE** | **P0：许可证 + 发版 checklist** |
-| API 契约 | 生成文档全；破坏性变更无流程 | **P0：公开 API / SemVer 规则** |
+| 工程可信 | 有 Linux 编译 CI + smoke 骨架；hello 样例 | 盯 CI 绿灯；补强冒烟稳定性 |
+| 法律/发版 | **LICENSE + NOTICE + checklist** | 正式 tag 前走发版清单 |
+| API 契约 | **api-stability.md** | 真正 tag 前保持 pre-production 措辞 |
 | 平台 | 文档矩阵有；CI 未钉死 | **P1：Win + 一另平台绿灯** |
 | 无障碍 | 约定文档有；无审计清单勾选 | **P1：核心路径键盘/读屏抽检** |
 | 性能 | 有指南；无回归门禁 | **P1：VirtualList/DataTable 冒烟预算** |
@@ -30,30 +30,30 @@
 
 ### 1.1 法律与发版
 
-- [ ] 根目录 **`LICENSE`**（建议 MIT 或与 Qt 消费方友好的许可证；写清字体/图标二次许可）
-- [ ] **`NOTICE` / 第三方归因**（Material Icons、若有 KF 等）
-- [ ] 发版 checklist：`CHANGELOG` 条目、版本号、`find_package` 安装包、Gallery 冒烟、文档站同步
-- [ ] README「支持范围」：Qt 最低版本、官方仅保证的 OS、实验 API 指向 `docs/experimental.md`
+- [x] 根目录 **`LICENSE`**（MIT）
+- [x] **`NOTICE` / 第三方归因**（Material Icons、HarmonyOS Sans、Qt）
+- [x] 发版 checklist：[`docs/release-checklist.md`](release-checklist.md)
+- [x] README「支持范围」+ 实验 API 指向 `docs/experimental.md`
 
 ### 1.2 消费方证明
 
-- [ ] **`examples/hello-md3`**：干净工程 `find_package(Md3)` → 一窗 + Theme + Button + Dialog
-- [ ] 文档一条龙：从 zip/`dist/Md3` 到跑起来 ≤ 10 分钟（Windows 为主，附 Linux）
-- [ ] 明确 **static vs shared** 推荐默认（与 `docs/packaging.md` 一致，加故障对照）
+- [x] **`examples/hello-md3`**：`find_package` / in-tree → 一窗 + Theme + Button + Dialog
+- [x] 文档一条龙：[`docs/quickstart.md`](quickstart.md)
+- [x] **static vs shared** 推荐默认 + 故障对照（`packaging.md`）
 
 ### 1.3 CI 与测试底线
 
-- [ ] GitHub Actions：**配置 + 编译库**（至少 Windows 或 Linux 一条；Gallery 可选矩阵）
-- [ ] **qmltest / 冒烟**：Theme 单例、Button 点击、Dialog Esc、PageHost 推页（5–15 个用例即可）
-- [ ] PR 门禁：编译失败不可合；文档-only 可跳过重构建（可选）
-- [ ] `tests/baselines`：选定 3–5 个控件做视觉基线流程（可先手工，后自动化）
+- [x] GitHub Actions：**配置 + 编译库**（`build.yml`，Linux + Qt 6.8）
+- [x] **qmltest / 冒烟**：Theme、Button、Dialog Esc、PageHost（`tests/smoke`；CI `continue-on-error` 至稳定）
+- [x] PR 门禁：代码变更触发 build；纯 `docs/api` 变更可跳过
+- [x] `tests/baselines`：选定 3–5 控件的手工基线流程说明
 
 ### 1.4 API 契约
 
-- [ ] 文档页：**Public vs Private**（`private/`、playground、实验件不进 SemVer 承诺）
-- [ ] SemVer 规则：何为 breaking（删属性 / 改枚举序 / 改默认交互）
-- [ ] 弃用策略：`/// @deprecated` + Gallery 警告 + 至少一个次版本过渡
-- [ ] `1.0.0` 真正 tag：上述 P0 勾完再打；在此之前 CHANGELOG 标 Pre-production
+- [x] 文档页：**Public vs Private** — [`api-stability.md`](api-stability.md)
+- [x] SemVer 规则（同页）
+- [x] 弃用策略（同页）
+- [ ] `1.0.0` **正式稳定 tag**：CI 持续绿灯 + 发版清单走完后再打；当前 CHANGELOG 标 **pre-production**
 
 ---
 
@@ -162,7 +162,7 @@
 
 对外可以说 **Production-ready 1.0** 当且仅当：
 
-- [ ] P0 全部勾选（许可证、hello、CI 编译、冒烟测试、SemVer/公开 API 说明、正式 tag）
+- [~] P0 工程项已齐（LICENSE、hello、CI、smoke、SemVer 文档）；**正式稳定 tag** 仍待 CI 稳定后补
 - [ ] P1 壳层至少 **Flyout 或 NavigationView 其一** 可用，TitleBar 示例可抄
 - [ ] Windows 上 hello-md3 与 Gallery 核心页无已知 blocker
 - [ ] 文档站 / `docs/integration.md` 与安装包路径一致
@@ -175,7 +175,8 @@
 
 | 日期 | 说明 |
 |------|------|
-| 2026-07-31 | **改为生产可用视角**：P0 工程契约优先；WinUI 剩余降为 P2；保留壳层为 P1 |
+| 2026-07-31 | P0：LICENSE/NOTICE、hello-md3、build CI、smoke、api-stability；docs-sync 改为手动；文档索引清理 |
+| 2026-07-31 | **改为生产可用视角**：P0 工程契约优先；WinUI 剩余降为 P2 |
 | 2026-07-31 | 集合面：ListView/GridView/ItemsView/Pips/Swipe/PTR + DataTable 就地编辑 |
 | 2026-07-31 | 按钮/命令条文档与 api-manual |
 | 2026-07-31 | 初版 WinUI 3 能力对标稿 |

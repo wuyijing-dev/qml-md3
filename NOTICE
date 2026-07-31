@@ -1,0 +1,37 @@
+# Third-party notices
+
+QML MD3 (MIT) bundles or references the following third-party materials.
+Their licenses apply to those components in addition to this project's MIT license.
+
+## Material Icons / Material Icons Outlined
+
+- Files: `src/Md3/resources/fonts/MaterialIcons-Regular.ttf`,
+  `MaterialIconsOutlined-Regular.otf`
+- Copyright: Google LLC
+- License: Apache License 2.0
+- Upstream: https://github.com/google/material-design-icons
+
+## HarmonyOS Sans SC
+
+- Files: `src/Md3/resources/fonts/HarmonyOS_SansSC_*.ttf`
+- Copyright: Huawei Device Co., Ltd.
+- License: HarmonyOS Sans Fonts License Agreement (as distributed by Huawei)
+- Upstream: https://developer.huawei.com/ (HarmonyOS design resources)
+- Apps that redistribute these font binaries must comply with Huawei's font license terms.
+  If your product cannot accept that license, disable bundled SC fonts and supply your own
+  UI font (see packaging / Theme font configuration).
+
+## Qt
+
+- QML MD3 links against Qt modules at build/runtime.
+- Qt is licensed under LGPL / commercial terms from The Qt Company.
+- This project does not redistribute Qt binaries in source form.
+
+## Optional dependencies
+
+- KDE Frameworks (if enabled in your build) retain their LGPL licenses.
+- See your packaged `Md3` install and system packages for exact versions.
+
+## Documentation tooling
+
+- MkDocs Material theme (docs site) is not required to use the library at runtime.

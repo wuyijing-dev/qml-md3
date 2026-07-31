@@ -1,6 +1,7 @@
 # Local preview only. Canonical MkDocs + GitHub Pages live in:
 #   https://github.com/wuyijing-dev/QML_MD3_Document
-# Sync: python scripts/docs/sync_document_repo.py --push
+# Sync is manual: workflow_dispatch or
+#   python scripts/docs/sync_document_repo.py --push
 
 site_name: QML MD3
 site_description: Material Design 3 component library for Qt Quick / QML
@@ -46,23 +47,25 @@ markdown_extensions:
 
 nav:
   - 首页: index.md
+  - 快速开始: quickstart.md
   - 集成: integration.md
-  - 性能: performance.md
-  - 设计与模式: design-guidelines.md
-  - 按钮与命令条: buttons-commands.md
-  - 集合与列表: collections.md
-  - 模块边界: module-boundaries.md
-  - 校验 API: validation.md
-  - 反馈层级: feedback.md
-  - 托盘菜单: tray.md
-  - 无障碍: a11y.md
-  - 国际化: i18n.md
   - 打包: packaging.md
-  - DataTable: datatable.md
-  - 深链路由: routing.md
-  - 多文档: multi-document.md
-  - 发版更新安全: release-updater.md
-  - Qt 版本矩阵: qt-version-matrix.md
-  - 实验性 API: experimental.md
-  - 文档托管: mkdocs-hosting.md
+  - API 稳定性: api-stability.md
+  - 发版清单: release-checklist.md
+  - 生产 TODO: professional-todo.md
+  - 设计与模式:
+    - 设计指南: design-guidelines.md
+    - 按钮与命令: buttons-commands.md
+    - 集合与列表: collections.md
+    - 布局: layout.md
+    - 反馈层级: feedback.md
+    - 模块边界: module-boundaries.md
+  - 专题:
+    - 性能: performance.md
+    - 无障碍: a11y.md
+    - 国际化: i18n.md
+    - DataTable: datatable.md
+    - Qt 版本矩阵: qt-version-matrix.md
+    - 实验性 API: experimental.md
+    - 文档托管: mkdocs-hosting.md
   - API 索引: api/README.md
