@@ -19,17 +19,20 @@ Md3ApplicationWindow {
     railExpanded: false
     railHeader: qsTr("组件图库")
     pagePadding: Md3Theme.pagePadding
-    pageSkeleton: true
-    pageAsync: true
-    pageCacheLimit: 1
-    pageL2CacheLimit: 1
-    pagePrefetch: false
+    // Seamless open: no skeleton/busy gap; sync first paint; keep neighbors warm.
+    pageSkeleton: false
+    pageAsync: false
+    pageCacheLimit: 6
+    pageL2CacheLimit: 32
+    pagePrefetch: true
     pagePredictPrefetch: false
     pageWarmStart: false
     pageL2Warm: true
     pageIdleTrimMs: 90000
     pageLeaveSnapshot: false
     pageNavWarm: true
+    pageTransition: "none"
+    pageTransitionDuration: 0
     persistSession: true
     settingsOrganization: "QML_MD3"
     settingsApplication: "Gallery"

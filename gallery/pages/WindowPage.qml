@@ -159,7 +159,7 @@ Flickable {
         Md3HStack {
             spacing: 12
             Md3Switch {
-                checked: root.appWin ? root.appWin.pageSkeleton : true
+                checked: root.appWin ? root.appWin.pageSkeleton : false
                 onToggled: function (on) {
                     if (root.appWin)
                         root.appWin.pageSkeleton = on
