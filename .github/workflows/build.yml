@@ -32,16 +32,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libgl1-mesa-dev libxkbcommon-dev \
+            libxcb-cursor0 libxcb-cursor-dev libxcb-xinerama0 libxcb-icccm4 \
+            libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-shape0
+
+      # Default linux desktop kit already includes QtDeclarative / Quick.
+      # Do NOT pass modules: qtdeclarative — aqt rejects that name.
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
           version: "6.8.3"
-          modules: "qtdeclarative"
+          host: linux
+          target: desktop
+          arch: linux_gcc_64
           cache: true
 
       - name: Configure (library + examples + tests)
         run: |
-          cmake -S . -B build \
+          cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DMD3_BUILD_GALLERY=OFF \
             -DMD3_BUILD_EXAMPLES=ON \
@@ -52,5 +63,7 @@ jobs:
         run: cmake --build build --parallel
 
       - name: Smoke tests
+        env:
+          QT_QPA_PLATFORM: offscreen
         run: ctest --test-dir build --output-on-failure
         continue-on-error: true
