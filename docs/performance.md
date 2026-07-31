@@ -130,30 +130,36 @@ Relative `source` paths resolve via `resolvedPageSourceBase` (hot-reload disk tr
 
 空壳 / async / L2 warm；L1 保持较小。
 
-### E+（**当前 Gallery 默认**）— 可多占一点内存换切页手感
+### F. Seamless open（无感：不显示 skeleton / busy）
 
-在 E 基础上：
-
-- 暖机后 **`pageCacheLimit: 6`** + **`pagePrefetch: true`**（±1 邻居活页）
-- **`pageIdleTrimMs: 90000`** — 避免几秒无操作就把 L1 裁回 1
-- 仍关 `pagePredictPrefetch` / `pageWarmStart`（不全表常驻 Item）
+关掉可见 loading，用 **同步首屏 + 常驻近邻** 换「空白/骨架」：
 
 ```qml
 Md3ApplicationWindow {
-    pageAsync: true
-    pageSkeleton: true
-    pageL2Warm: true
-    pageIdleTrimMs: 90000
-    pageCacheLimit: 1             // after warm → 6
+    pageSkeleton: false          // 关键：不要骨架屏
+    pageAsync: false             // 首屏同步孵化，避免 Loader 空窗
+    pageCacheLimit: 6
     pageL2CacheLimit: 32
-    pagePrefetch: false           // after warm → true
-    pagePredictPrefetch: false
-    pageWarmStart: false
-    pageLeaveSnapshot: false
-    hotReload: false
-    progressiveContent: true
+    pagePrefetch: true
+    pageL2Warm: true
+    pageWarmStart: false         // 冷启别全表预编译（会拖第一帧）
+    pageTransition: "none"
+    pageTransitionDuration: 0
+    pageNavWarm: true
+    pageIdleTrimMs: 90000
+    progressiveContent: true     // 页内重块仍 DeferredSection
 }
 ```
+
+| 现象 | 原因 | 处理 |
+|------|------|------|
+| 切页闪骨架 | `pageSkeleton: true` | 设 `false` |
+| 切页白一下再出内容 | `pageAsync: true` 且无骨架 | `pageAsync: false`，或提高 L2 + prefetch |
+| 回访仍慢 | `pageCacheLimit: 1` 被 idle trim | `pageCacheLimit ≥ 4` + `pageIdleTrimMs` 加大 |
+| 冷启卡住 | `pageWarmStart: true` / 重页同步 | 关 warmStart；重页用 `Md3DeferredSection` |
+| 页内仍 “Loading” | DataTable `loading` / 业务态 | 与 PageHost 无关，别和骨架混为一谈 |
+
+Gallery 当前默认偏 **Profile F**（无感），内存高于纯 Low memory。
 
 Page author pattern (Charts already):
 
