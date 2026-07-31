@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Minimal PySide host for the shared Md3 QML module."""
+"""Minimal PySide host for the shared Md3 QML module (+ native helper demo)."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ PYTHON_DIR = ROOT / "python"
 if str(PYTHON_DIR) not in sys.path:
     sys.path.insert(0, str(PYTHON_DIR))
 
-from md3qml import RunOptions, run  # noqa: E402
+from md3qml import Md3Application, RunOptions  # noqa: E402
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -33,6 +33,11 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Allow PySide2 even when loading Md3 (will fail unless a Qt5 Md3 module exists)",
     )
+    parser.add_argument(
+        "--demo-native",
+        action="store_true",
+        help="Call C++ Md3WindowHelper via app.native after load (beep + status)",
+    )
     args = parser.parse_args(argv)
 
     opts = RunOptions(
@@ -44,7 +49,20 @@ def main(argv: list[str] | None = None) -> int:
         binding=None if args.binding == "auto" else args.binding,
         require_qt6_for_md3=not args.allow_qt5,
     )
-    return run(Path(__file__).with_name("Main.qml"), opts=opts)
+    app = Md3Application(opts)
+    qml = Path(__file__).with_name("Main.qml")
+    if not app.load_file(qml):
+        print("Failed to load", qml, file=sys.stderr)
+        return 1
+    if args.demo_native:
+        n = app.native
+        print(
+            f"native: platform={n.platform_id} display={n.display_server} "
+            f"dark={n.system_color_scheme_dark()}"
+        )
+        n.beep()
+        print(f"lastNativeStatus={n.last_native_status}")
+    return app.exec()
 
 
 if __name__ == "__main__":

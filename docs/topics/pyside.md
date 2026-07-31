@@ -36,7 +36,8 @@ md3qml run examples/hello-pyside/Main.qml --auto-fetch
 |--------|------|
 | `md3qml.qt` | Uniform `QtCore` / `QObject` / `Signal` / `Slot` from detected PySide |
 | `md3qml.bridge` | `connect_signal` / `invoke` / `find_child` / `root_object` |
-| `Md3Application` | Long-lived engine, context props, `load_file` / `load_data` / `load_module`, `auto_fetch`, QML warnings |
+| `md3qml.native.WindowHelper` | **C++-parity** facade over `Md3WindowHelper` (same invokables as C++) |
+| `Md3Application.native` | Lazy `WindowHelper` after imports; default window = first root |
 | `RunOptions.auto_fetch` | Download shared zip when prefix missing |
 | CLI `md3qml install` | Fetch natives (+ optional `pip install PySide6`) |
 
@@ -45,18 +46,28 @@ from md3qml import Md3Application, RunOptions
 from md3qml.qt import QObject, Signal, Slot
 
 class Host(QObject):
-    ping = Signal(str)
-
     @Slot(str)
     def log(self, text: str) -> None:
         print(text)
 
-app = Md3Application(RunOptions(auto_fetch=True, application_name="Demo"))
+app = Md3Application(RunOptions(application_name="Demo"))
 app.set_context_property("host", Host())
-app.load_file("Main.qml")
+assert app.load_file("Main.qml")
+
+# Same surface as C++ Md3WindowHelper / Md3ApplicationWindow helpers:
+n = app.native
+print(n.platform_id, n.display_server, n.last_native_status)
+n.open_url("https://github.com/wuyijing-dev/QML_MD3")
+n.set_idle_inhibit(True, "demo")
+n.center_on_screen()
+n.set_dock_badge(3)
+n.share_text("hello from Python")
+n.beep()
+
 raise SystemExit(app.exec())
 ```
 
+`WindowHelper` methods use snake_case; pass `window=` or rely on the default root after load.
 ## What to publish on PyPI
 
 Md3 cannot be “just QML source” on pip: users need `Md3.dll` / `libMd3.so` + `lib/qml/Md3` built against the **same Qt major** as PySide. Three practical products:

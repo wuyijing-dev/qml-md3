@@ -6,6 +6,7 @@ from .bridge import connect_signal, disconnect_signal, find_child, invoke, root_
 from .capi import CRunConfig, load_md3_library, run_qml_file_c
 from .doctor import doctor
 from .fetch import candidate_asset_urls, fetch_md3_prefix
+from .native import WindowHelper, create_window_helper
 from .paths import bundled_prefix, resolve_md3_prefix, setup_native_paths
 from .run import RunOptions, run
 
@@ -14,9 +15,11 @@ __all__ = [
     "CRunConfig",
     "Md3Application",
     "RunOptions",
+    "WindowHelper",
     "bundled_prefix",
     "candidate_asset_urls",
     "connect_signal",
+    "create_window_helper",
     "detect_binding",
     "disconnect_signal",
     "doctor",

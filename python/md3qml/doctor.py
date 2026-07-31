@@ -97,5 +97,6 @@ def doctor(*, md3_prefix: str | None = None) -> Tuple[int, List[str]]:
 
     lines.append("INFO CLI: pip install -e ./python   then  md3qml doctor")
     lines.append("INFO or:  python -m md3qml doctor")
+    lines.append("INFO native: app.native → WindowHelper (C++ Md3WindowHelper)")
     lines.append("OK  doctor finished" if ok else "FAIL doctor found blocking issues")
     return (0 if ok else 1), lines

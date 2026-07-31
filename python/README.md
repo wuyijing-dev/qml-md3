@@ -32,12 +32,29 @@ pip install "md3qml[pyside6]"   # after publish + PYPI_API_TOKEN / Release wheel
 md3qml info                     # shows bundled _native when present
 ```
 
+## C++-parity native API
+
+```python
+from md3qml import Md3Application, RunOptions
+
+app = Md3Application(RunOptions(application_name="My App"))
+assert app.load_file("Main.qml")
+n = app.native  # wraps C++ Md3WindowHelper
+n.open_url("https://example.com")
+n.set_idle_inhibit(True, "work")
+n.center_on_screen()
+n.raise_window()
+print(n.platform_id, n.display_server, n.last_native_status)
+raise SystemExit(app.exec())
+```
+
+Also: `from md3qml import WindowHelper, create_window_helper`.
+
 ## Stronger Python binding
 
 ```python
 from md3qml import Md3Application, RunOptions
 from md3qml.qt import QObject, Signal, Slot
-from md3qml.bridge import connect_signal, root_object
 
 class Host(QObject):
     ping = Signal(str)
@@ -50,7 +67,6 @@ class Host(QObject):
 app = Md3Application(RunOptions(application_name="My App", auto_fetch=True))
 app.set_context_property("host", Host())
 assert app.load_file("Main.qml")
-root = app.root_object()
 raise SystemExit(app.exec())
 ```
 

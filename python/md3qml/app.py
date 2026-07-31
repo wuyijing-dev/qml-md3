@@ -70,6 +70,7 @@ class Md3Application:
         self._import_paths: List[str] = []
         self._context: Dict[str, Any] = dict(self.opts.context_properties)
         self._warnings: List[str] = []
+        self._native: Any = None
 
         # Surface QML errors to Python (PySide6).
         warn = getattr(self.engine, "warnings", None)
@@ -101,6 +102,29 @@ class Md3Application:
     @property
     def import_paths(self) -> List[str]:
         return list(self._import_paths)
+
+    @property
+    def native(self) -> Any:
+        """
+        C++ ``Md3WindowHelper`` facade (``md3qml.native.WindowHelper``).
+
+        Created lazily after import paths are prepared. Call ``prepare_imports()``
+        or ``load_file()`` first. After load, defaults ``window`` to the first root.
+        """
+        return self.ensure_native()
+
+    def ensure_native(self) -> Any:
+        if self._native is not None:
+            return self._native
+        if self._prefix is None:
+            self.prepare_imports()
+        from .native import create_window_helper
+
+        self._native = create_window_helper(self.engine, parent=self.engine)
+        roots = list(self.engine.rootObjects())
+        if roots:
+            self._native.set_default_window(roots[0])
+        return self._native
 
     def prepare_imports(self, *, start: Optional[PathLike] = None) -> Path:
         try:
@@ -156,7 +180,13 @@ class Md3Application:
         self._apply_context()
         url = self._qt.QUrl.fromLocalFile(str(qml_path))
         self.engine.load(url)
-        return bool(self.engine.rootObjects())
+        ok = bool(self.engine.rootObjects())
+        if ok and self._native is not None:
+            self._native.set_default_window(self.engine.rootObjects()[0])
+        elif ok:
+            # Warm native helper and bind default window for C++-parity calls.
+            self.ensure_native()
+        return ok
 
     def load_data(self, qml_source: str, *, name: str = "inline.qml") -> bool:
         """Load QML from a string (useful for tests / generated UI)."""
@@ -174,7 +204,10 @@ class Md3Application:
             tmp = Path(tempfile.gettempdir()) / f"md3qml-{name}"
             tmp.write_text(qml_source, encoding="utf-8")
             self.engine.load(self._qt.QUrl.fromLocalFile(str(tmp)))
-        return bool(self.engine.rootObjects())
+        ok = bool(self.engine.rootObjects())
+        if ok:
+            self.ensure_native()
+        return ok
 
     def load_module(self, uri: str, component: str = "Main") -> bool:
         if self._prefix is None:
@@ -184,7 +217,10 @@ class Md3Application:
         if not callable(load_from):
             raise RuntimeError("loadFromModule requires Qt 6 / PySide6")
         load_from(uri, component)
-        return bool(self.engine.rootObjects())
+        ok = bool(self.engine.rootObjects())
+        if ok:
+            self.ensure_native()
+        return ok
 
     def root_objects(self) -> Sequence[Any]:
         return self.engine.rootObjects()
