@@ -90,6 +90,8 @@ Item {
     property real contentPadding: 20
     property bool asynchronous: false
     property bool prefetchNeighbors: false
+    /// When prefetchNeighbors is on: true = L1 warm neighbors; false = L2 Component only.
+    property bool prefetchNeighborsL1: true
     property bool l2Components: true
     /// Few compiled Components — enough for back/forward, not every destination
     property int l2CacheLimit: 1
@@ -460,8 +462,12 @@ Item {
     onDisplayedIndexChanged: {
         _sparseEnsure(displayedIndex)
         Qt.callLater(_syncSparseSlots)
+        Qt.callLater(_syncAllPageActivity)
     }
-    onTransitioningChanged: Qt.callLater(_syncSparseSlots)
+    onTransitioningChanged: {
+        Qt.callLater(_syncSparseSlots)
+        Qt.callLater(_syncAllPageActivity)
+    }
 
     function _contentRect() {
         const w = Math.max(1, width - contentPadding * 2)
@@ -1299,11 +1305,12 @@ Item {
     }
 
     /// Inject shell context so pages need not walk parents / duck-type Window.
-    function _syncPageContext(item) {
+    function _syncPageContext(item, pageIndex) {
         if (!item)
             return
         const win = Window.window
         const host = root
+        const idx = pageIndex === undefined ? -1 : Number(pageIndex)
         _trySetPageProp(item, "md3HostWindow", win)
         _trySetPageProp(item, "md3RouteParams", routeParams)
         _trySetPageProp(item, "routeParams", routeParams)
@@ -1315,12 +1322,35 @@ Item {
         _trySetPageProp(item, "md3PushRoute", function (index, params, opts) {
             return host.pushRoute(index, params, opts)
         })
+        if (idx >= 0)
+            _trySetPageProp(item, "md3PageActive", _pageSlotIsActive(idx))
+    }
+
+    function _pageSlotIsActive(index) {
+        if (index < 0)
+            return false
+        if (transitioning)
+            return index === transitionFrom || index === transitionTo
+                    || index === displayedIndex || index === currentIndex
+        return index === displayedIndex
+    }
+
+    /// Keep shell in L1; pages opt into unloading DeferredSection via md3PageActive.
+    function _syncAllPageActivity() {
+        if (!model)
+            return
+        for (let i = 0; i < model.length; ++i) {
+            const ldr = _loaderAt(i)
+            if (!ldr || !ldr.item)
+                continue
+            _trySetPageProp(ldr.item, "md3PageActive", _pageSlotIsActive(i))
+        }
     }
 
     function _syncCurrentPageContext() {
         const ldr = _loaderAt(currentIndex)
         if (ldr && ldr.item)
-            _syncPageContext(ldr.item)
+            _syncPageContext(ldr.item, currentIndex)
     }
 
     onRouteParamsChanged: Qt.callLater(_syncCurrentPageContext)
@@ -1329,6 +1359,7 @@ Item {
         _sparseEnsure(currentIndex)
         Qt.callLater(_syncSparseSlots)
         Qt.callLater(_syncCurrentPageContext)
+        Qt.callLater(_syncAllPageActivity)
     }
 
     /// Soft-warm: L2 only unless allowL1; never inflates beyond cacheLimit.
@@ -1382,6 +1413,7 @@ Item {
         _dismissLeaveSnapshot(false)
         _evict()
         _schedulePrefetch(displayedIndex)
+        Qt.callLater(_syncAllPageActivity)
     }
 
     function _applyLaunchIntensityProfile() {
@@ -1492,6 +1524,7 @@ Item {
             _dismissLeaveSnapshot(true)
             _evict()
             _schedulePrefetch(displayedIndex)
+            Qt.callLater(_syncAllPageActivity)
             return
         }
         // fromIndex < 0 → enter-only (initial / no previous page)
@@ -1619,7 +1652,7 @@ Item {
             const n = pair[i]
             if (n < 0 || n >= model.length)
                 continue
-            _warmPage(n, true)
+            _warmPage(n, root.prefetchNeighborsL1)
         }
     }
 
@@ -1675,7 +1708,7 @@ Item {
         onTriggered: {
             if (root._hoverHint < 0)
                 return
-            root._warmPage(root._hoverHint, root.prefetchNeighbors)
+            root._warmPage(root._hoverHint, root.prefetchNeighbors && root.prefetchNeighborsL1)
         }
     }
 
@@ -2072,7 +2105,7 @@ Item {
                     if (item) {
                         item.width = Qt.binding(function () { return pageLoader.width })
                         item.height = Qt.binding(function () { return pageLoader.height })
-                        root._syncPageContext(item)
+                        root._syncPageContext(item, pageSlot.pageIndex)
                     }
                     if (pageSlot.pageIndex === root.currentIndex)
                         root._tryShow(pageSlot.pageIndex)

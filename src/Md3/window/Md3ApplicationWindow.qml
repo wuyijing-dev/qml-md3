@@ -106,6 +106,8 @@ Window {
     property int pageIdleTrimMs: 4000
     property real pagePadding: Md3Theme.pagePadding
     property bool pagePrefetch: false
+    /// With pagePrefetch: inflate neighbor L1 Items. False = warm neighbor Components (L2) only.
+    property bool pagePrefetchL1: true
     property bool pagePredictPrefetch: false
     property bool pageL2Cache: true
     property int pageL2CacheLimit: 1
@@ -1395,6 +1397,7 @@ Window {
                     sourceBase: root.resolvedPageSourceBase
                     asynchronous: root.pageAsync
                     prefetchNeighbors: root.pagePrefetch
+                    prefetchNeighborsL1: root.pagePrefetchL1
                     predictPrefetch: root.pagePredictPrefetch
                     l2Components: root.pageL2Cache
                     l2CacheLimit: root.pageL2CacheLimit

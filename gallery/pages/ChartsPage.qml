@@ -5,6 +5,9 @@ import Md3
 Item {
     id: root
 
+    /// Injected by PageHost — DeferredSection unloads heavy loaders while false.
+    property bool md3PageActive: true
+
     property Component kpiCard: Component {
         Md3Card {
             variant: Md3Card.Outlined

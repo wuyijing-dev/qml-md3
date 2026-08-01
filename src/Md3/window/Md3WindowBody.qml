@@ -18,6 +18,8 @@ Item {
     property url sourceBase: ""
     property bool asynchronous: false
     property bool prefetchNeighbors: false
+    /// When true with prefetchNeighbors: inflate neighbor Items (L1). False = L2 only.
+    property bool prefetchNeighborsL1: true
     property bool predictPrefetch: false
     property bool l2Components: true
     property int l2CacheLimit: 1
@@ -189,6 +191,7 @@ Item {
             sourceBase: root.sourceBase
             asynchronous: root.asynchronous
             prefetchNeighbors: root.prefetchNeighbors
+            prefetchNeighborsL1: root.prefetchNeighborsL1
             predictPrefetch: root.predictPrefetch
             l2Components: root.l2Components
             l2CacheLimit: root.l2CacheLimit

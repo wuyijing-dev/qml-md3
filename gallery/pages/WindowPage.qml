@@ -11,6 +11,7 @@ Flickable {
 
     /// Injected by Md3PageHost; fallback Window.window (ApplicationWindow is the Window).
     property var md3HostWindow: null
+    property bool md3PageActive: true
     readonly property var appWin: {
         const w = Md3OverlayHost.resolveWindow(md3HostWindow, root)
         if (w && w.systemBackdrop !== undefined)

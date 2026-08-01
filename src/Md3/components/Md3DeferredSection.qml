@@ -4,6 +4,7 @@ import Md3
 
 /// Within-page progressive load: placeholder first, then create `sourceComponent`.
 /// Honors Md3Theme.progressiveContent (default on). Set forceImmediate to always load now.
+/// When `unloadWhenPageInactive`, disarms while ancestor `md3PageActive` is false (PageHost injects).
 Item {
     id: root
 
@@ -20,6 +21,8 @@ Item {
     property bool requireNearViewport: true
     /// Extra pixels around the viewport before arming.
     property real viewportMargin: 240
+    /// Drop Loader while page is off-display (keep preferredHeight shell).
+    property bool unloadWhenPageInactive: true
 
     readonly property bool progressive: Md3Theme.progressiveContent && !forceImmediate
     readonly property bool ready: loader.status === Loader.Ready
@@ -29,6 +32,8 @@ Item {
     property bool _delayElapsed: !progressive
     property bool _nearViewport: true
     property var _flickable: null
+    property var _pageRoot: null
+    property bool _pageActive: true
 
     Layout.fillWidth: true
     Layout.preferredHeight: preferredHeight
@@ -42,6 +47,59 @@ Item {
         _armed = true
         _delayElapsed = true
         _nearViewport = true
+    }
+
+    /// Destroy heavy Loader item; keep placeholder height.
+    function disarm() {
+        _armed = false
+    }
+
+    /// Re-arm after page return — delay already satisfied; viewport gate still applies.
+    function rearm() {
+        if (!_pageActive && unloadWhenPageInactive)
+            return
+        if (!progressive) {
+            _armed = true
+            return
+        }
+        _delayElapsed = true
+        _hookFlickable()
+        _updateNearViewport()
+        _tryArm()
+    }
+
+    function _findPageRoot() {
+        let p = parent
+        while (p) {
+            try {
+                const v = p.md3PageActive
+                if (typeof v === "boolean")
+                    return p
+            } catch (e) { /* not declared */ }
+            p = p.parent
+        }
+        return null
+    }
+
+    function _resolvePageRoot() {
+        const p = _findPageRoot()
+        if (p === _pageRoot)
+            return
+        _pageRoot = p
+        _syncPageActive()
+    }
+
+    function _syncPageActive() {
+        const next = _pageRoot ? !!_pageRoot.md3PageActive : true
+        if (next === _pageActive)
+            return
+        _pageActive = next
+        if (!unloadWhenPageInactive)
+            return
+        if (!_pageActive)
+            disarm()
+        else
+            rearm()
     }
 
     function _findFlickable() {
@@ -99,6 +157,8 @@ Item {
     function _tryArm() {
         if (_armed)
             return
+        if (unloadWhenPageInactive && !_pageActive)
+            return
         if (!progressive) {
             _armed = true
             return
@@ -111,16 +171,28 @@ Item {
         if (!progressive) {
             _delayElapsed = true
             _nearViewport = true
-            _armed = true
+            if (!unloadWhenPageInactive || _pageActive)
+                _armed = true
         }
+    }
+
+    onUnloadWhenPageInactiveChanged: {
+        if (!unloadWhenPageInactive && !_armed)
+            rearm()
+        else if (unloadWhenPageInactive && !_pageActive)
+            disarm()
     }
 
     on_DelayElapsedChanged: _tryArm()
     on_NearViewportChanged: _tryArm()
-    onParentChanged: Qt.callLater(_hookFlickable)
+    onParentChanged: {
+        Qt.callLater(_hookFlickable)
+        Qt.callLater(_resolvePageRoot)
+    }
     Component.onCompleted: {
         Qt.callLater(_hookFlickable)
-        if (!progressive)
+        Qt.callLater(_resolvePageRoot)
+        if (!progressive && (!unloadWhenPageInactive || _pageActive))
             _armed = true
     }
     Component.onDestruction: {
@@ -132,10 +204,16 @@ Item {
         }
     }
 
+    Connections {
+        target: root._pageRoot
+        function onMd3PageActiveChanged() { root._syncPageActive() }
+    }
+
     Timer {
         id: deferTimer
         interval: Math.max(0, root.delayMs)
         running: root.progressive && !root._delayElapsed
+                && (!root.unloadWhenPageInactive || root._pageActive)
         repeat: false
         onTriggered: root._delayElapsed = true
     }
@@ -144,9 +222,11 @@ Item {
     Timer {
         interval: 160
         running: root.progressive && !root._armed && root.visible && root.requireNearViewport
+                && (!root.unloadWhenPageInactive || root._pageActive)
         repeat: true
         onTriggered: {
             root._hookFlickable()
+            root._resolvePageRoot()
             root._updateNearViewport()
             root._tryArm()
         }

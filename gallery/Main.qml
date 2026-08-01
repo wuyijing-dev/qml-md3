@@ -19,18 +19,20 @@ Md3ApplicationWindow {
     railExpanded: false
     railHeader: qsTr("组件图库")
     pagePadding: Md3Theme.pagePadding
-    // Seamless open: no skeleton/busy gap; sync first paint; keep neighbors warm.
+    // Seamless open + restrained L1: L2 warm for revisit; unload DeferredSection off-display.
     pageSkeleton: false
     pageAsync: false
-    pageCacheLimit: 6
+    pageCacheLimit: 3
     pageL2CacheLimit: 32
     pagePrefetch: true
+    pagePrefetchL1: false
     pagePredictPrefetch: false
     pageWarmStart: false
     pageL2Warm: true
     pageIdleTrimMs: 90000
     pageLeaveSnapshot: false
     pageNavWarm: true
+    pageNavWarmCacheLimit: 3
     // Short fade (keep sync/warm Profile F loading — not the same as pageTransition none).
     pageTransition: "fade"
     pageTransitionDuration: Md3Motion.medium2

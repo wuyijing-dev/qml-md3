@@ -9,6 +9,7 @@ Flickable {
 
     /// Injected by Md3PageHost (Flickable root — declare injectables without Md3Page).
     property var md3HostWindow: null
+    property bool md3PageActive: true
 
     LayoutMirroring.enabled: rtlSwitch.checked
     LayoutMirroring.childrenInherit: true

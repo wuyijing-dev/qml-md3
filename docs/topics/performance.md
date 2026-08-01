@@ -38,8 +38,9 @@ Industry UI stacks converge on the same rules Md3 applies:
 22. **List/Grid/VirtualList** — selection/current sync via bindings + `onReused` (no per-row `Connections` fan-out).
 23. **`Md3Carousel`** — `reuseItems`, async images, shadow only on current ±1.
 24. **`Md3CodeBlock`** — 40ms coalesced HTML rebuild.
-25. **`Md3DeferredSection`** — arms after delay **and** near-viewport (skips off-screen incubate).
+25. **`Md3DeferredSection`** — arms after delay **and** near-viewport (skips off-screen incubate); **`disarm`/`rearm`** when ancestor `md3PageActive` is false (PageHost injects).
 26. **`Md3BarChart` / `Md3PieChart`** — bars/slices on one Canvas (no per-item Rectangle/Shape Repeater).
+27. **PageHost `md3PageActive`** — kept L1 pages unload DeferredSection loaders off-display (shell + height stay); Gallery uses L1≤3 + neighbor **L2** prefetch (`pagePrefetchL1: false`).
 
 ---
 
@@ -47,8 +48,8 @@ Industry UI stacks converge on the same rules Md3 applies:
 |-------|------------------|----------------|
 | **GPU layers** (`layer` + `MultiEffect`) | FBO per masked button / dual-blur shadow | Ripple: only while ink runs. **Buttons / IconButton / AppBar / Toggle / Split / ButtonGroup**: clip mask FBO only while `ripple.layersNeeded` (idle = no FBO). Shadow: off when `elevation === 0` / `effectsLevel === 0`; Balanced = key blur only, High = ambient+key. LiquidGlass layers only while visible |
 | **Scene Graph** | Draw calls for on-screen items | Off-screen *drawing* is usually culled; **FBOs still exist** if the Item is alive with `layer.enabled` |
-| **PageHost L1** | Live page Items in RAM | Default `arc` + `pageCacheLimit: 1` |
-| **PageHost L2** | Compiled `Component` (cheap to re-instantiate) | Default limit `1` |
+| **PageHost L1** | Live page Items in RAM | Default `arc` + `pageCacheLimit: 1`; inactive kept pages can unload DeferredSection via `md3PageActive` |
+| **PageHost L2** | Compiled `Component` (cheap to re-instantiate) | Default limit `1`; `pagePrefetchL1: false` warms neighbors as L2 only |
 | **Within page** | Charts / tables / long forms | `Md3DeferredSection` + `progressiveContent` |
 
 “看不见不渲染也不算特效” ≈ **不要让重控件以 `layer.enabled: true` 活在树里**（滚动出视野仍占 FBO）。做法：出屏用 `Loader { active: false }` / `Md3DeferredSection` / 列表用 `Md3VirtualList`，而不是只设 `visible: false` 却保留 layer。
@@ -171,20 +172,22 @@ Relative `source` paths resolve via `resolvedPageSourceBase` (hot-reload disk tr
 
 ### F. Seamless open（无感：不显示 skeleton / busy）
 
-关掉可见 loading，用 **同步首屏 + 常驻近邻** 换「空白/骨架」：
+关掉可见 loading，用 **同步首屏 + L2 暖机 + 克制 L1** 换「空白/骨架」。页离开时 `md3PageActive` 卸 DeferredSection 重块，壳仍留在 L1：
 
 ```qml
 Md3ApplicationWindow {
     pageSkeleton: false          // 关键：不要骨架屏
     pageAsync: false             // 首屏同步孵化，避免 Loader 空窗
-    pageCacheLimit: 6
+    pageCacheLimit: 3            // 克制 L1 RSS
     pageL2CacheLimit: 32
     pagePrefetch: true
+    pagePrefetchL1: false        // 近邻只暖 Component，不撑满 L1
     pageL2Warm: true
     pageWarmStart: false         // 冷启别全表预编译（会拖第一帧）
     pageTransition: "none"
     pageTransitionDuration: 0
     pageNavWarm: true
+    pageNavWarmCacheLimit: 3
     pageIdleTrimMs: 90000
     progressiveContent: true     // 页内重块仍 DeferredSection
 }
@@ -196,11 +199,12 @@ Gallery 默认用短 **fade**（仍无骨架、同步首屏）；要完全无动
 |------|------|------|
 | 切页闪骨架 | `pageSkeleton: true` | 设 `false` |
 | 切页白一下再出内容 | `pageAsync: true` 且无骨架；或 `pageTransitionDuration: 0` 却仍用 fade（会闪一帧 t=0） | `pageAsync: false`；无动画用 `pageTransition: "none"`（或 duration≤0，Host 会强制 instant） |
-| 回访仍慢 | `pageCacheLimit: 1` 被 idle trim | `pageCacheLimit ≥ 4` + `pageIdleTrimMs` 加大 |
+| 回访仍慢 | `pageCacheLimit: 1` 被 idle trim | `pageCacheLimit ≥ 3` + `pageIdleTrimMs` 加大；DeferredSection 回页会 `rearm` |
 | 冷启卡住 | `pageWarmStart: true` / 重页同步 | 关 warmStart；重页用 `Md3DeferredSection` |
 | 页内仍 “Loading” | DataTable `loading` / 业务态 | 与 PageHost 无关，别和骨架混为一谈 |
+| 离页 RSS 不掉 | 重块未包 DeferredSection / 未声明 `md3PageActive` | 用 `Md3Page` 或声明 `property bool md3PageActive`；重块放 DeferredSection |
 
-Gallery 当前默认偏 **Profile F**（无感），内存高于纯 Low memory。
+Gallery 当前默认偏 **Profile F（克制 L1）**：无感开页 + L2 暖近邻；Charts 等离屏卸重块。
 
 Page author pattern (Charts already):
 
@@ -213,6 +217,7 @@ Flickable {
             delayMs: 0
             asynchronous: true
             sourceComponent: heavyBlock
+            // unloadWhenPageInactive: true  // default — follows md3PageActive
         }
     }
 }
@@ -223,9 +228,9 @@ Flickable {
 | qmlcachegen | ↑↑ | ≈0 |
 | pageAsync + skeleton | ↑（不假死） | ≈0 |
 | pageL2Warm（全表 Component） | 任意页首次更顺 | 低 |
-| L1=6 + prefetch（E+） | 近邻/回访明显快 | **中等**（可接受） |
-| L1=6+prefetch / warmStart | 回访很快 | **易炸** |
-| DeferredSection 空壳 | 首屏立刻 | ↓ |
+| L1=3 + L2 neighbor prefetch | 近邻/回访快，RSS 可控 | **中低** |
+| L1=6+prefetch L1 / warmStart | 回访很快 | **易炸** |
+| DeferredSection 空壳 + 离页 disarm | 首屏立刻 / 离页掉 RSS | ↓ |
 
 ---
 

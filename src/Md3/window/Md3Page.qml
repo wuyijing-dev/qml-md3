@@ -11,6 +11,8 @@ Item {
     property var md3HostWindow: null
     property var md3RouteParams: ({})
     property int md3NavDepth: 0
+    /// Injected by PageHost: true while this page is on-display (incl. mid-transition).
+    property bool md3PageActive: true
     /// function (opts) → bool
     property var md3GoBack: null
     /// function (index, params, opts) → …
