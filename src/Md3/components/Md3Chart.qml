@@ -101,7 +101,6 @@ Item {
     }
     onVisibleChanged: _refreshSceneLive()
     onEnabledChanged: _refreshSceneLive()
-    Component.onCompleted: _refreshSceneLive()
 
     signal cleared()
     signal rebuilt()
@@ -444,5 +443,8 @@ Item {
     onAxisLabelColorChanged: themeDebounce.restart()
     onSurfaceColorChanged: themeDebounce.restart()
 
-    Component.onCompleted: requestRebuild()
+    Component.onCompleted: {
+        _refreshSceneLive()
+        requestRebuild()
+    }
 }
