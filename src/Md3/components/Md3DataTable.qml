@@ -38,7 +38,9 @@ Item {
     property var overlayWindow: null
 
     Accessible.role: Accessible.Table
-    Accessible.name: qsTr("Data table")
+    Accessible.name: accessibleName.length ? accessibleName : qsTr("Data table")
+    /// Screen-reader label (defaults to “Data table”).
+    property string accessibleName: ""
 
     property bool serverSidePagination: false
     property int serverTotalCount: 0
@@ -52,6 +54,8 @@ Item {
     /// In-cell edit target (−1 = none). Column must set `editable: true`.
     property int editingSourceIndex: -1
     property int editingColumnIndex: -1
+    /// Keyboard focus column for F2 / Left-Right (first editable when unset).
+    property int focusedColumnIndex: -1
 
     signal rowClicked(int sourceIndex)
     signal rowDoubleClicked(int sourceIndex)
@@ -518,6 +522,24 @@ Item {
         tableFocus.forceActiveFocus()
     }
 
+    function _firstEditableColumn() {
+        const cols = columns || []
+        for (let i = 0; i < cols.length; ++i) {
+            if (cols[i] && cols[i].editable === true)
+                return i
+        }
+        return -1
+    }
+
+    function _moveFocusColumn(delta) {
+        const cols = columns || []
+        if (!cols.length)
+            return
+        let next = focusedColumnIndex < 0 ? 0 : focusedColumnIndex + delta
+        next = Math.max(0, Math.min(cols.length - 1, next))
+        focusedColumnIndex = next
+    }
+
     function _moveFocus(delta) {
         const n = pageEntries.length
         if (n === 0) {
@@ -530,6 +552,8 @@ Item {
         const entry = pageEntries[next]
         if (entry)
             selectedRow = entry.sourceIndex
+        if (focusedColumnIndex < 0)
+            focusedColumnIndex = Math.max(0, _firstEditableColumn())
     }
 
     function _activateFocusedRow() {
@@ -906,6 +930,7 @@ Item {
         id: tableFocus
         anchors.fill: parent
         focus: root.keyboardNavigationEnabled
+        activeFocusOnTab: root.keyboardNavigationEnabled
 
         Keys.onPressed: function (event) {
             if (!root.keyboardNavigationEnabled)
@@ -919,6 +944,14 @@ Item {
                 root._moveFocus(1)
                 event.accepted = true
                 break
+            case Qt.Key_Left:
+                root._moveFocusColumn(-1)
+                event.accepted = true
+                break
+            case Qt.Key_Right:
+                root._moveFocusColumn(1)
+                event.accepted = true
+                break
             case Qt.Key_Return:
             case Qt.Key_Enter:
                 root._activateFocusedRow()
@@ -929,12 +962,13 @@ Item {
                     const e = root.pageEntries[root.focusedPageRow]
                     const cols = root.columns || []
                     if (e) {
-                        for (let i = 0; i < cols.length; ++i) {
-                            if (cols[i] && cols[i].editable === true) {
-                                root.beginCellEdit(e.sourceIndex, i)
-                                event.accepted = true
-                                break
-                            }
+                        let col = root.focusedColumnIndex
+                        if (col < 0 || !cols[col] || cols[col].editable !== true)
+                            col = root._firstEditableColumn()
+                        if (col >= 0) {
+                            root.focusedColumnIndex = col
+                            root.beginCellEdit(e.sourceIndex, col)
+                            event.accepted = true
                         }
                     }
                 }

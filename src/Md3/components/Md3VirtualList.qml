@@ -15,6 +15,8 @@ Item {
     property int currentIndex: -1
     property bool interactive: true
     property string emptyText: qsTr("No items")
+    /// Screen-reader label (defaults to “Virtual list”).
+    property string accessibleName: ""
 
     signal itemActivated(int index, var item)
     signal currentIndexChangedByUser(int index, var item)
@@ -28,7 +30,7 @@ Item {
     }
 
     Accessible.role: Accessible.List
-    Accessible.name: emptyText.length ? emptyText : qsTr("Virtual list")
+    Accessible.name: accessibleName.length ? accessibleName : qsTr("Virtual list")
 
     function scrollToIndex(index) {
         if (index < 0 || index >= (model ? model.length : 0))
@@ -119,6 +121,18 @@ Item {
                 currentIndex = n - 1
                 root.currentIndexChangedByUser(currentIndex, root.model[currentIndex])
                 positionViewAtIndex(currentIndex, ListView.End)
+                event.accepted = true
+            } else if (event.key === Qt.Key_PageUp) {
+                const step = Math.max(1, Math.floor(height / root.itemHeight) - 1)
+                currentIndex = Math.max(0, (currentIndex < 0 ? 0 : currentIndex) - step)
+                root.currentIndexChangedByUser(currentIndex, root.model[currentIndex])
+                positionViewAtIndex(currentIndex, ListView.Contain)
+                event.accepted = true
+            } else if (event.key === Qt.Key_PageDown) {
+                const step = Math.max(1, Math.floor(height / root.itemHeight) - 1)
+                currentIndex = Math.min(n - 1, (currentIndex < 0 ? 0 : currentIndex) + step)
+                root.currentIndexChangedByUser(currentIndex, root.model[currentIndex])
+                positionViewAtIndex(currentIndex, ListView.Contain)
                 event.accepted = true
             } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter
                        || event.key === Qt.Key_Space) {

@@ -121,7 +121,15 @@ Item {
     focus: true
     Accessible.name: accessibleName.length ? accessibleName : (label.length ? label : qsTr("Select"))
     Accessible.role: Accessible.ComboBox
-    Accessible.description: helper
+    Accessible.description: {
+        if (helper.length)
+            return helper
+        if (multiSelect)
+            return qsTr("%1 selected").arg(selectedIndices ? selectedIndices.length : 0)
+        if (currentIndex >= 0)
+            return itemLabel(model[currentIndex])
+        return placeholderText
+    }
     Accessible.onPressAction: openMenu()
 
     Keys.onPressed: function (event) {

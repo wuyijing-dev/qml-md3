@@ -325,6 +325,8 @@ Md3Page {
 
                         Md3BottomAppBar {
                             width: parent.width
+                            // Demo home-indicator inset (Md3Adaptive.safeBottomInset on device).
+                            height: implicitHeight + Md3Adaptive.safeBottomInset
                             showFab: true
                             actions: ["menu", "search", "more_vert"]
                             onActionClicked: function (i) {

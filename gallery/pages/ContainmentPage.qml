@@ -271,11 +271,35 @@ Md3Page {
         id: sideSheet
         anchors.fill: parent
         title: qsTr("Side sheet")
-        text: qsTr("Use side sheets for secondary detail without leaving the page.")
+        text: qsTr("Use side sheets for secondary detail without leaving the page. Esc / outside click dismisses; focus returns.")
         edge: Md3SideSheet.End
-        Md3Button {
-            text: qsTr("Done")
-            onClicked: sideSheet.dismiss()
+        modal: sideSheetModal.checked
+        Md3VStack {
+            width: parent.width
+            spacing: 12
+            Md3HStack {
+                spacing: 12
+                Md3Switch {
+                    id: sideSheetModal
+                    checked: true
+                }
+                Md3Text {
+                    text: qsTr("Modal scrim")
+                    role: Md3Text.BodyMedium
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+            }
+            Md3Text {
+                width: parent.width
+                wrapMode: Text.WordWrap
+                text: qsTr("关闭 Modal 时仍可点外侧关闭（light-dismiss）。Esc 关闭后焦点归还。")
+                role: Md3Text.BodySmall
+                tone: Md3Text.OnSurfaceVariant
+            }
+            Md3Button {
+                text: qsTr("Done")
+                onClicked: sideSheet.dismiss()
+            }
         }
     }
 

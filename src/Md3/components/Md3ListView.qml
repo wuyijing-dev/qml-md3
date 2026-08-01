@@ -21,6 +21,8 @@ Item {
     property bool interactive: true
     property string emptyText: qsTr("No items")
     property string emptyIcon: "inbox"
+    /// Screen-reader / AT name (defaults to “List”; do not reuse emptyText).
+    property string accessibleName: ""
 
     signal itemActivated(int index, var item)
     signal itemClicked(int index, var item)
@@ -36,7 +38,7 @@ Item {
     }
 
     Accessible.role: Accessible.List
-    Accessible.name: emptyText.length ? emptyText : qsTr("List")
+    Accessible.name: accessibleName.length ? accessibleName : qsTr("List")
 
     readonly property bool hasSections: sectionRole.length > 0
 

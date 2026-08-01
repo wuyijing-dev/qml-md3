@@ -21,6 +21,38 @@ Item {
     /// Dim = dark scrim. Frosted = 毛玻璃 (light blur + surface tint). Blur = stronger blur.
     enum LaunchBackdrop { Dim, Frosted, Blur }
 
+    Accessible.role: Accessible.Pane
+    Accessible.name: qsTr("Page host")
+    focus: true
+    /// Left-edge swipe back (phone / compact demos). Esc also goes back when canGoBack.
+    property bool edgeSwipeBackEnabled: true
+    Keys.onPressed: function (event) {
+        if (event.key === Qt.Key_Escape && root.canGoBack) {
+            root.goBack()
+            event.accepted = true
+        }
+    }
+
+    Item {
+        id: edgeBackCatcher
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        width: 28
+        z: 50
+        visible: root.edgeSwipeBackEnabled && root.canGoBack
+        property real _startX: 0
+        MouseArea {
+            anchors.fill: parent
+            enabled: parent.visible
+            onPressed: function (mouse) { edgeBackCatcher._startX = mouse.x }
+            onReleased: function (mouse) {
+                if (mouse.x - edgeBackCatcher._startX > 56)
+                    root.goBack()
+            }
+        }
+    }
+
     property var model: []
     property int currentIndex: 0
     property int displayedIndex: 0

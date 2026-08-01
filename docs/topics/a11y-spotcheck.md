@@ -8,15 +8,15 @@ Static heuristic: `python scripts/checks/check_a11y_qml.py --json scripts/checks
 
 | Surface | Tab order | Esc | Enter / Space | `Accessible.name` |
 |---------|-----------|-----|---------------|-------------------|
-| Dialog | [ ] | [ ] | [ ] primary | [ ] |
-| Menu / Dropdown | [ ] | [ ] | [ ] | [ ] |
-| Select | [ ] | [ ] | [ ] | [ ] |
-| DataTable | [ ] | [ ] | [ ] / F2 edit | [ ] |
-| ListView | [ ] | — | [ ] | [ ] |
+| Dialog | [x] focus restore | [x] | [x] primary (skips body editors) | [x] |
+| Menu / Dropdown | [x] | [x] cascade | [x] | [x] restore trigger |
+| Select | [x] | [x] closes menu | [x] opens | [x] + selection description |
+| DataTable | [x] `activeFocusOnTab` | [x] cancel edit | [x] / F2 focused col | [x] `accessibleName` |
+| ListView | [x] | — | [x] | [x] `accessibleName` (not emptyText) |
 | CommandBar | [ ] | — | [ ] | [ ] |
-| PageHost | [ ] | [ ] back | — | [ ] |
+| PageHost | [x] | [x] Esc / edge swipe back | — | [x] |
 
-Also toggle Gallery **reduceMotion** / **highContrast** once per release candidate.
+Also toggle Gallery **Accessibility** page **reduceMotion** / **highContrast** once per release candidate. Window page has a reduceMotion shortcut + “淡入 220ms”.
 
 ## Windows verify notes (v1.0.0)
 

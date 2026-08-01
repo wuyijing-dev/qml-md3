@@ -24,6 +24,8 @@ Item {
     Accessible.name: title.length ? title : qsTr("Dialog")
     Accessible.description: text
 
+    property var _focusBeforeOpen: null
+
     function accept() {
         open = false
         confirmed()
@@ -34,15 +36,41 @@ Item {
         dismissed()
     }
 
+    function _restoreFocus() {
+        const prev = _focusBeforeOpen
+        _focusBeforeOpen = null
+        if (prev && typeof prev.forceActiveFocus === "function")
+            Qt.callLater(function () {
+                try { prev.forceActiveFocus() } catch (e) { /* destroyed */ }
+            })
+    }
+
+    function _enterShouldAccept() {
+        const win = Md3OverlayHost.resolveWindow(null, root)
+        const f = win ? win.activeFocusItem : null
+        if (!f || f === root || f === panel || f === confirmBtn || f === dismissBtn)
+            return true
+        if (f.text !== undefined && f.cursorPosition !== undefined && f.readOnly !== true)
+            return false
+        return true
+    }
+
     onOpenChanged: {
         if (open) {
+            const win = Md3OverlayHost.resolveWindow(null, root)
+            if (win && win.activeFocusItem)
+                _focusBeforeOpen = win.activeFocusItem
             forceActiveFocus()
             Qt.callLater(function () {
+                if (!root.open)
+                    return
                 if (confirmBtn.visible)
                     confirmBtn.forceActiveFocus()
                 else if (dismissBtn.visible)
                     dismissBtn.forceActiveFocus()
             })
+        } else {
+            _restoreFocus()
         }
     }
 
@@ -52,7 +80,8 @@ Item {
         if (event.key === Qt.Key_Escape) {
             reject()
             event.accepted = true
-        } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+        } else if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter)
+                   && _enterShouldAccept()) {
             accept()
             event.accepted = true
         }

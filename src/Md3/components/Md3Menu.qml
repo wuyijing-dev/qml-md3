@@ -28,6 +28,7 @@ Item {
     readonly property alias itemColumn: column
     /// Optional explicit Window for overlay reparent (else Window.window).
     property var overlayWindow: null
+    property var _restoreFocus: null
 
     readonly property real containerRadius: Md3Theme.shape.large
     readonly property var __md3Menu: root
@@ -87,6 +88,11 @@ Item {
 
     onOpenChanged: {
         if (open) {
+            if (!isSubMenu) {
+                const win = Md3OverlayHost.resolveWindow(root.overlayWindow, root)
+                if (win && win.activeFocusItem)
+                    _restoreFocus = win.activeFocusItem
+            }
             highlightedIndex = 0
             Qt.callLater(function () {
                 _syncHighlight()
@@ -95,6 +101,14 @@ Item {
         } else {
             highlightedIndex = -1
             _syncHighlight()
+            if (!isSubMenu) {
+                const f = _restoreFocus
+                _restoreFocus = null
+                if (f && typeof f.forceActiveFocus === "function")
+                    Qt.callLater(function () {
+                        try { f.forceActiveFocus() } catch (e) { /* destroyed */ }
+                    })
+            }
         }
     }
 

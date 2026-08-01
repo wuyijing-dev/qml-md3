@@ -99,6 +99,14 @@ Item {
         }
     }
 
+    // Non-modal light-dismiss: transparent catcher under the sheet.
+    MouseArea {
+        anchors.fill: parent
+        enabled: root.open && !root.modal
+        z: 0
+        onClicked: root.dismiss()
+    }
+
     Md3Shadow {
         anchors.fill: sheet
         elevation: root.open ? 2 : 0
@@ -108,6 +116,7 @@ Item {
 
     Rectangle {
         id: sheet
+        z: 1
         width: root.panelWidth
         height: parent.height
         y: 0

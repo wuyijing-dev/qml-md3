@@ -88,6 +88,15 @@ Md3Page {
                 text: "Tooltip label"
                 Md3Button { text: "Hover me" }
             }
+            Md3Tooltip {
+                text: qsTr("Keyboard focus tip (Tab here)")
+                showOnFocus: true
+                showDelay: 200
+                Md3Button {
+                    text: qsTr("Tab focus tooltip")
+                    variant: Md3Button.Outlined
+                }
+            }
             Md3ExpansionTile {
                 width: parent.width
                 title: "Advanced"
@@ -276,6 +285,8 @@ Md3Page {
                     id: virtualDemo
                     anchors.fill: parent
                     itemHeight: 40
+                    accessibleName: qsTr("Virtual log list")
+                    cacheBufferPx: 1200
                     model: {
                         const rows = []
                         for (let i = 0; i < 5000; ++i)
@@ -287,6 +298,20 @@ Md3Page {
                         if (w)
                             w.showStatusMessage(qsTr("Focused item %1").arg(index + 1))
                     }
+                }
+            }
+            Md3HStack {
+                width: parent.width
+                spacing: 8
+                Md3Button {
+                    text: qsTr("跳到第 2500 行")
+                    variant: Md3Button.Outlined
+                    onClicked: virtualDemo.scrollToIndex(2499)
+                }
+                Md3Text {
+                    text: qsTr("PgUp/PgDn · cacheBuffer 1200（性能冒烟）")
+                    role: Md3Text.BodySmall
+                    tone: Md3Text.OnSurfaceVariant
                 }
             }
 
@@ -306,6 +331,7 @@ Md3Page {
                     itemHeight: 52
                     sectionRole: "group"
                     selectionMode: Md3ListView.Multiple
+                    accessibleName: qsTr("People list")
                     model: [
                         { title: "Ada", subtitle: "Admin", group: "A" },
                         { title: "Alan", subtitle: "Editor", group: "A" },
@@ -467,6 +493,8 @@ Md3Page {
                 frozenColumnCount: 1
                 showFilterBar: true
                 keyboardNavigationEnabled: true
+                accessibleName: qsTr("Extras data table")
+                columnWidthsPersistKey: "gallery/extrasTableWidths"
                 columnFilters: ({ status: statusFilter.text })
                 columns: [
                     { title: "Name", role: "name", width: 140, type: "avatar" },

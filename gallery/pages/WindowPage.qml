@@ -266,6 +266,25 @@ Flickable {
             role: Md3Text.BodySmall
             tone: Md3Text.OnSurfaceVariant
         }
+        Md3Card {
+            variant: Md3Card.Outlined
+            width: parent.width
+            title: qsTr("TitleBar / AppToolBar 内容槽（示例）")
+            subtitle: qsTr("复制到 Md3ApplicationWindow { titleBar / toolBar }")
+            Md3CodeBlock {
+                width: parent.width
+                height: 168
+                language: "qml"
+                showLineNumbers: false
+                code: "titleBar: Md3TitleBar {
+    Md3ChipGroup { model: [{ text: \"Inbox\" }] }
+}
+toolBar: Md3AppToolBar {
+    Md3IconButton { icon: \"save\" }
+    Md3Text { text: qsTr(\"Ready\") }
+}"
+            }
+        }
         Md3FlowLayout {
             width: parent.width
             spacing: 8
@@ -391,6 +410,32 @@ Flickable {
                 text: qsTr("加载时显示骨架屏")
                 role: Md3Text.BodySmall
                 tone: Md3Text.OnSurfaceVariant
+            }
+        }
+        Md3HStack {
+            spacing: 12
+            Md3Switch {
+                checked: Md3Theme.reduceMotion
+                onToggled: function (on) {
+                    Md3Theme.reduceMotion = on
+                    Md3AppSettings.setValue("a11y/reduceMotion", on)
+                }
+            }
+            Md3Text {
+                text: qsTr("减少动效（PageHost 切换立刻完成）")
+                role: Md3Text.BodySmall
+                tone: Md3Text.OnSurfaceVariant
+            }
+            Md3Button {
+                text: qsTr("淡入 220ms")
+                variant: Md3Button.Text
+                enabled: !!root.appWin
+                onClicked: {
+                    if (!root.appWin)
+                        return
+                    root.appWin.pageTransition = "fade"
+                    root.appWin.pageTransitionDuration = 220
+                }
             }
         }
 

@@ -170,4 +170,19 @@ QtObject {
     /// Same thresholds as Md3NavigationView Auto mode.
     readonly property real navigationCompactBreakpoint: 600
     readonly property real navigationExpandedBreakpoint: 840
+
+    /// Conservative home-indicator / gesture-bar padding (6.5 baseline — no Qt SafeArea API).
+    /// Use under bottom bars / FABs on phone-class shells.
+    readonly property real safeBottomInset: {
+        const os = Qt.platform.os
+        if (os === "android" || os === "ios")
+            return 20
+        return 0
+    }
+    readonly property real safeTopInset: {
+        const os = Qt.platform.os
+        if (os === "ios")
+            return 12
+        return 0
+    }
 }

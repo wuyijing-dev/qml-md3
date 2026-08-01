@@ -126,7 +126,7 @@ Window {
     property bool pageNavWarmPrefetch: true
     property bool _pageNavWarmDone: false
     property string pageTransition: "fade"
-    property int pageTransitionDuration: 100
+    property int pageTransitionDuration: 180
     property bool pageSkeleton: false
     property alias pageHost: windowBody.pageHost
     property alias shellRail: windowBody.rail
@@ -1304,6 +1304,12 @@ Window {
 
                 Keys.onBackPressed: function (event) {
                     if (root.canGoBack) {
+                        root.goBack()
+                        event.accepted = true
+                    }
+                }
+                Keys.onPressed: function (event) {
+                    if (event.key === Qt.Key_Escape && root.canGoBack) {
                         root.goBack()
                         event.accepted = true
                     }

@@ -276,6 +276,8 @@ Item {
         const copy = JSON.parse(JSON.stringify(model))
         mark(copy, true)
         model = copy
+        forceActiveFocus()
+        Qt.callLater(function () { root._ensureVisible(Math.max(0, root.selectedIndex)) })
     }
 
     function collapseAll() {
@@ -292,6 +294,8 @@ Item {
         const copy = JSON.parse(JSON.stringify(model))
         mark(copy, false)
         model = copy
+        forceActiveFocus()
+        Qt.callLater(function () { root._ensureVisible(Math.max(0, root.selectedIndex)) })
     }
 
     function _titleText(node) {
@@ -311,10 +315,12 @@ Item {
         switch (event.key) {
         case Qt.Key_Up:
             selectedIndex = Math.max(0, selectedIndex <= 0 ? 0 : selectedIndex - 1)
+            _ensureVisible(selectedIndex)
             event.accepted = true
             break
         case Qt.Key_Down:
             selectedIndex = Math.min(n - 1, selectedIndex < 0 ? 0 : selectedIndex + 1)
+            _ensureVisible(selectedIndex)
             event.accepted = true
             break
         case Qt.Key_Left:
@@ -330,6 +336,7 @@ Item {
                         }
                     }
                 }
+                _ensureVisible(selectedIndex)
             }
             event.accepted = true
             break
@@ -342,6 +349,7 @@ Item {
                     else if (selectedIndex + 1 < n)
                         selectedIndex = selectedIndex + 1
                 }
+                _ensureVisible(selectedIndex)
             }
             event.accepted = true
             break
@@ -360,13 +368,27 @@ Item {
             break
         case Qt.Key_Home:
             selectedIndex = 0
+            _ensureVisible(0)
             event.accepted = true
             break
         case Qt.Key_End:
             selectedIndex = n - 1
+            _ensureVisible(selectedIndex)
             event.accepted = true
             break
         }
+    }
+
+    function _ensureVisible(flatIndex) {
+        if (flatIndex < 0 || !flick)
+            return
+        const y = flatIndex * root.rowHeight
+        const viewTop = flick.contentY
+        const viewBot = viewTop + flick.height
+        if (y < viewTop)
+            flick.contentY = Math.max(0, y)
+        else if (y + root.rowHeight > viewBot)
+            flick.contentY = Math.max(0, y + root.rowHeight - flick.height)
     }
 
     Md3HStack {
