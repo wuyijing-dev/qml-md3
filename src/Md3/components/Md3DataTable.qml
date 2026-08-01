@@ -179,8 +179,7 @@ Item {
                                           + (pagination ? 48 : 0)
     implicitHeight: _chromeHeight + bodyHeight
     width: parent ? parent.width : implicitWidth
-    // Do not bind height↔implicitHeight↔bodyHeight (Qt 6.8 Binding loop when callers
-    // set bodyHeight from height, or combine anchors.fill with height: implicitHeight).
+    // Do not bind height↔bodyHeight (Qt 6.8 loop when callers set bodyHeight from height).
     // Prefer leftover space when height is set by anchors / explicit height.
     readonly property real _resolvedBodyHeight: {
         const avail = height - _chromeHeight
@@ -188,8 +187,14 @@ Item {
             return Math.max(40, avail)
         return Math.max(40, bodyHeight)
     }
-    // No height: implicitHeight — that loops with bodyHeight: f(height) and fights
-    // top+bottom anchors on Qt 6.8. Callers set height or vertical anchors.
+    // Floor height from implicit when unset; never when anchors.fill (fights top+bottom).
+    // AtLeastImplicit only raises height — safe if bodyHeight is a fixed number.
+    // Still forbid bodyHeight: height - chrome (that fights any height sync).
+    readonly property Md3HeightSync _heightSync: Md3HeightSync {
+        target: root
+        enabled: !root.anchors.fill
+        policy: Md3HeightSync.AtLeastImplicit
+    }
 
     onFilterTextChanged: filterChanged()
     onColumnFiltersChanged: filterChanged()

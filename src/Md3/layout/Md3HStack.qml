@@ -30,9 +30,15 @@ Item {
 
     implicitWidth: leftPadding + rightPadding + contentHost._laidOutWidth
     implicitHeight: Math.max(1, topPadding + bottomPadding + contentHost._laidOutHeight)
-    // Synchronous default height so Column does not skip this row on the first frame.
-    // External height / anchors.fill still override. HeightSync keeps floor after polish.
-    height: implicitHeight
+    // Sync height for Column's first pass (same Binding+HeightSync pattern as VStack).
+    // Never bind height when anchors.fill — fights vertical anchors on Qt 6.8/6.10.
+    Binding {
+        target: root
+        property: "height"
+        value: root.implicitHeight
+        when: !root.anchors.fill
+        restoreMode: Binding.RestoreNone
+    }
     readonly property Md3HeightSync _heightSync: Md3HeightSync {
         target: root
         enabled: !root.anchors.fill

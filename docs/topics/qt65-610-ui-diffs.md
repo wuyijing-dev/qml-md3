@@ -19,9 +19,10 @@
 | `Layout.useDefaultSizePolicy`（`SizePolicyImplicit` / `Explicit`） | **≥ 6.8** | **不要**在公共 API 依赖；需要时走 C++/feature 探测或仅 Gallery 6.8+ 演示 |
 | `AA_QtQuickUseDefaultSizePolicy` 应用属性 | **≥ 6.8** | 默认不改；改了会让 Controls/Layout 默认尺寸策略整体偏移 |
 | nested VStack `height: 0`、HStack 用 `height` 测子项 → 横排重叠 | 全线 | `Md3QtCompat.preferredHeight` = `max(h, ih)` |
-| Card `bodySlot` + `anchors.fill` → fill 子项高度 0、上下锚点叠在一起 | 6.8 严格路径 | `Md3HeightSync.Exact` + `expand` |
-| DataTable `height` ↔ `bodyHeight` 绑定环 | 6.8 易炸；6.10 可能“看起来没事” | **禁止**互绑；用 `_resolvedBodyHeight` |
-| `Row` 上手动改 `y`/`height` → polish 环警告 | 全线 | `Md3HStack` 用 `Item` 手摆，不用 `Row` |
+| Card `bodySlot` + `anchors.fill` → fill 子项高度 0、上下锚点叠在一起 | 6.8 严格路径 | `Md3HeightSync.Exact` + `expand`；Card 根用 `AtLeastImplicit`（勿 `height: implicitHeight`，会盖掉显式高度） |
+| DataTable `height` ↔ `bodyHeight` 绑定环 | 6.8 易炸；6.10 可能“看起来没事” | **禁止**互绑；用 `_resolvedBodyHeight`；根 `AtLeastImplicit` 仅抬升未设高度 |
+| HStack `height: implicitHeight` 与 `anchors.fill` 互殴 | 6.8/6.10 | `Binding when: !anchors.fill` + `AtLeastImplicit`（对齐 VStack） |
+| `Row` 上手动改 `y`/`height` → polish 环警告 | 全线 | `Md3HStack` 用 `Item` 手摆；Card header 用 `Md3HStack` + `expand` 标题列 |
 
 **编写口诀**
 

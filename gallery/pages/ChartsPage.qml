@@ -9,8 +9,8 @@ Item {
         Md3Card {
             variant: Md3Card.Outlined
             width: root.width
-            implicitHeight: 620
-            height: 620
+            implicitHeight: 680
+            height: 680
             Md3VStack {
                 width: parent.width
                 spacing: 16
@@ -95,8 +95,9 @@ Item {
                         size: 112
                     }
                     Md3KnobGauge {
+                        id: demoKnob
                         value: 45
-                        label: qsTr("Knob · drag / ←→")
+                        label: qsTr("Knob")
                         size: 112
                         interactive: true
                         valueColor: Md3Theme.colorScheme.tertiary
@@ -105,6 +106,27 @@ Item {
                         value: 42
                         label: qsTr("HDG")
                         size: 112
+                    }
+                }
+                Md3FlowLayout {
+                    width: parent.width
+                    spacing: 8
+                    Md3AssistChip {
+                        text: qsTr("聚焦旋钮")
+                        icon: "tune"
+                        onClicked: root._focusKnob(demoKnob)
+                    }
+                    Md3AssistChip {
+                        text: qsTr("←→ / ↑↓")
+                        onClicked: root._focusKnob(demoKnob)
+                    }
+                    Md3AssistChip {
+                        text: qsTr("Home / End · PgUp/Dn")
+                        onClicked: root._focusKnob(demoKnob)
+                    }
+                    Md3AssistChip {
+                        text: qsTr("拖动调节")
+                        onClicked: root._focusKnob(demoKnob)
                     }
                 }
                 Md3HStack {
@@ -298,6 +320,13 @@ Item {
                 tone: Md3Text.OnSurfaceVariant
                 wrapMode: Text.Wrap
             }
+            Md3Text {
+                width: parent.width
+                text: qsTr("键盘：点下方芯片聚焦图表/旋钮后，用方向键操作（详见各卡片提示）")
+                role: Md3Text.BodySmall
+                tone: Md3Text.OnSurfaceVariant
+                wrapMode: Text.Wrap
+            }
 
             // Shell-first: title shows immediately; live chart + toolbar incubate next frames.
             Md3DeferredSection {
@@ -309,14 +338,14 @@ Item {
 
             Md3DeferredSection {
                 id: stage1
-                preferredHeight: 280
+                preferredHeight: 320
                 delayMs: 1
                 asynchronous: true
                 sourceComponent: multiCard
             }
             Md3DeferredSection {
                 id: stage1b
-                preferredHeight: 260
+                preferredHeight: 300
                 delayMs: 1
                 asynchronous: true
                 sourceComponent: barCard
@@ -344,7 +373,7 @@ Item {
             }
             Md3DeferredSection {
                 id: stage2d
-                preferredHeight: 240
+                preferredHeight: 280
                 delayMs: 64
                 asynchronous: true
                 sourceComponent: pieCard
@@ -358,7 +387,7 @@ Item {
             }
             Md3DeferredSection {
                 id: stage2f
-                preferredHeight: 620
+                preferredHeight: 680
                 delayMs: 96
                 asynchronous: true
                 sourceComponent: root.kpiCard
@@ -391,6 +420,29 @@ Item {
         for (let i = 0; i < 160; ++i)
             b.push(28 + Math.cos(i * 0.11) * 16 + i * 0.02)
         return b
+    }
+
+    /// Focus chart interaction layer and optionally seed the probe (keyboard path).
+    function _focusChartProbe(chart, seedProbe) {
+        if (!chart)
+            return
+        if (seedProbe !== false && typeof chart.nudgeProbe === "function")
+            chart.nudgeProbe(0)
+        const kids = chart.children
+        for (let i = 0; i < kids.length; ++i) {
+            const c = kids[i]
+            if (c && typeof c.nudgeProbe === "function" && c.activeFocusOnTab !== undefined) {
+                c.forceActiveFocus()
+                return
+            }
+        }
+        chart.forceActiveFocus()
+    }
+
+    function _focusKnob(knob) {
+        if (!knob)
+            return
+        knob.forceActiveFocus()
     }
 
     Component {
@@ -501,25 +553,56 @@ Item {
         Md3Card {
             variant: Md3Card.Outlined
             width: root.width
-            height: 280
-            title: qsTr("Zoom / pan / probe (wheel · drag · hover · keyboard)")
-            subtitle: qsTr("滚轮缩放 · 拖动平移 · 悬停/点击聚焦探针 · ←→ 移点 · Esc 清除 · 双击重置")
+            height: 320
+            title: qsTr("Zoom / pan / probe")
+            subtitle: qsTr("滚轮缩放 · 拖动平移 · 悬停/点击 · 下方芯片聚焦后键盘操作")
             actions: [{ text: qsTr("重置视图"), variant: "outlined" }]
             onActionClicked: interactChart.resetView()
-            Md3LineChart {
-                id: interactChart
+            Md3VStack {
                 width: parent.width
-                height: 200
-                valueDecimals: 1
-                series: [root._demoSeriesA(), root._demoSeriesB()]
-                seriesColors: [
-                    Md3Theme.colorScheme.primary,
-                    Md3Theme.colorScheme.secondary
-                ]
-                showDots: false
-                showArea: true
-                smooth: true
-                horizontalGridLines: 4
+                spacing: 8
+                Md3FlowLayout {
+                    width: parent.width
+                    spacing: 8
+                    Md3AssistChip {
+                        text: qsTr("聚焦探针")
+                        icon: "touch_app"
+                        onClicked: root._focusChartProbe(interactChart, true)
+                    }
+                    Md3AssistChip {
+                        text: qsTr("←→ 移点")
+                        onClicked: {
+                            root._focusChartProbe(interactChart, true)
+                            interactChart.nudgeProbe(1)
+                        }
+                    }
+                    Md3AssistChip {
+                        text: qsTr("Home / End")
+                        onClicked: root._focusChartProbe(interactChart, true)
+                    }
+                    Md3AssistChip {
+                        text: qsTr("Esc 清除")
+                        onClicked: {
+                            root._focusChartProbe(interactChart, false)
+                            interactChart.clearProbe()
+                        }
+                    }
+                }
+                Md3LineChart {
+                    id: interactChart
+                    width: parent.width
+                    height: 200
+                    valueDecimals: 1
+                    series: [root._demoSeriesA(), root._demoSeriesB()]
+                    seriesColors: [
+                        Md3Theme.colorScheme.primary,
+                        Md3Theme.colorScheme.secondary
+                    ]
+                    showDots: false
+                    showArea: true
+                    smooth: true
+                    horizontalGridLines: 4
+                }
             }
         }
     }
@@ -529,7 +612,7 @@ Item {
         Md3Card {
             variant: Md3Card.Outlined
             width: root.width
-            height: 260
+            height: 300
             Md3VStack {
                 width: parent.width
                 spacing: 8
@@ -554,6 +637,29 @@ Item {
                         text: qsTr("重置")
                         variant: Md3Button.Text
                         onClicked: barChart.resetView()
+                    }
+                }
+                Md3FlowLayout {
+                    width: parent.width
+                    spacing: 8
+                    Md3AssistChip {
+                        text: qsTr("聚焦探针")
+                        icon: "touch_app"
+                        onClicked: root._focusChartProbe(barChart, true)
+                    }
+                    Md3AssistChip {
+                        text: qsTr("←→ 移柱")
+                        onClicked: {
+                            root._focusChartProbe(barChart, true)
+                            barChart.nudgeProbe(1)
+                        }
+                    }
+                    Md3AssistChip {
+                        text: qsTr("Esc 清除")
+                        onClicked: {
+                            root._focusChartProbe(barChart, false)
+                            barChart.clearProbe()
+                        }
                     }
                 }
                 Md3BarChart {
@@ -716,7 +822,7 @@ Item {
         Md3Card {
             variant: Md3Card.Outlined
             width: root.width
-            height: 240
+            height: 280
             Md3VStack {
                 width: parent.width
                 spacing: 8
@@ -731,6 +837,29 @@ Item {
                         text: pie.innerRatio > 0.1 ? qsTr("饼图") : qsTr("环图")
                         variant: Md3Button.Outlined
                         onClicked: pie.innerRatio = pie.innerRatio > 0.1 ? 0 : 0.58
+                    }
+                }
+                Md3FlowLayout {
+                    width: parent.width
+                    spacing: 8
+                    Md3AssistChip {
+                        text: qsTr("聚焦探针")
+                        icon: "touch_app"
+                        onClicked: root._focusChartProbe(pie, true)
+                    }
+                    Md3AssistChip {
+                        text: qsTr("←→ 扇区")
+                        onClicked: {
+                            root._focusChartProbe(pie, true)
+                            pie.nudgeProbe(1)
+                        }
+                    }
+                    Md3AssistChip {
+                        text: qsTr("Esc 清除")
+                        onClicked: {
+                            root._focusChartProbe(pie, false)
+                            pie.clearProbe()
+                        }
                     }
                 }
                 Md3PieChart {

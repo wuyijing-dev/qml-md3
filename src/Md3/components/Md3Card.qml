@@ -24,8 +24,14 @@ Item {
     signal actionClicked(int index)
 
     // Intrinsic only — never bind width/height to implicit* (Layout + fill children loop).
+    // HeightSync AtLeastImplicit raises unset height for Column; does not fight explicit height.
     implicitWidth: Math.max(280, contentHost.contentImplicitWidth + padding * 2)
     implicitHeight: contentHost.contentImplicitHeight + padding * 2
+    readonly property Md3HeightSync _heightSync: Md3HeightSync {
+        target: root
+        enabled: !root.anchors.fill
+        policy: Md3HeightSync.AtLeastImplicit
+    }
 
     readonly property real elev: variant === Md3Card.Elevated ? 1 : 0
     readonly property bool hasHeader: title.length > 0 || subtitle.length > 0
@@ -96,13 +102,13 @@ Item {
             anchors.top: parent.top
             anchors.margins: root.padding
             layoutMode: root.layoutMode
-            // Also break contentHost ↔ root.implicitHeight feedback when auto-sized.
-    height: {
-        const autoSized = Math.abs(root.height - root.implicitHeight) <= 1.5
-        if (!autoSized && root.height >= root.padding * 2 + 1)
-            return root.height - root.padding * 2
-        return implicitHeight
-    }
+            // Break contentHost ↔ root.implicitHeight feedback when auto-sized.
+            height: {
+                const autoSized = Math.abs(root.height - root.implicitHeight) <= 1.5
+                if (!autoSized && root.height >= root.padding * 2 + 1)
+                    return root.height - root.padding * 2
+                return implicitHeight
+            }
 
             Md3VStack {
                 id: cardStack
@@ -118,18 +124,17 @@ Item {
                 spacing: 8
                 fillWidth: true
 
-                Row {
+                // HStack (not Row): expand title column; avoid Row+verticalCenter polish issues.
+                Md3HStack {
                     id: headerRow
                     visible: root.hasHeader
                     width: parent.width
                     spacing: 8
+                    alignment: Md3HStack.Center
 
                     Column {
-                        width: Math.max(40, parent.width
-                                        - headerTrailingSlot.width
-                                        - actionsRow.width
-                                        - (headerTrailingSlot.visible ? parent.spacing : 0)
-                                        - (actionsRow.visible ? parent.spacing : 0))
+                        id: headerTitles
+                        property bool expand: true
                         spacing: 2
                         Md3Text {
                             visible: root.title.length > 0
@@ -151,16 +156,14 @@ Item {
                     Item {
                         id: headerTrailingSlot
                         visible: children.length > 0
-                        width: childrenRect.width
+                        width: Math.max(1, childrenRect.width)
                         height: Math.max(childrenRect.height, 24)
-                        anchors.verticalCenter: parent.verticalCenter
                     }
 
                     Row {
                         id: actionsRow
                         visible: root.actions && root.actions.length > 0
                         spacing: 4
-                        anchors.verticalCenter: parent.verticalCenter
                         Repeater {
                             model: root.actions
                             Md3Button {
