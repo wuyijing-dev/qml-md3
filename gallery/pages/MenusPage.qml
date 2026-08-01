@@ -52,6 +52,16 @@ Md3Page {
             ]
         }
 
+        Md3DeferredSection {
+            width: parent.width
+            preferredHeight: 420
+            delayMs: 24
+            asynchronous: true
+            sourceComponent: Component {
+                Md3VStack {
+                    width: parent ? parent.width : 400
+                    spacing: 20
+
         Md3Text {
             text: "Menu bar (nested model)"
             role: Md3Text.TitleSmall
@@ -174,6 +184,10 @@ Md3Page {
             text: qsTr("Tip: Md3ContextMenuArea + Md3Menu enables page-level right-click menus (see Extras page).")
             role: Md3Text.BodySmall
             tone: Md3Text.OnSurfaceVariant
+        }
+
+                }
+            }
         }
 
         Md3Spacer { expand: true }

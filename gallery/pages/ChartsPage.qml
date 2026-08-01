@@ -524,7 +524,7 @@ Item {
                     id: liveChart
                     width: parent.width
                     height: 160
-                    active: true
+                    active: root.md3PageActive
                     asynchronous: true
                     sourceComponent: Component {
                         Md3LineChart {

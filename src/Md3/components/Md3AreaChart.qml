@@ -17,7 +17,32 @@ Item {
     property real lineWidth: 2
     property real areaOpacity: 0.35
     /// Drop Canvas while page/window inactive (FBO free).
-    readonly property bool _plotActive: Md3TreeVisibility.isLiveMotionScene(root, null)
+    property bool unloadWhenPageInactive: true
+    property bool _sceneLive: true
+    readonly property bool _plotActive: pageGate.contentActive && _sceneLive
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
+
+    function _refreshSceneLive() {
+        const ok = Md3TreeVisibility.isLiveMotionScene(root, null)
+        if (_sceneLive !== ok)
+            _sceneLive = ok
+    }
+
+    Connections {
+        target: pageGate
+        function onContentActiveChanged() { root._refreshSceneLive() }
+    }
+    Connections {
+        target: Qt.application
+        function onStateChanged() { root._refreshSceneLive() }
+    }
+    onVisibleChanged: _refreshSceneLive()
+
 
     implicitWidth: 320
     implicitHeight: 200
@@ -177,5 +202,8 @@ Item {
         }    }
 
 
-    Component.onCompleted: requestPaint()
+    Component.onCompleted: {
+        _refreshSceneLive()
+        requestPaint()
+    }
 }

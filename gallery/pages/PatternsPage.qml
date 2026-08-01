@@ -36,7 +36,19 @@ Md3Page {
     Timer {
         id: loadTimer
         interval: 1200
-        onTriggered: page._fillDemoList()
+        onTriggered: {
+            if (!page.md3PageActive)
+                return
+            page._fillDemoList()
+        }
+    }
+
+    onMd3PageActiveChanged: {
+        if (!md3PageActive) {
+            loadTimer.stop()
+            _listLoading = false
+            _listModel = []
+        }
     }
 
     Flickable {

@@ -48,7 +48,7 @@ Item {
         }
 
         Repeater {
-            model: root.suggestions
+            model: root.open ? root.suggestions : []
             Md3ListTile {
                 required property var modelData
                 width: parent.width

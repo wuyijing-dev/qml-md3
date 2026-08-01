@@ -55,6 +55,15 @@ Item {
     width: parent ? parent.width : implicitWidth
     height: hasPages ? (parent ? parent.height : implicitHeight) : headerLoader.height
 
+    /// Drop step-header Repeater while page is off-display (chrome height kept via preferredHeight).
+    property bool unloadWhenPageInactive: true
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 16
@@ -63,6 +72,7 @@ Item {
             id: headerLoader
             Layout.fillWidth: true
             Layout.preferredHeight: root.vertical ? Math.max(72, root.model.length * 72) : 72
+            active: pageGate.contentActive
             sourceComponent: root.vertical ? verticalComp : horizontalComp
         }
 

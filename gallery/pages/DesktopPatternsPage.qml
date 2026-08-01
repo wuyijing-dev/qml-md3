@@ -157,6 +157,18 @@ Md3Page {
         applyStatus(qsTr("Desktop patterns ready"))
     }
 
+    onMd3PageActiveChanged: {
+        if (!md3PageActive) {
+            allRows = []
+            currentRows = []
+            if (fileTable)
+                fileTable.rows = []
+            return
+        }
+        if (fileTreeModel && fileTreeModel.length)
+            selectNode(fileTreeModel[0])
+    }
+
     Md3VStack {
         anchors.fill: parent
         width: parent.width

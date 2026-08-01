@@ -24,6 +24,8 @@ Item {
     property int highlightIndex: 0
 
     readonly property var filtered: {
+        if (!open)
+            return []
         const q = String(query || "").trim().toLowerCase()
         const src = model || []
         const out = []

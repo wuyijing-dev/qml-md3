@@ -36,8 +36,7 @@ Item {
     }
 
     SequentialAnimation {
-        running: root.active && root.visible
-                 && Md3TreeVisibility.isLiveMotionScene(root, null)
+        running: root.active && root.visible && root._pulseLive
         loops: Animation.Infinite
         NumberAnimation {
             target: root
@@ -56,4 +55,32 @@ Item {
             easing.type: Easing.InOutSine
         }
     }
+
+    property bool unloadWhenPageInactive: true
+    property bool _pulseLive: true
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
+
+    function _refreshPulseLive() {
+        const ok = pageGate.contentActive
+                && Md3TreeVisibility.isLiveMotionScene(root, null)
+        if (_pulseLive !== ok)
+            _pulseLive = ok
+    }
+
+    Connections {
+        target: pageGate
+        function onContentActiveChanged() { root._refreshPulseLive() }
+    }
+    Connections {
+        target: Qt.application
+        function onStateChanged() { root._refreshPulseLive() }
+    }
+    onVisibleChanged: _refreshPulseLive()
+    onActiveChanged: _refreshPulseLive()
+    Component.onCompleted: _refreshPulseLive()
 }

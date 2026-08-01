@@ -40,6 +40,16 @@ Md3Page {
                 }
             }
 
+            Md3DeferredSection {
+                width: parent.width
+                preferredHeight: 720
+                delayMs: 24
+                asynchronous: true
+                sourceComponent: Component {
+                    Md3VStack {
+                        width: parent ? parent.width : 400
+                        spacing: 20
+
             Md3Text {
                 text: qsTr("Inline date picker")
                 role: Md3Text.LabelLarge
@@ -87,6 +97,9 @@ Md3Page {
                 text: qsTr("Open modal time picker")
                 variant: Md3Button.Outlined
                 onClicked: page.modalTimeOpen = true
+            }
+                    }
+                }
             }
 
             Item { width: parent.width; height: 48 }

@@ -83,7 +83,7 @@ Flickable {
                 SequentialAnimation on x {
                     id: boxAnim
                     loops: Animation.Infinite
-                    running: root.visible && !Md3Theme.reduceMotion
+                    running: root.md3PageActive && root.visible && !Md3Theme.reduceMotion
                     NumberAnimation {
                         to: Math.max(0, root.width - 80)
                         duration: Md3Motion.medium4
