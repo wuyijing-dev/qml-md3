@@ -90,6 +90,8 @@ Item {
             ctx.lineWidth = root.barWidth
 
             for (let i = 0; i < n; ++i) {
+                if (!(r > 0))
+                    break
                 const p = Math.max(0, Math.min(1, list[i].value / root._max))
                 const col = root._colorAt(i, list[i].color)
                 ctx.strokeStyle = root.trackColor
@@ -114,8 +116,6 @@ Item {
                                  cy + Math.sin(a) * (r - 2))
                 }
                 r -= root.barWidth + root.barGap
-                if (r < root.barWidth)
-                    break
             }
         }
     }

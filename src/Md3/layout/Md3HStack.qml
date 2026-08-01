@@ -76,19 +76,41 @@ Item {
         }
     }
 
+    property var _sizeWatchTargets: []
+
+    function _clearChildSizeWatchers() {
+        const prev = _sizeWatchTargets || []
+        for (let i = 0; i < prev.length; ++i) {
+            const c = prev[i]
+            if (!c)
+                continue
+            try {
+                c.implicitWidthChanged.disconnect(root._scheduleLayout)
+                c.implicitHeightChanged.disconnect(root._scheduleLayout)
+                c.visibleChanged.disconnect(root._scheduleLayout)
+                c.widthChanged.disconnect(root._scheduleLayout)
+                c.heightChanged.disconnect(root._scheduleLayout)
+            } catch (e) { /* child already gone */ }
+        }
+        _sizeWatchTargets = []
+    }
+
     function _hookChildSizeWatchers() {
+        _clearChildSizeWatchers()
         const kids = contentHost.children
+        const next = []
         for (let i = 0; i < kids.length; ++i) {
             const c = kids[i]
-            if (!c || c._md3HStackHooked)
+            if (!c)
                 continue
-            c._md3HStackHooked = true
             c.implicitWidthChanged.connect(root._scheduleLayout)
             c.implicitHeightChanged.connect(root._scheduleLayout)
             c.visibleChanged.connect(root._scheduleLayout)
             c.widthChanged.connect(root._scheduleLayout)
             c.heightChanged.connect(root._scheduleLayout)
+            next.push(c)
         }
+        _sizeWatchTargets = next
     }
 
     onWidthChanged: _scheduleLayout()
@@ -105,7 +127,10 @@ Item {
         _hookChildSizeWatchers()
         _scheduleLayout()
     }
-    Component.onDestruction: layoutTimer.stop()
+    Component.onDestruction: {
+        _clearChildSizeWatchers()
+        layoutTimer.stop()
+    }
 
     function _scheduleLayout() {
         if (_applying || !layoutTimer)

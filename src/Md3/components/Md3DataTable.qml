@@ -685,7 +685,7 @@ Item {
             return t.length ? t : "text"
         }
         readonly property bool useBuiltin: root.cellDelegate === null
-        readonly property bool editable: columnDef && columnDef.editable === true
+        readonly property bool editable: !!(columnDef && columnDef.editable === true)
         readonly property bool editing: editable
                 && root.editingSourceIndex === sourceIndex
                 && root.editingColumnIndex === columnIndex

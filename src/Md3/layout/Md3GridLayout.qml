@@ -169,22 +169,46 @@ Item {
         }
     }
 
+    property var _sizeWatchTargets: []
+
+    function _clearChildSizeWatchers() {
+        const prev = _sizeWatchTargets || []
+        for (let i = 0; i < prev.length; ++i) {
+            const c = prev[i]
+            if (!c)
+                continue
+            try {
+                c.implicitWidthChanged.disconnect(root._scheduleRelayout)
+                c.implicitHeightChanged.disconnect(root._scheduleRelayout)
+                c.visibleChanged.disconnect(root._scheduleRelayout)
+                c.widthChanged.disconnect(root._scheduleRelayout)
+                c.heightChanged.disconnect(root._scheduleRelayout)
+            } catch (e) { /* child already gone */ }
+        }
+        _sizeWatchTargets = []
+    }
+
     function _hookChildSizeWatchers() {
+        _clearChildSizeWatchers()
         const kids = host.children
+        const next = []
         for (let i = 0; i < kids.length; ++i) {
             const c = kids[i]
-            if (!c || c._md3GridHooked)
+            if (!c)
                 continue
-            c._md3GridHooked = true
             c.implicitWidthChanged.connect(root._scheduleRelayout)
             c.implicitHeightChanged.connect(root._scheduleRelayout)
             c.visibleChanged.connect(root._scheduleRelayout)
             c.widthChanged.connect(root._scheduleRelayout)
             c.heightChanged.connect(root._scheduleRelayout)
+            next.push(c)
         }
+        _sizeWatchTargets = next
     }
 
     function _scheduleRelayout() {
         Qt.callLater(root.relayout)
     }
+
+    Component.onDestruction: _clearChildSizeWatchers()
 }

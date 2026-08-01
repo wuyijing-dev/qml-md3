@@ -600,9 +600,12 @@ Item {
     onYChanged: _armSuggestionSync()
     Component.onDestruction: _clearSuggestionScrollHooks()
 
+    /// Window is not an Item — Connections needs contentItem.
+    readonly property Item _windowContent: Window.window ? Window.window.contentItem : null
+
     Connections {
-        target: Window.window
-        enabled: root.suggestionOpen && Window.window
+        target: root._windowContent
+        enabled: root.suggestionOpen && root._windowContent
         function onWidthChanged() { root._armSuggestionSync() }
         function onHeightChanged() { root._armSuggestionSync() }
     }

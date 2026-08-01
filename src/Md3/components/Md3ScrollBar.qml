@@ -27,7 +27,8 @@ Item {
     readonly property real _pos: vertical
             ? (flickable ? flickable.contentY : 0)
             : (flickable ? flickable.contentX : 0)
-    readonly property bool needed: flickable && _content > _view + 1
+    /// Writable + hysteresis avoids visible↔size binding loops with paired bars.
+    property bool needed: false
     readonly property real thumbRatio: needed ? Math.min(1, _view / Math.max(1, _content)) : 1
     readonly property real thumbSize: needed ? Math.max(minThumb, (_view - 4) * thumbRatio) : 0
     readonly property real travel: Math.max(0, _view - 4 - thumbSize)
@@ -59,6 +60,35 @@ Item {
     Accessible.name: activeAnnotation.length
                      ? qsTr("Scroll bar, %1").arg(activeAnnotation)
                      : qsTr("Scroll bar")
+
+    function _syncNeeded() {
+        if (!flickable) {
+            if (needed)
+                needed = false
+            return
+        }
+        const overflow = _content - _view
+        // Hysteresis: hide only when clearly flush; show when clearly overflowing.
+        // Breaks paired v/h bar margin ↔ size binding loops (TreeView / DataTable).
+        if (needed) {
+            if (overflow <= 1)
+                needed = false
+        } else if (overflow > thickness + 2) {
+            needed = true
+        }
+    }
+
+    Connections {
+        target: root.flickable
+        function onContentHeightChanged() { root._syncNeeded() }
+        function onContentWidthChanged() { root._syncNeeded() }
+        function onHeightChanged() { root._syncNeeded() }
+        function onWidthChanged() { root._syncNeeded() }
+    }
+    onFlickableChanged: _syncNeeded()
+    on_ContentChanged: _syncNeeded()
+    on_ViewChanged: _syncNeeded()
+    Component.onCompleted: _syncNeeded()
 
     function _labelAt(t) {
         const list = annotations || []
