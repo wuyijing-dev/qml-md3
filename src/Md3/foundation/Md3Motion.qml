@@ -38,6 +38,12 @@ QtObject {
         return Math.max(1, Math.round(ms * s))
     }
 
+    /// Durations for loaders / progress / live indicators — never collapsed by reduceMotion.
+    function essential(ms) {
+        const s = durationScale > 0.05 ? durationScale : 1
+        return Math.max(1, Math.round(ms * s))
+    }
+
     // Original M3 / Flutter easings
     readonly property var emphasized: [0.2, 0.0, 0.0, 1.0]
     readonly property var emphasizedDecelerate: [0.05, 0.7, 0.1, 1.0]
@@ -99,10 +105,10 @@ QtObject {
     readonly property int smoothPanelEasing: _scaled(160)
     readonly property int smoothMaxEasing: _scaled(180)
 
-    readonly property int progressTravel: _scaled(1800)
-    readonly property int progressSpin: _scaled(1600)
-    readonly property int progressSweep: _scaled(1100)
-    readonly property int progressWave: _scaled(2400)
+    readonly property int progressTravel: essential(1800)
+    readonly property int progressSpin: essential(1600)
+    readonly property int progressSweep: essential(1100)
+    readonly property int progressWave: essential(2400)
 
     function curve(token) {
         const p = root[token]

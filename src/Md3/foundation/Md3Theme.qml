@@ -9,7 +9,8 @@ QtObject {
     property color seed: "#6750A4"
     property real textScale: 1.0
     property bool highContrast: false
-    /// Prefer near-instant motion for vestibular / a11y preferences.
+    /// Prefer near-instant **decorative** motion (page fades, ripples, state layers).
+    /// Loaders / progress use Md3Motion.essential() and keep full timing.
     property bool reduceMotion: false
     /// Within-page progressive load (Md3DeferredSection). Default on; set false to load everything immediately.
     property bool progressiveContent: true

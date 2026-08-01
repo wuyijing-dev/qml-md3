@@ -128,9 +128,20 @@ Item {
         id: press
         acceptedDevices: PointerDevice.TouchScreen | PointerDevice.Stylus
         longPressThreshold: root.longPressMs
-        onLongPressed: root.showNow()
-        onCanceled: root.hideNow()
-        onReleased: root.hideNow()
+        onLongPressed: {
+            root.showNow()
+            tipHide.start()
+        }
+        onCanceled: {
+            tipHide.stop()
+            root.hideNow()
+        }
+    }
+
+    Timer {
+        id: tipHide
+        interval: Math.max(800, root.showDelay)
+        onTriggered: root.hideNow()
     }
 
     Rectangle {

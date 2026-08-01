@@ -16,7 +16,7 @@ Item {
     property color valueColor: Md3Theme.colorScheme.primary
     property color waveColor: Qt.rgba(valueColor.r, valueColor.g, valueColor.b, 0.55)
     property bool showValue: true
-    property bool animated: !Md3Theme.reduceMotion
+    property bool animated: true
     /// 0 = display refresh (full quality). >0 only if you explicitly want a cap.
     property int animationFps: 0
     property real size: 140

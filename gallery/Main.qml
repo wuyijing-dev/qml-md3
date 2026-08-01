@@ -238,12 +238,7 @@ Md3ApplicationWindow {
     Component.onCompleted: {
         Md3AppSettings.organization = settingsOrganization
         Md3AppSettings.application = settingsApplication
-        // Honor persisted a11y/reduceMotion — do not force-clear (breaks motion verification).
-        Qt.callLater(function () {
-            const saved = Md3AppSettings.value("a11y/reduceMotion", undefined)
-            if (saved !== undefined && saved !== null)
-                Md3Theme.reduceMotion = !!saved
-        })
+        // Decorative reduceMotion is restored by ApplicationWindow.restoreSession (default off).
         if (!Md3AppSettings.value("tour/completed", false))
             Qt.callLater(function () { window.startTour() })
     }

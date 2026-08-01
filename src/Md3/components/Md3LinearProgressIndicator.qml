@@ -52,13 +52,13 @@ Item {
     readonly property real progress: Math.max(0, Math.min(1, value))
     readonly property real barWidth: indeterminate ? Math.max(48, width * 0.35) : width * progress
     property bool _treeShown: true
-    readonly property bool sceneActive: enabled && _treeShown && Md3Theme.effectsLiveMotion
+    readonly property bool sceneActive: enabled && _treeShown
     property real travelX: -barWidth
     property real _waveAccum: 0
-    readonly property real _travelMs: Math.max(1200, Md3Theme.reduceMotion ? 1200 : Md3Motion.progressTravel)
+    readonly property real _travelMs: Md3Motion.progressTravel
     readonly property real _liveFrameSec: {
         const fps = Md3Theme.effectsLiveFps
-        return fps > 0 ? (1 / fps) : (1 / 30)
+        return (!Md3Theme.reduceMotion && fps > 0) ? (1 / fps) : (1 / 30)
     }
 
     function _refreshTreeShown() {
@@ -158,30 +158,9 @@ Item {
         to: root.width
         duration: root._travelMs
         loops: Animation.Infinite
-        running: !root.isWavy && root.indeterminate && root.sceneActive && !Md3Theme.reduceMotion
+        running: !root.isWavy && root.indeterminate && root.sceneActive
         easing.type: Easing.Linear
         onRunningChanged: if (running) root.travelX = -root.barWidth
-    }
-
-    SequentialAnimation {
-        running: !root.isWavy && root.indeterminate && root._treeShown && Md3Theme.reduceMotion
-        loops: Animation.Infinite
-        NumberAnimation {
-            target: standardBar
-            property: "opacity"
-            from: 0.35
-            to: 1.0
-            duration: 700
-            easing.type: Easing.InOutQuad
-        }
-        NumberAnimation {
-            target: standardBar
-            property: "opacity"
-            from: 1.0
-            to: 0.35
-            duration: 700
-            easing.type: Easing.InOutQuad
-        }
     }
 
     Shape {

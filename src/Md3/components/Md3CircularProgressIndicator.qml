@@ -55,17 +55,18 @@ Item {
     readonly property real sweepMax: Math.PI * 1.15
     readonly property bool isWavy: style !== Md3CircularProgressIndicator.Standard
     property bool _treeShown: true
-    readonly property bool sceneActive: enabled && _treeShown && Md3Theme.effectsLiveMotion
+    readonly property bool sceneActive: enabled && _treeShown
     readonly property real radius: Math.min(width, height) / 2 - indicatorLineWidth - (isWavy ? amplitude : 0)
 
     property real sweepDir: 1
     property real _waveAccum: 0
-    /// Keep animation math stable even if reduceMotion collapses token durations to 1ms.
-    readonly property real _spinMs: Math.max(900, Md3Theme.reduceMotion ? 900 : Md3Motion.progressSpin)
-    readonly property real _sweepMs: Math.max(700, Md3Theme.reduceMotion ? 700 : Md3Motion.progressSweep)
+    /// Loaders ignore reduceMotion collapse (Md3Motion.essential / progress* tokens).
+    readonly property real _spinMs: Md3Motion.progressSpin
+    readonly property real _sweepMs: Md3Motion.progressSweep
     readonly property real _liveFrameSec: {
         const fps = Md3Theme.effectsLiveFps
-        return fps > 0 ? (1 / fps) : 0
+        // When reduceMotion, effectsLiveFps still applies for wavy throttle; 0 → uncapped vsync.
+        return (!Md3Theme.reduceMotion && fps > 0) ? (1 / fps) : (1 / 30)
     }
 
     function _refreshTreeShown() {
@@ -202,13 +203,6 @@ Item {
                 loops: Animation.Infinite
                 running: root.indeterminate && root.sceneActive && !root.isWavy
             }
-
-            SequentialAnimation on opacity {
-                running: root.indeterminate && !root.isWavy && Md3Theme.reduceMotion && root._treeShown
-                loops: Animation.Infinite
-                NumberAnimation { from: 0.35; to: 1.0; duration: 700; easing.type: Easing.InOutQuad }
-                NumberAnimation { from: 1.0; to: 0.35; duration: 700; easing.type: Easing.InOutQuad }
-            }
         }
     }
 
@@ -273,7 +267,6 @@ Item {
     }
     onIndeterminateChanged: {
         standardIndicator.rotation = 0
-        standardIndicator.opacity = 1
         deferredSyncTimer.restart()
     }
     onStyleChanged: deferredSyncTimer.restart()

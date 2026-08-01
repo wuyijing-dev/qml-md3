@@ -696,7 +696,7 @@ Window {
         Md3Theme.dark = dark
         if (seed !== undefined && String(seed).length > 0)
             Md3Theme.applySeed(seed)
-        Md3Theme.reduceMotion = _settingsBool("a11y/reduceMotion", Md3Theme.reduceMotion)
+        Md3Theme.reduceMotion = _settingsBool("a11y/reduceMotion", false)
         Md3Theme.highContrast = _settingsBool("a11y/highContrast", Md3Theme.highContrast)
         Md3Theme.textScale = Number(Md3AppSettings.value("a11y/textScale", Md3Theme.textScale))
         const fx = Number(Md3AppSettings.value("perf/effectsLevel", Md3Theme.effectsLevel))
@@ -706,9 +706,16 @@ Window {
         if (isFinite(fxi))
             Md3Theme.setEffectsIntensity(fxi)
         Md3Accessibility.showFocusRings = _settingsBool("a11y/showFocusRings", Md3Accessibility.showFocusRings)
+        // One-shot: older Gallery builds could leave reduceMotion stuck ON (all motion ≈1ms).
+        if (!_settingsBool("a11y/reduceMotionMigrated", false)) {
+            Md3Theme.reduceMotion = false
+            Md3AppSettings.setValue("a11y/reduceMotion", false)
+            Md3AppSettings.setValue("a11y/reduceMotionMigrated", true)
+            Md3AppSettings.sync()
+        }
         if (Md3Theme.reduceMotion) {
-            console.warn("Md3: reduceMotion is ON — Md3Motion durations collapse to ~1ms "
-                         + "(Theme page → 减弱动效, or clear a11y/reduceMotion in settings)")
+            console.info("Md3: reduceMotion ON — decorative motion is near-instant; "
+                         + "loaders/progress keep essential timing (Theme → 减弱动效)")
         }
         railExpanded = _settingsBool("shell/railExpanded", railExpanded)
         const page = Number(Md3AppSettings.value("shell/pageIndex", currentIndex))

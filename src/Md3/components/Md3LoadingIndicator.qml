@@ -32,9 +32,9 @@ Item {
     }
 
     property bool _treeShown: true
-    readonly property bool sceneActive: enabled && _treeShown && Md3Theme.effectsLiveMotion
+    readonly property bool sceneActive: enabled && _treeShown
     readonly property real radius: indicatorSize / 2 - strokeWidth
-    readonly property real _spinMs: Math.max(900, Md3Theme.reduceMotion ? 900 : Md3Motion.progressSpin)
+    readonly property real _spinMs: Md3Motion.progressSpin
 
     function _refreshTreeShown() {
         const ok = Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
@@ -133,13 +133,6 @@ Item {
                     loops: Animation.Infinite
                     running: root.indeterminate && root.sceneActive
                 }
-
-                SequentialAnimation on opacity {
-                    running: root.indeterminate && Md3Theme.reduceMotion && root._treeShown
-                    loops: Animation.Infinite
-                    NumberAnimation { from: 0.35; to: 1.0; duration: 700; easing.type: Easing.InOutQuad }
-                    NumberAnimation { from: 1.0; to: 0.35; duration: 700; easing.type: Easing.InOutQuad }
-                }
             }
         }
 
@@ -158,7 +151,6 @@ Item {
     onValueChanged: if (!indeterminate) syncDeterminate()
     onIndeterminateChanged: {
         indicatorShape.rotation = 0
-        indicatorShape.opacity = 1
         syncDeterminate()
     }
 }
