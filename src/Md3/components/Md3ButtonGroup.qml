@@ -100,7 +100,7 @@ Item {
                     width: parent.width
                     height: root.buttonHeight
 
-                    layer.enabled: true
+                    layer.enabled: Md3Theme.effectsRippleMasked && stdRipple.layersNeeded
                     layer.smooth: true
                     layer.effect: MultiEffect {
                         maskEnabled: true
@@ -167,7 +167,7 @@ Item {
                     id: stdMask
                     width: stdBg.width
                     height: stdBg.height
-                    layer.enabled: true
+                    layer.enabled: stdBg.layer.enabled
                     visible: false
                     Rectangle {
                         anchors.fill: parent

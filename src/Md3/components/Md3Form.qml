@@ -210,8 +210,9 @@ Item {
     Component.onCompleted: Qt.callLater(refreshGate)
 
     Timer {
-        interval: 250
+        interval: 400
         running: root.liveGate && root.visible
+                 && Md3TreeVisibility.isSceneActive(root, null)
         repeat: true
         onTriggered: root.refreshGate()
     }

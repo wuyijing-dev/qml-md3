@@ -13,6 +13,9 @@ Item {
             return 0
         return Math.min(elevation, Md3Theme.effectsMaxElevation)
     }
+    /// Dual-blur MultiEffect is expensive; Balanced keeps blur, Low skips shadows entirely.
+    readonly property bool _useBlur: _elev > 0 && Md3Theme.effectsShadows
+    readonly property bool _layersOn: _useBlur && visible
 
     visible: _elev > 0
     z: -1
@@ -24,7 +27,8 @@ Item {
         anchors.topMargin: Md3Theme.elevation.ambientY(root._elev)
         anchors.margins: -6
         opacity: Md3Theme.elevation.ambientOpacity(root._elev)
-        layer.enabled: true
+        visible: root._useBlur
+        layer.enabled: root._layersOn
         layer.smooth: true
         layer.effect: MultiEffect {
             blurEnabled: true
@@ -48,7 +52,8 @@ Item {
         anchors.topMargin: Md3Theme.elevation.keyY(root._elev)
         anchors.margins: -3
         opacity: Md3Theme.elevation.keyOpacity(root._elev)
-        layer.enabled: true
+        visible: root._useBlur
+        layer.enabled: root._layersOn
         layer.smooth: true
         layer.effect: MultiEffect {
             blurEnabled: true
@@ -66,6 +71,7 @@ Item {
     }
 
     Behavior on elevation {
+        enabled: !Md3Theme.reduceMotion && Md3Theme.effectsLiveMotion
         NumberAnimation {
             duration: Md3Motion.short4
             easing.type: Easing.BezierSpline

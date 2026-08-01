@@ -166,7 +166,7 @@ Item {
     }
 
     Timer {
-        interval: 48
+        interval: 120
         running: root.visible && host.children.length > 0
         repeat: true
         onTriggered: root.relayout()

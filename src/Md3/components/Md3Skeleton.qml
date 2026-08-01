@@ -36,7 +36,8 @@ Item {
     }
 
     SequentialAnimation {
-        running: root.active && root.visible && !Md3Theme.reduceMotion
+        running: root.active && root.visible
+                 && Md3TreeVisibility.isLiveMotionScene(root, null)
         loops: Animation.Infinite
         NumberAnimation {
             target: root

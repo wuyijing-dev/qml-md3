@@ -53,8 +53,9 @@ Item {
     }
 
     // Catch late implicitWidth (text/icons) — same idea as Md3AnimatedFlow.
+    // Poll sparsely; size changes also schedule via onChildrenChanged / width.
     Timer {
-        interval: 48
+        interval: 120
         running: root.visible && contentHost.children.length > 0
         repeat: true
         onTriggered: {

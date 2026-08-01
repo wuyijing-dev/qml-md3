@@ -24,6 +24,7 @@ Rectangle {
 
     // Original button/state pacing (~100ms)
     Behavior on opacity {
+        enabled: !Md3Theme.reduceMotion
         NumberAnimation {
             duration: Md3Motion.stateDuration
             easing.type: Easing.BezierSpline

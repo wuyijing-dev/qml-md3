@@ -84,7 +84,7 @@ Md3AbstractButton {
         width: parent.width
         height: root.h
 
-        layer.enabled: true
+        layer.enabled: Md3Theme.effectsRippleMasked && ripple.layersNeeded
         layer.smooth: true
         layer.effect: MultiEffect {
             maskEnabled: true
@@ -161,7 +161,7 @@ Md3AbstractButton {
         id: btnMask
         width: bg.width
         height: bg.height
-        layer.enabled: true
+        layer.enabled: bg.layer.enabled
         visible: false
         Rectangle {
             anchors.fill: parent

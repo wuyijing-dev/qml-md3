@@ -74,12 +74,16 @@ QtObject {
         return Qt.rgba(c.r, c.g, c.b, a)
     }
 
+    /// Cached disabled tokens — avoid Qt.rgba on every binding eval across buttons/lists.
+    readonly property color disabledContentColor: Qt.rgba(colorOnSurface.r, colorOnSurface.g, colorOnSurface.b, 0.38)
+    readonly property color disabledContainerColor: Qt.rgba(colorOnSurface.r, colorOnSurface.g, colorOnSurface.b, 0.12)
+
     function disabledContent() {
-        return withOpacity(colorOnSurface, 0.38)
+        return disabledContentColor
     }
 
     function disabledContainer() {
-        return withOpacity(colorOnSurface, 0.12)
+        return disabledContainerColor
     }
 
     /// Inactive gauge / chart track — solid roles (opacity tracks look washed out).

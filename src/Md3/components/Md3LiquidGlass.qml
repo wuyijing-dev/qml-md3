@@ -17,8 +17,9 @@ Item {
     property real liquidDeform: 1.0
     /// 0=Low, 1=Medium, 2=High — scales sample res, frost taps, chroma.
     property int quality: Md3Theme.effectsGlassQuality
-    /// Keep sampling every frame (video). For static images set false — updates on move.
-    property bool liveSampling: true
+    /// Keep sampling every frame (video). Default off — updates on move/resize/drag
+    /// (static chrome & lists); set true for video / animated backdrops.
+    property bool liveSampling: false
 
     // Defaults aligned with first-version look + open recreations
     // (kennsorr ior≈1.5 / glass-gl curve≈2.8 / ybouane fresnel rim).

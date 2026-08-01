@@ -216,7 +216,9 @@ Item {
     }
 
     Timer {
-        running: root.autoPlay && root.model && root.model.length > 1
+        running: root.autoPlay && root.visible
+                 && root.model && root.model.length > 1
+                 && Md3TreeVisibility.isLiveMotionScene(root, null)
         interval: root.autoPlayInterval
         repeat: true
         onTriggered: root.next()

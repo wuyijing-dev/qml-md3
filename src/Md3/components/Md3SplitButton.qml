@@ -95,7 +95,7 @@ Md3AbstractButton {
             Accessible.name: root.accessibleName
             Accessible.role: Accessible.Button
 
-            layer.enabled: true
+            layer.enabled: Md3Theme.effectsRippleMasked && mainRipple.layersNeeded
             layer.smooth: true
             layer.effect: MultiEffect {
                 maskEnabled: true
@@ -106,6 +106,10 @@ Md3AbstractButton {
                 id: mainRipple
                 rippleColor: root.contentColor
                 clipRadius: 0
+                topLeftRadius: root.corner
+                bottomLeftRadius: root.corner
+                topRightRadius: 0
+                bottomRightRadius: 0
             }
             Md3StateOverlay {
                 overlayColor: root.contentColor
@@ -159,7 +163,7 @@ Md3AbstractButton {
             id: mainMask
             width: mainSeg.width
             height: mainSeg.height
-            layer.enabled: true
+            layer.enabled: mainSeg.layer.enabled
             visible: false
             Rectangle {
                 anchors.fill: parent
@@ -199,7 +203,7 @@ Md3AbstractButton {
             Accessible.name: "More"
             Accessible.role: Accessible.Button
 
-            layer.enabled: true
+            layer.enabled: Md3Theme.effectsRippleMasked && trailRipple.layersNeeded
             layer.smooth: true
             layer.effect: MultiEffect {
                 maskEnabled: true
@@ -210,6 +214,10 @@ Md3AbstractButton {
                 id: trailRipple
                 rippleColor: root.contentColor
                 clipRadius: 0
+                topLeftRadius: 0
+                bottomLeftRadius: 0
+                topRightRadius: root.corner
+                bottomRightRadius: root.corner
             }
             Md3StateOverlay {
                 overlayColor: root.contentColor
@@ -267,7 +275,7 @@ Md3AbstractButton {
             id: trailMask
             width: trailing.width
             height: trailing.height
-            layer.enabled: true
+            layer.enabled: trailing.layer.enabled
             visible: false
             Rectangle {
                 anchors.fill: parent

@@ -2,11 +2,32 @@
 
 Md3 keeps the look (elevation, ripple, motion tokens) while letting you trade **first paint**, **page revisit speed**, and **RSS**. Those three cannot all be maxed at once.
 
-## Mental model
+## Cross-platform lessons (iOS / Android / Qt)
+
+Industry UI stacks converge on the same rules Md3 applies:
+
+| Platform | Core idea | Md3 mapping |
+|----------|-----------|-------------|
+| **SwiftUI** ([Apple](https://developer.apple.com/documentation/xcode/understanding-and-improving-swiftui-performance)) | Narrow invalidation; keep body cheap; avoid whole-list updates | Prefer property tokens over JS in hot bindings; virtualize lists; don’t rebuild models every frame |
+| **Jetpack Compose** ([Android](https://developer.android.com/develop/ui/compose/performance/bestpractices)) | Skip composition/layout; defer state reads to draw | Animate opacity/transform without re-layout; gate live timers with `Md3TreeVisibility` |
+| **Qt Quick** ([Qt docs](https://doc.qt.io/qt-6/qtquick-performance.html)) | Batching; avoid JS during animation; Animator on render thread; no permanent FBO | `layer.enabled` only while ink runs; `RotationAnimator` for loaders; no heavy bindings on animating props |
+
+## Library wins shipped (appearance-preserving)
+
+1. **Button family clip FBOs** — armed only while masked ripple runs (`effectsRippleMasked && ripple.layersNeeded`).
+2. **`Md3Shadow`** — elevation Behavior gated by `effectsLiveMotion`; no blur work when elevation/effects off.
+3. **`Md3Skeleton` / Carousel / Form** — scene / window active gates; layout size-watch 48→120 ms.
+4. **`Md3ColorScheme.disabledContent/Container`** — cached colors (no per-eval `Qt.rgba`).
+5. **`Md3LiquidGlass.liveSampling`** — default `false` (opt-in for video); drag still samples live.
+6. **`Md3StateOverlay`** — opacity Behavior skipped under `reduceMotion`.
+
+Still high-ROI for a later pass: virtualize `Md3DataTable` / `Md3TreeView` bodies; PageHost slot pooling; event-driven Form gate (drop poll).
+
+---
 
 | Layer | What costs money | Already gated? |
 |-------|------------------|----------------|
-| **GPU layers** (`layer` + `MultiEffect`) | FBO per masked button / dual-blur shadow | Ripple: only while ink runs. Shadow: off when `elevation === 0`. IconButton mask: always on while the control exists |
+| **GPU layers** (`layer` + `MultiEffect`) | FBO per masked button / dual-blur shadow | Ripple: only while ink runs. **Buttons / IconButton / AppBar / Toggle / Split / ButtonGroup**: clip mask FBO only while `ripple.layersNeeded` (idle = no FBO). Shadow: off when `elevation === 0` / `effectsLevel === 0` |
 | **Scene Graph** | Draw calls for on-screen items | Off-screen *drawing* is usually culled; **FBOs still exist** if the Item is alive with `layer.enabled` |
 | **PageHost L1** | Live page Items in RAM | Default `arc` + `pageCacheLimit: 1` |
 | **PageHost L2** | Compiled `Component` (cheap to re-instantiate) | Default limit `1` |
