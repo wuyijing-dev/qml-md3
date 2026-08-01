@@ -457,17 +457,11 @@ Item {
     }
 
     onUseSparseSlotsChanged: Qt.callLater(_syncSparseSlots)
-    onModelChanged: Qt.callLater(_syncSparseSlots)
-    onCurrentIndexChanged: {
-        _sparseEnsure(currentIndex)
-        Qt.callLater(_syncSparseSlots)
-    }
     onDisplayedIndexChanged: {
         _sparseEnsure(displayedIndex)
         Qt.callLater(_syncSparseSlots)
     }
     onTransitioningChanged: Qt.callLater(_syncSparseSlots)
-    Component.onCompleted: Qt.callLater(_syncSparseSlots)
 
     function _contentRect() {
         const w = Math.max(1, width - contentPadding * 2)
@@ -1331,7 +1325,11 @@ Item {
 
     onRouteParamsChanged: Qt.callLater(_syncCurrentPageContext)
     onNavDepthChanged: Qt.callLater(_syncCurrentPageContext)
-    onCurrentIndexChanged: Qt.callLater(_syncCurrentPageContext)
+    onCurrentIndexChanged: {
+        _sparseEnsure(currentIndex)
+        Qt.callLater(_syncSparseSlots)
+        Qt.callLater(_syncCurrentPageContext)
+    }
 
     /// Soft-warm: L2 only unless allowL1; never inflates beyond cacheLimit.
     function _warmPage(index, allowL1) {
@@ -1764,6 +1762,7 @@ Item {
     }
 
     Component.onCompleted: {
+        _syncSparseSlots()
         _ensureKeepArray()
         _setKeep(currentIndex, true)
         _touchLru(currentIndex)
@@ -1803,6 +1802,7 @@ Item {
         if (model && currentIndex >= model.length)
             currentIndex = 0
         displayedIndex = currentIndex
+        _syncSparseSlots()
         _ensureKeepArray()
         _setKeep(currentIndex, true)
         _touchLru(currentIndex)
