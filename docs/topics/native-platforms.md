@@ -44,9 +44,9 @@ C++: `Md3WindowHelper::displayServer()` mirrors the same probe; `platformId()` s
 | `requestAttention` | Taskbar flash | Urgent / alert | Same | `alert` |
 | Single-instance lock | Yes (`Md3NativeShell`) | Yes | Yes | Best-effort |
 | Open at login | Run key | XDG autostart | LaunchAgent | — |
-| Global shortcut | `RegisterHotKey` | — (portal TBD) | — | — |
-| Protocol client | HKCU Classes | `.desktop` + xdg-mime | — | — |
-| Power / lock signals | WM_POWER / WTS | `ApplicationSuspended` | Same | Same |
+| Global shortcut | `RegisterHotKey` | X11 `xcb_grab_key` / Wayland **GlobalShortcuts portal** | Carbon `RegisterEventHotKey` | — |
+| Protocol client | HKCU Classes | `.desktop` + xdg-mime | `LSSetDefaultHandlerForURLScheme` | — |
+| Power / lock signals | WM_POWER / WTS | logind PrepareForSleep / LockedHint | NSWorkspace sleep/wake | Same |
 | `getPath` (userData/logs/…) | Yes | Yes | Yes | Yes |
 
 ## Electron-parity host (`Md3NativeShell`)
@@ -62,9 +62,16 @@ Md3NativeShell.onSecondInstance: (argv) => raiseWindow()
 // Open at login / protocol / hotkey / paths
 Md3NativeShell.setOpenAtLoginEnabled(true)
 Md3NativeShell.setAsDefaultProtocolClient("myapp")
-Md3NativeShell.registerGlobalShortcut("focus", "Ctrl+Shift+M") // Windows
+Md3NativeShell.registerGlobalShortcut("focus", "Ctrl+Shift+M") // Win / macOS / Linux
 const logs = Md3NativeShell.getPath("logs")
 ```
+
+| Platform | Global shortcut backend |
+|----------|-------------------------|
+| Windows | `RegisterHotKey` |
+| macOS | Carbon `RegisterEventHotKey` |
+| Linux X11 | `xcb_grab_key` |
+| Linux Wayland | `org.freedesktop.portal.GlobalShortcuts` (user may confirm in portal UI) |
 
 Capability flags: `Md3WindowCapabilities.openAtLogin` / `globalShortcut` / `protocolClient` / `powerMonitor`.
 

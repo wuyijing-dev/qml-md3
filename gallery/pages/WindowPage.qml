@@ -275,7 +275,7 @@ Flickable {
         Md3Text {
             width: parent.width
             wrapMode: Text.WordWrap
-            text: qsTr("Md3NativeShell：单实例 · 开机启动 · 全局快捷键(Win) · 自定义协议 · 电源/锁屏 · getPath。能力旗：openAtLogin=%1 · globalShortcut=%2 · protocolClient=%3")
+            text: qsTr("Md3NativeShell：单实例 · 开机启动 · 全局快捷键(Win/macOS/Linux) · 自定义协议 · 电源/锁屏 · getPath。能力旗：openAtLogin=%1 · globalShortcut=%2 · protocolClient=%3")
                   .arg(Md3WindowCapabilities.openAtLogin ? qsTr("是") : qsTr("否"))
                   .arg(Md3WindowCapabilities.globalShortcut ? qsTr("是") : qsTr("否"))
                   .arg(Md3WindowCapabilities.protocolClient ? qsTr("是") : qsTr("否"))

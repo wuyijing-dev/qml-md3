@@ -40,7 +40,7 @@ QtObject {
     readonly property bool immersiveSystemUi: false
     readonly property bool skipTaskbar: true
     readonly property bool openAtLogin: true
-    readonly property bool globalShortcut: false
-    readonly property bool protocolClient: false
+    readonly property bool globalShortcut: true
+    readonly property bool protocolClient: true
     readonly property bool powerMonitor: true
 }

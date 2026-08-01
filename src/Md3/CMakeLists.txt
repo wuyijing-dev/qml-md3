@@ -450,11 +450,13 @@ set(MD3_PLATFORM_SOURCES)
 if (MD3_IS_WASM)
     list(APPEND MD3_PLATFORM_SOURCES
         window/platforms/mobile/md3mobilenative.cpp
+        window/platforms/mobile/md3mobile_nativeshell_stub.cpp
     )
     target_compile_definitions(Md3 PUBLIC MD3_PLATFORM_WASM=1)
 elseif (MD3_IS_ANDROID)
     list(APPEND MD3_PLATFORM_SOURCES
         window/platforms/android/md3androidnative.cpp
+        window/platforms/mobile/md3mobile_nativeshell_stub.cpp
     )
     target_compile_definitions(Md3 PUBLIC MD3_PLATFORM_ANDROID=1)
 elseif (WIN32)
@@ -466,13 +468,21 @@ elseif (WIN32)
         window/platforms/windows/md3winicons.cpp
         window/platforms/windows/md3wintaskbar.cpp
         window/platforms/windows/md3wintray.cpp
+        window/platforms/windows/md3win_nativeshell_stub.cpp
     )
     target_include_directories(Md3 PRIVATE window/platforms/windows)
     target_link_libraries(Md3 PRIVATE dwmapi shell32 shlwapi ole32 propsys advapi32 psapi pdh)
 elseif (APPLE)
     list(APPEND MD3_PLATFORM_SOURCES
         window/platforms/macos/md3macosnative.cpp
+        window/platforms/macos/md3macos_nativeshell.mm
     )
+    set_source_files_properties(window/platforms/macos/md3macos_nativeshell.mm PROPERTIES
+        COMPILE_FLAGS "-fobjc-arc")
+    target_link_libraries(Md3 PRIVATE
+        "-framework Carbon"
+        "-framework AppKit"
+        "-framework CoreServices")
 elseif (UNIX)
     list(APPEND MD3_PLATFORM_SOURCES
         window/platforms/linux/md3linux_p.h
@@ -481,8 +491,13 @@ elseif (UNIX)
         window/platforms/linux/md3linuxnative.cpp
         window/platforms/linux/md3linuxdock.cpp
         window/platforms/linux/md3linuxtray.cpp
+        window/platforms/linux/md3linux_nativeshell.cpp
     )
     target_include_directories(Md3 PRIVATE window/platforms/linux)
+    find_library(MD3_XCB_LIB xcb)
+    if (MD3_XCB_LIB)
+        target_link_libraries(Md3 PRIVATE ${MD3_XCB_LIB})
+    endif()
     find_package(Qt6 REQUIRED COMPONENTS DBus Widgets)
     target_link_libraries(Md3 PRIVATE Qt6::DBus Qt6::Widgets)
 
@@ -504,6 +519,7 @@ elseif (UNIX)
 else()
     list(APPEND MD3_PLATFORM_SOURCES
         window/platforms/mobile/md3mobilenative.cpp
+        window/platforms/mobile/md3mobile_nativeshell_stub.cpp
     )
 endif()
 target_sources(Md3 PRIVATE ${MD3_PLATFORM_SOURCES})

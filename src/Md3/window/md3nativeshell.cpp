@@ -1,4 +1,5 @@
 #include "md3nativeshell.h"
+#include "md3nativeshell_p.h"
 
 #include <QAbstractNativeEventFilter>
 #include <QCoreApplication>
@@ -166,6 +167,7 @@ Md3NativeShell::Md3NativeShell(QObject *parent)
 {
     ensureNativeFilter();
     refreshBattery();
+    Md3NativeShellPlatform::installSessionWatch(this);
 
     if (qGuiApp) {
         QObject::connect(qGuiApp, &QGuiApplication::applicationStateChanged, this,
@@ -181,6 +183,8 @@ Md3NativeShell::Md3NativeShell(QObject *parent)
 Md3NativeShell::~Md3NativeShell()
 {
     unregisterAllGlobalShortcuts();
+    Md3NativeShellPlatform::shutdownGlobalShortcuts();
+    Md3NativeShellPlatform::uninstallSessionWatch();
     teardownSingleInstance();
 #if defined(Q_OS_WIN)
     if (m_msgHwnd) {
@@ -264,6 +268,12 @@ void Md3NativeShell::refreshBattery()
 void Md3NativeShell::handleHotkey(int nativeId)
 {
     const QString id = m_hotkeyToId.value(nativeId);
+    if (!id.isEmpty())
+        emit globalShortcutActivated(id);
+}
+
+void Md3NativeShell::handlePortalShortcut(const QString &id)
+{
     if (!id.isEmpty())
         emit globalShortcutActivated(id);
 }
@@ -553,6 +563,8 @@ bool Md3NativeShell::globalShortcutSupported() const
 {
 #if defined(Q_OS_WIN)
     return true;
+#elif defined(Q_OS_MACOS) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
+    return Md3NativeShellPlatform::globalShortcutSupported();
 #else
     return false;
 #endif
@@ -565,20 +577,21 @@ bool Md3NativeShell::registerGlobalShortcut(const QString &id, const QString &ac
         return false;
     }
     if (!globalShortcutSupported()) {
-        reportStatus(QStringLiteral("global-shortcut: unsupported (Windows RegisterHotKey only for now)"));
+        reportStatus(QStringLiteral("global-shortcut: unsupported on this platform"));
         return false;
     }
     unregisterGlobalShortcut(id);
+
+    const QKeySequence seq(accelerator, QKeySequence::PortableText);
+    if (seq.isEmpty()) {
+        reportStatus(QStringLiteral("global-shortcut: invalid accelerator"));
+        return false;
+    }
 
 #if defined(Q_OS_WIN)
     ensureNativeFilter();
     if (!m_msgHwnd) {
         reportStatus(QStringLiteral("global-shortcut: no message HWND"));
-        return false;
-    }
-    const QKeySequence seq(accelerator, QKeySequence::PortableText);
-    if (seq.isEmpty()) {
-        reportStatus(QStringLiteral("global-shortcut: invalid accelerator"));
         return false;
     }
     const QKeyCombination comb = seq[0];
@@ -597,9 +610,18 @@ bool Md3NativeShell::registerGlobalShortcut(const QString &id, const QString &ac
     m_hotkeyToId.insert(nativeId, id);
     reportStatus(QStringLiteral("global-shortcut: registered %1 → %2").arg(id, accelerator));
     return true;
+#elif defined(Q_OS_MACOS) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
+    const int nativeId = m_nextHotkeyId++;
+    if (!Md3NativeShellPlatform::registerGlobalShortcut(this, id, seq, nativeId)) {
+        reportStatus(QStringLiteral("global-shortcut: platform register failed"));
+        return false;
+    }
+    m_shortcutIds.insert(id, nativeId);
+    m_hotkeyToId.insert(nativeId, id);
+    reportStatus(QStringLiteral("global-shortcut: registered %1 → %2").arg(id, accelerator));
+    return true;
 #else
     Q_UNUSED(id)
-    Q_UNUSED(accelerator)
     return false;
 #endif
 }
@@ -608,17 +630,16 @@ bool Md3NativeShell::unregisterGlobalShortcut(const QString &id)
 {
     if (!m_shortcutIds.contains(id))
         return false;
-#if defined(Q_OS_WIN)
     const int nativeId = m_shortcutIds.take(id);
     m_hotkeyToId.remove(nativeId);
+#if defined(Q_OS_WIN)
     if (m_msgHwnd)
         UnregisterHotKey(static_cast<HWND>(m_msgHwnd), nativeId);
+#elif defined(Q_OS_MACOS) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
+    Md3NativeShellPlatform::unregisterGlobalShortcut(nativeId);
+#endif
     reportStatus(QStringLiteral("global-shortcut: unregistered %1").arg(id));
     return true;
-#else
-    m_shortcutIds.remove(id);
-    return true;
-#endif
 }
 
 void Md3NativeShell::unregisterAllGlobalShortcuts()
@@ -632,6 +653,8 @@ bool Md3NativeShell::protocolClientSupported() const
 {
 #if defined(Q_OS_WIN) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
     return true;
+#elif defined(Q_OS_MACOS)
+    return Md3NativeShellPlatform::protocolClientSupported();
 #else
     return false;
 #endif
@@ -728,6 +751,14 @@ bool Md3NativeShell::setAsDefaultProtocolClient(const QString &scheme, const QSt
                               QStringLiteral("x-scheme-handler/%1").arg(s) });
     reportStatus(QStringLiteral("protocol: registered %1://").arg(s));
     return true;
+#elif defined(Q_OS_MACOS)
+    QString status;
+    const bool ok = Md3NativeShellPlatform::setAsDefaultProtocolClient(s, exe, args, &status);
+    reportStatus(status.isEmpty()
+                         ? (ok ? QStringLiteral("protocol: registered %1://").arg(s)
+                               : QStringLiteral("protocol: failed"))
+                         : status);
+    return ok;
 #else
     Q_UNUSED(args)
     Q_UNUSED(exe)
@@ -757,6 +788,12 @@ bool Md3NativeShell::removeAsDefaultProtocolClient(const QString &scheme)
     QFile::remove(desktopPath);
     reportStatus(QStringLiteral("protocol: removed %1://").arg(s));
     return true;
+#elif defined(Q_OS_MACOS)
+    QString status;
+    const bool ok = Md3NativeShellPlatform::removeAsDefaultProtocolClient(s, &status);
+    if (!status.isEmpty())
+        reportStatus(status);
+    return ok;
 #else
     return false;
 #endif
@@ -791,6 +828,8 @@ bool Md3NativeShell::isDefaultProtocolClient(const QString &scheme) const
                                  .path();
     return QFileInfo::exists(
             QDir(apps).filePath(QStringLiteral("md3-%1-handler.desktop").arg(s)));
+#elif defined(Q_OS_MACOS)
+    return Md3NativeShellPlatform::isDefaultProtocolClient(s);
 #else
     return false;
 #endif

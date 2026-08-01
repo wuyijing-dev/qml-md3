@@ -87,8 +87,9 @@ public:
     /// Bring this process's first top-level window forward (second-instance helper).
     Q_INVOKABLE void focusMainWindow();
 
-    // Called from native WndProc / event filter (not QML API).
+    // Called from native WndProc / event filter / portal (not QML API).
     void handleHotkey(int nativeId);
+    void handlePortalShortcut(const QString &id);
     void handlePowerBroadcast(quintptr wParam);
     void handleSessionChange(quintptr wParam);
 

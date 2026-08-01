@@ -26,8 +26,8 @@ Prefer this singleton (or `Md3ApplicationWindow` thin wrappers) over calling OS 
 | `singleInstancePrimary` | `bool` | After a successful `requestSingleInstanceLock` |
 | `openAtLogin` | `bool` | Read/write; mirrors login-item state |
 | `openAtLoginSupported` | `bool` | Win / Linux / macOS |
-| `globalShortcutSupported` | `bool` | Windows `RegisterHotKey` today |
-| `protocolClientSupported` | `bool` | Win HKCU Classes; Linux xdg handler |
+| `globalShortcutSupported` | `bool` | Win / macOS / Linux (X11 grab or Wayland portal) |
+| `protocolClientSupported` | `bool` | Win / Linux / macOS |
 | `powerMonitorSupported` | `bool` | Always true (at least app suspend) |
 | `onBattery` | `bool` | Best-effort (Windows power status) |
 | `lastStatus` | `string` | Last native operation message |
