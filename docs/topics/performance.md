@@ -20,8 +20,12 @@ Industry UI stacks converge on the same rules Md3 applies:
 4. **`Md3ColorScheme.disabledContent/Container`** — cached colors (no per-eval `Qt.rgba`).
 5. **`Md3LiquidGlass.liveSampling`** — default `false` (opt-in for video); drag still samples live.
 6. **`Md3StateOverlay`** — opacity Behavior skipped under `reduceMotion`.
+7. **`Md3TreeView`** — `ListView { reuseItems }` + 160ms debounced `flatRows` rebuild.
+8. **`Md3DataTable`** — free + frozen bodies virtualized; `_scrollColumnIndices` cached; V-bar tracks `rowsCol`.
+9. **`Md3PageHost`** — prefetch coalesced (120ms); launch mask geometry only while morphing.
+10. **`Md3Form.liveGate`** — event-wired field signals + 48ms debounce (poll only if no named fields).
 
-Still high-ROI for a later pass: virtualize `Md3DataTable` / `Md3TreeView` bodies; PageHost slot pooling; event-driven Form gate (drop poll).
+Still optional later: sparse PageHost slot pool for huge destination catalogs; TableView for multi-column body.
 
 ---
 
