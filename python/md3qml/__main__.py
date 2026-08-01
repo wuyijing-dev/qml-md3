@@ -117,12 +117,25 @@ def _cmd_run(args: argparse.Namespace) -> int:
 
 
 def _cmd_run_c(args: argparse.Namespace) -> int:
-    from .capi import CRunConfig, run_qml_file_c
+    from .capi import CRunConfig, run_qml_file_c, run_qml_module_c
+
+    if not args.module and not args.qml:
+        raise SystemExit("run-c: provide a .qml path or --module URI")
 
     cfg = CRunConfig(
         application_name=args.name,
         qml_import_path=args.qml_import or "",
+        load_fonts=not args.no_fonts,
+        alpha_buffer=not args.no_alpha,
+        print_banner=args.banner,
     )
+    if args.module:
+        return run_qml_module_c(
+            args.module,
+            args.component,
+            config=cfg,
+            md3_prefix=args.md3_prefix,
+        )
     return run_qml_file_c(args.qml, config=cfg, md3_prefix=args.md3_prefix)
 
 
@@ -193,11 +206,23 @@ def main(argv: list[str] | None = None) -> int:
     p_run.add_argument("--fetch-url", default=None)
     p_run.set_defaults(func=_cmd_run)
 
-    p_c = sub.add_parser("run-c", help="Load via libMd3 C ABI (md3_run_qml_file)")
-    p_c.add_argument("qml", help="Path to Main.qml")
+    p_c = sub.add_parser(
+        "run-c",
+        help="Load via libMd3 C ABI (md3_run_qml_file / md3_run_qml_module) — Rust parity",
+    )
+    p_c.add_argument("qml", nargs="?", default=None, help="Path to Main.qml")
+    p_c.add_argument("--module", default=None, help="QML module URI (md3_run_qml_module)")
+    p_c.add_argument("--component", default="Main")
     p_c.add_argument("--md3-prefix", default=None)
     p_c.add_argument("--qml-import", default=None, help="Override lib/qml path")
     p_c.add_argument("--name", default="Md3 App")
+    p_c.add_argument(
+        "--banner",
+        action="store_true",
+        help="Release-only ANSI banner (Md3::printBanner / print_banner)",
+    )
+    p_c.add_argument("--no-fonts", action="store_true", help="Skip Md3 font load")
+    p_c.add_argument("--no-alpha", action="store_true", help="Disable alpha buffer")
     p_c.set_defaults(func=_cmd_run_c)
 
     p_gal = sub.add_parser(

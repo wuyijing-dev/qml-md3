@@ -53,3 +53,18 @@ python examples/gallery-pyside/main.py
 ## Hello example
 
 See [examples/hello-pyside/README.md](../../examples/hello-pyside/README.md).
+
+## C ABI host (Rust parity)
+
+Prefer `md3qml run` (PySide) for day-to-day apps. For the same entry as Rust `md3qml::run_qml_file` / `run_qml_module`:
+
+```bash
+md3qml run-c examples/hello-pyside/Main.qml --banner
+# or: md3qml run-c --module MyApp --component Main --banner
+```
+
+| Python | Rust |
+|--------|------|
+| `CRunConfig` / `run_qml_file_c` / `run_qml_module_c` | `RunOptions` / `run_qml_file` / `run_qml_module` |
+
+Field matrix: [rust.md](rust.md).

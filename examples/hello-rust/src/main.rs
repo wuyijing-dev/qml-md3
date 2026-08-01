@@ -11,6 +11,8 @@ use std::env;
 use std::path::PathBuf;
 use std::process;
 
+use md3qml::RunOptions;
+
 fn main() {
     let qml = env::args()
         .nth(1)
@@ -23,7 +25,8 @@ fn main() {
     }
 
     // Do not probe/unload Md3 before run — keep one LoadLibrary for the Qt lifetime.
-    match md3qml::run_qml_file(&qml, None, "Hello Rust Md3") {
+    let opts = RunOptions::new("Hello Rust Md3").with_banner(true);
+    match md3qml::run_qml_file(&qml, &opts) {
         Ok(code) => process::exit(code),
         Err(e) => {
             eprintln!("{e}");

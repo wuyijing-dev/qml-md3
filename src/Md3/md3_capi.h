@@ -7,6 +7,7 @@ extern "C" {
 #endif
 
 /// Plain C config for Python ctypes / Rust / other hosts. All pointers may be NULL.
+/// Field layout must stay ABI-compatible across language hosts.
 typedef struct Md3RunConfig {
     const char *organization;
     const char *application_name;
@@ -16,8 +17,9 @@ typedef struct Md3RunConfig {
     const char *app_user_model_id;
     /// Extra QML import path (single directory, typically `…/lib/qml`).
     const char *qml_import_path;
-    int alpha_buffer; /* default 1 if config is NULL */
-    int load_fonts;   /* default 1 if config is NULL */
+    int alpha_buffer;  /* default 1 if config is NULL */
+    int load_fonts;    /* default 1 if config is NULL */
+    int print_banner;  /* default 0; Release-only banner via Md3::printBanner */
 } Md3RunConfig;
 
 /// Load a filesystem `.qml` that `import Md3`. Returns process exit code (0 ok).

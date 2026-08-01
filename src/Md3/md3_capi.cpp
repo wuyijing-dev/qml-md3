@@ -29,6 +29,7 @@ Md3::RunOptions optionsFromC(const Md3RunConfig *config)
         opts.qmlImportPaths = QStringList{QString::fromUtf8(config->qml_import_path)};
     opts.alphaBuffer = config->alpha_buffer != 0;
     opts.loadFonts = config->load_fonts != 0;
+    opts.printBanner = config->print_banner != 0;
     return opts;
 }
 

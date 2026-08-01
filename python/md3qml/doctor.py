@@ -84,11 +84,17 @@ def doctor(*, md3_prefix: str | None = None) -> Tuple[int, List[str]]:
 
             lib = load_md3_library(prefix)
             has_run = hasattr(lib, "md3_run_qml_file")
+            has_mod = hasattr(lib, "md3_run_qml_module")
             has_ver = hasattr(lib, "md3_version_string")
-            if has_run and has_ver:
-                lines.append("OK  C ABI md3_run_qml_file / md3_version_string")
+            if has_run and has_mod and has_ver:
+                lines.append(
+                    "OK  C ABI md3_run_qml_file / md3_run_qml_module / md3_version_string"
+                )
             else:
-                lines.append("WARN Md3 loaded but C ABI symbols missing — rebuild shared Md3")
+                lines.append(
+                    "WARN Md3 loaded but C ABI symbols incomplete — rebuild shared Md3 "
+                    "(need print_banner field + module entry)"
+                )
         except Exception as exc:  # noqa: BLE001 — doctor should never crash
             lines.append(f"WARN C ABI load: {exc}")
 

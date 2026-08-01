@@ -1,6 +1,6 @@
 # md3qml (Rust)
 
-Thin **library** host for the shared Md3 QML module via the C ABI (`md3_capi.h`).
+Thin **library** host for the shared Md3 QML module via the C ABI (`md3_capi.h`). Kept in sync with Python `md3qml.capi`.
 
 Runnable sample: [`examples/hello-rust`](../../examples/hello-rust/) (`src/main.rs` + `Main.qml`).
 
@@ -18,12 +18,22 @@ md3qml = { path = "../path/to/rust/md3qml" }
 ```
 
 ```rust
-md3qml::run_qml_file(std::path::Path::new("Main.qml"), None, "My App")?;
+use md3qml::RunOptions;
+
+let opts = RunOptions::new("My App").with_banner(true);
+md3qml::run_qml_file(std::path::Path::new("Main.qml"), &opts)?;
+// md3qml::run_qml_module("MyApp", "Main", &opts)?;
 ```
 
-## API
+## API (parity with Python `capi`)
 
-- `md3qml::run_qml_file(path, prefix, app_name)` → exit code
-- `md3qml::version_string(prefix)` → `md3_version_string()`
+| Rust | Python |
+|------|--------|
+| `RunOptions` | `CRunConfig` (+ `md3_prefix` kwarg) |
+| `run_qml_file` | `run_qml_file_c` |
+| `run_qml_module` | `run_qml_module_c` |
+| `version_string` | `version_string_c` |
+| `discover_qt_bin_dirs` | `discover_qt_bin_dirs` |
+| `find_md3_library` | `load_md3_library` |
 
-Python hosts use the same C ABI via `md3qml.run_qml_file_c` / `md3qml run-c`.
+See [docs/topics/rust.md](../../docs/topics/rust.md) for the full field matrix.
