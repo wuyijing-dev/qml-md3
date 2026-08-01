@@ -102,6 +102,13 @@ Item {
     /// Full-res leave snapshot during launch (avoids chroma fringing on blurred text).
     property bool leaveSnapHiRes: false
     property bool warmStart: false
+    /// Above this destination count (and cacheMode !== "all"), only live/kept pages get Item slots.
+    property int sparseSlotThreshold: 40
+    readonly property bool useSparseSlots: {
+        if (!model || cacheMode === "all")
+            return false
+        return model.length > sparseSlotThreshold
+    }
     property bool showBusyIndicator: false
     property bool showSkeleton: false
     property string skeletonLayout: "page"
@@ -367,13 +374,100 @@ Item {
     }
 
     function _pageSlotAt(index) {
-        return pageRepeater.itemAt(index)
+        // Dense path: slots are ordered by pageIndex === repeater index.
+        if (!useSparseSlots) {
+            const ordered = pageRepeater.itemAt(index)
+            if (ordered && ordered.pageIndex === index)
+                return ordered
+        }
+        for (let i = 0; i < pageRepeater.count; ++i) {
+            const slot = pageRepeater.itemAt(i)
+            if (slot && slot.pageIndex === index)
+                return slot
+        }
+        return null
     }
 
     function _loaderAt(index) {
         const slot = _pageSlotAt(index)
         return slot ? slot.pageLoader : null
     }
+
+    function _sparseHas(pageIndex) {
+        for (let i = 0; i < sparseSlotModel.count; ++i) {
+            if (Number(sparseSlotModel.get(i).pageIndex) === pageIndex)
+                return true
+        }
+        return false
+    }
+
+    function _sparseEnsure(pageIndex) {
+        if (pageIndex < 0 || !model || pageIndex >= model.length)
+            return
+        if (_sparseHas(pageIndex))
+            return
+        sparseSlotModel.append({ pageIndex: pageIndex })
+    }
+
+    /// Keep `sparseSlotModel` in sync. Dense catalogs: one entry per page index.
+    /// Sparse catalogs (large N): only kept / current / transition pages.
+    function _syncSparseSlots() {
+        if (!model || model.length === 0) {
+            if (sparseSlotModel.count > 0)
+                sparseSlotModel.clear()
+            return
+        }
+        if (!useSparseSlots) {
+            const n = model.length
+            while (sparseSlotModel.count > n)
+                sparseSlotModel.remove(sparseSlotModel.count - 1)
+            for (let i = sparseSlotModel.count; i < n; ++i)
+                sparseSlotModel.append({ pageIndex: i })
+            for (let i = 0; i < n; ++i) {
+                if (Number(sparseSlotModel.get(i).pageIndex) !== i)
+                    sparseSlotModel.setProperty(i, "pageIndex", i)
+            }
+            return
+        }
+        const want = ({})
+        function add(i) {
+            if (i >= 0 && i < model.length)
+                want[i] = true
+        }
+        add(currentIndex)
+        add(displayedIndex)
+        add(transitionFrom)
+        add(transitionTo)
+        _ensureKeepArray()
+        for (let i = 0; i < keepFlags.length; ++i) {
+            if (keepFlags[i] || _isPinned(i))
+                add(i)
+        }
+        for (let i = sparseSlotModel.count - 1; i >= 0; --i) {
+            const pi = Number(sparseSlotModel.get(i).pageIndex)
+            if (!want[pi])
+                sparseSlotModel.remove(i)
+        }
+        for (const k in want)
+            _sparseEnsure(Number(k))
+    }
+
+    ListModel {
+        id: sparseSlotModel
+    }
+
+    onUseSparseSlotsChanged: Qt.callLater(_syncSparseSlots)
+    onModelChanged: Qt.callLater(_syncSparseSlots)
+    onCurrentIndexChanged: {
+        _sparseEnsure(currentIndex)
+        Qt.callLater(_syncSparseSlots)
+    }
+    onDisplayedIndexChanged: {
+        _sparseEnsure(displayedIndex)
+        Qt.callLater(_syncSparseSlots)
+    }
+    onTransitioningChanged: Qt.callLater(_syncSparseSlots)
+    Component.onCompleted: Qt.callLater(_syncSparseSlots)
 
     function _contentRect() {
         const w = Math.max(1, width - contentPadding * 2)
@@ -700,6 +794,9 @@ Item {
         next[index] = on
         keepFlags = next
         generation++
+        if (on)
+            _sparseEnsure(index)
+        Qt.callLater(_syncSparseSlots)
     }
 
     function _listRemove(list, value) {
@@ -1435,6 +1532,10 @@ Item {
         if (transitioning && index === transitionTo)
             return
         opts = opts || ({})
+        // Sparse catalogs: create the destination slot before probing the Loader.
+        _sparseEnsure(index)
+        if (useSparseSlots)
+            _syncSparseSlots()
         const targetLdr = _loaderAt(index)
         const cacheHit = !!(targetLdr && targetLdr.status === Loader.Ready && targetLdr.item)
         if (cacheHit && lightFadeOnCacheHit
@@ -1590,7 +1691,7 @@ Item {
     Timer {
         id: l2WarmTimer
         property int cursor: 0
-        interval: 20
+        interval: 48
         repeat: true
         running: false
         onTriggered: {
@@ -1786,21 +1887,22 @@ Item {
 
     Repeater {
         id: pageRepeater
-        model: root.model ? root.model.length : 0
+        model: sparseSlotModel
 
         delegate: Item {
             id: pageSlot
             required property int index
+            required property int pageIndex
             property alias pageLoader: pageLoader
 
             anchors.fill: parent
             anchors.margins: root.contentPadding
 
-            readonly property bool keep: root._shouldKeep(index)
-            readonly property bool isDisplayed: index === root.displayedIndex
-            readonly property bool isTarget: index === root.currentIndex
-            readonly property bool isLeaving: root.transitioning && index === root.transitionFrom
-            readonly property bool isEntering: root.transitioning && index === root.transitionTo
+            readonly property bool keep: root._shouldKeep(pageIndex)
+            readonly property bool isDisplayed: pageIndex === root.displayedIndex
+            readonly property bool isTarget: pageIndex === root.currentIndex
+            readonly property bool isLeaving: root.transitioning && pageIndex === root.transitionFrom
+            readonly property bool isEntering: root.transitioning && pageIndex === root.transitionTo
             readonly property real t: root.transitionProgress
             readonly property string mode: root.transitionModeActive
             readonly property int dir: root.transitionDir
@@ -1947,7 +2049,7 @@ Item {
                 onActiveChanged: {
                     const on = active
                     const ldr = pageLoader
-                    const idx = index
+                    const idx = pageSlot.pageIndex
                     Qt.callLater(function () {
                         if (!ldr)
                             return
@@ -1972,13 +2074,13 @@ Item {
                         item.height = Qt.binding(function () { return pageLoader.height })
                         root._syncPageContext(item)
                     }
-                    if (index === root.currentIndex)
-                        root._tryShow(index)
+                    if (pageSlot.pageIndex === root.currentIndex)
+                        root._tryShow(pageSlot.pageIndex)
                 }
 
                 onStatusChanged: {
-                    if (status === Loader.Ready && index === root.currentIndex)
-                        root._tryShow(index)
+                    if (status === Loader.Ready && pageSlot.pageIndex === root.currentIndex)
+                        root._tryShow(pageSlot.pageIndex)
                     if (status === Loader.Error)
                         console.warn("Md3PageHost: failed to load", source)
                 }
@@ -1987,7 +2089,7 @@ Item {
             onKeepChanged: {
                 if (keep && pageLoader.active) {
                     const ldr = pageLoader
-                    const idx = index
+                    const idx = pageSlot.pageIndex
                     Qt.callLater(function () {
                         if (ldr && ldr.active)
                             root._fillLoader(ldr, idx)

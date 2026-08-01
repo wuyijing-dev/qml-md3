@@ -590,7 +590,7 @@ Item {
         y: root._ghostY
         z: 100
         opacity: root._tearArmed ? 0.95 : 0.88
-        layer.enabled: true
+        layer.enabled: visible
         layer.smooth: true
 
         Row {

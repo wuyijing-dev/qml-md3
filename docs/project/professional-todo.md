@@ -26,6 +26,6 @@
 | 状态 | 项 |
 |------|----|
 | 已有 | Rail / Drawer / Bar / Scaffold / NavigationView / **Flyout** / TitleBar 槽示例 / **NativeShell（全桌面）** / **Android extras** / **SafeArea 6.9+ gate** / CommandBar a11y |
-| 后续 | 真机 SafeArea 冒烟；超大 destination 槽池化（可选） |
+| 后续 | 真机 SafeArea 冒烟；TableView 多列体（可选） |
 
 参考：[wasm.md](../topics/wasm.md) · [android.md](../topics/android.md) · [native-platforms.md](../topics/native-platforms.md) · [quickstart](../getting-started/quickstart.md) · [a11y-spotcheck.md](../topics/a11y-spotcheck.md)

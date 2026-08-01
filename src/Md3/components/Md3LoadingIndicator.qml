@@ -53,10 +53,14 @@ Item {
     }
 
     Timer {
-        interval: 500
+        interval: 2000
         running: root.enabled && root.indeterminate
         repeat: true
         onTriggered: root._refreshTreeShown()
+    }
+    Connections {
+        target: Qt.application
+        function onStateChanged() { root._refreshTreeShown() }
     }
     Component.onCompleted: {
         _refreshTreeShown()

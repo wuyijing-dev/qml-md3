@@ -22,10 +22,12 @@ Industry UI stacks converge on the same rules Md3 applies:
 6. **`Md3StateOverlay`** — opacity Behavior skipped under `reduceMotion`.
 7. **`Md3TreeView`** — `ListView { reuseItems }` + 160ms debounced `flatRows` rebuild.
 8. **`Md3DataTable`** — free + frozen bodies virtualized; `_scrollColumnIndices` cached; V-bar tracks `rowsCol`.
-9. **`Md3PageHost`** — prefetch coalesced (120ms); launch mask geometry only while morphing.
+9. **`Md3PageHost`** — prefetch coalesced (120ms); launch mask geometry only while morphing; **sparse slots** when `model.length > sparseSlotThreshold` (default 40, skipped for `cacheMode: "all"`).
 10. **`Md3Form.liveGate`** — event-wired field signals + 48ms debounce (poll only if no named fields).
+11. **Progress / Loading** — tree-visibility poll 500→2000ms + `Qt.application` state Connections.
+12. **`Md3DocumentTabBar` ghost** — `layer.enabled` only while ghost visible.
 
-Still optional later: sparse PageHost slot pool for huge destination catalogs; TableView for multi-column body.
+Still optional later: TableView for multi-column DataTable body.
 
 ---
 
