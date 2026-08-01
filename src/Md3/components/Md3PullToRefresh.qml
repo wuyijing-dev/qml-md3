@@ -1,7 +1,7 @@
 import QtQuick
 import Md3
 
-/// Pull-to-refresh host for a Flickable (touch / trackpad; desktop optional).
+/// Pull-to-refresh host for a Flickable (touch / trackpad; desktop via overscroll or `beginRefresh()`).
 Item {
     id: root
 
@@ -11,6 +11,9 @@ Item {
     property string refreshingText: qsTr("Refreshing…")
     property string pullText: qsTr("Pull to refresh")
     property string releaseText: qsTr("Release to refresh")
+    /// Show a compact control for mouse / keyboard hosts that cannot overscroll easily.
+    property bool showManualRefresh: false
+    property string manualRefreshText: qsTr("Refresh")
 
     signal refreshRequested()
 
@@ -36,6 +39,17 @@ Item {
         refreshing = true
         refreshRequested()
     }
+
+    /// Enable DragOverBounds on the flickable so desktop drag can arm the gesture.
+    function attachOverscroll() {
+        if (!flickable)
+            return
+        flickable.boundsBehavior = Flickable.DragAndOvershootBounds
+        flickable.flickableDirection = Flickable.VerticalFlick
+    }
+
+    Component.onCompleted: attachOverscroll()
+    onFlickableChanged: attachOverscroll()
 
     Connections {
         target: root.flickable
@@ -71,5 +85,17 @@ Item {
                 tone: Md3Text.OnSurfaceVariant
             }
         }
+    }
+
+    Md3Button {
+        visible: root.showManualRefresh
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.margins: 8
+        z: 2
+        text: root.manualRefreshText
+        variant: Md3Button.Text
+        enabled: !root.refreshing
+        onClicked: root.beginRefresh()
     }
 }

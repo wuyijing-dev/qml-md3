@@ -7,7 +7,8 @@ Item {
 
     property var model: []
     property int selectedIndex: -1
-    property real rowHeight: 40
+    /// Row height follows Theme density (override for custom trees).
+    property real rowHeight: Md3Theme.tableRowHeight
     property real indent: 20
     property bool showConnectors: false
     property bool checkEnabled: false
@@ -23,6 +24,8 @@ Item {
     property var contextMenu: null
     /// Optional explicit Window for context-menu overlay coords.
     property var overlayWindow: null
+    /// Cap scroll viewport in Column layouts (0 = natural full content height).
+    property real preferredMaxHeight: 0
 
     signal activated(int flatIndex, var node)
     signal expandedChanged(int flatIndex, var node, bool expanded)
@@ -36,8 +39,13 @@ Item {
     readonly property real _chromeH: {
         if (!showFilter && !showExpandControls)
             return 0
-        return 56 + 8
+        return Md3Theme.fieldHeight + 8
     }
+
+    readonly property real _contentH: flatRows.length * rowHeight
+    readonly property real _bodyH: preferredMaxHeight > 0
+                                   ? Math.min(_contentH, preferredMaxHeight)
+                                   : _contentH
 
     readonly property var flatRows: {
         const out = []
@@ -100,9 +108,9 @@ Item {
     }
 
     implicitWidth: 280
-    implicitHeight: Math.min(flatRows.length * rowHeight, 360) + _chromeH
+    implicitHeight: _bodyH + _chromeH
     width: parent ? parent.width : implicitWidth
-    height: implicitHeight
+    // Do not bind height → implicitHeight (breaks anchors.fill hosts).
     clip: true
     focus: true
     activeFocusOnTab: true

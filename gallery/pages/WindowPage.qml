@@ -255,7 +255,61 @@ Flickable {
         }
 
         Md3Text {
-                    width: parent.width
+            text: qsTr("标题栏中间槽 / AppToolBar / 文档标签撕离")
+            role: Md3Text.LabelLarge
+            tone: Md3Text.OnSurfaceVariant
+        }
+        Md3Text {
+            width: parent.width
+            wrapMode: Text.WordWrap
+            text: qsTr("图库 TitleBar 中间已放入 ChipGroup + ButtonGroup；窗口下方 AppToolBar 可切密度、新建标签、撕离当前标签。documentTabsEnabled + documentTabsTearOff 已开：拖出标签条，或点工具条「撕离」。")
+            role: Md3Text.BodySmall
+            tone: Md3Text.OnSurfaceVariant
+        }
+        Md3FlowLayout {
+            width: parent.width
+            spacing: 8
+            Md3Button {
+                enabled: !!root.appWin
+                text: qsTr("新建文档标签")
+                variant: Md3Button.FilledTonal
+                onClicked: if (root.appWin) root.appWin.addTab(root.appWin.currentIndex)
+            }
+            Md3Button {
+                enabled: !!root.appWin && root.appWin.documentTabs
+                         && root.appWin.documentTabs.length > 1
+                text: qsTr("撕离当前标签")
+                variant: Md3Button.Outlined
+                onClicked: {
+                    if (!root.appWin)
+                        return
+                    const cx = root.appWin.x + root.appWin.width / 2
+                    const cy = root.appWin.y + 96
+                    root.appWin.tearOffTab(root.appWin.documentTabIndex, cx, cy)
+                }
+            }
+            Md3Button {
+                enabled: !!root.appWin
+                text: qsTr("关闭当前标签")
+                variant: Md3Button.Text
+                onClicked: if (root.appWin) root.appWin.closeTab()
+            }
+        }
+        Md3Text {
+            width: parent.width
+            visible: !!root.appWin
+            wrapMode: Text.WordWrap
+            text: qsTr("标签数 %1 · 当前索引 %2 · 撕离=%3")
+                  .arg(root.appWin && root.appWin.documentTabs
+                       ? root.appWin.documentTabs.length : 0)
+                  .arg(root.appWin ? root.appWin.documentTabIndex : -1)
+                  .arg(root.appWin && root.appWin.documentTabsTearOff ? qsTr("开") : qsTr("关"))
+            role: Md3Text.BodySmall
+            tone: Md3Text.Tertiary
+        }
+
+        Md3Text {
+            width: parent.width
             wrapMode: Text.WordWrap
             text: qsTr("文档标签：标题栏下方开启 documentTabsEnabled。支持 + 新建 / 关闭 / 拖拽排序；拖出标签条可撕离为独立 Md3TabWindow（documentTabsTearOff）。")
             role: Md3Text.BodySmall

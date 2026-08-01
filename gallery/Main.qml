@@ -98,6 +98,56 @@ Md3ApplicationWindow {
         }
     }
 
+    toolBar: Md3AppToolBar {
+        Md3IconButton {
+            icon: "home"
+            accessibleName: qsTr("Tokens")
+            onClicked: window.navigateTo(0)
+        }
+        Md3IconButton {
+            icon: "menu"
+            accessibleName: qsTr("Navigation demo")
+            onClicked: {
+                for (let i = 0; i < window.destinations.length; ++i) {
+                    if (window.destinations[i].source === "NavigationPage.qml") {
+                        window.navigateTo(i)
+                        return
+                    }
+                }
+            }
+        }
+        Md3Divider {
+            width: 1
+            height: 20
+        }
+        Md3Text {
+            text: qsTr("AppToolBar · middle chips live in TitleBar")
+            role: Md3Text.LabelMedium
+            tone: Md3Text.OnSurfaceVariant
+        }
+        Md3Spacer { expand: true }
+        Md3FilterChip {
+            text: qsTr("Compact")
+            selected: Md3Theme.densityCompact
+            onClicked: Md3Theme.setDensity(Md3Theme.densityCompact ? 0 : 1)
+        }
+        Md3IconButton {
+            icon: "tab"
+            accessibleName: qsTr("Add document tab")
+            onClicked: window.addTab(window.currentIndex)
+        }
+        Md3IconButton {
+            icon: "open_in_new"
+            accessibleName: qsTr("Tear off current tab")
+            enabled: window.documentTabs && window.documentTabs.length > 1
+            onClicked: {
+                const cx = window.x + window.width / 2
+                const cy = window.y + 80
+                window.tearOffTab(window.documentTabIndex, cx, cy)
+            }
+        }
+    }
+
     overlay: [
         Md3Tour {
             id: galleryTour

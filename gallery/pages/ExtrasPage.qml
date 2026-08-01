@@ -150,7 +150,7 @@ Md3Page {
             Md3Card {
                 variant: Md3Card.Outlined
                 width: parent.width
-                height: 340
+                height: 480
                 Md3TreeView {
                     id: treeDemo
                     anchors.fill: parent
@@ -176,19 +176,29 @@ Md3Page {
                             children: [
                                 { title: qsTr("src"), icon: "folder", expanded: true, children: [
                                     { title: "main.cpp", icon: "description" },
+                                    { title: "app.cpp", icon: "description" },
+                                    { title: "window.cpp", icon: "description" },
                                     { title: "CMakeLists.txt", icon: "description" }
                                 ]},
-                                { title: qsTr("resources"), icon: "folder", children: [
-                                    { title: "icons", icon: "image" }
+                                { title: qsTr("resources"), icon: "folder", expanded: true, children: [
+                                    { title: "icons", icon: "image" },
+                                    { title: "fonts", icon: "font_download" },
+                                    { title: "i18n", icon: "translate" }
+                                ]},
+                                { title: qsTr("tests"), icon: "folder", children: [
+                                    { title: "smoke", icon: "science" },
+                                    { title: "baselines", icon: "photo" }
                                 ]}
                             ]
                         },
                         {
                             title: qsTr("Settings"),
                             icon: "settings",
+                            expanded: true,
                             children: [
                                 { title: qsTr("Theme"), icon: "palette" },
-                                { title: qsTr("Keyboard"), icon: "keyboard" }
+                                { title: qsTr("Keyboard"), icon: "keyboard" },
+                                { title: qsTr("Accessibility"), icon: "accessibility" }
                             ]
                         }
                     ]
@@ -345,7 +355,7 @@ Md3Page {
             }
 
             Md3Text {
-                text: qsTr("Swipe actions")
+                text: qsTr("Swipe actions (leading + trailing · ←/→ keyboard · exclusive)")
                 role: Md3Text.LabelLarge
                 tone: Md3Text.OnSurfaceVariant
             }
@@ -360,19 +370,24 @@ Md3Page {
                         width: parent.width
                         height: 72
                         panelColor: Md3Theme.colorScheme.surfaceContainerLow
+                        leadingActions: [
+                            { icon: "mark_email_read", label: qsTr("Read") }
+                        ]
                         trailingActions: [
                             { icon: "archive", label: qsTr("Archive") },
                             { icon: "delete", label: qsTr("Delete"), destructive: true }
                         ]
-                        onActionTriggered: function (i) {
+                        onActionTriggered: function (i, leading) {
                             const w = _galleryWindow()
                             if (w)
-                                w.showStatusMessage(qsTr("Swipe action %1").arg(i))
+                                w.showStatusMessage(qsTr("%1 action %2")
+                                                    .arg(leading ? qsTr("Leading") : qsTr("Trailing"))
+                                                    .arg(i))
                         }
                         Md3ListTile {
                             anchors.fill: parent
                             title: qsTr("Inbox message")
-                            subtitle: qsTr("Swipe left for actions")
+                            subtitle: qsTr("Swipe either way · Tab then ←/→")
                             leadingIcon: "mail"
                             showDivider: true
                         }
@@ -381,13 +396,23 @@ Md3Page {
                         width: parent.width
                         height: 72
                         panelColor: Md3Theme.colorScheme.surface
+                        leadingActions: [
+                            { icon: "push_pin", label: qsTr("Pin") }
+                        ]
                         trailingActions: [
                             { icon: "flag", label: qsTr("Flag") }
                         ]
+                        onActionTriggered: function (i, leading) {
+                            const w = _galleryWindow()
+                            if (w)
+                                w.showStatusMessage(qsTr("%1 #%2")
+                                                    .arg(leading ? qsTr("Pin/Read side") : qsTr("Flag side"))
+                                                    .arg(i))
+                        }
                         Md3ListTile {
                             anchors.fill: parent
                             title: qsTr("Another item")
-                            subtitle: qsTr("Drag sideways")
+                            subtitle: qsTr("Opening one closes the other")
                             leadingIcon: "inbox"
                         }
                     }

@@ -22,14 +22,6 @@ Md3AbstractButton {
     readonly property real circleSize: Md3Theme.iconCircleSize
     readonly property real circleRadius: circleSize / 2
     cornerRadius: circleRadius
-    scale: pressed ? 0.96 : 1
-    Behavior on scale {
-        NumberAnimation {
-            duration: Md3Motion.spatialSnapDuration
-            easing.type: Easing.BezierSpline
-            easing.bezierCurve: Md3Motion.emphasized
-        }
-    }
 
     containerColor: {
         if (!enabled && variant !== Md3IconButton.Standard)
@@ -64,6 +56,26 @@ Md3AbstractButton {
         anchors.centerIn: parent
         width: root.circleSize
         height: root.circleSize
+        transform: Scale {
+            origin.x: bg.width / 2
+            origin.y: bg.height / 2
+            xScale: root.pressed ? 0.96 : (root.hovered ? 1.04 : 1)
+            yScale: xScale
+            Behavior on xScale {
+                NumberAnimation {
+                    duration: Md3Motion.spatialSnapDuration
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Md3Motion.emphasized
+                }
+            }
+            Behavior on yScale {
+                NumberAnimation {
+                    duration: Md3Motion.spatialSnapDuration
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Md3Motion.emphasized
+                }
+            }
+        }
 
         layer.enabled: true
         layer.smooth: true

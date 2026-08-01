@@ -215,6 +215,126 @@ Md3Page {
                     }
                 }
 
+                Md3Text {
+                    text: qsTr("Mobile shell — PullToRefresh + SwipeReveal + BottomAppBar")
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.OnSurfaceVariant
+                }
+
+                Md3Surface {
+                    width: parent.width
+                    height: 420
+                    radius: Md3Theme.shape.medium
+                    elevation: 0
+                    color: Md3Theme.colorScheme.surfaceContainerLow
+                    clipContent: true
+
+                    Column {
+                        anchors.fill: parent
+                        anchors.margins: 1
+                        spacing: 0
+
+                        Md3TopAppBar {
+                            width: parent.width
+                            title: qsTr("Messages")
+                            size: Md3TopAppBar.Small
+                            trailingIcons: [{ icon: "search" }]
+                        }
+
+                        Item {
+                            width: parent.width
+                            height: parent.height - Md3Theme.appBarHeight - Md3Theme.bottomBarHeight
+
+                            Flickable {
+                                id: mobileFlick
+                                anchors.fill: parent
+                                contentWidth: width
+                                contentHeight: mobileList.implicitHeight + 24
+                                clip: true
+                                boundsBehavior: Flickable.DragAndOvershootBounds
+
+                                Column {
+                                    id: mobileList
+                                    width: mobileFlick.width
+                                    spacing: 0
+
+                                    Repeater {
+                                        model: [
+                                            { title: qsTr("Alex"), subtitle: qsTr("Swipe either side") },
+                                            { title: qsTr("Blake"), subtitle: qsTr("Pull list down to refresh") },
+                                            { title: qsTr("Casey"), subtitle: qsTr("Bottom bar actions + FAB") },
+                                            { title: qsTr("Drew"), subtitle: qsTr("Exclusive open swipe") },
+                                            { title: qsTr("Ellis"), subtitle: qsTr("Use Refresh if mouse-only") }
+                                        ]
+                                        Md3SwipeReveal {
+                                            required property var modelData
+                                            width: mobileList.width
+                                            height: 64
+                                            panelColor: Md3Theme.colorScheme.surface
+                                            leadingActions: [
+                                                { icon: "call", label: qsTr("Call") }
+                                            ]
+                                            trailingActions: [
+                                                { icon: "archive", label: qsTr("Archive") },
+                                                { icon: "delete", label: qsTr("Delete"), destructive: true }
+                                            ]
+                                            onActionTriggered: function (i, leading) {
+                                                mobileStatus.text = qsTr("%1 · %2 #%3")
+                                                    .arg(modelData.title)
+                                                    .arg(leading ? qsTr("leading") : qsTr("trailing"))
+                                                    .arg(i)
+                                            }
+                                            Md3ListTile {
+                                                anchors.fill: parent
+                                                title: modelData.title
+                                                subtitle: modelData.subtitle
+                                                leadingIcon: "person"
+                                                showDivider: true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            Md3PullToRefresh {
+                                id: mobilePtr
+                                flickable: mobileFlick
+                                showManualRefresh: true
+                                onRefreshRequested: mobileRefreshTimer.start()
+                            }
+
+                            Timer {
+                                id: mobileRefreshTimer
+                                interval: 900
+                                onTriggered: {
+                                    mobileStatus.text = qsTr("Inbox refreshed")
+                                    mobilePtr.endRefresh()
+                                }
+                            }
+
+                            Md3Text {
+                                id: mobileStatus
+                                anchors.left: parent.left
+                                anchors.bottom: parent.bottom
+                                anchors.margins: 8
+                                text: qsTr("Ready")
+                                role: Md3Text.LabelSmall
+                                tone: Md3Text.OnSurfaceVariant
+                            }
+                        }
+
+                        Md3BottomAppBar {
+                            width: parent.width
+                            showFab: true
+                            actions: ["menu", "search", "more_vert"]
+                            onActionClicked: function (i) {
+                                mobileStatus.text = qsTr("Bottom action %1").arg(i)
+                            }
+                            onFabClicked: mobileStatus.text = qsTr("Compose FAB")
+                        }
+                    }
+                }
+
                 Md3NavigationBar {
                     width: parent.width
                     model: [

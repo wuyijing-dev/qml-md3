@@ -5,9 +5,9 @@ import Md3
 Rectangle {
     id: root
 
-    property real barHeight: 44
-    property real contentSpacing: 8
-    property real horizontalPadding: 12
+    property real barHeight: Md3Theme.controlHeight + 8
+    property real contentSpacing: Md3Theme.spacingSm
+    property real horizontalPadding: Md3Theme.spacingMd
     property bool showDivider: true
     property alias content: stack.content
     default property alias data: stack.content

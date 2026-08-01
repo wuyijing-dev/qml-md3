@@ -57,4 +57,24 @@ QtObject {
             host.z = zOrder
         return target
     }
+
+    /// Exclusive open SwipeReveal (one open panel at a time).
+    property var swipeRevealActive: null
+
+    function claimSwipeReveal(item) {
+        if (!item)
+            return
+        if (swipeRevealActive && swipeRevealActive !== item) {
+            try {
+                if (typeof swipeRevealActive.close === "function")
+                    swipeRevealActive.close()
+            } catch (e) { /* destroyed */ }
+        }
+        swipeRevealActive = item
+    }
+
+    function releaseSwipeReveal(item) {
+        if (swipeRevealActive === item)
+            swipeRevealActive = null
+    }
 }
