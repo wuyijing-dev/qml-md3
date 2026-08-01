@@ -33,6 +33,8 @@ Industry UI stacks converge on the same rules Md3 applies:
 17. **`Md3ItemsView`** — only the active Stack/Grid host is loaded.
 18. **`Md3Shadow`** — Balanced (`effectsLevel` 1) uses key blur only; High keeps ambient+key.
 19. **`Md3LiquidGlass`** — body/mask FBOs only while visible with non-zero size.
+20. **`Md3ContainerBody` / `Md3ScrollView`** — deferred content measure (no `height ↔ childrenRect` polish loop).
+21. **Canvas gauges** — visibility poll backs off to 6s while opacity-hidden.
 
 ---
 

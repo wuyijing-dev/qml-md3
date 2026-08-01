@@ -24,6 +24,19 @@ Item {
     implicitWidth: 320
     implicitHeight: 240
 
+    property real _measuredContentW: 0
+    property real _measuredContentH: 0
+    property bool _measureGuard: false
+
+    function _syncMeasuredSize() {
+        if (_measureGuard)
+            return
+        _measureGuard = true
+        _measuredContentW = Math.max(0, contentHost.childrenRect.width)
+        _measuredContentH = Math.max(0, contentHost.childrenRect.height)
+        _measureGuard = false
+    }
+
     Flickable {
         id: flick
         anchors.fill: parent
@@ -39,16 +52,23 @@ Item {
                 return Flickable.HorizontalFlick
             return Flickable.VerticalFlick
         }
-        contentWidth: root.fillContentWidth ? width : Math.max(width, contentHost.childrenRect.width)
-        contentHeight: Math.max(height, contentHost.childrenRect.height)
+        contentWidth: root.fillContentWidth ? width : Math.max(width, root._measuredContentW)
+        contentHeight: Math.max(height, root._measuredContentH)
 
         Item {
             id: contentHost
             width: root.fillContentWidth ? flick.width
-                                         : Math.max(flick.width, childrenRect.width)
-            height: childrenRect.height
+                                         : Math.max(flick.width, root._measuredContentW)
+            // Never bind height to childrenRect — polish loop with contentHeight.
+            height: Math.max(root._measuredContentH, 1)
+
+            onChildrenChanged: Qt.callLater(root._syncMeasuredSize)
+            onChildrenRectChanged: Qt.callLater(root._syncMeasuredSize)
+            onWidthChanged: Qt.callLater(root._syncMeasuredSize)
         }
     }
+
+    Component.onCompleted: Qt.callLater(_syncMeasuredSize)
 
     Md3ScrollBar {
         anchors.right: parent.right

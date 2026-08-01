@@ -17,7 +17,11 @@ Item {
     readonly property alias contentHost: contentHost
     readonly property real contentImplicitWidth: contentHost.childrenRect.width
     readonly property bool hasParentFillChild: _hasParentFillChild()
-    readonly property real contentImplicitHeight: _measureContentHeight()
+    /// Measured without live-binding height to childrenRect (avoids polish loops).
+    property real _measuredContentH: 0
+    property bool _measureGuard: false
+
+    readonly property real contentImplicitHeight: hasParentFillChild ? 0 : _measuredContentH
 
     function _hasParentFillChild() {
         const kids = contentHost.children
@@ -33,12 +37,12 @@ Item {
         return false
     }
 
-    function _measureContentHeight() {
-        // If child uses anchors.fill parent, deriving implicit height from childrenRect
-        // creates a feedback loop (parent implicitHeight -> child height -> childrenRect).
-        if (hasParentFillChild)
-            return 0
-        return contentHost.childrenRect.height
+    function _syncMeasuredHeight() {
+        if (_measureGuard || hasParentFillChild)
+            return
+        _measureGuard = true
+        _measuredContentH = Math.max(0, contentHost.childrenRect.height)
+        _measureGuard = false
     }
 
     implicitWidth: Math.max(1, contentImplicitWidth + padding * 2)
@@ -54,7 +58,7 @@ Item {
         clip: root.clipContent
         contentWidth: width
         contentHeight: {
-            const intrinsic = contentImplicitHeight + root.padding * 2
+            const intrinsic = root.contentImplicitHeight + root.padding * 2
             // Do not fold flick.height into contentHeight — fights parent height bindings.
             return Math.max(intrinsic, 1)
         }
@@ -70,13 +74,27 @@ Item {
             y: root.padding
             width: Math.max(0, flick.width - root.padding * 2)
             height: {
-                if (root.layoutMode === Md3ContainerBody.Scroll)
-                    return Math.max(childrenRect.height, 1)
                 const viewH = Math.max(0, flick.height - root.padding * 2)
-                if (viewH > 1)
+                if (root.layoutMode === Md3ContainerBody.Fit && viewH > 1)
                     return viewH
-                return Math.max(childrenRect.height, 1)
+                if (root.hasParentFillChild && viewH > 1)
+                    return viewH
+                // Scroll / intrinsic: use deferred measure — never bind height to childrenRect.
+                return Math.max(root._measuredContentH, 1)
             }
+
+            onChildrenChanged: Qt.callLater(root._syncMeasuredHeight)
+            onChildrenRectChanged: Qt.callLater(root._syncMeasuredHeight)
+            onWidthChanged: Qt.callLater(root._syncMeasuredHeight)
         }
     }
+
+    onHasParentFillChildChanged: {
+        if (hasParentFillChild)
+            _measuredContentH = 0
+        else
+            Qt.callLater(_syncMeasuredHeight)
+    }
+    onLayoutModeChanged: Qt.callLater(_syncMeasuredHeight)
+    Component.onCompleted: Qt.callLater(_syncMeasuredHeight)
 }

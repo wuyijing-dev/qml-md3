@@ -46,7 +46,8 @@ Item {
     }
 
     Timer {
-        interval: 2000
+        // Fast while shown/pending; slow while opacity-hidden so resume still works.
+        interval: root._treeShown || root._paintPending ? 2000 : 6000
         running: root.visible
         repeat: true
         onTriggered: root._refreshTreeShown()
