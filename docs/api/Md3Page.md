@@ -18,6 +18,7 @@ import Md3
 | `md3HostWindow` | `var` | `null` | read/write | `Md3Page` | — |
 | `md3RouteParams` | `var` | `{…}` | read/write | `Md3Page` | — |
 | `md3NavDepth` | `int` | `0` | read/write | `Md3Page` | — |
+| `md3PageActive` | `bool` | `true` | read/write | `Md3Page` | Injected by PageHost: true while this page is on-display (incl. mid-transition). |
 | `md3GoBack` | `var` | `null` | read/write | `Md3Page` | function (opts) → bool |
 | `md3PushRoute` | `var` | `null` | read/write | `Md3Page` | function (index, params, opts) → … |
 | `routeParams` | `var` | `md3RouteParams && typeof md3RouteParams === "object"` | readonly | `Md3Page` | — |

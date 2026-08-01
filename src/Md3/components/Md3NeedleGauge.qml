@@ -41,11 +41,19 @@ Item {
 
 
     property var hostWindow: null
+    property bool unloadWhenPageInactive: true
     property bool _treeShown: true
     property bool _paintPending: false
 
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
+
     function _refreshTreeShown() {
-        const ok = Md3TreeVisibility.isSceneActive(root, root.hostWindow)
+        const ok = pageGate.contentActive
+                && Md3TreeVisibility.isSceneActive(root, root.hostWindow)
         if (_treeShown !== ok)
             _treeShown = ok
         if (_treeShown && _paintPending)
@@ -61,59 +69,65 @@ Item {
         (ticksLoader.item && ticksLoader.item.requestPaint())
     }
 
-    Timer {
-        // Fast while shown/pending; slow while opacity-hidden so resume still works.
-        interval: root._treeShown || root._paintPending ? 2000 : 6000
-        running: root.visible
-        repeat: true
-        onTriggered: root._refreshTreeShown()
+    Connections {
+        target: pageGate
+        function onContentActiveChanged() { root._refreshTreeShown() }
     }
     Connections {
         target: Qt.application
         function onStateChanged() { root._refreshTreeShown() }
     }
     onVisibleChanged: root._refreshTreeShown()
+    Component.onCompleted: root._refreshTreeShown()
 
     function _rad(deg) { return deg * Math.PI / 180 }
 
-    Shape {
-        id: dial
+    Loader {
         anchors.fill: parent
-        preferredRendererType: Shape.GeometryRenderer
+        active: root._treeShown
+        sourceComponent: dialComp
+    }
 
-        ShapePath {
-            strokeWidth: root.strokeWidth
-            strokeColor: root.trackColor
-            fillColor: "transparent"
-            capStyle: ShapePath.RoundCap
-            PathAngleArc {
-                centerX: root._cx
-                centerY: root._cy
-                radiusX: root._r
-                radiusY: root._r
-                startAngle: root.startAngle
-                sweepAngle: root.sweepAngle
+    Component {
+        id: dialComp
+        Shape {
+            anchors.fill: parent
+            preferredRendererType: Shape.GeometryRenderer
+
+            ShapePath {
+                strokeWidth: root.strokeWidth
+                strokeColor: root.trackColor
+                fillColor: "transparent"
+                capStyle: ShapePath.RoundCap
+                PathAngleArc {
+                    centerX: root._cx
+                    centerY: root._cy
+                    radiusX: root._r
+                    radiusY: root._r
+                    startAngle: root.startAngle
+                    sweepAngle: root.sweepAngle
+                }
             }
-        }
 
-        ShapePath {
-            strokeWidth: root.strokeWidth
-            strokeColor: root.valueColor
-            fillColor: "transparent"
-            capStyle: ShapePath.RoundCap
-            PathAngleArc {
-                centerX: root._cx
-                centerY: root._cy
-                radiusX: root._r
-                radiusY: root._r
-                startAngle: root.startAngle
-                sweepAngle: root.sweepAngle * root.progress
+            ShapePath {
+                strokeWidth: root.strokeWidth
+                strokeColor: root.valueColor
+                fillColor: "transparent"
+                capStyle: ShapePath.RoundCap
+                PathAngleArc {
+                    centerX: root._cx
+                    centerY: root._cy
+                    radiusX: root._r
+                    radiusY: root._r
+                    startAngle: root.startAngle
+                    sweepAngle: root.sweepAngle * root.progress
+                }
             }
         }
     }
 
     // Ticks + needle via Canvas for simpler polar math
-        Loader {
+    Loader {
         id: ticksLoader
         anchors.fill: parent
         active: root._treeShown

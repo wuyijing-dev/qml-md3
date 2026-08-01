@@ -8,6 +8,8 @@ Flickable {
     clip: true
     flickableDirection: Flickable.VerticalFlick
 
+    property bool md3PageActive: true
+
     Md3VStack {
         id: column
         width: root.width

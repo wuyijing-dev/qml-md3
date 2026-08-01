@@ -16,11 +16,19 @@ Item {
     property var rangeColors: []
     property real barHeight: 18
     property real trackHeight: 28
+    /// Drop qualitative bands while page is off-display.
+    property bool unloadWhenPageInactive: true
 
     implicitWidth: 320
     implicitHeight: label.length ? 56 : 40
     width: parent ? parent.width : implicitWidth
     height: implicitHeight
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
 
     readonly property real progress: {
         const span = Math.max(1e-6, to - from)
@@ -64,6 +72,8 @@ Item {
                 }
                 Repeater {
                     model: {
+                        if (!pageGate.contentActive)
+                            return []
                         const t = bands._thresh
                         const out = []
                         let prev = root.from

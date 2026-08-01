@@ -55,17 +55,22 @@ def check_rail_hover_gates() -> list[str]:
 
 def check_docs_anchors() -> list[str]:
     failures: list[str] = []
-    perf = _read("docs/performance.md")
+    perf = _read("docs/topics/performance.md")
     required = [
         "## Charts：Live / Wave 默认档位与 CPU 预算",
         "## Rail：拖动时禁止 hover 预编译",
         "## 大列表检查清单：`Md3VirtualList` + 禁止层叠 `layer.enabled`",
         "effectsLiveFps",
         "Md3VirtualList",
+        "md3PageActive",
+        "pagePrefetchL1",
     ]
     for needle in required:
         if needle not in perf:
-            failures.append(f"docs/performance.md: missing section/anchor {needle!r}")
+            failures.append(f"docs/topics/performance.md: missing section/anchor {needle!r}")
+    gate = ROOT / "docs/api/Md3PageActivityGate.md"
+    if not gate.is_file():
+        failures.append("docs/api/Md3PageActivityGate.md: missing")
     return failures
 
 

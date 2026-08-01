@@ -2,6 +2,7 @@ import QtQuick
 import Md3
 
 /// Scatter chart — X/Y points with zoom/pan/probe (parity with line chart ops).
+/// Points drawn on one Canvas; unloaded while !chartActive.
 Md3Chart {
     id: root
 
@@ -41,6 +42,13 @@ Md3Chart {
     }
 
     function rebuild() {
+        if (!chartActive) {
+            geom.points = []
+            geom.numsList = []
+            geom.sampleCount = 0
+            renderedPointCount = 0
+            return
+        }
         const all = (series && series.length > 0) ? series : [values]
         const range = rangeFromSeries(all.length ? all : [[0]])
         const span = Math.max(1e-6, range.max - range.min)
@@ -53,7 +61,6 @@ Md3Chart {
         }
         const xr = _xRange(maxN)
         const xSpan = Math.max(1e-6, xr.max - xr.min)
-        // Map viewStart/viewSpan onto X domain
         const x0 = xr.min + viewStart * xSpan
         const x1 = xr.min + (viewStart + viewSpan) * xSpan
         const visSpan = Math.max(1e-6, x1 - x0)
@@ -87,6 +94,8 @@ Md3Chart {
         geom.numsList = numsList
         geom.sampleCount = maxN
         rebuilt()
+        if (plotCanvas.item)
+            plotCanvas.item.requestPaint()
         if (probeActive)
             _updateProbeAtPixel(probePixelX)
     }
@@ -111,7 +120,6 @@ Md3Chart {
             return
         }
         const hit = geom.points[best]
-        // Gather all series at same index
         const info = []
         for (let s = 0; s < geom.numsList.length; ++s) {
             const nums = geom.numsList[s]
@@ -124,6 +132,8 @@ Md3Chart {
             })
         }
         setProbe(hit.index, hit.x, info, hit.y)
+        if (plotCanvas.item)
+            plotCanvas.item.requestPaint()
     }
 
     QtObject {
@@ -140,6 +150,24 @@ Md3Chart {
 
     onXValuesChanged: requestRebuild()
     onPointRadiusChanged: requestRebuild()
+    onProbeActiveChanged: if (plotCanvas.item) plotCanvas.item.requestPaint()
+    onProbeIndexChanged: if (plotCanvas.item) plotCanvas.item.requestPaint()
+    onCleared: if (plotCanvas.item) plotCanvas.item.requestPaint()
+    onRebuilt: if (plotCanvas.item) plotCanvas.item.requestPaint()
+
+    Connections {
+        target: root
+        function onChartActiveChanged() {
+            if (!root.chartActive) {
+                geom.points = []
+                geom.numsList = []
+                geom.sampleCount = 0
+                renderedPointCount = 0
+                return
+            }
+            root.requestRebuild()
+        }
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -147,43 +175,59 @@ Md3Chart {
         radius: Md3Theme.shape.small
     }
 
-    Item {
+    Loader {
+        id: plotCanvas
         anchors.fill: parent
-        clip: true
+        active: root.chartActive
+        sourceComponent: plotComp
+        onLoaded: if (item) item.requestPaint()
+    }
 
-        Repeater {
-            model: root.showGrid ? root.horizontalGridLines + 1 : 0
-            delegate: Rectangle {
-                required property int index
-                readonly property real t: index / Math.max(1, root.horizontalGridLines)
-                width: root.plotWidth
-                height: 1
-                x: root.plotLeft
-                y: root.plotTop + root.plotHeight * (1 - t)
-                color: root.resolvedGridColor()
-                opacity: 0.45
-            }
-        }
-
-        Repeater {
-            model: geom.points
-            delegate: Rectangle {
-                required property var modelData
-                width: modelData.r * 2
-                height: width
-                radius: width / 2
-                x: modelData.x - width / 2
-                y: modelData.y - height / 2
-                color: modelData.color
-                border.width: root.probeActive && root.probeIndex === modelData.index ? 2 : 0
-                border.color: root.resolvedSurfaceColor()
-                opacity: root.probeActive && root.probeIndex !== modelData.index ? 0.45 : 1
+    Component {
+        id: plotComp
+        Canvas {
+            anchors.fill: parent
+            onPaint: {
+                const ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+                if (root.showGrid) {
+                    const n = root.horizontalGridLines + 1
+                    ctx.strokeStyle = root.resolvedGridColor()
+                    ctx.globalAlpha = 0.45
+                    ctx.lineWidth = 1
+                    for (let i = 0; i < n; ++i) {
+                        const t = i / Math.max(1, root.horizontalGridLines)
+                        const y = root.plotTop + root.plotHeight * (1 - t)
+                        ctx.beginPath()
+                        ctx.moveTo(root.plotLeft, y)
+                        ctx.lineTo(root.plotLeft + root.plotWidth, y)
+                        ctx.stroke()
+                    }
+                    ctx.globalAlpha = 1
+                }
+                const pts = geom.points || []
+                const probeOn = root.probeActive
+                const probeIdx = root.probeIndex
+                for (let i = 0; i < pts.length; ++i) {
+                    const p = pts[i]
+                    ctx.globalAlpha = probeOn && probeIdx !== p.index ? 0.45 : 1
+                    ctx.fillStyle = p.color
+                    ctx.beginPath()
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+                    ctx.fill()
+                    if (probeOn && probeIdx === p.index) {
+                        ctx.strokeStyle = root.resolvedSurfaceColor()
+                        ctx.lineWidth = 2
+                        ctx.stroke()
+                    }
+                }
+                ctx.globalAlpha = 1
             }
         }
     }
 
     Repeater {
-        model: root.showYLabels ? root.horizontalGridLines + 1 : 0
+        model: root.chartActive && root.showYLabels ? root.horizontalGridLines + 1 : 0
         delegate: Text {
             required property int index
             readonly property real t: index / Math.max(1, root.horizontalGridLines)

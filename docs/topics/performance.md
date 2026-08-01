@@ -47,6 +47,22 @@ Industry UI stacks converge on the same rules Md3 applies:
 31. **`Md3TreeVisibility.isSceneActive`** — also requires `isPageActive` (PageHost `md3PageActive`).
 32. **Charts** — Bar/Pie/Radar/Area/Funnel/RadialBar/Waterfall/Heatmap Canvas via `Loader` when inactive; LineChart clears Shape series; Canvas gauges unload when `!_treeShown`.
 33. **Gallery DeferredSection** — Theme live swatches, Communication loaders/morph, Extras stepper/skeleton, NavigationView demo.
+34. **ScatterChart** — single Canvas + clear points while `!chartActive` (parity with LineChart).
+35. **Shape gauges** — Gauge/Ring/Half/ArcBand (+ Needle dial) Loader on `md3PageActive`; Canvas gauges use PageActivityGate (no 2s/6s poll).
+36. **BulletChart** — qualitative bands clear while page inactive.
+37. **Docs** — `Md3PageActivityGate` API; `md3PageActive` / `pagePrefetchL1` on Page/ApplicationWindow; perf guards point at `docs/topics/performance.md`.
+
+### Author checklist (auto-unload vs not)
+
+| Auto (follow `md3PageActive` / `chartActive`) | Still declare DeferredSection / own Loader |
+|-----------------------------------------------|--------------------------------------------|
+| DataTable, lists, TreeView, Carousel, ItemsView | Dense demo pages (Containment/Buttons) |
+| CodeBlock, Sparkline, FileDropZone, Form | Custom Shape/Canvas not using Chart/Gauge |
+| Date/Time pickers, DeferredSection | Always-on overlays you want to keep warm |
+| Bar/Pie/Line/Scatter/Radar/… Canvas charts | — |
+| Shape + Canvas gauges, BulletChart | — |
+
+**Gallery ≠ embedded default:** Gallery uses Profile F (L1≈3, `pagePrefetchL1: false`, `pageL2Warm: true`). Library defaults stay lean (`pageCacheLimit: 1`, L2Warm off). Prefer system window corners / backdrop over custom full-window radius mask on weak GPUs (`roundedCorners` + `systemBackdrop: 0` keeps a chrome FBO). Ship `MD3_QML_CACHEGEN=ON` for cold open; optional Regular-only CJK font to cut ~8 MB RSS.
 
 ---
 
@@ -56,7 +72,7 @@ Industry UI stacks converge on the same rules Md3 applies:
 | **Scene Graph** | Draw calls for on-screen items | Off-screen *drawing* is usually culled; **FBOs still exist** if the Item is alive with `layer.enabled` |
 | **PageHost L1** | Live page Items in RAM | Default `arc` + `pageCacheLimit: 1`; inactive kept pages can unload DeferredSection via `md3PageActive` |
 | **PageHost L2** | Compiled `Component` (cheap to re-instantiate) | Default limit `1`; `pagePrefetchL1: false` warms neighbors as L2 only |
-| **Within page** | Charts / tables / long forms | `Md3DeferredSection` + `progressiveContent`; table/list bodies also follow `Md3PageActivityGate`; chart/gauge Canvas Loader on inactive |
+| **Within page** | Charts / tables / long forms | `Md3DeferredSection` + `progressiveContent`; table/list bodies also follow `Md3PageActivityGate`; chart/gauge Canvas/Shape Loader on inactive |
 
 “看不见不渲染也不算特效” ≈ **不要让重控件以 `layer.enabled: true` 活在树里**（滚动出视野仍占 FBO）。做法：出屏用 `Loader { active: false }` / `Md3DeferredSection` / 列表用 `Md3VirtualList`，而不是只设 `visible: false` 却保留 layer。
 

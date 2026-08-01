@@ -21,6 +21,8 @@ Item {
     property bool showValue: true
     property bool showMarker: true
     property real size: 140
+    /// Drop Shape geometry while page is off-display.
+    property bool unloadWhenPageInactive: true
 
     readonly property real progress: {
         const span = Math.max(1e-6, to - from)
@@ -36,50 +38,68 @@ Item {
 
     function _rad(deg) { return deg * Math.PI / 180 }
 
-    Shape {
-        anchors.fill: parent
-        preferredRendererType: Shape.GeometryRenderer
-        ShapePath {
-            strokeWidth: root.strokeWidth
-            strokeColor: root.trackColor
-            fillColor: "transparent"
-            capStyle: ShapePath.FlatCap
-            PathAngleArc {
-                centerX: root.width / 2
-                centerY: root.height / 2
-                radiusX: root._r
-                radiusY: root._r
-                startAngle: root.startAngle
-                sweepAngle: root.sweepAngle
-            }
-        }
-        ShapePath {
-            strokeWidth: root.strokeWidth
-            strokeColor: root.valueColor
-            fillColor: "transparent"
-            capStyle: ShapePath.FlatCap
-            PathAngleArc {
-                centerX: root.width / 2
-                centerY: root.height / 2
-                radiusX: root._r
-                radiusY: root._r
-                startAngle: root.startAngle
-                sweepAngle: root.sweepAngle * root.progress
-            }
-        }
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
     }
 
-    // End marker
-    Rectangle {
-        visible: root.showMarker && root.progress > 0.001
-        width: root.strokeWidth + 4
-        height: root.strokeWidth + 4
-        radius: width / 2
-        color: root.markerColor
-        border.width: 2
-        border.color: root.valueColor
-        x: root.width / 2 + Math.cos(root._rad(root.startAngle + root.sweepAngle * root.progress)) * root._r - width / 2
-        y: root.height / 2 + Math.sin(root._rad(root.startAngle + root.sweepAngle * root.progress)) * root._r - height / 2
+    Loader {
+        anchors.fill: parent
+        active: pageGate.contentActive
+        sourceComponent: dialComp
+    }
+
+    Component {
+        id: dialComp
+        Item {
+            anchors.fill: parent
+
+            Shape {
+                anchors.fill: parent
+                preferredRendererType: Shape.GeometryRenderer
+                ShapePath {
+                    strokeWidth: root.strokeWidth
+                    strokeColor: root.trackColor
+                    fillColor: "transparent"
+                    capStyle: ShapePath.FlatCap
+                    PathAngleArc {
+                        centerX: root.width / 2
+                        centerY: root.height / 2
+                        radiusX: root._r
+                        radiusY: root._r
+                        startAngle: root.startAngle
+                        sweepAngle: root.sweepAngle
+                    }
+                }
+                ShapePath {
+                    strokeWidth: root.strokeWidth
+                    strokeColor: root.valueColor
+                    fillColor: "transparent"
+                    capStyle: ShapePath.FlatCap
+                    PathAngleArc {
+                        centerX: root.width / 2
+                        centerY: root.height / 2
+                        radiusX: root._r
+                        radiusY: root._r
+                        startAngle: root.startAngle
+                        sweepAngle: root.sweepAngle * root.progress
+                    }
+                }
+            }
+
+            Rectangle {
+                visible: root.showMarker && root.progress > 0.001
+                width: root.strokeWidth + 4
+                height: root.strokeWidth + 4
+                radius: width / 2
+                color: root.markerColor
+                border.width: 2
+                border.color: root.valueColor
+                x: root.width / 2 + Math.cos(root._rad(root.startAngle + root.sweepAngle * root.progress)) * root._r - width / 2
+                y: root.height / 2 + Math.sin(root._rad(root.startAngle + root.sweepAngle * root.progress)) * root._r - height / 2
+            }
+        }
     }
 
     Column {

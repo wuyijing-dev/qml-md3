@@ -53,7 +53,8 @@ import Md3
 | `pageCacheLimit` | `int` | `1` | read/write | `Md3ApplicationWindow` | — |
 | `pageIdleTrimMs` | `int` | `4000` | read/write | `Md3ApplicationWindow` | — |
 | `pagePadding` | `real` | `Md3Theme.pagePadding` | read/write | `Md3ApplicationWindow` | — |
-| `pagePrefetch` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
+| `pagePrefetch` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Warm neighbor destinations after navigate. |
+| `pagePrefetchL1` | `bool` | `true` | read/write | `Md3ApplicationWindow` | With `pagePrefetch`: inflate neighbor L1 Items. Set `false` to warm L2 Components only (Gallery Profile F). |
 | `pagePredictPrefetch` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
 | `pageL2Cache` | `bool` | `true` | read/write | `Md3ApplicationWindow` | — |
 | `pageL2CacheLimit` | `int` | `1` | read/write | `Md3ApplicationWindow` | — |

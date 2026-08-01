@@ -25,6 +25,7 @@ Item {
     property real waveSpeed: 2.2
     /// Optional Window for live-motion checks (else OverlayHost).
     property var hostWindow: null
+    property bool unloadWhenPageInactive: true
     property bool _treeShown: true
     property bool _paintPending: false
 
@@ -36,8 +37,15 @@ Item {
     readonly property int _effectiveFps: animationFps > 0 ? animationFps : Md3Theme.effectsLiveFps
     readonly property bool effectivelyShown: _treeShown
 
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
+
     function _refreshTreeShown() {
-        const ok = Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
+        const ok = pageGate.contentActive
+                && Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
         if (_treeShown !== ok)
             _treeShown = ok
         if (_treeShown && _paintPending)
@@ -53,18 +61,16 @@ Item {
         (canvasLoader.item && canvasLoader.item.requestPaint())
     }
 
-    Timer {
-        // Fast while shown/pending; slow while opacity-hidden so resume still works.
-        interval: root._treeShown || root._paintPending ? 2000 : 6000
-        running: root.visible
-        repeat: true
-        onTriggered: root._refreshTreeShown()
+    Connections {
+        target: pageGate
+        function onContentActiveChanged() { root._refreshTreeShown() }
     }
     Connections {
         target: Qt.application
         function onStateChanged() { root._refreshTreeShown() }
     }
     onVisibleChanged: root._refreshTreeShown()
+    Component.onCompleted: root._refreshTreeShown()
 
     width: size
     height: size

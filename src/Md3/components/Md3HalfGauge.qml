@@ -19,6 +19,8 @@ Item {
     property color valueColor: Md3Theme.colorScheme.primary
     property bool showValue: true
     property real size: 140
+    /// Drop Shape geometry while page is off-display.
+    property bool unloadWhenPageInactive: true
 
     readonly property real progress: {
         const span = Math.max(1e-6, to - from)
@@ -31,36 +33,51 @@ Item {
     implicitWidth: size
     implicitHeight: size * 0.62
 
-    Shape {
-        anchors.fill: parent
-        preferredRendererType: Shape.GeometryRenderer
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
 
-        ShapePath {
-            strokeWidth: root.strokeWidth
-            strokeColor: root.trackColor
-            fillColor: "transparent"
-            capStyle: ShapePath.RoundCap
-            PathAngleArc {
-                centerX: root.width / 2
-                centerY: root.height - root.strokeWidth
-                radiusX: Math.min(root.width / 2, root.height) - root.strokeWidth
-                radiusY: radiusX
-                startAngle: root.startAngle
-                sweepAngle: root.sweepAngle
+    Loader {
+        anchors.fill: parent
+        active: pageGate.contentActive
+        sourceComponent: dialComp
+    }
+
+    Component {
+        id: dialComp
+        Shape {
+            anchors.fill: parent
+            preferredRendererType: Shape.GeometryRenderer
+
+            ShapePath {
+                strokeWidth: root.strokeWidth
+                strokeColor: root.trackColor
+                fillColor: "transparent"
+                capStyle: ShapePath.RoundCap
+                PathAngleArc {
+                    centerX: root.width / 2
+                    centerY: root.height - root.strokeWidth
+                    radiusX: Math.min(root.width / 2, root.height) - root.strokeWidth
+                    radiusY: radiusX
+                    startAngle: root.startAngle
+                    sweepAngle: root.sweepAngle
+                }
             }
-        }
-        ShapePath {
-            strokeWidth: root.strokeWidth
-            strokeColor: root.valueColor
-            fillColor: "transparent"
-            capStyle: ShapePath.RoundCap
-            PathAngleArc {
-                centerX: root.width / 2
-                centerY: root.height - root.strokeWidth
-                radiusX: Math.min(root.width / 2, root.height) - root.strokeWidth
-                radiusY: radiusX
-                startAngle: root.startAngle
-                sweepAngle: root.sweepAngle * root.progress
+            ShapePath {
+                strokeWidth: root.strokeWidth
+                strokeColor: root.valueColor
+                fillColor: "transparent"
+                capStyle: ShapePath.RoundCap
+                PathAngleArc {
+                    centerX: root.width / 2
+                    centerY: root.height - root.strokeWidth
+                    radiusX: Math.min(root.width / 2, root.height) - root.strokeWidth
+                    radiusY: radiusX
+                    startAngle: root.startAngle
+                    sweepAngle: root.sweepAngle * root.progress
+                }
             }
         }
     }
