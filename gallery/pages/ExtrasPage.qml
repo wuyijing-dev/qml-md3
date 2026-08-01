@@ -358,7 +358,8 @@ Md3Page {
                     spacing: 0
                     Md3SwipeReveal {
                         width: parent.width
-                        height: 56
+                        height: 72
+                        panelColor: Md3Theme.colorScheme.surfaceContainerLow
                         trailingActions: [
                             { icon: "archive", label: qsTr("Archive") },
                             { icon: "delete", label: qsTr("Delete"), destructive: true }
@@ -378,7 +379,8 @@ Md3Page {
                     }
                     Md3SwipeReveal {
                         width: parent.width
-                        height: 56
+                        height: 72
+                        panelColor: Md3Theme.colorScheme.surface
                         trailingActions: [
                             { icon: "flag", label: qsTr("Flag") }
                         ]

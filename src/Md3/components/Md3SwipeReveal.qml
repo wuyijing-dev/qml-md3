@@ -2,6 +2,7 @@ import QtQuick
 import Md3
 
 /// Swipe-to-reveal trailing actions behind content (WinUI SwipeControl-lite).
+/// Actions sit under an opaque sliding panel so they stay hidden until swiped.
 Item {
     id: root
 
@@ -10,6 +11,8 @@ Item {
     property var trailingActions: []
     property real openThreshold: 0.4
     property bool interactive: true
+    /// Panel fill — must be opaque or actions show through ListTile (transparent bg).
+    property color panelColor: Md3Theme.colorScheme.surface
 
     readonly property bool open: Math.abs(panel.x) > 4
     readonly property real revealWidth: trailingActions.length * actionWidth
@@ -18,11 +21,11 @@ Item {
     signal opened()
     signal closed()
 
-    default property alias contentData: panel.data
+    default property alias contentData: contentHost.data
 
     clip: true
     implicitWidth: 320
-    implicitHeight: Math.max(56, panel.childrenRect.height)
+    implicitHeight: Math.max(56, contentHost.childrenRect.height)
     height: implicitHeight
 
     Accessible.role: Accessible.ListItem
@@ -33,12 +36,13 @@ Item {
     function close() { panel.x = 0 }
     function reveal() { panel.x = -revealWidth }
 
+    // Underlay — only visible where the panel has slid away.
     Row {
         id: actions
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        width: root.revealWidth
+        width: Math.max(0, root.revealWidth)
         z: 0
 
         Repeater {
@@ -77,6 +81,7 @@ Item {
 
                 MouseArea {
                     anchors.fill: parent
+                    enabled: root.open
                     onClicked: {
                         root.actionTriggered(index)
                         root.close()
@@ -88,10 +93,22 @@ Item {
 
     Item {
         id: panel
-        width: parent.width
-        height: parent.height
+        width: root.width
+        height: root.height
         x: 0
         z: 1
+
+        // Opaque shield — ListTile / custom content often use transparent backgrounds.
+        Rectangle {
+            anchors.fill: parent
+            color: root.panelColor
+        }
+
+        Item {
+            id: contentHost
+            anchors.fill: parent
+            // Children that set anchors.fill attach here (gallery ListTile pattern).
+        }
 
         Behavior on x {
             id: slideBehavior
@@ -127,8 +144,8 @@ Item {
                     startX = panel.x
                 } else {
                     slideBehavior.enabled = true
-                    const open = Math.abs(panel.x) > root.revealWidth * root.openThreshold
-                    panel.x = open ? -root.revealWidth : 0
+                    const shouldOpen = Math.abs(panel.x) > root.revealWidth * root.openThreshold
+                    panel.x = shouldOpen ? -root.revealWidth : 0
                 }
             }
             onTranslationChanged: {
