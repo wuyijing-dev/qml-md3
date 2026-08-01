@@ -2,7 +2,8 @@ import QtQuick
 import QtQuick.Shapes
 import Md3
 
-/// Circular progress — Standard animates PathAngleArc in-place; wavy uses sparse polyline.
+/// Circular progress — Standard spins the Shape (no per-frame Path mutation);
+/// wavy / expressive styles use a throttled polyline rebuild.
 Item {
     id: root
 
@@ -39,11 +40,10 @@ Item {
         }
     }
     property real wavePhase: 0
-    /// Arc start angle in radians (not Item.rotation).
+    /// Arc start angle in radians (wavy / determinate standard).
     property real arcRotation: -Math.PI / 2
     property real sweep: Math.PI * 0.55
     property real waveSpeed: Math.PI * 2 / 1.8
-    property real spinSpeed: Math.PI * 2 / (Md3Motion.progressSpin / 1000)
     /// Thin track + thicker active arc (M3 expressive).
     property bool contained: true
     readonly property real trackLineWidth: contained
@@ -55,14 +55,21 @@ Item {
     readonly property real sweepMax: Math.PI * 1.15
     readonly property bool isWavy: style !== Md3CircularProgressIndicator.Standard
     property bool _treeShown: true
-    readonly property bool sceneActive: enabled && _treeShown
+    readonly property bool sceneActive: enabled && _treeShown && Md3Theme.effectsLiveMotion
     readonly property real radius: Math.min(width, height) / 2 - indicatorLineWidth - (isWavy ? amplitude : 0)
 
     property real sweepDir: 1
     property real _waveAccum: 0
+    /// Keep animation math stable even if reduceMotion collapses token durations to 1ms.
+    readonly property real _spinMs: Math.max(900, Md3Theme.reduceMotion ? 900 : Md3Motion.progressSpin)
+    readonly property real _sweepMs: Math.max(700, Md3Theme.reduceMotion ? 700 : Md3Motion.progressSweep)
+    readonly property real _liveFrameSec: {
+        const fps = Md3Theme.effectsLiveFps
+        return fps > 0 ? (1 / fps) : 0
+    }
 
     function _refreshTreeShown() {
-        const ok = Md3TreeVisibility.isSceneActive(root, root.hostWindow)
+        const ok = Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
         if (_treeShown !== ok)
             _treeShown = ok
     }
@@ -75,8 +82,7 @@ Item {
         const cx = width / 2
         const cy = height / 2
         const baseR = radius
-        // Sparse — full circle was ~175 pts ×2 every frame.
-        const steps = Math.max(18, Math.ceil(Math.abs(sweepRad) * 10))
+        const steps = Math.max(14, Math.ceil(Math.abs(sweepRad) * 8))
         const pts = []
         for (let i = 0; i <= steps; ++i) {
             const t = i / steps
@@ -99,20 +105,20 @@ Item {
             indPoly.path = _arcPoints(-Math.PI / 2, Math.PI * 2 * Math.max(0, Math.min(1, value)))
     }
 
-    function syncStandardArc() {
+    function syncStandardDeterminate() {
         if (isWavy)
             return
         if (indeterminate) {
-            indArc.startAngle = radToDeg(arcRotation)
-            indArc.sweepAngle = -radToDeg(sweep)
-        } else {
             indArc.startAngle = -90
-            indArc.sweepAngle = -360 * Math.max(0, Math.min(1, value))
+            indArc.sweepAngle = -200
+            return
         }
+        indArc.startAngle = -90
+        indArc.sweepAngle = -360 * Math.max(0, Math.min(1, value))
     }
 
     Timer {
-        interval: 400
+        interval: 500
         running: root.enabled && (root.indeterminate || root.isWavy)
         repeat: true
         onTriggered: root._refreshTreeShown()
@@ -125,7 +131,7 @@ Item {
             if (root.isWavy)
                 root.rebuildWavy()
             else
-                root.syncStandardArc()
+                root.syncStandardDeterminate()
         }
     }
     Component.onCompleted: {
@@ -133,44 +139,75 @@ Item {
         deferredSyncTimer.restart()
     }
     onVisibleChanged: _refreshTreeShown()
-    onOpacityChanged: _refreshTreeShown()
 
     width: size
     height: size
 
-    Shape {
+    // Standard track + indicator. Indeterminate spins this item — avoids dirtying Path every frame.
+    Item {
+        id: standardHost
         anchors.fill: parent
         visible: !root.isWavy
-        preferredRendererType: Shape.CurveRenderer
-        asynchronous: false
 
-        ShapePath {
-            strokeWidth: root.contained ? root.trackLineWidth : root.strokeWidth
-            strokeColor: Md3Theme.colorScheme.gaugeTrack
-            fillColor: "transparent"
-            capStyle: ShapePath.RoundCap
-            PathAngleArc {
-                centerX: root.width / 2
-                centerY: root.height / 2
-                radiusX: root.radius
-                radiusY: root.radius
-                startAngle: -90
-                sweepAngle: 360
+        Shape {
+            anchors.fill: parent
+            preferredRendererType: Shape.GeometryRenderer
+            asynchronous: false
+
+            ShapePath {
+                strokeWidth: root.contained ? root.trackLineWidth : root.strokeWidth
+                strokeColor: Md3Theme.colorScheme.gaugeTrack
+                fillColor: "transparent"
+                capStyle: ShapePath.RoundCap
+                PathAngleArc {
+                    centerX: root.width / 2
+                    centerY: root.height / 2
+                    radiusX: root.radius
+                    radiusY: root.radius
+                    startAngle: -90
+                    sweepAngle: 360
+                }
             }
         }
-        ShapePath {
-            strokeWidth: root.contained ? root.indicatorLineWidth : root.strokeWidth
-            strokeColor: Md3Theme.colorScheme.primary
-            fillColor: "transparent"
-            capStyle: ShapePath.RoundCap
-            PathAngleArc {
-                id: indArc
-                centerX: root.width / 2
-                centerY: root.height / 2
-                radiusX: root.radius
-                radiusY: root.radius
-                startAngle: -90
-                sweepAngle: 0
+
+        Shape {
+            id: standardIndicator
+            anchors.fill: parent
+            preferredRendererType: Shape.GeometryRenderer
+            asynchronous: false
+            // Fixed sweep for indeterminate; rotate the Shape instead of rewriting the arc.
+            rotation: 0
+            transformOrigin: Item.Center
+
+            ShapePath {
+                strokeWidth: root.contained ? root.indicatorLineWidth : root.strokeWidth
+                strokeColor: Md3Theme.colorScheme.primary
+                fillColor: "transparent"
+                capStyle: ShapePath.RoundCap
+                PathAngleArc {
+                    id: indArc
+                    centerX: root.width / 2
+                    centerY: root.height / 2
+                    radiusX: root.radius
+                    radiusY: root.radius
+                    startAngle: -90
+                    sweepAngle: -200
+                }
+            }
+
+            RotationAnimator on rotation {
+                from: 0
+                to: 360
+                duration: root._spinMs
+                loops: Animation.Infinite
+                running: root.indeterminate && root.sceneActive && !root.isWavy
+            }
+
+            SequentialAnimation on opacity {
+                running: root.indeterminate && !root.isWavy && Md3Theme.reduceMotion && root._treeShown
+                loops: Animation.Infinite
+                NumberAnimation { from: 0.35; to: 1.0; duration: 700; easing.type: Easing.InOutQuad }
+                NumberAnimation { from: 1.0; to: 0.35; duration: 700; easing.type: Easing.InOutQuad }
             }
         }
     }
@@ -200,14 +237,15 @@ Item {
     }
 
     FrameAnimation {
-        running: root.sceneActive && (root.indeterminate || root.isWavy)
+        running: root.sceneActive && root.isWavy
         onTriggered: {
-            if (root.isWavy)
-                root.wavePhase = (root.wavePhase + root.waveSpeed * frameTime) % (Math.PI * 2)
+            const ft = Math.min(frameTime, 0.05)
+            root.wavePhase = (root.wavePhase + root.waveSpeed * ft) % (Math.PI * 2)
             if (root.indeterminate) {
-                root.arcRotation = (root.arcRotation + root.spinSpeed * frameTime) % (Math.PI * 2)
+                const spin = (Math.PI * 2) / (root._spinMs / 1000)
+                root.arcRotation = (root.arcRotation + spin * ft) % (Math.PI * 2)
                 root.sweep += root.sweepDir * (root.sweepMax - root.sweepMin)
-                             * frameTime / (Md3Motion.progressSweep / 1000)
+                             * ft / (root._sweepMs / 1000)
                 if (root.sweep >= root.sweepMax) {
                     root.sweep = root.sweepMax
                     root.sweepDir = -1
@@ -216,14 +254,11 @@ Item {
                     root.sweepDir = 1
                 }
             }
-            if (root.isWavy) {
-                root._waveAccum += frameTime
-                if (root._waveAccum >= 1 / 45) {
-                    root._waveAccum = 0
-                    root.rebuildWavy()
-                }
-            } else {
-                root.syncStandardArc()
+            root._waveAccum += ft
+            const minDt = root._liveFrameSec > 0 ? root._liveFrameSec : (1 / 30)
+            if (root._waveAccum >= minDt) {
+                root._waveAccum = 0
+                root.rebuildWavy()
             }
         }
     }
@@ -234,19 +269,14 @@ Item {
         if (isWavy)
             rebuildWavy()
         else
-            syncStandardArc()
+            syncStandardDeterminate()
+    }
+    onIndeterminateChanged: {
+        standardIndicator.rotation = 0
+        standardIndicator.opacity = 1
+        deferredSyncTimer.restart()
     }
     onStyleChanged: deferredSyncTimer.restart()
-    onWidthChanged: {
-        if (isWavy)
-            rebuildWavy()
-        else
-            syncStandardArc()
-    }
-    onHeightChanged: {
-        if (isWavy)
-            rebuildWavy()
-        else
-            syncStandardArc()
-    }
+    onWidthChanged: deferredSyncTimer.restart()
+    onHeightChanged: deferredSyncTimer.restart()
 }

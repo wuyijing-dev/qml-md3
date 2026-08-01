@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Shapes
 import Md3
 
-/// Material 3 Loading indicator — PathAngleArc updated in-place (no per-frame Shape rebuild).
+/// Material 3 Loading indicator — spins a fixed arc (no per-frame Path mutation).
 Item {
     id: root
 
@@ -32,49 +32,41 @@ Item {
     }
 
     property bool _treeShown: true
-    readonly property bool sceneActive: enabled && _treeShown
+    readonly property bool sceneActive: enabled && _treeShown && Md3Theme.effectsLiveMotion
     readonly property real radius: indicatorSize / 2 - strokeWidth
-
-    /// Arc start angle in radians (not Item.rotation).
-    property real arcRotation: -Math.PI / 2
-    property real sweep: Math.PI * 0.65
-    property real sweepDir: 1
-    property real spinSpeed: Math.PI * 2 / (Md3Motion.progressSpin / 1000)
+    readonly property real _spinMs: Math.max(900, Md3Theme.reduceMotion ? 900 : Md3Motion.progressSpin)
 
     function _refreshTreeShown() {
-        const ok = Md3TreeVisibility.isSceneActive(root, root.hostWindow)
+        const ok = Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
         if (_treeShown !== ok)
             _treeShown = ok
     }
 
-    function radToDeg(r) { return r * 180 / Math.PI }
-
-    function syncArc() {
+    function syncDeterminate() {
         if (indeterminate) {
-            indArc.startAngle = radToDeg(arcRotation)
-            indArc.sweepAngle = -radToDeg(sweep)
-        } else {
-            indArc.startAngle = -90
-            indArc.sweepAngle = -360 * Math.max(0.001, Math.min(1, value))
+            indArc.sweepAngle = -220
+            indicatorShape.rotation = 0
+            return
         }
+        indArc.sweepAngle = -360 * Math.max(0.001, Math.min(1, value))
+        indicatorShape.rotation = 0
     }
 
     Timer {
-        interval: 400
+        interval: 500
         running: root.enabled && root.indeterminate
         repeat: true
         onTriggered: root._refreshTreeShown()
     }
     Component.onCompleted: {
         _refreshTreeShown()
-        syncArc()
+        syncDeterminate()
     }
     onVisibleChanged: {
         _refreshTreeShown()
         if (visible)
-            syncArc()
+            syncDeterminate()
     }
-    onOpacityChanged: _refreshTreeShown()
 
     implicitWidth: Math.max(indicatorSize, labelItem.visible ? labelItem.implicitWidth : 0)
     implicitHeight: indicatorSize + (labelItem.visible ? labelItem.implicitHeight + 8 : 0)
@@ -92,7 +84,7 @@ Item {
 
             Shape {
                 anchors.fill: parent
-                preferredRendererType: Shape.CurveRenderer
+                preferredRendererType: Shape.GeometryRenderer
                 asynchronous: false
 
                 ShapePath {
@@ -109,6 +101,15 @@ Item {
                         sweepAngle: 360
                     }
                 }
+            }
+
+            Shape {
+                id: indicatorShape
+                anchors.fill: parent
+                preferredRendererType: Shape.GeometryRenderer
+                asynchronous: false
+                transformOrigin: Item.Center
+
                 ShapePath {
                     strokeWidth: root.strokeWidth
                     strokeColor: root.indicatorColor
@@ -121,8 +122,23 @@ Item {
                         radiusX: root.radius
                         radiusY: root.radius
                         startAngle: -90
-                        sweepAngle: 0
+                        sweepAngle: -220
                     }
+                }
+
+                RotationAnimator on rotation {
+                    from: 0
+                    to: 360
+                    duration: root._spinMs
+                    loops: Animation.Infinite
+                    running: root.indeterminate && root.sceneActive
+                }
+
+                SequentialAnimation on opacity {
+                    running: root.indeterminate && Md3Theme.reduceMotion && root._treeShown
+                    loops: Animation.Infinite
+                    NumberAnimation { from: 0.35; to: 1.0; duration: 700; easing.type: Easing.InOutQuad }
+                    NumberAnimation { from: 1.0; to: 0.35; duration: 700; easing.type: Easing.InOutQuad }
                 }
             }
         }
@@ -139,23 +155,10 @@ Item {
         }
     }
 
-    FrameAnimation {
-        running: root.sceneActive && root.indeterminate
-        onTriggered: {
-            const dt = frameTime
-            root.arcRotation += root.spinSpeed * dt
-            root.sweep += root.sweepDir * Math.PI * 1.1 * dt
-            if (root.sweep > Math.PI * 1.2) {
-                root.sweep = Math.PI * 1.2
-                root.sweepDir = -1
-            } else if (root.sweep < Math.PI * 0.3) {
-                root.sweep = Math.PI * 0.3
-                root.sweepDir = 1
-            }
-            root.syncArc()
-        }
+    onValueChanged: if (!indeterminate) syncDeterminate()
+    onIndeterminateChanged: {
+        indicatorShape.rotation = 0
+        indicatorShape.opacity = 1
+        syncDeterminate()
     }
-
-    onValueChanged: if (!indeterminate) syncArc()
-    onIndeterminateChanged: syncArc()
 }

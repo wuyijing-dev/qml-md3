@@ -1324,11 +1324,17 @@ Item {
                     anchors.topMargin: root.headerHeight
                     visible: root.loading
                     z: 4
+                    // Isolate progress animation dirty region from table MultiEffect/shadows.
+                    layer.enabled: true
                     color: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.surface, 0.72)
                     Column {
                         anchors.centerIn: parent
                         spacing: 12
-                        Md3CircularProgressIndicator { anchors.horizontalCenter: parent.horizontalCenter; indeterminate: true; size: 40 }
+                        Md3CircularProgressIndicator {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            indeterminate: true
+                            size: 40
+                        }
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: qsTr("Loading…")

@@ -2,7 +2,8 @@ import QtQuick
 import QtQuick.Shapes
 import Md3
 
-/// Linear progress — Standard uses Rectangles; wavy uses sparse polylines + throttled rebuild.
+/// Linear progress — Standard uses Rectangles + NumberAnimation;
+/// wavy styles rebuild polylines on a capped cadence (not every vsync).
 Item {
     id: root
 
@@ -51,12 +52,17 @@ Item {
     readonly property real progress: Math.max(0, Math.min(1, value))
     readonly property real barWidth: indeterminate ? Math.max(48, width * 0.35) : width * progress
     property bool _treeShown: true
-    readonly property bool sceneActive: enabled && _treeShown
+    readonly property bool sceneActive: enabled && _treeShown && Md3Theme.effectsLiveMotion
     property real travelX: -barWidth
     property real _waveAccum: 0
+    readonly property real _travelMs: Math.max(1200, Md3Theme.reduceMotion ? 1200 : Md3Motion.progressTravel)
+    readonly property real _liveFrameSec: {
+        const fps = Md3Theme.effectsLiveFps
+        return fps > 0 ? (1 / fps) : (1 / 30)
+    }
 
     function _refreshTreeShown() {
-        const ok = Md3TreeVisibility.isSceneActive(root, root.hostWindow)
+        const ok = Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
         if (_treeShown !== ok)
             _treeShown = ok
     }
@@ -68,8 +74,7 @@ Item {
         const amp = amplitude
         const wl = Math.max(8, wavelength)
         const phase = wavePhase
-        // Sparse samples — was ~2px (too heavy for FrameAnimation).
-        const stepPx = 5
+        const stepPx = 6
         const steps = Math.max(2, Math.ceil((toX - fromX) / stepPx))
         const pts = []
         for (let i = 0; i <= steps; ++i) {
@@ -95,7 +100,7 @@ Item {
     }
 
     Timer {
-        interval: 400
+        interval: 500
         running: root.enabled && (root.isWavy || root.indeterminate)
         repeat: true
         onTriggered: root._refreshTreeShown()
@@ -112,9 +117,9 @@ Item {
             deferredWaveTimer.restart()
     }
     onVisibleChanged: _refreshTreeShown()
-    onOpacityChanged: _refreshTreeShown()
 
     Rectangle {
+        id: standardTrack
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         anchors.right: parent.right
@@ -122,15 +127,16 @@ Item {
         radius: height / 2
         color: Md3Theme.colorScheme.gaugeTrack
         visible: !root.isWavy
-        clip: false
 
         Rectangle {
+            id: standardBar
             anchors.verticalCenter: parent.verticalCenter
             height: root.contained ? root.indicatorThickness : parent.height
             radius: height / 2
             color: Md3Theme.colorScheme.primary
             width: root.indeterminate ? root.barWidth : Math.min(root.barWidth, root.width)
             x: root.indeterminate ? root.travelX : 0
+            opacity: 1
         }
 
         Rectangle {
@@ -141,6 +147,40 @@ Item {
             height: width
             radius: width / 2
             color: Md3Theme.colorScheme.primary
+        }
+    }
+
+    NumberAnimation {
+        id: travelAnim
+        target: root
+        property: "travelX"
+        from: -root.barWidth
+        to: root.width
+        duration: root._travelMs
+        loops: Animation.Infinite
+        running: !root.isWavy && root.indeterminate && root.sceneActive && !Md3Theme.reduceMotion
+        easing.type: Easing.Linear
+        onRunningChanged: if (running) root.travelX = -root.barWidth
+    }
+
+    SequentialAnimation {
+        running: !root.isWavy && root.indeterminate && root._treeShown && Md3Theme.reduceMotion
+        loops: Animation.Infinite
+        NumberAnimation {
+            target: standardBar
+            property: "opacity"
+            from: 0.35
+            to: 1.0
+            duration: 700
+            easing.type: Easing.InOutQuad
+        }
+        NumberAnimation {
+            target: standardBar
+            property: "opacity"
+            from: 1.0
+            to: 0.35
+            duration: 700
+            easing.type: Easing.InOutQuad
         }
     }
 
@@ -183,33 +223,20 @@ Item {
         id: waveFrames
         running: root.isWavy && root.sceneActive
         onTriggered: {
-            root.wavePhase = (root.wavePhase + root.waveSpeed * frameTime) % (Math.PI * 2)
+            const ft = Math.min(frameTime, 0.05)
+            root.wavePhase = (root.wavePhase + root.waveSpeed * ft) % (Math.PI * 2)
             if (root.indeterminate) {
                 const span = root.width + root.barWidth
-                root.travelX += span * frameTime / (Md3Motion.progressTravel / 1000)
+                root.travelX += span * ft / (root._travelMs / 1000)
                 if (root.travelX > root.width)
                     root.travelX = -root.barWidth
             }
-            // Cap wavy rebuilds ~45fps — full polyline rewrite every vsync was ~12fps.
-            root._waveAccum += frameTime
-            if (root._waveAccum >= 1 / 45) {
+            root._waveAccum += ft
+            if (root._waveAccum >= root._liveFrameSec) {
                 root._waveAccum = 0
                 root.rebuildWave()
             }
         }
-    }
-
-    NumberAnimation {
-        id: travelAnim
-        target: root
-        property: "travelX"
-        from: -root.barWidth
-        to: root.width
-        duration: Md3Motion.progressTravel
-        loops: Animation.Infinite
-        running: !root.isWavy && root.indeterminate && root.sceneActive
-        easing.type: Easing.Linear
-        onRunningChanged: if (running) root.travelX = -root.barWidth
     }
 
     onWidthChanged: {
@@ -220,5 +247,10 @@ Item {
     }
     onValueChanged: if (isWavy) rebuildWave()
     onStyleChanged: if (isWavy) deferredWaveTimer.restart()
-    onTravelXChanged: if (isWavy && !waveFrames.running) rebuildWave()
+    onIndeterminateChanged: {
+        if (!indeterminate)
+            travelX = 0
+        else
+            travelX = -barWidth
+    }
 }

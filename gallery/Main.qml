@@ -121,16 +121,11 @@ Md3ApplicationWindow {
             height: 20
         }
         Md3Text {
-            text: qsTr("AppToolBar · middle chips live in TitleBar")
+            text: qsTr("AppToolBar · TitleBar middle chips above")
             role: Md3Text.LabelMedium
             tone: Md3Text.OnSurfaceVariant
         }
         Md3Spacer { expand: true }
-        Md3FilterChip {
-            text: qsTr("Compact")
-            selected: Md3Theme.densityCompact
-            onClicked: Md3Theme.setDensity(Md3Theme.densityCompact ? 0 : 1)
-        }
         Md3IconButton {
             icon: "tab"
             accessibleName: qsTr("Add document tab")

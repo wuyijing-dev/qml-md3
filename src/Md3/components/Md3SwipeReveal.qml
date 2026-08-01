@@ -301,9 +301,9 @@ Item {
             id: slideBehavior
             enabled: true
             NumberAnimation {
-                duration: Md3Motion.short4
+                duration: Md3Motion.short3
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: Md3Motion.emphasized
+                easing.bezierCurve: Md3Motion.standard
             }
         }
 

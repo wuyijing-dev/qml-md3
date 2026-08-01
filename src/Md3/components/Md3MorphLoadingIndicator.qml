@@ -29,13 +29,13 @@ Item {
     }
 
     property bool _treeShown: true
-    readonly property bool sceneActive: enabled && _treeShown && indeterminate
+    readonly property bool sceneActive: enabled && _treeShown && indeterminate && Md3Theme.effectsLiveMotion
 
     width: box
     height: box
 
     function _refreshTreeShown() {
-        const ok = Md3TreeVisibility.isSceneActive(root, root.hostWindow)
+        const ok = Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
         if (_treeShown !== ok)
             _treeShown = ok
     }
@@ -101,10 +101,11 @@ Item {
     FrameAnimation {
         running: root.sceneActive
         onTriggered: {
-            root.spin = (root.spin + frameTime * 1.2) % (Math.PI * 2)
-            root.morphPhase = (root.morphPhase + frameTime * 2.4) % (Math.PI * 2)
-            // Rebuild only when the phase bucket changes (~24fps worst-case).
-            const bucket = Math.floor(root.morphPhase * 24 / (Math.PI * 2))
+            const ft = Math.min(frameTime, 0.05)
+            root.spin = (root.spin + ft * 1.2) % (Math.PI * 2)
+            root.morphPhase = (root.morphPhase + ft * 2.4) % (Math.PI * 2)
+            // Rebuild only when the phase bucket changes (~20fps).
+            const bucket = Math.floor(root.morphPhase * 20 / (Math.PI * 2))
             if (bucket !== root._morphBucket && !rebuildThrottle.running) {
                 root._morphBucket = bucket
                 rebuildThrottle.start()
@@ -114,7 +115,7 @@ Item {
 
     Timer {
         id: rebuildThrottle
-        interval: 33
+        interval: 50
         repeat: false
         onTriggered: root.rebuildPath()
     }
