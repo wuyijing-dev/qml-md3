@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Window
 import Md3
 
 Item {
@@ -24,6 +25,14 @@ Item {
     property bool passwordVisible: false
     // When true (default for trailing "close"), clears text on trailing tap.
     property bool clearOnTrailing: true
+    /// When true, shows a clear affordance whenever the field has text (unless password).
+    property bool showClearButton: false
+    /// Shake + announce when error becomes active; optional Android haptic.
+    property bool announceErrors: true
+    property bool errorFeedbackEnabled: true
+    property int errorShakeMs: Md3Motion.short3
+    property real errorShakePx: 6
+    property real _shakeX: 0
 
     /// Enable typeahead popup from `suggestions`.
     property bool autoComplete: false
@@ -63,6 +72,9 @@ Item {
     readonly property string effectiveTrailingIcon: {
         if (password)
             return passwordVisible ? "visibility_off" : "visibility"
+        if (showClearButton && text.length > 0
+                && (trailingIcon.length === 0 || trailingIcon === "close" || trailingIcon === "clear"))
+            return "clear"
         return trailingIcon
     }
 
@@ -184,12 +196,40 @@ Item {
             trailingClicked()
             return
         }
-        if (clearOnTrailing && (trailingIcon === "close" || trailingIcon === "clear")) {
+        if (clearOnTrailing && (effectiveTrailingIcon === "close" || effectiveTrailingIcon === "clear")) {
             input.clear()
             trailingClicked()
             return
         }
         trailingClicked()
+    }
+
+    function _errorFeedback() {
+        if (!errorFeedbackEnabled || !hasError)
+            return
+        if (!Md3Theme.reduceMotion) {
+            shakeAnim.stop()
+            shakeAnim.start()
+        }
+        if (announceErrors && typeof Md3Accessibility !== "undefined" && Md3Accessibility.announceError) {
+            const msg = errorText.length ? errorText : qsTr("Invalid input")
+            Md3Accessibility.announceError(msg)
+        }
+        const win = Window.window
+        if (win && typeof win.hapticFeedback === "function"
+                && typeof Md3WindowCapabilities !== "undefined"
+                && Md3WindowCapabilities.hapticFeedback) {
+            win.hapticFeedback(0)
+        } else if (win && typeof win.vibrate === "function"
+                   && typeof Md3WindowCapabilities !== "undefined"
+                   && Md3WindowCapabilities.vibrate) {
+            win.vibrate(28)
+        }
+    }
+
+    onHasErrorChanged: {
+        if (hasError)
+            Qt.callLater(_errorFeedback)
     }
 
     Column {
@@ -201,6 +241,32 @@ Item {
             id: fieldBox
             width: parent.width
             height: root.multiline ? Math.max(Md3Theme.fieldHeight, input.contentHeight + 32) : Md3Theme.fieldHeight
+            transform: Translate { x: root._shakeX }
+
+            SequentialAnimation {
+                id: shakeAnim
+                NumberAnimation {
+                    target: root
+                    property: "_shakeX"
+                    to: root.errorShakePx
+                    duration: Math.max(1, Math.round(root.errorShakeMs / 4))
+                    easing.type: Easing.OutQuad
+                }
+                NumberAnimation {
+                    target: root
+                    property: "_shakeX"
+                    to: -root.errorShakePx
+                    duration: Math.max(1, Math.round(root.errorShakeMs / 2))
+                    easing.type: Easing.InOutQuad
+                }
+                NumberAnimation {
+                    target: root
+                    property: "_shakeX"
+                    to: 0
+                    duration: Math.max(1, Math.round(root.errorShakeMs / 4))
+                    easing.type: Easing.OutQuad
+                }
+            }
 
             Rectangle {
                 id: fill
@@ -275,9 +341,9 @@ Item {
                     visible: {
                         if (root.password)
                             return true
-                        if (root.trailingIcon.length === 0)
+                        if (root.effectiveTrailingIcon.length === 0)
                             return false
-                        if (root.trailingIcon === "close" || root.trailingIcon === "clear")
+                        if (root.effectiveTrailingIcon === "close" || root.effectiveTrailingIcon === "clear")
                             return root.text.length > 0
                         return true
                     }
@@ -347,6 +413,8 @@ Item {
                     onAccepted: {
                         if (root.applyHighlightedSuggestion())
                             return
+                        if (root.hasError && root.announceErrors)
+                            root._errorFeedback()
                         root.accepted()
                     }
                 }

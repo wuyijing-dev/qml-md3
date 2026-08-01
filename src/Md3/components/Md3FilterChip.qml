@@ -38,10 +38,23 @@ Md3AbstractButton {
     width: implicitWidth
 
     Md3Shadow {
-        anchors.fill: bg
+        anchors.fill: bgHost
         elevation: root.elevated && root.enabled && !root.selected ? 1 : 0
         cornerRadius: root.cornerRadius
     }
+
+    Item {
+        id: bgHost
+        anchors.fill: parent
+        scale: root.pressed ? 0.96 : 1.0
+        Behavior on scale {
+            enabled: !Md3Theme.reduceMotion
+            NumberAnimation {
+                duration: Md3Motion.short2
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.standard
+            }
+        }
 
     Rectangle {
         id: bg
@@ -97,5 +110,6 @@ Md3AbstractButton {
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
+    }
     }
 }

@@ -28,3 +28,11 @@ See [Window appearance](../guides/window-appearance.md).
 | `preferNavigationBar(w, h)` / `preferNavigationRail(w, h)` | Shell nav density |
 
 `Md3ApplicationWindow` mirrors these as readonly properties when `adaptiveChrome` is true.
+
+## Safe area (Qt 6.9+)
+
+| API | Notes |
+|-----|--------|
+| `safeAreaWindow` | Optional Window; `Md3ApplicationWindow` sets this on completed |
+| `safeBottomInset` / `safeTopInset` / `safeLeftInset` / `safeRightInset` | From `Window.safeAreaMargins` when Qt ≥ 6.9 and window bound; else platform fallback |
+| `safeInsetsFor(win)` | Resolve insets for an arbitrary Window |

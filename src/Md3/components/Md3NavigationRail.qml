@@ -20,6 +20,8 @@ Rectangle {
     signal currentIndexChangedByUser(int index)
     signal destinationHovered(int index)
     signal destinationUnhovered(int index)
+    /// Fired on long-press of a destination (preview / peek).
+    signal destinationPreview(int index)
     signal expandToggleClicked()
 
     /// True while the destination list is being flicked/dragged.
@@ -307,6 +309,7 @@ Rectangle {
                     ripple.pulse(local.x, local.y)
                     root._selectDest(dest.destIndex)
                 }
+                onPressAndHold: root.destinationPreview(dest.destIndex)
             }
 
             Accessible.name: modelData.label !== undefined ? modelData.label : qsTr("Destination")
@@ -346,9 +349,9 @@ Rectangle {
         property: "_indicatorReveal"
         from: 0
         to: 1
-        duration: Md3Motion.short4
-        easing.type: Easing.BezierSpline
-        easing.bezierCurve: Md3Motion.emphasizedDecelerate
+        duration: Md3Theme.reduceMotion ? 1 : Md3Motion.medium2
+        easing.type: Easing.OutBack
+        easing.overshoot: 1.35
     }
 
     Item {

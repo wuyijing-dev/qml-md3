@@ -48,9 +48,26 @@ Item {
         if (opts.position !== undefined)
             root.position = _resolvePosition(opts.position)
         const toastId = opts.id !== undefined ? String(opts.id) : ("toast-" + (++_serial))
+        const text = String(message || "")
+        if (opts.dedupe !== false) {
+            for (let i = 0; i < activeModel.count; ++i) {
+                const cur = activeModel.get(i)
+                if ((opts.id !== undefined && String(cur.toastId) === toastId)
+                        || (opts.id === undefined && String(cur.text) === text)) {
+                    return String(cur.toastId)
+                }
+            }
+            for (let j = 0; j < _queue.length; ++j) {
+                const q = _queue[j]
+                if ((opts.id !== undefined && String(q.toastId) === toastId)
+                        || (opts.id === undefined && String(q.text) === text)) {
+                    return String(q.toastId)
+                }
+            }
+        }
         const entry = {
             toastId: toastId,
-            text: String(message || ""),
+            text: text,
             severity: opts.severity !== undefined ? Number(opts.severity) : 0,
             durationMs: opts.durationMs !== undefined ? Number(opts.durationMs) : defaultDurationMs
         }

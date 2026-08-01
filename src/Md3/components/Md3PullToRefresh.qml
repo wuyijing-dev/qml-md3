@@ -75,6 +75,7 @@ Item {
             Md3CircularProgressIndicator {
                 size: 24
                 indeterminate: true
+                // progressSpin uses Md3Motion.essential (~1600ms) — matches iOS-paced loaders.
                 visible: root.refreshing || root._armed
             }
             Md3Text {

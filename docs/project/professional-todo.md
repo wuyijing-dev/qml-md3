@@ -18,12 +18,13 @@
 10. [x] TitleBar/AppToolBar 内容槽示例（WindowPage）+ Sheet light-dismiss + Adaptive safeBottomInset
 11. [x] **Electron 对标宿主**：`Md3NativeShell` 单实例 / 开机启动 / 全局快捷键(Win·macOS·Linux) / 协议注册 / 电源锁屏 / `getPath`
 12. [x] **Android 扩展**：通知、系统栏颜色、方向、软键盘、Toast/触觉、应用/通知设置、电池优化、shareFile、Material You accent
+13. [x] **体验抛光**：CommandBar a11y；Chip/Switch/Checkbox/Segmented 按压缩放；TextField/SearchBar 清空+错误反馈；Snackbar/Toast 滑动关闭/去重；Tooltip focus 延迟；SafeArea 6.9+；Nav 弹簧/长按/返回关抽屉；Skeleton/PageHost 节奏
 
 ## 壳层对照
 
 | 状态 | 项 |
 |------|----|
-| 已有 | Rail / Drawer / Bar / Scaffold / NavigationView / **Flyout** / TitleBar 槽示例 / **NativeShell（全桌面）** / **Android extras** |
-| 后续 | CommandBar a11y 矩阵；真机 SafeArea（6.9+ feature gate） |
+| 已有 | Rail / Drawer / Bar / Scaffold / NavigationView / **Flyout** / TitleBar 槽示例 / **NativeShell（全桌面）** / **Android extras** / **SafeArea 6.9+ gate** / CommandBar a11y |
+| 后续 | 真机 SafeArea 冒烟（Android/iOS）；更多 gallery 示例对齐 |
 
 参考：[wasm.md](../topics/wasm.md) · [android.md](../topics/android.md) · [native-platforms.md](../topics/native-platforms.md) · [quickstart](../getting-started/quickstart.md) · [a11y-spotcheck.md](../topics/a11y-spotcheck.md)

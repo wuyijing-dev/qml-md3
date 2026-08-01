@@ -9,6 +9,9 @@ Item {
     property bool dualLine: false
     property bool open: false
     property int durationMs: 4000
+    /// When true, snackbar is not an assertive live region (avoids stealing AT focus).
+    property bool politeAnnouncements: true
+    property real _dragX: 0
 
     signal actionClicked()
     signal closed()
@@ -19,18 +22,25 @@ Item {
     opacity: open ? 1 : 0
     z: 1200
 
-    Accessible.role: Accessible.Alert
+    Accessible.role: Accessible.Status
     Accessible.name: text.length ? text : qsTr("Snackbar")
+    // Do not grab keyboard focus while other controls are focused.
+    activeFocusOnTab: false
+    focus: false
 
     function show(message) {
         if (message !== undefined)
             text = message
         open = true
+        _dragX = 0
         hideTimer.restart()
+        if (politeAnnouncements && typeof Md3Accessibility !== "undefined" && Md3Accessibility.announce)
+            Md3Accessibility.announce(text)
     }
 
     function dismiss() {
         open = false
+        _dragX = 0
         closed()
     }
 
@@ -42,24 +52,29 @@ Item {
 
     Behavior on opacity {
         NumberAnimation {
-                    duration: Md3Motion.overlayDuration
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Md3Motion.standard
-                }
+            duration: Md3Motion.overlayDuration
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Md3Motion.standard
+        }
     }
 
     // Slide up from below the anchored bottom edge
     property real slideY: open ? 0 : height + 8
-    transform: Translate {
-        y: root.slideY
-        Behavior on y {
-            NumberAnimation {
+    transform: [
+        Translate {
+            y: root.slideY
+            Behavior on y {
+                NumberAnimation {
                     duration: Md3Motion.spatialDuration
                     easing.type: Easing.BezierSpline
                     easing.bezierCurve: Md3Motion.emphasized
                 }
+            }
+        },
+        Translate {
+            x: root._dragX
         }
-    }
+    ]
 
     Rectangle {
         anchors.fill: parent
@@ -93,6 +108,65 @@ Item {
                     root.actionClicked()
                     root.dismiss()
                 }
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            // Action button keeps its own hit target above when present.
+            enabled: root.actionText.length === 0
+            property real _sx: 0
+            onPressed: function (mouse) {
+                _sx = mouse.x
+                hideTimer.stop()
+            }
+            onPositionChanged: function (mouse) {
+                root._dragX = mouse.x - _sx
+            }
+            onReleased: function (mouse) {
+                if (Math.abs(root._dragX) > Math.min(96, root.width * 0.28))
+                    root.dismiss()
+                else {
+                    root._dragX = 0
+                    if (root.open)
+                        hideTimer.restart()
+                }
+            }
+            onCanceled: {
+                root._dragX = 0
+                if (root.open)
+                    hideTimer.restart()
+            }
+        }
+
+        // When an action exists, swipe from the text area only (left side).
+        MouseArea {
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            width: parent.width - 96
+            visible: root.actionText.length > 0
+            property real _sx: 0
+            onPressed: function (mouse) {
+                _sx = mouse.x
+                hideTimer.stop()
+            }
+            onPositionChanged: function (mouse) {
+                root._dragX = mouse.x - _sx
+            }
+            onReleased: function (mouse) {
+                if (Math.abs(root._dragX) > Math.min(96, root.width * 0.28))
+                    root.dismiss()
+                else {
+                    root._dragX = 0
+                    if (root.open)
+                        hideTimer.restart()
+                }
+            }
+            onCanceled: {
+                root._dragX = 0
+                if (root.open)
+                    hideTimer.restart()
             }
         }
     }

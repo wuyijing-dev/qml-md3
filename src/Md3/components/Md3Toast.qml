@@ -12,6 +12,7 @@ Item {
     property int durationMs: 2200
     property bool open: false
     property real maxWidth: 420
+    property real _dragX: 0
 
     signal closed()
 
@@ -21,6 +22,11 @@ Item {
     opacity: open ? 1 : 0
     scale: open ? 1 : 0.94
     transformOrigin: Item.Center
+    activeFocusOnTab: false
+    focus: false
+
+    Accessible.role: Accessible.Status
+    Accessible.name: text.length ? text : qsTr("Toast")
 
     readonly property color bg: {
         switch (severity) {
@@ -48,13 +54,17 @@ Item {
         if (opts.durationMs !== undefined)
             durationMs = Number(opts.durationMs)
         open = true
+        _dragX = 0
         hideTimer.restart()
+        if (typeof Md3Accessibility !== "undefined" && Md3Accessibility.announce)
+            Md3Accessibility.announce(text)
     }
 
     function dismiss() {
         if (!open)
             return
         open = false
+        _dragX = 0
         closed()
     }
 
@@ -79,6 +89,8 @@ Item {
         }
     }
 
+    transform: Translate { x: root._dragX }
+
     Rectangle {
         id: box
         anchors.fill: parent
@@ -102,6 +114,32 @@ Item {
             elide: Text.ElideRight
             font.family: Md3Theme.typography.fontFamily
             font.pixelSize: Md3Theme.typography.bodyMedium.size
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            property real _sx: 0
+            onPressed: function (mouse) {
+                _sx = mouse.x
+                hideTimer.stop()
+            }
+            onPositionChanged: function (mouse) {
+                root._dragX = mouse.x - _sx
+            }
+            onReleased: function (mouse) {
+                if (Math.abs(root._dragX) > Math.min(72, root.width * 0.32))
+                    root.dismiss()
+                else {
+                    root._dragX = 0
+                    if (root.open)
+                        hideTimer.restart()
+                }
+            }
+            onCanceled: {
+                root._dragX = 0
+                if (root.open)
+                    hideTimer.restart()
+            }
         }
     }
 }

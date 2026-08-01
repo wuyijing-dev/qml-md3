@@ -24,6 +24,19 @@ Md3AbstractButton {
     height: implicitHeight
     width: implicitWidth
 
+    Item {
+        id: bgHost
+        anchors.fill: parent
+        scale: root.pressed ? 0.96 : 1.0
+        Behavior on scale {
+            enabled: !Md3Theme.reduceMotion
+            NumberAnimation {
+                duration: Md3Motion.short2
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.standard
+            }
+        }
+
     Rectangle {
         id: bg
         anchors.fill: parent
@@ -83,6 +96,7 @@ Md3AbstractButton {
                 }
             }
         }
+    }
     }
 
     MouseArea {

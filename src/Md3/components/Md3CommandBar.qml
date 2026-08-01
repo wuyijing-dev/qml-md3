@@ -14,6 +14,7 @@ Rectangle {
     property var overflowModel: []
     /// Optional explicit Window for overflow menu overlay.
     property var overlayWindow: null
+    property string accessibleName: qsTr("Command bar")
 
     property alias content: primaryStack.content
     default property alias data: primaryStack.content
@@ -26,9 +27,11 @@ Rectangle {
     width: parent ? parent.width : 400
     height: barHeight
     color: Md3Theme.colorScheme.surfaceContainerLow
+    // FocusScope child owns tab cycle; bar itself is not a tab stop.
+    activeFocusOnTab: false
 
     Accessible.role: Accessible.ToolBar
-    Accessible.name: qsTr("Command bar")
+    Accessible.name: accessibleName
 
     function openOverflow() {
         if (!hasOverflow)
@@ -44,36 +47,55 @@ Rectangle {
         overflowMenu.dismiss()
     }
 
-    Md3HStack {
-        id: row
+    FocusScope {
+        id: barFocus
         anchors.fill: parent
-        spacing: root.contentSpacing
-        leftPadding: root.horizontalPadding
-        rightPadding: root.horizontalPadding
-        fillHeight: true
-        alignment: Md3HStack.Center
+        focus: true
 
         Md3HStack {
-            id: primaryStack
+            id: row
+            anchors.fill: parent
             spacing: root.contentSpacing
+            leftPadding: root.horizontalPadding
+            rightPadding: root.horizontalPadding
             fillHeight: true
             alignment: Md3HStack.Center
-        }
 
-        Md3Spacer { expand: true }
+            Md3HStack {
+                id: primaryStack
+                spacing: root.contentSpacing
+                fillHeight: true
+                alignment: Md3HStack.Center
+            }
 
-        Md3AppBarButton {
-            id: overflowBtn
-            visible: root.hasOverflow
-            icon: "more_horiz"
-            label: qsTr("More")
-            layout: Md3AppBarButton.IconOnly
-            accessibleName: qsTr("More commands")
-            onClicked: {
-                if (overflowMenu.open)
-                    root.dismissOverflow()
-                else
-                    root.openOverflow()
+            Md3Spacer { expand: true }
+
+            Md3AppBarButton {
+                id: overflowBtn
+                visible: root.hasOverflow
+                icon: "more_horiz"
+                label: qsTr("More")
+                layout: Md3AppBarButton.IconOnly
+                accessibleName: qsTr("More commands")
+                activeFocusOnTab: visible && enabled
+                onClicked: {
+                    if (overflowMenu.open)
+                        root.dismissOverflow()
+                    else
+                        root.openOverflow()
+                }
+                Keys.onReturnPressed: function (event) {
+                    clicked()
+                    event.accepted = true
+                }
+                Keys.onEnterPressed: function (event) {
+                    clicked()
+                    event.accepted = true
+                }
+                Keys.onSpacePressed: function (event) {
+                    clicked()
+                    event.accepted = true
+                }
             }
         }
     }

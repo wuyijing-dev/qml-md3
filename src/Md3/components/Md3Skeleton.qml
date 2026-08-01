@@ -36,14 +36,14 @@ Item {
     }
 
     SequentialAnimation {
-        running: root.active && root.visible
+        running: root.active && root.visible && !Md3Theme.reduceMotion
         loops: Animation.Infinite
         NumberAnimation {
             target: root
             property: "pulseOpacity"
             from: 0.45
             to: 0.9
-            duration: 900
+            duration: Md3Motion.essential(1100)
             easing.type: Easing.InOutSine
         }
         NumberAnimation {
@@ -51,7 +51,7 @@ Item {
             property: "pulseOpacity"
             from: 0.9
             to: 0.45
-            duration: 900
+            duration: Md3Motion.essential(1100)
             easing.type: Easing.InOutSine
         }
     }

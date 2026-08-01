@@ -631,6 +631,8 @@ Window {
         Md3Theme.progressiveContent = root.progressiveContent
         Md3AppSettings.organization = root.settingsOrganization
         Md3AppSettings.application = root.settingsApplication
+        if (Md3Adaptive)
+            Md3Adaptive.safeAreaWindow = root
         if (root.persistSession)
             root.restoreSession()
         root._configureHotReload()

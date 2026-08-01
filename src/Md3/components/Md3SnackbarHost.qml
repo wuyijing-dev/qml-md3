@@ -35,10 +35,28 @@ Item {
     function show(message, options) {
         const opts = options || {}
         const snackId = opts.id !== undefined ? String(opts.id) : ("snack-" + (++_serial))
+        const text = String(message || "")
         const priority = opts.priority !== undefined ? Number(opts.priority) : 0
+        // Dedup by explicit id, else by identical text still pending/visible.
+        if (opts.dedupe !== false) {
+            for (let i = 0; i < activeModel.count; ++i) {
+                const cur = activeModel.get(i)
+                if ((opts.id !== undefined && String(cur.snackId) === snackId)
+                        || (opts.id === undefined && String(cur.text) === text)) {
+                    return String(cur.snackId)
+                }
+            }
+            for (let j = 0; j < _queue.length; ++j) {
+                const q = _queue[j]
+                if ((opts.id !== undefined && String(q.snackId) === snackId)
+                        || (opts.id === undefined && String(q.text) === text)) {
+                    return String(q.snackId)
+                }
+            }
+        }
         const entry = {
             snackId: snackId,
-            text: String(message || ""),
+            text: text,
             actionText: opts.actionText !== undefined ? String(opts.actionText) : "",
             dualLine: !!opts.dualLine,
             durationMs: opts.durationMs !== undefined ? Number(opts.durationMs) : defaultDurationMs,

@@ -171,18 +171,63 @@ QtObject {
     readonly property real navigationCompactBreakpoint: 600
     readonly property real navigationExpandedBreakpoint: 840
 
-    /// Conservative home-indicator / gesture-bar padding (6.5 baseline — no Qt SafeArea API).
-    /// Use under bottom bars / FABs on phone-class shells.
-    readonly property real safeBottomInset: {
+    /// Optional Window used to read Qt 6.9+ `safeAreaMargins` (falls back when unset).
+    property var safeAreaWindow: null
+
+    function _platformSafeBottom() {
         const os = Qt.platform.os
         if (os === "android" || os === "ios")
             return 20
         return 0
     }
-    readonly property real safeTopInset: {
+
+    function _platformSafeTop() {
         const os = Qt.platform.os
         if (os === "ios")
             return 12
+        return 0
+    }
+
+    /// Resolve insets from a Window (Qt 6.9+ `safeAreaMargins`) with platform fallback.
+    function safeInsetsFor(win) {
+        const fallback = { top: _platformSafeTop(), bottom: _platformSafeBottom(), left: 0, right: 0 }
+        if (!Md3QtCompat || !Md3QtCompat.atLeast69 || !win)
+            return fallback
+        try {
+            const m = win.safeAreaMargins
+            if (!m)
+                return fallback
+            return {
+                top: Math.max(0, Number(m.top !== undefined ? m.top : 0)),
+                bottom: Math.max(0, Number(m.bottom !== undefined ? m.bottom : 0)),
+                left: Math.max(0, Number(m.left !== undefined ? m.left : 0)),
+                right: Math.max(0, Number(m.right !== undefined ? m.right : 0))
+            }
+        } catch (e) {
+            return fallback
+        }
+    }
+
+    /// Home-indicator / gesture-bar padding. On Qt 6.9+ uses Window.safeAreaMargins when
+    /// `safeAreaWindow` is set; otherwise platform fallback (6.5 baseline).
+    readonly property real safeBottomInset: {
+        if (safeAreaWindow)
+            return safeInsetsFor(safeAreaWindow).bottom
+        return _platformSafeBottom()
+    }
+    readonly property real safeTopInset: {
+        if (safeAreaWindow)
+            return safeInsetsFor(safeAreaWindow).top
+        return _platformSafeTop()
+    }
+    readonly property real safeLeftInset: {
+        if (safeAreaWindow)
+            return safeInsetsFor(safeAreaWindow).left
+        return 0
+    }
+    readonly property real safeRightInset: {
+        if (safeAreaWindow)
+            return safeInsetsFor(safeAreaWindow).right
         return 0
     }
 }

@@ -13,8 +13,8 @@ Static heuristic: `python scripts/checks/check_a11y_qml.py --json scripts/checks
 | Select | [x] | [x] closes menu | [x] opens | [x] + selection description |
 | DataTable | [x] `activeFocusOnTab` | [x] cancel edit | [x] / F2 focused col | [x] `accessibleName` |
 | ListView | [x] | — | [x] | [x] `accessibleName` (not emptyText) |
-| CommandBar | [ ] | — | [ ] | [ ] |
-| PageHost | [x] | [x] Esc / edge swipe back | — | [x] |
+| CommandBar | [x] FocusScope + primary Tab | — | [x] overflow Enter/Space | [x] + focus ring |
+| PageHost | [x] | [x] Esc / damped edge swipe back | — | [x] |
 
 Also toggle Gallery **Accessibility** page **reduceMotion** / **highContrast** once per release candidate. Window page has a reduceMotion shortcut + “淡入 220ms”.
 

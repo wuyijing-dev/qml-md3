@@ -10,6 +10,8 @@ Item {
     property string text: ""
     property bool open: false
     property int showDelay: 500
+    /// Separate delay when the host gains keyboard focus (defaults slightly longer than hover).
+    property int focusShowDelay: 700
     property int longPressMs: 550
     property bool showOnFocus: true
     property int placement: Md3Tooltip.Top
@@ -32,6 +34,7 @@ Item {
 
     function hideNow() {
         delay.stop()
+        focusDelay.stop()
         open = false
     }
 
@@ -100,10 +103,12 @@ Item {
         onActiveFocusChanged: {
             if (!root.showOnFocus)
                 return
-            if (activeFocus)
-                delay.restart()
-            else if (!hover.hovered && !press.pressed)
+            if (activeFocus) {
+                delay.stop()
+                focusDelay.restart()
+            } else if (!hover.hovered && !press.pressed) {
                 root.hideNow()
+            }
         }
     }
 
@@ -113,14 +118,22 @@ Item {
         onTriggered: root.showNow()
     }
 
+    Timer {
+        id: focusDelay
+        interval: root.focusShowDelay
+        onTriggered: root.showNow()
+    }
+
     HoverHandler {
         id: hover
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
         onHoveredChanged: {
-            if (hovered)
+            if (hovered) {
+                focusDelay.stop()
                 delay.restart()
-            else if (!host.activeFocus)
+            } else if (!host.activeFocus) {
                 root.hideNow()
+            }
         }
     }
 

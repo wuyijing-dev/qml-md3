@@ -185,8 +185,19 @@ Item {
 
     /// Run `validate()`; on success emit `submitted(values)` and return true.
     function submit() {
-        if (!validate())
+        if (!validate()) {
+            if (typeof Md3Accessibility !== "undefined" && Md3Accessibility.announceError) {
+                const keys = Object.keys(errors || ({}))
+                let msg = qsTr("Form has errors")
+                if (keys.length) {
+                    const first = errors[keys[0]]
+                    if (first)
+                        msg = String(first)
+                }
+                Md3Accessibility.announceError(msg)
+            }
             return false
+        }
         submitted(values)
         return true
     }

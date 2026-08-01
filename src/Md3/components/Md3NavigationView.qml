@@ -37,6 +37,7 @@ Item {
     signal currentIndexChangedByUser(int index)
     signal expandToggleClicked()
     signal drawerDismissed()
+    signal destinationPreview(int index)
 
     clip: true
 
@@ -111,6 +112,24 @@ Item {
     function openDrawer() { drawerOpen = true }
     function closeDrawer() { drawerOpen = false }
 
+    function handleBack() {
+        if (drawerOpen) {
+            closeDrawer()
+            return true
+        }
+        return false
+    }
+
+    focus: true
+    Keys.onBackPressed: function (event) {
+        if (handleBack())
+            event.accepted = true
+    }
+    Keys.onPressed: function (event) {
+        if (event.key === Qt.Key_Escape && handleBack())
+            event.accepted = true
+    }
+
     function _select(index) {
         if (index !== currentIndex)
             currentIndexChangedByUser(index)
@@ -171,6 +190,7 @@ Item {
         footerModel: root._railModels.footer
         currentIndex: root.currentIndex
         onCurrentIndexChangedByUser: function (index) { root._select(index) }
+        onDestinationPreview: function (index) { root.destinationPreview(index) }
         onExpandToggleClicked: {
             root.expanded = !root.expanded
             root.expandToggleClicked()
@@ -199,6 +219,9 @@ Item {
         currentIndex: root._visualOfDest(root.currentIndex)
         onCurrentIndexChangedByUser: function (visual) {
             root._select(root._destOfVisualBar(visual))
+        }
+        onDestinationPreview: function (visual) {
+            root.destinationPreview(root._destOfVisualBar(visual))
         }
     }
 

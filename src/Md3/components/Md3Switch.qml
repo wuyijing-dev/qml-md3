@@ -44,6 +44,15 @@ Md3SelectionControl {
         height: 48
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
+        scale: root.pressed ? 0.94 : 1.0
+        Behavior on scale {
+            enabled: !Md3Theme.reduceMotion
+            NumberAnimation {
+                duration: Md3Motion.short2
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.standard
+            }
+        }
 
         Rectangle {
             id: track

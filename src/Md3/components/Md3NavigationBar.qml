@@ -8,6 +8,8 @@ Rectangle {
     property int currentIndex: 0
 
     signal currentIndexChangedByUser(int index)
+    /// Fired on long-press of a destination (preview / peek).
+    signal destinationPreview(int index)
 
     readonly property real indicatorWidth: 64
     readonly property real indicatorHeight: 32
@@ -67,10 +69,12 @@ Rectangle {
         }
 
         Behavior on x {
-            NumberAnimation {
-                duration: Md3Motion.spatialSnapDuration
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Md3Motion.emphasized
+            enabled: !Md3Theme.reduceMotion
+            SpringAnimation {
+                spring: 3.4
+                damping: 0.28
+                epsilon: 0.15
+                mass: 1.0
             }
         }
     }
@@ -196,6 +200,7 @@ Rectangle {
                         root.currentIndex = dest.index
                         root.currentIndexChangedByUser(dest.index)
                     }
+                    onPressAndHold: root.destinationPreview(dest.index)
                 }
             }
         }

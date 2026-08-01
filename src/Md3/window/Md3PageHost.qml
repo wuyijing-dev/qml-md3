@@ -26,6 +26,16 @@ Item {
     focus: true
     /// Left-edge swipe back (phone / compact demos). Esc also goes back when canGoBack.
     property bool edgeSwipeBackEnabled: true
+    /// Rubber-band / damping factor while dragging from the left edge (0–1 applied to raw dx).
+    property real edgeSwipeDamping: 0.55
+    /// Release distance (logical px) after damping to commit goBack.
+    property real edgeSwipeCommitPx: 48
+    /// When revisiting an L1-resident page, prefer a short fade instead of a heavy transition.
+    property bool lightFadeOnCacheHit: true
+    property int cacheHitFadeMs: 90
+    property int _transitionDurationOverride: -1
+    property real _edgeDragOffset: 0
+
     Keys.onPressed: function (event) {
         if (event.key === Qt.Key_Escape && root.canGoBack) {
             root.goBack()
@@ -45,11 +55,24 @@ Item {
         MouseArea {
             anchors.fill: parent
             enabled: parent.visible
-            onPressed: function (mouse) { edgeBackCatcher._startX = mouse.x }
-            onReleased: function (mouse) {
-                if (mouse.x - edgeBackCatcher._startX > 56)
-                    root.goBack()
+            onPressed: function (mouse) {
+                edgeBackCatcher._startX = mouse.x
+                root._edgeDragOffset = 0
             }
+            onPositionChanged: function (mouse) {
+                const raw = Math.max(0, mouse.x - edgeBackCatcher._startX)
+                // Damped pull with soft clamp so the gesture feels rubber-banded.
+                const damped = raw * root.edgeSwipeDamping
+                root._edgeDragOffset = Math.min(72, damped)
+            }
+            onReleased: function (mouse) {
+                const raw = mouse.x - edgeBackCatcher._startX
+                const damped = Math.max(0, raw) * root.edgeSwipeDamping
+                if (damped >= root.edgeSwipeCommitPx || raw > 72)
+                    root.goBack()
+                root._edgeDragOffset = 0
+            }
+            onCanceled: root._edgeDragOffset = 0
         }
     }
 
@@ -1239,6 +1262,7 @@ Item {
         transitionModeActive = pageTransition
         transitionProgress = 1
         launchReturning = false
+        _transitionDurationOverride = -1
         generation++
         _dismissLeaveSnapshot(false)
         _evict()
@@ -1391,6 +1415,17 @@ Item {
         if (transitioning && index === transitionTo)
             return
         opts = opts || ({})
+        const targetLdr = _loaderAt(index)
+        const cacheHit = !!(targetLdr && targetLdr.status === Loader.Ready && targetLdr.item)
+        if (cacheHit && lightFadeOnCacheHit
+                && opts.transitionMode === undefined
+                && opts.returnToSource !== true
+                && !_isLaunchNav(opts)) {
+            opts = Object.assign({}, opts, {
+                transitionMode: "fade",
+                _cacheHitFade: true
+            })
+        }
         if (!opts._stackOp) {
             resetNavStack()
             if (opts.params !== undefined)
@@ -1401,6 +1436,7 @@ Item {
         }
         _lastNavOpts = opts
         _pendingNavOpts = opts
+        _transitionDurationOverride = (opts && opts._cacheHitFade) ? cacheHitFadeMs : -1
 
         if (_navPrev >= 0 && _navPrev !== index)
             _recordMarkov(_navPrev, index)
@@ -1572,9 +1608,11 @@ Item {
         property: "transitionProgress"
         from: 0
         to: 1
-        duration: root.transitionModeActive === "launch"
+        duration: root._transitionDurationOverride >= 0
+                  ? root._transitionDurationOverride
+                  : (root.transitionModeActive === "launch"
                   ? Math.max(root.pageTransitionDuration, root.launchTransitionDuration)
-                  : root.pageTransitionDuration
+                  : root.pageTransitionDuration)
         easing.type: Easing.BezierSpline
         easing.bezierCurve: root.transitionModeActive === "launch"
                             ? [0.0, 0.0, 1.0, 1.0]

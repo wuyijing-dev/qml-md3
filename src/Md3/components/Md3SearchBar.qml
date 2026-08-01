@@ -9,9 +9,11 @@ Item {
     // Use Item.enabled (do not redeclare)
     /// When set, click / focus opens this Md3SearchView (forwards `text`).
     property var searchView: null
+    property bool showClearButton: true
 
     signal accepted(string text)
     signal clicked()
+    signal cleared()
 
     function openSearchView() {
         if (!searchView)
@@ -19,6 +21,11 @@ Item {
         if (searchView.text !== undefined)
             searchView.text = text
         searchView.open = true
+    }
+
+    function clear() {
+        input.clear()
+        cleared()
     }
 
     width: parent ? Math.min(parent.width, 720) : 360
@@ -44,7 +51,7 @@ Item {
         Row {
             anchors.fill: parent
             anchors.leftMargin: 16
-            anchors.rightMargin: 16
+            anchors.rightMargin: 8
             spacing: 12
 
             Md3Icon {
@@ -57,12 +64,36 @@ Item {
             TextInput {
                 id: input
                 anchors.verticalCenter: parent.verticalCenter
-                width: parent.width - 72
+                width: parent.width - 72 - (clearHit.visible ? 40 : 0)
                 enabled: root.enabled
                 color: Md3Theme.colorScheme.colorOnSurface
                 font.family: Md3Theme.typography.fontFamily
                 font.pixelSize: Md3Theme.typography.bodyLarge.size
                 onAccepted: root.accepted(text)
+            }
+
+            Item {
+                id: clearHit
+                visible: root.showClearButton && input.text.length > 0
+                width: 40
+                height: parent.height
+                anchors.verticalCenter: parent.verticalCenter
+                Accessible.role: Accessible.Button
+                Accessible.name: qsTr("Clear search")
+                Accessible.onPressAction: root.clear()
+
+                Md3Icon {
+                    anchors.centerIn: parent
+                    icon: "close"
+                    size: 20
+                    iconColor: Md3Theme.colorScheme.colorOnSurfaceVariant
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    enabled: root.enabled
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.clear()
+                }
             }
         }
     }

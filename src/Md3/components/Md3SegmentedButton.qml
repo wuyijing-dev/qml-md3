@@ -78,6 +78,28 @@ Item {
 
                     width: Math.max(48, contentRow.implicitWidth + 24)
                     height: parent.height
+                    activeFocusOnTab: seg.segEnabled
+                    scale: segMouse.pressed ? 0.96 : 1.0
+                    Behavior on scale {
+                        enabled: !Md3Theme.reduceMotion
+                        NumberAnimation {
+                            duration: Md3Motion.short2
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Md3Motion.standard
+                        }
+                    }
+                    Keys.onReturnPressed: function (event) {
+                        root.toggle(seg.index)
+                        event.accepted = true
+                    }
+                    Keys.onEnterPressed: function (event) {
+                        root.toggle(seg.index)
+                        event.accepted = true
+                    }
+                    Keys.onSpacePressed: function (event) {
+                        root.toggle(seg.index)
+                        event.accepted = true
+                    }
 
                     Rectangle {
                         id: segFill
@@ -106,7 +128,7 @@ Item {
                                                        : Md3Theme.colorScheme.colorOnSurface
                             hovered: segMouse.containsMouse
                             pressed: segMouse.pressed
-                            focused: false
+                            focused: seg.activeFocus
                             controlEnabled: seg.segEnabled
                             topLeftRadius: segFill.topLeftRadius
                             bottomLeftRadius: segFill.bottomLeftRadius
