@@ -43,6 +43,16 @@ Item {
                 const cur = activeModel.get(i)
                 if ((opts.id !== undefined && String(cur.snackId) === snackId)
                         || (opts.id === undefined && String(cur.text) === text)) {
+                    const wrap = stackRepeater.itemAt(i)
+                    if (wrap && wrap.snack) {
+                        wrap.snack.actionText = opts.actionText !== undefined
+                                ? String(opts.actionText) : cur.actionText
+                        wrap.snack.dualLine = opts.dualLine !== undefined
+                                ? !!opts.dualLine : cur.dualLine
+                        if (opts.durationMs !== undefined)
+                            wrap.snack.durationMs = Number(opts.durationMs)
+                        wrap.snack.show(text)
+                    }
                     return String(cur.snackId)
                 }
             }
@@ -50,6 +60,11 @@ Item {
                 const q = _queue[j]
                 if ((opts.id !== undefined && String(q.snackId) === snackId)
                         || (opts.id === undefined && String(q.text) === text)) {
+                    q.text = text
+                    if (opts.actionText !== undefined)
+                        q.actionText = String(opts.actionText)
+                    if (opts.durationMs !== undefined)
+                        q.durationMs = Number(opts.durationMs)
                     return String(q.snackId)
                 }
             }
@@ -59,7 +74,9 @@ Item {
             text: text,
             actionText: opts.actionText !== undefined ? String(opts.actionText) : "",
             dualLine: !!opts.dualLine,
-            durationMs: opts.durationMs !== undefined ? Number(opts.durationMs) : defaultDurationMs,
+            durationMs: opts.durationMs !== undefined ? Number(opts.durationMs)
+                       : ((opts.actionText && String(opts.actionText).length)
+                          ? Math.max(defaultDurationMs, 6500) : defaultDurationMs),
             priority: priority
         }
         // Higher priority first; equal priority keeps FIFO order.

@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Window
 import Md3
 
 Md3Page {
@@ -237,9 +238,46 @@ Md3Page {
                 }
             }
 
+            Md3Text {
+                text: qsTr("Recipes — Snackbar Undo · Shell InfoBar · Toast dedupe")
+                role: Md3Text.LabelLarge
+                tone: Md3Text.OnSurfaceVariant
+            }
+            Md3Button {
+                text: qsTr("Delete with Undo")
+                onClicked: {
+                    Md3Notify.snackbar(qsTr("Message deleted"), {
+                        id: "undo-delete",
+                        actionText: qsTr("Undo"),
+                        durationMs: 6500
+                    })
+                }
+            }
             Md3Button {
                 text: "Show snackbar"
                 onClicked: Md3Notify.snackbar(qsTr("Message sent"), { actionText: qsTr("Undo") })
+            }
+            Md3Button {
+                text: qsTr("Shell InfoBar (offline)")
+                variant: Md3Button.Outlined
+                onClicked: {
+                    const w = Window.window
+                    if (w && w.showShellInfoBar)
+                        w.showShellInfoBar(qsTr("You’re offline — changes will sync later."), {
+                            title: qsTr("Connection"),
+                            severity: Md3InfoBar.Warning,
+                            actionText: qsTr("Dismiss")
+                        })
+                }
+            }
+            Md3Button {
+                text: qsTr("Toast dedupe id")
+                variant: Md3Button.Text
+                onClicked: Md3Notify.toast(qsTr("Still syncing…"), {
+                    id: "sync-toast",
+                    severity: Md3Toast.Warning,
+                    durationMs: 4000
+                })
             }
             Md3Button {
                 text: qsTr("Queue 3 snackbars")

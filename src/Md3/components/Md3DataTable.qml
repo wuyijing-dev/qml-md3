@@ -17,7 +17,23 @@ Item {
     property int sortOrder: Qt.AscendingOrder
     property int density: Md3Theme.density
     property real rowHeight: Md3Theme.tableRowHeight
+    Behavior on rowHeight {
+        enabled: !Md3Theme.reduceMotion
+        NumberAnimation {
+            duration: Md3Motion.medium2
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Md3Motion.standard
+        }
+    }
     property real headerHeight: density === Md3DataTable.Compact ? 44 : 56
+    Behavior on headerHeight {
+        enabled: !Md3Theme.reduceMotion
+        NumberAnimation {
+            duration: Md3Motion.medium2
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Md3Motion.standard
+        }
+    }
     property real bodyHeight: 280
     property bool loading: false
     property string emptyIcon: "inbox"

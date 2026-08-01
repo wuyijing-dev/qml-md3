@@ -54,7 +54,8 @@ Md3Chart {
         geom.total = total
         geom.slices = slices
         rebuilt()
-        (canvasLoader.item && canvasLoader.item.requestPaint())
+        if (canvasLoader.item)
+            canvasLoader.item.requestPaint()
     }
 
     function _rad(deg) { return deg * Math.PI / 180 }

@@ -105,6 +105,14 @@ Window {
     property int pageCacheLimit: 1
     property int pageIdleTrimMs: 4000
     property real pagePadding: Md3Theme.pagePadding
+    Behavior on pagePadding {
+        enabled: !Md3Theme.reduceMotion
+        NumberAnimation {
+            duration: Md3Motion.medium2
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Md3Motion.standard
+        }
+    }
     property bool pagePrefetch: false
     /// With pagePrefetch: inflate neighbor L1 Items. False = warm neighbor Components (L2) only.
     property bool pagePrefetchL1: true
@@ -171,6 +179,27 @@ Window {
     property bool performanceDetached: false
     property alias performanceMonitor: perfMonitor
     property alias performancePanel: perfPanel
+
+    /// Persistent shell banner under the chrome (offline / sync) — not a Snackbar.
+    property bool shellInfoBarOpen: false
+    property string shellInfoBarTitle: ""
+    property string shellInfoBarMessage: ""
+    property string shellInfoBarActionText: ""
+    property int shellInfoBarSeverity: 0
+    signal shellInfoBarActionClicked()
+
+    function showShellInfoBar(message, options) {
+        const opts = options || {}
+        shellInfoBarMessage = String(message || "")
+        shellInfoBarTitle = opts.title !== undefined ? String(opts.title) : ""
+        shellInfoBarActionText = opts.actionText !== undefined ? String(opts.actionText) : ""
+        shellInfoBarSeverity = opts.severity !== undefined ? Number(opts.severity) : 0
+        shellInfoBarOpen = true
+    }
+
+    function dismissShellInfoBar() {
+        shellInfoBarOpen = false
+    }
 
     // --- Document tabs (under title bar; drag out → Md3TabWindow) ---
     /// Show Win11-style tab strip under the title bar.
@@ -1380,6 +1409,34 @@ Window {
                     visible: height > 0
                 }
 
+                Md3InfoBar {
+                    id: shellInfoBar
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: toolBarSlot.bottom
+                    anchors.leftMargin: root.pagePadding
+                    anchors.rightMargin: root.pagePadding
+                    anchors.topMargin: open ? 8 : 0
+                    z: 4
+                    open: root.shellInfoBarOpen
+                    title: root.shellInfoBarTitle
+                    message: root.shellInfoBarMessage
+                    actionText: root.shellInfoBarActionText
+                    severity: root.shellInfoBarSeverity
+                    height: open ? implicitHeight : 0
+                    opacity: open ? 1 : 0
+                    Behavior on height {
+                        enabled: !Md3Theme.reduceMotion
+                        NumberAnimation {
+                            duration: Md3Motion.spatialDuration
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Md3Motion.emphasized
+                        }
+                    }
+                    onClosed: root.shellInfoBarOpen = false
+                    onActionClicked: root.shellInfoBarActionClicked()
+                }
+
                 Keys.onBackPressed: function (event) {
                     if (root.canGoBack) {
                         root.goBack()
@@ -1397,7 +1454,7 @@ Window {
                     id: windowBody
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    anchors.top: toolBarSlot.bottom
+                    anchors.top: shellInfoBar.bottom
                     anchors.bottom: statusBarSlot.top
                     visible: root.usesDestinations
                     enabled: visible
@@ -1481,6 +1538,21 @@ Window {
                 dodgeBottom: root.statusBarHeight
                              + (perfDockHost.wantVisible ? (perfPanel.height + 28) : 0)
                 z: 1300
+            }
+
+            Connections {
+                target: snackbarHost
+                function onActionTriggered(snackId, actionText) {
+                    if (String(snackId) === "undo-delete")
+                        root.showToast(qsTr("Restored"), { severity: Md3Toast.Success })
+                }
+            }
+
+            Connections {
+                target: root
+                function onShellInfoBarActionClicked() {
+                    root.dismissShellInfoBar()
+                }
             }
 
             // Screen-reader live region for Md3Accessibility.announce*()

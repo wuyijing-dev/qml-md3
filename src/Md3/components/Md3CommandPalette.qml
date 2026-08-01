@@ -22,6 +22,7 @@ Item {
 
     property string query: ""
     property int highlightIndex: 0
+    property var _focusBeforeOpen: null
 
     readonly property var filtered: {
         if (!open)
@@ -48,8 +49,18 @@ Item {
         if (open) {
             query = ""
             highlightIndex = 0
+            const win = Md3OverlayHost.resolveWindow(null, root)
+            if (win && win.activeFocusItem)
+                _focusBeforeOpen = win.activeFocusItem
             Qt.callLater(function () { searchField.forceActiveFocus() })
         } else {
+            const prev = _focusBeforeOpen
+            _focusBeforeOpen = null
+            if (prev && typeof prev.forceActiveFocus === "function") {
+                Qt.callLater(function () {
+                    try { prev.forceActiveFocus() } catch (e) { /* destroyed */ }
+                })
+            }
             closed()
         }
     }
@@ -74,6 +85,13 @@ Item {
         if (filtered.length === 0)
             return
         highlightIndex = (highlightIndex + delta + filtered.length) % filtered.length
+        if (list.count > 0)
+            list.positionViewAtIndex(highlightIndex, ListView.Contain)
+    }
+
+    onHighlightIndexChanged: {
+        if (open && list.count > 0)
+            list.positionViewAtIndex(highlightIndex, ListView.Contain)
     }
 
     Rectangle {
@@ -225,6 +243,14 @@ Item {
                         color: index === root.highlightIndex
                                ? Md3Theme.colorScheme.secondaryContainer
                                : "transparent"
+                        Behavior on color {
+                            enabled: !Md3Theme.reduceMotion
+                            ColorAnimation {
+                                duration: Md3Motion.short2
+                                easing.type: Easing.BezierSpline
+                                easing.bezierCurve: Md3Motion.standard
+                            }
+                        }
                     }
 
                     RowLayout {

@@ -34,12 +34,22 @@ Item {
     property var _flickable: null
 
     Layout.fillWidth: true
-    Layout.preferredHeight: preferredHeight
+    Layout.preferredHeight: root._shellHeight
     implicitWidth: parent ? parent.width : preferredHeight
-    implicitHeight: preferredHeight
-    height: preferredHeight
+    implicitHeight: root._shellHeight
+    height: root._shellHeight
     width: parent ? parent.width : implicitWidth
-    clip: true
+    /// Only clip the placeholder; loaded content must expand the shell.
+    clip: !root.ready
+
+    readonly property real _shellHeight: {
+        if (ready && loader.item) {
+            const h = Number(loader.item.implicitHeight || loader.item.height || 0)
+            if (h > 1)
+                return h
+        }
+        return preferredHeight
+    }
 
     Md3PageActivityGate {
         id: pageGate
@@ -196,7 +206,10 @@ Item {
 
     Loader {
         id: loader
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        height: item ? Math.max(1, item.implicitHeight) : root.preferredHeight
         active: root._armed && !!root.sourceComponent
         asynchronous: root.asynchronous
         sourceComponent: root.sourceComponent
@@ -205,6 +218,8 @@ Item {
                 return
             item.width = Qt.binding(function () { return loader.width })
         }
+        onStatusChanged: if (status === Loader.Ready)
+            Qt.callLater(function () { root.height = root._shellHeight })
     }
 
     Rectangle {

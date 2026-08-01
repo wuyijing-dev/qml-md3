@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Window
 import Md3
 
 Flickable {
@@ -149,6 +150,47 @@ Flickable {
                         role: Md3Text.LabelSmall
                     }
                 }
+            }
+        }
+
+        Md3Text {
+            text: qsTr("页面切换动效")
+            role: Md3Text.TitleMedium
+        }
+        Md3Text {
+            width: parent.width
+            wrapMode: Text.Wrap
+            text: qsTr("切换 Gallery 的 pageTransition（当前：%1）。reduceMotion 时几乎瞬时。")
+                    .arg(Window.window && Window.window.pageTransition
+                         ? Window.window.pageTransition : "fade")
+            role: Md3Text.BodySmall
+            tone: Md3Text.OnSurfaceVariant
+        }
+        Md3HStack {
+            spacing: 8
+            Md3Button {
+                text: "fade"
+                variant: (Window.window && Window.window.pageTransition === "fade")
+                         ? Md3Button.Filled : Md3Button.Outlined
+                onClicked: if (Window.window) Window.window.pageTransition = "fade"
+            }
+            Md3Button {
+                text: "slide"
+                variant: (Window.window && Window.window.pageTransition === "slide")
+                         ? Md3Button.Filled : Md3Button.Outlined
+                onClicked: if (Window.window) Window.window.pageTransition = "slide"
+            }
+            Md3Button {
+                text: "fadeThrough"
+                variant: (Window.window && Window.window.pageTransition === "fadeThrough")
+                         ? Md3Button.Filled : Md3Button.Outlined
+                onClicked: if (Window.window) Window.window.pageTransition = "fadeThrough"
+            }
+            Md3Button {
+                text: "none"
+                variant: (Window.window && Window.window.pageTransition === "none")
+                         ? Md3Button.Filled : Md3Button.Outlined
+                onClicked: if (Window.window) Window.window.pageTransition = "none"
             }
         }
     }

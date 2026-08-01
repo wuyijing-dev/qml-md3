@@ -13,6 +13,8 @@ Item {
     property bool open: false
     property real maxWidth: 420
     property real _dragX: 0
+    property bool pauseOnHover: true
+    property bool _hovering: false
 
     signal closed()
 
@@ -53,8 +55,11 @@ Item {
             severity = Number(opts.severity)
         if (opts.durationMs !== undefined)
             durationMs = Number(opts.durationMs)
+        if (opts.pauseOnHover !== undefined)
+            pauseOnHover = !!opts.pauseOnHover
         open = true
         _dragX = 0
+        _hovering = false
         hideTimer.restart()
         if (typeof Md3Accessibility !== "undefined" && Md3Accessibility.announce)
             Md3Accessibility.announce(text)
@@ -65,6 +70,7 @@ Item {
             return
         open = false
         _dragX = 0
+        hideTimer.stop()
         closed()
     }
 
@@ -72,6 +78,17 @@ Item {
         id: hideTimer
         interval: root.durationMs
         onTriggered: root.dismiss()
+    }
+
+    HoverHandler {
+        enabled: root.pauseOnHover && root.open
+        onHoveredChanged: {
+            root._hovering = hovered
+            if (hovered)
+                hideTimer.stop()
+            else if (root.open)
+                hideTimer.restart()
+        }
     }
 
     Behavior on opacity {

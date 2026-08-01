@@ -231,9 +231,56 @@ Item {
         return ok
     }
 
+    function focusFirstError() {
+        const fields = collectFields()
+        const keys = Object.keys(errors || ({}))
+        let target = null
+        if (keys.length) {
+            for (let i = 0; i < fields.length; ++i) {
+                if (String(fields[i].name) === String(keys[0])) {
+                    target = fields[i]
+                    break
+                }
+            }
+        }
+        if (!target) {
+            for (let j = 0; j < fields.length; ++j) {
+                const f = fields[j]
+                if (f.errorText && String(f.errorText).length) {
+                    target = f
+                    break
+                }
+            }
+        }
+        if (!target)
+            return false
+        try {
+            if (typeof target.forceActiveFocus === "function")
+                target.forceActiveFocus()
+        } catch (e) { /* destroyed */ }
+        // Scroll nearest Flickable so the field is visible.
+        let p = target.parent
+        while (p) {
+            if (p.contentY !== undefined && p.height !== undefined && p.contentItem) {
+                try {
+                    const y = target.mapToItem(p.contentItem, 0, 0).y
+                    const margin = 24
+                    if (y < p.contentY + margin)
+                        p.contentY = Math.max(0, y - margin)
+                    else if (y + target.height > p.contentY + p.height - margin)
+                        p.contentY = Math.max(0, y + target.height - p.height + margin)
+                } catch (e2) { /* ignore */ }
+                break
+            }
+            p = p.parent
+        }
+        return true
+    }
+
     /// Run `validate()`; on success emit `submitted(values)` and return true.
     function submit() {
         if (!validate()) {
+            focusFirstError()
             if (typeof Md3Accessibility !== "undefined" && Md3Accessibility.announceError) {
                 const keys = Object.keys(errors || ({}))
                 let msg = qsTr("Form has errors")

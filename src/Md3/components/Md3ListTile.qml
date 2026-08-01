@@ -50,6 +50,14 @@ Md3AbstractButton {
     implicitHeight: Math.max(minH, col.implicitHeight + 16)
     implicitWidth: 320
     height: implicitHeight
+    Behavior on height {
+        enabled: !Md3Theme.reduceMotion
+        NumberAnimation {
+            duration: Md3Motion.medium2
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Md3Motion.standard
+        }
+    }
     width: fillWidth && parent ? parent.width : implicitWidth
     accessibleName: title
     accessibleRole: Accessible.ListItem

@@ -24,6 +24,8 @@ Item {
 
     /// When false, the built-in MouseArea ignores presses (custom hit areas).
     property bool pressEnabled: true
+    /// Gate clicks / keyboard activate without forcing `enabled: false` (e.g. busy spinner).
+    property bool interactive: true
     property real pressRightMargin: 0
     property real pressLeftMargin: 0
 
@@ -40,10 +42,10 @@ Item {
     Accessible.role: accessibleRole
     Accessible.checkable: checkable
     Accessible.checked: checked
-    Accessible.onPressAction: if (enabled) root.activate(true)
+    Accessible.onPressAction: if (enabled && interactive) root.activate(true)
 
     function activate(fromKeyboard) {
-        if (!enabled)
+        if (!enabled || !interactive)
             return
         if (fromKeyboard)
             visualFocus = true
@@ -64,9 +66,9 @@ Item {
                 || event.key === Qt.Key_Up || event.key === Qt.Key_Down)
             root.visualFocus = true
     }
-    Keys.onReturnPressed: if (enabled) activate(true)
-    Keys.onEnterPressed: if (enabled) activate(true)
-    Keys.onSpacePressed: if (enabled) activate(true)
+    Keys.onReturnPressed: if (enabled && interactive) activate(true)
+    Keys.onEnterPressed: if (enabled && interactive) activate(true)
+    Keys.onSpacePressed: if (enabled && interactive) activate(true)
 
     MouseArea {
         id: mouse
@@ -74,7 +76,7 @@ Item {
         anchors.leftMargin: root.pressLeftMargin
         anchors.rightMargin: root.pressRightMargin
         hoverEnabled: true
-        enabled: root.enabled && root.pressEnabled
+        enabled: root.enabled && root.pressEnabled && root.interactive
         cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
         onClicked: function (ev) {
             root.visualFocus = false

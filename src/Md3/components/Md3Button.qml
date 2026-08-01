@@ -10,9 +10,14 @@ Md3AbstractButton {
 
     property int variant: Md3Button.Filled
     property int size: Md3Button.Small
+    /// Show spinner and block clicks while keeping the laid-out width.
+    property bool busy: false
 
     accessibleName: text
+    interactive: enabled && !busy
 
+    /// Visual enabled (colors). Busy keeps brand colors and shows a spinner instead.
+    readonly property bool effectivelyEnabled: enabled
     readonly property real h: {
         switch (size) {
         case Md3Button.ExtraSmall: return Md3Theme.densityCompact ? 28 : 32
@@ -32,7 +37,7 @@ Md3AbstractButton {
     readonly property real elev: variant === Md3Button.Elevated ? (hovered || pressed ? 2 : 1) : 0
 
     containerColor: {
-        if (!enabled) return Md3Theme.colorScheme.disabledContainer()
+        if (!effectivelyEnabled) return Md3Theme.colorScheme.disabledContainer()
         switch (variant) {
         case Md3Button.Filled: return Md3Theme.colorScheme.primary
         case Md3Button.FilledTonal: return Md3Theme.colorScheme.secondaryContainer
@@ -43,7 +48,7 @@ Md3AbstractButton {
         }
     }
     contentColor: {
-        if (!enabled) return Md3Theme.colorScheme.disabledContent()
+        if (!effectivelyEnabled) return Md3Theme.colorScheme.disabledContent()
         switch (variant) {
         case Md3Button.Filled: return Md3Theme.colorScheme.colorOnPrimary
         case Md3Button.FilledTonal: return Md3Theme.colorScheme.colorOnSecondaryContainer
@@ -55,7 +60,7 @@ Md3AbstractButton {
     }
 
     pressTarget: bg
-    onPressFeedback: function (x, y) { ripple.pulse(x, y) }
+    onPressFeedback: function (x, y) { if (!busy) ripple.pulse(x, y) }
 
     implicitWidth: Math.max(Md3Theme.iconButtonSize, row.implicitWidth + padH * 2)
     implicitHeight: Math.max(Md3Theme.iconButtonSize, h)
@@ -122,6 +127,7 @@ Md3AbstractButton {
                 id: row
                 anchors.centerIn: parent
                 spacing: 8
+                opacity: root.busy ? 0 : 1
                 Md3Icon {
                     visible: root.icon.length > 0
                     icon: root.icon
@@ -136,6 +142,14 @@ Md3AbstractButton {
                     customColor: root.contentColor
                     anchors.verticalCenter: parent.verticalCenter
                 }
+            }
+
+            Md3CircularProgressIndicator {
+                anchors.centerIn: parent
+                visible: root.busy
+                indeterminate: true
+                size: Math.min(22, root.h - 10)
+                strokeWidth: 2.5
             }
         }
     }

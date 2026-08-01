@@ -190,7 +190,8 @@ Md3Chart {
         geom.sampleCount = maxLen
         geom.seriesCount = seriesCount
         rebuilt()
-        (canvasLoader.item && canvasLoader.item.requestPaint())
+        if (canvasLoader.item)
+            canvasLoader.item.requestPaint()
         if (probeActive)
             _updateProbeAtPixel(probePixelX)
     }

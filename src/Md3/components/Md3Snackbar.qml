@@ -9,6 +9,8 @@ Item {
     property bool dualLine: false
     property bool open: false
     property int durationMs: 4000
+    /// Extra dwell when an action is present (Undo / View).
+    property int actionDurationMs: 6500
     /// When true, snackbar is not an assertive live region (avoids stealing AT focus).
     property bool politeAnnouncements: true
     property real _dragX: 0
@@ -28,11 +30,16 @@ Item {
     activeFocusOnTab: false
     focus: false
 
+    readonly property int _effectiveDuration: actionText.length > 0
+            ? Math.max(durationMs, actionDurationMs)
+            : durationMs
+
     function show(message) {
         if (message !== undefined)
             text = message
         open = true
         _dragX = 0
+        hideTimer.interval = _effectiveDuration
         hideTimer.restart()
         if (politeAnnouncements && typeof Md3Accessibility !== "undefined" && Md3Accessibility.announce)
             Md3Accessibility.announce(text)
@@ -41,12 +48,13 @@ Item {
     function dismiss() {
         open = false
         _dragX = 0
+        hideTimer.stop()
         closed()
     }
 
     Timer {
         id: hideTimer
-        interval: root.durationMs
+        interval: root._effectiveDuration
         onTriggered: root.dismiss()
     }
 

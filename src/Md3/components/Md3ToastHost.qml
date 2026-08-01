@@ -54,6 +54,13 @@ Item {
                 const cur = activeModel.get(i)
                 if ((opts.id !== undefined && String(cur.toastId) === toastId)
                         || (opts.id === undefined && String(cur.text) === text)) {
+                    const wrap = stackRepeater.itemAt(i)
+                    if (wrap && wrap.toast) {
+                        wrap.toast.show(text, {
+                            severity: opts.severity !== undefined ? Number(opts.severity) : cur.severity,
+                            durationMs: opts.durationMs !== undefined ? Number(opts.durationMs) : cur.durationMs
+                        })
+                    }
                     return String(cur.toastId)
                 }
             }

@@ -42,7 +42,7 @@ Md3Page {
 
             Md3DeferredSection {
                 width: parent.width
-                preferredHeight: 720
+                preferredHeight: 1100
                 delayMs: 24
                 asynchronous: true
                 sourceComponent: Component {

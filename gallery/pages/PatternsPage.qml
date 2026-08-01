@@ -118,36 +118,56 @@ Md3Page {
 
                         Md3SkeletonPane {
                             anchors.fill: parent
-                            visible: page._listLoading
+                            opacity: page._listLoading ? 1 : 0
+                            visible: opacity > 0.01
                             active: page._listLoading
                             layout: "list"
+                            Behavior on opacity {
+                                enabled: !Md3Theme.reduceMotion
+                                NumberAnimation { duration: Md3Motion.overlayDuration }
+                            }
                         }
 
                         Md3EmptyState {
                             anchors.fill: parent
-                            visible: !page._listLoading && page._listError
+                            opacity: (!page._listLoading && page._listError) ? 1 : 0
+                            visible: opacity > 0.01
                             icon: "error_outline"
                             title: qsTr("无法加载列表")
                             body: qsTr("检查网络后重试，或稍后再试。")
                             actionText: qsTr("重试")
                             onActionClicked: page._simulateLoad()
+                            Behavior on opacity {
+                                enabled: !Md3Theme.reduceMotion
+                                NumberAnimation { duration: Md3Motion.overlayDuration }
+                            }
                         }
 
                         Md3EmptyState {
                             anchors.fill: parent
-                            visible: !page._listLoading && !page._listError && page._listModel.length === 0
+                            opacity: (!page._listLoading && !page._listError && page._listModel.length === 0) ? 1 : 0
+                            visible: opacity > 0.01
                             icon: "inbox"
                             title: qsTr("还没有项目")
                             body: qsTr("创建第一个项目，或切换上方按钮模拟加载。")
                             actionText: qsTr("模拟加载")
                             onActionClicked: page._simulateLoad()
+                            Behavior on opacity {
+                                enabled: !Md3Theme.reduceMotion
+                                NumberAnimation { duration: Md3Motion.overlayDuration }
+                            }
                         }
 
                         Md3VirtualList {
                             anchors.fill: parent
-                            visible: !page._listLoading && !page._listError && page._listModel.length > 0
+                            opacity: (!page._listLoading && !page._listError && page._listModel.length > 0) ? 1 : 0
+                            visible: opacity > 0.01
                             model: page._listModel
                             itemHeight: Md3Theme.tableRowHeight
+                            Behavior on opacity {
+                                enabled: !Md3Theme.reduceMotion
+                                NumberAnimation { duration: Md3Motion.overlayDuration }
+                            }
                             delegate: Component {
                                 Md3ListTile {
                                     title: modelData.title
@@ -185,17 +205,29 @@ Md3Page {
                     Md3HStack {
                         spacing: Md3Theme.spacingSm
                         Md3Button {
+                            id: submitBtn
                             text: qsTr("Submit")
                             enabled: gateForm.canSubmit
+                            busy: false
                             onClicked: {
+                                busy = true
+                                busyClear.restart()
                                 if (!gateForm.submit())
-                                    Md3Notify.snackbar(qsTr("请填写必填项"))
+                                    Md3Notify.snackbar(qsTr("请填写必填项或修正错误"))
+                            }
+                            Timer {
+                                id: busyClear
+                                interval: 600
+                                onTriggered: submitBtn.busy = false
                             }
                         }
                         Md3Button {
                             text: qsTr("标错邮箱")
                             variant: Md3Button.Outlined
-                            onClicked: gateForm.setError("email", qsTr("格式无效"))
+                            onClicked: {
+                                gateForm.setError("email", qsTr("格式无效"))
+                                gateForm.focusFirstError()
+                            }
                         }
                         Md3Button {
                             text: qsTr("清错误")

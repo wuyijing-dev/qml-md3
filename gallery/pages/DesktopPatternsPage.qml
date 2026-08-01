@@ -54,6 +54,7 @@ Md3Page {
     property var allRows: []
     property var currentRows: []
     property string currentStatusFilter: ""
+    property var _pendingUndo: null
 
     function galleryWindow() {
         const w = hostWindow()
@@ -121,6 +122,79 @@ Md3Page {
         applyStatus("")
     }
 
+    function applyRowDelete(sourceIndex) {
+        const globalIndex = serverPage * serverPageSize + sourceIndex
+        if (globalIndex < 0 || globalIndex >= allRows.length)
+            return
+        const removed = allRows[globalIndex]
+        const name = removed && removed.name ? removed.name : ("#" + globalIndex)
+        const next = allRows.slice()
+        next.splice(globalIndex, 1)
+        allRows = next
+        _pendingUndo = { kind: "delete", row: removed, index: globalIndex, name: name }
+        if (currentRows.length <= 1 && serverPage > 0)
+            serverPage = Math.max(0, serverPage - 1)
+        fileTable.currentPage = serverPage
+        rebuildServerRows()
+        applyStatus(qsTr("Deleted %1").arg(name))
+        Md3Notify.snackbar(qsTr("Deleted “%1”").arg(name), {
+            id: "desktop-row-undo",
+            actionText: qsTr("Undo"),
+            durationMs: 6500
+        })
+    }
+
+    function applyRowRename(sourceIndex) {
+        const globalIndex = serverPage * serverPageSize + sourceIndex
+        if (globalIndex < 0 || globalIndex >= allRows.length)
+            return
+        const row = allRows[globalIndex]
+        const oldName = row && row.name ? row.name : ("#" + globalIndex)
+        const newName = oldName + qsTr(" (renamed)")
+        const next = allRows.slice()
+        const copy = Object.assign({}, row, { name: newName })
+        next[globalIndex] = copy
+        allRows = next
+        _pendingUndo = { kind: "rename", row: row, index: globalIndex, name: oldName }
+        rebuildServerRows()
+        applyStatus(qsTr("Renamed %1 → %2").arg(oldName).arg(newName))
+        Md3Notify.snackbar(qsTr("Renamed “%1”").arg(oldName), {
+            id: "desktop-row-undo",
+            actionText: qsTr("Undo"),
+            durationMs: 6500
+        })
+    }
+
+    function undoPendingRowAction() {
+        const u = _pendingUndo
+        _pendingUndo = null
+        if (!u || !u.row)
+            return
+        const next = allRows.slice()
+        if (u.kind === "delete") {
+            const idx = Math.max(0, Math.min(next.length, Number(u.index) || 0))
+            next.splice(idx, 0, u.row)
+            allRows = next
+            applyStatus(qsTr("Restored %1").arg(u.name || u.row.name || ""))
+        } else if (u.kind === "rename") {
+            const idx = Number(u.index)
+            if (idx >= 0 && idx < next.length) {
+                next[idx] = u.row
+                allRows = next
+            }
+            applyStatus(qsTr("Undo rename — back to %1").arg(u.name || u.row.name || ""))
+        }
+        rebuildServerRows()
+    }
+
+    Connections {
+        target: Md3Notify.host
+        function onActionTriggered(snackId, actionText) {
+            if (String(snackId) === "desktop-row-undo" && page.md3PageActive)
+                page.undoPendingRowAction()
+        }
+    }
+
     function selectNode(node) {
         currentPath = node && node.path ? node.path : (node && node.title ? node.title : "D:/QML_MD3/QML_MD3")
         pathField.path = currentPath
@@ -177,6 +251,13 @@ Md3Page {
         Md3Text {
             text: qsTr("Desktop Patterns")
             role: Md3Text.HeadlineMedium
+        }
+        Md3Text {
+            width: parent.width
+            wrapMode: Text.Wrap
+            text: qsTr("选中行 → StatusBar 提示 → 行操作 Delete/Rename 弹出 Snackbar Undo（可恢复）。")
+            role: Md3Text.BodySmall
+            tone: Md3Text.OnSurfaceVariant
         }
 
         Md3Text {
@@ -357,6 +438,15 @@ Md3Page {
                         }
                         onSelectionChanged: page.applyStatus("")
                         onRowActionTriggered: function (sourceIndex, action) {
+                            const id = action && action.id !== undefined ? String(action.id) : ""
+                            if (id === "delete") {
+                                page.applyRowDelete(sourceIndex)
+                                return
+                            }
+                            if (id === "rename") {
+                                page.applyRowRename(sourceIndex)
+                                return
+                            }
                             page.applyStatus(qsTr("%1 row %2").arg(action.text).arg(sourceIndex))
                         }
                         onRowDoubleClicked: function (sourceIndex) {
