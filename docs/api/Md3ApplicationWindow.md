@@ -77,6 +77,7 @@ import Md3
 | `progressiveContent` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Within-page progressive sections (Md3DeferredSection). Default on. |
 | `resolvedPageSourceBase` | `url` | `{…}` | readonly | `Md3ApplicationWindow` | Effective pages root for PageHost (hot-reload disk path or `pageSourceBase`). |
 | `persistSession` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Persist geometry / theme / shell via Md3AppSettings (QSettings). |
+| `sessionSaveDebounceMs` | `int` | `400` | read/write | `Md3ApplicationWindow` | Coalesce session writes during window move/resize (immediate flush on close). |
 | `settingsOrganization` | `string` | `"QML_MD3"` | read/write | `Md3ApplicationWindow` | — |
 | `settingsApplication` | `string` | `"Md3"` | read/write | `Md3ApplicationWindow` | — |
 | `hotReload` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Dev hot-reload of QML sources (file watcher + clearComponentCache). |

@@ -5,6 +5,10 @@
 #include <QVariant>
 #include <QtQml/qqmlregistration.h>
 
+#include <memory>
+
+class QSettings;
+
 /// Thin QSettings facade for window / theme / shell / tour persistence.
 class Md3AppSettings : public QObject
 {
@@ -17,6 +21,7 @@ class Md3AppSettings : public QObject
 
 public:
     explicit Md3AppSettings(QObject *parent = nullptr);
+    ~Md3AppSettings() override;
 
     QString organization() const { return m_org; }
     void setOrganization(const QString &v);
@@ -34,6 +39,9 @@ signals:
     void applicationChanged();
 
 private:
+    QSettings *settings() const;
+
     QString m_org = QStringLiteral("QML_MD3");
     QString m_app = QStringLiteral("Md3");
+    mutable std::unique_ptr<QSettings> m_settings;
 };

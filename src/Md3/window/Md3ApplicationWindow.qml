@@ -157,6 +157,8 @@ Window {
     property string settingsApplication: "Md3"
     property bool _sessionRestored: false
     property bool _sessionSaveScheduled: false
+    /// Coalesce geometry/theme writes so title-bar drag does not hit QSettings every move tick.
+    property int sessionSaveDebounceMs: 400
 
     /// Dev hot-reload of QML sources (file watcher + clearComponentCache).
     property bool hotReload: false
@@ -642,8 +644,11 @@ Window {
     }
 
     onClosing: function (close) {
-        if (root.persistSession)
+        if (root.persistSession) {
+            sessionSaveTimer.stop()
+            root._sessionSaveScheduled = false
             root.saveSession()
+        }
     }
 
     onProgressiveContentChanged: Md3Theme.progressiveContent = progressiveContent
@@ -660,6 +665,16 @@ Window {
     onWidthChanged: _scheduleSessionSave()
     onHeightChanged: _scheduleSessionSave()
     onRailExpandedChanged: _scheduleSessionSave()
+
+    Timer {
+        id: sessionSaveTimer
+        interval: Math.max(50, root.sessionSaveDebounceMs)
+        repeat: false
+        onTriggered: {
+            root._sessionSaveScheduled = false
+            root.saveSession()
+        }
+    }
 
     Connections {
         target: Md3Theme
@@ -753,13 +768,8 @@ Window {
     function _scheduleSessionSave() {
         if (!persistSession || !_sessionRestored)
             return
-        if (_sessionSaveScheduled)
-            return
         _sessionSaveScheduled = true
-        Qt.callLater(function () {
-            root._sessionSaveScheduled = false
-            root.saveSession()
-        })
+        sessionSaveTimer.restart()
     }
 
     function _configureHotReload() {
