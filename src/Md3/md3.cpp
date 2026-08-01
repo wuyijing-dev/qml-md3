@@ -48,11 +48,11 @@ SetCurrentProcessExplicitAppUserModelID(PCWSTR appId);
 #  include <unistd.h>
 #endif
 
-// Startup font probes — Debug only (Release stays quiet).
+// Internal startup probes — Debug builds only (qDebug). Release stays quiet.
 #ifdef QT_DEBUG
-#  define MD3_DBG_INFO(...) qInfo(__VA_ARGS__)
+#  define MD3_DBG(...) qDebug(__VA_ARGS__)
 #else
-#  define MD3_DBG_INFO(...) do { } while (0)
+#  define MD3_DBG(...) do { } while (0)
 #endif
 
 // From qt_add_resources(Md3 "md3_fonts" / "md3_icons" …) — forces registration
@@ -103,6 +103,11 @@ namespace Md3 {
 
 void printBanner(const QString &appTitle)
 {
+    // Debug builds: no banner — developers want qDebug, not marketing ASCII.
+#ifdef QT_DEBUG
+    Q_UNUSED(appTitle);
+    return;
+#else
     if (!stderrIsTty())
         return;
 
@@ -140,6 +145,7 @@ void printBanner(const QString &appTitle)
     std::fprintf(stderr, "          %simport Md3%s  ·  tokens · controls · chrome\n", T, R);
     std::fprintf(stderr, "\n");
     std::fflush(stderr);
+#endif
 }
 
 void applyEarly(int &argc, char **argv, const RunOptions &opts)
@@ -173,8 +179,8 @@ static bool addFontFile(const QString &path)
         return false;
     }
     const QStringList fams = QFontDatabase::applicationFontFamilies(id);
-    MD3_DBG_INFO("Md3: loaded font %s → %s", qPrintable(path),
-                 qPrintable(fams.join(QLatin1String(", "))));
+    MD3_DBG("Md3: loaded font %s → %s", qPrintable(path),
+            qPrintable(fams.join(QLatin1String(", "))));
     return true;
 }
 
@@ -291,8 +297,8 @@ int loadFonts()
         QFont probe(hasUiFont ? uiFamily : families.value(0));
         probe.setStyleStrategy(QFont::PreferAntialias);
         const QFontInfo info(probe);
-        MD3_DBG_INFO("Md3: probe family=\"%s\" style=\"%s\"",
-                     qPrintable(info.family()), qPrintable(info.styleName()));
+        MD3_DBG("Md3: probe family=\"%s\" style=\"%s\"",
+                qPrintable(info.family()), qPrintable(info.styleName()));
     }
 
     for (const QString &file : iconFiles) {
@@ -303,9 +309,9 @@ int loadFonts()
     // QtRendering (distance field) anti-aliases better than Native on GPU UIs.
     QQuickWindow::setTextRenderType(QQuickWindow::QtTextRendering);
 
-    MD3_DBG_INFO("Md3: loadFonts done, %d faces, hasUiFont=%d, appFont=%s",
-                 loaded, int(hasUiFont),
-                 qPrintable(QGuiApplication::font().families().join(QLatin1Char(','))));
+    MD3_DBG("Md3: loadFonts done, %d faces, hasUiFont=%d, appFont=%s",
+            loaded, int(hasUiFont),
+            qPrintable(QGuiApplication::font().families().join(QLatin1Char(','))));
 
     cached = loaded;
     return loaded;

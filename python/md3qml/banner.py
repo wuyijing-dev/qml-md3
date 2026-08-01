@@ -35,7 +35,14 @@ def _enable_windows_ansi() -> bool:
 
 
 def print_banner(title: str = "Md3", version: str = "1.0.0") -> None:
-    """Print a colorful Md3 intro to stderr when attached to a TTY."""
+    """
+    Print a colorful Md3 intro to stderr when attached to a TTY.
+
+    Skipped when ``MD3_DEBUG=1`` (mirrors C++ Debug: no banner, prefer logs).
+    """
+    dbg = os.environ.get("MD3_DEBUG", "").strip().lower()
+    if dbg in ("1", "true", "yes", "on"):
+        return
     if not _stderr_is_tty():
         return
     color = _enable_windows_ansi()

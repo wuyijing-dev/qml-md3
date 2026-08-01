@@ -94,13 +94,15 @@ else()
 endif()
 md3_apply_qt_compat_definitions(Md3)
 
-# Quiet Qt qDebug/qInfo in Release (banner uses fprintf, not qInfo).
+# Quiet internal Qt logging in non-Debug configs (banner uses fprintf).
+# Debug keeps qDebug/qInfo so font probes and diagnostics remain visible.
 target_compile_definitions(Md3 PRIVATE
     $<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>
     $<$<CONFIG:Release>:QT_NO_INFO_OUTPUT>
     $<$<CONFIG:MinSizeRel>:QT_NO_DEBUG_OUTPUT>
     $<$<CONFIG:MinSizeRel>:QT_NO_INFO_OUTPUT>
     $<$<CONFIG:RelWithDebInfo>:QT_NO_DEBUG_OUTPUT>
+    $<$<CONFIG:RelWithDebInfo>:QT_NO_INFO_OUTPUT>
 )
 
 # Dedicated font qrc (not only via qt_add_qml_module). Static MSVC links can drop
