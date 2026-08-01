@@ -189,33 +189,52 @@ void ungrabX11(int) {}
 
 QDBusObjectPath g_portalSession;
 
+class PortalRequestWaiter : public QObject
+{
+    Q_OBJECT
+public:
+    explicit PortalRequestWaiter(QEventLoop *loop)
+        : QObject(loop)
+        , m_loop(loop)
+    {
+    }
+
+    uint code = 2;
+    QVariantMap map;
+
+public slots:
+    void onResponse(uint response, const QVariantMap &results)
+    {
+        code = response;
+        map = results;
+        if (m_loop)
+            m_loop->quit();
+    }
+
+private:
+    QEventLoop *m_loop = nullptr;
+};
+
 bool waitRequestResponse(const QDBusObjectPath &requestPath, QVariantMap *results, int timeoutMs)
 {
     QEventLoop loop;
-    uint code = 2;
-    QVariantMap map;
+    PortalRequestWaiter waiter(&loop);
     const bool okConn = QDBusConnection::sessionBus().connect(
             QStringLiteral("org.freedesktop.portal.Desktop"), requestPath.path(),
             QStringLiteral("org.freedesktop.portal.Request"), QStringLiteral("Response"),
-            &loop,
-            [&](uint response, const QVariantMap &r) {
-                code = response;
-                map = r;
-                loop.quit();
-            });
+            &waiter, SLOT(onResponse(uint,QVariantMap)));
     if (!okConn)
         return false;
     QTimer::singleShot(timeoutMs, &loop, &QEventLoop::quit);
-    // Kick: some portals emit immediately
     loop.exec();
     QDBusConnection::sessionBus().disconnect(
             QStringLiteral("org.freedesktop.portal.Desktop"), requestPath.path(),
             QStringLiteral("org.freedesktop.portal.Request"), QStringLiteral("Response"),
-            &loop, nullptr);
-    if (code != 0)
+            &waiter, SLOT(onResponse(uint,QVariantMap)));
+    if (waiter.code != 0)
         return false;
     if (results)
-        *results = map;
+        *results = waiter.map;
     return true;
 }
 
