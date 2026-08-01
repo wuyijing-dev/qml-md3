@@ -33,6 +33,40 @@ Item {
     implicitWidth: size
     implicitHeight: size + _captionH
 
+
+    property var hostWindow: null
+    property bool _treeShown: true
+    property bool _paintPending: false
+
+    function _refreshTreeShown() {
+        const ok = Md3TreeVisibility.isSceneActive(root, root.hostWindow)
+        if (_treeShown !== ok)
+            _treeShown = ok
+        if (_treeShown && _paintPending)
+            _requestPaint()
+    }
+
+    function _requestPaint() {
+        if (!_treeShown) {
+            _paintPending = true
+            return
+        }
+        _paintPending = false
+        canvas.requestPaint()
+    }
+
+    Timer {
+        interval: 2000
+        running: root.visible
+        repeat: true
+        onTriggered: root._refreshTreeShown()
+    }
+    Connections {
+        target: Qt.application
+        function onStateChanged() { root._refreshTreeShown() }
+    }
+    onVisibleChanged: root._refreshTreeShown()
+
     function _rad(deg) { return deg * Math.PI / 180 }
 
     Canvas {
@@ -100,12 +134,12 @@ Item {
         }
     }
 
-    onValueChanged: canvas.requestPaint()
-    onDialColorChanged: canvas.requestPaint()
-    onTrackColorChanged: canvas.requestPaint()
-    onWidthChanged: canvas.requestPaint()
-    onHeightChanged: canvas.requestPaint()
-    Component.onCompleted: canvas.requestPaint()
+    onValueChanged: root._requestPaint()
+    onDialColorChanged: root._requestPaint()
+    onTrackColorChanged: root._requestPaint()
+    onWidthChanged: root._requestPaint()
+    onHeightChanged: root._requestPaint()
+    Component.onCompleted: { root._refreshTreeShown(); root._requestPaint() }
 
     // Caption sits under the dial — never over N/E/S/W
     Text {

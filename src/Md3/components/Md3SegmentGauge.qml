@@ -33,6 +33,40 @@ Item {
     implicitWidth: size
     implicitHeight: size
 
+
+    property var hostWindow: null
+    property bool _treeShown: true
+    property bool _paintPending: false
+
+    function _refreshTreeShown() {
+        const ok = Md3TreeVisibility.isSceneActive(root, root.hostWindow)
+        if (_treeShown !== ok)
+            _treeShown = ok
+        if (_treeShown && _paintPending)
+            _requestPaint()
+    }
+
+    function _requestPaint() {
+        if (!_treeShown) {
+            _paintPending = true
+            return
+        }
+        _paintPending = false
+        canvas.requestPaint()
+    }
+
+    Timer {
+        interval: 2000
+        running: root.visible
+        repeat: true
+        onTriggered: root._refreshTreeShown()
+    }
+    Connections {
+        target: Qt.application
+        function onStateChanged() { root._refreshTreeShown() }
+    }
+    onVisibleChanged: root._refreshTreeShown()
+
     function _rad(deg) { return deg * Math.PI / 180 }
 
     Canvas {
@@ -61,13 +95,13 @@ Item {
         }
     }
 
-    onValueChanged: canvas.requestPaint()
-    onSegmentsChanged: canvas.requestPaint()
-    onWidthChanged: canvas.requestPaint()
-    onHeightChanged: canvas.requestPaint()
-    onValueColorChanged: canvas.requestPaint()
-    onTrackColorChanged: canvas.requestPaint()
-    Component.onCompleted: canvas.requestPaint()
+    onValueChanged: root._requestPaint()
+    onSegmentsChanged: root._requestPaint()
+    onWidthChanged: root._requestPaint()
+    onHeightChanged: root._requestPaint()
+    onValueColorChanged: root._requestPaint()
+    onTrackColorChanged: root._requestPaint()
+    Component.onCompleted: { root._refreshTreeShown(); root._requestPaint() }
 
     Column {
         anchors.centerIn: parent

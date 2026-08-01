@@ -63,6 +63,7 @@ Item {
     property bool gestureActive: false
     property real _panVelocity: 0
     property bool _viewDirty: false
+    property bool _rebuildDirty: false
     /// Optional Window for live-motion checks (else OverlayHost).
     property var hostWindow: null
     /// True while dragging or coasting — skip Catmull / async Shape to avoid release flicker.
@@ -183,7 +184,15 @@ Item {
     function rebuild() { rebuilt() }
 
     function requestRebuild() {
+        _rebuildDirty = true
+        if (!chartActive)
+            return
         rebuildTimer.restart()
+    }
+
+    onChartActiveChanged: {
+        if (chartActive && _rebuildDirty)
+            rebuildTimer.restart()
     }
 
     function pause() { paused = true }
@@ -324,10 +333,17 @@ Item {
         return plotLeft + plotWidth * (index - win.start) / denom
     }
 
+    /// Coalesce property churn to one rebuild (same event-loop tick as viewSync).
     Timer {
         id: rebuildTimer
-        interval: 16
-        onTriggered: root.rebuild()
+        interval: 0
+        repeat: false
+        onTriggered: {
+            if (!root.chartActive || !root._rebuildDirty)
+                return
+            root._rebuildDirty = false
+            root.rebuild()
+        }
     }
     /// Coalesce pan/zoom to one rebuild per frame (smoother than every mouse move).
     Timer {
@@ -337,7 +353,12 @@ Item {
         onTriggered: {
             if (!root._viewDirty)
                 return
+            if (!root.chartActive) {
+                root._rebuildDirty = true
+                return
+            }
             root._viewDirty = false
+            root._rebuildDirty = false
             root.rebuild()
         }
     }
@@ -396,5 +417,5 @@ Item {
     onAxisLabelColorChanged: themeDebounce.restart()
     onSurfaceColorChanged: themeDebounce.restart()
 
-    Component.onCompleted: rebuild()
+    Component.onCompleted: requestRebuild()
 }

@@ -52,18 +52,6 @@ Item {
         onTriggered: root._applyLayout()
     }
 
-    // Catch late implicitWidth (text/icons) — same idea as Md3AnimatedFlow.
-    // Poll sparsely; size changes also schedule via onChildrenChanged / width.
-    Timer {
-        interval: 120
-        running: root.visible && contentHost.children.length > 0
-        repeat: true
-        onTriggered: {
-            if (root._sizesDirty())
-                root._scheduleLayout()
-        }
-    }
-
     Item {
         id: contentHost
         clip: root.clipContent
@@ -82,7 +70,25 @@ Item {
         property real _laidOutWidth: 0
         property real _laidOutHeight: 1
 
-        onChildrenChanged: root._scheduleLayout()
+        onChildrenChanged: {
+            root._hookChildSizeWatchers()
+            root._scheduleLayout()
+        }
+    }
+
+    function _hookChildSizeWatchers() {
+        const kids = contentHost.children
+        for (let i = 0; i < kids.length; ++i) {
+            const c = kids[i]
+            if (!c || c._md3HStackHooked)
+                continue
+            c._md3HStackHooked = true
+            c.implicitWidthChanged.connect(root._scheduleLayout)
+            c.implicitHeightChanged.connect(root._scheduleLayout)
+            c.visibleChanged.connect(root._scheduleLayout)
+            c.widthChanged.connect(root._scheduleLayout)
+            c.heightChanged.connect(root._scheduleLayout)
+        }
     }
 
     onWidthChanged: _scheduleLayout()
@@ -95,7 +101,10 @@ Item {
     onRightPaddingChanged: _scheduleLayout()
     onTopPaddingChanged: _scheduleLayout()
     onBottomPaddingChanged: _scheduleLayout()
-    Component.onCompleted: _scheduleLayout()
+    Component.onCompleted: {
+        _hookChildSizeWatchers()
+        _scheduleLayout()
+    }
     Component.onDestruction: layoutTimer.stop()
 
     function _scheduleLayout() {

@@ -21,13 +21,14 @@ Industry UI stacks converge on the same rules Md3 applies:
 5. **`Md3LiquidGlass.liveSampling`** — default `false` (opt-in for video); drag still samples live.
 6. **`Md3StateOverlay`** — opacity Behavior skipped under `reduceMotion`.
 7. **`Md3TreeView`** — `ListView { reuseItems }` + 160ms debounced `flatRows` rebuild.
-8. **`Md3DataTable`** — free + frozen bodies virtualized; `_scrollColumnIndices` cached; V-bar tracks `rowsCol`.
+8. **`Md3DataTable`** — free + frozen bodies use **`TableView`** (row **and** column virtualization) via `Md3TableGridModel`; frozen strip stays a synced `ListView`.
 9. **`Md3PageHost`** — prefetch coalesced (120ms); launch mask geometry only while morphing; **sparse slots** when `model.length > sparseSlotThreshold` (default 40, skipped for `cacheMode: "all"`).
 10. **`Md3Form.liveGate`** — event-wired field signals + 48ms debounce (poll only if no named fields).
 11. **Progress / Loading** — tree-visibility poll 500→2000ms + `Qt.application` state Connections.
 12. **`Md3DocumentTabBar` ghost** — `layer.enabled` only while ghost visible.
-
-Still optional later: TableView for multi-column DataTable body.
+13. **`Md3Chart`** — rebuild coalesced on event-loop tick; skipped while `!chartActive`, flushed on re-show.
+14. **Canvas gauges** — `Md3TreeVisibility` gate + pending paint flush (Wave / Needle / Knob / …).
+15. **`Md3HStack` / `Md3AnimatedFlow` / `Md3GridLayout`** — child `implicit*Changed` hooks; no 120ms size poll.
 
 ---
 

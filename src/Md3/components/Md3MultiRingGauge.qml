@@ -23,6 +23,40 @@ Item {
     implicitWidth: size
     implicitHeight: size
 
+
+    property var hostWindow: null
+    property bool _treeShown: true
+    property bool _paintPending: false
+
+    function _refreshTreeShown() {
+        const ok = Md3TreeVisibility.isSceneActive(root, root.hostWindow)
+        if (_treeShown !== ok)
+            _treeShown = ok
+        if (_treeShown && _paintPending)
+            _requestPaint()
+    }
+
+    function _requestPaint() {
+        if (!_treeShown) {
+            _paintPending = true
+            return
+        }
+        _paintPending = false
+        canvas.requestPaint()
+    }
+
+    Timer {
+        interval: 2000
+        running: root.visible
+        repeat: true
+        onTriggered: root._refreshTreeShown()
+    }
+    Connections {
+        target: Qt.application
+        function onStateChanged() { root._refreshTreeShown() }
+    }
+    onVisibleChanged: root._refreshTreeShown()
+
     readonly property int _ringCount: rings && rings.length ? rings.length : 0
     readonly property real _dialR: Math.min(width, height) / 2
     /// Guaranteed readable hole; rings auto-thin to leave this clear.
@@ -85,13 +119,13 @@ Item {
         }
     }
 
-    onRingsChanged: canvas.requestPaint()
-    onTrackColorChanged: canvas.requestPaint()
-    onWidthChanged: canvas.requestPaint()
-    onHeightChanged: canvas.requestPaint()
-    onStrokeWidthChanged: canvas.requestPaint()
-    onRingGapChanged: canvas.requestPaint()
-    Component.onCompleted: canvas.requestPaint()
+    onRingsChanged: root._requestPaint()
+    onTrackColorChanged: root._requestPaint()
+    onWidthChanged: root._requestPaint()
+    onHeightChanged: root._requestPaint()
+    onStrokeWidthChanged: root._requestPaint()
+    onRingGapChanged: root._requestPaint()
+    Component.onCompleted: { root._refreshTreeShown(); root._requestPaint() }
 
     Item {
         id: centerHole

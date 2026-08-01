@@ -39,6 +39,40 @@ Item {
     implicitWidth: size
     implicitHeight: size
 
+
+    property var hostWindow: null
+    property bool _treeShown: true
+    property bool _paintPending: false
+
+    function _refreshTreeShown() {
+        const ok = Md3TreeVisibility.isSceneActive(root, root.hostWindow)
+        if (_treeShown !== ok)
+            _treeShown = ok
+        if (_treeShown && _paintPending)
+            _requestPaint()
+    }
+
+    function _requestPaint() {
+        if (!_treeShown) {
+            _paintPending = true
+            return
+        }
+        _paintPending = false
+        ticks.requestPaint()
+    }
+
+    Timer {
+        interval: 2000
+        running: root.visible
+        repeat: true
+        onTriggered: root._refreshTreeShown()
+    }
+    Connections {
+        target: Qt.application
+        function onStateChanged() { root._refreshTreeShown() }
+    }
+    onVisibleChanged: root._refreshTreeShown()
+
     function _rad(deg) { return deg * Math.PI / 180 }
 
     Shape {
@@ -125,11 +159,11 @@ Item {
         }
     }
 
-    onValueChanged: ticks.requestPaint()
-    onWidthChanged: ticks.requestPaint()
-    onHeightChanged: ticks.requestPaint()
-    onShowTicksChanged: ticks.requestPaint()
-    Component.onCompleted: ticks.requestPaint()
+    onValueChanged: root._requestPaint()
+    onWidthChanged: root._requestPaint()
+    onHeightChanged: root._requestPaint()
+    onShowTicksChanged: root._requestPaint()
+    Component.onCompleted: { root._refreshTreeShown(); root._requestPaint() }
 
     Column {
         anchors.horizontalCenter: parent.horizontalCenter

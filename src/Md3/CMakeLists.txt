@@ -203,6 +203,8 @@ qt_add_qml_module(Md3
         foundation/md3qtversion.h
         foundation/md3qtcompat.h
         foundation/md3qtcompat.cpp
+        foundation/md3tablegridmodel.h
+        foundation/md3tablegridmodel.cpp
         layout/md3heightsync.h
         layout/md3heightsync.cpp
     QML_FILES

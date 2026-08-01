@@ -25,6 +25,8 @@ Item {
     property real waveSpeed: 2.2
     /// Optional Window for live-motion checks (else OverlayHost).
     property var hostWindow: null
+    property bool _treeShown: true
+    property bool _paintPending: false
 
     readonly property real progress: {
         const span = Math.max(1e-6, to - from)
@@ -32,7 +34,36 @@ Item {
     }
     readonly property string valueText: Number(value).toFixed(decimals) + (unit.length ? unit : "")
     readonly property int _effectiveFps: animationFps > 0 ? animationFps : Md3Theme.effectsLiveFps
-    readonly property bool effectivelyShown: Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
+    readonly property bool effectivelyShown: _treeShown
+
+    function _refreshTreeShown() {
+        const ok = Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
+        if (_treeShown !== ok)
+            _treeShown = ok
+        if (_treeShown && _paintPending)
+            _requestPaint()
+    }
+
+    function _requestPaint() {
+        if (!_treeShown) {
+            _paintPending = true
+            return
+        }
+        _paintPending = false
+        canvas.requestPaint()
+    }
+
+    Timer {
+        interval: 2000
+        running: root.visible
+        repeat: true
+        onTriggered: root._refreshTreeShown()
+    }
+    Connections {
+        target: Qt.application
+        function onStateChanged() { root._refreshTreeShown() }
+    }
+    onVisibleChanged: root._refreshTreeShown()
 
     width: size
     height: size
@@ -45,7 +76,7 @@ Item {
         root.wavePhase += root.waveSpeed * dt
         if (root.wavePhase > Math.PI * 2)
             root.wavePhase -= Math.PI * 2
-        canvas.requestPaint()
+        root._requestPaint()
     }
 
     FrameAnimation {
@@ -61,12 +92,12 @@ Item {
         onTriggered: root._advance(interval / 1000)
     }
 
-    onValueChanged: canvas.requestPaint()
-    onDialColorChanged: canvas.requestPaint()
-    onTrackColorChanged: canvas.requestPaint()
-    onValueColorChanged: canvas.requestPaint()
-    onWidthChanged: canvas.requestPaint()
-    onHeightChanged: canvas.requestPaint()
+    onValueChanged: root._requestPaint()
+    onDialColorChanged: root._requestPaint()
+    onTrackColorChanged: root._requestPaint()
+    onValueColorChanged: root._requestPaint()
+    onWidthChanged: root._requestPaint()
+    onHeightChanged: root._requestPaint()
 
     Canvas {
         id: canvas
@@ -162,5 +193,5 @@ Item {
         }
     }
 
-    Component.onCompleted: canvas.requestPaint()
+    Component.onCompleted: { root._refreshTreeShown(); root._requestPaint() }
 }

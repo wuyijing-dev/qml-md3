@@ -111,6 +111,14 @@ Item {
             out.push(i)
         return out
     }
+    /// All column indices for the unfrozen TableView path.
+    readonly property var _allColumnIndices: {
+        const out = []
+        const cols = columns || []
+        for (let i = 0; i < cols.length; ++i)
+            out.push(i)
+        return out
+    }
     readonly property real scrollColsWidth: {
         let w = 0
         const widths = effectiveWidths
@@ -810,131 +818,6 @@ Item {
         }
     }
 
-    component BodyRow: Rectangle {
-        id: bodyRow
-        property int pageRowIndex: 0
-        property var entry
-        readonly property int sourceIndex: entry ? entry.sourceIndex : -1
-        readonly property var rowData: entry ? entry.row : null
-        readonly property bool checked: root._isSelected(sourceIndex)
-        readonly property bool highlighted: root.selectedRow === sourceIndex || checked
-        readonly property bool keyboardFocused: root.focusedPageRow === pageRowIndex
-
-        width: parent ? parent.width : 0
-        height: root.rowHeight
-        color: keyboardFocused ? Md3Theme.colorScheme.primaryContainer
-              : (highlighted ? Md3Theme.colorScheme.secondaryContainer : "transparent")
-        border.width: keyboardFocused && tableFocus.activeFocus ? 2 : 0
-        border.color: Md3Theme.colorScheme.secondary
-
-        property int dragFromIndex: -1
-        property int dragTargetIndex: -1
-
-        Row {
-            anchors.fill: parent
-            anchors.leftMargin: 8
-            anchors.rightMargin: 8
-            spacing: 0
-
-            Item {
-                visible: root.selectionEnabled
-                width: 48
-                height: parent.height
-                Md3Checkbox {
-                    anchors.centerIn: parent
-                    checked: bodyRow.checked
-                    onToggled: function (state) {
-                        root._setSelected(bodyRow.sourceIndex, state === Qt.Checked)
-                    }
-                }
-            }
-
-            Repeater {
-                model: root.columns
-                delegate: DataCell {
-                    required property int index
-                    required property var modelData
-                    width: root.effectiveWidths[index] || 120
-                    height: bodyRow.height
-                    visible: index >= 0
-                    rowData: bodyRow.rowData
-                    columnDef: modelData
-                    columnIndex: index
-                    sourceIndex: bodyRow.sourceIndex
-                }
-            }
-
-            Item {
-                visible: root.actionsColWidth > 0
-                width: 48
-                height: parent.height
-                Md3IconButton {
-                    id: moreBtn
-                    anchors.centerIn: parent
-                    icon: "more_vert"
-                    accessibleName: qsTr("Row actions")
-                    onClicked: root.openRowMenu(bodyRow.sourceIndex, moreBtn)
-                }
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            anchors.leftMargin: root.selectionEnabled ? 48 : 0
-            anchors.rightMargin: root.actionsColWidth
-            z: -1
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
-            onClicked: function (mouse) {
-                root.focusedPageRow = bodyRow.pageRowIndex
-                root.selectedRow = bodyRow.sourceIndex
-                root.rowClicked(bodyRow.sourceIndex)
-                tableFocus.forceActiveFocus()
-            }
-            onDoubleClicked: {
-                const cols = root.columns || []
-                for (let i = 0; i < cols.length; ++i) {
-                    if (cols[i] && cols[i].editable === true) {
-                        root.beginCellEdit(bodyRow.sourceIndex, i)
-                        return
-                    }
-                }
-                root.rowDoubleClicked(bodyRow.sourceIndex)
-                root.rowActivated(bodyRow.sourceIndex)
-            }
-        }
-
-        DragHandler {
-            enabled: root.rowReorderEnabled
-            target: null
-            onActiveChanged: {
-                if (active) {
-                    bodyRow.dragFromIndex = bodyRow.sourceIndex
-                    bodyRow.dragTargetIndex = bodyRow.sourceIndex
-                } else if (bodyRow.dragFromIndex >= 0 && bodyRow.dragTargetIndex >= 0
-                           && bodyRow.dragFromIndex !== bodyRow.dragTargetIndex) {
-                    if (root.autoReorderRows)
-                        root.moveRow(bodyRow.dragFromIndex, bodyRow.dragTargetIndex)
-                    else
-                        root.rowOrderChanged(bodyRow.dragFromIndex, bodyRow.dragTargetIndex)
-                }
-            }
-            onTranslationChanged: {
-                if (!active || bodyRow.dragFromIndex < 0)
-                    return
-                const y = bodyRow.mapToItem(rowsCol, 0, translation.y).y
-                const idx = Math.max(0, Math.min(root.pageEntries.length - 1, Math.floor(y / root.rowHeight)))
-                const target = root.pageEntries[idx]
-                if (target)
-                    bodyRow.dragTargetIndex = target.sourceIndex
-            }
-        }
-
-        Md3Divider {
-            anchors.bottom: parent.bottom
-            width: parent.width
-        }
-    }
-
     FocusScope {
         id: tableFocus
         anchors.fill: parent
@@ -1152,7 +1035,7 @@ Item {
                             anchors.right: parent.right
                             width: 4
                             height: parent.height
-                            visible: bodyFlick.contentX > 0.5
+                            visible: scrollTable.contentX > 0.5
                             gradient: Gradient {
                                 orientation: Gradient.Horizontal
                                 GradientStop { position: 0; color: "transparent" }
@@ -1161,7 +1044,7 @@ Item {
                         }
                     }
 
-                    // Scrollable region (H+V); sticky header tracks contentX
+                    // Scrollable region (H+V TableView); sticky header tracks contentX
                     Item {
                         id: scrollPane
                         width: parent.width - frozenPane.width
@@ -1169,6 +1052,14 @@ Item {
                         clip: true
 
                         readonly property real _paneContentW: Math.max(width, root.scrollColsWidth)
+
+                        Md3TableGridModel {
+                            id: scrollGridModel
+                            entries: root.loading ? [] : root.pageEntries
+                            columnIndices: root._scrollColumnIndices
+                            leadingSelection: false
+                            trailingActions: root.actionsColWidth > 0
+                        }
 
                         Item {
                             id: scrollHeaderClip
@@ -1179,7 +1070,7 @@ Item {
 
                             Rectangle {
                                 id: headerBar
-                                x: -bodyFlick.contentX
+                                x: -scrollTable.contentX
                                 width: scrollPane._paneContentW
                                 height: root.headerHeight
                                 color: Md3Theme.colorScheme.surfaceContainerLow
@@ -1189,12 +1080,7 @@ Item {
                                     anchors.rightMargin: 8
                                     spacing: 0
                                     Repeater {
-                                        model: {
-                                            const out = []
-                                            for (let i = root.frozenCount; i < (root.columns || []).length; ++i)
-                                                out.push(i)
-                                            return out
-                                        }
+                                        model: root._scrollColumnIndices
                                         delegate: HeaderCell {
                                             required property var modelData
                                             columnIndex: modelData
@@ -1213,105 +1099,114 @@ Item {
                             }
                         }
 
-                        Flickable {
-                            id: bodyFlick
+                        TableView {
+                            id: scrollTable
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.top: scrollHeaderClip.bottom
                             anchors.bottom: parent.bottom
                             clip: true
-                            contentWidth: scrollPane._paneContentW
-                            contentHeight: height
+                            model: scrollGridModel
                             boundsBehavior: Flickable.StopAtBounds
-                            interactive: !root.loading && contentWidth > width + 1
-                            flickableDirection: Flickable.HorizontalFlick
+                            interactive: !root.loading && root.pageEntries.length > 0
+                            leftMargin: 8
+                            rightMargin: 8
+                            reuseItems: true
+                            columnWidthProvider: function (column) {
+                                if (scrollGridModel.cellKindAt(column) === Md3TableGridModel.ActionsCell)
+                                    return root.actionsColWidth
+                                const ci = scrollGridModel.columnIndexAt(column)
+                                return root.effectiveWidths[ci] || 120
+                            }
+                            rowHeightProvider: function (row) { return root.rowHeight }
+                            onContentYChanged: {
+                                if (bodyFrozen.contentY !== contentY)
+                                    bodyFrozen.contentY = contentY
+                            }
+                            Connections {
+                                target: bodyFrozen
+                                function onContentYChanged() {
+                                    if (scrollTable.contentY !== bodyFrozen.contentY)
+                                        scrollTable.contentY = bodyFrozen.contentY
+                                }
+                            }
+                            Connections {
+                                target: root
+                                function onEffectiveWidthsChanged() { scrollTable.forceLayout() }
+                                function onActionsColWidthChanged() { scrollTable.forceLayout() }
+                                function onRowHeightChanged() { scrollTable.forceLayout() }
+                            }
+                            delegate: Item {
+                                id: scrollCell
+                                required property int row
+                                required property int column
+                                required property var entry
+                                required property int columnIndex
+                                required property int cellKind
+                                implicitWidth: 120
+                                implicitHeight: root.rowHeight
 
-                            ListView {
-                                id: rowsCol
-                                width: scrollPane._paneContentW
-                                height: parent.height
-                                model: root.loading ? null : root.pageEntries
-                                reuseItems: true
-                                cacheBuffer: Math.max(200, root.rowHeight * 12)
-                                clip: true
-                                boundsBehavior: Flickable.StopAtBounds
-                                interactive: !root.loading && root.pageEntries.length > 0
-                                onContentYChanged: {
-                                    if (bodyFrozen.contentY !== contentY)
-                                        bodyFrozen.contentY = contentY
+                                readonly property int sourceIndex: entry ? entry.sourceIndex : -1
+                                readonly property var rowData: entry ? entry.row : null
+                                readonly property bool checked: root._isSelected(sourceIndex)
+                                readonly property bool highlighted: root.selectedRow === sourceIndex || checked
+                                readonly property bool keyboardFocused: root.focusedPageRow === row
+
+                                Rectangle {
+                                    anchors.fill: parent
+                                    z: -2
+                                    color: scrollCell.keyboardFocused ? Md3Theme.colorScheme.primaryContainer
+                                          : (scrollCell.highlighted ? Md3Theme.colorScheme.secondaryContainer : "transparent")
                                 }
-                                Connections {
-                                    target: bodyFrozen
-                                    function onContentYChanged() {
-                                        if (rowsCol.contentY !== bodyFrozen.contentY)
-                                            rowsCol.contentY = bodyFrozen.contentY
+
+                                DataCell {
+                                    anchors.fill: parent
+                                    visible: scrollCell.cellKind === Md3TableGridModel.DataCell
+                                    rowData: scrollCell.rowData
+                                    columnDef: root.columns[scrollCell.columnIndex]
+                                    columnIndex: scrollCell.columnIndex
+                                    sourceIndex: scrollCell.sourceIndex
+                                }
+
+                                Item {
+                                    anchors.fill: parent
+                                    visible: scrollCell.cellKind === Md3TableGridModel.ActionsCell
+                                    Md3IconButton {
+                                        id: scrollMoreBtn
+                                        anchors.centerIn: parent
+                                        icon: "more_vert"
+                                        onClicked: root.openRowMenu(scrollCell.sourceIndex, scrollMoreBtn)
                                     }
                                 }
-                                delegate: Item {
-                                    id: scrollRowItem
-                                    required property int index
-                                    required property var modelData
-                                    width: rowsCol.width
-                                    height: root.rowHeight
-                                    Row {
-                                        anchors.fill: parent
-                                        anchors.leftMargin: 8
-                                        anchors.rightMargin: 8
-                                        Repeater {
-                                            model: root._scrollColumnIndices
-                                            delegate: DataCell {
-                                                required property var modelData
-                                                width: root.effectiveWidths[modelData] || 120
-                                                height: parent.height
-                                                rowData: scrollRowItem.modelData.row
-                                                columnDef: root.columns[modelData]
-                                                columnIndex: modelData
-                                                sourceIndex: scrollRowItem.modelData.sourceIndex
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    enabled: scrollCell.cellKind === Md3TableGridModel.DataCell
+                                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                    z: -1
+                                    onClicked: {
+                                        root.focusedPageRow = scrollCell.row
+                                        root.selectedRow = scrollCell.sourceIndex
+                                        root.rowClicked(scrollCell.sourceIndex)
+                                        tableFocus.forceActiveFocus()
+                                    }
+                                    onDoubleClicked: {
+                                        const cols = root.columns || []
+                                        const src = scrollCell.sourceIndex
+                                        for (let i = 0; i < cols.length; ++i) {
+                                            if (cols[i] && cols[i].editable === true) {
+                                                root.beginCellEdit(src, i)
+                                                return
                                             }
                                         }
-                                        Item {
-                                            visible: root.actionsColWidth > 0
-                                            width: 48
-                                            height: parent.height
-                                            Md3IconButton {
-                                                id: scrollMoreBtn
-                                                anchors.centerIn: parent
-                                                icon: "more_vert"
-                                                onClicked: root.openRowMenu(scrollRowItem.modelData.sourceIndex, scrollMoreBtn)
-                                            }
-                                        }
+                                        root.rowDoubleClicked(src)
+                                        root.rowActivated(src)
                                     }
-                                    MouseArea {
-                                        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                                        anchors.fill: parent
-                                        anchors.rightMargin: root.actionsColWidth
-                                        z: -1
-                                        onClicked: {
-                                            root.focusedPageRow = scrollRowItem.index
-                                            root.selectedRow = scrollRowItem.modelData.sourceIndex
-                                            root.rowClicked(scrollRowItem.modelData.sourceIndex)
-                                            tableFocus.forceActiveFocus()
-                                        }
-                                        onDoubleClicked: {
-                                            const cols = root.columns || []
-                                            const src = scrollRowItem.modelData.sourceIndex
-                                            for (let i = 0; i < cols.length; ++i) {
-                                                if (cols[i] && cols[i].editable === true) {
-                                                    root.beginCellEdit(src, i)
-                                                    return
-                                                }
-                                            }
-                                            root.rowDoubleClicked(src)
-                                            root.rowActivated(src)
-                                        }
-                                    }
-                                    Rectangle {
-                                        anchors.bottom: parent.bottom
-                                        width: parent.width
-                                        height: 1
-                                        color: "transparent"
-                                        Md3Divider { anchors.fill: parent }
-                                    }
+                                }
+
+                                Md3Divider {
+                                    anchors.bottom: parent.bottom
+                                    width: parent.width
                                 }
                             }
                         }
@@ -1334,7 +1229,7 @@ Item {
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: tableHBar.visible ? tableHBar.height : 0
                     z: 5
-                    flickable: root.frozenCount > 0 ? rowsCol : (freeLoader.item ? freeLoader.item.bodyFlickable : null)
+                    flickable: root.frozenCount > 0 ? scrollTable : (freeLoader.item ? freeLoader.item.bodyFlickable : null)
                     orientation: Qt.Vertical
                 }
 
@@ -1346,7 +1241,7 @@ Item {
                     anchors.rightMargin: tableVBar.visible ? tableVBar.width : 0
                     anchors.bottom: parent.bottom
                     z: 5
-                    flickable: root.frozenCount > 0 ? bodyFlick : (freeLoader.item ? freeLoader.item.bodyFlickable : null)
+                    flickable: root.frozenCount > 0 ? scrollTable : (freeLoader.item ? freeLoader.item.bodyFlickable : null)
                     orientation: Qt.Horizontal
                 }
 
@@ -1463,34 +1358,160 @@ Item {
                 }
             }
 
-            ListView {
+            Md3TableGridModel {
+                id: freeGridModel
+                entries: root.loading ? [] : root.pageEntries
+                columnIndices: root._allColumnIndices
+                leadingSelection: root.selectionEnabled
+                trailingActions: root.actionsColWidth > 0
+            }
+
+            TableView {
                 id: freeBody
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: freeHeaderClip.bottom
                 anchors.bottom: parent.bottom
-                contentWidth: freeRoot._contentW
-                model: root.loading ? null : root.pageEntries
-                reuseItems: true
-                cacheBuffer: Math.max(200, root.rowHeight * 12)
                 clip: true
+                model: freeGridModel
                 boundsBehavior: Flickable.StopAtBounds
-                interactive: !root.loading && (contentWidth > width + 1 || contentHeight > height + 1)
-                flickableDirection: {
-                    const h = contentWidth > width + 1
-                    const v = contentHeight > height + 1
-                    if (h && v)
-                        return Flickable.HorizontalAndVerticalFlick
-                    if (h)
-                        return Flickable.HorizontalFlick
-                    return Flickable.VerticalFlick
+                interactive: !root.loading && root.pageEntries.length > 0
+                leftMargin: 8
+                rightMargin: 8
+                reuseItems: true
+                columnWidthProvider: function (column) {
+                    const kind = freeGridModel.cellKindAt(column)
+                    if (kind === Md3TableGridModel.SelectionCell)
+                        return root.selectionColWidth
+                    if (kind === Md3TableGridModel.ActionsCell)
+                        return root.actionsColWidth
+                    const ci = freeGridModel.columnIndexAt(column)
+                    return root.effectiveWidths[ci] || 120
                 }
-                delegate: BodyRow {
-                    required property int index
-                    required property var modelData
-                    width: Math.max(freeRoot._contentW, freeBody.width)
-                    pageRowIndex: index
-                    entry: modelData
+                rowHeightProvider: function (row) { return root.rowHeight }
+                Connections {
+                    target: root
+                    function onEffectiveWidthsChanged() { freeBody.forceLayout() }
+                    function onActionsColWidthChanged() { freeBody.forceLayout() }
+                    function onSelectionColWidthChanged() { freeBody.forceLayout() }
+                    function onRowHeightChanged() { freeBody.forceLayout() }
+                }
+                delegate: Item {
+                    id: freeCell
+                    required property int row
+                    required property int column
+                    required property var entry
+                    required property int columnIndex
+                    required property int cellKind
+                    implicitWidth: 120
+                    implicitHeight: root.rowHeight
+
+                    readonly property int sourceIndex: entry ? entry.sourceIndex : -1
+                    readonly property var rowData: entry ? entry.row : null
+                    readonly property bool checked: root._isSelected(sourceIndex)
+                    readonly property bool highlighted: root.selectedRow === sourceIndex || checked
+                    readonly property bool keyboardFocused: root.focusedPageRow === row
+
+                    property int dragFromIndex: -1
+                    property int dragTargetIndex: -1
+
+                    Rectangle {
+                        anchors.fill: parent
+                        z: -2
+                        color: freeCell.keyboardFocused ? Md3Theme.colorScheme.primaryContainer
+                              : (freeCell.highlighted ? Md3Theme.colorScheme.secondaryContainer : "transparent")
+                        border.width: freeCell.keyboardFocused && tableFocus.activeFocus ? 2 : 0
+                        border.color: Md3Theme.colorScheme.secondary
+                    }
+
+                    Item {
+                        anchors.fill: parent
+                        visible: freeCell.cellKind === Md3TableGridModel.SelectionCell
+                        Md3Checkbox {
+                            anchors.centerIn: parent
+                            checked: freeCell.checked
+                            onToggled: function (state) {
+                                root._setSelected(freeCell.sourceIndex, state === Qt.Checked)
+                            }
+                        }
+                    }
+
+                    DataCell {
+                        anchors.fill: parent
+                        visible: freeCell.cellKind === Md3TableGridModel.DataCell
+                        rowData: freeCell.rowData
+                        columnDef: root.columns[freeCell.columnIndex]
+                        columnIndex: freeCell.columnIndex
+                        sourceIndex: freeCell.sourceIndex
+                    }
+
+                    Item {
+                        anchors.fill: parent
+                        visible: freeCell.cellKind === Md3TableGridModel.ActionsCell
+                        Md3IconButton {
+                            id: freeMoreBtn
+                            anchors.centerIn: parent
+                            icon: "more_vert"
+                            accessibleName: qsTr("Row actions")
+                            onClicked: root.openRowMenu(freeCell.sourceIndex, freeMoreBtn)
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        enabled: freeCell.cellKind === Md3TableGridModel.DataCell
+                        z: -1
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+                        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                        onClicked: function (mouse) {
+                            root.focusedPageRow = freeCell.row
+                            root.selectedRow = freeCell.sourceIndex
+                            root.rowClicked(freeCell.sourceIndex)
+                            tableFocus.forceActiveFocus()
+                        }
+                        onDoubleClicked: {
+                            const cols = root.columns || []
+                            for (let i = 0; i < cols.length; ++i) {
+                                if (cols[i] && cols[i].editable === true) {
+                                    root.beginCellEdit(freeCell.sourceIndex, i)
+                                    return
+                                }
+                            }
+                            root.rowDoubleClicked(freeCell.sourceIndex)
+                            root.rowActivated(freeCell.sourceIndex)
+                        }
+                    }
+
+                    DragHandler {
+                        enabled: root.rowReorderEnabled && freeCell.cellKind === Md3TableGridModel.DataCell
+                        target: null
+                        onActiveChanged: {
+                            if (active) {
+                                freeCell.dragFromIndex = freeCell.sourceIndex
+                                freeCell.dragTargetIndex = freeCell.sourceIndex
+                            } else if (freeCell.dragFromIndex >= 0 && freeCell.dragTargetIndex >= 0
+                                       && freeCell.dragFromIndex !== freeCell.dragTargetIndex) {
+                                if (root.autoReorderRows)
+                                    root.moveRow(freeCell.dragFromIndex, freeCell.dragTargetIndex)
+                                else
+                                    root.rowOrderChanged(freeCell.dragFromIndex, freeCell.dragTargetIndex)
+                            }
+                        }
+                        onTranslationChanged: {
+                            if (!active || freeCell.dragFromIndex < 0)
+                                return
+                            const y = freeCell.mapToItem(freeBody, 0, translation.y).y + freeBody.contentY
+                            const idx = Math.max(0, Math.min(root.pageEntries.length - 1, Math.floor(y / root.rowHeight)))
+                            const target = root.pageEntries[idx]
+                            if (target)
+                                freeCell.dragTargetIndex = target.sourceIndex
+                        }
+                    }
+
+                    Md3Divider {
+                        anchors.bottom: parent.bottom
+                        width: parent.width
+                    }
                 }
             }
         }

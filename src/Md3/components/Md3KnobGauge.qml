@@ -37,6 +37,40 @@ Item {
     focus: true
     activeFocusOnTab: interactive
 
+
+    property var hostWindow: null
+    property bool _treeShown: true
+    property bool _paintPending: false
+
+    function _refreshTreeShown() {
+        const ok = Md3TreeVisibility.isSceneActive(root, root.hostWindow)
+        if (_treeShown !== ok)
+            _treeShown = ok
+        if (_treeShown && _paintPending)
+            _requestPaint()
+    }
+
+    function _requestPaint() {
+        if (!_treeShown) {
+            _paintPending = true
+            return
+        }
+        _paintPending = false
+        canvas.requestPaint()
+    }
+
+    Timer {
+        interval: 2000
+        running: root.visible
+        repeat: true
+        onTriggered: root._refreshTreeShown()
+    }
+    Connections {
+        target: Qt.application
+        function onStateChanged() { root._refreshTreeShown() }
+    }
+    onVisibleChanged: root._refreshTreeShown()
+
     Accessible.role: Accessible.Dial
     Accessible.name: label.length ? label : qsTr("Knob")
     // Accessible.value is not available on Item in all Qt 6.x kits — use description.
@@ -183,12 +217,12 @@ Item {
         }
     }
 
-    onValueChanged: canvas.requestPaint()
-    onKnobColorChanged: canvas.requestPaint()
-    onTrackColorChanged: canvas.requestPaint()
-    onWidthChanged: canvas.requestPaint()
-    onHeightChanged: canvas.requestPaint()
-    Component.onCompleted: canvas.requestPaint()
+    onValueChanged: root._requestPaint()
+    onKnobColorChanged: root._requestPaint()
+    onTrackColorChanged: root._requestPaint()
+    onWidthChanged: root._requestPaint()
+    onHeightChanged: root._requestPaint()
+    Component.onCompleted: { root._refreshTreeShown(); root._requestPaint() }
 
     Md3FocusRing {
         anchors.horizontalCenter: canvas.horizontalCenter

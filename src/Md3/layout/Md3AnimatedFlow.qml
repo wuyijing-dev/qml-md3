@@ -217,23 +217,37 @@ Item {
     onTopPaddingChanged: Qt.callLater(relayout)
     onBottomPaddingChanged: Qt.callLater(relayout)
     onAlignmentChanged: Qt.callLater(relayout)
-    Component.onCompleted: Qt.callLater(relayout)
 
     Connections {
         target: host
         function onChildrenChanged() {
             root._sizeCache = ({})
+            root._hookChildSizeWatchers()
             Qt.callLater(root.relayout)
         }
     }
 
-    Timer {
-        interval: 120
-        running: root.visible && host.children.length > 0
-        repeat: true
-        onTriggered: {
-            if (root._sizesDirty())
-                root.relayout()
+    function _hookChildSizeWatchers() {
+        const kids = host.children
+        for (let i = 0; i < kids.length; ++i) {
+            const c = kids[i]
+            if (!c || c._md3FlowHooked)
+                continue
+            c._md3FlowHooked = true
+            c.implicitWidthChanged.connect(root._scheduleRelayout)
+            c.implicitHeightChanged.connect(root._scheduleRelayout)
+            c.visibleChanged.connect(root._scheduleRelayout)
+            c.widthChanged.connect(root._scheduleRelayout)
+            c.heightChanged.connect(root._scheduleRelayout)
         }
+    }
+
+    function _scheduleRelayout() {
+        Qt.callLater(root.relayout)
+    }
+
+    Component.onCompleted: {
+        _hookChildSizeWatchers()
+        Qt.callLater(relayout)
     }
 }
