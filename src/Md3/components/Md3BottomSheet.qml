@@ -11,6 +11,8 @@ Item {
     property string text: ""
     property string confirmText: ""
     property string dismissText: ""
+    /// Drag distance (px) before release dismisses the sheet.
+    property real dismissDragThreshold: 96
     default property alias content: bodySlot.data
 
     signal dismissed()
@@ -19,8 +21,69 @@ Item {
     anchors.fill: parent
     visible: open || sheet.y < height - 0.5 || scrim.opacity > 0.01
     z: 900
+    focus: open
     Accessible.role: Accessible.Dialog
     Accessible.name: title.length ? title : qsTr("Bottom sheet")
+
+    property var _restoreFocus: null
+    property real _dragOffset: 0
+    property bool _dragging: false
+
+    function accept() {
+        open = false
+        confirmed()
+        _restore()
+    }
+
+    function reject() {
+        open = false
+        dismissed()
+        _restore()
+    }
+
+    function _restore() {
+        _dragOffset = 0
+        _dragging = false
+        const f = _restoreFocus
+        _restoreFocus = null
+        if (f && typeof f.forceActiveFocus === "function")
+            Qt.callLater(function () {
+                try { f.forceActiveFocus() } catch (e) { /* destroyed */ }
+            })
+    }
+
+    onOpenChanged: {
+        if (open) {
+            _dragOffset = 0
+            const win = Md3OverlayHost.resolveWindow(null, root)
+            if (win && win.activeFocusItem)
+                _restoreFocus = win.activeFocusItem
+            forceActiveFocus()
+            Qt.callLater(function () {
+                if (!open)
+                    return
+                if (confirmBtn.visible)
+                    confirmBtn.forceActiveFocus()
+                else if (dismissBtn.visible)
+                    dismissBtn.forceActiveFocus()
+            })
+        } else if (!_dragging) {
+            _dragOffset = 0
+        }
+    }
+
+    Keys.onPressed: function (event) {
+        if (!open)
+            return
+        if (event.key === Qt.Key_Escape) {
+            reject()
+            event.accepted = true
+        } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+            if (confirmText.length > 0)
+                accept()
+            event.accepted = true
+        }
+    }
 
     Rectangle {
         id: scrim
@@ -39,10 +102,7 @@ Item {
             anchors.fill: parent
             enabled: root.open && root.modal
             cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-            onClicked: {
-                root.open = false
-                root.dismissed()
-            }
+            onClicked: root.reject()
         }
     }
 
@@ -60,13 +120,14 @@ Item {
                 ? root.maxSheetHeight
                 : Math.min(root.maxSheetHeight,
                            sheetBody.contentImplicitHeight + root._chromeH)
-        y: root.open ? parent.height - height : parent.height
+        y: (root.open ? parent.height - height : parent.height) + root._dragOffset
         radius: 0
         topLeftRadius: Md3Theme.shape.extraLarge
         topRightRadius: Md3Theme.shape.extraLarge
         color: Md3Theme.colorScheme.surfaceContainerLow
 
         Behavior on y {
+            enabled: !root._dragging
             NumberAnimation {
                 duration: Md3Motion.spatialDuration
                 easing.type: Easing.BezierSpline
@@ -74,14 +135,45 @@ Item {
             }
         }
 
-        Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
+        // Drag handle hit area (visual bar + dismiss gesture)
+        Item {
+            id: handleZone
+            anchors.left: parent.left
+            anchors.right: parent.right
             anchors.top: parent.top
-            anchors.topMargin: 16
-            width: 32
-            height: 4
-            radius: 2
-            color: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.colorOnSurfaceVariant, 0.4)
+            height: 36
+            z: 2
+
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 16
+                width: 32
+                height: 4
+                radius: 2
+                color: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.colorOnSurfaceVariant, 0.4)
+            }
+
+            DragHandler {
+                id: sheetDrag
+                target: null
+                enabled: root.open
+                yAxis.enabled: true
+                xAxis.enabled: false
+                onActiveChanged: {
+                    root._dragging = active
+                    if (!active) {
+                        if (root._dragOffset >= root.dismissDragThreshold)
+                            root.reject()
+                        else
+                            root._dragOffset = 0
+                    }
+                }
+                onTranslationChanged: {
+                    if (active)
+                        root._dragOffset = Math.max(0, translation.y)
+                }
+            }
         }
 
         Md3VStack {
@@ -135,22 +227,18 @@ Item {
                 spacing: 8
                 Md3Spacer { expand: true }
                 Md3Button {
+                    id: dismissBtn
                     visible: root.dismissText.length > 0
                     text: root.dismissText
                     variant: Md3Button.Text
-                    onClicked: {
-                        root.open = false
-                        root.dismissed()
-                    }
+                    onClicked: root.reject()
                 }
                 Md3Button {
+                    id: confirmBtn
                     visible: root.confirmText.length > 0
                     text: root.confirmText
                     variant: Md3Button.Text
-                    onClicked: {
-                        root.open = false
-                        root.confirmed()
-                    }
+                    onClicked: root.accept()
                 }
             }
         }

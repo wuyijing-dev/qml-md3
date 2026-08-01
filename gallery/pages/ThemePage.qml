@@ -431,6 +431,8 @@ Flickable {
                 accessibleName: qsTr("减弱动效")
                 onToggled: function (on) {
                     Md3Theme.reduceMotion = on
+                    Md3AppSettings.setValue("a11y/reduceMotion", on)
+                    Md3AppSettings.sync()
                     Md3Accessibility.announce(on ? qsTr("已开启减弱动效") : qsTr("已关闭减弱动效"))
                 }
             }

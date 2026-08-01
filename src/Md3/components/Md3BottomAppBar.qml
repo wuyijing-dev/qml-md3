@@ -14,7 +14,7 @@ Rectangle {
     Accessible.name: qsTr("Bottom app bar")
 
     width: parent ? parent.width : 360
-    height: 80
+    height: Md3Theme.bottomBarHeight
     color: Md3Theme.colorScheme.surfaceContainer
 
     Row {

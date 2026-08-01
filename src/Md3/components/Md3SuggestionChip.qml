@@ -16,7 +16,7 @@ Md3AbstractButton {
     pressTarget: bg
     onPressFeedback: function (x, y) { ripple.pulse(x, y) }
 
-    implicitHeight: 32
+    implicitHeight: Md3Theme.chipHeight
     implicitWidth: label.implicitWidth + 24
     height: implicitHeight
     width: implicitWidth

@@ -63,7 +63,7 @@ Item {
             owner.childMenu.dismiss()
     }
 
-    height: 48
+    height: Md3Theme.controlHeight + 8
     width: parent ? parent.width : 200
     implicitWidth: Math.max(168, 12 + 24 + 12 + textMetrics.width + 12
                             + ((resolvedTrailing.length > 0 || showCheck) ? 36 : 0) + 12)
@@ -86,7 +86,7 @@ Item {
         anchors.fill: parent
         anchors.leftMargin: 8
         anchors.rightMargin: 8
-        height: 40
+        height: Md3Theme.controlHeight
         anchors.verticalCenter: parent.verticalCenter
         radius: root.itemRadius
         color: root.selected ? Md3Theme.colorScheme.secondaryContainer : "transparent"

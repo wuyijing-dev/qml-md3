@@ -19,7 +19,7 @@ Md3AbstractButton {
 
     signal removed()
 
-    implicitHeight: 32
+    implicitHeight: Md3Theme.chipHeight
     implicitWidth: row.implicitWidth + 4
     height: implicitHeight
     width: implicitWidth

@@ -9,7 +9,7 @@ Item {
 
     property var model: []
     property Component delegate: null
-    property real itemHeight: 40
+    property real itemHeight: Md3Theme.tableRowHeight
     property bool clipContent: true
     property int cacheBufferPx: 800
     property int currentIndex: -1
@@ -79,6 +79,50 @@ Item {
         currentIndex: root.currentIndex
         boundsBehavior: Flickable.StopAtBounds
         visible: model && model.length > 0
+        focus: true
+        activeFocusOnTab: true
+
+        Keys.onPressed: function (event) {
+            const n = root.model ? root.model.length : 0
+            if (n <= 0)
+                return
+            if (event.key === Qt.Key_Up) {
+                if (currentIndex > 0) {
+                    currentIndex = currentIndex - 1
+                    root.currentIndexChangedByUser(currentIndex, root.model[currentIndex])
+                    positionViewAtIndex(currentIndex, ListView.Contain)
+                }
+                event.accepted = true
+            } else if (event.key === Qt.Key_Down) {
+                if (currentIndex < 0)
+                    currentIndex = 0
+                else if (currentIndex < n - 1)
+                    currentIndex = currentIndex + 1
+                else {
+                    event.accepted = true
+                    return
+                }
+                root.currentIndexChangedByUser(currentIndex, root.model[currentIndex])
+                positionViewAtIndex(currentIndex, ListView.Contain)
+                event.accepted = true
+            } else if (event.key === Qt.Key_Home) {
+                currentIndex = 0
+                root.currentIndexChangedByUser(0, root.model[0])
+                positionViewAtIndex(0, ListView.Beginning)
+                event.accepted = true
+            } else if (event.key === Qt.Key_End) {
+                currentIndex = n - 1
+                root.currentIndexChangedByUser(currentIndex, root.model[currentIndex])
+                positionViewAtIndex(currentIndex, ListView.End)
+                event.accepted = true
+            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter
+                       || event.key === Qt.Key_Space) {
+                if (currentIndex >= 0) {
+                    root.itemActivated(currentIndex, root.model[currentIndex])
+                    event.accepted = true
+                }
+            }
+        }
 
         delegate: Loader {
             id: rowLoader

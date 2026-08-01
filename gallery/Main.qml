@@ -193,13 +193,11 @@ Md3ApplicationWindow {
     Component.onCompleted: {
         Md3AppSettings.organization = settingsOrganization
         Md3AppSettings.application = settingsApplication
+        // Honor persisted a11y/reduceMotion — do not force-clear (breaks motion verification).
         Qt.callLater(function () {
-            if (Md3Theme.reduceMotion) {
-                console.warn("Md3 Gallery: clearing stuck reduceMotion (was collapsing all motion to ~1ms)")
-                Md3Theme.reduceMotion = false
-            }
-            Md3AppSettings.setValue("a11y/reduceMotion", false)
-            Md3AppSettings.sync()
+            const saved = Md3AppSettings.value("a11y/reduceMotion", undefined)
+            if (saved !== undefined && saved !== null)
+                Md3Theme.reduceMotion = !!saved
         })
         if (!Md3AppSettings.value("tour/completed", false))
             Qt.callLater(function () { window.startTour() })

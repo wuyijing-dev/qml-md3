@@ -19,9 +19,17 @@ Md3AbstractButton {
     icon: "favorite"
     accessibleName: text.length ? text : (icon.length ? icon : qsTr("Icon button"))
 
-    readonly property real circleSize: 40
+    readonly property real circleSize: Md3Theme.iconCircleSize
     readonly property real circleRadius: circleSize / 2
     cornerRadius: circleRadius
+    scale: pressed ? 0.96 : 1
+    Behavior on scale {
+        NumberAnimation {
+            duration: Md3Motion.spatialSnapDuration
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Md3Motion.emphasized
+        }
+    }
 
     containerColor: {
         if (!enabled && variant !== Md3IconButton.Standard)
@@ -48,8 +56,8 @@ Md3AbstractButton {
     pressTarget: bg
     onPressFeedback: function (x, y) { ripple.pulse(x, y) }
 
-    width: 48
-    height: 48
+    width: Md3Theme.iconButtonSize
+    height: Md3Theme.iconButtonSize
 
     Item {
         id: bg

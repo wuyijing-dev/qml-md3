@@ -18,10 +18,29 @@ Item {
     signal closed()
 
     width: 280
-    height: 56
+    height: Md3Theme.fieldHeight
+    activeFocusOnTab: enabled
+    focus: true
 
     Accessible.role: Accessible.PopupMenu
     Accessible.name: label.length ? label : (text.length ? text : qsTr("Dropdown menu"))
+    Accessible.onPressAction: openMenu()
+
+    Keys.onPressed: function (event) {
+        if (!enabled)
+            return
+        if (event.key === Qt.Key_Escape && menu.open) {
+            menu.dismiss()
+            event.accepted = true
+            return
+        }
+        if (event.key === Qt.Key_Space || event.key === Qt.Key_Return
+                || event.key === Qt.Key_Enter || event.key === Qt.Key_Down) {
+            if (!menu.open)
+                openMenu()
+            event.accepted = true
+        }
+    }
 
     readonly property string displayText: {
         if (currentIndex >= 0 && currentIndex < model.length) {
@@ -56,11 +75,11 @@ Item {
         anchors.fill: parent
         radius: Md3Theme.shape.extraSmall
         color: "transparent"
-        border.width: menu.open || mouse.containsMouse ? 2 : 1
+        border.width: menu.open || mouse.containsMouse || root.activeFocus ? 2 : 1
         border.color: {
             if (!root.enabled)
                 return Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.colorOnSurface, 0.12)
-            if (menu.open)
+            if (menu.open || root.activeFocus)
                 return Md3Theme.colorScheme.primary
             return Md3Theme.colorScheme.outline
         }
@@ -84,6 +103,7 @@ Item {
             overlayColor: Md3Theme.colorScheme.colorOnSurface
             hovered: mouse.containsMouse
             pressed: mouse.pressed
+            focused: root.activeFocus
             controlEnabled: root.enabled
             radius: field.radius
         }

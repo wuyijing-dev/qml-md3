@@ -15,10 +15,10 @@ Md3AbstractButton {
 
     readonly property real h: {
         switch (size) {
-        case Md3Button.ExtraSmall: return 32
-        case Md3Button.Medium: return 56
-        case Md3Button.Large: return 96
-        default: return 40
+        case Md3Button.ExtraSmall: return Md3Theme.densityCompact ? 28 : 32
+        case Md3Button.Medium: return Md3Theme.fieldHeight
+        case Md3Button.Large: return Md3Theme.densityCompact ? 80 : 96
+        default: return Md3Theme.controlHeight
         }
     }
     readonly property real padH: size === Md3Button.ExtraSmall ? 12 : (size === Md3Button.Large ? 24 : 16)
@@ -57,8 +57,8 @@ Md3AbstractButton {
     pressTarget: bg
     onPressFeedback: function (x, y) { ripple.pulse(x, y) }
 
-    implicitWidth: Math.max(48, row.implicitWidth + padH * 2)
-    implicitHeight: Math.max(48, h)
+    implicitWidth: Math.max(Md3Theme.iconButtonSize, row.implicitWidth + padH * 2)
+    implicitHeight: Math.max(Md3Theme.iconButtonSize, h)
     width: implicitWidth
     height: implicitHeight
 

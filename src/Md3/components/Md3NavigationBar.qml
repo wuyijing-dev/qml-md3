@@ -13,11 +13,38 @@ Rectangle {
     readonly property real indicatorHeight: 32
 
     width: parent ? parent.width : 360
-    height: 80
+    height: Md3Theme.bottomBarHeight
     color: Md3Theme.colorScheme.surfaceContainer
+    activeFocusOnTab: true
+    focus: true
 
     Accessible.role: Accessible.PageTabList
     Accessible.name: qsTr("Navigation bar")
+
+    function _moveDest(delta) {
+        const n = model.length
+        if (n <= 0)
+            return
+        const next = (currentIndex + delta + n) % n
+        currentIndex = next
+        currentIndexChangedByUser(next)
+    }
+
+    Keys.onPressed: function (event) {
+        if (model.length <= 0)
+            return
+        if (event.key === Qt.Key_Left || event.key === Qt.Key_Up) {
+            _moveDest(-1)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Right || event.key === Qt.Key_Down) {
+            _moveDest(1)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Space || event.key === Qt.Key_Return
+                   || event.key === Qt.Key_Enter) {
+            currentIndexChangedByUser(currentIndex)
+            event.accepted = true
+        }
+    }
 
     // Shared sliding active indicator (behind destinations)
     Rectangle {
@@ -85,7 +112,7 @@ Rectangle {
                                                         : Md3Theme.colorScheme.colorOnSurfaceVariant
                             hovered: mouse.containsMouse
                             pressed: mouse.pressed
-                            focused: false
+                            focused: root.activeFocus && dest.selected
                             controlEnabled: true
                             radius: Md3Theme.shape.full
                         }

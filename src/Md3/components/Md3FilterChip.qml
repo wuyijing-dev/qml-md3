@@ -8,7 +8,7 @@ Md3AbstractButton {
 
     property bool elevated: false
     property bool selected: false
-    property real chipHeight: 32
+    property real chipHeight: Md3Theme.chipHeight
     property real iconSize: 18
     property real fontSize: Md3Theme.scaled(Md3Theme.typography.labelLarge.size)
 

@@ -171,7 +171,7 @@ Item {
     }
 
     implicitWidth: 280
-    implicitHeight: (multiline ? Math.max(56, input.contentHeight + 32) : 56)
+    implicitHeight: (multiline ? Math.max(Md3Theme.fieldHeight, input.contentHeight + 32) : Md3Theme.fieldHeight)
                     + (helper.length > 0 ? 20 : 0)
     width: implicitWidth
     height: implicitHeight
@@ -200,7 +200,7 @@ Item {
         Item {
             id: fieldBox
             width: parent.width
-            height: root.multiline ? Math.max(56, input.contentHeight + 32) : 56
+            height: root.multiline ? Math.max(Md3Theme.fieldHeight, input.contentHeight + 32) : Md3Theme.fieldHeight
 
             Rectangle {
                 id: fill

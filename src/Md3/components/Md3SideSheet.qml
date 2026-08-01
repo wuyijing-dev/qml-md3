@@ -24,11 +24,13 @@ Item {
     // Without guarding, `Behavior on x` would animate during resize even when open=false,
     // which makes the sheet briefly become visible.
     property bool _transitioning: false
+    property var _restoreFocus: null
 
     anchors.fill: parent
     visible: open || _transitioning
     z: 960
     clip: true
+    focus: open
 
     Accessible.role: Accessible.Dialog
     Accessible.name: title.length ? title : qsTr("Side sheet")
@@ -36,11 +38,36 @@ Item {
     function dismiss() {
         open = false
         dismissed()
+        const f = _restoreFocus
+        _restoreFocus = null
+        if (f && typeof f.forceActiveFocus === "function")
+            Qt.callLater(function () {
+                try { f.forceActiveFocus() } catch (e) { /* destroyed */ }
+            })
     }
 
     onOpenChanged: {
         _transitioning = true
         transitionTimer.restart()
+        if (open) {
+            const win = Md3OverlayHost.resolveWindow(null, root)
+            if (win && win.activeFocusItem)
+                _restoreFocus = win.activeFocusItem
+            forceActiveFocus()
+            Qt.callLater(function () {
+                if (open && closeBtn.visible)
+                    closeBtn.forceActiveFocus()
+            })
+        }
+    }
+
+    Keys.onPressed: function (event) {
+        if (!open)
+            return
+        if (event.key === Qt.Key_Escape) {
+            dismiss()
+            event.accepted = true
+        }
     }
 
     Timer {
@@ -114,7 +141,7 @@ Item {
 
             Item {
                 width: parent.width
-                height: root.title.length > 0 ? 64 : 12
+                height: root.title.length > 0 ? Md3Theme.appBarHeight : 12
                 visible: height > 12
 
                 Text {
@@ -144,7 +171,7 @@ Item {
             Md3ContainerBody {
                 id: sheetBody
                 width: parent.width
-                height: parent.height - (root.title.length > 0 ? 64 : 12)
+                height: parent.height - (root.title.length > 0 ? Md3Theme.appBarHeight : 12)
                 layoutMode: root.layoutMode
                 padding: 24
 

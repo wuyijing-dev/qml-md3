@@ -30,8 +30,22 @@ QtObject {
     readonly property real spacingXl: densityCompact ? 16 : 24
     /// Window / page content inset hint（`Md3ApplicationWindow.pagePadding` 可绑此值）
     readonly property real pagePadding: densityCompact ? 12 : 20
-    /// Default control row height hint（按钮/字段外壳；控件可自有高度）
+    /// Default control row height hint（按钮 Small / 菜单条）
     readonly property real controlHeight: densityCompact ? 36 : 40
+    /// Text field / Select / Dropdown shell height
+    readonly property real fieldHeight: densityCompact ? 48 : 56
+    /// Icon button outer hit target
+    readonly property real iconButtonSize: densityCompact ? 40 : 48
+    /// Icon button filled circle
+    readonly property real iconCircleSize: densityCompact ? 36 : 40
+    /// Assist / Filter / Input / Suggestion chip height
+    readonly property real chipHeight: densityCompact ? 28 : 32
+    /// Top app bar Small / fullscreen dialog chrome
+    readonly property real appBarHeight: densityCompact ? 56 : 64
+    /// Bottom app bar / navigation bar
+    readonly property real bottomBarHeight: densityCompact ? 68 : 80
+    /// Navigation rail / drawer destination row
+    readonly property real navDestinationHeight: densityCompact ? 48 : 56
     /// Data table row height hint（与 Md3DataTable Comfortable/Compact 对齐）
     readonly property real tableRowHeight: densityCompact ? 40 : 52
 

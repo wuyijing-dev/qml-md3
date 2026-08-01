@@ -17,9 +17,9 @@ Rectangle {
 
     readonly property real barHeight: {
         switch (size) {
-        case Md3TopAppBar.Medium: return 112
-        case Md3TopAppBar.Large: return 152
-        default: return 64
+        case Md3TopAppBar.Medium: return Md3Theme.densityCompact ? 96 : 112
+        case Md3TopAppBar.Large: return Md3Theme.densityCompact ? 128 : 152
+        default: return Md3Theme.appBarHeight
         }
     }
 
@@ -35,7 +35,7 @@ Rectangle {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        height: 64
+        height: Md3Theme.appBarHeight
         spacing: 4
         leftPadding: 4
         rightPadding: 4

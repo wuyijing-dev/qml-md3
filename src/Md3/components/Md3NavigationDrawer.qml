@@ -16,7 +16,7 @@ Item {
     signal currentIndexChangedByUser(int index)
     signal dismissed()
 
-    readonly property real destinationHeight: 56
+    readonly property real destinationHeight: Md3Theme.navDestinationHeight
     readonly property real destinationSpacing: 0
     readonly property real panelWidth: Math.min(drawerWidth, Math.max(0, width - startMargin))
 
@@ -25,9 +25,13 @@ Item {
     visible: open || drawer.x > -drawer.width + startMargin + 0.5 || scrim.opacity > 0.01
     z: 950
     clip: true // keep drawer/scrim inside host (e.g. gallery content pane)
+    focus: open
+    activeFocusOnTab: open
 
     Accessible.role: Accessible.Pane
     Accessible.name: title.length ? title : qsTr("Navigation drawer")
+
+    property var _restoreFocus: null
 
     function destinationY(index) {
         return index * (destinationHeight + destinationSpacing)
@@ -36,6 +40,51 @@ Item {
     function dismiss() {
         open = false
         dismissed()
+        const f = _restoreFocus
+        _restoreFocus = null
+        if (f && typeof f.forceActiveFocus === "function")
+            Qt.callLater(function () {
+                try { f.forceActiveFocus() } catch (e) { /* destroyed */ }
+            })
+    }
+
+    function _moveDest(delta) {
+        const n = model.length
+        if (n <= 0)
+            return
+        const next = (currentIndex + delta + n) % n
+        currentIndex = next
+        currentIndexChangedByUser(next)
+    }
+
+    onOpenChanged: {
+        if (open) {
+            const win = Md3OverlayHost.resolveWindow(null, root)
+            if (win && win.activeFocusItem)
+                _restoreFocus = win.activeFocusItem
+            forceActiveFocus()
+        }
+    }
+
+    Keys.onPressed: function (event) {
+        if (!open)
+            return
+        if (event.key === Qt.Key_Escape) {
+            dismiss()
+            event.accepted = true
+        } else if (event.key === Qt.Key_Up || event.key === Qt.Key_Left) {
+            _moveDest(-1)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Right) {
+            _moveDest(1)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Space || event.key === Qt.Key_Return
+                   || event.key === Qt.Key_Enter) {
+            currentIndexChangedByUser(currentIndex)
+            if (modal)
+                dismiss()
+            event.accepted = true
+        }
     }
 
     Rectangle {
@@ -159,7 +208,7 @@ Item {
                                                         : Md3Theme.colorScheme.colorOnSurface
                             hovered: mouse.containsMouse
                             pressed: mouse.pressed
-                            focused: false
+                            focused: root.activeFocus && dest.selected
                             controlEnabled: true
                             radius: Md3Theme.shape.full
                         }

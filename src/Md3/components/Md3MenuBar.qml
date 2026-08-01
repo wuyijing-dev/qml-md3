@@ -8,15 +8,50 @@ Rectangle {
     property var model: []
     /// Optional explicit Window for menu overlay (else Window.window).
     property var overlayWindow: null
+    /// Keyboard highlight among top-level menus.
+    property int highlightedIndex: 0
     signal itemClicked(string path)
 
-    implicitHeight: 48
+    implicitHeight: Md3Theme.controlHeight + 8
     height: implicitHeight
     width: parent ? parent.width : 400
     color: Md3Theme.colorScheme.surfaceContainer
+    activeFocusOnTab: true
+    focus: true
 
     Accessible.role: Accessible.MenuBar
     Accessible.name: qsTr("Menu bar")
+
+    function _openAt(index) {
+        const dest = menuRepeater.itemAt(index)
+        if (dest)
+            _popupFor(dest)
+    }
+
+    Keys.onPressed: function (event) {
+        const n = model ? model.length : 0
+        if (n <= 0)
+            return
+        if (event.key === Qt.Key_Left) {
+            highlightedIndex = (highlightedIndex - 1 + n) % n
+            if (menu.open)
+                _openAt(highlightedIndex)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Right) {
+            highlightedIndex = (highlightedIndex + 1) % n
+            if (menu.open)
+                _openAt(highlightedIndex)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Return
+                   || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
+            _openAt(highlightedIndex)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Escape) {
+            if (menu.open)
+                menu.dismiss()
+            event.accepted = true
+        }
+    }
 
     function _kidsOf(entry) {
         if (!entry)
@@ -105,6 +140,7 @@ Rectangle {
         spacing: 0
 
         Repeater {
+            id: menuRepeater
             model: root.model
 
             delegate: Item {
@@ -140,7 +176,8 @@ Rectangle {
                     anchors.fill: parent
                     anchors.margins: 4
                     radius: Md3Theme.shape.small
-                    color: menu.open && menu.anchorIndex === dest.index
+                    color: (menu.open && menu.anchorIndex === dest.index)
+                           || (root.activeFocus && root.highlightedIndex === dest.index)
                            ? Md3Theme.colorScheme.secondaryContainer
                            : (mouse.containsMouse
                               ? Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.colorOnSurface, 0.08)
@@ -160,7 +197,10 @@ Rectangle {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root._popupFor(dest)
+                    onClicked: {
+                        root.highlightedIndex = dest.index
+                        root._popupFor(dest)
+                    }
                 }
             }
         }

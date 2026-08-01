@@ -25,15 +25,17 @@ Rectangle {
     /// True while the destination list is being flicked/dragged.
     readonly property bool scrolling: flick.moving || flick.dragging
 
-    readonly property real destinationHeight: 56
+    readonly property real destinationHeight: Md3Theme.navDestinationHeight
     readonly property real destinationSpacing: 4
     readonly property real indicatorInset: 12
     readonly property real collapsedIndicatorWidth: 56
-    readonly property real collapsedIndicatorHeight: 32
+    readonly property real collapsedIndicatorHeight: Md3Theme.densityCompact ? 28 : 32
     readonly property int expandDuration: Md3Motion.spatialDuration
 
     width: expanded ? 256 : 80
     height: parent ? parent.height : 400
+    activeFocusOnTab: true
+    focus: true
     color: {
         const w = Md3OverlayHost.resolveWindow(root.hostWindow, root)
         if (w && w.usesSystemBackdrop) {
@@ -43,6 +45,45 @@ Rectangle {
         return Md3Theme.colorScheme.surface
     }
     clip: true
+
+    Accessible.role: Accessible.PageTabList
+    Accessible.name: qsTr("Navigation rail")
+
+    function _orderedDestIndices() {
+        const out = []
+        const main = model || []
+        for (let i = 0; i < main.length; ++i)
+            out.push(destIndexOf(main[i], i))
+        const foot = footerModel || []
+        for (let i = 0; i < foot.length; ++i)
+            out.push(destIndexOf(foot[i], main.length + i))
+        return out
+    }
+
+    function _moveDest(delta) {
+        const ids = _orderedDestIndices()
+        if (ids.length <= 0)
+            return
+        let at = ids.indexOf(currentIndex)
+        if (at < 0)
+            at = 0
+        const next = ids[(at + delta + ids.length) % ids.length]
+        _selectDest(next)
+    }
+
+    Keys.onPressed: function (event) {
+        if (event.key === Qt.Key_Up || event.key === Qt.Key_Left) {
+            _moveDest(-1)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Right) {
+            _moveDest(1)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Space || event.key === Qt.Key_Return
+                   || event.key === Qt.Key_Enter) {
+            _selectDest(currentIndex)
+            event.accepted = true
+        }
+    }
 
     Behavior on width {
         NumberAnimation {
@@ -136,7 +177,7 @@ Rectangle {
                                                 : Md3Theme.colorScheme.colorOnSurfaceVariant
                     hovered: mouse.containsMouse
                     pressed: mouse.pressed
-                    focused: false
+                    focused: root.activeFocus && dest.selected
                     controlEnabled: true
                     radius: Md3Theme.shape.full
                 }
