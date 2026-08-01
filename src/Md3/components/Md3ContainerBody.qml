@@ -55,8 +55,7 @@ Item {
         contentWidth: width
         contentHeight: {
             const intrinsic = contentImplicitHeight + root.padding * 2
-            if (root.layoutMode === Md3ContainerBody.Fit)
-                return Math.max(intrinsic, height)
+            // Do not fold flick.height into contentHeight — fights parent height bindings.
             return Math.max(intrinsic, 1)
         }
         interactive: root.layoutMode === Md3ContainerBody.Scroll

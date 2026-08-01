@@ -23,10 +23,15 @@ Item {
     signal clicked()
     signal actionClicked(int index)
 
-    // Intrinsic only — never bind width/height to implicit* (Layout + fill children loop).
-    // HeightSync AtLeastImplicit raises unset height for Column; does not fight explicit height.
-    implicitWidth: Math.max(280, contentHost.contentImplicitWidth + padding * 2)
-    implicitHeight: contentHost.contentImplicitHeight + padding * 2
+    // Intrinsic from header + body measure — never from contentHost.height (binding loop).
+    // Width is parent-driven in Gallery/app layouts; keep a stable minimum only.
+    implicitWidth: 280
+    implicitHeight: {
+        const headerH = hasHeader ? (headerRow.implicitHeight + cardStack.spacing) : 0
+        const bodyH = bodySlot.hasFillChild ? bodySlot.fillFallback
+                                            : Math.max(0, bodySlot.contentHeight)
+        return Math.max(1, headerH + bodyH + padding * 2)
+    }
     readonly property Md3HeightSync _heightSync: Md3HeightSync {
         target: root
         enabled: !root.anchors.fill
@@ -97,32 +102,14 @@ Item {
 
         Md3ContainerBody {
             id: contentHost
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
+            anchors.fill: parent
             anchors.margins: root.padding
             layoutMode: root.layoutMode
-            // Break contentHost ↔ root.implicitHeight feedback when auto-sized.
-            height: {
-                const autoSized = Math.abs(root.height - root.implicitHeight) <= 1.5
-                if (!autoSized && root.height >= root.padding * 2 + 1)
-                    return root.height - root.padding * 2
-                return implicitHeight
-            }
+            // No height: f(implicitHeight) — that loops with content measure / HeightSync.
 
             Md3VStack {
                 id: cardStack
-                width: parent.width
-                // Prefer ContainerBody viewport height when the card is explicitly sized.
-                // Parent of this VStack is ContainerBody's inner Item (often height 0);
-                // expand children need a real stack height or lists/grids stay empty.
-                height: {
-                    const viewport = contentHost.height
-                    const autoSized = Math.abs(root.height - root.implicitHeight) <= 1.5
-                    if (!autoSized && viewport > 1)
-                        return viewport
-                    return implicitHeight
-                }
+                anchors.fill: parent
                 spacing: 8
                 fillWidth: true
 
