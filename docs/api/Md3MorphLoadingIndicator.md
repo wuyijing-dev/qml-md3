@@ -33,6 +33,7 @@ import Md3
 | `morphPhase` | `real` | `0` | read/write | `Md3MorphLoadingIndicator` | — |
 | `spin` | `real` | `0` | read/write | `Md3MorphLoadingIndicator` | — |
 | `hostWindow` | `var` | `null` | read/write | `Md3MorphLoadingIndicator` | Optional Window for scene-active checks (else OverlayHost). |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3MorphLoadingIndicator` | Drop Shape geometry while page is off-display. |
 | `box` | `real` | `{…}` | readonly | `Md3MorphLoadingIndicator` | — |
 | `sceneActive` | `bool` | `enabled && _treeShown && indeterminate` | readonly | `Md3MorphLoadingIndicator` | — |
 

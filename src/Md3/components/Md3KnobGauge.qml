@@ -76,7 +76,6 @@ Item {
         function onStateChanged() { root._refreshTreeShown() }
     }
     onVisibleChanged: root._refreshTreeShown()
-    Component.onCompleted: root._refreshTreeShown()
 
     Accessible.role: Accessible.Dial
     Accessible.name: label.length ? label : qsTr("Knob")

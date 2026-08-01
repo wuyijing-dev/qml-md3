@@ -28,6 +28,7 @@ import Md3
 | `indicatorColor` | `color` | `Md3Theme.colorScheme.primary` | read/write | `Md3LoadingIndicator` | — |
 | `trackColor` | `color` | `Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.primary, 0.2)` | read/write | `Md3LoadingIndicator` | — |
 | `hostWindow` | `var` | `null` | read/write | `Md3LoadingIndicator` | Optional Window for scene-active checks (else OverlayHost). |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3LoadingIndicator` | Drop Shape geometry while page is off-display. |
 | `strokeWidth` | `real` | `{…}` | read/write | `Md3LoadingIndicator` | — |
 | `indicatorSize` | `real` | `{…}` | read/write | `Md3LoadingIndicator` | — |
 | `sceneActive` | `bool` | `enabled && _treeShown` | readonly | `Md3LoadingIndicator` | — |

@@ -70,11 +70,38 @@ Item {
     readonly property bool viewMoving: gestureActive || Math.abs(_panVelocity) > 1e-5
 
     property bool paused: false
-    /// Page/window/app visibility — no per-scroll mapToItem (that starved the UI thread / rail).
-    readonly property bool chartActive: !paused && enabled
-            && Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
+    /// Drop Canvas/Shape while page is off-display (PageHost `md3PageActive`).
+    property bool unloadWhenPageInactive: true
+    /// Page/window/app visibility — Gate tracks `md3PageActive` (bindings alone do not).
+    readonly property bool chartActive: !paused && enabled && pageGate.contentActive
+            && _sceneLive
 
+    property bool _sceneLive: true
     property int renderedPointCount: 0
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
+
+    function _refreshSceneLive() {
+        const ok = Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
+        if (_sceneLive !== ok)
+            _sceneLive = ok
+    }
+
+    Connections {
+        target: pageGate
+        function onContentActiveChanged() { root._refreshSceneLive() }
+    }
+    Connections {
+        target: Qt.application
+        function onStateChanged() { root._refreshSceneLive() }
+    }
+    onVisibleChanged: _refreshSceneLive()
+    onEnabledChanged: _refreshSceneLive()
+    Component.onCompleted: _refreshSceneLive()
 
     signal cleared()
     signal rebuilt()

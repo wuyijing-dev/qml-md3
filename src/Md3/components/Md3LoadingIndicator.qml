@@ -16,6 +16,8 @@ Item {
     property color trackColor: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.primary, 0.2)
     /// Optional Window for scene-active checks (else OverlayHost).
     property var hostWindow: null
+    /// Drop Shape geometry while page is off-display.
+    property bool unloadWhenPageInactive: true
     property real strokeWidth: {
         switch (sizePreset) {
         case Md3LoadingIndicator.Small: return 3
@@ -36,41 +38,29 @@ Item {
     readonly property real radius: indicatorSize / 2 - strokeWidth
     readonly property real _spinMs: Math.max(800, Md3Motion.progressSpin)
 
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
+
     function _refreshTreeShown() {
-        const ok = Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
+        const ok = pageGate.contentActive
+                && Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
         if (_treeShown !== ok)
             _treeShown = ok
     }
 
-    function syncDeterminate() {
-        if (indeterminate) {
-            indArc.sweepAngle = -220
-            indicatorShape.rotation = 0
-            return
-        }
-        indArc.sweepAngle = -360 * Math.max(0.001, Math.min(1, value))
-        indicatorShape.rotation = 0
-    }
-
-    Timer {
-        interval: 2000
-        running: root.enabled && root.indeterminate
-        repeat: true
-        onTriggered: root._refreshTreeShown()
+    Connections {
+        target: pageGate
+        function onContentActiveChanged() { root._refreshTreeShown() }
     }
     Connections {
         target: Qt.application
         function onStateChanged() { root._refreshTreeShown() }
     }
-    Component.onCompleted: {
-        _refreshTreeShown()
-        syncDeterminate()
-    }
-    onVisibleChanged: {
-        _refreshTreeShown()
-        if (visible)
-            syncDeterminate()
-    }
+    onVisibleChanged: _refreshTreeShown()
+    Component.onCompleted: _refreshTreeShown()
 
     implicitWidth: Math.max(indicatorSize, labelItem.visible ? labelItem.implicitWidth : 0)
     implicitHeight: indicatorSize + (labelItem.visible ? labelItem.implicitHeight + 8 : 0)
@@ -81,10 +71,56 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: 8
 
-        Item {
+        Loader {
             width: root.indicatorSize
             height: root.indicatorSize
             anchors.horizontalCenter: parent.horizontalCenter
+            active: pageGate.contentActive
+            sourceComponent: dialComp
+        }
+
+        Text {
+            id: labelItem
+            visible: root.label.length > 0
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: root.label
+            color: Md3Theme.colorScheme.colorOnSurfaceVariant
+            font.pixelSize: Md3Theme.typography.bodySmall.size
+            font.family: Md3Theme.typography.fontFamily
+            horizontalAlignment: Text.AlignHCenter
+        }
+    }
+
+    Component {
+        id: dialComp
+        Item {
+            id: dial
+            width: root.indicatorSize
+            height: root.indicatorSize
+
+            function syncDeterminate() {
+                if (root.indeterminate) {
+                    indArc.sweepAngle = -220
+                    indicatorShape.rotation = 0
+                    return
+                }
+                indArc.sweepAngle = -360 * Math.max(0.001, Math.min(1, root.value))
+                indicatorShape.rotation = 0
+            }
+
+            Component.onCompleted: syncDeterminate()
+
+            Connections {
+                target: root
+                function onValueChanged() {
+                    if (!root.indeterminate)
+                        dial.syncDeterminate()
+                }
+                function onIndeterminateChanged() {
+                    indicatorShape.rotation = 0
+                    dial.syncDeterminate()
+                }
+            }
 
             Shape {
                 anchors.fill: parent
@@ -139,22 +175,5 @@ Item {
                 }
             }
         }
-
-        Text {
-            id: labelItem
-            visible: root.label.length > 0
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: root.label
-            color: Md3Theme.colorScheme.colorOnSurfaceVariant
-            font.pixelSize: Md3Theme.typography.bodySmall.size
-            font.family: Md3Theme.typography.fontFamily
-            horizontalAlignment: Text.AlignHCenter
-        }
-    }
-
-    onValueChanged: if (!indeterminate) syncDeterminate()
-    onIndeterminateChanged: {
-        indicatorShape.rotation = 0
-        syncDeterminate()
     }
 }

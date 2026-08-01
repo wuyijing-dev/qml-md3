@@ -7,6 +7,8 @@ Flickable {
     contentHeight: col.implicitHeight
     clip: true
 
+    property bool md3PageActive: true
+
     property var scanFindings: []
     property int scanCount: -1
 

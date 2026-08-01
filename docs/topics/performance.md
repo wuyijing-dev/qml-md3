@@ -51,6 +51,10 @@ Industry UI stacks converge on the same rules Md3 applies:
 35. **Shape gauges** — Gauge/Ring/Half/ArcBand (+ Needle dial) Loader on `md3PageActive`; Canvas gauges use PageActivityGate (no 2s/6s poll).
 36. **BulletChart** — qualitative bands clear while page inactive.
 37. **Docs** — `Md3PageActivityGate` API; `md3PageActive` / `pagePrefetchL1` on Page/ApplicationWindow; perf guards point at `docs/topics/performance.md`.
+38. **`Md3Chart.chartActive`** — `Md3PageActivityGate` so Canvas/Shape charts unload when `md3PageActive` flips (bindings alone do not track ancestor page props).
+39. **Progress indicators** — Circular / Linear / Loading / Morph: Gate + Loader drop Shape trees; no 2s visibility poll.
+40. **Gallery** — Accessibility/Chips/Fab/Selection/TextFields declare `md3PageActive`; WindowPage platform Loaders require `md3PageActive`.
+41. **Canvas gauges** — remove duplicate `Component.onCompleted` (refresh + paint once).
 
 ### Author checklist (auto-unload vs not)
 
@@ -61,6 +65,7 @@ Industry UI stacks converge on the same rules Md3 applies:
 | Date/Time pickers, DeferredSection | Always-on overlays you want to keep warm |
 | Bar/Pie/Line/Scatter/Radar/… Canvas charts | — |
 | Shape + Canvas gauges, BulletChart | — |
+| Circular / Linear / Loading / Morph progress | — |
 
 **Gallery ≠ embedded default:** Gallery uses Profile F (L1≈3, `pagePrefetchL1: false`, `pageL2Warm: true`). Library defaults stay lean (`pageCacheLimit: 1`, L2Warm off). Prefer system window corners / backdrop over custom full-window radius mask on weak GPUs (`roundedCorners` + `systemBackdrop: 0` keeps a chrome FBO). Ship `MD3_QML_CACHEGEN=ON` for cold open; optional Regular-only CJK font to cut ~8 MB RSS.
 

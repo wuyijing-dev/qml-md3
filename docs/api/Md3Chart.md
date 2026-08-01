@@ -61,7 +61,8 @@ import Md3
 | `hostWindow` | `var` | `null` | read/write | `Md3Chart` | Optional Window for live-motion checks (else OverlayHost). |
 | `viewMoving` | `bool` | `gestureActive \|\| Math.abs(_panVelocity) > 1e-5` | readonly | `Md3Chart` | True while dragging or coasting — skip Catmull / async Shape to avoid release flicker. |
 | `paused` | `bool` | `false` | read/write | `Md3Chart` | — |
-| `chartActive` | `bool` | `!paused && enabled` | readonly | `Md3Chart` | Page/window/app visibility — no per-scroll mapToItem (that starved the UI thread / rail). |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3Chart` | Drop Canvas/Shape while page is off-display (PageHost `md3PageActive`). |
+| `chartActive` | `bool` | `!paused && enabled && pageGate.contentActive && _sceneLive` | readonly | `Md3Chart` | True while page/window/app allow live chart work; Gate tracks `md3PageActive`. |
 | `renderedPointCount` | `int` | `0` | read/write | `Md3Chart` | — |
 | `plotLeft` | `real` | `contentPadding + labelWidth` | readonly | `Md3Chart` | — |
 | `plotRight` | `real` | `width - contentPadding` | readonly | `Md3Chart` | — |

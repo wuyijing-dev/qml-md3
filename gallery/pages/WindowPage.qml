@@ -655,28 +655,28 @@ toolBar: Md3AppToolBar {
             Loader {
                 id: winPaneLoader
                 width: parent.width
-                active: root.platformTab === 0
+                active: root.md3PageActive && root.platformTab === 0
                 sourceComponent: windowsPaneComp
                 onLoaded: if (item) item.width = Qt.binding(function () { return winPaneLoader.width })
             }
             Loader {
                 id: linuxPaneLoader
                 width: parent.width
-                active: root.linuxDesktopActive
+                active: root.md3PageActive && root.linuxDesktopActive
                 sourceComponent: linuxPaneComp
                 onLoaded: if (item) item.width = Qt.binding(function () { return linuxPaneLoader.width })
             }
             Loader {
                 id: macPaneLoader
                 width: parent.width
-                active: root.platformTab === 3
+                active: root.md3PageActive && root.platformTab === 3
                 sourceComponent: macPaneComp
                 onLoaded: if (item) item.width = Qt.binding(function () { return macPaneLoader.width })
             }
             Loader {
                 id: androidPaneLoader
                 width: parent.width
-                active: root.platformTab === 4
+                active: root.md3PageActive && root.platformTab === 4
                 sourceComponent: androidPaneComp
                 onLoaded: if (item) item.width = Qt.binding(function () { return androidPaneLoader.width })
             }

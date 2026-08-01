@@ -70,7 +70,6 @@ Item {
         function onStateChanged() { root._refreshTreeShown() }
     }
     onVisibleChanged: root._refreshTreeShown()
-    Component.onCompleted: root._refreshTreeShown()
 
     width: size
     height: size

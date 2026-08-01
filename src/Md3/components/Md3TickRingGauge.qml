@@ -70,7 +70,6 @@ Item {
         function onStateChanged() { root._refreshTreeShown() }
     }
     onVisibleChanged: root._refreshTreeShown()
-    Component.onCompleted: root._refreshTreeShown()
 
     function _rad(deg) { return deg * Math.PI / 180 }
 

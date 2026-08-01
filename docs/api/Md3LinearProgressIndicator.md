@@ -25,6 +25,7 @@ import Md3
 | `indeterminate` | `bool` | `false` | read/write | `Md3LinearProgressIndicator` | — |
 | `style` | `int` | `Md3LinearProgressIndicator.Standard` | read/write | `Md3LinearProgressIndicator` | — |
 | `hostWindow` | `var` | `null` | read/write | `Md3LinearProgressIndicator` | Optional Window for scene-active checks (else OverlayHost). |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3LinearProgressIndicator` | Drop Shape / animated chrome while page is off-display. |
 | `wavelength` | `real` | `style === Md3LinearProgressIndicator.Lively ? 28` | read/write | `Md3LinearProgressIndicator` | — |
 | `amplitude` | `real` | `{…}` | read/write | `Md3LinearProgressIndicator` | — |
 | `trackThickness` | `real` | `{…}` | read/write | `Md3LinearProgressIndicator` | — |

@@ -16,9 +16,10 @@ Item {
     property color containerColor: Md3Theme.colorScheme.primaryContainer
     property real morphPhase: 0
     property real spin: 0
-    property int _morphBucket: -1
     /// Optional Window for scene-active checks (else OverlayHost).
     property var hostWindow: null
+    /// Drop Shape geometry while page is off-display.
+    property bool unloadWhenPageInactive: true
 
     readonly property real box: {
         switch (sizePreset) {
@@ -30,94 +31,118 @@ Item {
 
     property bool _treeShown: true
     readonly property bool sceneActive: enabled && _treeShown && indeterminate
-            && Md3TreeVisibility.isPageActive(root)
 
     width: box
     height: box
 
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
+
     function _refreshTreeShown() {
-        const ok = Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
+        const ok = pageGate.contentActive
+                && Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)
         if (_treeShown !== ok)
             _treeShown = ok
     }
 
-    /// Flower / clover path: r(θ) = R*(a + b*cos(8θ)) with morphing a/b.
-    function rebuildPath() {
-        const cx = width / 2
-        const cy = height / 2
-        const R = Math.min(width, height) * 0.42
-        const t = morphPhase
-        // Morph between tight asterisk and softer clover
-        const a = 0.55 + 0.12 * Math.sin(t)
-        const b = 0.45 + 0.10 * Math.cos(t * 1.3)
-        const steps = 64
-        const pts = []
-        for (let i = 0; i <= steps; ++i) {
-            const th = (i / steps) * Math.PI * 2
-            const r = R * (a + b * Math.cos(8 * th))
-            pts.push(Qt.point(cx + Math.cos(th) * r, cy + Math.sin(th) * r))
-        }
-        morphPoly.path = pts
+    Connections {
+        target: pageGate
+        function onContentActiveChanged() { root._refreshTreeShown() }
     }
-
-    Timer {
-        interval: 400
-        running: root.enabled && root.indeterminate
-        repeat: true
-        onTriggered: root._refreshTreeShown()
-    }
-    Component.onCompleted: {
-        _refreshTreeShown()
-        rebuildPath()
+    Connections {
+        target: Qt.application
+        function onStateChanged() { root._refreshTreeShown() }
     }
     onVisibleChanged: _refreshTreeShown()
     onOpacityChanged: _refreshTreeShown()
-    onWidthChanged: rebuildPath()
-    onHeightChanged: rebuildPath()
+    Component.onCompleted: _refreshTreeShown()
 
     Rectangle {
         anchors.centerIn: parent
         width: root.box * 0.92
         height: width
         radius: width / 2
-        visible: root.variant === Md3MorphLoadingIndicator.Contained
+        visible: root.variant === Md3MorphLoadingIndicator.Contained && pageGate.contentActive
         color: root.containerColor
     }
 
-    Shape {
-        id: morphShape
+    Loader {
         anchors.fill: parent
-        preferredRendererType: Shape.GeometryRenderer
-        asynchronous: false
-        rotation: root.spin * 180 / Math.PI
-        transformOrigin: Item.Center
-
-        ShapePath {
-            fillColor: root.indicatorColor
-            strokeWidth: 0
-            PathPolyline { id: morphPoly }
-        }
+        active: pageGate.contentActive
+        sourceComponent: morphComp
     }
 
-    FrameAnimation {
-        running: root.sceneActive
-        onTriggered: {
-            const ft = Math.min(frameTime, 0.05)
-            root.spin = (root.spin + ft * 1.2) % (Math.PI * 2)
-            root.morphPhase = (root.morphPhase + ft * 2.4) % (Math.PI * 2)
-            // Rebuild only when the phase bucket changes (~20fps).
-            const bucket = Math.floor(root.morphPhase * 20 / (Math.PI * 2))
-            if (bucket !== root._morphBucket && !rebuildThrottle.running) {
-                root._morphBucket = bucket
-                rebuildThrottle.start()
+    Component {
+        id: morphComp
+        Item {
+            id: morph
+            anchors.fill: parent
+
+            property real morphPhase: root.morphPhase
+            property real spin: root.spin
+            property int _morphBucket: -1
+
+            function rebuildPath() {
+                const cx = width / 2
+                const cy = height / 2
+                const R = Math.min(width, height) * 0.42
+                const t = morphPhase
+                const a = 0.55 + 0.12 * Math.sin(t)
+                const b = 0.45 + 0.10 * Math.cos(t * 1.3)
+                const steps = 64
+                const pts = []
+                for (let i = 0; i <= steps; ++i) {
+                    const th = (i / steps) * Math.PI * 2
+                    const r = R * (a + b * Math.cos(8 * th))
+                    pts.push(Qt.point(cx + Math.cos(th) * r, cy + Math.sin(th) * r))
+                }
+                morphPoly.path = pts
+            }
+
+            Component.onCompleted: rebuildPath()
+            onWidthChanged: rebuildPath()
+            onHeightChanged: rebuildPath()
+
+            Shape {
+                id: morphShape
+                anchors.fill: parent
+                preferredRendererType: Shape.GeometryRenderer
+                asynchronous: false
+                rotation: morph.spin * 180 / Math.PI
+                transformOrigin: Item.Center
+
+                ShapePath {
+                    fillColor: root.indicatorColor
+                    strokeWidth: 0
+                    PathPolyline { id: morphPoly }
+                }
+            }
+
+            FrameAnimation {
+                running: root.sceneActive
+                onTriggered: {
+                    const ft = Math.min(frameTime, 0.05)
+                    morph.spin = (morph.spin + ft * 1.2) % (Math.PI * 2)
+                    morph.morphPhase = (morph.morphPhase + ft * 2.4) % (Math.PI * 2)
+                    root.spin = morph.spin
+                    root.morphPhase = morph.morphPhase
+                    const bucket = Math.floor(morph.morphPhase * 20 / (Math.PI * 2))
+                    if (bucket !== morph._morphBucket && !rebuildThrottle.running) {
+                        morph._morphBucket = bucket
+                        rebuildThrottle.start()
+                    }
+                }
+            }
+
+            Timer {
+                id: rebuildThrottle
+                interval: 50
+                repeat: false
+                onTriggered: morph.rebuildPath()
             }
         }
-    }
-
-    Timer {
-        id: rebuildThrottle
-        interval: 50
-        repeat: false
-        onTriggered: root.rebuildPath()
     }
 }

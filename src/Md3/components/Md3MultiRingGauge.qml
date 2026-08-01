@@ -62,7 +62,6 @@ Item {
         function onStateChanged() { root._refreshTreeShown() }
     }
     onVisibleChanged: root._refreshTreeShown()
-    Component.onCompleted: root._refreshTreeShown()
 
     readonly property int _ringCount: rings && rings.length ? rings.length : 0
     readonly property real _dialR: Math.min(width, height) / 2

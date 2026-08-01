@@ -25,6 +25,7 @@ import Md3
 | `indeterminate` | `bool` | `true` | read/write | `Md3CircularProgressIndicator` | — |
 | `style` | `int` | `Md3CircularProgressIndicator.Standard` | read/write | `Md3CircularProgressIndicator` | — |
 | `hostWindow` | `var` | `null` | read/write | `Md3CircularProgressIndicator` | Optional Window for scene-active checks (else OverlayHost). |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3CircularProgressIndicator` | Drop Shape geometry while page is off-display. |
 | `strokeWidth` | `real` | `{…}` | read/write | `Md3CircularProgressIndicator` | — |
 | `size` | `real` | `style === Md3CircularProgressIndicator.Standard ? 48 : 52` | read/write | `Md3CircularProgressIndicator` | — |
 | `amplitude` | `real` | `{…}` | read/write | `Md3CircularProgressIndicator` | — |
