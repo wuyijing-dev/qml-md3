@@ -1,6 +1,6 @@
 # Design tokens
 
-Aligned with Material Design 3 and Flutter Material (`ColorScheme`, `TextTheme`, `Durations`, `Easings`, state-layer opacities).
+Aligned with Material Design 3 for **color / type / shape / elevation**. **Motion** follows iOS UIKit / Core Animation (see Motion section below).
 
 ## Sources
 
@@ -8,9 +8,9 @@ Aligned with Material Design 3 and Flutter Material (`ColorScheme`, `TextTheme`,
 - https://m3.material.io/styles/typography/type-scale-tokens
 - https://m3.material.io/styles/shape/shape-scale-tokens
 - https://m3.material.io/styles/elevation
-- https://m3.material.io/styles/motion/easing-and-duration/tokens-specs
+- https://developer.apple.com/documentation/quartzcore/camediatimingfunction
+- https://developer.apple.com/design/human-interface-guidelines/motion
 - https://api.flutter.dev/flutter/material/ColorScheme-class.html
-- https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/material/motion.dart
 
 ## Color roles
 
