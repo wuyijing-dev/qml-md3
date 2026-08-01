@@ -2,6 +2,7 @@ import QtQuick
 import Md3
 
 /// Vertical / horizontal / stacked bar chart — zoom/pan/probe like Md3LineChart.
+/// Bars + grid drawn on one Canvas (no per-bar Rectangle Repeater).
 Md3Chart {
     id: root
 
@@ -189,8 +190,25 @@ Md3Chart {
         geom.sampleCount = maxLen
         geom.seriesCount = seriesCount
         rebuilt()
+        canvas.requestPaint()
         if (probeActive)
             _updateProbeAtPixel(probePixelX)
+    }
+
+    function _roundRect(ctx, x, y, w, h, r) {
+        r = Math.max(0, Math.min(r, w * 0.5, h * 0.5))
+        if (r < 0.5) {
+            ctx.fillRect(x, y, w, h)
+            return
+        }
+        ctx.beginPath()
+        ctx.moveTo(x + r, y)
+        ctx.arcTo(x + w, y, x + w, y + h, r)
+        ctx.arcTo(x + w, y + h, x, y + h, r)
+        ctx.arcTo(x, y + h, x, y, r)
+        ctx.arcTo(x, y, x + w, y, r)
+        ctx.closePath()
+        ctx.fill()
     }
 
     function _updateProbeAtPixel(px) {
@@ -230,6 +248,7 @@ Md3Chart {
                 ? (plotTop + (ii + 0.5) * plotHeight / visibleCount)
                 : (plotTop + plotHeight / 2)
         setProbe(idx, x, info, y)
+        canvas.requestPaint()
     }
 
     function nudgeProbe(delta) {
@@ -269,6 +288,10 @@ Md3Chart {
     onStackedChanged: requestRebuild()
     onHorizontalChanged: requestRebuild()
     onBarGapChanged: requestRebuild()
+    onProbeActiveChanged: canvas.requestPaint()
+    onProbeIndexChanged: canvas.requestPaint()
+    onCleared: canvas.requestPaint()
+    onRebuilt: canvas.requestPaint()
 
     Rectangle {
         anchors.fill: parent
@@ -276,41 +299,45 @@ Md3Chart {
         radius: Md3Theme.shape.small
     }
 
-    Item {
+    Canvas {
+        id: canvas
         anchors.fill: parent
-        clip: true
-
-        Repeater {
-            model: root.showGrid ? root.horizontalGridLines + 1 : 0
-            delegate: Rectangle {
-                required property int index
-                readonly property real t: index / Math.max(1, root.horizontalGridLines)
-                width: root.horizontal ? 1 : root.plotWidth
-                height: root.horizontal ? root.plotHeight : 1
-                x: root.horizontal
-                   ? (root.plotLeft + root.plotWidth * t)
-                   : root.plotLeft
-                y: root.horizontal
-                   ? root.plotTop
-                   : (root.plotTop + root.plotHeight * (1 - t))
-                color: root.resolvedGridColor()
-                opacity: 0.45
+        onPaint: {
+            const ctx = getContext("2d")
+            ctx.clearRect(0, 0, width, height)
+            const gridColor = root.resolvedGridColor()
+            if (root.showGrid) {
+                const n = root.horizontalGridLines + 1
+                ctx.strokeStyle = gridColor
+                ctx.globalAlpha = 0.45
+                ctx.lineWidth = 1
+                for (let i = 0; i < n; ++i) {
+                    const t = i / Math.max(1, root.horizontalGridLines)
+                    ctx.beginPath()
+                    if (root.horizontal) {
+                        const x = root.plotLeft + root.plotWidth * t
+                        ctx.moveTo(x, root.plotTop)
+                        ctx.lineTo(x, root.plotTop + root.plotHeight)
+                    } else {
+                        const y = root.plotTop + root.plotHeight * (1 - t)
+                        ctx.moveTo(root.plotLeft, y)
+                        ctx.lineTo(root.plotLeft + root.plotWidth, y)
+                    }
+                    ctx.stroke()
+                }
+                ctx.globalAlpha = 1
             }
-        }
-
-        Repeater {
-            model: geom.bars
-            delegate: Rectangle {
-                required property var modelData
-                x: modelData.x
-                y: modelData.y
-                width: modelData.w
-                height: modelData.h
-                radius: Math.min(root.barRadius,
-                                 Math.min(width, height) / 2)
-                color: modelData.color
-                opacity: root.probeActive && root.probeIndex === modelData.index ? 1 : 0.92
+            const bars = geom.bars || []
+            const probeOn = root.probeActive
+            const probeIdx = root.probeIndex
+            for (let i = 0; i < bars.length; ++i) {
+                const b = bars[i]
+                ctx.fillStyle = b.color
+                ctx.globalAlpha = probeOn && probeIdx === b.index ? 1 : 0.92
+                const r = Math.min(root.barRadius, Math.min(b.w, b.h) / 2)
+                root._roundRect(ctx, b.x, b.y, b.w, b.h, r)
             }
+            ctx.globalAlpha = 1
         }
     }
 

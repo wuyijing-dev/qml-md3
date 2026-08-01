@@ -1,8 +1,8 @@
 import QtQuick
-import QtQuick.Shapes
 import Md3
 
 /// Pie / donut chart with hover probe (slice value + percent).
+/// Slices drawn on one Canvas (no per-slice Shape Repeater).
 Md3Chart {
     id: root
 
@@ -54,7 +54,10 @@ Md3Chart {
         geom.total = total
         geom.slices = slices
         rebuilt()
+        canvas.requestPaint()
     }
+
+    function _rad(deg) { return deg * Math.PI / 180 }
 
     function _updateProbeAtPos(px, py) {
         if (!showProbe || geom.slices.length < 1) {
@@ -69,7 +72,6 @@ Md3Chart {
             return
         }
         let deg = Math.atan2(dy, dx) * 180 / Math.PI
-        // normalize to same space as startAngle..startAngle+360
         let rel = deg - startAngle
         while (rel < 0) rel += 360
         while (rel >= 360) rel -= 360
@@ -86,6 +88,7 @@ Md3Chart {
                     value: s.percent,
                     color: s.color
                 }], s.ly)
+                canvas.requestPaint()
                 return
             }
             acc += s.sweep
@@ -116,6 +119,7 @@ Md3Chart {
             value: s.percent,
             color: s.color
         }], s.ly)
+        canvas.requestPaint()
     }
 
     QtObject {
@@ -128,6 +132,12 @@ Md3Chart {
     onStartAngleChanged: requestRebuild()
     onShowPercentLabelsChanged: requestRebuild()
     onLabelsChanged: requestRebuild()
+    onProbeActiveChanged: canvas.requestPaint()
+    onProbeIndexChanged: canvas.requestPaint()
+    onCxChanged: canvas.requestPaint()
+    onCyChanged: canvas.requestPaint()
+    onOuterRChanged: canvas.requestPaint()
+    onInnerRChanged: canvas.requestPaint()
 
     Rectangle {
         anchors.fill: parent
@@ -135,40 +145,50 @@ Md3Chart {
         radius: Md3Theme.shape.small
     }
 
-    Repeater {
-        model: geom.slices
-        delegate: Shape {
-            required property var modelData
-            anchors.fill: parent
-            preferredRendererType: Shape.GeometryRenderer
-            opacity: root.probeActive && root.probeIndex !== modelData.index ? 0.45 : 1
-            ShapePath {
-                strokeWidth: 1
-                strokeColor: modelData.color
-                fillColor: modelData.color
-                startX: root.cx
-                startY: root.cy
-                PathLine {
-                    x: root.cx + root.outerR * Math.cos(modelData.start * Math.PI / 180)
-                    y: root.cy + root.outerR * Math.sin(modelData.start * Math.PI / 180)
+    Canvas {
+        id: canvas
+        anchors.fill: parent
+        onPaint: {
+            const ctx = getContext("2d")
+            ctx.clearRect(0, 0, width, height)
+            const slices = geom.slices || []
+            if (!slices.length)
+                return
+            const cx = root.cx
+            const cy = root.cy
+            const outer = root.outerR
+            const inner = root.innerR
+            const probeOn = root.probeActive
+            const probeIdx = root.probeIndex
+            const donut = inner > 1
+
+            for (let i = 0; i < slices.length; ++i) {
+                const s = slices[i]
+                if (!(s.sweep > 0) || !(outer > 0))
+                    continue
+                const a0 = root._rad(s.start)
+                const a1 = root._rad(s.start + Math.max(0.01, s.sweep))
+                ctx.globalAlpha = probeOn && probeIdx !== s.index ? 0.45 : 1
+                ctx.fillStyle = s.color
+                ctx.strokeStyle = s.color
+                ctx.lineWidth = 1
+                ctx.beginPath()
+                if (donut) {
+                    ctx.arc(cx, cy, outer, a0, a1, false)
+                    ctx.arc(cx, cy, inner, a1, a0, true)
+                } else {
+                    ctx.moveTo(cx, cy)
+                    ctx.arc(cx, cy, outer, a0, a1, false)
                 }
-                PathAngleArc {
-                    centerX: root.cx
-                    centerY: root.cy
-                    radiusX: root.outerR
-                    radiusY: root.outerR
-                    startAngle: modelData.start
-                    sweepAngle: Math.max(0.01, modelData.sweep)
-                }
-                PathLine {
-                    x: root.cx
-                    y: root.cy
-                }
+                ctx.closePath()
+                ctx.fill()
+                ctx.stroke()
             }
+            ctx.globalAlpha = 1
         }
     }
 
-    // Donut hole
+    // Donut hole (also covers canvas center for solid background when needed)
     Rectangle {
         visible: root.innerRatio > 0.02
         anchors.centerIn: parent

@@ -39,6 +39,7 @@ Industry UI stacks converge on the same rules Md3 applies:
 23. **`Md3Carousel`** — `reuseItems`, async images, shadow only on current ±1.
 24. **`Md3CodeBlock`** — 40ms coalesced HTML rebuild.
 25. **`Md3DeferredSection`** — arms after delay **and** near-viewport (skips off-screen incubate).
+26. **`Md3BarChart` / `Md3PieChart`** — bars/slices on one Canvas (no per-item Rectangle/Shape Repeater).
 
 ---
 
