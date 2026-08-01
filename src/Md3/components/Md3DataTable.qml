@@ -102,6 +102,15 @@ Item {
             w += widths[i]
         return w + 8
     }
+
+    /// Non-frozen column indices (cached — avoid per-row array alloc in delegates).
+    readonly property var _scrollColumnIndices: {
+        const out = []
+        const cols = columns || []
+        for (let i = frozenCount; i < cols.length; ++i)
+            out.push(i)
+        return out
+    }
     readonly property real scrollColsWidth: {
         let w = 0
         const widths = effectiveWidths
@@ -1092,54 +1101,47 @@ Item {
                             Md3Divider { anchors.bottom: parent.bottom; width: parent.width }
                         }
 
-                        Flickable {
+                        ListView {
                             id: bodyFrozen
                             width: parent.width
                             height: root._resolvedBodyHeight
                             clip: true
-                            contentHeight: frozenRows.height
+                            model: root.loading ? null : root.pageEntries
+                            reuseItems: true
+                            cacheBuffer: Math.max(200, root.rowHeight * 12)
                             boundsBehavior: Flickable.StopAtBounds
-                            flickableDirection: Flickable.VerticalFlick
                             interactive: !root.loading && root.pageEntries.length > 0
-
-                            Column {
-                                id: frozenRows
-                                width: parent.width
-                                Repeater {
-                                    model: root.loading ? 0 : root.pageEntries
-                                    delegate: Item {
-                                        id: frozenRowItem
-                                        required property int index
-                                        required property var modelData
-                                        width: frozenRows.width
-                                        height: root.rowHeight
-                                        Row {
-                                            anchors.fill: parent
-                                            anchors.leftMargin: 8
-                                            Item {
-                                                visible: root.selectionEnabled
-                                                width: 48
-                                                height: parent.height
-                                                Md3Checkbox {
-                                                    anchors.centerIn: parent
-                                                    checked: root._isSelected(frozenRowItem.modelData.sourceIndex)
-                                                    onToggled: function (state) {
-                                                        root._setSelected(frozenRowItem.modelData.sourceIndex, state === Qt.Checked)
-                                                    }
-                                                }
+                            delegate: Item {
+                                id: frozenRowItem
+                                required property int index
+                                required property var modelData
+                                width: bodyFrozen.width
+                                height: root.rowHeight
+                                Row {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 8
+                                    Item {
+                                        visible: root.selectionEnabled
+                                        width: 48
+                                        height: parent.height
+                                        Md3Checkbox {
+                                            anchors.centerIn: parent
+                                            checked: root._isSelected(frozenRowItem.modelData.sourceIndex)
+                                            onToggled: function (state) {
+                                                root._setSelected(frozenRowItem.modelData.sourceIndex, state === Qt.Checked)
                                             }
-                                            Repeater {
-                                                model: root.frozenCount
-                                                delegate: DataCell {
-                                                    required property int index
-                                                    width: root.effectiveWidths[index] || 120
-                                                    height: parent.height
-                                                    rowData: frozenRowItem.modelData.row
-                                                    columnDef: root.columns[index]
-                                                    columnIndex: index
-                                                    sourceIndex: frozenRowItem.modelData.sourceIndex
-                                                }
-                                            }
+                                        }
+                                    }
+                                    Repeater {
+                                        model: root.frozenCount
+                                        delegate: DataCell {
+                                            required property int index
+                                            width: root.effectiveWidths[index] || 120
+                                            height: parent.height
+                                            rowData: frozenRowItem.modelData.row
+                                            columnDef: root.columns[index]
+                                            columnIndex: index
+                                            sourceIndex: frozenRowItem.modelData.sourceIndex
                                         }
                                     }
                                 }
@@ -1219,106 +1221,96 @@ Item {
                             anchors.bottom: parent.bottom
                             clip: true
                             contentWidth: scrollPane._paneContentW
-                            contentHeight: rowsCol.height
+                            contentHeight: height
                             boundsBehavior: Flickable.StopAtBounds
-                            interactive: !root.loading && root.pageEntries.length > 0
-                            flickableDirection: {
-                                const h = contentWidth > width + 1
-                                const v = contentHeight > height + 1
-                                if (h && v)
-                                    return Flickable.HorizontalAndVerticalFlick
-                                if (h)
-                                    return Flickable.HorizontalFlick
-                                return Flickable.VerticalFlick
-                            }
-                            onContentYChanged: {
-                                if (bodyFrozen.contentY !== contentY)
-                                    bodyFrozen.contentY = contentY
-                            }
+                            interactive: !root.loading && contentWidth > width + 1
+                            flickableDirection: Flickable.HorizontalFlick
 
-                            Connections {
-                                target: bodyFrozen
-                                function onContentYChanged() {
-                                    if (bodyFlick.contentY !== bodyFrozen.contentY)
-                                        bodyFlick.contentY = bodyFrozen.contentY
-                                }
-                            }
-
-                            Column {
+                            ListView {
                                 id: rowsCol
                                 width: scrollPane._paneContentW
-                                Repeater {
-                                    model: root.loading ? 0 : root.pageEntries
-                                    delegate: Item {
-                                        id: scrollRowItem
-                                        required property int index
-                                        required property var modelData
-                                        width: rowsCol.width
-                                        height: root.rowHeight
-                                        Row {
-                                            anchors.fill: parent
-                                            anchors.leftMargin: 8
-                                            anchors.rightMargin: 8
-                                            Repeater {
-                                                model: {
-                                                    const out = []
-                                                    for (let i = root.frozenCount; i < (root.columns || []).length; ++i)
-                                                        out.push(i)
-                                                    return out
-                                                }
-                                                delegate: DataCell {
-                                                    required property var modelData
-                                                    width: root.effectiveWidths[modelData] || 120
-                                                    height: parent.height
-                                                    rowData: scrollRowItem.modelData.row
-                                                    columnDef: root.columns[modelData]
-                                                    columnIndex: modelData
-                                                    sourceIndex: scrollRowItem.modelData.sourceIndex
-                                                }
-                                            }
-                                            Item {
-                                                visible: root.actionsColWidth > 0
-                                                width: 48
+                                height: parent.height
+                                model: root.loading ? null : root.pageEntries
+                                reuseItems: true
+                                cacheBuffer: Math.max(200, root.rowHeight * 12)
+                                clip: true
+                                boundsBehavior: Flickable.StopAtBounds
+                                interactive: !root.loading && root.pageEntries.length > 0
+                                onContentYChanged: {
+                                    if (bodyFrozen.contentY !== contentY)
+                                        bodyFrozen.contentY = contentY
+                                }
+                                Connections {
+                                    target: bodyFrozen
+                                    function onContentYChanged() {
+                                        if (rowsCol.contentY !== bodyFrozen.contentY)
+                                            rowsCol.contentY = bodyFrozen.contentY
+                                    }
+                                }
+                                delegate: Item {
+                                    id: scrollRowItem
+                                    required property int index
+                                    required property var modelData
+                                    width: rowsCol.width
+                                    height: root.rowHeight
+                                    Row {
+                                        anchors.fill: parent
+                                        anchors.leftMargin: 8
+                                        anchors.rightMargin: 8
+                                        Repeater {
+                                            model: root._scrollColumnIndices
+                                            delegate: DataCell {
+                                                required property var modelData
+                                                width: root.effectiveWidths[modelData] || 120
                                                 height: parent.height
-                                                Md3IconButton {
-                                                    id: scrollMoreBtn
-                                                    anchors.centerIn: parent
-                                                    icon: "more_vert"
-                                                    onClicked: root.openRowMenu(scrollRowItem.modelData.sourceIndex, scrollMoreBtn)
+                                                rowData: scrollRowItem.modelData.row
+                                                columnDef: root.columns[modelData]
+                                                columnIndex: modelData
+                                                sourceIndex: scrollRowItem.modelData.sourceIndex
+                                            }
+                                        }
+                                        Item {
+                                            visible: root.actionsColWidth > 0
+                                            width: 48
+                                            height: parent.height
+                                            Md3IconButton {
+                                                id: scrollMoreBtn
+                                                anchors.centerIn: parent
+                                                icon: "more_vert"
+                                                onClicked: root.openRowMenu(scrollRowItem.modelData.sourceIndex, scrollMoreBtn)
+                                            }
+                                        }
+                                    }
+                                    MouseArea {
+                                        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                        anchors.fill: parent
+                                        anchors.rightMargin: root.actionsColWidth
+                                        z: -1
+                                        onClicked: {
+                                            root.focusedPageRow = scrollRowItem.index
+                                            root.selectedRow = scrollRowItem.modelData.sourceIndex
+                                            root.rowClicked(scrollRowItem.modelData.sourceIndex)
+                                            tableFocus.forceActiveFocus()
+                                        }
+                                        onDoubleClicked: {
+                                            const cols = root.columns || []
+                                            const src = scrollRowItem.modelData.sourceIndex
+                                            for (let i = 0; i < cols.length; ++i) {
+                                                if (cols[i] && cols[i].editable === true) {
+                                                    root.beginCellEdit(src, i)
+                                                    return
                                                 }
                                             }
+                                            root.rowDoubleClicked(src)
+                                            root.rowActivated(src)
                                         }
-                                        MouseArea {
-                                            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                                            anchors.fill: parent
-                                            anchors.rightMargin: root.actionsColWidth
-                                            z: -1
-                                            onClicked: {
-                                                root.focusedPageRow = scrollRowItem.index
-                                                root.selectedRow = scrollRowItem.modelData.sourceIndex
-                                                root.rowClicked(scrollRowItem.modelData.sourceIndex)
-                                                tableFocus.forceActiveFocus()
-                                            }
-                                            onDoubleClicked: {
-                                                const cols = root.columns || []
-                                                const src = scrollRowItem.modelData.sourceIndex
-                                                for (let i = 0; i < cols.length; ++i) {
-                                                    if (cols[i] && cols[i].editable === true) {
-                                                        root.beginCellEdit(src, i)
-                                                        return
-                                                    }
-                                                }
-                                                root.rowDoubleClicked(src)
-                                                root.rowActivated(src)
-                                            }
-                                        }
-                                        Rectangle {
-                                            anchors.bottom: parent.bottom
-                                            width: parent.width
-                                            height: 1
-                                            color: "transparent"
-                                            Md3Divider { anchors.fill: parent }
-                                        }
+                                    }
+                                    Rectangle {
+                                        anchors.bottom: parent.bottom
+                                        width: parent.width
+                                        height: 1
+                                        color: "transparent"
+                                        Md3Divider { anchors.fill: parent }
                                     }
                                 }
                             }
@@ -1342,7 +1334,7 @@ Item {
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: tableHBar.visible ? tableHBar.height : 0
                     z: 5
-                    flickable: root.frozenCount > 0 ? bodyFlick : (freeLoader.item ? freeLoader.item.bodyFlickable : null)
+                    flickable: root.frozenCount > 0 ? rowsCol : (freeLoader.item ? freeLoader.item.bodyFlickable : null)
                     orientation: Qt.Vertical
                 }
 
@@ -1364,7 +1356,7 @@ Item {
                     visible: root.loading
                     z: 4
                     // Isolate progress animation dirty region from table MultiEffect/shadows.
-                    layer.enabled: true
+                    layer.enabled: root.loading
                     color: Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.surface, 0.72)
                     Column {
                         anchors.centerIn: parent
@@ -1471,14 +1463,16 @@ Item {
                 }
             }
 
-            Flickable {
+            ListView {
                 id: freeBody
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: freeHeaderClip.bottom
                 anchors.bottom: parent.bottom
                 contentWidth: freeRoot._contentW
-                contentHeight: freeRows.height
+                model: root.loading ? null : root.pageEntries
+                reuseItems: true
+                cacheBuffer: Math.max(200, root.rowHeight * 12)
                 clip: true
                 boundsBehavior: Flickable.StopAtBounds
                 interactive: !root.loading && (contentWidth > width + 1 || contentHeight > height + 1)
@@ -1491,19 +1485,12 @@ Item {
                         return Flickable.HorizontalFlick
                     return Flickable.VerticalFlick
                 }
-                Column {
-                    id: freeRows
-                    width: freeRoot._contentW
-                    Repeater {
-                        model: root.loading ? 0 : root.pageEntries
-                        delegate: BodyRow {
-                            required property int index
-                            required property var modelData
-                            width: freeRows.width
-                            pageRowIndex: index
-                            entry: modelData
-                        }
-                    }
+                delegate: BodyRow {
+                    required property int index
+                    required property var modelData
+                    width: Math.max(freeRoot._contentW, freeBody.width)
+                    pageRowIndex: index
+                    entry: modelData
                 }
             }
         }

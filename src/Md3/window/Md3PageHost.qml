@@ -806,6 +806,26 @@ Item {
         return best
     }
 
+    property int _prefetchCenter: -1
+
+    function _schedulePrefetch(center) {
+        if (center === undefined || center === null)
+            return
+        _prefetchCenter = Number(center)
+        prefetchDebounce.restart()
+    }
+
+    Timer {
+        id: prefetchDebounce
+        interval: 120
+        repeat: false
+        onTriggered: {
+            if (root._prefetchCenter < 0)
+                return
+            root._prefetchSmart(root._prefetchCenter)
+        }
+    }
+
     function noteActivity() {
         if (cacheMode !== "adaptive" && cacheMode !== "arc")
             return
@@ -816,7 +836,7 @@ Item {
         idleTrimTimer.restart()
         generation++
         _evict()
-        Qt.callLater(_prefetchSmart, currentIndex)
+        _schedulePrefetch(currentIndex)
     }
 
     function _trimForIdle() {
@@ -1266,7 +1286,7 @@ Item {
         generation++
         _dismissLeaveSnapshot(false)
         _evict()
-        Qt.callLater(_prefetchSmart, displayedIndex)
+        _schedulePrefetch(displayedIndex)
     }
 
     function _applyLaunchIntensityProfile() {
@@ -1376,7 +1396,7 @@ Item {
             _pendingNavOpts = ({})
             _dismissLeaveSnapshot(true)
             _evict()
-            Qt.callLater(_prefetchSmart, displayedIndex)
+            _schedulePrefetch(displayedIndex)
             return
         }
         // fromIndex < 0 → enter-only (initial / no previous page)
@@ -1464,7 +1484,7 @@ Item {
                 _dismissLeaveSnapshot(true)
             if (!transitioning)
                 _evict()
-            Qt.callLater(_prefetchSmart, index)
+            _schedulePrefetch(index)
             return
         }
 
@@ -1489,7 +1509,7 @@ Item {
             _setKeep(index, true)
         // Drop previous Item ASAP on cold path (keep only target + optional snapshot)
         _evict()
-        Qt.callLater(_prefetchSmart, index)
+        _schedulePrefetch(index)
     }
 
     function _prefetchAround(center) {
@@ -1551,7 +1571,7 @@ Item {
 
     Timer {
         id: hoverPrefetchTimer
-        interval: 90
+        interval: 120
         repeat: false
         onTriggered: {
             if (root._hoverHint < 0)
@@ -1658,7 +1678,7 @@ Item {
         if (warmStart)
             Qt.callLater(_warmAll)
         else
-            Qt.callLater(_prefetchSmart, currentIndex)
+            _schedulePrefetch(currentIndex)
         if (l2WarmIdle && l2Components)
             l2WarmDelay.start()
     }
@@ -1692,7 +1712,7 @@ Item {
         if (warmStart)
             Qt.callLater(_warmAll)
         else
-            Qt.callLater(_prefetchSmart, currentIndex)
+            _schedulePrefetch(currentIndex)
         if (l2WarmIdle && l2Components)
             l2WarmDelay.restart()
     }
@@ -1785,15 +1805,13 @@ Item {
             readonly property string mode: root.transitionModeActive
             readonly property int dir: root.transitionDir
             readonly property bool launchClipActive: mode === "launch" && isEntering && !root.launchReturning
-            readonly property var launchMask: launchClipActive
-                    ? root._launchMaskRect(t)
-                    : ({
-                           x: 0,
-                           y: 0,
-                           width: pageSlot.width,
-                           height: pageSlot.height,
-                           radius: Md3Theme.shape.large
-                       })
+            // Single geometry snapshot while launching — idle slots skip alloc entirely.
+            readonly property var _launchGeom: launchClipActive ? root._launchMaskRect(t) : null
+            readonly property real launchMaskX: _launchGeom ? _launchGeom.x : 0
+            readonly property real launchMaskY: _launchGeom ? _launchGeom.y : 0
+            readonly property real launchMaskW: _launchGeom ? _launchGeom.width : width
+            readonly property real launchMaskH: _launchGeom ? _launchGeom.height : height
+            readonly property real launchMaskR: _launchGeom ? _launchGeom.radius : Md3Theme.shape.large
 
             z: isEntering ? 10 : (isLeaving ? 2 : (isDisplayed ? 1 : 0))
 
@@ -1813,11 +1831,11 @@ Item {
                 visible: false
 
                 Rectangle {
-                    x: pageSlot.launchMask.x
-                    y: pageSlot.launchMask.y
-                    width: pageSlot.launchMask.width
-                    height: pageSlot.launchMask.height
-                    radius: Math.min(pageSlot.launchMask.radius,
+                    x: pageSlot.launchMaskX
+                    y: pageSlot.launchMaskY
+                    width: pageSlot.launchMaskW
+                    height: pageSlot.launchMaskH
+                    radius: Math.min(pageSlot.launchMaskR,
                                      Math.min(width, height) / 2)
                     color: "#ffffff"
                 }

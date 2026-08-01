@@ -13,7 +13,7 @@ Item {
     property real spacing: Md3Theme.spacingMd
     /// Stretch direct children to form width.
     property bool fillFields: true
-    /// Poll named fields so `canSubmit` / `hasErrors` stay fresh while typing.
+    /// When true, keep `canSubmit` / `hasErrors` fresh while typing (event-driven; no poll).
     property bool liveGate: true
     /// True when any entry in `errors` is a non-empty string.
     property bool hasErrors: false
@@ -21,6 +21,7 @@ Item {
     property bool canSubmit: true
     /// True when every `requiredFields` entry has a non-empty value.
     property bool requiredSatisfied: true
+    property var _wiredFields: ({})
     default property alias content: formStack.data
 
     signal submitted(var values)
@@ -158,6 +159,45 @@ Item {
         return canSubmit
     }
 
+    function _scheduleRefreshGate() {
+        if (!liveGate)
+            return
+        gateDebounce.restart()
+    }
+
+    function _wireField(field) {
+        if (!field || field.name === undefined || field.name === null)
+            return
+        const key = String(field.name)
+        if (!key.length || _wiredFields[key])
+            return
+        const next = Object.assign({}, _wiredFields)
+        next[key] = true
+        _wiredFields = next
+        function hook(sig) {
+            if (sig === undefined || sig === null)
+                return
+            try {
+                sig.connect(_scheduleRefreshGate)
+            } catch (e) {
+                // Property may not be a signal on some custom fields.
+            }
+        }
+        hook(field.textChanged)
+        hook(field.checkedChanged)
+        hook(field.currentIndexChanged)
+        hook(field.valueChanged)
+        hook(field.toggled)
+    }
+
+    function _wireAllFields() {
+        if (!liveGate)
+            return
+        const fields = collectFields()
+        for (let i = 0; i < fields.length; ++i)
+            _wireField(fields[i])
+    }
+
     function validate(required) {
         syncValues()
         let ok = true
@@ -207,14 +247,36 @@ Item {
         refreshGate()
     })
     onRequiredFieldsChanged: Qt.callLater(refreshGate)
-    Component.onCompleted: Qt.callLater(refreshGate)
+    Component.onCompleted: Qt.callLater(function () {
+        refreshGate()
+        _wireAllFields()
+    })
 
     Timer {
-        interval: 400
+        id: gateDebounce
+        interval: 48
+        repeat: false
+        onTriggered: root.refreshGate()
+    }
+
+    // Fallback poll only when liveGate is on but no named fields were wired yet.
+    Timer {
+        interval: 800
         running: root.liveGate && root.visible
+                 && Object.keys(root._wiredFields).length === 0
                  && Md3TreeVisibility.isSceneActive(root, null)
         repeat: true
-        onTriggered: root.refreshGate()
+        onTriggered: {
+            root._wireAllFields()
+            root.refreshGate()
+        }
+    }
+
+    Connections {
+        target: formStack
+        function onChildrenChanged() {
+            Qt.callLater(root._wireAllFields)
+        }
     }
 
     Md3ContainerBody {

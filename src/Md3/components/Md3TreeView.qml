@@ -45,14 +45,17 @@ Item {
         return Md3Theme.fieldHeight + 8
     }
 
+    property var flatRows: []
+    property string _filterApplied: ""
+
     readonly property real _contentH: flatRows.length * rowHeight
     readonly property real _bodyH: preferredMaxHeight > 0
                                    ? Math.min(_contentH, preferredMaxHeight)
                                    : _contentH
 
-    readonly property var flatRows: {
+    function _rebuildFlatRows() {
         const out = []
-        const filter = String(filterText || "").trim().toLowerCase()
+        const filter = String(_filterApplied || "").trim().toLowerCase()
         function titleOf(n) {
             if (!n)
                 return ""
@@ -107,8 +110,27 @@ Item {
             }
         }
         walk(root.model, 0, [], false)
-        return out
+        flatRows = out
     }
+
+    function _applyFilterNow() {
+        _filterApplied = String(filterText || "").trim().toLowerCase()
+        _rebuildFlatRows()
+    }
+
+    Timer {
+        id: filterDebounce
+        interval: 160
+        repeat: false
+        onTriggered: root._applyFilterNow()
+    }
+
+    onFilterTextChanged: filterDebounce.restart()
+    onModelChanged: {
+        filterDebounce.stop()
+        _applyFilterNow()
+    }
+    Component.onCompleted: _applyFilterNow()
 
     implicitWidth: 280
     implicitHeight: _bodyH + _chromeH
@@ -382,13 +404,7 @@ Item {
     function _ensureVisible(flatIndex) {
         if (flatIndex < 0 || !flick)
             return
-        const y = flatIndex * root.rowHeight
-        const viewTop = flick.contentY
-        const viewBot = viewTop + flick.height
-        if (y < viewTop)
-            flick.contentY = Math.max(0, y)
-        else if (y + root.rowHeight > viewBot)
-            flick.contentY = Math.max(0, y + root.rowHeight - flick.height)
+        flick.positionViewAtIndex(flatIndex, ListView.Contain)
     }
 
     Md3HStack {
@@ -424,7 +440,7 @@ Item {
         }
     }
 
-    Flickable {
+    ListView {
         id: flick
         anchors.left: parent.left
         anchors.right: parent.right
@@ -434,23 +450,22 @@ Item {
         // Always reserve gutter when vertical bar can appear — avoids label under scrollbar.
         anchors.rightMargin: vBar.needed ? Math.max(vBar.width, 10) : 0
         anchors.bottomMargin: hBar.needed ? Math.max(hBar.height, 10) : 0
-        contentWidth: width
-        contentHeight: Math.max(col.implicitHeight, col.height)
+        model: root.flatRows
+        reuseItems: true
+        cacheBuffer: Math.max(240, root.rowHeight * 16)
         clip: true
         boundsBehavior: Flickable.StopAtBounds
-        flickableDirection: Flickable.VerticalFlick
+        currentIndex: root.selectedIndex
+        onCurrentIndexChanged: {
+            if (root.selectedIndex !== currentIndex && currentIndex >= 0)
+                root.selectedIndex = currentIndex
+        }
 
-        Column {
-            id: col
-            width: flick.width
-
-            Repeater {
-                model: root.flatRows
-                delegate: Item {
+        delegate: Item {
                     id: row
                     required property int index
                     required property var modelData
-                    width: col.width
+                    width: ListView.view ? ListView.view.width : root.width
                     height: root.rowHeight
                     implicitWidth: width
                     implicitHeight: height
@@ -686,8 +701,6 @@ Item {
                         }
                     }
                 }
-            }
-        }
     }
 
     Md3ScrollBar {
