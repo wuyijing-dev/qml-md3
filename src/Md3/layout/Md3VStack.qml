@@ -47,6 +47,15 @@ Item {
         when: !root._hasExpandChild && !root.anchors.fill
         restoreMode: Binding.RestoreNone
     }
+    // Expand spacers need a real stack height — prefer parent viewport when available
+    // (Card/ContainerBody Fit host), else fall back to implicit.
+    Binding {
+        target: root
+        property: "height"
+        value: (root.parent && root.parent.height > 1) ? root.parent.height : root.implicitHeight
+        when: root._hasExpandChild && !root.anchors.fill
+        restoreMode: Binding.RestoreNone
+    }
     readonly property Md3HeightSync _heightSync: Md3HeightSync {
         target: root
         enabled: !root._hasExpandChild && !root.anchors.fill

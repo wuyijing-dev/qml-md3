@@ -53,16 +53,31 @@ Item {
         anchors.fill: parent
         clip: root.clipContent
         contentWidth: width
-        contentHeight: contentImplicitHeight + root.padding * 2
+        contentHeight: {
+            const intrinsic = contentImplicitHeight + root.padding * 2
+            if (root.layoutMode === Md3ContainerBody.Fit)
+                return Math.max(intrinsic, height)
+            return Math.max(intrinsic, 1)
+        }
         interactive: root.layoutMode === Md3ContainerBody.Scroll
                      && contentHeight > height + 1
         boundsBehavior: Flickable.StopAtBounds
 
+        // Give Fit-mode content a real viewport height so nested expand/fill children
+        // (Card body lists, etc.) are not stuck at height 0 inside the Flickable host.
         Item {
             id: contentHost
             x: root.padding
             y: root.padding
             width: Math.max(0, flick.width - root.padding * 2)
+            height: {
+                if (root.layoutMode === Md3ContainerBody.Scroll)
+                    return Math.max(childrenRect.height, 1)
+                const viewH = Math.max(0, flick.height - root.padding * 2)
+                if (viewH > 1)
+                    return viewH
+                return Math.max(childrenRect.height, 1)
+            }
         }
     }
 }

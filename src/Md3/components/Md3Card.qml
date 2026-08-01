@@ -113,12 +113,14 @@ Item {
             Md3VStack {
                 id: cardStack
                 width: parent.width
-                // Explicit height when card is sized (SplitView / anchors); else intrinsic.
-                // Required so bodySlot.expand can consume leftover on Qt 6.8.
+                // Prefer ContainerBody viewport height when the card is explicitly sized.
+                // Parent of this VStack is ContainerBody's inner Item (often height 0);
+                // expand children need a real stack height or lists/grids stay empty.
                 height: {
-                    const h = parent.height
-                    if (h > 1 && Math.abs(h - implicitHeight) > 1.5)
-                        return h
+                    const viewport = contentHost.height
+                    const autoSized = Math.abs(root.height - root.implicitHeight) <= 1.5
+                    if (!autoSized && viewport > 1)
+                        return viewport
                     return implicitHeight
                 }
                 spacing: 8

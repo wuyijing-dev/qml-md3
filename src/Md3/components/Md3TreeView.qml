@@ -39,6 +39,9 @@ Item {
     readonly property real _chromeH: {
         if (!showFilter && !showExpandControls)
             return 0
+        // Prefer live chrome height once laid out (label + field); fall back to token.
+        if (chrome.visible && chrome.height > 1)
+            return chrome.height + 4
         return Md3Theme.fieldHeight + 8
     }
 
@@ -361,22 +364,16 @@ Item {
         }
     }
 
-    Row {
+    Md3HStack {
         id: chrome
         visible: root.showFilter || root.showExpandControls
         width: parent.width
-        height: visible ? 56 : 0
         spacing: 8
+        alignment: Md3HStack.Center
 
         Md3TextField {
             visible: root.showFilter
-            width: {
-                if (!root.showExpandControls)
-                    return parent.width
-                return Math.max(80, parent.width - expandBtn.implicitWidth
-                                - collapseBtn.implicitWidth - parent.spacing * 2)
-            }
-            height: 56
+            property bool expand: true
             label: root.filterLabel
             placeholderText: root.filterPlaceholder
             text: root.filterText
@@ -387,7 +384,6 @@ Item {
         Md3Button {
             id: expandBtn
             visible: root.showExpandControls
-            anchors.verticalCenter: parent.verticalCenter
             text: qsTr("Expand all")
             variant: Md3Button.Text
             onClicked: root.expandAll()
@@ -395,7 +391,6 @@ Item {
         Md3Button {
             id: collapseBtn
             visible: root.showExpandControls
-            anchors.verticalCenter: parent.verticalCenter
             text: qsTr("Collapse all")
             variant: Md3Button.Text
             onClicked: root.collapseAll()

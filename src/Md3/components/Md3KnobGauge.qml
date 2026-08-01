@@ -39,7 +39,8 @@ Item {
 
     Accessible.role: Accessible.Dial
     Accessible.name: label.length ? label : qsTr("Knob")
-    Accessible.value: valueText
+    // Accessible.value is not available on Item in all Qt 6.x kits — use description.
+    Accessible.description: valueText
     Accessible.onIncreaseAction: if (interactive) _nudge(1)
     Accessible.onDecreaseAction: if (interactive) _nudge(-1)
 
