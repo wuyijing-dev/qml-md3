@@ -4,6 +4,9 @@ import Md3
 Md3Page {
     id: page
 
+    property bool modalDateOpen: false
+    property bool modalTimeOpen: false
+
     Flickable {
         id: flick
         anchors.fill: parent
@@ -53,7 +56,7 @@ Md3Page {
             Md3Button {
                 text: qsTr("Open modal date picker")
                 variant: Md3Button.FilledTonal
-                onClicked: modalPicker.open = true
+                onClicked: page.modalDateOpen = true
             }
 
             Md3Text {
@@ -79,40 +82,52 @@ Md3Page {
                 supportingText: qsTr("Docked field — peer of Md3DateField")
                 onAccepted: function (h, m) { console.log("time field", h, m) }
             }
-            Md3TimePicker {
-                id: timePicker
-                hour: 14
-                minute: 0
-                onAccepted: function (h, m) { console.log("time", h, m) }
-            }
 
             Md3Button {
                 text: qsTr("Open modal time picker")
                 variant: Md3Button.Outlined
-                onClicked: modalTime.open = true
+                onClicked: page.modalTimeOpen = true
             }
 
             Item { width: parent.width; height: 48 }
         }
     }
 
-    Md3DatePicker {
-        id: modalPicker
+    Loader {
         anchors.fill: parent
-        modal: true
-        open: false
-        title: qsTr("Select date")
+        active: page.modalDateOpen
         z: 2000
-        onAccepted: function (d) { console.log("modal", d) }
+        sourceComponent: Component {
+            Md3DatePicker {
+                anchors.fill: parent
+                modal: true
+                open: true
+                title: qsTr("Select date")
+                onAccepted: function (d) {
+                    console.log("modal", d)
+                    page.modalDateOpen = false
+                }
+                onCancelled: page.modalDateOpen = false
+            }
+        }
     }
 
-    Md3TimePicker {
-        id: modalTime
+    Loader {
         anchors.fill: parent
-        modal: true
-        open: false
-        title: qsTr("Select time")
+        active: page.modalTimeOpen
         z: 2001
-        onAccepted: function (h, m) { console.log("modal time", h, m) }
+        sourceComponent: Component {
+            Md3TimePicker {
+                anchors.fill: parent
+                modal: true
+                open: true
+                title: qsTr("Select time")
+                onAccepted: function (h, m) {
+                    console.log("modal time", h, m)
+                    page.modalTimeOpen = false
+                }
+                onCancelled: page.modalTimeOpen = false
+            }
+        }
     }
 }

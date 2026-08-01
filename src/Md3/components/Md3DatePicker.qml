@@ -34,6 +34,8 @@ Item {
     property string dateFormat: "yyyy-MM-dd"
     property bool modal: false
     property bool open: true
+    /// Drop day/year cells while modal closed or page off-display.
+    property bool unloadWhenPageInactive: true
 
     signal accepted(date date)
     signal cancelled()
@@ -41,6 +43,14 @@ Item {
 
     Accessible.role: Accessible.ComboBox
     Accessible.name: title.length ? title : qsTr("Date picker")
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
+
+    readonly property bool _calendarActive: (!modal || open) && pageGate.contentActive
 
     readonly property date today: {
         const n = new Date()
@@ -378,6 +388,8 @@ Item {
 
                     Repeater {
                         model: {
+                            if (!root._calendarActive)
+                                return []
                             const arr = []
                             for (let y = root.yearFrom; y <= root.yearTo; ++y)
                                 arr.push(y)
@@ -455,7 +467,7 @@ Item {
                     columns: 7
 
                     Repeater {
-                        model: root.calendarCells()
+                        model: root._calendarActive ? root.calendarCells() : []
                         delegate: Item {
                             id: cell
                             required property var modelData

@@ -29,7 +29,7 @@ Md3ApplicationWindow {
     pagePredictPrefetch: false
     pageWarmStart: false
     pageL2Warm: true
-    pageIdleTrimMs: 90000
+    pageIdleTrimMs: 45000
     pageLeaveSnapshot: false
     pageNavWarm: true
     pageNavWarmCacheLimit: 3

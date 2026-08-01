@@ -21,6 +21,8 @@ Item {
     property real tableBodyHeight: 168
     property real rowHeight: 44
     property bool appendOnDrop: true
+    /// Drop table row Items while page is off-display (chrome height stays).
+    property bool unloadWhenPageInactive: true
 
     signal filesDropped(var items)
     signal itemRemoved(int index, var item)
@@ -30,6 +32,12 @@ Item {
     property string lastRejectMessage: ""
     property string rejectExtensionText: qsTr("File type not allowed")
     property bool announceRejections: true
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
 
     implicitWidth: 360
     implicitHeight: hasFiles && showTable ? (52 + 36 + tableBodyHeight + 24) : 180
@@ -325,7 +333,7 @@ Item {
                     spacing: 0
 
                     Repeater {
-                        model: root.droppedItems
+                        model: pageGate.contentActive ? root.droppedItems : []
 
                         Rectangle {
                             id: rowRoot

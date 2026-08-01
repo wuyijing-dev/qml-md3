@@ -22,6 +22,8 @@ Item {
     property bool modal: false
     property bool open: true
     property int minuteStep: 1 // dial snap; 5 matches classic MD clock ticks
+    /// Drop dial ticks while modal closed or page off-display.
+    property bool unloadWhenPageInactive: true
 
     signal accepted(int hour, int minute)
     signal cancelled()
@@ -29,6 +31,14 @@ Item {
 
     Accessible.role: Accessible.ComboBox
     Accessible.name: title.length ? title : qsTr("Time picker")
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
+
+    readonly property bool _dialActive: (!modal || open) && pageGate.contentActive
 
     readonly property bool isPm: hour >= 12
     readonly property int displayHour12: {
@@ -389,7 +399,7 @@ Item {
 
                     // Hour labels 1–12 or minute ticks 0,5,…55
                     Repeater {
-                        model: 12
+                        model: root._dialActive ? 12 : 0
                         delegate: Item {
                             id: tick
                             required property int index

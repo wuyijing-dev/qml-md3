@@ -15,6 +15,8 @@ Item {
     property bool fillFields: true
     /// When true, keep `canSubmit` / `hasErrors` fresh while typing (event-driven; no poll).
     property bool liveGate: true
+    /// Drop gate polling while page is off-display.
+    property bool unloadWhenPageInactive: true
     /// True when any entry in `errors` is a non-empty string.
     property bool hasErrors: false
     /// True when required fields are non-empty and `hasErrors` is false (does not run validators).
@@ -25,6 +27,12 @@ Item {
     default property alias content: formStack.data
 
     signal submitted(var values)
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
 
     implicitWidth: Math.max(200, host.implicitWidth)
     implicitHeight: host.implicitHeight
@@ -262,7 +270,7 @@ Item {
     // Fallback poll only when liveGate is on but no named fields were wired yet.
     Timer {
         interval: 800
-        running: root.liveGate && root.visible
+        running: root.liveGate && root.visible && pageGate.contentActive
                  && Object.keys(root._wiredFields).length === 0
                  && Md3TreeVisibility.isSceneActive(root, null)
         repeat: true

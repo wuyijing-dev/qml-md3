@@ -4,10 +4,30 @@ import Md3
 Md3Page {
     id: page
 
+    property var virtualListModel: []
+
     function _galleryWindow() {
         const w = hostWindow()
         return (w && w.galleryTableSelection !== undefined) ? w : null
     }
+
+    function _buildVirtualListModel() {
+        const rows = []
+        for (let i = 0; i < 5000; ++i)
+            rows.push({ title: qsTr("Log row %1").arg(i + 1) })
+        return rows
+    }
+
+    function _syncVirtualListModel() {
+        if (md3PageActive) {
+            if (!virtualListModel || virtualListModel.length !== 5000)
+                virtualListModel = _buildVirtualListModel()
+        } else {
+            virtualListModel = []
+        }
+    }
+
+    onMd3PageActiveChanged: _syncVirtualListModel()
 
     function _syncGalleryStatus() {
         const w = _galleryWindow()
@@ -23,7 +43,10 @@ Md3Page {
         }
     }
 
-    Component.onCompleted: _syncGalleryStatus()
+    Component.onCompleted: {
+        _syncVirtualListModel()
+        _syncGalleryStatus()
+    }
 
     Flickable {
         id: flick
@@ -287,12 +310,7 @@ Md3Page {
                     itemHeight: 40
                     accessibleName: qsTr("Virtual log list")
                     cacheBufferPx: 1200
-                    model: {
-                        const rows = []
-                        for (let i = 0; i < 5000; ++i)
-                            rows.push({ title: qsTr("Log row %1").arg(i + 1) })
-                        return rows
-                    }
+                    model: page.virtualListModel
                     onCurrentIndexChangedByUser: function (index, item) {
                         const w = _galleryWindow()
                         if (w)
@@ -558,52 +576,62 @@ Md3Page {
                 text: qsTr("Carousel")
                 role: Md3Text.TitleMedium
             }
-            Md3Carousel {
-                width: parent.width
-                itemHeight: 180
-                peekRatio: 0.14
-                autoPlay: true
-                autoPlayInterval: 4500
-                model: [
-                    {
-                        title: qsTr("主推"),
-                        subtitle: qsTr("左右滑动，可预览下一页"),
-                        color: Md3Theme.colorScheme.primary
-                    },
-                    {
-                        title: qsTr("次要"),
-                        subtitle: qsTr("指示点可跳转"),
-                        color: Md3Theme.colorScheme.secondary
-                    },
-                    {
-                        title: qsTr("强调"),
-                        subtitle: qsTr("支持自动轮播"),
-                        color: Md3Theme.colorScheme.tertiary
+            Md3DeferredSection {
+                preferredHeight: 420
+                delayMs: 48
+                asynchronous: true
+                sourceComponent: Component {
+                    Md3VStack {
+                        width: parent ? parent.width : 400
+                        spacing: 16
+                        Md3Carousel {
+                            width: parent.width
+                            itemHeight: 180
+                            peekRatio: 0.14
+                            autoPlay: true
+                            autoPlayInterval: 4500
+                            model: [
+                                {
+                                    title: qsTr("主推"),
+                                    subtitle: qsTr("左右滑动，可预览下一页"),
+                                    color: Md3Theme.colorScheme.primary
+                                },
+                                {
+                                    title: qsTr("次要"),
+                                    subtitle: qsTr("指示点可跳转"),
+                                    color: Md3Theme.colorScheme.secondary
+                                },
+                                {
+                                    title: qsTr("强调"),
+                                    subtitle: qsTr("支持自动轮播"),
+                                    color: Md3Theme.colorScheme.tertiary
+                                }
+                            ]
+                        }
+                        Md3Text {
+                            text: qsTr("FlipView + PipsPager")
+                            role: Md3Text.LabelLarge
+                            tone: Md3Text.OnSurfaceVariant
+                        }
+                        Md3Carousel {
+                            width: parent.width
+                            mode: Md3Carousel.Flip
+                            itemHeight: 160
+                            autoPlay: false
+                            model: [
+                                { title: qsTr("Page 1"), subtitle: qsTr("Full-bleed flip"), color: Md3Theme.colorScheme.primaryContainer },
+                                { title: qsTr("Page 2"), subtitle: qsTr("Snap one item"), color: Md3Theme.colorScheme.secondaryContainer },
+                                { title: qsTr("Page 3"), subtitle: qsTr("Pips below"), color: Md3Theme.colorScheme.tertiaryContainer }
+                            ]
+                        }
+                        Md3PipsPager {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            count: 5
+                            currentIndex: 2
+                            style: Md3PipsPager.Dot
+                        }
                     }
-                ]
-            }
-
-            Md3Text {
-                text: qsTr("FlipView + PipsPager")
-                role: Md3Text.LabelLarge
-                tone: Md3Text.OnSurfaceVariant
-            }
-            Md3Carousel {
-                width: parent.width
-                mode: Md3Carousel.Flip
-                itemHeight: 160
-                autoPlay: false
-                model: [
-                    { title: qsTr("Page 1"), subtitle: qsTr("Full-bleed flip"), color: Md3Theme.colorScheme.primaryContainer },
-                    { title: qsTr("Page 2"), subtitle: qsTr("Snap one item"), color: Md3Theme.colorScheme.secondaryContainer },
-                    { title: qsTr("Page 3"), subtitle: qsTr("Pips below"), color: Md3Theme.colorScheme.tertiaryContainer }
-                ]
-            }
-            Md3PipsPager {
-                anchors.horizontalCenter: parent.horizontalCenter
-                count: 5
-                currentIndex: 2
-                style: Md3PipsPager.Dot
+                }
             }
 
             Md3Text {

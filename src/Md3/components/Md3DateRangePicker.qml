@@ -34,10 +34,20 @@ Item {
     property string dateFormat: "yyyy-MM-dd"
     property bool modal: false
     property bool open: true
+    /// Drop day/year cells while modal closed or page off-display.
+    property bool unloadWhenPageInactive: true
 
     signal accepted(date start, date end)
     signal cancelled()
     signal rangeChanged(date start, date end)
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
+
+    readonly property bool _calendarActive: (!modal || open) && pageGate.contentActive
 
     Accessible.role: Accessible.ComboBox
     Accessible.name: title.length ? title : qsTr("Date range picker")
@@ -382,6 +392,8 @@ Item {
                     columnSpacing: 4
                     Repeater {
                         model: {
+                            if (!root._calendarActive)
+                                return []
                             const arr = []
                             for (let y = root.yearFrom; y <= root.yearTo; ++y)
                                 arr.push(y)
@@ -451,7 +463,7 @@ Item {
                     width: parent.width
                     columns: 7
                     Repeater {
-                        model: root.calendarCells()
+                        model: root._calendarActive ? root.calendarCells() : []
                         delegate: Item {
                             id: cell
                             required property var modelData

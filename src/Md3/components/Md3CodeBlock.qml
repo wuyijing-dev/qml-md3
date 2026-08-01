@@ -18,6 +18,8 @@ Item {
     property int maxHeight: 280
     /// When false, height grows with content (still clipped by parent).
     property bool scrollable: true
+    /// Drop RichText HTML while page is off-display (chrome size stays).
+    property bool unloadWhenPageInactive: true
 
     readonly property string _lang: {
         const l = String(language).toLowerCase()
@@ -26,6 +28,12 @@ Item {
         if (l === "c++")
             return "cpp"
         return l
+    }
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
     }
 
     implicitWidth: 360
@@ -208,11 +216,17 @@ Item {
     property int _gen: 0
 
     function refresh() {
+        if (!pageGate.contentActive) {
+            _html = ""
+            return
+        }
         _html = _buildHtml()
         _gen++
     }
 
     function requestRefresh() {
+        if (!pageGate.contentActive)
+            return
         refreshTimer.restart()
     }
 
@@ -226,6 +240,17 @@ Item {
         target: Md3Theme
         function onDarkChanged() { root.requestRefresh() }
         function onSeedChanged() { themeTimer.restart() }
+    }
+    Connections {
+        target: pageGate
+        function onContentActiveChanged() {
+            if (pageGate.contentActive)
+                root.requestRefresh()
+            else {
+                root._html = ""
+                root._gen++
+            }
+        }
     }
     Timer {
         id: themeTimer
@@ -264,7 +289,7 @@ Item {
                 id: codeText
                 width: root.wrap ? flick.width : implicitWidth
                 textFormat: Text.RichText
-                text: root._html
+                text: pageGate.contentActive ? root._html : ""
                 color: Md3Theme.colorScheme.colorOnSurface
                 wrapMode: root.wrap ? Text.WrapAnywhere : Text.NoWrap
                 property int gen: root._gen

@@ -647,893 +647,926 @@ toolBar: Md3AppToolBar {
             id: platformHost
             width: parent.width
             height: {
-                const panes = [paneWindows, paneLinuxDesktop, paneLinuxDesktop, paneMac, paneAndroid]
-                const p = panes[root.platformTab]
-                return p ? p.implicitHeight : 0
+                const loaders = [winPaneLoader, linuxPaneLoader, linuxPaneLoader, macPaneLoader, androidPaneLoader]
+                const L = loaders[root.platformTab]
+                return (L && L.item) ? L.item.implicitHeight : 0
             }
 
-            // ===== Windows =====
-            Md3VStack {
-                id: paneWindows
+            Loader {
+                id: winPaneLoader
                 width: parent.width
-                visible: root.platformTab === 0
-                spacing: 12
+                active: root.platformTab === 0
+                sourceComponent: windowsPaneComp
+                onLoaded: if (item) item.width = Qt.binding(function () { return winPaneLoader.width })
+            }
+            Loader {
+                id: linuxPaneLoader
+                width: parent.width
+                active: root.linuxDesktopActive
+                sourceComponent: linuxPaneComp
+                onLoaded: if (item) item.width = Qt.binding(function () { return linuxPaneLoader.width })
+            }
+            Loader {
+                id: macPaneLoader
+                width: parent.width
+                active: root.platformTab === 3
+                sourceComponent: macPaneComp
+                onLoaded: if (item) item.width = Qt.binding(function () { return macPaneLoader.width })
+            }
+            Loader {
+                id: androidPaneLoader
+                width: parent.width
+                active: root.platformTab === 4
+                sourceComponent: androidPaneComp
+                onLoaded: if (item) item.width = Qt.binding(function () { return androidPaneLoader.width })
+            }
 
-                Md3Text {
+            Component {
+                id: windowsPaneComp
+    Md3VStack {
+                    id: paneWindows
                     width: parent.width
-                    wrapMode: Text.WordWrap
-                    text: qsTr("Windows 10/11 客户区（能力袋 id=windows）：DWM 边框、任务栏进度与角标、跳转列表、缩略图工具栏、托盘、Peek/捕获、延迟 Snap Layouts。（系统背景材质已标记为不适合使用，Gallery 不再展示。）")
-                    role: Md3Text.BodyMedium
-                    tone: Md3Text.OnSurfaceVariant
-                }
-
-                Md3Text {
-                    width: parent.width
-                    visible: root.appWin && Md3WindowCapabilities.isWindows
-                    wrapMode: Text.WordWrap
-                    text: qsTr("已绑定 — 边框=\"%1\"")
-                          .arg(root.appWin ? root.appWin.nativeBorderColor : "")
-                    role: Md3Text.BodySmall
-                    tone: Md3Text.Primary
-                }
-                Md3HStack {
-                    visible: Md3WindowCapabilities.isWindows && root.appWin
                     spacing: 12
-                    Md3Switch {
-                        checked: root.appWin.syncImmersiveDarkMode
-                        onToggled: function (isOn) { root.appWin.syncImmersiveDarkMode = isOn }
-                    }
-                    Md3Text {
-                        text: qsTr("与主题同步沉浸式深色")
-                        role: Md3Text.BodyMedium
-                    }
-                }
 
-                Md3Text {
-                    text: qsTr("DWM 边框颜色")
-                    role: Md3Text.LabelLarge
-                    tone: Md3Text.OnSurfaceVariant
-                }
-                Md3FlowLayout {
-            width: parent.width
-                    spacing: 8
-                    Repeater {
-                        model: [
-                            { label: qsTr("默认"), color: "" },
-                            { label: qsTr("无"), color: "none" },
-                            { label: qsTr("主色"), color: "primary" },
-                            { label: qsTr("错误色"), color: "error" },
-                            { label: qsTr("轮廓色"), color: "outline" }
-                        ]
-                        delegate: Md3Button {
-                            required property var modelData
-                            enabled: Md3WindowCapabilities.isWindows
-                            text: modelData.label
-                            variant: Md3Button.Outlined
-                            onClicked: {
-                                let c = modelData.color
-                                if (c === "primary") c = Md3Theme.colorScheme.primary
-                                else if (c === "error") c = Md3Theme.colorScheme.error
-                                else if (c === "outline") c = Md3Theme.colorScheme.outline
-                                root.applyBorder(c)
+                    Md3Text {
+                        width: parent.width
+                        wrapMode: Text.WordWrap
+                        text: qsTr("Windows 10/11 客户区（能力袋 id=windows）：DWM 边框、任务栏进度与角标、跳转列表、缩略图工具栏、托盘、Peek/捕获、延迟 Snap Layouts。（系统背景材质已标记为不适合使用，Gallery 不再展示。）")
+                        role: Md3Text.BodyMedium
+                        tone: Md3Text.OnSurfaceVariant
+                    }
+
+                    Md3Text {
+                        width: parent.width
+                        visible: root.appWin && Md3WindowCapabilities.isWindows
+                        wrapMode: Text.WordWrap
+                        text: qsTr("已绑定 — 边框=\"%1\"")
+                              .arg(root.appWin ? root.appWin.nativeBorderColor : "")
+                        role: Md3Text.BodySmall
+                        tone: Md3Text.Primary
+                    }
+                    Md3HStack {
+                        visible: Md3WindowCapabilities.isWindows && root.appWin
+                        spacing: 12
+                        Md3Switch {
+                            checked: root.appWin.syncImmersiveDarkMode
+                            onToggled: function (isOn) { root.appWin.syncImmersiveDarkMode = isOn }
+                        }
+                        Md3Text {
+                            text: qsTr("与主题同步沉浸式深色")
+                            role: Md3Text.BodyMedium
+                        }
+                    }
+
+                    Md3Text {
+                        text: qsTr("DWM 边框颜色")
+                        role: Md3Text.LabelLarge
+                        tone: Md3Text.OnSurfaceVariant
+                    }
+                    Md3FlowLayout {
+                width: parent.width
+                        spacing: 8
+                        Repeater {
+                            model: [
+                                { label: qsTr("默认"), color: "" },
+                                { label: qsTr("无"), color: "none" },
+                                { label: qsTr("主色"), color: "primary" },
+                                { label: qsTr("错误色"), color: "error" },
+                                { label: qsTr("轮廓色"), color: "outline" }
+                            ]
+                            delegate: Md3Button {
+                                required property var modelData
+                                enabled: Md3WindowCapabilities.isWindows
+                                text: modelData.label
+                                variant: Md3Button.Outlined
+                                onClicked: {
+                                    let c = modelData.color
+                                    if (c === "primary") c = Md3Theme.colorScheme.primary
+                                    else if (c === "error") c = Md3Theme.colorScheme.error
+                                    else if (c === "outline") c = Md3Theme.colorScheme.outline
+                                    root.applyBorder(c)
+                                }
                             }
                         }
                     }
-                }
 
-                Md3FlowLayout {
-            width: parent.width
-                    spacing: 8
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("闪烁任务栏")
-                        onClicked: if (root.appWin) root.appWin.flashTaskbar(true)
-                    }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("停止闪烁")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.flashTaskbar(false)
-                    }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("系统菜单…")
-                        variant: Md3Button.Outlined
-                        onClicked: {
-                            if (!root.appWin) return
-                            const g = mapToGlobal(width / 2, height)
-                            if (root.appWin.titleBarItem
-                                    && typeof root.appWin.titleBarItem.openSystemMenu === "function")
-                                root.appWin.titleBarItem.openSystemMenu(g.x, g.y)
-                            else
-                                nativeHelper.showSystemMenu(root.appWin, g.x, g.y)
+                    Md3FlowLayout {
+                width: parent.width
+                        spacing: 8
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isWindows
+                            text: qsTr("闪烁任务栏")
+                            onClicked: if (root.appWin) root.appWin.flashTaskbar(true)
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isWindows
+                            text: qsTr("停止闪烁")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.flashTaskbar(false)
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isWindows
+                            text: qsTr("系统菜单…")
+                            variant: Md3Button.Outlined
+                            onClicked: {
+                                if (!root.appWin) return
+                                const g = mapToGlobal(width / 2, height)
+                                if (root.appWin.titleBarItem
+                                        && typeof root.appWin.titleBarItem.openSystemMenu === "function")
+                                    root.appWin.titleBarItem.openSystemMenu(g.x, g.y)
+                                else
+                                    nativeHelper.showSystemMenu(root.appWin, g.x, g.y)
+                            }
                         }
                     }
-                }
 
-                Md3Text {
-                    text: qsTr("任务栏进度 / 角标")
-                    role: Md3Text.LabelLarge
-                    tone: Md3Text.OnSurfaceVariant
-                }
-                Md3HStack {
-                    spacing: 12
-                    enabled: Md3WindowCapabilities.isWindows
-                    Md3Slider {
-                        id: winProgress
-                        from: 0; to: 1; value: 0.35
-                        onMoved: function () {
-                            if (root.appWin)
-                                root.appWin.setTaskbarProgress(winProgress.value)
-                        }
-                    }
                     Md3Text {
-                        text: Math.round(winProgress.value * 100) + "%"
-                        role: Md3Text.BodySmall
+                        text: qsTr("任务栏进度 / 角标")
+                        role: Md3Text.LabelLarge
                         tone: Md3Text.OnSurfaceVariant
                     }
-                }
-                Md3FlowLayout {
-            width: parent.width
-                    spacing: 8
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("不确定进度")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.setTaskbarProgress(0, Md3WindowHelper.ProgressIndeterminate)
-                    }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("错误")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.setTaskbarProgress(winProgress.value, Md3WindowHelper.ProgressError)
-                    }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("清除")
-                        variant: Md3Button.Text
-                        onClicked: if (root.appWin) root.appWin.clearTaskbarProgress()
-                    }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("叠加图标")
-                        onClicked: if (root.appWin) root.appWin.setTaskbarOverlayIcon(Md3AppIcons.app16, qsTr("角标"))
-                    }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("清除角标")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.clearTaskbarOverlayIcon()
-                    }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows
-                                   || Md3WindowCapabilities.isAndroid
-                                   || Md3WindowCapabilities.isLinux
-                        text: qsTr("数字角标 3")
-                        onClicked: if (root.appWin) root.appWin.setDockBadge(3)
-                    }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows
-                                   || Md3WindowCapabilities.isAndroid
-                                   || Md3WindowCapabilities.isLinux
-                        text: qsTr("清除数字角标")
-                        variant: Md3Button.Text
-                        onClicked: if (root.appWin) root.appWin.setDockBadge(0)
-                    }
-                }
-
-                Md3Text {
-                    text: qsTr("空闲抑制")
-                    role: Md3Text.LabelLarge
-                    tone: Md3Text.OnSurfaceVariant
-                }
-                Md3FlowLayout {
-                    width: parent.width
-                    spacing: 8
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.idleInhibit
-                        text: qsTr("防止休眠")
-                        onClicked: {
-                            if (!root.appWin)
-                                return
-                            const ok = root.appWin.setIdleInhibit(true, qsTr("Md3 演示"))
-                            shellEventLabel.text = ok ? qsTr("外壳事件：已抑制空闲")
-                                                     : qsTr("外壳事件：空闲抑制失败")
-                        }
-                    }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.idleInhibit
-                        text: qsTr("恢复空闲")
-                        variant: Md3Button.Outlined
-                        onClicked: {
-                            if (!root.appWin)
-                                return
-                            root.appWin.setIdleInhibit(false)
-                            shellEventLabel.text = qsTr("外壳事件：已恢复空闲计时")
-                        }
-                    }
-                }
-
-                Md3Text {
-                    visible: Md3WindowCapabilities.isAndroid
-                    text: qsTr("Android：系统标题栏；息屏抑制=FLAG_KEEP_SCREEN_ON；防截屏=FLAG_SECURE；角标=setBadgeNumber。")
-                    role: Md3Text.BodySmall
-                    tone: Md3Text.OnSurfaceVariant
-                    wrapMode: Text.WordWrap
-                    width: parent.width
-                }
-
-                Md3Text {
-                    visible: Md3WindowCapabilities.isWindows && Md3WindowCapabilities.snapLayouts
-                    text: qsTr("Snap Layouts：短按最大化按钮为普通最大化；悬停约 0.4s 后触发 Win11 贴靠面板。")
-                    role: Md3Text.BodySmall
-                    tone: Md3Text.OnSurfaceVariant
-                    wrapMode: Text.WordWrap
-                    width: parent.width
-                }
-
-                Md3Text {
-                    text: qsTr("Peek、捕获与外壳")
-                    role: Md3Text.LabelLarge
-                    tone: Md3Text.OnSurfaceVariant
-                }
-                Md3VStack {
-                    spacing: 8
-                    enabled: Md3WindowCapabilities.isWindows
                     Md3HStack {
                         spacing: 12
-                        Md3Switch {
-                            onToggled: function (on) { if (root.appWin) root.appWin.setExcludedFromPeek(on) }
+                        enabled: Md3WindowCapabilities.isWindows
+                        Md3Slider {
+                            id: winProgress
+                            from: 0; to: 1; value: 0.35
+                            onMoved: function () {
+                                if (root.appWin)
+                                    root.appWin.setTaskbarProgress(winProgress.value)
+                            }
                         }
                         Md3Text {
-                            wrapMode: Text.WordWrap
-                            text: qsTr("从 Aero Peek 排除")
-                            role: Md3Text.BodyMedium
+                            text: Math.round(winProgress.value * 100) + "%"
+                            role: Md3Text.BodySmall
+                            tone: Md3Text.OnSurfaceVariant
                         }
                     }
-                    Md3HStack {
-                        spacing: 12
-                        Md3Switch {
-                            onToggled: function (on) { if (root.appWin) root.appWin.setDisallowPeek(on) }
+                    Md3FlowLayout {
+                width: parent.width
+                        spacing: 8
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isWindows
+                            text: qsTr("不确定进度")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.setTaskbarProgress(0, Md3WindowHelper.ProgressIndeterminate)
                         }
-                        Md3Text {
-                            text: qsTr("禁止 Peek 预览")
-                            role: Md3Text.BodyMedium
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isWindows
+                            text: qsTr("错误")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.setTaskbarProgress(winProgress.value, Md3WindowHelper.ProgressError)
                         }
-                    }
-                    Md3HStack {
-                        spacing: 12
-                        Md3Switch {
-                            onToggled: function (on) { if (root.appWin) root.appWin.setExcludeFromCapture(on) }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isWindows
+                            text: qsTr("清除")
+                            variant: Md3Button.Text
+                            onClicked: if (root.appWin) root.appWin.clearTaskbarProgress()
                         }
-                        Md3Text {
-                            text: qsTr("排除屏幕捕获")
-                            role: Md3Text.BodyMedium
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isWindows
+                            text: qsTr("叠加图标")
+                            onClicked: if (root.appWin) root.appWin.setTaskbarOverlayIcon(Md3AppIcons.app16, qsTr("角标"))
                         }
-                    }
-                }
-                Md3FlowLayout {
-            width: parent.width
-                    spacing: 8
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("跳转列表")
-                        onClicked: if (root.appWin) root.appWin.setJumpListTasks([
-                            { title: qsTr("打开图库"), arguments: "" },
-                            { title: qsTr("窗口页"), arguments: "--page=window" }
-                        ])
-                    }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("缩略图栏")
-                        onClicked: if (root.appWin) root.appWin.setThumbBarButtons([
-                            { id: 1, icon: Md3AppIcons.app16, tooltip: qsTr("操作 A") },
-                            { id: 2, icon: Md3AppIcons.app16, tooltip: qsTr("操作 B") }
-                        ])
-                    }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("显示托盘")
-                        onClicked: {
-                            if (!root.appWin)
-                                return
-                            const ok = root.appWin.showSystemTrayIcon(Md3AppIcons.app16, qsTr("Md3 图库"))
-                            shellEventLabel.text = ok ? qsTr("外壳事件：托盘图标已显示（左键抬窗 / 右键菜单）")
-                                                     : qsTr("外壳事件：显示托盘失败")
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isWindows
+                            text: qsTr("清除角标")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.clearTaskbarOverlayIcon()
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isWindows
+                                       || Md3WindowCapabilities.isAndroid
+                                       || Md3WindowCapabilities.isLinux
+                            text: qsTr("数字角标 3")
+                            onClicked: if (root.appWin) root.appWin.setDockBadge(3)
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isWindows
+                                       || Md3WindowCapabilities.isAndroid
+                                       || Md3WindowCapabilities.isLinux
+                            text: qsTr("清除数字角标")
+                            variant: Md3Button.Text
+                            onClicked: if (root.appWin) root.appWin.setDockBadge(0)
                         }
                     }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("气泡通知")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.showTrayNotification(qsTr("Md3 图库"), qsTr("托盘通知"), 4000)
+
+                    Md3Text {
+                        text: qsTr("空闲抑制")
+                        role: Md3Text.LabelLarge
+                        tone: Md3Text.OnSurfaceVariant
                     }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("隐藏托盘")
-                        variant: Md3Button.Text
-                        onClicked: {
-                            if (!root.appWin)
-                                return
-                            root.appWin.hideSystemTrayIcon()
-                            shellEventLabel.text = qsTr("外壳事件：托盘已隐藏")
+                    Md3FlowLayout {
+                        width: parent.width
+                        spacing: 8
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.idleInhibit
+                            text: qsTr("防止休眠")
+                            onClicked: {
+                                if (!root.appWin)
+                                    return
+                                const ok = root.appWin.setIdleInhibit(true, qsTr("Md3 演示"))
+                                shellEventLabel.text = ok ? qsTr("外壳事件：已抑制空闲")
+                                                         : qsTr("外壳事件：空闲抑制失败")
+                            }
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.idleInhibit
+                            text: qsTr("恢复空闲")
+                            variant: Md3Button.Outlined
+                            onClicked: {
+                                if (!root.appWin)
+                                    return
+                                root.appWin.setIdleInhibit(false)
+                                shellEventLabel.text = qsTr("外壳事件：已恢复空闲计时")
+                            }
                         }
                     }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("窗口置顶")
-                        onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(true)
+
+                    Md3Text {
+                        visible: Md3WindowCapabilities.isAndroid
+                        text: qsTr("Android：系统标题栏；息屏抑制=FLAG_KEEP_SCREEN_ON；防截屏=FLAG_SECURE；角标=setBadgeNumber。")
+                        role: Md3Text.BodySmall
+                        tone: Md3Text.OnSurfaceVariant
+                        wrapMode: Text.WordWrap
+                        width: parent.width
                     }
-                    Md3Button {
+
+                    Md3Text {
+                        visible: Md3WindowCapabilities.isWindows && Md3WindowCapabilities.snapLayouts
+                        text: qsTr("Snap Layouts：短按最大化按钮为普通最大化；悬停约 0.4s 后触发 Win11 贴靠面板。")
+                        role: Md3Text.BodySmall
+                        tone: Md3Text.OnSurfaceVariant
+                        wrapMode: Text.WordWrap
+                        width: parent.width
+                    }
+
+                    Md3Text {
+                        text: qsTr("Peek、捕获与外壳")
+                        role: Md3Text.LabelLarge
+                        tone: Md3Text.OnSurfaceVariant
+                    }
+                    Md3VStack {
+                        spacing: 8
                         enabled: Md3WindowCapabilities.isWindows
-                        text: qsTr("注册崩溃重启")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.registerApplicationRestart("")
+                        Md3HStack {
+                            spacing: 12
+                            Md3Switch {
+                                onToggled: function (on) { if (root.appWin) root.appWin.setExcludedFromPeek(on) }
+                            }
+                            Md3Text {
+                                wrapMode: Text.WordWrap
+                                text: qsTr("从 Aero Peek 排除")
+                                role: Md3Text.BodyMedium
+                            }
+                        }
+                        Md3HStack {
+                            spacing: 12
+                            Md3Switch {
+                                onToggled: function (on) { if (root.appWin) root.appWin.setDisallowPeek(on) }
+                            }
+                            Md3Text {
+                                text: qsTr("禁止 Peek 预览")
+                                role: Md3Text.BodyMedium
+                            }
+                        }
+                        Md3HStack {
+                            spacing: 12
+                            Md3Switch {
+                                onToggled: function (on) { if (root.appWin) root.appWin.setExcludeFromCapture(on) }
+                            }
+                            Md3Text {
+                                text: qsTr("排除屏幕捕获")
+                                role: Md3Text.BodyMedium
+                            }
+                        }
+                    }
+                    Md3FlowLayout {
+                width: parent.width
+                        spacing: 8
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isWindows
+                            text: qsTr("跳转列表")
+                            onClicked: if (root.appWin) root.appWin.setJumpListTasks([
+                                { title: qsTr("打开图库"), arguments: "" },
+                                { title: qsTr("窗口页"), arguments: "--page=window" }
+                            ])
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isWindows
+                            text: qsTr("缩略图栏")
+                            onClicked: if (root.appWin) root.appWin.setThumbBarButtons([
+                                { id: 1, icon: Md3AppIcons.app16, tooltip: qsTr("操作 A") },
+                                { id: 2, icon: Md3AppIcons.app16, tooltip: qsTr("操作 B") }
+                            ])
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isWindows
+                            text: qsTr("显示托盘")
+                            onClicked: {
+                                if (!root.appWin)
+                                    return
+                                const ok = root.appWin.showSystemTrayIcon(Md3AppIcons.app16, qsTr("Md3 图库"))
+                                shellEventLabel.text = ok ? qsTr("外壳事件：托盘图标已显示（左键抬窗 / 右键菜单）")
+                                                         : qsTr("外壳事件：显示托盘失败")
+                            }
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isWindows
+                            text: qsTr("气泡通知")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.showTrayNotification(qsTr("Md3 图库"), qsTr("托盘通知"), 4000)
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isWindows
+                            text: qsTr("隐藏托盘")
+                            variant: Md3Button.Text
+                            onClicked: {
+                                if (!root.appWin)
+                                    return
+                                root.appWin.hideSystemTrayIcon()
+                                shellEventLabel.text = qsTr("外壳事件：托盘已隐藏")
+                            }
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isWindows
+                            text: qsTr("窗口置顶")
+                            onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(true)
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isWindows
+                            text: qsTr("注册崩溃重启")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.registerApplicationRestart("")
+                        }
                     }
                 }
             }
 
-            // ===== Wayland / X11 (shared FreeDesktop stack; tab selects honesty notes) =====
-            Md3VStack {
-                id: paneLinuxDesktop
-                width: parent.width
-                visible: root.linuxDesktopActive
-                spacing: 12
-
-                Md3Text {
+            Component {
+                id: linuxPaneComp
+    Md3VStack {
+                    id: paneLinuxDesktop
                     width: parent.width
-                    wrapMode: Text.WordWrap
-                    text: root.platformTab === 2
-                          ? qsTr("X11（xcb）：CSD 客户区、KX11Extras KeepAbove / forceActiveWindow（装 KF 时）、KWin blur atom、StatusNotifier 托盘、LauncherEntry 进度/角标、空闲抑制。合成器仍可能覆盖置顶。")
-                          : qsTr("Wayland：CSD、xdg-activation 前置、KF6 模糊协议（需合成器开启 Blur）、托盘 portal、LauncherEntry。无令牌时「前置」常被忽略；fractional scale 更可靠。")
-                    role: Md3Text.BodyMedium
-                    tone: Md3Text.OnSurfaceVariant
-                }
-
-                Md3Text {
-                    width: parent.width
-                    visible: root.appWin && root.linuxOpsEnabled
-                    wrapMode: Text.WordWrap
-                    text: qsTr("已绑定 — 显示服务器=%1 · 能力袋=%2 · 模糊=%3 · 强调色=%4")
-                          .arg(Md3WindowCapabilities.displayServer)
-                          .arg(Md3WindowCapabilities.platformId)
-                          .arg((root.appWin.windowNative
-                                ? root.appWin.windowNative.blurBehindAvailable()
-                                : nativeHelper.blurBehindAvailable()) ? qsTr("可用") : qsTr("不可用"))
-                          .arg(nativeHelper.systemAccentColor())
-                    role: Md3Text.BodySmall
-                    tone: Md3Text.Primary
-                }
-
-                Md3Text {
-                    width: parent.width
-                    visible: root.linuxOpsEnabled
-                    wrapMode: Text.WordWrap
-                    text: qsTr("原生反馈：%1").arg(
-                              (root.appWin && root.appWin.windowNative
-                               ? root.appWin.windowNative.lastNativeStatus
-                               : nativeHelper.lastNativeStatus) || qsTr("（点击下方按钮后显示）"))
-                    role: Md3Text.BodySmall
-                    tone: Md3Text.Tertiary
-                }
-                Md3HStack {
-                    visible: root.linuxOpsEnabled && root.appWin
                     spacing: 12
-                    Md3Switch {
-                        checked: root.appWin.syncImmersiveDarkMode
-                        onToggled: function (isOn) { root.appWin.syncImmersiveDarkMode = isOn }
+
+                    Md3Text {
+                        width: parent.width
+                        wrapMode: Text.WordWrap
+                        text: root.platformTab === 2
+                              ? qsTr("X11（xcb）：CSD 客户区、KX11Extras KeepAbove / forceActiveWindow（装 KF 时）、KWin blur atom、StatusNotifier 托盘、LauncherEntry 进度/角标、空闲抑制。合成器仍可能覆盖置顶。")
+                              : qsTr("Wayland：CSD、xdg-activation 前置、KF6 模糊协议（需合成器开启 Blur）、托盘 portal、LauncherEntry。无令牌时「前置」常被忽略；fractional scale 更可靠。")
+                        role: Md3Text.BodyMedium
+                        tone: Md3Text.OnSurfaceVariant
+                    }
+
+                    Md3Text {
+                        width: parent.width
+                        visible: root.appWin && root.linuxOpsEnabled
+                        wrapMode: Text.WordWrap
+                        text: qsTr("已绑定 — 显示服务器=%1 · 能力袋=%2 · 模糊=%3 · 强调色=%4")
+                              .arg(Md3WindowCapabilities.displayServer)
+                              .arg(Md3WindowCapabilities.platformId)
+                              .arg((root.appWin.windowNative
+                                    ? root.appWin.windowNative.blurBehindAvailable()
+                                    : nativeHelper.blurBehindAvailable()) ? qsTr("可用") : qsTr("不可用"))
+                              .arg(nativeHelper.systemAccentColor())
+                        role: Md3Text.BodySmall
+                        tone: Md3Text.Primary
+                    }
+
+                    Md3Text {
+                        width: parent.width
+                        visible: root.linuxOpsEnabled
+                        wrapMode: Text.WordWrap
+                        text: qsTr("原生反馈：%1").arg(
+                                  (root.appWin && root.appWin.windowNative
+                                   ? root.appWin.windowNative.lastNativeStatus
+                                   : nativeHelper.lastNativeStatus) || qsTr("（点击下方按钮后显示）"))
+                        role: Md3Text.BodySmall
+                        tone: Md3Text.Tertiary
+                    }
+                    Md3HStack {
+                        visible: root.linuxOpsEnabled && root.appWin
+                        spacing: 12
+                        Md3Switch {
+                            checked: root.appWin.syncImmersiveDarkMode
+                            onToggled: function (isOn) { root.appWin.syncImmersiveDarkMode = isOn }
+                        }
+                        Md3Text {
+                            width: parent.width
+                            text: qsTr("与主题同步配色方案")
+                            role: Md3Text.BodyMedium
+                        }
+                    }
+
+                    Md3Text {
+                        text: qsTr("窗口操作")
+                        role: Md3Text.LabelLarge
+                        tone: Md3Text.OnSurfaceVariant
                     }
                     Md3Text {
                         width: parent.width
-                        text: qsTr("与主题同步配色方案")
-                        role: Md3Text.BodyMedium
+                        wrapMode: Text.WordWrap
+                        text: root.platformTab === 2
+                              ? qsTr("X11：「请求注意」请先切到其他窗口；「前置」可用 forceActiveWindow（KF）。「允许空闲」需先成功「禁止休眠」。")
+                              : qsTr("Wayland：「请求注意」请先切窗；无 xdg-activation 令牌时「前置」常被忽略（看 lastNativeStatus）。「允许空闲」需先成功「禁止休眠」。")
+                        role: Md3Text.BodySmall
+                        tone: Md3Text.OnSurfaceVariant
                     }
-                }
-
-                Md3Text {
-                    text: qsTr("窗口操作")
-                    role: Md3Text.LabelLarge
-                    tone: Md3Text.OnSurfaceVariant
-                }
-                Md3Text {
-                    width: parent.width
-                    wrapMode: Text.WordWrap
-                    text: root.platformTab === 2
-                          ? qsTr("X11：「请求注意」请先切到其他窗口；「前置」可用 forceActiveWindow（KF）。「允许空闲」需先成功「禁止休眠」。")
-                          : qsTr("Wayland：「请求注意」请先切窗；无 xdg-activation 令牌时「前置」常被忽略（看 lastNativeStatus）。「允许空闲」需先成功「禁止休眠」。")
-                    role: Md3Text.BodySmall
-                    tone: Md3Text.OnSurfaceVariant
-                }
-                Md3FlowLayout {
-                    width: parent.width
-                    spacing: 8
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("请求注意")
-                        onClicked: if (root.appWin) root.appWin.flashTaskbar(true)
-                    }
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("停止")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.flashTaskbar(false)
-                    }
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("系统菜单…")
-                        variant: Md3Button.Outlined
-                        onClicked: {
-                            if (!root.appWin) return
-                            const g = mapToGlobal(width / 2, height)
-                            if (root.appWin.titleBarItem
-                                    && typeof root.appWin.titleBarItem.openSystemMenu === "function")
-                                root.appWin.titleBarItem.openSystemMenu(g.x, g.y)
-                            else
-                                nativeHelper.showSystemMenu(root.appWin, g.x, g.y)
+                    Md3FlowLayout {
+                        width: parent.width
+                        spacing: 8
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("请求注意")
+                            onClicked: if (root.appWin) root.appWin.flashTaskbar(true)
+                        }
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("停止")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.flashTaskbar(false)
+                        }
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("系统菜单…")
+                            variant: Md3Button.Outlined
+                            onClicked: {
+                                if (!root.appWin) return
+                                const g = mapToGlobal(width / 2, height)
+                                if (root.appWin.titleBarItem
+                                        && typeof root.appWin.titleBarItem.openSystemMenu === "function")
+                                    root.appWin.titleBarItem.openSystemMenu(g.x, g.y)
+                                else
+                                    nativeHelper.showSystemMenu(root.appWin, g.x, g.y)
+                            }
+                        }
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("前置激活")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.raiseWindow()
+                        }
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("窗口置顶")
+                            onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(true)
+                        }
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("取消置顶")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(false)
+                        }
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("禁止休眠/锁屏")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.setIdleInhibit(true, qsTr("Md3 演示"))
+                        }
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("允许空闲")
+                            variant: Md3Button.Text
+                            onClicked: if (root.appWin) root.appWin.setIdleInhibit(false)
+                        }
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("偏好深色")
+                            onClicked: if (root.appWin) root.appWin.setPreferredAppMode(true)
+                        }
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("偏好浅色")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.setPreferredAppMode(false)
+                        }
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("打开模糊设置")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.openBlurSettings()
                         }
                     }
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("前置激活")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.raiseWindow()
-                    }
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("窗口置顶")
-                        onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(true)
-                    }
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("取消置顶")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(false)
-                    }
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("禁止休眠/锁屏")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.setIdleInhibit(true, qsTr("Md3 演示"))
-                    }
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("允许空闲")
-                        variant: Md3Button.Text
-                        onClicked: if (root.appWin) root.appWin.setIdleInhibit(false)
-                    }
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("偏好深色")
-                        onClicked: if (root.appWin) root.appWin.setPreferredAppMode(true)
-                    }
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("偏好浅色")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.setPreferredAppMode(false)
-                    }
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("打开模糊设置")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.openBlurSettings()
-                    }
-                }
 
-                Md3Text {
-                    text: qsTr("Dock 进度 / 角标")
-                    role: Md3Text.LabelLarge
-                    tone: Md3Text.OnSurfaceVariant
-                }
-                Md3HStack {
-                    spacing: 12
-                    enabled: root.linuxOpsEnabled
-                    Md3Slider {
-                        id: linuxProgress
-                        from: 0; to: 1; value: 0.35
-                        onMoved: function () {
-                            if (root.appWin)
-                                root.appWin.setTaskbarProgress(linuxProgress.value)
-                        }
-                    }
                     Md3Text {
-                        text: Math.round(linuxProgress.value * 100) + "%"
+                        text: qsTr("Dock 进度 / 角标")
+                        role: Md3Text.LabelLarge
+                        tone: Md3Text.OnSurfaceVariant
+                    }
+                    Md3HStack {
+                        spacing: 12
+                        enabled: root.linuxOpsEnabled
+                        Md3Slider {
+                            id: linuxProgress
+                            from: 0; to: 1; value: 0.35
+                            onMoved: function () {
+                                if (root.appWin)
+                                    root.appWin.setTaskbarProgress(linuxProgress.value)
+                            }
+                        }
+                        Md3Text {
+                            text: Math.round(linuxProgress.value * 100) + "%"
+                            role: Md3Text.BodySmall
+                            tone: Md3Text.OnSurfaceVariant
+                        }
+                    }
+                    Md3FlowLayout {
+                        width: parent.width
+                        spacing: 8
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("不确定进度")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.setTaskbarProgress(0, Md3WindowHelper.ProgressIndeterminate)
+                        }
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("清除进度")
+                            variant: Md3Button.Text
+                            onClicked: if (root.appWin) root.appWin.clearTaskbarProgress()
+                        }
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("角标 3")
+                            onClicked: if (root.appWin) root.appWin.setDockBadge(3)
+                        }
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("清除角标")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.setDockBadge(0)
+                        }
+                    }
+
+                    Md3Text {
+                        text: qsTr("托盘 / 通知")
+                        role: Md3Text.LabelLarge
+                        tone: Md3Text.OnSurfaceVariant
+                    }
+                    Md3FlowLayout {
+                        width: parent.width
+                        spacing: 8
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("显示托盘")
+                            onClicked: {
+                                if (!root.appWin)
+                                    return
+                                const ok = root.appWin.showSystemTrayIcon(Md3AppIcons.app16, qsTr("Md3 图库"))
+                                shellEventLabel.text = ok ? qsTr("外壳事件：托盘图标已显示（左键抬窗 / 右键菜单）")
+                                                         : qsTr("外壳事件：显示托盘失败")
+                            }
+                        }
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("发送通知")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.showTrayNotification(qsTr("Md3 图库"), qsTr("桌面通知"), 4000)
+                        }
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("隐藏托盘")
+                            variant: Md3Button.Text
+                            onClicked: if (root.appWin) root.appWin.hideSystemTrayIcon()
+                        }
+                        Md3Button {
+                            enabled: root.linuxOpsEnabled
+                            text: qsTr("下一显示器")
+                            variant: Md3Button.Outlined
+                            onClicked: {
+                                if (!root.appWin) return
+                                const n = root.appWin.monitorCount
+                                if (n <= 1) return
+                                root._monitorIndex = (root._monitorIndex + 1) % n
+                                root.appWin.moveToMonitor(root._monitorIndex)
+                            }
+                        }
+                    }
+
+                    Md3Text {
+                        width: parent.width
+                        wrapMode: Text.WordWrap
+                        text: root.platformTab === 2
+                              ? qsTr("X11 能力袋 id=x11。桌面文件仍建议安装以便任务栏匹配。")
+                              : qsTr("Wayland 能力袋 id=wayland。安装 resources/linux/appQML_MD3.desktop 以获得正确的任务栏图标（desktopFileName → xdg app_id）。")
                         role: Md3Text.BodySmall
                         tone: Md3Text.OnSurfaceVariant
                     }
                 }
-                Md3FlowLayout {
-                    width: parent.width
-                    spacing: 8
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("不确定进度")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.setTaskbarProgress(0, Md3WindowHelper.ProgressIndeterminate)
-                    }
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("清除进度")
-                        variant: Md3Button.Text
-                        onClicked: if (root.appWin) root.appWin.clearTaskbarProgress()
-                    }
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("角标 3")
-                        onClicked: if (root.appWin) root.appWin.setDockBadge(3)
-                    }
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("清除角标")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.setDockBadge(0)
-                    }
-                }
-
-                Md3Text {
-                    text: qsTr("托盘 / 通知")
-                    role: Md3Text.LabelLarge
-                    tone: Md3Text.OnSurfaceVariant
-                }
-                Md3FlowLayout {
-                    width: parent.width
-                    spacing: 8
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("显示托盘")
-                        onClicked: {
-                            if (!root.appWin)
-                                return
-                            const ok = root.appWin.showSystemTrayIcon(Md3AppIcons.app16, qsTr("Md3 图库"))
-                            shellEventLabel.text = ok ? qsTr("外壳事件：托盘图标已显示（左键抬窗 / 右键菜单）")
-                                                     : qsTr("外壳事件：显示托盘失败")
-                        }
-                    }
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("发送通知")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.showTrayNotification(qsTr("Md3 图库"), qsTr("桌面通知"), 4000)
-                    }
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("隐藏托盘")
-                        variant: Md3Button.Text
-                        onClicked: if (root.appWin) root.appWin.hideSystemTrayIcon()
-                    }
-                    Md3Button {
-                        enabled: root.linuxOpsEnabled
-                        text: qsTr("下一显示器")
-                        variant: Md3Button.Outlined
-                        onClicked: {
-                            if (!root.appWin) return
-                            const n = root.appWin.monitorCount
-                            if (n <= 1) return
-                            root._monitorIndex = (root._monitorIndex + 1) % n
-                            root.appWin.moveToMonitor(root._monitorIndex)
-                        }
-                    }
-                }
-
-                Md3Text {
-                    width: parent.width
-                    wrapMode: Text.WordWrap
-                    text: root.platformTab === 2
-                          ? qsTr("X11 能力袋 id=x11。桌面文件仍建议安装以便任务栏匹配。")
-                          : qsTr("Wayland 能力袋 id=wayland。安装 resources/linux/appQML_MD3.desktop 以获得正确的任务栏图标（desktopFileName → xdg app_id）。")
-                    role: Md3Text.BodySmall
-                    tone: Md3Text.OnSurfaceVariant
-                }
             }
 
-            // ===== macOS =====
-            Md3VStack {
-                id: paneMac
-                width: parent.width
-                visible: root.platformTab === 3
-                spacing: 12
-
-                Md3Text {
+            Component {
+                id: macPaneComp
+    Md3VStack {
+                    id: paneMac
                     width: parent.width
-                    wrapMode: Text.WordWrap
-                    text: qsTr("macOS：保留红绿灯留白、半透明背景钩子、配色/强调色。标题按钮保持系统原生。能力袋 id=macos。")
-                    role: Md3Text.BodyMedium
-                    tone: Md3Text.OnSurfaceVariant
-                }
-
-                Md3Text {
-                    visible: root.appWin && Md3WindowCapabilities.isMacOS
-                    text: qsTr("已绑定 — 红绿灯留白=%1")
-                          .arg(nativeHelper.trafficLightsInset)
-                    role: Md3Text.BodySmall
-                    tone: Md3Text.Primary
-                }
-                Md3HStack {
-                    visible: Md3WindowCapabilities.isMacOS && root.appWin
                     spacing: 12
-                    Md3Switch {
-                        checked: root.appWin.syncImmersiveDarkMode
-                        onToggled: function (isOn) { root.appWin.syncImmersiveDarkMode = isOn }
-                    }
-                    Md3Text {
-                        text: qsTr("与主题同步配色方案")
-                        role: Md3Text.BodyMedium
-                    }
-                }
 
-                Md3FlowLayout {
-            width: parent.width
-                    spacing: 8
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isMacOS
-                        text: qsTr("请求注意")
-                        onClicked: if (root.appWin) root.appWin.flashTaskbar(true)
+                    Md3Text {
+                        width: parent.width
+                        wrapMode: Text.WordWrap
+                        text: qsTr("macOS：保留红绿灯留白、半透明背景钩子、配色/强调色。标题按钮保持系统原生。能力袋 id=macos。")
+                        role: Md3Text.BodyMedium
+                        tone: Md3Text.OnSurfaceVariant
                     }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isMacOS
-                        text: qsTr("前置激活")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.raiseWindow()
+
+                    Md3Text {
+                        visible: root.appWin && Md3WindowCapabilities.isMacOS
+                        text: qsTr("已绑定 — 红绿灯留白=%1")
+                              .arg(nativeHelper.trafficLightsInset)
+                        role: Md3Text.BodySmall
+                        tone: Md3Text.Primary
                     }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isMacOS
-                        text: qsTr("窗口置顶")
-                        onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(true)
+                    Md3HStack {
+                        visible: Md3WindowCapabilities.isMacOS && root.appWin
+                        spacing: 12
+                        Md3Switch {
+                            checked: root.appWin.syncImmersiveDarkMode
+                            onToggled: function (isOn) { root.appWin.syncImmersiveDarkMode = isOn }
+                        }
+                        Md3Text {
+                            text: qsTr("与主题同步配色方案")
+                            role: Md3Text.BodyMedium
+                        }
                     }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isMacOS
-                        text: qsTr("取消置顶")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(false)
-                    }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isMacOS
-                        text: qsTr("程序坞角标 3")
-                        onClicked: if (root.appWin) root.appWin.setDockBadge(3)
-                    }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isMacOS
-                        text: qsTr("清除角标")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.setDockBadge(0)
-                    }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isMacOS
-                        text: qsTr("偏好深色")
-                        onClicked: if (root.appWin) root.appWin.setPreferredAppMode(true)
-                    }
-                    Md3Button {
-                        enabled: Md3WindowCapabilities.isMacOS
-                        text: qsTr("偏好浅色")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.setPreferredAppMode(false)
+
+                    Md3FlowLayout {
+                width: parent.width
+                        spacing: 8
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isMacOS
+                            text: qsTr("请求注意")
+                            onClicked: if (root.appWin) root.appWin.flashTaskbar(true)
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isMacOS
+                            text: qsTr("前置激活")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.raiseWindow()
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isMacOS
+                            text: qsTr("窗口置顶")
+                            onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(true)
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isMacOS
+                            text: qsTr("取消置顶")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(false)
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isMacOS
+                            text: qsTr("程序坞角标 3")
+                            onClicked: if (root.appWin) root.appWin.setDockBadge(3)
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isMacOS
+                            text: qsTr("清除角标")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.setDockBadge(0)
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isMacOS
+                            text: qsTr("偏好深色")
+                            onClicked: if (root.appWin) root.appWin.setPreferredAppMode(true)
+                        }
+                        Md3Button {
+                            enabled: Md3WindowCapabilities.isMacOS
+                            text: qsTr("偏好浅色")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.setPreferredAppMode(false)
+                        }
                     }
                 }
             }
 
-            // ===== Android =====
-            Md3VStack {
-                id: paneAndroid
-                width: parent.width
-                visible: root.platformTab === 4
-                spacing: 12
-
-                Md3Text {
+            Component {
+                id: androidPaneComp
+    Md3VStack {
+                    id: paneAndroid
                     width: parent.width
-                    wrapMode: Text.WordWrap
-                    text: qsTr("Android：系统标题栏（无 CSD / Snap / 托盘）。能力袋 id=android。原生：亮屏/FLAG_SECURE/角标/沉浸式/分享/振动，以及通知、系统栏颜色、方向锁定、软键盘、Toast/触觉、应用设置、电池优化白名单。")
-                    role: Md3Text.BodyMedium
-                    tone: Md3Text.OnSurfaceVariant
-                }
+                    spacing: 12
 
-                Md3Text {
-                    width: parent.width
-                    visible: root.androidOpsEnabled && root.appWin
-                    wrapMode: Text.WordWrap
-                    text: qsTr("已绑定 — displayServer=%1 · notifications=%2 · systemBar=%3 · softInput=%4")
-                          .arg(Md3WindowCapabilities.displayServer)
-                          .arg(Md3WindowCapabilities.notifications ? qsTr("是") : qsTr("否"))
-                          .arg(Md3WindowCapabilities.systemBarColors ? qsTr("是") : qsTr("否"))
-                          .arg(Md3WindowCapabilities.softInput ? qsTr("是") : qsTr("否"))
-                    role: Md3Text.BodySmall
-                    tone: Md3Text.Primary
-                }
+                    Md3Text {
+                        width: parent.width
+                        wrapMode: Text.WordWrap
+                        text: qsTr("Android：系统标题栏（无 CSD / Snap / 托盘）。能力袋 id=android。原生：亮屏/FLAG_SECURE/角标/沉浸式/分享/振动，以及通知、系统栏颜色、方向锁定、软键盘、Toast/触觉、应用设置、电池优化白名单。")
+                        role: Md3Text.BodyMedium
+                        tone: Md3Text.OnSurfaceVariant
+                    }
 
-                Md3Text {
-                    width: parent.width
-                    visible: root.androidOpsEnabled
-                    wrapMode: Text.WordWrap
-                    text: qsTr("原生反馈：%1").arg(
-                              (root.appWin && root.appWin.windowNative
-                               ? root.appWin.windowNative.lastNativeStatus
-                               : nativeHelper.lastNativeStatus) || qsTr("（点击下方按钮后显示）"))
-                    role: Md3Text.BodySmall
-                    tone: Md3Text.Tertiary
-                }
+                    Md3Text {
+                        width: parent.width
+                        visible: root.androidOpsEnabled && root.appWin
+                        wrapMode: Text.WordWrap
+                        text: qsTr("已绑定 — displayServer=%1 · notifications=%2 · systemBar=%3 · softInput=%4")
+                              .arg(Md3WindowCapabilities.displayServer)
+                              .arg(Md3WindowCapabilities.notifications ? qsTr("是") : qsTr("否"))
+                              .arg(Md3WindowCapabilities.systemBarColors ? qsTr("是") : qsTr("否"))
+                              .arg(Md3WindowCapabilities.softInput ? qsTr("是") : qsTr("否"))
+                        role: Md3Text.BodySmall
+                        tone: Md3Text.Primary
+                    }
 
-                Md3Text {
-                    text: qsTr("屏幕 / 安全")
-                    role: Md3Text.LabelLarge
-                    tone: Md3Text.OnSurfaceVariant
-                }
-                Md3FlowLayout {
-                    width: parent.width
-                    spacing: 8
-                    Md3Button {
-                        enabled: root.androidOpsEnabled
-                        text: qsTr("保持亮屏")
-                        onClicked: {
-                            if (!root.appWin) return
-                            const ok = root.appWin.setIdleInhibit(true, qsTr("Md3 演示"))
-                            shellEventLabel.text = ok ? qsTr("外壳事件：FLAG_KEEP_SCREEN_ON")
-                                                     : qsTr("外壳事件：息屏抑制失败")
+                    Md3Text {
+                        width: parent.width
+                        visible: root.androidOpsEnabled
+                        wrapMode: Text.WordWrap
+                        text: qsTr("原生反馈：%1").arg(
+                                  (root.appWin && root.appWin.windowNative
+                                   ? root.appWin.windowNative.lastNativeStatus
+                                   : nativeHelper.lastNativeStatus) || qsTr("（点击下方按钮后显示）"))
+                        role: Md3Text.BodySmall
+                        tone: Md3Text.Tertiary
+                    }
+
+                    Md3Text {
+                        text: qsTr("屏幕 / 安全")
+                        role: Md3Text.LabelLarge
+                        tone: Md3Text.OnSurfaceVariant
+                    }
+                    Md3FlowLayout {
+                        width: parent.width
+                        spacing: 8
+                        Md3Button {
+                            enabled: root.androidOpsEnabled
+                            text: qsTr("保持亮屏")
+                            onClicked: {
+                                if (!root.appWin) return
+                                const ok = root.appWin.setIdleInhibit(true, qsTr("Md3 演示"))
+                                shellEventLabel.text = ok ? qsTr("外壳事件：FLAG_KEEP_SCREEN_ON")
+                                                         : qsTr("外壳事件：息屏抑制失败")
+                            }
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled
+                            text: qsTr("恢复息屏")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.setIdleInhibit(false)
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled
+                            text: qsTr("防截屏 ON")
+                            onClicked: if (root.appWin) root.appWin.setExcludeFromCapture(true)
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled
+                            text: qsTr("防截屏 OFF")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.setExcludeFromCapture(false)
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled && Md3WindowCapabilities.immersiveSystemUi
+                            text: qsTr("沉浸式 UI")
+                            onClicked: if (root.appWin) root.appWin.setImmersiveSystemUi(true)
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled && Md3WindowCapabilities.immersiveSystemUi
+                            text: qsTr("恢复系统栏")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.setImmersiveSystemUi(false)
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled && Md3WindowCapabilities.screenOrientation
+                            text: qsTr("锁定竖屏")
+                            onClicked: if (root.appWin) root.appWin.setScreenOrientation("portrait")
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled && Md3WindowCapabilities.screenOrientation
+                            text: qsTr("方向自动")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.setScreenOrientation("sensor")
                         }
                     }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled
-                        text: qsTr("恢复息屏")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.setIdleInhibit(false)
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled
-                        text: qsTr("防截屏 ON")
-                        onClicked: if (root.appWin) root.appWin.setExcludeFromCapture(true)
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled
-                        text: qsTr("防截屏 OFF")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.setExcludeFromCapture(false)
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.immersiveSystemUi
-                        text: qsTr("沉浸式 UI")
-                        onClicked: if (root.appWin) root.appWin.setImmersiveSystemUi(true)
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.immersiveSystemUi
-                        text: qsTr("恢复系统栏")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.setImmersiveSystemUi(false)
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.screenOrientation
-                        text: qsTr("锁定竖屏")
-                        onClicked: if (root.appWin) root.appWin.setScreenOrientation("portrait")
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.screenOrientation
-                        text: qsTr("方向自动")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.setScreenOrientation("sensor")
-                    }
-                }
 
-                Md3Text {
-                    text: qsTr("系统栏 / 通知 / Toast")
-                    role: Md3Text.LabelLarge
-                    tone: Md3Text.OnSurfaceVariant
-                }
-                Md3FlowLayout {
-                    width: parent.width
-                    spacing: 8
-                    Md3Button {
-                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.systemBarColors
-                        text: qsTr("主题色状态栏")
-                        onClicked: {
-                            if (!root.appWin) return
-                            const c = String(Md3Theme.colorScheme.primary)
-                            root.appWin.setSystemBarColors(c, c, !Md3Theme.dark)
+                    Md3Text {
+                        text: qsTr("系统栏 / 通知 / Toast")
+                        role: Md3Text.LabelLarge
+                        tone: Md3Text.OnSurfaceVariant
+                    }
+                    Md3FlowLayout {
+                        width: parent.width
+                        spacing: 8
+                        Md3Button {
+                            enabled: root.androidOpsEnabled && Md3WindowCapabilities.systemBarColors
+                            text: qsTr("主题色状态栏")
+                            onClicked: {
+                                if (!root.appWin) return
+                                const c = String(Md3Theme.colorScheme.primary)
+                                root.appWin.setSystemBarColors(c, c, !Md3Theme.dark)
+                            }
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled && Md3WindowCapabilities.notifications
+                            text: qsTr("系统通知")
+                            onClicked: if (root.appWin) root.appWin.showTrayNotification(qsTr("Md3"), qsTr("Android 通知测试"), 4000)
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled && Md3WindowCapabilities.nativeToast
+                            text: qsTr("原生 Toast")
+                            onClicked: if (root.appWin) root.appWin.nativeToast(qsTr("Hello from Md3"))
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled
+                            text: qsTr("通知设置")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.openNotificationSettings()
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled && Md3WindowCapabilities.openAppSettings
+                            text: qsTr("应用设置")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.openAppSettings()
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled
+                            text: qsTr("电池优化白名单")
+                            variant: Md3Button.Text
+                            onClicked: if (root.appWin) root.appWin.requestIgnoreBatteryOptimizations()
                         }
                     }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.notifications
-                        text: qsTr("系统通知")
-                        onClicked: if (root.appWin) root.appWin.showTrayNotification(qsTr("Md3"), qsTr("Android 通知测试"), 4000)
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.nativeToast
-                        text: qsTr("原生 Toast")
-                        onClicked: if (root.appWin) root.appWin.nativeToast(qsTr("Hello from Md3"))
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled
-                        text: qsTr("通知设置")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.openNotificationSettings()
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.openAppSettings
-                        text: qsTr("应用设置")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.openAppSettings()
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled
-                        text: qsTr("电池优化白名单")
-                        variant: Md3Button.Text
-                        onClicked: if (root.appWin) root.appWin.requestIgnoreBatteryOptimizations()
-                    }
-                }
 
-                Md3Text {
-                    text: qsTr("角标 / 分享 / 振动 / 键盘")
-                    role: Md3Text.LabelLarge
-                    tone: Md3Text.OnSurfaceVariant
-                }
-                Md3FlowLayout {
-                    width: parent.width
-                    spacing: 8
-                    Md3Button {
-                        enabled: root.androidOpsEnabled
-                        text: qsTr("角标 3")
-                        onClicked: if (root.appWin) root.appWin.setDockBadge(3)
+                    Md3Text {
+                        text: qsTr("角标 / 分享 / 振动 / 键盘")
+                        role: Md3Text.LabelLarge
+                        tone: Md3Text.OnSurfaceVariant
                     }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled
-                        text: qsTr("清除角标")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.setDockBadge(0)
+                    Md3FlowLayout {
+                        width: parent.width
+                        spacing: 8
+                        Md3Button {
+                            enabled: root.androidOpsEnabled
+                            text: qsTr("角标 3")
+                            onClicked: if (root.appWin) root.appWin.setDockBadge(3)
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled
+                            text: qsTr("清除角标")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.setDockBadge(0)
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled && Md3WindowCapabilities.shareText
+                            text: qsTr("系统分享")
+                            onClicked: if (root.appWin) root.appWin.shareText(qsTr("来自 Md3 Gallery"), qsTr("Md3"))
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled && Md3WindowCapabilities.vibrate
+                            text: qsTr("振动")
+                            onClicked: if (root.appWin) root.appWin.vibrate(50)
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled && Md3WindowCapabilities.softInput
+                            text: qsTr("显示键盘")
+                            onClicked: if (root.appWin) root.appWin.showSoftInput()
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled && Md3WindowCapabilities.softInput
+                            text: qsTr("隐藏键盘")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.hideSoftInput()
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled && Md3WindowCapabilities.hapticFeedback
+                            text: qsTr("触觉")
+                            onClicked: if (root.appWin) root.appWin.hapticFeedback(0)
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled
+                            text: qsTr("复制测试")
+                            variant: Md3Button.Text
+                            onClicked: if (root.appWin) root.appWin.copyToClipboard(qsTr("Md3 clipboard"))
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled
+                            text: qsTr("尝试置顶")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(true)
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled
+                            text: qsTr("取消置顶")
+                            variant: Md3Button.Text
+                            onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(false)
+                        }
+                        Md3Button {
+                            enabled: root.androidOpsEnabled
+                            text: qsTr("前置 Activity")
+                            variant: Md3Button.Outlined
+                            onClicked: if (root.appWin) root.appWin.raiseWindow()
+                        }
                     }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.shareText
-                        text: qsTr("系统分享")
-                        onClicked: if (root.appWin) root.appWin.shareText(qsTr("来自 Md3 Gallery"), qsTr("Md3"))
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.vibrate
-                        text: qsTr("振动")
-                        onClicked: if (root.appWin) root.appWin.vibrate(50)
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.softInput
-                        text: qsTr("显示键盘")
-                        onClicked: if (root.appWin) root.appWin.showSoftInput()
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.softInput
-                        text: qsTr("隐藏键盘")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.hideSoftInput()
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.hapticFeedback
-                        text: qsTr("触觉")
-                        onClicked: if (root.appWin) root.appWin.hapticFeedback(0)
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled
-                        text: qsTr("复制测试")
-                        variant: Md3Button.Text
-                        onClicked: if (root.appWin) root.appWin.copyToClipboard(qsTr("Md3 clipboard"))
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled
-                        text: qsTr("尝试置顶")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(true)
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled
-                        text: qsTr("取消置顶")
-                        variant: Md3Button.Text
-                        onClicked: if (root.appWin) root.appWin.setAlwaysOnTop(false)
-                    }
-                    Md3Button {
-                        enabled: root.androidOpsEnabled
-                        text: qsTr("前置 Activity")
-                        variant: Md3Button.Outlined
-                        onClicked: if (root.appWin) root.appWin.raiseWindow()
-                    }
-                }
 
-                Md3Text {
-                    width: parent.width
-                    wrapMode: Text.WordWrap
-                    text: qsTr("详见 docs/topics/android.md。桌面端浏览本标签时按钮禁用。Android 13+ 通知需 POST_NOTIFICATIONS；shareFile 需宿主 FileProvider（${applicationId}.fileprovider）。")
-                    role: Md3Text.BodySmall
-                    tone: Md3Text.OnSurfaceVariant
+                    Md3Text {
+                        width: parent.width
+                        wrapMode: Text.WordWrap
+                        text: qsTr("详见 docs/topics/android.md。桌面端浏览本标签时按钮禁用。Android 13+ 通知需 POST_NOTIFICATIONS；shareFile 需宿主 FileProvider（${applicationId}.fileprovider）。")
+                        role: Md3Text.BodySmall
+                        tone: Md3Text.OnSurfaceVariant
+                    }
                 }
             }
         }

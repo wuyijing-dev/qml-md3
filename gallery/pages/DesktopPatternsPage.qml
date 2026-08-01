@@ -388,6 +388,8 @@ Md3Page {
         id: reloadTimer
         interval: 700
         onTriggered: {
+            if (!page.md3PageActive)
+                return
             fileTable.loading = false
             applyStatus(qsTr("Refresh finished"))
         }
@@ -397,6 +399,8 @@ Md3Page {
         id: pageTimer
         interval: 600
         onTriggered: {
+            if (!page.md3PageActive)
+                return
             fileTable.loading = false
             rebuildServerRows()
             applyStatus(qsTr("Loaded page %1").arg(serverPage + 1))
@@ -407,6 +411,8 @@ Md3Page {
         id: lazyTimer
         interval: 500
         onTriggered: {
+            if (!page.md3PageActive)
+                return
             insertLazyChildren(lazyPath, [
                 { title: "DesktopPatternsPage.qml", icon: "description", kind: "file", path: "D:/QML_MD3/QML_MD3/gallery/pages/DesktopPatternsPage.qml", size: "15 KB", modified: "Today 14:47", status: "Active", team: "UI" },
                 { title: "ExtrasPage.qml", icon: "description", kind: "file", path: "D:/QML_MD3/QML_MD3/gallery/pages/ExtrasPage.qml", size: "18 KB", modified: "Today 14:30", status: "Away", team: "UI" }

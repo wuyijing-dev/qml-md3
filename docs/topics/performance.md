@@ -42,6 +42,8 @@ Industry UI stacks converge on the same rules Md3 applies:
 26. **`Md3BarChart` / `Md3PieChart`** — bars/slices on one Canvas (no per-item Rectangle/Shape Repeater).
 27. **PageHost `md3PageActive`** — kept L1 pages unload DeferredSection loaders off-display (shell + height stay); Gallery uses L1≤3 + neighbor **L2** prefetch (`pagePrefetchL1: false`).
 28. **`Md3PageActivityGate`** — DataTable / VirtualList / TreeView / ListView / GridView / Carousel / ItemsView clear row models (or Loader) while `md3PageActive` is false; chrome size unchanged.
+29. **CodeBlock / Sparkline / FileDropZone / Form / Date* / TimePicker** — follow `md3PageActive` (clear HTML, Canvas FBO, drop-zone rows, calendar/dial cells; Form poll gated).
+30. **Gallery** — WindowPage platform panes Loader-per-tab; Extras frees 5k VirtualList array + Deferred carousels; Pickers modal Loaders; `pageIdleTrimMs` 45s.
 
 ---
 

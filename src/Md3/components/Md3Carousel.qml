@@ -231,7 +231,7 @@ Item {
     }
 
     Timer {
-        running: root.autoPlay && root.visible
+        running: root.autoPlay && root.visible && pageGate.contentActive
                  && root.model && root.model.length > 1
                  && Md3TreeVisibility.isLiveMotionScene(root, null)
         interval: root.autoPlayInterval
