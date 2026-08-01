@@ -42,10 +42,11 @@ QtObject {
         return Math.max(1, Math.round(ms * s))
     }
 
-    /// Durations for loaders / progress / live indicators — never collapsed by reduceMotion.
+    /// Durations for loaders / progress / live indicators.
+    /// Fixed wall-clock ms — never follow reduceMotion (1ms collapse) or durationScale.
+    /// UIActivityIndicatorView-like pacing: ~1.5–1.8s per revolution.
     function essential(ms) {
-        const s = durationScale > 0.05 ? durationScale : 1
-        return Math.max(1, Math.round(ms * s))
+        return Math.max(800, Math.round(ms))
     }
 
     // --- CAMediaTimingFunction (Core Animation) ---

@@ -34,7 +34,7 @@ Item {
     property bool _treeShown: true
     readonly property bool sceneActive: enabled && _treeShown
     readonly property real radius: indicatorSize / 2 - strokeWidth
-    readonly property real _spinMs: Md3Motion.progressSpin
+    readonly property real _spinMs: Math.max(800, Md3Motion.progressSpin)
 
     function _refreshTreeShown() {
         const ok = Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)

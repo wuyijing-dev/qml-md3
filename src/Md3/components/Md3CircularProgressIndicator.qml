@@ -61,7 +61,7 @@ Item {
     property real sweepDir: 1
     property real _waveAccum: 0
     /// Loaders ignore reduceMotion collapse (Md3Motion.essential / progress* tokens).
-    readonly property real _spinMs: Md3Motion.progressSpin
+    readonly property real _spinMs: Math.max(800, Md3Motion.progressSpin)
     readonly property real _sweepMs: Md3Motion.progressSweep
     readonly property real _liveFrameSec: {
         const fps = Md3Theme.effectsLiveFps
