@@ -1,13 +1,14 @@
 import QtQuick
 import Md3
 
-/// Rotary knob-style gauge (value as dial rotation with notch).
+/// Rotary knob-style gauge — drag or arrow keys to change value.
 Item {
     id: root
 
     property real value: 0
     property real from: 0
     property real to: 100
+    property real step: 1
     property string label: ""
     property string unit: ""
     property int decimals: 0
@@ -17,7 +18,10 @@ Item {
     property color valueColor: Md3Theme.colorScheme.primary
     property color knobColor: Md3Theme.colorScheme.gaugeDial
     property bool showValue: true
+    property bool interactive: true
     property real size: 140
+
+    signal valueEdited(real value)
 
     readonly property real progress: {
         const span = Math.max(1e-6, to - from)
@@ -30,8 +34,85 @@ Item {
     height: size + _captionH
     implicitWidth: size
     implicitHeight: size + _captionH
+    focus: true
+    activeFocusOnTab: interactive
+
+    Accessible.role: Accessible.Dial
+    Accessible.name: label.length ? label : qsTr("Knob")
+    Accessible.value: valueText
+    Accessible.onIncreaseAction: if (interactive) _nudge(1)
+    Accessible.onDecreaseAction: if (interactive) _nudge(-1)
 
     function _rad(deg) { return deg * Math.PI / 180 }
+
+    function _clampValue(v) {
+        return Math.max(from, Math.min(to, v))
+    }
+
+    function _setValue(v, announce) {
+        const next = _clampValue(v)
+        if (Math.abs(next - value) < 1e-9)
+            return
+        value = next
+        valueEdited(next)
+        if (announce)
+            Md3Accessibility.announce(valueText)
+    }
+
+    function _nudge(steps) {
+        const s = step > 0 ? step : 1
+        _setValue(value + steps * s, true)
+    }
+
+    /// Map pointer in canvas coords → value along the dial arc.
+    function _valueFromCanvasPos(px, py) {
+        const cx = canvas.width / 2
+        const cy = canvas.height / 2
+        let deg = Math.atan2(py - cy, px - cx) * 180 / Math.PI
+        // Normalize into [startAngle, startAngle+sweep]
+        let rel = deg - startAngle
+        while (rel < 0) rel += 360
+        while (rel >= 360) rel -= 360
+        const span = Math.max(1e-6, sweepAngle)
+        let t = rel / span
+        if (rel > sweepAngle) {
+            // Past arc end — snap to nearer endpoint
+            t = (rel - sweepAngle) < (360 - rel) ? 1 : 0
+        }
+        t = Math.max(0, Math.min(1, t))
+        const raw = from + t * (to - from)
+        if (step > 0) {
+            const steps = Math.round((raw - from) / step)
+            return _clampValue(from + steps * step)
+        }
+        return _clampValue(raw)
+    }
+
+    Keys.onPressed: function (event) {
+        if (!interactive)
+            return
+        if (event.key === Qt.Key_Left || event.key === Qt.Key_Down
+                || event.key === Qt.Key_Minus) {
+            _nudge(-1)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Right || event.key === Qt.Key_Up
+                   || event.key === Qt.Key_Plus || event.key === Qt.Key_Equal) {
+            _nudge(1)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Home) {
+            _setValue(from, true)
+            event.accepted = true
+        } else if (event.key === Qt.Key_End) {
+            _setValue(to, true)
+            event.accepted = true
+        } else if (event.key === Qt.Key_PageUp) {
+            _nudge(10)
+            event.accepted = true
+        } else if (event.key === Qt.Key_PageDown) {
+            _nudge(-10)
+            event.accepted = true
+        }
+    }
 
     Canvas {
         id: canvas
@@ -82,6 +163,23 @@ Item {
             ctx.fillStyle = root.valueColor
             ctx.fill()
         }
+
+        MouseArea {
+            anchors.fill: parent
+            enabled: root.interactive
+            hoverEnabled: true
+            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+            preventStealing: true
+            onPressed: function (mouse) {
+                root.forceActiveFocus()
+                root._setValue(root._valueFromCanvasPos(mouse.x, mouse.y), false)
+            }
+            onPositionChanged: function (mouse) {
+                if (pressed)
+                    root._setValue(root._valueFromCanvasPos(mouse.x, mouse.y), false)
+            }
+            onReleased: Md3Accessibility.announce(root.valueText)
+        }
     }
 
     onValueChanged: canvas.requestPaint()
@@ -90,6 +188,17 @@ Item {
     onWidthChanged: canvas.requestPaint()
     onHeightChanged: canvas.requestPaint()
     Component.onCompleted: canvas.requestPaint()
+
+    Md3FocusRing {
+        anchors.horizontalCenter: canvas.horizontalCenter
+        anchors.verticalCenter: canvas.verticalCenter
+        width: canvas.width + 8
+        height: canvas.height + 8
+        radius: width / 2
+        focused: root.activeFocus
+        visualFocus: root.activeFocus
+        controlEnabled: root.interactive
+    }
 
     Column {
         anchors.horizontalCenter: parent.horizontalCenter

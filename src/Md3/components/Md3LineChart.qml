@@ -195,6 +195,16 @@ Md3Chart {
         setProbe(idx, x, info, tipY)
     }
 
+    function nudgeProbe(delta) {
+        if (!showProbe || geom.sampleCount < 1)
+            return
+        let idx = probeActive ? probeIndex : 0
+        if (idx < 0)
+            idx = 0
+        idx = Math.min(geom.sampleCount - 1, Math.max(0, idx + Math.round(delta)))
+        _updateProbeAtPixel(plotXForIndex(idx, geom.sampleCount))
+    }
+
     QtObject {
         id: geom
         property real rangeMin: 0

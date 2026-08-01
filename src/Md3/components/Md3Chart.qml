@@ -276,6 +276,19 @@ Item {
         probeSeries = []
         probeActive = false
     }
+    /// Move probe by ±1 sample (Line/Bar override with geom.sampleCount).
+    function nudgeProbe(delta) {
+        if (!showProbe || typeof _updateProbeAtPixel !== "function")
+            return
+        const n = values && values.length ? values.length : 0
+        if (n <= 0)
+            return
+        let idx = probeActive ? probeIndex : 0
+        if (idx < 0)
+            idx = 0
+        idx = Math.min(n - 1, Math.max(0, idx + Math.round(delta)))
+        _updateProbeAtPixel(plotXForIndex(idx, n))
+    }
     function categoryLabel(index) {
         if (labels && index >= 0 && index < labels.length
                 && labels[index] !== undefined && labels[index] !== null

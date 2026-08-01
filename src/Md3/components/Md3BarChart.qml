@@ -232,6 +232,24 @@ Md3Chart {
         setProbe(idx, x, info, y)
     }
 
+    function nudgeProbe(delta) {
+        if (!showProbe || geom.sampleCount < 1)
+            return
+        let idx = probeActive ? probeIndex : 0
+        if (idx < 0)
+            idx = 0
+        idx = Math.min(geom.sampleCount - 1, Math.max(0, idx + Math.round(delta)))
+        if (horizontal) {
+            const win = windowIndices(geom.sampleCount)
+            const visibleCount = Math.max(1, win.i1 - win.i0 + 1)
+            const ii = idx - win.i0
+            const y = plotTop + (ii + 0.5) * plotHeight / visibleCount
+            _updateProbeAtPos(plotLeft + plotWidth / 2, y)
+        } else {
+            _updateProbeAtPixel(plotXForIndex(idx, geom.sampleCount))
+        }
+    }
+
     function _updateProbeAtPos(px, py) {
         probePixelY = py
         _updateProbeAtPixel(px)

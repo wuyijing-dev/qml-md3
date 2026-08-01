@@ -96,8 +96,9 @@ Item {
                     }
                     Md3KnobGauge {
                         value: 45
-                        label: qsTr("Knob")
+                        label: qsTr("Knob · drag / ←→")
                         size: 112
+                        interactive: true
                         valueColor: Md3Theme.colorScheme.tertiary
                     }
                     Md3CompassGauge {
@@ -501,8 +502,8 @@ Item {
             variant: Md3Card.Outlined
             width: root.width
             height: 280
-            title: qsTr("Zoom / pan / probe (wheel · drag · hover)")
-            subtitle: qsTr("滚轮缩放 · 拖动平移（带惯性）· 悬停探针 · 双击重置。interactive/showProbe 默认开启。")
+            title: qsTr("Zoom / pan / probe (wheel · drag · hover · keyboard)")
+            subtitle: qsTr("滚轮缩放 · 拖动平移 · 悬停/点击聚焦探针 · ←→ 移点 · Esc 清除 · 双击重置")
             actions: [{ text: qsTr("重置视图"), variant: "outlined" }]
             onActionClicked: interactChart.resetView()
             Md3LineChart {

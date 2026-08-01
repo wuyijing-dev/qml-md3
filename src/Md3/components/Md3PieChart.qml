@@ -97,6 +97,27 @@ Md3Chart {
         _updateProbeAtPos(px, height / 2)
     }
 
+    function nudgeProbe(delta) {
+        if (!showProbe || geom.slices.length < 1)
+            return
+        let idx = probeActive ? probeIndex : 0
+        if (idx < 0)
+            idx = 0
+        idx = Math.min(geom.slices.length - 1, Math.max(0, idx + Math.round(delta)))
+        const s = geom.slices[idx]
+        if (!s)
+            return
+        setProbe(s.index, s.lx, [{
+            label: s.label,
+            value: s.value,
+            color: s.color
+        }, {
+            label: qsTr("%"),
+            value: s.percent,
+            color: s.color
+        }], s.ly)
+    }
+
     QtObject {
         id: geom
         property real total: 0

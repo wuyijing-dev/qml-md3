@@ -25,6 +25,50 @@ Item {
 
     Accessible.role: Accessible.Pane
     Accessible.name: probeTitle.length ? probeTitle : qsTr("Chart interaction")
+    Accessible.description: qsTr("Arrow keys move probe, Escape clears, Home/End jump")
+
+    focus: true
+    activeFocusOnTab: chart && chart.showProbe
+
+    function nudgeProbe(delta) {
+        if (!chart || !chart.showProbe)
+            return
+        if (typeof chart.nudgeProbe === "function")
+            chart.nudgeProbe(delta)
+        else if (typeof chart._updateProbeAtPixel === "function") {
+            const step = Math.max(8, (chart.plotWidth || width) / 24)
+            const px = (chart.probeActive ? chart.probePixelX : chart.plotLeft) + delta * step
+            chart._updateProbeAtPixel(px)
+        }
+        forceActiveFocus()
+    }
+
+    Keys.onPressed: function (event) {
+        if (!chart || !chart.showProbe)
+            return
+        if (event.key === Qt.Key_Escape) {
+            chart.clearProbe()
+            event.accepted = true
+        } else if (event.key === Qt.Key_Left || event.key === Qt.Key_Up) {
+            nudgeProbe(-1)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Right || event.key === Qt.Key_Down) {
+            nudgeProbe(1)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Home) {
+            if (typeof chart.nudgeProbe === "function") {
+                if (!chart.probeActive)
+                    chart.nudgeProbe(0)
+                else if (chart.probeIndex > 0)
+                    chart.nudgeProbe(-chart.probeIndex)
+            }
+            event.accepted = true
+        } else if (event.key === Qt.Key_End) {
+            if (typeof chart.nudgeProbe === "function")
+                chart.nudgeProbe(100000)
+            event.accepted = true
+        }
+    }
 
     // Crosshair
     Rectangle {
@@ -140,8 +184,11 @@ Item {
                 chart.clearProbe()
         }
         onPressed: function (mouse) {
-            if (!(root.enableZoomPan && chart && chart.interactive))
+            root.forceActiveFocus()
+            if (!(root.enableZoomPan && chart && chart.interactive)) {
+                probeAt(mouse.x, mouse.y)
                 return
+            }
             dragging = true
             lastX = mouse.x
             lastTs = Date.now()
