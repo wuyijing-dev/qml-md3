@@ -43,4 +43,12 @@ QtObject {
     readonly property bool globalShortcut: true
     readonly property bool protocolClient: true
     readonly property bool powerMonitor: true
+    readonly property bool notifications: false
+    readonly property bool systemBarColors: false
+    readonly property bool screenOrientation: false
+    readonly property bool softInput: false
+    readonly property bool nativeToast: false
+    readonly property bool hapticFeedback: false
+    readonly property bool openAppSettings: false
+    readonly property bool shareFile: false
 }

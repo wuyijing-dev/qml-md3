@@ -1320,7 +1320,7 @@ toolBar: Md3AppToolBar {
                 Md3Text {
                     width: parent.width
                     wrapMode: Text.WordWrap
-                    text: qsTr("Android：系统标题栏（无 CSD / Snap / 托盘）。能力袋 id=android。原生 hooks：息屏抑制 FLAG_KEEP_SCREEN_ON、防截屏 FLAG_SECURE、启动器角标 setBadgeNumber、沉浸式系统栏、分享 Intent、振动。OEM 可能忽略置顶。")
+                    text: qsTr("Android：系统标题栏（无 CSD / Snap / 托盘）。能力袋 id=android。原生：亮屏/FLAG_SECURE/角标/沉浸式/分享/振动，以及通知、系统栏颜色、方向锁定、软键盘、Toast/触觉、应用设置、电池优化白名单。")
                     role: Md3Text.BodyMedium
                     tone: Md3Text.OnSurfaceVariant
                 }
@@ -1329,12 +1329,11 @@ toolBar: Md3AppToolBar {
                     width: parent.width
                     visible: root.androidOpsEnabled && root.appWin
                     wrapMode: Text.WordWrap
-                    text: qsTr("已绑定 — displayServer=%1 · idleInhibit=%2 · excludeFromCapture=%3 · vibrate=%4 · immersive=%5")
+                    text: qsTr("已绑定 — displayServer=%1 · notifications=%2 · systemBar=%3 · softInput=%4")
                           .arg(Md3WindowCapabilities.displayServer)
-                          .arg(Md3WindowCapabilities.idleInhibit ? qsTr("是") : qsTr("否"))
-                          .arg(Md3WindowCapabilities.excludeFromCapture ? qsTr("是") : qsTr("否"))
-                          .arg(Md3WindowCapabilities.vibrate ? qsTr("是") : qsTr("否"))
-                          .arg(Md3WindowCapabilities.immersiveSystemUi ? qsTr("是") : qsTr("否"))
+                          .arg(Md3WindowCapabilities.notifications ? qsTr("是") : qsTr("否"))
+                          .arg(Md3WindowCapabilities.systemBarColors ? qsTr("是") : qsTr("否"))
+                          .arg(Md3WindowCapabilities.softInput ? qsTr("是") : qsTr("否"))
                     role: Md3Text.BodySmall
                     tone: Md3Text.Primary
                 }
@@ -1397,10 +1396,68 @@ toolBar: Md3AppToolBar {
                         variant: Md3Button.Outlined
                         onClicked: if (root.appWin) root.appWin.setImmersiveSystemUi(false)
                     }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.screenOrientation
+                        text: qsTr("锁定竖屏")
+                        onClicked: if (root.appWin) root.appWin.setScreenOrientation("portrait")
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.screenOrientation
+                        text: qsTr("方向自动")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.setScreenOrientation("sensor")
+                    }
                 }
 
                 Md3Text {
-                    text: qsTr("角标 / 分享 / 振动")
+                    text: qsTr("系统栏 / 通知 / Toast")
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.OnSurfaceVariant
+                }
+                Md3FlowLayout {
+                    width: parent.width
+                    spacing: 8
+                    Md3Button {
+                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.systemBarColors
+                        text: qsTr("主题色状态栏")
+                        onClicked: {
+                            if (!root.appWin) return
+                            const c = String(Md3Theme.colorScheme.primary)
+                            root.appWin.setSystemBarColors(c, c, !Md3Theme.dark)
+                        }
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.notifications
+                        text: qsTr("系统通知")
+                        onClicked: if (root.appWin) root.appWin.showTrayNotification(qsTr("Md3"), qsTr("Android 通知测试"), 4000)
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.nativeToast
+                        text: qsTr("原生 Toast")
+                        onClicked: if (root.appWin) root.appWin.nativeToast(qsTr("Hello from Md3"))
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled
+                        text: qsTr("通知设置")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.openNotificationSettings()
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.openAppSettings
+                        text: qsTr("应用设置")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.openAppSettings()
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled
+                        text: qsTr("电池优化白名单")
+                        variant: Md3Button.Text
+                        onClicked: if (root.appWin) root.appWin.requestIgnoreBatteryOptimizations()
+                    }
+                }
+
+                Md3Text {
+                    text: qsTr("角标 / 分享 / 振动 / 键盘")
                     role: Md3Text.LabelLarge
                     tone: Md3Text.OnSurfaceVariant
                 }
@@ -1429,6 +1486,28 @@ toolBar: Md3AppToolBar {
                         onClicked: if (root.appWin) root.appWin.vibrate(50)
                     }
                     Md3Button {
+                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.softInput
+                        text: qsTr("显示键盘")
+                        onClicked: if (root.appWin) root.appWin.showSoftInput()
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.softInput
+                        text: qsTr("隐藏键盘")
+                        variant: Md3Button.Outlined
+                        onClicked: if (root.appWin) root.appWin.hideSoftInput()
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled && Md3WindowCapabilities.hapticFeedback
+                        text: qsTr("触觉")
+                        onClicked: if (root.appWin) root.appWin.hapticFeedback(0)
+                    }
+                    Md3Button {
+                        enabled: root.androidOpsEnabled
+                        text: qsTr("复制测试")
+                        variant: Md3Button.Text
+                        onClicked: if (root.appWin) root.appWin.copyToClipboard(qsTr("Md3 clipboard"))
+                    }
+                    Md3Button {
                         enabled: root.androidOpsEnabled
                         text: qsTr("尝试置顶")
                         variant: Md3Button.Outlined
@@ -1451,7 +1530,7 @@ toolBar: Md3AppToolBar {
                 Md3Text {
                     width: parent.width
                     wrapMode: Text.WordWrap
-                    text: qsTr("详见 docs/topics/android.md。桌面端浏览本标签时按钮禁用；真机/模拟器上 CMake 需 MD3_IS_ANDROID。")
+                    text: qsTr("详见 docs/topics/android.md。桌面端浏览本标签时按钮禁用。Android 13+ 通知需 POST_NOTIFICATIONS；shareFile 需宿主 FileProvider（${applicationId}.fileprovider）。")
                     role: Md3Text.BodySmall
                     tone: Md3Text.OnSurfaceVariant
                 }

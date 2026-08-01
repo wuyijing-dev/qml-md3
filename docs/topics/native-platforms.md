@@ -39,6 +39,13 @@ C++: `Md3WindowHelper::displayServer()` mirrors the same probe; `platformId()` s
 | `shareText` | Clipboard fallback | Clipboard | Clipboard | `ACTION_SEND` chooser |
 | `vibrate` | Beep fallback | Beep | Beep | `Vibrator` / `VibrationEffect` |
 | `setImmersiveSystemUi` | — | — | — | Immersive sticky flags |
+| Notifications | Tray balloon | desktop notify | — | `NotificationManager` |
+| System bar colors | — | — | — | status / nav bar |
+| Screen orientation | — | — | — | `setRequestedOrientation` |
+| Soft input / Toast / haptic | — | — | — | IMM / Toast / HapticFeedback |
+| App / notification settings | — | — | — | Settings intents |
+| Battery opt-out request | — | — | — | ignore battery optimizations |
+| `shareFile` | openUrl fallback | openUrl | openUrl | ACTION_SEND + FileProvider |
 | `setVisibleInTaskbar` | `WS_EX_TOOLWINDOW` | Qt::Tool hint | Same | — |
 | `centerOnScreen` / opacity / min·max·fullscreen | Qt | Qt | Qt | Qt |
 | `requestAttention` | Taskbar flash | Urgent / alert | Same | `alert` |

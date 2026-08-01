@@ -101,6 +101,29 @@ void Md3WindowHelper::setPreferredAppMode(bool) {}
 
 QString Md3WindowHelper::systemAccentColor() const
 {
+#if defined(Q_OS_ANDROID)
+    const QJniObject activity = QNativeInterface::QAndroidApplication::context();
+    if (activity.isValid()) {
+        const jint sdk = QJniObject::getStaticField<jint>("android/os/Build$VERSION", "SDK_INT");
+        if (sdk >= 31) {
+            const jint colorId =
+                    QJniObject::getStaticField<jint>("android/R$color", "system_accent1_600");
+            if (colorId != 0) {
+                const QJniObject res =
+                        activity.callObjectMethod("getResources", "()Landroid/content/res/Resources;");
+                if (res.isValid()) {
+                    const jint c = res.callMethod<jint>("getColor", "(I)I", colorId);
+                    if (c != 0) {
+                        const quint32 u = quint32(c);
+                        return QStringLiteral("#%1")
+                                .arg(u & 0xFFFFFFu, 6, 16, QLatin1Char('0'))
+                                .toUpper();
+                    }
+                }
+            }
+        }
+    }
+#endif
     return QStringLiteral("#6750A4");
 }
 
@@ -164,7 +187,74 @@ bool Md3WindowHelper::setWindowIcon(QObject *window, const QUrl &iconUrl)
 
 bool Md3WindowHelper::showSystemTrayIcon(QObject *, const QUrl &, const QString &) { return false; }
 void Md3WindowHelper::hideSystemTrayIcon() {}
-bool Md3WindowHelper::showTrayNotification(const QString &, const QString &, int) { return false; }
+
+bool Md3WindowHelper::showTrayNotification(const QString &title, const QString &body, int timeoutMs)
+{
+    Q_UNUSED(timeoutMs);
+#if defined(Q_OS_ANDROID)
+    const QJniObject activity = QNativeInterface::QAndroidApplication::context();
+    if (!activity.isValid()) {
+        reportNativeStatus(QStringLiteral("通知：无 Activity"));
+        return false;
+    }
+    bool ok = false;
+    auto future = QNativeInterface::QAndroidApplication::runOnAndroidMainThread([&]() {
+        const jint sdk = QJniObject::getStaticField<jint>("android/os/Build$VERSION", "SDK_INT");
+        if (sdk >= 26) {
+            const QJniObject nm = activity.callObjectMethod(
+                    "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;",
+                    QJniObject::fromString(QStringLiteral("notification")).object());
+            if (nm.isValid()) {
+                const QJniObject channelId = QJniObject::fromString(QStringLiteral("md3_default"));
+                const QJniObject name = QJniObject::fromString(QStringLiteral("Md3"));
+                QJniObject channel("android/app/NotificationChannel",
+                                   "(Ljava/lang/String;Ljava/lang/CharSequence;I)V", channelId.object(),
+                                   name.object(), jint(3));
+                if (channel.isValid())
+                    nm.callMethod<void>("createNotificationChannel",
+                                        "(Landroid/app/NotificationChannel;)V", channel.object());
+            }
+        }
+        QJniObject builder;
+        if (sdk >= 26) {
+            builder = QJniObject("android/app/Notification$Builder",
+                                 "(Landroid/content/Context;Ljava/lang/String;)V", activity.object(),
+                                 QJniObject::fromString(QStringLiteral("md3_default")).object());
+        } else {
+            builder = QJniObject("android/app/Notification$Builder", "(Landroid/content/Context;)V",
+                                 activity.object());
+        }
+        if (!builder.isValid())
+            return;
+        builder.callObjectMethod("setContentTitle",
+                                 "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;",
+                                 QJniObject::fromString(title).object());
+        builder.callObjectMethod("setContentText",
+                                 "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;",
+                                 QJniObject::fromString(body).object());
+        builder.callObjectMethod("setSmallIcon", "(I)Landroid/app/Notification$Builder;",
+                                 jint(0x01080052)); // android.R.drawable.ic_dialog_info
+        builder.callObjectMethod("setAutoCancel", "(Z)Landroid/app/Notification$Builder;", jboolean(true));
+        const QJniObject notification =
+                builder.callObjectMethod("build", "()Landroid/app/Notification;");
+        const QJniObject nm = activity.callObjectMethod(
+                "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;",
+                QJniObject::fromString(QStringLiteral("notification")).object());
+        if (!nm.isValid() || !notification.isValid())
+            return;
+        nm.callMethod<void>("notify", "(ILandroid/app/Notification;)V", jint(1001),
+                            notification.object());
+        ok = true;
+    });
+    future.waitForFinished();
+    reportNativeStatus(ok ? QStringLiteral("已发送系统通知") : QStringLiteral("系统通知失败（检查 POST_NOTIFICATIONS）"));
+    return ok;
+#else
+    Q_UNUSED(title)
+    Q_UNUSED(body)
+    return false;
+#endif
+}
 
 bool Md3WindowHelper::setDockBadge(int count)
 {

@@ -215,6 +215,32 @@ public:
     /// Request attention (alias of flashTaskbar where available).
     Q_INVOKABLE void requestAttention(QObject *window, bool on = true);
 
+    // --- Android extras (no-op / soft fallback on other platforms) ---
+
+    /// Status / navigation bar colors (CSS #RRGGBB or #AARRGGBB). lightIcons → dark glyphs on light bar.
+    Q_INVOKABLE bool setSystemBarColors(const QString &statusBarCss,
+                                        const QString &navigationBarCss = QString(),
+                                        bool lightStatusBarIcons = false);
+    /// portrait | landscape | sensor | fullSensor | unspecified | locked
+    Q_INVOKABLE bool setScreenOrientation(const QString &mode);
+    Q_INVOKABLE bool showSoftInput();
+    Q_INVOKABLE bool hideSoftInput();
+    /// SOFT_INPUT_ADJUST_RESIZE vs ADJUST_PAN
+    Q_INVOKABLE bool setSoftInputAdjustResize(bool adjustResize);
+    Q_INVOKABLE bool openAppSettings();
+    /// Native Android Toast (desktop → Md3Notify not available here; reports status only).
+    Q_INVOKABLE bool nativeToast(const QString &message, int durationMs = 2000);
+    /// 0=click · 1=longPress · 2=confirm · 3=reject (Android HapticFeedbackConstants)
+    Q_INVOKABLE bool hapticFeedback(int kind = 0);
+    Q_INVOKABLE bool requestIgnoreBatteryOptimizations();
+    /// ACTION_SEND stream share (needs readable file URI / FileProvider in the host app).
+    Q_INVOKABLE bool shareFile(const QUrl &fileUrl, const QString &mimeType = QString(),
+                               const QString &title = QString());
+    Q_INVOKABLE bool copyToClipboard(const QString &text);
+    Q_INVOKABLE QString clipboardText() const;
+    /// Best-effort open notification settings for this app.
+    Q_INVOKABLE bool openNotificationSettings();
+
     QString lastNativeStatus() const { return m_lastNativeStatus; }
 
 signals:

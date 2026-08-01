@@ -1,46 +1,72 @@
 # Android（experimental）
 
-Md3 on Android uses **system window chrome** (no CSD / Snap / tray). `Md3WindowHelper` exposes a few real native hooks that mirror the desktop APIs.
+Md3 on Android uses **system window chrome** (no CSD / Snap / tray). `Md3WindowHelper` / `Md3ApplicationWindow` expose native hooks that mirror desktop APIs where possible, plus Android-specific extras.
 
 ## Capability bag
 
 | API | Android path |
 |-----|----------------|
-| `setIdleInhibit` | `WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON` |
-| `setExcludeFromCapture` | `FLAG_SECURE` (blocks screenshot / screen record) |
-| `setDockBadge` | `QGuiApplication::setBadgeNumber` (Qt 6.5+; OEM may ignore) |
-| `setAlwaysOnTop` | `Qt::WindowStaysOnTopHint` (often ignored by OEMs) |
-| `raiseWindow` | Qt `raise` + `requestActivate` (Activity focus rules apply) |
+| `setIdleInhibit` | `FLAG_KEEP_SCREEN_ON` |
+| `setExcludeFromCapture` | `FLAG_SECURE` |
+| `setDockBadge` | `QGuiApplication::setBadgeNumber` (OEM may ignore) |
+| `setAlwaysOnTop` | `Qt::WindowStaysOnTopHint` (often ignored) |
+| `raiseWindow` | Qt raise / activate |
 | `shareText` | `Intent.ACTION_SEND` text/plain chooser |
-| `vibrate` | `Vibrator` / `VibrationEffect.createOneShot` |
-| `setImmersiveSystemUi` | DecorView immersive sticky + hide nav/status |
-| `openUrl` / `revealInFolder` | `QDesktopServices` / file VIEW (storage permissions apply) |
+| `shareFile` | `ACTION_SEND` stream（需宿主 `FileProvider`：`${applicationId}.fileprovider`） |
+| `vibrate` / `hapticFeedback` | `Vibrator` / `View.performHapticFeedback` |
+| `setImmersiveSystemUi` | Immersive sticky system UI flags |
+| `showTrayNotification` | `NotificationManager` + channel `md3_default`（API 33+ 需 `POST_NOTIFICATIONS`） |
+| `setSystemBarColors` | status / navigation bar color + light status icons |
+| `setScreenOrientation` | `setRequestedOrientation`（portrait / landscape / sensor / …） |
+| `showSoftInput` / `hideSoftInput` | `InputMethodManager` |
+| `setSoftInputAdjustResize` | `SOFT_INPUT_ADJUST_RESIZE` / `ADJUST_PAN` |
+| `nativeToast` | `android.widget.Toast` |
+| `openAppSettings` | `APPLICATION_DETAILS_SETTINGS` |
+| `openNotificationSettings` | `APP_NOTIFICATION_SETTINGS` |
+| `requestIgnoreBatteryOptimizations` | `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` |
+| `copyToClipboard` / `clipboardText` | `QClipboard` |
+| `systemAccentColor` | Material You `system_accent1_600`（API 31+） |
+| `openUrl` / `revealInFolder` | desktop-services / VIEW（存储权限适用） |
 
-Everything else (Snap, tray, jump list, Mica, taskbar progress) stays unavailable — see [native-platforms.md](native-platforms.md).
+Unavailable on Android: Snap, tray icon UI, jump list, Mica, taskbar progress, global shortcuts, open-at-login, protocol client registration — see [native-platforms.md](native-platforms.md).
 
-QML: `Md3WindowCapabilities.isAndroid` / `platformId === "android"` / `displayServer === "android"`.
+QML flags: `Md3WindowCapabilities.isAndroid` · `notifications` · `systemBarColors` · `screenOrientation` · `softInput` · `nativeToast` · `hapticFeedback` · `openAppSettings` · `shareFile`.
+
+## Example
+
+```qml
+app.setSystemBarColors("#6750A4", "#6750A4", !Md3Theme.dark)
+app.showTrayNotification(qsTr("Title"), qsTr("Body"))
+app.nativeToast(qsTr("Saved"))
+app.setScreenOrientation("portrait")
+app.hapticFeedback(0) // click
+app.openAppSettings()
+```
 
 ## Build notes
 
-Android is detected via `MD3_IS_ANDROID` in [`cmake/Md3Platform.cmake`](../../cmake/Md3Platform.cmake) and must **not** use the Linux DBus/KF6 sources (Android also defines UNIX / often `Q_OS_LINUX`).
+Android is detected via `MD3_IS_ANDROID` in [`cmake/Md3Platform.cmake`](../../cmake/Md3Platform.cmake) and must **not** use the Linux DBus/KF6 sources.
 
-Native sources: `src/Md3/window/platforms/android/md3androidnative.cpp` (idle / FLAG_SECURE / badge). Capability bag: `Md3WindowPlatformAndroid.qml`.
+Native sources: `src/Md3/window/platforms/android/md3androidnative.cpp` + Android branches in `md3windowhelper.cpp`.
 
 ```bash
-# Example: Qt for Android kit
 qt-cmake -S . -B build-android -DMD3_BUILD_GALLERY=OFF -DMD3_BUILD_SHARED=ON
 cmake --build build-android
 ```
 
-Ship Md3 as a shared/static dependency of your Qt Quick Android app; import `Md3` from QML as on desktop.
+Manifest tips for host apps:
+
+- `POST_NOTIFICATIONS` (API 33+)
+- Optional `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`
+- `FileProvider` authority `${applicationId}.fileprovider` for `shareFile`
 
 ## Lifecycle
 
-- Keep-screen-on / FLAG_SECURE apply to the **Activity** window; call after the UI is up.
-- Leaving the Activity may clear OEM-specific state; re-apply in `onActiveChanged` if needed.
-- Badge support varies by launcher; check `lastNativeStatus` on the window helper.
+- Keep-screen-on / FLAG_SECURE / bar colors apply to the **Activity** window; re-apply in `onActiveChanged` if the OEM clears them.
+- Badge / notification delivery varies by launcher and permission state; check `lastNativeStatus`.
 
 ## Related
 
-- [native-platforms.md](native-platforms.md) — matrix including Android
-- [wasm.md](wasm.md) — WASM still uses the generic mobile stub (not Android JNI)
+- [native-platforms.md](native-platforms.md)
+- [wasm.md](wasm.md) — WASM still uses the generic mobile stub
+- Gallery → Window → **Android** tab

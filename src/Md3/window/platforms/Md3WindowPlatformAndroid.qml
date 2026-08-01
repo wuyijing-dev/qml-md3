@@ -30,7 +30,7 @@ QtObject {
     readonly property bool applicationRestart: false
     readonly property bool preferredAppMode: false
     readonly property bool windowCloak: false
-    readonly property bool systemAccent: false
+    readonly property bool systemAccent: true
     readonly property bool idleInhibit: true
     readonly property bool systemOpen: true
     readonly property bool revealInFolder: true
@@ -42,4 +42,12 @@ QtObject {
     readonly property bool globalShortcut: false
     readonly property bool protocolClient: false
     readonly property bool powerMonitor: true
+    readonly property bool notifications: true
+    readonly property bool systemBarColors: true
+    readonly property bool screenOrientation: true
+    readonly property bool softInput: true
+    readonly property bool nativeToast: true
+    readonly property bool hapticFeedback: true
+    readonly property bool openAppSettings: true
+    readonly property bool shareFile: true
 }

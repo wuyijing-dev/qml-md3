@@ -607,6 +607,441 @@ void Md3WindowHelper::requestAttention(QObject *window, bool on)
     flashTaskbar(window, on);
 }
 
+namespace {
+
+#if defined(Q_OS_ANDROID)
+int parseCssColorArgb(const QString &css, bool *ok = nullptr)
+{
+    QString s = css.trimmed();
+    if (s.startsWith(QLatin1Char('#')))
+        s = s.mid(1);
+    bool localOk = false;
+    quint32 v = 0;
+    if (s.size() == 6) {
+        v = s.toUInt(&localOk, 16);
+        v |= 0xFF000000u;
+    } else if (s.size() == 8) {
+        v = s.toUInt(&localOk, 16);
+    }
+    if (ok)
+        *ok = localOk;
+    return int(v);
+}
+#endif
+
+} // namespace
+
+bool Md3WindowHelper::setSystemBarColors(const QString &statusBarCss, const QString &navigationBarCss,
+                                         bool lightStatusBarIcons)
+{
+#if defined(Q_OS_ANDROID)
+    const QJniObject activity = androidActivity();
+    if (!activity.isValid()) {
+        reportNativeStatus(QStringLiteral("setSystemBarColors：无 Activity"));
+        return false;
+    }
+    bool statusOk = false;
+    bool navOk = false;
+    const int status = statusBarCss.isEmpty() ? 0 : parseCssColorArgb(statusBarCss, &statusOk);
+    const int nav = navigationBarCss.isEmpty() ? 0 : parseCssColorArgb(navigationBarCss, &navOk);
+    bool ok = false;
+    auto future = QNativeInterface::QAndroidApplication::runOnAndroidMainThread([&]() {
+        const QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+        if (!window.isValid())
+            return;
+        // Clear translucent flags so solid colors apply
+        window.callMethod<void>("clearFlags", "(I)V", jint(0x04000000)); // FLAG_TRANSLUCENT_STATUS
+        window.callMethod<void>("addFlags", "(I)V", jint(0x80000000));   // FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+        if (statusOk)
+            window.callMethod<void>("setStatusBarColor", "(I)V", jint(status));
+        if (navOk || !navigationBarCss.isEmpty()) {
+            if (navOk)
+                window.callMethod<void>("setNavigationBarColor", "(I)V", jint(nav));
+        }
+        const QJniObject decor = window.callObjectMethod("getDecorView", "()Landroid/view/View;");
+        if (decor.isValid()) {
+            jint vis = decor.callMethod<jint>("getSystemUiVisibility", "()I");
+            constexpr jint kLightStatus = 0x00002000; // SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            if (lightStatusBarIcons)
+                vis |= kLightStatus;
+            else
+                vis &= ~kLightStatus;
+            decor.callMethod<void>("setSystemUiVisibility", "(I)V", vis);
+        }
+        ok = true;
+    });
+    future.waitForFinished();
+    reportNativeStatus(ok ? QStringLiteral("已设置系统栏颜色") : QStringLiteral("系统栏颜色设置失败"));
+    return ok;
+#else
+    Q_UNUSED(statusBarCss)
+    Q_UNUSED(navigationBarCss)
+    Q_UNUSED(lightStatusBarIcons)
+    reportNativeStatus(QStringLiteral("系统栏颜色仅 Android 可用"));
+    return false;
+#endif
+}
+
+bool Md3WindowHelper::setScreenOrientation(const QString &mode)
+{
+#if defined(Q_OS_ANDROID)
+    const QJniObject activity = androidActivity();
+    if (!activity.isValid()) {
+        reportNativeStatus(QStringLiteral("setScreenOrientation：无 Activity"));
+        return false;
+    }
+    const QString m = mode.trimmed().toLower();
+    // ActivityInfo.SCREEN_ORIENTATION_*
+    jint orient = -1; // UNSPECIFIED
+    if (m == QLatin1String("portrait") || m == QLatin1String("locked"))
+        orient = 1; // PORTRAIT
+    else if (m == QLatin1String("landscape"))
+        orient = 0;
+    else if (m == QLatin1String("sensor"))
+        orient = 4; // SENSOR
+    else if (m == QLatin1String("fullsensor") || m == QLatin1String("full_sensor"))
+        orient = 10; // FULL_SENSOR
+    else if (m == QLatin1String("unspecified") || m == QLatin1String("auto"))
+        orient = -1;
+    else {
+        reportNativeStatus(QStringLiteral("未知方向：%1").arg(mode));
+        return false;
+    }
+    bool ok = false;
+    auto future = QNativeInterface::QAndroidApplication::runOnAndroidMainThread([&]() {
+        activity.callMethod<void>("setRequestedOrientation", "(I)V", orient);
+        ok = true;
+    });
+    future.waitForFinished();
+    reportNativeStatus(ok ? QStringLiteral("屏幕方向：%1").arg(mode) : QStringLiteral("设置方向失败"));
+    return ok;
+#else
+    Q_UNUSED(mode)
+    reportNativeStatus(QStringLiteral("屏幕方向锁定仅 Android 可用"));
+    return false;
+#endif
+}
+
+bool Md3WindowHelper::showSoftInput()
+{
+#if defined(Q_OS_ANDROID)
+    const QJniObject activity = androidActivity();
+    if (!activity.isValid())
+        return false;
+    const QJniObject imm = activity.callObjectMethod(
+            "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;",
+            QJniObject::fromString(QStringLiteral("input_method")).object());
+    if (!imm.isValid())
+        return false;
+    const QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+    const QJniObject decor = window.isValid()
+            ? window.callObjectMethod("getDecorView", "()Landroid/view/View;")
+            : QJniObject();
+    if (!decor.isValid())
+        return false;
+    const QJniObject token = decor.callObjectMethod("getWindowToken", "()Landroid/os/IBinder;");
+    imm.callMethod<jboolean>("showSoftInput", "(Landroid/view/View;I)Z", decor.object(), jint(0));
+    Q_UNUSED(token)
+    reportNativeStatus(QStringLiteral("已请求显示软键盘"));
+    return true;
+#else
+    reportNativeStatus(QStringLiteral("showSoftInput 仅 Android 可用"));
+    return false;
+#endif
+}
+
+bool Md3WindowHelper::hideSoftInput()
+{
+#if defined(Q_OS_ANDROID)
+    const QJniObject activity = androidActivity();
+    if (!activity.isValid())
+        return false;
+    const QJniObject imm = activity.callObjectMethod(
+            "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;",
+            QJniObject::fromString(QStringLiteral("input_method")).object());
+    if (!imm.isValid())
+        return false;
+    const QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+    const QJniObject decor = window.isValid()
+            ? window.callObjectMethod("getDecorView", "()Landroid/view/View;")
+            : QJniObject();
+    if (!decor.isValid())
+        return false;
+    const QJniObject token = decor.callObjectMethod("getWindowToken", "()Landroid/os/IBinder;");
+    const bool ok = imm.callMethod<jboolean>("hideSoftInputFromWindow", "(Landroid/os/IBinder;I)Z",
+                                             token.object(), jint(0));
+    reportNativeStatus(ok ? QStringLiteral("已隐藏软键盘") : QStringLiteral("隐藏软键盘失败"));
+    return ok;
+#else
+    reportNativeStatus(QStringLiteral("hideSoftInput 仅 Android 可用"));
+    return false;
+#endif
+}
+
+bool Md3WindowHelper::setSoftInputAdjustResize(bool adjustResize)
+{
+#if defined(Q_OS_ANDROID)
+    const QJniObject activity = androidActivity();
+    if (!activity.isValid())
+        return false;
+    // SOFT_INPUT_ADJUST_RESIZE=0x10, ADJUST_PAN=0x20, STATE_HIDDEN=0x2
+    const jint mode = adjustResize ? 0x10 : 0x20;
+    bool ok = false;
+    auto future = QNativeInterface::QAndroidApplication::runOnAndroidMainThread([&]() {
+        const QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+        if (!window.isValid())
+            return;
+        window.callMethod<void>("setSoftInputMode", "(I)V", mode);
+        ok = true;
+    });
+    future.waitForFinished();
+    reportNativeStatus(ok ? (adjustResize ? QStringLiteral("软键盘：ADJUST_RESIZE")
+                                          : QStringLiteral("软键盘：ADJUST_PAN"))
+                          : QStringLiteral("setSoftInputMode 失败"));
+    return ok;
+#else
+    Q_UNUSED(adjustResize)
+    return false;
+#endif
+}
+
+bool Md3WindowHelper::openAppSettings()
+{
+#if defined(Q_OS_ANDROID)
+    const QJniObject activity = androidActivity();
+    if (!activity.isValid())
+        return false;
+    const QString pkg = activity.callObjectMethod("getPackageName", "()Ljava/lang/String;").toString();
+    QJniObject intent("android/content/Intent", "(Ljava/lang/String;)V",
+                      QJniObject::fromString(
+                              QStringLiteral("android.settings.APPLICATION_DETAILS_SETTINGS"))
+                              .object());
+    const QJniObject uri = QJniObject::callStaticObjectMethod(
+            "android/net/Uri", "fromParts",
+            "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/net/Uri;",
+            QJniObject::fromString(QStringLiteral("package")).object(),
+            QJniObject::fromString(pkg).object(), nullptr);
+    intent.callObjectMethod("setData", "(Landroid/net/Uri;)Landroid/content/Intent;", uri.object());
+    intent.callObjectMethod("addFlags", "(I)Landroid/content/Intent;", jint(0x10000000));
+    activity.callMethod<void>("startActivity", "(Landroid/content/Intent;)V", intent.object());
+    reportNativeStatus(QStringLiteral("已打开应用设置"));
+    return true;
+#else
+    reportNativeStatus(QStringLiteral("openAppSettings 仅 Android 可用"));
+    return false;
+#endif
+}
+
+bool Md3WindowHelper::nativeToast(const QString &message, int durationMs)
+{
+#if defined(Q_OS_ANDROID)
+    const QJniObject activity = androidActivity();
+    if (!activity.isValid() || message.isEmpty())
+        return false;
+    const jint length = durationMs >= 2500 ? 1 : 0; // LENGTH_LONG : SHORT
+    bool ok = false;
+    auto future = QNativeInterface::QAndroidApplication::runOnAndroidMainThread([&]() {
+        const QJniObject toast = QJniObject::callStaticObjectMethod(
+                "android/widget/Toast", "makeText",
+                "(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;",
+                activity.object(), QJniObject::fromString(message).object(), length);
+        if (toast.isValid()) {
+            toast.callMethod<void>("show", "()V");
+            ok = true;
+        }
+    });
+    future.waitForFinished();
+    reportNativeStatus(ok ? QStringLiteral("Toast 已显示") : QStringLiteral("Toast 失败"));
+    return ok;
+#else
+    Q_UNUSED(durationMs)
+    reportNativeStatus(QStringLiteral("nativeToast：%1（非 Android 仅记录）").arg(message));
+    return !message.isEmpty();
+#endif
+}
+
+bool Md3WindowHelper::hapticFeedback(int kind)
+{
+#if defined(Q_OS_ANDROID)
+    const QJniObject activity = androidActivity();
+    if (!activity.isValid())
+        return false;
+    // HapticFeedbackConstants: CONTEXT_CLICK=6, LONG_PRESS=0, CONFIRM=16, REJECT=17
+    jint feedback = 6;
+    switch (kind) {
+    case 1: feedback = 0; break;
+    case 2: feedback = 16; break;
+    case 3: feedback = 17; break;
+    default: feedback = 6; break;
+    }
+    bool ok = false;
+    auto future = QNativeInterface::QAndroidApplication::runOnAndroidMainThread([&]() {
+        const QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+        const QJniObject decor = window.isValid()
+                ? window.callObjectMethod("getDecorView", "()Landroid/view/View;")
+                : QJniObject();
+        if (!decor.isValid())
+            return;
+        ok = decor.callMethod<jboolean>("performHapticFeedback", "(I)Z", feedback);
+    });
+    future.waitForFinished();
+    reportNativeStatus(ok ? QStringLiteral("触觉反馈 kind=%1").arg(kind)
+                          : QStringLiteral("触觉反馈失败"));
+    return ok;
+#else
+    if (kind >= 0)
+        md3SystemBeep();
+    reportNativeStatus(QStringLiteral("非 Android：触觉回退提示音"));
+    return true;
+#endif
+}
+
+bool Md3WindowHelper::requestIgnoreBatteryOptimizations()
+{
+#if defined(Q_OS_ANDROID)
+    const QJniObject activity = androidActivity();
+    if (!activity.isValid())
+        return false;
+    const QString pkg = activity.callObjectMethod("getPackageName", "()Ljava/lang/String;").toString();
+    const QJniObject pm = activity.callObjectMethod(
+            "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;",
+            QJniObject::fromString(QStringLiteral("power")).object());
+    if (pm.isValid()) {
+        const bool ignoring = pm.callMethod<jboolean>(
+                "isIgnoringBatteryOptimizations", "(Ljava/lang/String;)Z",
+                QJniObject::fromString(pkg).object());
+        if (ignoring) {
+            reportNativeStatus(QStringLiteral("已在电池优化白名单中"));
+            return true;
+        }
+    }
+    QJniObject intent("android/content/Intent", "(Ljava/lang/String;)V",
+                      QJniObject::fromString(
+                              QStringLiteral("android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"))
+                              .object());
+    const QJniObject uri = QJniObject::callStaticObjectMethod(
+            "android/net/Uri", "parse", "(Ljava/lang/String;)Landroid/net/Uri;",
+            QJniObject::fromString(QStringLiteral("package:") + pkg).object());
+    intent.callObjectMethod("setData", "(Landroid/net/Uri;)Landroid/content/Intent;", uri.object());
+    activity.callMethod<void>("startActivity", "(Landroid/content/Intent;)V", intent.object());
+    reportNativeStatus(QStringLiteral("已请求忽略电池优化"));
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool Md3WindowHelper::shareFile(const QUrl &fileUrl, const QString &mimeType, const QString &title)
+{
+#if defined(Q_OS_ANDROID)
+    const QJniObject activity = androidActivity();
+    if (!activity.isValid()) {
+        reportNativeStatus(QStringLiteral("shareFile：无 Activity"));
+        return false;
+    }
+    QString path = fileUrl.toLocalFile();
+    if (path.isEmpty())
+        path = fileUrl.toString();
+    if (path.isEmpty()) {
+        reportNativeStatus(QStringLiteral("shareFile：路径为空"));
+        return false;
+    }
+    // Prefer FileProvider if host registered one: ${applicationId}.fileprovider
+    const QString pkg = activity.callObjectMethod("getPackageName", "()Ljava/lang/String;").toString();
+    QJniObject uri;
+    const QJniObject file("java/io/File", "(Ljava/lang/String;)V",
+                          QJniObject::fromString(path).object());
+    const QJniObject authority = QJniObject::fromString(pkg + QStringLiteral(".fileprovider"));
+    uri = QJniObject::callStaticObjectMethod(
+            "androidx/core/content/FileProvider", "getUriForFile",
+            "(Landroid/content/Context;Ljava/lang/String;Ljava/io/File;)Landroid/net/Uri;",
+            activity.object(), authority.object(), file.object());
+    if (!uri.isValid()) {
+        // Fallback file:// (may fail on API 24+)
+        uri = QJniObject::callStaticObjectMethod("android/net/Uri", "fromFile",
+                                                 "(Ljava/io/File;)Landroid/net/Uri;", file.object());
+    }
+    if (!uri.isValid()) {
+        reportNativeStatus(QStringLiteral("shareFile：无法构造 Uri（需 FileProvider）"));
+        return false;
+    }
+    QString mime = mimeType;
+    if (mime.isEmpty())
+        mime = QStringLiteral("*/*");
+    QJniObject intent("android/content/Intent", "()V");
+    intent.callObjectMethod(
+            "setAction", "(Ljava/lang/String;)Landroid/content/Intent;",
+            QJniObject::fromString(QStringLiteral("android.intent.action.SEND")).object());
+    intent.callObjectMethod("setType", "(Ljava/lang/String;)Landroid/content/Intent;",
+                            QJniObject::fromString(mime).object());
+    intent.callObjectMethod(
+            "putExtra",
+            "(Ljava/lang/String;Landroid/os/Parcelable;)Landroid/content/Intent;",
+            QJniObject::fromString(QStringLiteral("android.intent.extra.STREAM")).object(),
+            uri.object());
+    intent.callObjectMethod("addFlags", "(I)Landroid/content/Intent;", jint(0x00000001)); // GRANT_READ
+    const QJniObject chooser = QJniObject::callStaticObjectMethod(
+            "android/content/Intent", "createChooser",
+            "(Landroid/content/Intent;Ljava/lang/CharSequence;)Landroid/content/Intent;",
+            intent.object(),
+            QJniObject::fromString(title.isEmpty() ? QStringLiteral("Share") : title).object());
+    activity.callMethod<void>("startActivity", "(Landroid/content/Intent;)V", chooser.object());
+    reportNativeStatus(QStringLiteral("已打开文件分享"));
+    return true;
+#else
+    Q_UNUSED(mimeType)
+    Q_UNUSED(title)
+    return openUrl(fileUrl);
+#endif
+}
+
+bool Md3WindowHelper::copyToClipboard(const QString &text)
+{
+    if (auto *clip = QGuiApplication::clipboard()) {
+        clip->setText(text);
+        reportNativeStatus(QStringLiteral("已复制到剪贴板"));
+        return true;
+    }
+    reportNativeStatus(QStringLiteral("剪贴板不可用"));
+    return false;
+}
+
+QString Md3WindowHelper::clipboardText() const
+{
+    if (auto *clip = QGuiApplication::clipboard())
+        return clip->text();
+    return {};
+}
+
+bool Md3WindowHelper::openNotificationSettings()
+{
+#if defined(Q_OS_ANDROID)
+    const QJniObject activity = androidActivity();
+    if (!activity.isValid())
+        return false;
+    const QString pkg = activity.callObjectMethod("getPackageName", "()Ljava/lang/String;").toString();
+    QJniObject intent("android/content/Intent", "(Ljava/lang/String;)V",
+                      QJniObject::fromString(QStringLiteral("android.settings.APP_NOTIFICATION_SETTINGS"))
+                              .object());
+    intent.callObjectMethod(
+            "putExtra", "(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;",
+            QJniObject::fromString(QStringLiteral("android.provider.extra.APP_PACKAGE")).object(),
+            QJniObject::fromString(pkg).object());
+    // Pre-O fallback extra
+    intent.callObjectMethod(
+            "putExtra", "(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;",
+            QJniObject::fromString(QStringLiteral("app_package")).object(),
+            QJniObject::fromString(pkg).object());
+    intent.callObjectMethod("addFlags", "(I)Landroid/content/Intent;", jint(0x10000000));
+    activity.callMethod<void>("startActivity", "(Landroid/content/Intent;)V", intent.object());
+    reportNativeStatus(QStringLiteral("已打开通知设置"));
+    return true;
+#else
+    reportNativeStatus(QStringLiteral("openNotificationSettings 仅 Android 可用"));
+    return false;
+#endif
+}
+
 void Md3WindowHelper::reportNativeStatus(const QString &status)
 {
     if (m_lastNativeStatus == status)

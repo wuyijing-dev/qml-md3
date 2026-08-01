@@ -1110,6 +1110,41 @@ Window {
         return Md3NativeShell.getPath(name || "")
     }
 
+    // --- Android extras ---
+    function setSystemBarColors(statusCss, navCss, lightIcons) {
+        return windowHelper.setSystemBarColors(statusCss || "", navCss || "", !!lightIcons)
+    }
+    function setScreenOrientation(mode) {
+        return windowHelper.setScreenOrientation(mode || "unspecified")
+    }
+    function showSoftInput() { return windowHelper.showSoftInput() }
+    function hideSoftInput() { return windowHelper.hideSoftInput() }
+    function setSoftInputAdjustResize(enable) {
+        return windowHelper.setSoftInputAdjustResize(!!enable)
+    }
+    function openAppSettings() { return windowHelper.openAppSettings() }
+    function nativeToast(message, durationMs) {
+        return windowHelper.nativeToast(message || "", durationMs === undefined ? 2000 : durationMs)
+    }
+    function hapticFeedback(kind) {
+        return windowHelper.hapticFeedback(kind === undefined ? 0 : kind)
+    }
+    function requestIgnoreBatteryOptimizations() {
+        return windowHelper.requestIgnoreBatteryOptimizations()
+    }
+    function shareFile(fileUrl, mimeType, titleText) {
+        return windowHelper.shareFile(fileUrl, mimeType || "", titleText || "")
+    }
+    function copyToClipboard(text) {
+        return windowHelper.copyToClipboard(text || "")
+    }
+    function clipboardText() {
+        return windowHelper.clipboardText()
+    }
+    function openNotificationSettings() {
+        return windowHelper.openNotificationSettings()
+    }
+
     readonly property real windowDpr: windowHelper.devicePixelRatio(root)
     readonly property int windowDpi: windowHelper.windowDpi(root)
     readonly property int monitorCount: windowHelper.monitorCount()
