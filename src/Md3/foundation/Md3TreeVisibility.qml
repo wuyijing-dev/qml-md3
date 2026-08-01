@@ -51,4 +51,26 @@ QtObject {
             return false
         return true
     }
+
+    /// Nearest ancestor that declares boolean `md3PageActive` (PageHost injectable).
+    function findPageRoot(item) {
+        let p = item
+        while (p) {
+            try {
+                const v = p.md3PageActive
+                if (typeof v === "boolean")
+                    return p
+            } catch (e) { /* not declared */ }
+            p = p.parent
+        }
+        return null
+    }
+
+    /// True when no page root, or `md3PageActive` is true.
+    function isPageActive(item) {
+        const page = findPageRoot(item)
+        if (!page)
+            return true
+        return !!page.md3PageActive
+    }
 }

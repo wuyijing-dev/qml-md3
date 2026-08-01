@@ -19,6 +19,8 @@ Item {
     property int currentIndex: -1
     property string sectionRole: ""
     property string emptyText: qsTr("No items")
+    /// Drop Stack/Grid hosts while page is off-display (shell size stays).
+    property bool unloadWhenPageInactive: true
 
     signal itemActivated(int index, var item)
     signal itemClicked(int index, var item)
@@ -30,6 +32,12 @@ Item {
         target: root
         enabled: !root.anchors.fill
         policy: Md3HeightSync.AtLeastImplicit
+    }
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
     }
 
     readonly property Item _activeView: layout === Md3ItemsView.Stack ? listLoader.item : gridLoader.item
@@ -52,7 +60,7 @@ Item {
     Loader {
         id: listLoader
         anchors.fill: parent
-        active: root.layout === Md3ItemsView.Stack
+        active: pageGate.contentActive && root.layout === Md3ItemsView.Stack
         sourceComponent: listComponent
         onLoaded: {
             if (!item)
@@ -65,7 +73,7 @@ Item {
     Loader {
         id: gridLoader
         anchors.fill: parent
-        active: root.layout === Md3ItemsView.Grid
+        active: pageGate.contentActive && root.layout === Md3ItemsView.Grid
         sourceComponent: gridComponent
         onLoaded: {
             if (!item)

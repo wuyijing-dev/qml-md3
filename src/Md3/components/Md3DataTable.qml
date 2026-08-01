@@ -51,11 +51,19 @@ Item {
     property var rowActions: []
     /// Optional cell renderer: set `rowData`, `columnDef`, `columnIndex`, `displayText`, `sourceIndex`.
     property Component cellDelegate: null
+    /// Drop TableView row models while page is off-display (chrome height stays).
+    property bool unloadWhenPageInactive: true
     /// In-cell edit target (−1 = none). Column must set `editable: true`.
     property int editingSourceIndex: -1
     property int editingColumnIndex: -1
     /// Keyboard focus column for F2 / Left-Right (first editable when unset).
     property int focusedColumnIndex: -1
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
 
     signal rowClicked(int sourceIndex)
     signal rowDoubleClicked(int sourceIndex)
@@ -993,7 +1001,7 @@ Item {
 
                         Md3TableGridModel {
                             id: frozenGridModel
-                            entries: root.loading ? [] : root.pageEntries
+                            entries: (root.loading || !pageGate.contentActive) ? [] : root.pageEntries
                             columnIndices: root._frozenColumnIndices
                             leadingSelection: root.selectionEnabled
                             trailingActions: false
@@ -1097,7 +1105,7 @@ Item {
 
                         Md3TableGridModel {
                             id: scrollGridModel
-                            entries: root.loading ? [] : root.pageEntries
+                            entries: (root.loading || !pageGate.contentActive) ? [] : root.pageEntries
                             columnIndices: root._scrollColumnIndices
                             leadingSelection: false
                             trailingActions: root.actionsColWidth > 0
@@ -1402,7 +1410,7 @@ Item {
 
             Md3TableGridModel {
                 id: freeGridModel
-                entries: root.loading ? [] : root.pageEntries
+                entries: (root.loading || !pageGate.contentActive) ? [] : root.pageEntries
                 columnIndices: root._allColumnIndices
                 leadingSelection: root.selectionEnabled
                 trailingActions: root.actionsColWidth > 0

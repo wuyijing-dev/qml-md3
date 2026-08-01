@@ -32,8 +32,6 @@ Item {
     property bool _delayElapsed: !progressive
     property bool _nearViewport: true
     property var _flickable: null
-    property var _pageRoot: null
-    property bool _pageActive: true
 
     Layout.fillWidth: true
     Layout.preferredHeight: preferredHeight
@@ -42,6 +40,12 @@ Item {
     height: preferredHeight
     width: parent ? parent.width : implicitWidth
     clip: true
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
 
     function arm() {
         _armed = true
@@ -56,7 +60,7 @@ Item {
 
     /// Re-arm after page return — delay already satisfied; viewport gate still applies.
     function rearm() {
-        if (!_pageActive && unloadWhenPageInactive)
+        if (!pageGate.contentActive)
             return
         if (!progressive) {
             _armed = true
@@ -66,40 +70,6 @@ Item {
         _hookFlickable()
         _updateNearViewport()
         _tryArm()
-    }
-
-    function _findPageRoot() {
-        let p = parent
-        while (p) {
-            try {
-                const v = p.md3PageActive
-                if (typeof v === "boolean")
-                    return p
-            } catch (e) { /* not declared */ }
-            p = p.parent
-        }
-        return null
-    }
-
-    function _resolvePageRoot() {
-        const p = _findPageRoot()
-        if (p === _pageRoot)
-            return
-        _pageRoot = p
-        _syncPageActive()
-    }
-
-    function _syncPageActive() {
-        const next = _pageRoot ? !!_pageRoot.md3PageActive : true
-        if (next === _pageActive)
-            return
-        _pageActive = next
-        if (!unloadWhenPageInactive)
-            return
-        if (!_pageActive)
-            disarm()
-        else
-            rearm()
     }
 
     function _findFlickable() {
@@ -157,7 +127,7 @@ Item {
     function _tryArm() {
         if (_armed)
             return
-        if (unloadWhenPageInactive && !_pageActive)
+        if (!pageGate.contentActive)
             return
         if (!progressive) {
             _armed = true
@@ -171,28 +141,27 @@ Item {
         if (!progressive) {
             _delayElapsed = true
             _nearViewport = true
-            if (!unloadWhenPageInactive || _pageActive)
+            if (pageGate.contentActive)
                 _armed = true
         }
     }
 
-    onUnloadWhenPageInactiveChanged: {
-        if (!unloadWhenPageInactive && !_armed)
-            rearm()
-        else if (unloadWhenPageInactive && !_pageActive)
-            disarm()
+    Connections {
+        target: pageGate
+        function onContentActiveChanged() {
+            if (!pageGate.contentActive)
+                root.disarm()
+            else
+                root.rearm()
+        }
     }
 
     on_DelayElapsedChanged: _tryArm()
     on_NearViewportChanged: _tryArm()
-    onParentChanged: {
-        Qt.callLater(_hookFlickable)
-        Qt.callLater(_resolvePageRoot)
-    }
+    onParentChanged: Qt.callLater(_hookFlickable)
     Component.onCompleted: {
         Qt.callLater(_hookFlickable)
-        Qt.callLater(_resolvePageRoot)
-        if (!progressive && (!unloadWhenPageInactive || _pageActive))
+        if (!progressive && pageGate.contentActive)
             _armed = true
     }
     Component.onDestruction: {
@@ -204,16 +173,10 @@ Item {
         }
     }
 
-    Connections {
-        target: root._pageRoot
-        function onMd3PageActiveChanged() { root._syncPageActive() }
-    }
-
     Timer {
         id: deferTimer
         interval: Math.max(0, root.delayMs)
-        running: root.progressive && !root._delayElapsed
-                && (!root.unloadWhenPageInactive || root._pageActive)
+        running: root.progressive && !root._delayElapsed && pageGate.contentActive
         repeat: false
         onTriggered: root._delayElapsed = true
     }
@@ -222,11 +185,10 @@ Item {
     Timer {
         interval: 160
         running: root.progressive && !root._armed && root.visible && root.requireNearViewport
-                && (!root.unloadWhenPageInactive || root._pageActive)
+                && pageGate.contentActive
         repeat: true
         onTriggered: {
             root._hookFlickable()
-            root._resolvePageRoot()
             root._updateNearViewport()
             root._tryArm()
         }

@@ -23,6 +23,8 @@ Item {
     property string emptyIcon: "inbox"
     /// Screen-reader / AT name (defaults to “List”; do not reuse emptyText).
     property string accessibleName: ""
+    /// Drop ListView delegates while page is off-display (shell size stays).
+    property bool unloadWhenPageInactive: true
 
     signal itemActivated(int index, var item)
     signal itemClicked(int index, var item)
@@ -35,6 +37,12 @@ Item {
         target: root
         enabled: !root.anchors.fill
         policy: Md3HeightSync.AtLeastImplicit
+    }
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
     }
 
     Accessible.role: Accessible.List
@@ -153,14 +161,14 @@ Item {
     ListView {
         id: list
         anchors.fill: parent
-        model: root.model || []
+        model: pageGate.contentActive ? (root.model || []) : []
         clip: root.clipContent
         cacheBuffer: root.cacheBufferPx
         reuseItems: true
         interactive: root.interactive
         currentIndex: root.currentIndex
         boundsBehavior: Flickable.StopAtBounds
-        visible: root._count() > 0
+        visible: pageGate.contentActive && root._count() > 0
         focus: true
         activeFocusOnTab: true
         section.property: root.hasSections ? root.sectionRole : ""

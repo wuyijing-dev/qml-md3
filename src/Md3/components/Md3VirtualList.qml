@@ -17,6 +17,8 @@ Item {
     property string emptyText: qsTr("No items")
     /// Screen-reader label (defaults to “Virtual list”).
     property string accessibleName: ""
+    /// Drop ListView delegates while page is off-display (shell size stays).
+    property bool unloadWhenPageInactive: true
 
     signal itemActivated(int index, var item)
     signal currentIndexChangedByUser(int index, var item)
@@ -27,6 +29,12 @@ Item {
         target: root
         enabled: !root.anchors.fill
         policy: Md3HeightSync.AtLeastImplicit
+    }
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
     }
 
     Accessible.role: Accessible.List
@@ -78,14 +86,14 @@ Item {
     ListView {
         id: list
         anchors.fill: parent
-        model: root.model || []
+        model: pageGate.contentActive ? (root.model || []) : []
         clip: root.clipContent
         cacheBuffer: root.cacheBufferPx
         reuseItems: true
         interactive: root.interactive
         currentIndex: root.currentIndex
         boundsBehavior: Flickable.StopAtBounds
-        visible: model && model.length > 0
+        visible: pageGate.contentActive && model && model.length > 0
         focus: true
         activeFocusOnTab: true
 

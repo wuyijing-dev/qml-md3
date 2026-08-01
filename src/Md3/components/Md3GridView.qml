@@ -19,6 +19,8 @@ Item {
     property int cacheBufferPx: 800
     property string emptyText: qsTr("No items")
     property string emptyIcon: "grid_view"
+    /// Drop GridView delegates while page is off-display (shell size stays).
+    property bool unloadWhenPageInactive: true
 
     signal itemActivated(int index, var item)
     signal itemClicked(int index, var item)
@@ -31,6 +33,12 @@ Item {
         target: root
         enabled: !root.anchors.fill
         policy: Md3HeightSync.AtLeastImplicit
+    }
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
     }
 
     Accessible.role: Accessible.List
@@ -111,14 +119,14 @@ Item {
         id: grid
         anchors.fill: parent
         anchors.margins: 4
-        model: root.model || []
+        model: pageGate.contentActive ? (root.model || []) : []
         cellWidth: root.cellWidth + root.spacing
         cellHeight: root.cellHeight + root.spacing
         clip: root.clipContent
         cacheBuffer: root.cacheBufferPx
         reuseItems: true
         currentIndex: root.currentIndex
-        visible: root._count() > 0
+        visible: pageGate.contentActive && root._count() > 0
         focus: true
         activeFocusOnTab: true
         boundsBehavior: Flickable.StopAtBounds

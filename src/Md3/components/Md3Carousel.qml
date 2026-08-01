@@ -22,6 +22,8 @@ Item {
     property bool wrap: true
     /// Shadow bleed around each card so elevation is not clipped.
     property real shadowPad: 10
+    /// Drop carousel delegates while page is off-display (shell size stays).
+    property bool unloadWhenPageInactive: true
 
     signal indexChangedByUser(int index)
     signal itemClicked(int index)
@@ -30,6 +32,12 @@ Item {
     implicitHeight: itemHeight + shadowPad * 2 + (showIndicators ? 28 : 0)
     height: implicitHeight
     width: implicitWidth
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
 
     Accessible.role: Accessible.List
     Accessible.name: qsTr("Carousel")
@@ -74,7 +82,7 @@ Item {
             // Keep horizontal clip; vertical shadow bleed stays inside preferredHeight.
             clip: true
             reuseItems: true
-            model: root.model
+            model: pageGate.contentActive ? root.model : []
             snapMode: ListView.SnapOneItem
             highlightRangeMode: ListView.StrictlyEnforceRange
             preferredHighlightBegin: 0
@@ -83,6 +91,7 @@ Item {
             highlightMoveVelocity: -1
             boundsBehavior: Flickable.StopAtBounds
             currentIndex: root.currentIndex
+            visible: pageGate.contentActive
             displayMarginBeginning: root.mode === Md3Carousel.Flip ? 0 : root.shadowPad
             displayMarginEnd: root.mode === Md3Carousel.Flip ? 0 : root.shadowPad
 

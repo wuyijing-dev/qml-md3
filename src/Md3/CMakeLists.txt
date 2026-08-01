@@ -217,6 +217,7 @@ qt_add_qml_module(Md3
         foundation/Md3Notify.qml
         foundation/Md3TreeVisibility.qml
         foundation/Md3OverlayHost.qml
+        foundation/Md3PageActivityGate.qml
         foundation/Md3ColorScheme.qml
         foundation/Md3DynamicScheme.qml
         foundation/Md3Typography.qml

@@ -26,6 +26,8 @@ Item {
     property var overlayWindow: null
     /// Cap scroll viewport in Column layouts (0 = natural full content height).
     property real preferredMaxHeight: 0
+    /// Drop ListView row delegates while page is off-display (chrome stays).
+    property bool unloadWhenPageInactive: true
 
     signal activated(int flatIndex, var node)
     signal expandedChanged(int flatIndex, var node, bool expanded)
@@ -35,6 +37,12 @@ Item {
 
     Accessible.role: Accessible.Tree
     Accessible.name: qsTr("Tree view")
+
+    Md3PageActivityGate {
+        id: pageGate
+        watchItem: root
+        unloadWhenPageInactive: root.unloadWhenPageInactive
+    }
 
     readonly property real _chromeH: {
         if (!showFilter && !showExpandControls)
@@ -450,12 +458,13 @@ Item {
         // Always reserve gutter when vertical bar can appear — avoids label under scrollbar.
         anchors.rightMargin: vBar.needed ? Math.max(vBar.width, 10) : 0
         anchors.bottomMargin: hBar.needed ? Math.max(hBar.height, 10) : 0
-        model: root.flatRows
+        model: pageGate.contentActive ? root.flatRows : []
         reuseItems: true
         cacheBuffer: Math.max(240, root.rowHeight * 16)
         clip: true
         boundsBehavior: Flickable.StopAtBounds
         currentIndex: root.selectedIndex
+        visible: pageGate.contentActive
         onCurrentIndexChanged: {
             if (root.selectedIndex !== currentIndex && currentIndex >= 0)
                 root.selectedIndex = currentIndex

@@ -41,6 +41,7 @@ Industry UI stacks converge on the same rules Md3 applies:
 25. **`Md3DeferredSection`** — arms after delay **and** near-viewport (skips off-screen incubate); **`disarm`/`rearm`** when ancestor `md3PageActive` is false (PageHost injects).
 26. **`Md3BarChart` / `Md3PieChart`** — bars/slices on one Canvas (no per-item Rectangle/Shape Repeater).
 27. **PageHost `md3PageActive`** — kept L1 pages unload DeferredSection loaders off-display (shell + height stay); Gallery uses L1≤3 + neighbor **L2** prefetch (`pagePrefetchL1: false`).
+28. **`Md3PageActivityGate`** — DataTable / VirtualList / TreeView / ListView / GridView / Carousel / ItemsView clear row models (or Loader) while `md3PageActive` is false; chrome size unchanged.
 
 ---
 
@@ -50,7 +51,7 @@ Industry UI stacks converge on the same rules Md3 applies:
 | **Scene Graph** | Draw calls for on-screen items | Off-screen *drawing* is usually culled; **FBOs still exist** if the Item is alive with `layer.enabled` |
 | **PageHost L1** | Live page Items in RAM | Default `arc` + `pageCacheLimit: 1`; inactive kept pages can unload DeferredSection via `md3PageActive` |
 | **PageHost L2** | Compiled `Component` (cheap to re-instantiate) | Default limit `1`; `pagePrefetchL1: false` warms neighbors as L2 only |
-| **Within page** | Charts / tables / long forms | `Md3DeferredSection` + `progressiveContent` |
+| **Within page** | Charts / tables / long forms | `Md3DeferredSection` + `progressiveContent`; table/list bodies also follow `Md3PageActivityGate` |
 
 “看不见不渲染也不算特效” ≈ **不要让重控件以 `layer.enabled: true` 活在树里**（滚动出视野仍占 FBO）。做法：出屏用 `Loader { active: false }` / `Md3DeferredSection` / 列表用 `Md3VirtualList`，而不是只设 `visible: false` 却保留 layer。
 

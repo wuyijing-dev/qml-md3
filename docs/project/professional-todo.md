@@ -19,7 +19,7 @@
 11. [x] **Electron 对标宿主**：`Md3NativeShell` 单实例 / 开机启动 / 全局快捷键(Win·macOS·Linux) / 协议注册 / 电源锁屏 / `getPath`
 12. [x] **Android 扩展**：通知、系统栏颜色、方向、软键盘、Toast/触觉、应用/通知设置、电池优化、shareFile、Material You accent
 13. [x] **体验抛光**：CommandBar a11y；Chip/Switch/Checkbox/Segmented 按压缩放；TextField/SearchBar 清空+错误反馈；Snackbar/Toast 滑动关闭/去重；Tooltip focus 延迟；SafeArea 6.9+；Nav 弹簧/长按/返回关抽屉；Skeleton/PageHost 节奏
-14. [x] **性能（外观不变）**：按钮 clip FBO 按需；Shadow/Skeleton/Carousel 场景门控；disabled 色缓存；LiquidGlass 默认非 live；布局事件化；**DataTable TableView 行列虚拟化**；TreeView；PageHost prefetch/sparse；Form 事件驱动；Chart/Gauge 门控；**`md3PageActive` + DeferredSection 离页卸重**；Gallery L1≤3 + L2 近邻 — 见 [performance.md](../topics/performance.md)
+14. [x] **性能（外观不变）**：按钮 clip FBO 按需；Shadow/Skeleton/Carousel 场景门控；disabled 色缓存；LiquidGlass 默认非 live；布局事件化；**DataTable TableView 行列虚拟化**；TreeView；PageHost prefetch/sparse；Form 事件驱动；Chart/Gauge 门控；**`md3PageActive` + DeferredSection 离页卸重**；**PageActivityGate 表格/列表离页清 model**；Gallery L1≤3 + L2 近邻 — 见 [performance.md](../topics/performance.md)
 
 ## 壳层对照
 
