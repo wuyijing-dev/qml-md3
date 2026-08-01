@@ -8,6 +8,11 @@
 namespace {
 constexpr qreal kEps = 0.5;
 
+QQuickItem *asItem(QObject *object)
+{
+    return qobject_cast<QQuickItem *>(object);
+}
+
 bool childExpandTrue(const QQuickItem *item)
 {
     if (!item)
@@ -65,22 +70,25 @@ bool Md3QtCompat::nearlyEqual(qreal a, qreal b)
     return std::abs(a - b) < kEps;
 }
 
-qreal Md3QtCompat::preferredHeight(QQuickItem *item) const
+qreal Md3QtCompat::preferredHeight(QObject *object) const
 {
+    QQuickItem *item = asItem(object);
     if (!item)
         return 0;
     return std::max<qreal>({ item->height(), item->implicitHeight(), qreal(0) });
 }
 
-qreal Md3QtCompat::preferredWidth(QQuickItem *item) const
+qreal Md3QtCompat::preferredWidth(QObject *object) const
 {
+    QQuickItem *item = asItem(object);
     if (!item)
         return 0;
     return std::max<qreal>({ item->width(), item->implicitWidth(), qreal(0) });
 }
 
-bool Md3QtCompat::syncHeightFromImplicit(QQuickItem *item, bool exact) const
+bool Md3QtCompat::syncHeightFromImplicit(QObject *object, bool exact) const
 {
+    QQuickItem *item = asItem(object);
     if (!item)
         return false;
     const qreal ih = item->implicitHeight();
@@ -91,8 +99,9 @@ bool Md3QtCompat::syncHeightFromImplicit(QQuickItem *item, bool exact) const
     return true;
 }
 
-bool Md3QtCompat::syncWidthFromImplicit(QQuickItem *item, bool exact) const
+bool Md3QtCompat::syncWidthFromImplicit(QObject *object, bool exact) const
 {
+    QQuickItem *item = asItem(object);
     if (!item)
         return false;
     const qreal iw = item->implicitWidth();
@@ -103,11 +112,12 @@ bool Md3QtCompat::syncWidthFromImplicit(QQuickItem *item, bool exact) const
     return true;
 }
 
-int Md3QtCompat::syncSubtreeHeights(QQuickItem *root, int maxDepth) const
+int Md3QtCompat::syncSubtreeHeights(QObject *root, int maxDepth) const
 {
-    if (!root || maxDepth < 0)
+    QQuickItem *item = asItem(root);
+    if (!item || maxDepth < 0)
         return 0;
-    return syncSubtreeHeightsImpl(root, maxDepth);
+    return syncSubtreeHeightsImpl(item, maxDepth);
 }
 
 int Md3QtCompat::syncSubtreeHeightsImpl(QQuickItem *item, int depthLeft) const

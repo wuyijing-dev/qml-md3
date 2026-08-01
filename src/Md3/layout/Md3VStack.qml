@@ -39,7 +39,14 @@ Item {
         }
         return false
     }
-    // Named property: default alias sends bare children into contentCol.
+    // Synchronous height for Column's first pass (HeightSync alone is queued / too late).
+    Binding {
+        target: root
+        property: "height"
+        value: root.implicitHeight
+        when: !root._hasExpandChild && !root.anchors.fill
+        restoreMode: Binding.RestoreNone
+    }
     readonly property Md3HeightSync _heightSync: Md3HeightSync {
         target: root
         enabled: !root._hasExpandChild && !root.anchors.fill

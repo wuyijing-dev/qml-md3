@@ -401,34 +401,18 @@ Item {
         anchors.bottom: parent.bottom
         anchors.top: parent.top
         anchors.topMargin: root._chromeH
-        anchors.rightMargin: vBar.visible ? vBar.width : 0
-        anchors.bottomMargin: hBar.visible ? hBar.height : 0
-        contentWidth: Math.max(width, col.width)
-        contentHeight: col.height
+        // Always reserve gutter when vertical bar can appear — avoids label under scrollbar.
+        anchors.rightMargin: vBar.needed ? Math.max(vBar.width, 10) : 0
+        anchors.bottomMargin: hBar.needed ? Math.max(hBar.height, 10) : 0
+        contentWidth: width
+        contentHeight: Math.max(col.implicitHeight, col.height)
         clip: true
         boundsBehavior: Flickable.StopAtBounds
-        flickableDirection: {
-            const h = contentWidth > width + 1
-            const v = contentHeight > height + 1
-            if (h && v)
-                return Flickable.HorizontalAndVerticalFlick
-            if (h)
-                return Flickable.HorizontalFlick
-            return Flickable.VerticalFlick
-        }
+        flickableDirection: Flickable.VerticalFlick
 
         Column {
             id: col
-            width: {
-                let maxW = flick.width
-                const kids = children
-                for (let i = 0; i < kids.length; ++i) {
-                    const c = kids[i]
-                    if (c && c.visible !== false && c.implicitWidth > maxW)
-                        maxW = c.implicitWidth
-                }
-                return maxW
-            }
+            width: flick.width
 
             Repeater {
                 model: root.flatRows
@@ -438,7 +422,8 @@ Item {
                     required property var modelData
                     width: col.width
                     height: root.rowHeight
-                    implicitWidth: rowInner.implicitWidth + 16
+                    implicitWidth: width
+                    implicitHeight: height
 
                     readonly property var node: modelData.node
                     readonly property int depth: modelData.depth
@@ -485,27 +470,111 @@ Item {
                         border.color: Md3Theme.colorScheme.secondary
                     }
 
+                    // Fixed chrome widths so the label gets a real remaining width (ElideRight)
+                    // instead of being hard-clipped by Flickable when the pane is narrow.
+                    readonly property real _checkW: root.checkEnabled ? 28 : 0
+                    readonly property real _chevronW: 28
+                    readonly property real _iconW: (row.node.icon && String(row.node.icon).length) ? 22 : 0
+                    readonly property real _rowLeft: 8 + row.depth * root.indent
+                    readonly property real _rowGap: 8
+                    readonly property int _chromeCount: (root.checkEnabled ? 1 : 0) + 1
+                                                     + ((row.node.icon && String(row.node.icon).length) ? 1 : 0)
+                    readonly property real _labelW: {
+                        const gaps = Math.max(0, _chromeCount) * _rowGap
+                        const used = _rowLeft + _checkW + _chevronW + _iconW + gaps + 8
+                        return Math.max(24, row.width - used)
+                    }
+
                     Row {
                         id: rowInner
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.left: parent.left
-                        anchors.leftMargin: 8 + row.depth * root.indent
-                        spacing: 4
+                        anchors.leftMargin: row._rowLeft
+                        anchors.right: parent.right
+                        anchors.rightMargin: 8
+                        spacing: row._rowGap
+                        height: Math.min(parent.height, 36)
 
-                        Md3Checkbox {
+                        // Compact check (48px Md3Checkbox overflows rowHeight and steals label width).
+                        Item {
+                            id: checkSlot
                             visible: root.checkEnabled
-                            anchors.verticalCenter: parent.verticalCenter
-                            tristate: root.triStateCheck
-                            checkState: row.node.checkState !== undefined
-                                        ? row.node.checkState
-                                        : (row.node.checked ? Qt.Checked : Qt.Unchecked)
-                            onToggled: function (state) {
-                                root.setCheckState(row.path, state)
+                            width: row._checkW
+                            height: parent.height
+
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: 18
+                                height: 18
+                                radius: 2
+                                color: {
+                                    const st = row.node.checkState !== undefined
+                                             ? row.node.checkState
+                                             : (row.node.checked ? Qt.Checked : Qt.Unchecked)
+                                    if (st === Qt.Checked || st === Qt.PartiallyChecked)
+                                        return Md3Theme.colorScheme.primary
+                                    return "transparent"
+                                }
+                                border.width: {
+                                    const st = row.node.checkState !== undefined
+                                             ? row.node.checkState
+                                             : (row.node.checked ? Qt.Checked : Qt.Unchecked)
+                                    return (st === Qt.Checked || st === Qt.PartiallyChecked) ? 0 : 2
+                                }
+                                border.color: Md3Theme.colorScheme.colorOnSurfaceVariant
+
+                                // check mark
+                                Canvas {
+                                    id: checkMark
+                                    anchors.fill: parent
+                                    anchors.margins: 2
+                                    visible: {
+                                        const st = row.node.checkState !== undefined
+                                                 ? row.node.checkState
+                                                 : (row.node.checked ? Qt.Checked : Qt.Unchecked)
+                                        return st === Qt.Checked
+                                    }
+                                    onVisibleChanged: requestPaint()
+                                    onWidthChanged: requestPaint()
+                                    onHeightChanged: requestPaint()
+                                    onPaint: {
+                                        const ctx = getContext("2d")
+                                        ctx.clearRect(0, 0, width, height)
+                                        ctx.strokeStyle = Md3Theme.colorScheme.colorOnPrimary
+                                        ctx.lineWidth = 2
+                                        ctx.lineCap = "round"
+                                        ctx.lineJoin = "round"
+                                        ctx.beginPath()
+                                        ctx.moveTo(width * 0.15, height * 0.5)
+                                        ctx.lineTo(width * 0.4, height * 0.75)
+                                        ctx.lineTo(width * 0.85, height * 0.25)
+                                        ctx.stroke()
+                                    }
+                                }
+                                // indeterminate bar
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    width: 10
+                                    height: 2
+                                    radius: 1
+                                    color: Md3Theme.colorScheme.colorOnPrimary
+                                    visible: {
+                                        const st = row.node.checkState !== undefined
+                                                 ? row.node.checkState
+                                                 : (row.node.checked ? Qt.Checked : Qt.Unchecked)
+                                        return st === Qt.PartiallyChecked
+                                    }
+                                }
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.toggleCheckAt(row.index)
                             }
                         }
 
                         Item {
-                            width: 32
+                            width: row._chevronW
                             height: parent.height
                             Md3Icon {
                                 anchors.centerIn: parent
@@ -531,17 +600,20 @@ Item {
                         }
 
                         Md3Icon {
-                            visible: !!(row.node.icon && String(row.node.icon).length)
+                            visible: row._iconW > 0
+                            width: row._iconW
                             anchors.verticalCenter: parent.verticalCenter
-                            icon: String(row.node.icon)
+                            icon: String(row.node.icon || "")
                             size: 20
                             iconColor: row.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
                                                     : Md3Theme.colorScheme.colorOnSurfaceVariant
                         }
 
                         Text {
+                            width: row._labelW
                             anchors.verticalCenter: parent.verticalCenter
                             text: row.title
+                            elide: Text.ElideRight
                             color: row.filterHit ? Md3Theme.colorScheme.primary
                                   : (row.selected ? Md3Theme.colorScheme.colorOnSecondaryContainer
                                                   : Md3Theme.colorScheme.colorOnSurface)
@@ -553,7 +625,8 @@ Item {
 
                     MouseArea {
                         anchors.fill: parent
-                        anchors.leftMargin: 8 + row.depth * root.indent + (root.checkEnabled ? 36 : 0) + 32
+                        anchors.leftMargin: row._rowLeft + row._checkW
+                                            + (row._checkW > 0 ? row._rowGap : 0) + row._chevronW
                         acceptedButtons: Qt.LeftButton | Qt.RightButton
                         z: -1
                         onClicked: function (mouse) {
@@ -593,7 +666,7 @@ Item {
         anchors.top: parent.top
         anchors.topMargin: root._chromeH
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: hBar.visible ? hBar.height : 0
+        anchors.bottomMargin: hBar.needed ? Math.max(hBar.height, 10) : 0
         flickable: flick
         orientation: Qt.Vertical
     }
@@ -602,7 +675,7 @@ Item {
         id: hBar
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.rightMargin: vBar.visible ? vBar.width : 0
+        anchors.rightMargin: vBar.needed ? Math.max(vBar.width, 10) : 0
         anchors.bottom: parent.bottom
         flickable: flick
         orientation: Qt.Horizontal

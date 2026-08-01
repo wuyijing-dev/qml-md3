@@ -55,17 +55,18 @@ public:
     bool avoidFlexboxLayout() const { return true; }
 
     /// max(height, implicitHeight) — stable child measure across kits.
-    Q_INVOKABLE qreal preferredHeight(QQuickItem *item) const;
-    Q_INVOKABLE qreal preferredWidth(QQuickItem *item) const;
+    /// Take QObject* so QML Items convert reliably (raw QQuickItem* can be null).
+    Q_INVOKABLE qreal preferredHeight(QObject *object) const;
+    Q_INVOKABLE qreal preferredWidth(QObject *object) const;
 
     /// Align height with implicitHeight. exact=false → max(h, ih) (default);
     /// exact=true → height = ih (body slots). Returns true if height was written.
-    Q_INVOKABLE bool syncHeightFromImplicit(QQuickItem *item, bool exact = false) const;
-    Q_INVOKABLE bool syncWidthFromImplicit(QQuickItem *item, bool exact = false) const;
+    Q_INVOKABLE bool syncHeightFromImplicit(QObject *object, bool exact = false) const;
+    Q_INVOKABLE bool syncWidthFromImplicit(QObject *object, bool exact = false) const;
 
     /// Walk a subtree and sync heights (skips items with expand:true).
     /// Returns number of items updated.
-    Q_INVOKABLE int syncSubtreeHeights(QQuickItem *root, int maxDepth = 8) const;
+    Q_INVOKABLE int syncSubtreeHeights(QObject *root, int maxDepth = 8) const;
 
 private:
     static bool nearlyEqual(qreal a, qreal b);

@@ -26,9 +26,13 @@ Item {
     default property alias content: contentHost.data
 
     property bool _applying: false
+    property var _sizeCache: ({})
 
     implicitWidth: leftPadding + rightPadding + contentHost._laidOutWidth
     implicitHeight: Math.max(1, topPadding + bottomPadding + contentHost._laidOutHeight)
+    // Synchronous default height so Column does not skip this row on the first frame.
+    // External height / anchors.fill still override. HeightSync keeps floor after polish.
+    height: implicitHeight
     readonly property Md3HeightSync _heightSync: Md3HeightSync {
         target: root
         enabled: !root.anchors.fill
@@ -40,6 +44,17 @@ Item {
         interval: 0
         repeat: false
         onTriggered: root._applyLayout()
+    }
+
+    // Catch late implicitWidth (text/icons) — same idea as Md3AnimatedFlow.
+    Timer {
+        interval: 48
+        running: root.visible && contentHost.children.length > 0
+        repeat: true
+        onTriggered: {
+            if (root._sizesDirty())
+                root._scheduleLayout()
+        }
     }
 
     Item {
@@ -92,11 +107,34 @@ Item {
     }
 
     function _childPreferredWidth(c) {
-        return Md3QtCompat.preferredWidth(c)
+        // Local measure first — never trust a 0 from a failed C++ cast alone.
+        const w = Number(c.width) || 0
+        const iw = Number(c.implicitWidth) || 0
+        const viaCompat = Number(Md3QtCompat.preferredWidth(c)) || 0
+        return Math.max(w, iw, viaCompat, 0)
     }
 
     function _childPreferredHeight(c) {
-        return Md3QtCompat.preferredHeight(c)
+        const h = Number(c.height) || 0
+        const ih = Number(c.implicitHeight) || 0
+        const viaCompat = Number(Md3QtCompat.preferredHeight(c)) || 0
+        return Math.max(h, ih, viaCompat, 0)
+    }
+
+    function _sizesDirty() {
+        const kids = contentHost.children
+        const cache = root._sizeCache
+        for (let i = 0; i < kids.length; ++i) {
+            const c = kids[i]
+            if (!c || c.visible === false)
+                continue
+            const w = root._childPreferredWidth(c)
+            const h = root._childPreferredHeight(c)
+            const prev = cache[i]
+            if (!prev || prev.w !== w || prev.h !== h)
+                return true
+        }
+        return false
     }
 
     function _applyLayout() {
@@ -111,16 +149,20 @@ Item {
         let expanders = []
         let visible = []
         let maxH = 0
+        const sizes = ({})
         for (let i = 0; i < kids.length; ++i) {
             const c = kids[i]
             if (!c || c.visible === false)
                 continue
             visible.push(c)
+            const pw = _childPreferredWidth(c)
+            const ph = _childPreferredHeight(c)
+            sizes[visible.length - 1] = { w: pw, h: ph }
             if (c.expand === true)
                 expanders.push(c)
             else
-                fixed += _childPreferredWidth(c)
-            maxH = Math.max(maxH, _childPreferredHeight(c))
+                fixed += pw
+            maxH = Math.max(maxH, ph)
         }
 
         const gaps = Math.max(0, visible.length - 1) * root.spacing
@@ -133,10 +175,13 @@ Item {
                 : Math.max(1, maxH)
 
         let x = 0
+        let needRelayout = false
         for (let i = 0; i < visible.length; ++i) {
             const c = visible[i]
             const isExpand = c.expand === true
-            const w = isExpand ? expandEach : _childPreferredWidth(c)
+            let w = isExpand ? expandEach : _childPreferredWidth(c)
+            if (!isExpand && w < 0.5)
+                needRelayout = true
 
             if (isExpand)
                 _setReal(c, "width", w)
@@ -165,6 +210,10 @@ Item {
         if (Math.abs(contentHost._laidOutHeight - laidH) >= 0.5)
             contentHost._laidOutHeight = laidH
 
+        root._sizeCache = sizes
         _applying = false
+
+        if (needRelayout)
+            Qt.callLater(root._scheduleLayout)
     }
 }
