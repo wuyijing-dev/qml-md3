@@ -198,6 +198,7 @@ qt_add_qml_module(Md3
         diagnostics/md3i18n.cpp
         diagnostics/md3hotreload.h
         diagnostics/md3hotreload.cpp
+        foundation/md3qtversion.h
         foundation/md3qtcompat.h
         foundation/md3qtcompat.cpp
         layout/md3heightsync.h

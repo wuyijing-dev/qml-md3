@@ -33,7 +33,18 @@ Item {
 
     implicitWidth: 360
     implicitHeight: hasFiles && showTable ? (52 + 36 + tableBodyHeight + 24) : 180
-    height: implicitHeight
+    Binding {
+        target: root
+        property: "height"
+        value: root.implicitHeight
+        when: !root.anchors.fill
+        restoreMode: Binding.RestoreNone
+    }
+    readonly property Md3HeightSync _heightSync: Md3HeightSync {
+        target: root
+        enabled: !root.anchors.fill
+        policy: Md3HeightSync.AtLeastImplicit
+    }
 
     readonly property bool hasFiles: droppedItems && droppedItems.length > 0
     readonly property string summaryText: {

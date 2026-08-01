@@ -16,7 +16,18 @@ Item {
 
     implicitWidth: Math.min(parent ? parent.width : maxContentWidth, maxContentWidth + 48)
     implicitHeight: col.implicitHeight + 48
-    height: implicitHeight
+    Binding {
+        target: root
+        property: "height"
+        value: root.implicitHeight
+        when: !root.anchors.fill
+        restoreMode: Binding.RestoreNone
+    }
+    readonly property Md3HeightSync _heightSync: Md3HeightSync {
+        target: root
+        enabled: !root.anchors.fill
+        policy: Md3HeightSync.AtLeastImplicit
+    }
 
     Accessible.role: Accessible.StaticText
     Accessible.name: title.length ? title : qsTr("Empty state")

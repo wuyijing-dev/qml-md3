@@ -21,6 +21,11 @@ Item {
 
     implicitWidth: 320
     implicitHeight: 280
+    readonly property Md3HeightSync _heightSync: Md3HeightSync {
+        target: root
+        enabled: !root.anchors.fill
+        policy: Md3HeightSync.AtLeastImplicit
+    }
 
     Accessible.role: Accessible.List
     Accessible.name: emptyText.length ? emptyText : qsTr("Virtual list")

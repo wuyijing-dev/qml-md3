@@ -1,5 +1,6 @@
 #include "md3.h"
 #include "md3graphics.h"
+#include "md3qtversion.h"
 
 #if defined(Q_OS_LINUX)
 #  include <QApplication>
@@ -22,15 +23,6 @@
 
 #include <cstdio>
 #include <cstring>
-
-// Fallback when compiled outside md3_apply_qt_compat_definitions().
-#ifndef MD3_QT_AT_LEAST_68
-#  if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
-#    define MD3_QT_AT_LEAST_68 1
-#  else
-#    define MD3_QT_AT_LEAST_68 0
-#  endif
-#endif
 
 #if defined(Q_OS_WIN)
 #  include <windows.h>

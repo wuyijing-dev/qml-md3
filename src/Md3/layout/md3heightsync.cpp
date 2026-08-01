@@ -88,6 +88,9 @@ void Md3HeightSync::reconnect()
 
     connect(m_target, &QQuickItem::implicitHeightChanged, this, &Md3HeightSync::scheduleSync);
     connect(m_target, &QQuickItem::implicitWidthChanged, this, &Md3HeightSync::scheduleSync);
+    // Re-raise after polish collapses height/width to 0 (Qt 6.8 Column path).
+    connect(m_target, &QQuickItem::heightChanged, this, &Md3HeightSync::scheduleSync);
+    connect(m_target, &QQuickItem::widthChanged, this, &Md3HeightSync::scheduleSync);
 }
 
 void Md3HeightSync::scheduleSync()

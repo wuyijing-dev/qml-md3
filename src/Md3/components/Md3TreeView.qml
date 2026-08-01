@@ -114,6 +114,11 @@ Item {
     implicitHeight: _bodyH + _chromeH
     width: parent ? parent.width : implicitWidth
     // Do not bind height → implicitHeight (breaks anchors.fill hosts).
+    readonly property Md3HeightSync _heightSync: Md3HeightSync {
+        target: root
+        enabled: !root.anchors.fill
+        policy: Md3HeightSync.AtLeastImplicit
+    }
     clip: true
     focus: true
     activeFocusOnTab: true

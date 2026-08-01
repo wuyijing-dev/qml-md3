@@ -26,6 +26,11 @@ Item {
 
     implicitWidth: 400
     implicitHeight: 280
+    readonly property Md3HeightSync _heightSync: Md3HeightSync {
+        target: root
+        enabled: !root.anchors.fill
+        policy: Md3HeightSync.AtLeastImplicit
+    }
 
     onSelectedIndicesChanged: {
         if (layout === Md3ItemsView.Stack)

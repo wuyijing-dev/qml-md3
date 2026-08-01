@@ -7,7 +7,7 @@
 class QQuickItem;
 
 /// Compile + runtime Qt kit facts and the **unified** Md3 layout policy for
-/// Qt 6.5 / 6.8 / 6.10. Geometry helpers live here so QML does not branch on
+/// Qt 6.5 → 6.10+. Geometry helpers live here so QML does not branch on
 /// version for Column/Flickable height semantics.
 class Md3QtCompat : public QObject
 {
@@ -20,8 +20,16 @@ class Md3QtCompat : public QObject
     Q_PROPERTY(int qtPatch READ qtPatch CONSTANT)
     Q_PROPERTY(QString qtVersion READ qtVersion CONSTANT)
     Q_PROPERTY(bool atLeast65 READ atLeast65 CONSTANT)
+    Q_PROPERTY(bool atLeast66 READ atLeast66 CONSTANT)
+    Q_PROPERTY(bool atLeast67 READ atLeast67 CONSTANT)
     Q_PROPERTY(bool atLeast68 READ atLeast68 CONSTANT)
+    Q_PROPERTY(bool atLeast69 READ atLeast69 CONSTANT)
     Q_PROPERTY(bool atLeast610 READ atLeast610 CONSTANT)
+
+    /// Linked QuickEffects (public or Private) for this kit.
+    Q_PROPERTY(bool hasQuickEffects READ hasQuickEffects CONSTANT)
+    /// Linked QuickShapes (public or Private) for this kit.
+    Q_PROPERTY(bool hasQuickShapes READ hasQuickShapes CONSTANT)
 
     /// Always true: Column / layout shells must expose real height (not implicit-only).
     Q_PROPERTY(bool strictColumnHeight READ strictColumnHeight CONSTANT)
@@ -44,8 +52,13 @@ public:
     int qtPatch() const;
     QString qtVersion() const;
     bool atLeast65() const;
+    bool atLeast66() const;
+    bool atLeast67() const;
     bool atLeast68() const;
+    bool atLeast69() const;
     bool atLeast610() const;
+    bool hasQuickEffects() const;
+    bool hasQuickShapes() const;
 
     bool strictColumnHeight() const { return true; }
     bool flickableUsesImplicitHeight() const { return true; }
@@ -53,6 +66,9 @@ public:
     bool avoidUseDefaultSizePolicy() const { return true; }
     bool avoidSafeAreaBaseline() const { return true; }
     bool avoidFlexboxLayout() const { return true; }
+
+    /// Runtime gate: true when kit ≥ major.minor (patch ignored).
+    Q_INVOKABLE bool atLeast(int major, int minor) const;
 
     /// max(height, implicitHeight) — stable child measure across kits.
     /// Take QObject* so QML Items convert reliably (raw QQuickItem* can be null).

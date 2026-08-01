@@ -42,7 +42,18 @@ Item {
     implicitWidth: fillWidth && parent ? parent.width : (_contentWidth + leftPadding + rightPadding)
     implicitHeight: Math.max(_contentHeight + topPadding + bottomPadding, 0)
     width: fillWidth && parent ? parent.width : implicitWidth
-    height: implicitHeight
+    Binding {
+        target: root
+        property: "height"
+        value: root.implicitHeight
+        when: !root.anchors.fill
+        restoreMode: Binding.RestoreNone
+    }
+    readonly property Md3HeightSync _heightSync: Md3HeightSync {
+        target: root
+        enabled: !root.anchors.fill
+        policy: Md3HeightSync.AtLeastImplicit
+    }
 
     Item {
         id: host
@@ -64,10 +75,9 @@ Item {
     }
 
     function _itemSize(item) {
-        // Prefer the larger of explicit and intrinsic sizes so fixed-size cards
-        // (width/height set, implicit still 0) still measure correctly.
-        let w = Math.max(item.width || 0, item.implicitWidth || 0)
-        let h = Math.max(item.height || 0, item.implicitHeight || 0)
+        // Prefer the larger of explicit and intrinsic sizes (C++ policy — same on 6.5–6.10).
+        let w = Number(Md3QtCompat.preferredWidth(item)) || 0
+        let h = Number(Md3QtCompat.preferredHeight(item)) || 0
         if (item.Layout !== undefined) {
             const pw = item.Layout.preferredWidth
             const ph = item.Layout.preferredHeight

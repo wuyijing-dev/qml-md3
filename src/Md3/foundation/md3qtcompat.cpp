@@ -1,4 +1,5 @@
 #include "md3qtcompat.h"
+#include "md3qtversion.h"
 
 #include <QQuickItem>
 #include <QtGlobal>
@@ -52,17 +53,53 @@ QString Md3QtCompat::qtVersion() const
 
 bool Md3QtCompat::atLeast65() const
 {
-    return QT_VERSION >= QT_VERSION_CHECK(6, 5, 0);
+    return MD3_QT_AT_LEAST_65;
+}
+
+bool Md3QtCompat::atLeast66() const
+{
+    return MD3_QT_AT_LEAST_66;
+}
+
+bool Md3QtCompat::atLeast67() const
+{
+    return MD3_QT_AT_LEAST_67;
 }
 
 bool Md3QtCompat::atLeast68() const
 {
-    return QT_VERSION >= QT_VERSION_CHECK(6, 8, 0);
+    return MD3_QT_AT_LEAST_68;
+}
+
+bool Md3QtCompat::atLeast69() const
+{
+    return MD3_QT_AT_LEAST_69;
 }
 
 bool Md3QtCompat::atLeast610() const
 {
-    return QT_VERSION >= QT_VERSION_CHECK(6, 10, 0);
+    return MD3_QT_AT_LEAST_610;
+}
+
+bool Md3QtCompat::hasQuickEffects() const
+{
+    return MD3_HAS_QUICK_EFFECTS;
+}
+
+bool Md3QtCompat::hasQuickShapes() const
+{
+    return MD3_HAS_QUICK_SHAPES;
+}
+
+bool Md3QtCompat::atLeast(int major, int minor) const
+{
+    if (major < 0 || minor < 0)
+        return false;
+    if (QT_VERSION_MAJOR > major)
+        return true;
+    if (QT_VERSION_MAJOR < major)
+        return false;
+    return QT_VERSION_MINOR >= minor;
 }
 
 bool Md3QtCompat::nearlyEqual(qreal a, qreal b)

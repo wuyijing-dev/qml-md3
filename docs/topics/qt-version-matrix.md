@@ -19,8 +19,8 @@ UI 属性/布局差异清单（编写时查阅）：[qt65-610-ui-diffs.md](qt65-
 | Layer | What differs by kit | How Md3 unifies |
 |-------|---------------------|-----------------|
 | CMake link | Effects/Shapes **public** (6.10+) vs **Private** (6.5/6.8) | `md3_resolve_optional_qt_modules()` tries public then Private |
-| C++ features | e.g. Han font fallback API (6.8+) | `MD3_QT_AT_LEAST_68` / `MD3_QT_AT_LEAST_610` from `md3_apply_qt_compat_definitions()` |
-| QML layout geometry | Column/Flickable use `height` (6.8+) vs implicit-friendly kits | **C++** `Md3HeightSync` + `Md3QtCompat` prescribe one policy (`AtLeastImplicit` / `Exact`) on layout shells |
+| C++ features | font fallback (6.8+), SafeArea (6.9+), public Effects (6.10+) | `MD3_QT_AT_LEAST_65`…`_610` + `MD3_HAS_QUICK_*` via `md3_apply_qt_compat_definitions()` / `md3qtversion.h` |
+| QML layout geometry | Column/Flickable use `height` (6.8+) vs implicit-friendly kits | **C++** `Md3HeightSync` + `Md3QtCompat` on layout shells (VStack/HStack/Flow/Form/lists/Card/…) |
 | DataTable sizing | height ↔ bodyHeight loops | Never bind `bodyHeight` to `height`; use `_resolvedBodyHeight` |
 
 Do **not** write kit-specific Gallery pages or version `if` in QML for layout. Geometry rules live in C++ so 6.10 cannot mask bugs that break 6.5/6.8.

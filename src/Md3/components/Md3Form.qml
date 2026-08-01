@@ -28,7 +28,18 @@ Item {
     implicitWidth: Math.max(200, host.implicitWidth)
     implicitHeight: host.implicitHeight
     width: parent ? parent.width : implicitWidth
-    height: implicitHeight
+    Binding {
+        target: root
+        property: "height"
+        value: root.implicitHeight
+        when: !root.anchors.fill
+        restoreMode: Binding.RestoreNone
+    }
+    readonly property Md3HeightSync _heightSync: Md3HeightSync {
+        target: root
+        enabled: !root.anchors.fill
+        policy: Md3HeightSync.AtLeastImplicit
+    }
 
     function setError(name, message) {
         const next = Object.assign({}, errors)

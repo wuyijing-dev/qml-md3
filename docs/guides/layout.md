@@ -20,9 +20,10 @@
 
 Prescribed in **C++** (`Md3QtCompat` + `Md3HeightSync`), not per-kit QML:
 
-- Layout shells raise `height` to at least `implicitHeight` (`Md3HeightSync.AtLeastImplicit`).
+- Layout shells raise `height` to at least `implicitHeight` (`Md3HeightSync.AtLeastImplicit`): VStack, HStack, Flow, Form, PageSection, GridLayout, lists/tree, Card, DataTable, EmptyState, FileDropZone.
 - Card body slots use `Exact` so `Column` sees a real `height`.
 - Measure children with `Md3QtCompat.preferredHeight` / `preferredWidth`.
+- Version gates for optional APIs: `Md3QtCompat.atLeast66`…`atLeast610` / C++ `MD3_QT_AT_LEAST_*` — never `if (Qt.version…)` in public layout QML.
 
 `Column` / `Flickable.contentHeight` consume **`height`**. Prefer `contentHeight: column.implicitHeight` in Flickables. Do not bind `bodyHeight` to `height` on `Md3DataTable`.
 
