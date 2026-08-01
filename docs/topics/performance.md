@@ -21,7 +21,7 @@ Industry UI stacks converge on the same rules Md3 applies:
 5. **`Md3LiquidGlass.liveSampling`** — default `false` (opt-in for video); drag still samples live.
 6. **`Md3StateOverlay`** — opacity Behavior skipped under `reduceMotion`.
 7. **`Md3TreeView`** — `ListView { reuseItems }` + 160ms debounced `flatRows` rebuild.
-8. **`Md3DataTable`** — free + frozen bodies use **`TableView`** (row **and** column virtualization) via `Md3TableGridModel`; frozen strip stays a synced `ListView`.
+8. **`Md3DataTable`** — free, scroll, **and frozen** bodies use **`TableView`** (row **and** column virtualization) via `Md3TableGridModel`.
 9. **`Md3PageHost`** — prefetch coalesced (120ms); launch mask geometry only while morphing; **sparse slots** when `model.length > sparseSlotThreshold` (default 40, skipped for `cacheMode: "all"`).
 10. **`Md3Form.liveGate`** — event-wired field signals + 48ms debounce (poll only if no named fields).
 11. **Progress / Loading** — tree-visibility poll 500→2000ms + `Qt.application` state Connections.
@@ -29,12 +29,16 @@ Industry UI stacks converge on the same rules Md3 applies:
 13. **`Md3Chart`** — rebuild coalesced on event-loop tick; skipped while `!chartActive`, flushed on re-show.
 14. **Canvas gauges** — `Md3TreeVisibility` gate + pending paint flush (Wave / Needle / Knob / …).
 15. **`Md3HStack` / `Md3AnimatedFlow` / `Md3GridLayout`** — child `implicit*Changed` hooks; no 120ms size poll.
+16. **`Md3TextField` suggestions** — geometry sync on open / size / scroll parents / window resize (no 16ms poll).
+17. **`Md3ItemsView`** — only the active Stack/Grid host is loaded.
+18. **`Md3Shadow`** — Balanced (`effectsLevel` 1) uses key blur only; High keeps ambient+key.
+19. **`Md3LiquidGlass`** — body/mask FBOs only while visible with non-zero size.
 
 ---
 
 | Layer | What costs money | Already gated? |
 |-------|------------------|----------------|
-| **GPU layers** (`layer` + `MultiEffect`) | FBO per masked button / dual-blur shadow | Ripple: only while ink runs. **Buttons / IconButton / AppBar / Toggle / Split / ButtonGroup**: clip mask FBO only while `ripple.layersNeeded` (idle = no FBO). Shadow: off when `elevation === 0` / `effectsLevel === 0` |
+| **GPU layers** (`layer` + `MultiEffect`) | FBO per masked button / dual-blur shadow | Ripple: only while ink runs. **Buttons / IconButton / AppBar / Toggle / Split / ButtonGroup**: clip mask FBO only while `ripple.layersNeeded` (idle = no FBO). Shadow: off when `elevation === 0` / `effectsLevel === 0`; Balanced = key blur only, High = ambient+key. LiquidGlass layers only while visible |
 | **Scene Graph** | Draw calls for on-screen items | Off-screen *drawing* is usually culled; **FBOs still exist** if the Item is alive with `layer.enabled` |
 | **PageHost L1** | Live page Items in RAM | Default `arc` + `pageCacheLimit: 1` |
 | **PageHost L2** | Compiled `Component` (cheap to re-instantiate) | Default limit `1` |

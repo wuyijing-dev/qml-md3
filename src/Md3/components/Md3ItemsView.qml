@@ -32,63 +32,87 @@ Item {
         policy: Md3HeightSync.AtLeastImplicit
     }
 
+    readonly property Item _activeView: layout === Md3ItemsView.Stack ? listLoader.item : gridLoader.item
+
     onSelectedIndicesChanged: {
-        if (layout === Md3ItemsView.Stack)
-            listView.selectedIndices = selectedIndices
-        else
-            gridView.selectedIndices = selectedIndices
+        if (_activeView)
+            _activeView.selectedIndices = selectedIndices
     }
     onCurrentIndexChanged: {
-        if (layout === Md3ItemsView.Stack)
-            listView.currentIndex = currentIndex
-        else
-            gridView.currentIndex = currentIndex
+        if (_activeView)
+            _activeView.currentIndex = currentIndex
     }
 
     function clearSelection() {
         selectedIndices = []
-        if (layout === Md3ItemsView.Stack)
-            listView.clearSelection()
-        else
-            gridView.clearSelection()
+        if (_activeView)
+            _activeView.clearSelection()
     }
 
-    Md3ListView {
-        id: listView
+    Loader {
+        id: listLoader
         anchors.fill: parent
-        visible: root.layout === Md3ItemsView.Stack
-        model: root.model
-        delegate: root.delegate
-        itemHeight: root.itemHeight
-        selectionMode: root.selectionMode
-        sectionRole: root.sectionRole
-        emptyText: root.emptyText
-        onItemActivated: function (i, item) { root.itemActivated(i, item) }
-        onItemClicked: function (i, item) { root.itemClicked(i, item) }
-        onSelectionChanged: {
-            root.selectedIndices = selectedIndices
-            root.selectionChanged()
+        active: root.layout === Md3ItemsView.Stack
+        sourceComponent: listComponent
+        onLoaded: {
+            if (!item)
+                return
+            item.selectedIndices = root.selectedIndices
+            item.currentIndex = root.currentIndex
         }
-        onCurrentIndexChanged: root.currentIndex = currentIndex
     }
 
-    Md3GridView {
-        id: gridView
+    Loader {
+        id: gridLoader
         anchors.fill: parent
-        visible: root.layout === Md3ItemsView.Grid
-        model: root.model
-        delegate: root.delegate
-        cellWidth: root.cellWidth
-        cellHeight: root.cellHeight
-        spacing: root.spacing
-        selectionMode: root.selectionMode
-        emptyText: root.emptyText
-        onItemActivated: function (i, item) { root.itemActivated(i, item) }
-        onItemClicked: function (i, item) { root.itemClicked(i, item) }
-        onSelectionChanged: {
-            root.selectedIndices = selectedIndices
-            root.selectionChanged()
+        active: root.layout === Md3ItemsView.Grid
+        sourceComponent: gridComponent
+        onLoaded: {
+            if (!item)
+                return
+            item.selectedIndices = root.selectedIndices
+            item.currentIndex = root.currentIndex
         }
-        onCurrentIndexChanged: root.currentIndex = currentIndex
+    }
+
+    Component {
+        id: listComponent
+        Md3ListView {
+            anchors.fill: parent
+            model: root.model
+            delegate: root.delegate
+            itemHeight: root.itemHeight
+            selectionMode: root.selectionMode
+            sectionRole: root.sectionRole
+            emptyText: root.emptyText
+            onItemActivated: function (i, item) { root.itemActivated(i, item) }
+            onItemClicked: function (i, item) { root.itemClicked(i, item) }
+            onSelectionChanged: {
+                root.selectedIndices = selectedIndices
+                root.selectionChanged()
+            }
+            onCurrentIndexChanged: root.currentIndex = currentIndex
+        }
+    }
+
+    Component {
+        id: gridComponent
+        Md3GridView {
+            anchors.fill: parent
+            model: root.model
+            delegate: root.delegate
+            cellWidth: root.cellWidth
+            cellHeight: root.cellHeight
+            spacing: root.spacing
+            selectionMode: root.selectionMode
+            emptyText: root.emptyText
+            onItemActivated: function (i, item) { root.itemActivated(i, item) }
+            onItemClicked: function (i, item) { root.itemClicked(i, item) }
+            onSelectionChanged: {
+                root.selectedIndices = selectedIndices
+                root.selectionChanged()
+            }
+            onCurrentIndexChanged: root.currentIndex = currentIndex
+        }
     }
 }

@@ -160,6 +160,7 @@ Item {
         if (suggestionIndex >= filteredSuggestions.length)
             suggestionIndex = filteredSuggestions.length > 0 ? filteredSuggestions.length - 1 : -1
         _syncSuggestionPopup()
+        _armSuggestionSync()
     }
     onFocusedChanged: {
         if (!focused)
@@ -549,16 +550,61 @@ Item {
         _suggestionY = y
     }
 
-    onSuggestionOpenChanged: {
+    function _armSuggestionSync() {
         if (suggestionOpen)
             Qt.callLater(_syncSuggestionGeometry)
     }
 
-    Timer {
-        running: root.suggestionOpen
-        interval: 16
-        repeat: true
-        onTriggered: root._syncSuggestionGeometry()
+    property var _suggestionScrollHooks: []
+
+    function _clearSuggestionScrollHooks() {
+        const hooks = _suggestionScrollHooks || []
+        for (let i = 0; i < hooks.length; ++i) {
+            const t = hooks[i]
+            if (!t)
+                continue
+            try {
+                t.contentXChanged.disconnect(_armSuggestionSync)
+                t.contentYChanged.disconnect(_armSuggestionSync)
+            } catch (e) { /* already gone */ }
+        }
+        _suggestionScrollHooks = []
+    }
+
+    function _hookSuggestionScrollParents() {
+        _clearSuggestionScrollHooks()
+        const hooks = []
+        let p = parent
+        while (p) {
+            if (p.contentX !== undefined && p.contentY !== undefined) {
+                p.contentXChanged.connect(_armSuggestionSync)
+                p.contentYChanged.connect(_armSuggestionSync)
+                hooks.push(p)
+            }
+            p = p.parent
+        }
+        _suggestionScrollHooks = hooks
+    }
+
+    onSuggestionOpenChanged: {
+        if (suggestionOpen) {
+            _hookSuggestionScrollParents()
+            Qt.callLater(_syncSuggestionGeometry)
+        } else {
+            _clearSuggestionScrollHooks()
+        }
+    }
+    onWidthChanged: _armSuggestionSync()
+    onHeightChanged: _armSuggestionSync()
+    onXChanged: _armSuggestionSync()
+    onYChanged: _armSuggestionSync()
+    Component.onDestruction: _clearSuggestionScrollHooks()
+
+    Connections {
+        target: Window.window
+        enabled: root.suggestionOpen && Window.window
+        function onWidthChanged() { root._armSuggestionSync() }
+        function onHeightChanged() { root._armSuggestionSync() }
     }
 
     Rectangle {

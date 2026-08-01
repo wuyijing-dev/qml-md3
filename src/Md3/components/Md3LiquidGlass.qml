@@ -146,7 +146,7 @@ Item {
     Item {
         id: glassBody
         anchors.fill: parent
-        layer.enabled: true
+        layer.enabled: root.visible && root.width > 1 && root.height > 1
         layer.smooth: root.quality >= 1
         layer.samples: root.quality >= 2 ? 2 : 0
         layer.effect: MultiEffect {
@@ -266,7 +266,7 @@ Item {
         width: root.width
         height: root.height
         visible: false
-        layer.enabled: true
+        layer.enabled: root.visible && root.width > 1 && root.height > 1
         layer.smooth: root.quality >= 1
         ShaderEffect {
             anchors.fill: parent

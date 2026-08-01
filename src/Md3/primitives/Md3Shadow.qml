@@ -13,22 +13,23 @@ Item {
             return 0
         return Math.min(elevation, Md3Theme.effectsMaxElevation)
     }
-    /// Dual-blur MultiEffect is expensive; Balanced keeps blur, Low skips shadows entirely.
+    /// Dual-blur MultiEffect is expensive; Balanced keeps key blur only, High keeps ambient+key.
     readonly property bool _useBlur: _elev > 0 && Md3Theme.effectsShadows
+    readonly property bool _useAmbient: _useBlur && Md3Theme.effectsHigh
     readonly property bool _layersOn: _useBlur && visible
 
     visible: _elev > 0
     z: -1
 
-    // Soft ambient — separates surface from background
+    // Soft ambient — separates surface from background (High effects only).
     Item {
         id: ambientHost
         anchors.fill: parent
         anchors.topMargin: Md3Theme.elevation.ambientY(root._elev)
         anchors.margins: -6
         opacity: Md3Theme.elevation.ambientOpacity(root._elev)
-        visible: root._useBlur
-        layer.enabled: root._layersOn
+        visible: root._useAmbient
+        layer.enabled: root._layersOn && root._useAmbient
         layer.smooth: true
         layer.effect: MultiEffect {
             blurEnabled: true

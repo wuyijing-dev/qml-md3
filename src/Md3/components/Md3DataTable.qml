@@ -111,6 +111,13 @@ Item {
             out.push(i)
         return out
     }
+    /// Frozen column indices for the frozen-pane TableView.
+    readonly property var _frozenColumnIndices: {
+        const out = []
+        for (let i = 0; i < frozenCount; ++i)
+            out.push(i)
+        return out
+    }
     /// All column indices for the unfrozen TableView path.
     readonly property var _allColumnIndices: {
         const out = []
@@ -984,49 +991,84 @@ Item {
                             Md3Divider { anchors.bottom: parent.bottom; width: parent.width }
                         }
 
-                        ListView {
+                        Md3TableGridModel {
+                            id: frozenGridModel
+                            entries: root.loading ? [] : root.pageEntries
+                            columnIndices: root._frozenColumnIndices
+                            leadingSelection: root.selectionEnabled
+                            trailingActions: false
+                        }
+
+                        TableView {
                             id: bodyFrozen
                             width: parent.width
                             height: root._resolvedBodyHeight
                             clip: true
-                            model: root.loading ? null : root.pageEntries
-                            reuseItems: true
-                            cacheBuffer: Math.max(200, root.rowHeight * 12)
+                            model: frozenGridModel
                             boundsBehavior: Flickable.StopAtBounds
                             interactive: !root.loading && root.pageEntries.length > 0
+                            leftMargin: 8
+                            reuseItems: true
+                            columnWidthProvider: function (column) {
+                                if (frozenGridModel.cellKindAt(column) === Md3TableGridModel.SelectionCell)
+                                    return root.selectionColWidth
+                                const ci = frozenGridModel.columnIndexAt(column)
+                                return root.effectiveWidths[ci] || 120
+                            }
+                            rowHeightProvider: function (row) { return root.rowHeight }
+                            Connections {
+                                target: root
+                                function onEffectiveWidthsChanged() { bodyFrozen.forceLayout() }
+                                function onSelectionColWidthChanged() { bodyFrozen.forceLayout() }
+                                function onRowHeightChanged() { bodyFrozen.forceLayout() }
+                            }
                             delegate: Item {
-                                id: frozenRowItem
-                                required property int index
-                                required property var modelData
-                                width: bodyFrozen.width
-                                height: root.rowHeight
-                                Row {
+                                id: frozenCell
+                                required property int row
+                                required property int column
+                                required property var entry
+                                required property int columnIndex
+                                required property int cellKind
+                                implicitWidth: 120
+                                implicitHeight: root.rowHeight
+
+                                readonly property int sourceIndex: entry ? entry.sourceIndex : -1
+                                readonly property var rowData: entry ? entry.row : null
+                                readonly property bool checked: root._isSelected(sourceIndex)
+                                readonly property bool highlighted: root.selectedRow === sourceIndex || checked
+                                readonly property bool keyboardFocused: root.focusedPageRow === row
+
+                                Rectangle {
                                     anchors.fill: parent
-                                    anchors.leftMargin: 8
-                                    Item {
-                                        visible: root.selectionEnabled
-                                        width: 48
-                                        height: parent.height
-                                        Md3Checkbox {
-                                            anchors.centerIn: parent
-                                            checked: root._isSelected(frozenRowItem.modelData.sourceIndex)
-                                            onToggled: function (state) {
-                                                root._setSelected(frozenRowItem.modelData.sourceIndex, state === Qt.Checked)
-                                            }
+                                    z: -2
+                                    color: frozenCell.keyboardFocused ? Md3Theme.colorScheme.primaryContainer
+                                          : (frozenCell.highlighted ? Md3Theme.colorScheme.secondaryContainer : "transparent")
+                                }
+
+                                Item {
+                                    anchors.fill: parent
+                                    visible: frozenCell.cellKind === Md3TableGridModel.SelectionCell
+                                    Md3Checkbox {
+                                        anchors.centerIn: parent
+                                        checked: frozenCell.checked
+                                        onToggled: function (state) {
+                                            root._setSelected(frozenCell.sourceIndex, state === Qt.Checked)
                                         }
                                     }
-                                    Repeater {
-                                        model: root.frozenCount
-                                        delegate: DataCell {
-                                            required property int index
-                                            width: root.effectiveWidths[index] || 120
-                                            height: parent.height
-                                            rowData: frozenRowItem.modelData.row
-                                            columnDef: root.columns[index]
-                                            columnIndex: index
-                                            sourceIndex: frozenRowItem.modelData.sourceIndex
-                                        }
-                                    }
+                                }
+
+                                DataCell {
+                                    anchors.fill: parent
+                                    visible: frozenCell.cellKind === Md3TableGridModel.DataCell
+                                    rowData: frozenCell.rowData
+                                    columnDef: root.columns[frozenCell.columnIndex]
+                                    columnIndex: frozenCell.columnIndex
+                                    sourceIndex: frozenCell.sourceIndex
+                                }
+
+                                Md3Divider {
+                                    anchors.bottom: parent.bottom
+                                    width: parent.width
                                 }
                             }
                         }
