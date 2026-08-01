@@ -152,14 +152,17 @@ Item {
             // Exposed for delegate Components that bind `modelData` / `index` via Loader scope.
             sourceComponent: root.delegate !== null ? root.delegate : fallbackDelegate
 
+            readonly property bool rowCurrent: ListView.isCurrentItem
+
             function sync() {
-                root._syncDelegate(item, index, modelData, ListView.isCurrentItem)
+                root._syncDelegate(item, index, modelData, rowCurrent)
             }
 
             onLoaded: sync()
             onIndexChanged: sync()
             onModelDataChanged: sync()
-            ListView.onIsCurrentItemChanged: sync()
+            onRowCurrentChanged: sync()
+            ListView.onReused: sync()
         }
 
         onCurrentIndexChanged: {

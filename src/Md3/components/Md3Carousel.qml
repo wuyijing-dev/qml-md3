@@ -73,6 +73,7 @@ Item {
             spacing: root._spacing
             // Keep horizontal clip; vertical shadow bleed stays inside preferredHeight.
             clip: true
+            reuseItems: true
             model: root.model
             snapMode: ListView.SnapOneItem
             highlightRangeMode: ListView.StrictlyEnforceRange
@@ -100,12 +101,14 @@ Item {
                 height: root.itemHeight + (root.mode === Md3Carousel.Flip ? 0 : root.shadowPad * 2)
 
                 readonly property bool selected: ListView.isCurrentItem
+                readonly property bool nearSelected: Math.abs(index - root.currentIndex) <= 1
                 readonly property real elev: root.mode === Md3Carousel.Flip ? 0 : (selected ? 2 : 1)
 
                 // Soft approach — no opacity dimming (reads as a fake shadow).
                 scale: root.mode === Md3Carousel.Flip ? 1 : (selected ? 1 : 0.985)
                 transformOrigin: Item.Center
                 Behavior on scale {
+                    enabled: !Md3Theme.reduceMotion && Md3Theme.effectsLiveMotion
                     NumberAnimation {
                         duration: Md3Motion.spatialSnapDuration
                         easing.type: Easing.BezierSpline
@@ -123,7 +126,8 @@ Item {
                         anchors.fill: card
                         elevation: delegateRoot.elev
                         cornerRadius: card.radius
-                        visible: root.mode !== Md3Carousel.Flip
+                        // Only current ±1 cards keep blur FBOs.
+                        visible: root.mode !== Md3Carousel.Flip && delegateRoot.nearSelected
                     }
 
                     Rectangle {
@@ -144,6 +148,8 @@ Item {
                             source: delegateRoot.modelData.source !== undefined
                                     ? delegateRoot.modelData.source : ""
                             fillMode: Image.PreserveAspectCrop
+                            asynchronous: true
+                            cache: true
                         }
 
                         // Bottom scrim for title contrast only (not a drop shadow).

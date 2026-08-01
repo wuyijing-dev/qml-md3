@@ -35,6 +35,10 @@ Industry UI stacks converge on the same rules Md3 applies:
 19. **`Md3LiquidGlass`** — body/mask FBOs only while visible with non-zero size.
 20. **`Md3ContainerBody` / `Md3ScrollView`** — deferred content measure (no `height ↔ childrenRect` polish loop).
 21. **Canvas gauges** — visibility poll backs off to 6s while opacity-hidden.
+22. **List/Grid/VirtualList** — selection/current sync via bindings + `onReused` (no per-row `Connections` fan-out).
+23. **`Md3Carousel`** — `reuseItems`, async images, shadow only on current ±1.
+24. **`Md3CodeBlock`** — 40ms coalesced HTML rebuild.
+25. **`Md3DeferredSection`** — arms after delay **and** near-viewport (skips off-screen incubate).
 
 ---
 

@@ -212,20 +212,30 @@ Item {
         _gen++
     }
 
-    onCodeChanged: refresh()
-    onLanguageChanged: refresh()
-    onShowLineNumbersChanged: refresh()
-    onWrapChanged: refresh()
-    onFontSizeChanged: refresh()
-    Component.onCompleted: refresh()
+    function requestRefresh() {
+        refreshTimer.restart()
+    }
+
+    onCodeChanged: requestRefresh()
+    onLanguageChanged: requestRefresh()
+    onShowLineNumbersChanged: requestRefresh()
+    onWrapChanged: requestRefresh()
+    onFontSizeChanged: requestRefresh()
+    Component.onCompleted: requestRefresh()
     Connections {
         target: Md3Theme
-        function onDarkChanged() { root.refresh() }
+        function onDarkChanged() { root.requestRefresh() }
         function onSeedChanged() { themeTimer.restart() }
     }
     Timer {
         id: themeTimer
         interval: 40
+        onTriggered: root.refresh()
+    }
+    Timer {
+        id: refreshTimer
+        interval: 40
+        repeat: false
         onTriggered: root.refresh()
     }
 

@@ -131,18 +131,21 @@ Item {
             height: root.cellHeight
             sourceComponent: root.delegate !== null ? root.delegate : fallbackDelegate
 
+            readonly property bool rowSelected: {
+                void root.selectedIndices
+                return root.isSelected(index)
+            }
+            readonly property bool rowCurrent: GridView.isCurrentItem
+
             function sync() {
-                root._syncDelegate(item, index, modelData, GridView.isCurrentItem,
-                                   root.isSelected(index))
+                root._syncDelegate(item, index, modelData, rowCurrent, rowSelected)
             }
             onLoaded: sync()
             onIndexChanged: sync()
             onModelDataChanged: sync()
-            GridView.onIsCurrentItemChanged: sync()
-            Connections {
-                target: root
-                function onSelectedIndicesChanged() { cellLoader.sync() }
-            }
+            onRowSelectedChanged: sync()
+            onRowCurrentChanged: sync()
+            GridView.onReused: sync()
         }
 
         onCurrentIndexChanged: {

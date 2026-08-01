@@ -193,19 +193,23 @@ Item {
             height: root.itemHeight
             sourceComponent: root.delegate !== null ? root.delegate : fallbackDelegate
 
+            /// Binding (not Connections) — avoids O(visible) fan-out on every selection change.
+            readonly property bool rowSelected: {
+                void root.selectedIndices
+                return root.isSelected(index)
+            }
+            readonly property bool rowCurrent: ListView.isCurrentItem
+
             function sync() {
-                root._syncDelegate(item, index, modelData, ListView.isCurrentItem,
-                                   root.isSelected(index))
+                root._syncDelegate(item, index, modelData, rowCurrent, rowSelected)
             }
 
             onLoaded: sync()
             onIndexChanged: sync()
             onModelDataChanged: sync()
-            ListView.onIsCurrentItemChanged: sync()
-            Connections {
-                target: root
-                function onSelectedIndicesChanged() { rowLoader.sync() }
-            }
+            onRowSelectedChanged: sync()
+            onRowCurrentChanged: sync()
+            ListView.onReused: sync()
         }
 
         onCurrentIndexChanged: {
