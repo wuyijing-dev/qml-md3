@@ -57,6 +57,25 @@ Flickable {
     ]
 
     Md3WindowHelper { id: nativeHelper }
+    Connections {
+        target: Md3NativeShell
+        function onGlobalShortcutActivated(id) {
+            Md3Notify.toast(qsTr("全局快捷键：%1").arg(id), { severity: Md3Toast.Success })
+            if (root.appWin)
+                root.appWin.raiseWindow()
+        }
+        function onSecondInstance(argv) {
+            Md3Notify.snackbar(qsTr("次实例启动：%1").arg(argv.join(" ")))
+            if (root.appWin)
+                root.appWin.raiseWindow()
+        }
+        function onLockScreen() {
+            Md3Notify.toast(qsTr("锁屏"), { severity: Md3Toast.Warning })
+        }
+        function onUnlockScreen() {
+            Md3Notify.toast(qsTr("解锁"))
+        }
+    }
     Md3ReleaseUpdater {
         id: releaseUpdater
         owner: "wuyijing-dev"
@@ -244,6 +263,107 @@ Flickable {
                         ? root.appWin.windowNative.lastNativeStatus
                         : "") || qsTr("（点击上方按钮后显示）"))
                   .arg(root.appWin && root.appWin.systemColorSchemeDark() ? qsTr("是") : qsTr("否"))
+            role: Md3Text.BodySmall
+            tone: Md3Text.Tertiary
+        }
+
+        // —— Electron-parity host ——
+        Md3Text {
+            text: qsTr("宿主能力（对标 Electron）")
+            role: Md3Text.TitleSmall
+        }
+        Md3Text {
+            width: parent.width
+            wrapMode: Text.WordWrap
+            text: qsTr("Md3NativeShell：单实例 · 开机启动 · 全局快捷键(Win) · 自定义协议 · 电源/锁屏 · getPath。能力旗：openAtLogin=%1 · globalShortcut=%2 · protocolClient=%3")
+                  .arg(Md3WindowCapabilities.openAtLogin ? qsTr("是") : qsTr("否"))
+                  .arg(Md3WindowCapabilities.globalShortcut ? qsTr("是") : qsTr("否"))
+                  .arg(Md3WindowCapabilities.protocolClient ? qsTr("是") : qsTr("否"))
+            role: Md3Text.BodySmall
+            tone: Md3Text.OnSurfaceVariant
+        }
+        Md3Text {
+            width: parent.width
+            wrapMode: Text.WordWrap
+            text: qsTr("userData=%1").arg(Md3NativeShell.userDataPath)
+            role: Md3Text.BodySmall
+            tone: Md3Text.Tertiary
+        }
+        Md3FlowLayout {
+            width: parent.width
+            spacing: 8
+            Md3Button {
+                text: qsTr("申请单实例锁")
+                variant: Md3Button.FilledTonal
+                onClicked: {
+                    const ok = Md3NativeShell.requestSingleInstanceLock("QML_MD3.Gallery")
+                    Md3Notify.toast(ok ? qsTr("本进程是主实例") : qsTr("已是次实例（应退出）"),
+                                    { severity: ok ? Md3Toast.Success : Md3Toast.Warning })
+                }
+            }
+            Md3Button {
+                text: Md3NativeShell.openAtLogin ? qsTr("关闭开机启动") : qsTr("开启开机启动")
+                enabled: Md3NativeShell.openAtLoginSupported
+                variant: Md3Button.Outlined
+                onClicked: {
+                    const next = !Md3NativeShell.openAtLogin
+                    Md3NativeShell.setOpenAtLoginEnabled(next)
+                    Md3Notify.toast(next ? qsTr("已写入开机启动") : qsTr("已取消开机启动"))
+                }
+            }
+            Md3Button {
+                text: qsTr("注册 Ctrl+Shift+M")
+                enabled: Md3NativeShell.globalShortcutSupported
+                onClicked: {
+                    const ok = Md3NativeShell.registerGlobalShortcut("gallery.focus", "Ctrl+Shift+M")
+                    Md3Notify.toast(ok ? qsTr("全局快捷键已注册") : qsTr("注册失败"),
+                                    { severity: ok ? Md3Toast.Success : Md3Toast.Error })
+                }
+            }
+            Md3Button {
+                text: qsTr("注销快捷键")
+                enabled: Md3NativeShell.globalShortcutSupported
+                variant: Md3Button.Text
+                onClicked: {
+                    Md3NativeShell.unregisterGlobalShortcut("gallery.focus")
+                    Md3Notify.toast(qsTr("已注销"))
+                }
+            }
+            Md3Button {
+                text: qsTr("注册 md3gallery://")
+                enabled: Md3NativeShell.protocolClientSupported
+                variant: Md3Button.Outlined
+                onClicked: {
+                    const ok = Md3NativeShell.setAsDefaultProtocolClient("md3gallery")
+                    Md3Notify.toast(ok ? qsTr("协议已注册") : qsTr("协议注册失败"),
+                                    { severity: ok ? Md3Toast.Success : Md3Toast.Error })
+                }
+            }
+            Md3Button {
+                text: qsTr("移除协议")
+                enabled: Md3NativeShell.protocolClientSupported
+                variant: Md3Button.Text
+                onClicked: {
+                    Md3NativeShell.removeAsDefaultProtocolClient("md3gallery")
+                    Md3Notify.toast(qsTr("协议已移除"))
+                }
+            }
+            Md3Button {
+                text: qsTr("打开 logs 目录")
+                variant: Md3Button.Text
+                onClicked: {
+                    if (root.appWin)
+                        root.appWin.revealInFolder(Md3NativeShell.logsPath)
+                }
+            }
+        }
+        Md3Text {
+            width: parent.width
+            wrapMode: Text.WordWrap
+            text: qsTr("Shell 状态：%1 · 主实例=%2 · 电池=%3")
+                  .arg(Md3NativeShell.lastStatus || qsTr("（空）"))
+                  .arg(Md3NativeShell.singleInstancePrimary ? qsTr("是") : qsTr("否"))
+                  .arg(Md3NativeShell.onBattery ? qsTr("是") : qsTr("否"))
             role: Md3Text.BodySmall
             tone: Md3Text.Tertiary
         }

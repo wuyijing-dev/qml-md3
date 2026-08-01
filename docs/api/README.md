@@ -13,6 +13,7 @@
 - [Md3::run / initialize](Md3_cpp.md) — 一键初始化
 - [Md3Graphics](Md3Graphics.md) — RHI / alpha buffer
 - [Md3WindowHelper](Md3WindowHelper.md) — 原生窗口能力
+- [Md3NativeShell](../api-manual/Md3NativeShell.md) — Electron 对标：单实例 / 开机启动 / 全局快捷键 / 协议 / 电源
 - [Md3ChartData](Md3ChartData.md) — 大数据序列降采样
 - [Md3AppSettings](Md3AppSettings.md) — QSettings facade
 - [Md3HotReload](Md3HotReload.md) — QML hot reload watcher

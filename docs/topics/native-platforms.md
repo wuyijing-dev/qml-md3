@@ -42,6 +42,31 @@ C++: `Md3WindowHelper::displayServer()` mirrors the same probe; `platformId()` s
 | `setVisibleInTaskbar` | `WS_EX_TOOLWINDOW` | Qt::Tool hint | Same | — |
 | `centerOnScreen` / opacity / min·max·fullscreen | Qt | Qt | Qt | Qt |
 | `requestAttention` | Taskbar flash | Urgent / alert | Same | `alert` |
+| Single-instance lock | Yes (`Md3NativeShell`) | Yes | Yes | Best-effort |
+| Open at login | Run key | XDG autostart | LaunchAgent | — |
+| Global shortcut | `RegisterHotKey` | — (portal TBD) | — | — |
+| Protocol client | HKCU Classes | `.desktop` + xdg-mime | — | — |
+| Power / lock signals | WM_POWER / WTS | `ApplicationSuspended` | Same | Same |
+| `getPath` (userData/logs/…) | Yes | Yes | Yes | Yes |
+
+## Electron-parity host (`Md3NativeShell`)
+
+Singleton API mirroring common Electron `app` / `globalShortcut` / `powerMonitor` surfaces:
+
+```qml
+// Single instance (primary keeps lock; secondary should Qt.quit())
+if (!Md3NativeShell.requestSingleInstanceLock("com.example.App"))
+    Qt.quit()
+Md3NativeShell.onSecondInstance: (argv) => raiseWindow()
+
+// Open at login / protocol / hotkey / paths
+Md3NativeShell.setOpenAtLoginEnabled(true)
+Md3NativeShell.setAsDefaultProtocolClient("myapp")
+Md3NativeShell.registerGlobalShortcut("focus", "Ctrl+Shift+M") // Windows
+const logs = Md3NativeShell.getPath("logs")
+```
+
+Capability flags: `Md3WindowCapabilities.openAtLogin` / `globalShortcut` / `protocolClient` / `powerMonitor`.
 
 ## Adaptive window chrome
 

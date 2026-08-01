@@ -108,4 +108,11 @@ QtObject {
     readonly property bool vibrate: platform.vibrate
     readonly property bool immersiveSystemUi: platform.immersiveSystemUi
     readonly property bool skipTaskbar: platform.skipTaskbar
+
+    /// Electron-parity host APIs (Md3NativeShell).
+    readonly property bool singleInstance: true
+    readonly property bool openAtLogin: platform.openAtLogin
+    readonly property bool globalShortcut: platform.globalShortcut
+    readonly property bool protocolClient: platform.protocolClient
+    readonly property bool powerMonitor: platform.powerMonitor
 }

@@ -38,4 +38,8 @@ QtObject {
     readonly property bool vibrate: false
     readonly property bool immersiveSystemUi: false
     readonly property bool skipTaskbar: false
+    readonly property bool openAtLogin: false
+    readonly property bool globalShortcut: false
+    readonly property bool protocolClient: false
+    readonly property bool powerMonitor: true
 }

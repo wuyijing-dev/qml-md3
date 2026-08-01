@@ -1087,6 +1087,29 @@ Window {
         windowHelper.unregisterApplicationRestart()
     }
 
+    // --- Electron-parity host (Md3NativeShell) ---
+    function requestSingleInstanceLock(id) {
+        return Md3NativeShell.requestSingleInstanceLock(id || "")
+    }
+    function setOpenAtLoginEnabled(enabled, openAsHidden) {
+        return Md3NativeShell.setOpenAtLoginEnabled(!!enabled, !!openAsHidden)
+    }
+    function registerGlobalShortcut(id, accelerator) {
+        return Md3NativeShell.registerGlobalShortcut(id, accelerator)
+    }
+    function unregisterGlobalShortcut(id) {
+        return Md3NativeShell.unregisterGlobalShortcut(id)
+    }
+    function setAsDefaultProtocolClient(scheme, path, args) {
+        return Md3NativeShell.setAsDefaultProtocolClient(scheme || "", path || "", args || [])
+    }
+    function removeAsDefaultProtocolClient(scheme) {
+        return Md3NativeShell.removeAsDefaultProtocolClient(scheme || "")
+    }
+    function getPath(name) {
+        return Md3NativeShell.getPath(name || "")
+    }
+
     readonly property real windowDpr: windowHelper.devicePixelRatio(root)
     readonly property int windowDpi: windowHelper.windowDpi(root)
     readonly property int monitorCount: windowHelper.monitorCount()

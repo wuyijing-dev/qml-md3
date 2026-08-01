@@ -32,7 +32,7 @@ Material Design 3 组件库（Qt Quick / QML）。站点：[QML_MD3_Document](ht
 ## 专题
 
 - [性能](topics/performance.md) · [无障碍](topics/a11y.md) · [无障碍抽检](topics/a11y-spotcheck.md) · [国际化](topics/i18n.md)
-- [DataTable](topics/datatable.md) · [深链](topics/routing.md) · [多文档](topics/multi-document.md) · [托盘](topics/tray.md)
+- [DataTable](topics/datatable.md) · [深链](topics/routing.md) · [多文档](topics/multi-document.md) · [托盘](topics/tray.md) · [原生平台](topics/native-platforms.md) · [NativeShell](api-manual/Md3NativeShell.md)
 - [校验](topics/validation.md) · [更新安全](topics/release-updater.md)
 - [Qt 版本矩阵](topics/qt-version-matrix.md) · [WebAssembly](topics/wasm.md) · [实验性 API](topics/experimental.md)
 - [消费方 Main.qml](topics/consumer-app-main-qml.md) · [文档托管](topics/mkdocs-hosting.md)

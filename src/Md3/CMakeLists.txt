@@ -182,6 +182,8 @@ qt_add_qml_module(Md3
         md3_capi.cpp
         window/md3windowhelper.h
         window/md3windowhelper.cpp
+        window/md3nativeshell.h
+        window/md3nativeshell.cpp
         window/md3graphics.h
         window/md3graphics.cpp
         window/md3releaseupdaternative.h
@@ -510,6 +512,7 @@ install(FILES
     md3.h
     md3_capi.h
     window/md3windowhelper.h
+    window/md3nativeshell.h
     window/md3graphics.h
     charts/md3chartdata.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Md3
