@@ -59,6 +59,7 @@ Industry UI stacks converge on the same rules Md3 applies:
 43. **Progress / Search / CommandPalette / Skeleton / Stepper** — Search clears suggestion tiles when closed; palette `filtered` empty when closed; Skeleton pulse tracks Gate; Stepper header Loader inactive off-page.
 44. **Gallery** — DesktopPatterns clears table rows off-page; Motion anim gated; Pickers/Menus DeferredSection; Patterns stops load timer; Charts live Loader follows `md3PageActive`.
 45. **Window move** — `persistSession` debounces QSettings (~400 ms); `Md3AppSettings` reuses one `QSettings` (no per-call construct + sync storm while dragging).
+46. **System corners** — Win DWM + macOS NSView layer clip (`systemCornersSupported`); `chromeMaskActive` skips MultiEffect when the OS already rounds the silhouette. Linux still uses client mask when rounded.
 
 ### Author checklist (auto-unload vs not)
 
@@ -73,7 +74,7 @@ Industry UI stacks converge on the same rules Md3 applies:
 | Area/Radar/Waterfall/Funnel/RadialBar/Heatmap | — |
 | Skeleton pulse, Stepper header | — |
 
-**Gallery ≠ embedded default:** Gallery uses Profile F (L1≈3, `pagePrefetchL1: false`, `pageL2Warm: true`). Library defaults stay lean (`pageCacheLimit: 1`, L2Warm off). Prefer system window corners / backdrop over custom full-window radius mask on weak GPUs (`roundedCorners` + `systemBackdrop: 0` keeps a chrome FBO). Ship `MD3_QML_CACHEGEN=ON` for cold open; optional Regular-only CJK font to cut ~8 MB RSS. `persistSession` debounces geometry saves (~400 ms) so title-bar drag does not flush QSettings every move tick.
+**Gallery ≠ embedded default:** Gallery uses Profile F (L1≈3, `pagePrefetchL1: false`, `pageL2Warm: true`). Library defaults stay lean (`pageCacheLimit: 1`, L2Warm off). Prefer **system corners** (`Md3WindowCapabilities.systemCorners` / `usesSystemCorners`) so Win/macOS skip the full-window MultiEffect chrome FBO; Linux still needs the client mask when rounded. Avoid relying on `systemBackdrop` under Qt Quick for Gallery. Ship `MD3_QML_CACHEGEN=ON` for cold open; optional Regular-only CJK font to cut ~8 MB RSS. `persistSession` debounces geometry saves (~400 ms) so title-bar drag does not flush QSettings every move tick.
 
 ---
 

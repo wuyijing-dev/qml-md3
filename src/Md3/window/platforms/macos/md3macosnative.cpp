@@ -21,10 +21,15 @@ void Md3WindowHelper::setSnapLayoutsArmed(QObject *, bool) {}
 void Md3WindowHelper::setCaptionHitRect(QObject *, qreal, qreal, qreal, qreal) {}
 void Md3WindowHelper::clearCaptionHitRect(QObject *) {}
 
+extern void md3MacApplyCornerPreference(QWindow *window, bool rounded);
+
 void Md3WindowHelper::applyCornerPreference(QObject *window, bool rounded)
 {
-    if (auto *qw = qobject_cast<QWindow *>(window))
-        qw->setProperty("_md3_cornerRounded", rounded);
+    auto *qw = qobject_cast<QWindow *>(window);
+    if (!qw)
+        return;
+    qw->setProperty("_md3_cornerRounded", rounded);
+    md3MacApplyCornerPreference(qw, rounded);
 }
 
 void Md3WindowHelper::showSystemMenu(QObject *, qreal, qreal) {}

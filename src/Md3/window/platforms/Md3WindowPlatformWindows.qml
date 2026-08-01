@@ -12,6 +12,8 @@ QtObject {
     // Win11-style rounded frame when restored; 0 when maximized
     readonly property real windowCornerRadius: 12
     readonly property bool roundedCorners: true
+    /// DWM clips the frameless silhouette — Gallery can skip MultiEffect chrome FBO.
+    readonly property bool systemCorners: true
     // Delayed HTMAXBUTTON: short hover keeps QML cursor/click; ~380ms arms Win11 snap flyout.
     readonly property bool snapLayouts: true
     readonly property bool systemBackdrop: true // Mica / Acrylic / Tabbed (Win11+)

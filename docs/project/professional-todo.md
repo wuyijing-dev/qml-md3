@@ -2,30 +2,32 @@
 
 > 完整历史矩阵已收敛；此处只保留**下一步优先项**。
 
-**基线：** 2026-07-31 · tag `v1.0.0` · WASM experimental 已可配置编译 hello-md3
+**基线：** 2026-08-02 · tag `v1.1.0` · 性能生命周期 + 系统圆角；WASM / Android 仍 experimental
+
+## 已完成（至 1.1.0）
+
+1. [x] **WASM**：CMake 识别 Emscripten、mobile stub、文档；hello-md3 可编
+2. [x] **`Md3NavigationView`** / **`Md3Flyout`**
+3. [x] **原生 Win / Wayland / NativeShell**（全桌面）
+4. [x] **PySide6 / C ABI / Rust** 宿主
+5. [x] **Android hooks + extras**（通知、系统栏、IME…）
+6. [x] a11y / 体验抛光 / VirtualList·DataTable 冒烟
+7. [x] **性能（外观不变）**：`md3PageActive` / Gate / DeferredSection / charts·gauges；会话防抖 — [performance.md](../topics/performance.md)
+8. [x] **系统圆角**：Win DWM + macOS layer clip，跳过 MultiEffect chrome FBO — [native-platforms.md](../topics/native-platforms.md)
 
 ## 下一步（建议序）
 
-1. [x] **WASM**：CMake 识别 Emscripten、mobile stub、文档；hello-md3 可编
-2. [x] **`Md3NavigationView`**：Auto / Left / LeftCompact / Top
-3. [x] **`Md3Flyout`**：锚定、light-dismiss、Esc、焦点归还
-4. [x] **原生 Win / Wayland**：空闲抑制、数字角标、延迟 Snap、xdg 激活/`app_id`；见 [native-platforms.md](../topics/native-platforms.md)
-5. [x] **PySide6**：`python/md3qml` 宿主 + [hello-pyside](../../examples/hello-pyside/) / [gallery-pyside](../../examples/gallery-pyside/)；见 [pyside.md](../topics/pyside.md)
-6. [x] **Python 完整宿主 + C ABI + Rust**：`Md3Application` / `doctor` / `run-c`；`md3_capi`；[`rust/md3qml`](../../rust/md3qml/) + [hello-rust](../../examples/hello-rust/)；见 [rust.md](../topics/rust.md)
-7. [x] **Android 原生 hooks**：`FLAG_KEEP_SCREEN_ON` / `FLAG_SECURE` / `setBadgeNumber`；CMake `MD3_IS_ANDROID`；见 [android.md](../topics/android.md)
-8. [x] a11y 路径加固（Dialog 焦点归还、Esc→back、List/Table Accessible.name、Menu 归还）+ Button/FAB 按下缩放
-9. [x] VirtualList / DataTable 性能冒烟（Extras：跳转 2500、列宽 persist、PgUp/Dn）
-10. [x] TitleBar/AppToolBar 内容槽示例（WindowPage）+ Sheet light-dismiss + Adaptive safeBottomInset
-11. [x] **Electron 对标宿主**：`Md3NativeShell` 单实例 / 开机启动 / 全局快捷键(Win·macOS·Linux) / 协议注册 / 电源锁屏 / `getPath`
-12. [x] **Android 扩展**：通知、系统栏颜色、方向、软键盘、Toast/触觉、应用/通知设置、电池优化、shareFile、Material You accent
-13. [x] **体验抛光**：CommandBar a11y；Chip/Switch/Checkbox/Segmented 按压缩放；TextField/SearchBar 清空+错误反馈；Snackbar/Toast 滑动关闭/去重；Tooltip focus 延迟；SafeArea 6.9+；Nav 弹簧/长按/返回关抽屉；Skeleton/PageHost 节奏
-14. [x] **性能（外观不变）**：PageHost/`md3PageActive`/DeferredSection；PageActivityGate 表/列表/图/表盘/代码块；Scatter Canvas；Shape 表盘 Loader；Gallery Deferred + Profile F；API 文档 Gate/`pagePrefetchL1` — 见 [performance.md](../topics/performance.md)
+1. [ ] **Android 真机冒烟**：按 [android.md](../topics/android.md) Device smoke 表走完并记 OEM 差异
+2. [ ] **Linux 弱机 Gallery**：圆角开/关拖窗对比；可选默认 `cornerRadius: 0` 配置档
+3. [ ] **PyPI 预览**：`md3qml` 预发布 + 固定 quickstart（仍非官方必选项）
+4. [ ] **macOS vibrancy**（可选）：真实 `NSVisualEffectView`，今日仅透明钩子
+5. [ ] WASM：保持 experimental，无明确客户不深挖
 
 ## 壳层对照
 
 | 状态 | 项 |
 |------|----|
-| 已有 | Rail / Drawer / Bar / Scaffold / NavigationView / **Flyout** / TitleBar 槽示例 / **NativeShell（全桌面）** / **Android extras** / **SafeArea 6.9+ gate** / CommandBar a11y |
-| 后续 | 真机 SafeArea 冒烟 |
+| 已有 | Rail / Drawer / Bar / Scaffold / NavigationView / Flyout / TitleBar / NativeShell / Android extras / SafeArea 6.9+ / system corners (Win·macOS) |
+| 后续 | Android 真机 SafeArea/通知/沉浸栏冒烟；Linux 圆角 FBO 策略产品化 |
 
-参考：[wasm.md](../topics/wasm.md) · [android.md](../topics/android.md) · [native-platforms.md](../topics/native-platforms.md) · [quickstart](../getting-started/quickstart.md) · [a11y-spotcheck.md](../topics/a11y-spotcheck.md)
+参考：[wasm.md](../topics/wasm.md) · [android.md](../topics/android.md) · [native-platforms.md](../topics/native-platforms.md) · [performance.md](../topics/performance.md) · [release-checklist.md](../getting-started/release-checklist.md)

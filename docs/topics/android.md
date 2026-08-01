@@ -60,6 +60,23 @@ Manifest tips for host apps:
 - Optional `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`
 - `FileProvider` authority `${applicationId}.fileprovider` for `shareFile`
 
+## Device smoke checklist (experimental)
+
+Run on a physical device (or emulator with gesture nav) before claiming Android readiness:
+
+| # | Check | How |
+|---|--------|-----|
+| 1 | **SafeArea / insets** | Gallery → mobile shell / Adaptive; rotate; verify top/bottom content not under status/nav bars (`safeBottomInset` / Qt 6.9+ SafeArea) |
+| 2 | **System bar colors** | `setSystemBarColors` light/dark; icons readable on status bar |
+| 3 | **Immersive** | `setImmersiveSystemUi(true)` then false; bars hide/restore; back exits immersive |
+| 4 | **Notifications** | Grant `POST_NOTIFICATIONS` (API 33+); `showTrayNotification`; tap opens app if OEM allows |
+| 5 | **Keep screen on / secure** | `setIdleInhibit` / `setExcludeFromCapture`; confirm flags stick across `onActiveChanged` |
+| 6 | **IME / Toast / haptic** | Focus TextField → soft input; `nativeToast`; `hapticFeedback(0)` |
+| 7 | **Share** | `shareText` / `shareFile` (FileProvider configured) |
+| 8 | **Orientation** | `setScreenOrientation("portrait"\|"landscape")` |
+
+Record failures with OEM + API level in `lastNativeStatus` / issue notes. WASM stays on the mobile stub — do not treat Android smoke as WASM coverage.
+
 ## Lifecycle
 
 - Keep-screen-on / FLAG_SECURE / bar colors apply to the **Activity** window; re-apply in `onActiveChanged` if the OEM clears them.

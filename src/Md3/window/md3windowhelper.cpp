@@ -150,6 +150,17 @@ bool Md3WindowHelper::roundedCornersRecommended() const
 #endif
 }
 
+bool Md3WindowHelper::systemCornersSupported() const
+{
+    // Windows: DWMWA_WINDOW_CORNER_PREFERENCE. macOS: NSView layer masksToBounds.
+    // Linux: no portable compositor corner API — client MultiEffect still used when rounded.
+#if defined(Q_OS_WIN) || defined(Q_OS_MACOS)
+    return true;
+#else
+    return false;
+#endif
+}
+
 #define MD3_WIN_ONLY_CAP(name) \
 bool Md3WindowHelper::name() const \
 { \

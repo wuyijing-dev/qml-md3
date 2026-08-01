@@ -11,6 +11,7 @@ QtObject {
     readonly property bool doubleClickMaximize: false
     readonly property real windowCornerRadius: 0
     readonly property bool roundedCorners: false
+    readonly property bool systemCorners: false
     readonly property bool snapLayouts: false
     readonly property bool systemBackdrop: false
     readonly property bool systemMenu: false

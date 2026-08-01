@@ -86,6 +86,23 @@ Capability flags: `Md3WindowCapabilities.openAtLogin` / `globalShortcut` / `prot
 
 See [Window appearance](../guides/window-appearance.md). `Md3Adaptive` + `Md3ApplicationWindow.adaptiveChrome` pick System / CompactChrome / DesktopChrome from size class and mobile vs desktop.
 
+## Rounded corners & chrome FBO (v1.1+)
+
+| Platform | System corner clip | Client MultiEffect mask |
+|----------|--------------------|-------------------------|
+| Windows | Yes — `DWMWA_WINDOW_CORNER_PREFERENCE` | Skipped when `usesSystemCorners` |
+| macOS | Yes — `NSView` layer `masksToBounds` + radius | Skipped when `usesSystemCorners` |
+| Wayland / X11 | No portable API | Used when `roundedCorners` and restored (not maximized) |
+| Android / iOS | N/A (system chrome) | Off |
+
+QML: `Md3WindowCapabilities.systemCorners`, `Md3ApplicationWindow.usesSystemCorners` / `chromeMaskActive`. Always call `applyCornerPreference` so Win/macOS stay rounded when the FBO is off.
+
+### Desktop drag smoke
+
+1. **Windows 11** — restored Gallery: round silhouette, title-bar drag smooth; maximize clears radius; no need for Mica.
+2. **macOS** — traffic-lights inset; drag via `startSystemMove`; round clip without MultiEffect.
+3. **Wayland / X11** — `startSystemMove` from title bar; rounded Gallery still uses client mask (expected); `cornerRadius: 0` if measuring drag without FBO.
+
 ## System wrappers (QML)
 
 Prefer `Md3ApplicationWindow` helpers (they forward to `windowNative`):

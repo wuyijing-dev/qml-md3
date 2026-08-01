@@ -71,6 +71,10 @@ Window {
             return 0
         return Math.max(0, cornerRadius)
     }
+    readonly property bool usesSystemCorners: windowHelper.systemCornersSupported
+            && roundedCorners && customChrome && !isMaximizedLike
+    readonly property bool chromeMaskActive: effectiveRadius > 0
+            && !usesSystemBackdrop && !usesSystemCorners
 
     color: (customChrome && Md3WindowCapabilities.customChrome) || usesSystemBackdrop
            ? "transparent" : Md3Theme.colorScheme.surface
@@ -210,7 +214,7 @@ Window {
             id: chrome
             anchors.fill: parent
 
-            layer.enabled: root.effectiveRadius > 0 && !root.usesSystemBackdrop
+            layer.enabled: root.chromeMaskActive
             layer.smooth: true
             layer.effect: MultiEffect {
                 maskEnabled: true
@@ -220,7 +224,7 @@ Window {
             Rectangle {
                 id: fill
                 anchors.fill: parent
-                radius: root.usesSystemBackdrop ? 0 : root.effectiveRadius
+                radius: (root.usesSystemBackdrop || root.usesSystemCorners) ? 0 : root.effectiveRadius
                 color: root.usesSystemBackdrop
                        ? Qt.alpha(Md3Theme.colorScheme.surface, root.backdropTint)
                        : (root.customChrome ? Qt.alpha(Md3Theme.colorScheme.surface, 0.98)
@@ -230,9 +234,9 @@ Window {
 
             Rectangle {
                 anchors.fill: parent
-                radius: root.effectiveRadius
+                radius: root.usesSystemCorners ? 0 : root.effectiveRadius
                 color: "transparent"
-                border.width: root.showWindowBorder && root.effectiveRadius > 0 && !root.usesSystemBackdrop ? 1 : 0
+                border.width: root.showWindowBorder && root.effectiveRadius > 0 && !root.usesSystemBackdrop && !root.usesSystemCorners ? 1 : 0
                 border.color: Md3Theme.colorScheme.outlineVariant
                 z: 50
             }
@@ -406,7 +410,7 @@ Window {
             height: chrome.height
             // Independent of chrome.layer.enabled — avoids MultiEffect t2 “no texture provider”
             // while the mask FBO is still coming up in the same frame as the chrome layer.
-            layer.enabled: root.effectiveRadius > 0 && !root.usesSystemBackdrop
+            layer.enabled: root.chromeMaskActive
             layer.smooth: true
             visible: false
             Rectangle {

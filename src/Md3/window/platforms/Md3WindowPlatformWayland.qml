@@ -11,6 +11,7 @@ QtObject {
     readonly property bool doubleClickMaximize: true
     readonly property real windowCornerRadius: 12
     readonly property bool roundedCorners: true
+    readonly property bool systemCorners: false
     readonly property bool snapLayouts: false
     readonly property bool systemBackdrop: true // KF6 blur protocol when available
     readonly property bool systemMenu: true

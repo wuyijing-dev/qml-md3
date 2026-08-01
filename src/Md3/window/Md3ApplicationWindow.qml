@@ -475,7 +475,13 @@ Window {
             return 0
         return Math.max(0, cornerRadius)
     }
+    /// OS clips the window frame (Win DWM / macOS layer) — skip MultiEffect chrome FBO.
+    readonly property bool usesSystemCorners: Md3WindowCapabilities.systemCorners
+            && roundedCorners && useCustomChrome && !isMaximizedLike
     readonly property bool useTransparentFrame: useCustomChrome && effectiveRadius > 0
+    /// Client mask FBO only when the OS cannot clip the silhouette.
+    readonly property bool chromeMaskActive: effectiveRadius > 0
+            && !usesSystemBackdrop && !usesSystemCorners
 
     // Always transparent with custom chrome so DWM materials / rounded corners can show
     color: useCustomChrome || usesSystemBackdrop
@@ -1173,9 +1179,9 @@ Window {
             id: chrome
             anchors.fill: parent
 
-            // MultiEffect offscreen FBO is opaque to DWM — never enable under backdrop.
-            // Prefer DWM rounded corners whenever possible.
-            layer.enabled: root.effectiveRadius > 0 && !root.usesSystemBackdrop
+            // MultiEffect offscreen FBO is opaque to DWM — never enable under backdrop
+            // or when the OS already clips corners (Win DWM / macOS layer).
+            layer.enabled: root.chromeMaskActive
             layer.smooth: true
             layer.effect: MultiEffect {
                 maskEnabled: true
@@ -1185,7 +1191,7 @@ Window {
             Rectangle {
                 id: fill
                 anchors.fill: parent
-                radius: root.usesSystemBackdrop ? 0 : root.effectiveRadius
+                radius: (root.usesSystemBackdrop || root.usesSystemCorners) ? 0 : root.effectiveRadius
                 color: root.usesSystemBackdrop
                        ? Qt.alpha(Md3Theme.colorScheme.surface, root.backdropTint)
                        : (root.useCustomChrome ? Qt.alpha(Md3Theme.colorScheme.surface, 0.98)
@@ -1197,9 +1203,9 @@ Window {
             // Visible edge along the rounded boundary (skip under backdrop — DWM draws frame)
             Rectangle {
                 anchors.fill: parent
-                radius: root.effectiveRadius
+                radius: root.usesSystemCorners ? 0 : root.effectiveRadius
                 color: "transparent"
-                border.width: root.showWindowBorder && root.effectiveRadius > 0 && !root.usesSystemBackdrop ? 1 : 0
+                border.width: root.showWindowBorder && root.effectiveRadius > 0 && !root.usesSystemBackdrop && !root.usesSystemCorners ? 1 : 0
                 border.color: Md3Theme.colorScheme.outlineVariant
                 z: 50
             }
@@ -1819,7 +1825,7 @@ Window {
             height: chrome.height
             // Independent of chrome.layer.enabled — avoids MultiEffect t2 “no texture provider”
             // while the mask FBO is still coming up in the same frame as the chrome layer.
-            layer.enabled: root.effectiveRadius > 0 && !root.usesSystemBackdrop
+            layer.enabled: root.chromeMaskActive
             layer.smooth: true
             visible: false
             Rectangle {

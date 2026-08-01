@@ -113,6 +113,8 @@ import Md3
 | `content` | `alias` | `customContent.content` | default read/write | `Md3ApplicationWindow` | Default property → `customContent.content` |
 | `isMaximizedLike` | `bool` | `visibility === Window.Maximized` | readonly | `Md3ApplicationWindow` | — |
 | `effectiveRadius` | `real` | `{…}` | readonly | `Md3ApplicationWindow` | — |
+| `usesSystemCorners` | `bool` | `…` | readonly | `Md3ApplicationWindow` | True when OS corner clip is active (skip chrome MultiEffect). |
+| `chromeMaskActive` | `bool` | `…` | readonly | `Md3ApplicationWindow` | Client MultiEffect mask when rounded and OS cannot clip. |
 | `useTransparentFrame` | `bool` | `customChrome && Md3WindowCapabilities.customChrome` | readonly | `Md3ApplicationWindow` | — |
 | `windowNative` | `alias` | `windowHelper` | read/write | `Md3ApplicationWindow` | Access native helper (signals: thumbBarButtonClicked, trayActivated, dpiChanged). |
 | `chromeTop` | `real` | `chromeHost.height` | readonly | `Md3ApplicationWindow` | — |

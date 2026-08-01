@@ -12,6 +12,8 @@ QtObject {
     // Frameless + client radius can fight system shadow; keep subtle
     readonly property real windowCornerRadius: 10
     readonly property bool roundedCorners: true
+    /// NSView layer masksToBounds clips frameless content without Qt MultiEffect.
+    readonly property bool systemCorners: true
     readonly property bool snapLayouts: false
     readonly property bool systemBackdrop: true // translucent / vibrancy hook
     readonly property bool systemMenu: false

@@ -81,6 +81,8 @@ QtObject {
     readonly property bool doubleClickMaximize: platform.doubleClickMaximize
     readonly property real windowCornerRadius: platform.windowCornerRadius
     readonly property bool roundedCorners: platform.roundedCorners
+    /// OS clips window silhouette — skip Qt MultiEffect chrome mask (Win/macOS).
+    readonly property bool systemCorners: platform.systemCorners
     readonly property bool snapLayouts: platform.snapLayouts
     readonly property bool systemBackdrop: platform.systemBackdrop
     readonly property bool systemMenu: platform.systemMenu

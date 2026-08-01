@@ -44,6 +44,8 @@ class Md3WindowHelper : public QObject
     Q_PROPERTY(bool systemAccentSupported READ systemAccentSupported CONSTANT)
     Q_PROPERTY(qreal windowCornerRadius READ windowCornerRadius CONSTANT)
     Q_PROPERTY(bool roundedCornersRecommended READ roundedCornersRecommended CONSTANT)
+    /// True when the OS can clip the window silhouette (skip Qt MultiEffect chrome mask).
+    Q_PROPERTY(bool systemCornersSupported READ systemCornersSupported CONSTANT)
     Q_PROPERTY(QString lastNativeStatus READ lastNativeStatus NOTIFY lastNativeStatusChanged)
 
 public:
@@ -89,6 +91,7 @@ public:
     bool captionButtonsRecommended() const;
     qreal windowCornerRadius() const;
     bool roundedCornersRecommended() const;
+    bool systemCornersSupported() const;
     bool snapLayoutsSupported() const;
     bool systemBackdropSupported() const;
     bool systemMenuSupported() const;

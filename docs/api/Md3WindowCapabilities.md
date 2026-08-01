@@ -42,6 +42,7 @@ import Md3
 | `doubleClickMaximize` | `bool` | `platform.doubleClickMaximize` | readonly | `Md3WindowCapabilities` | — |
 | `windowCornerRadius` | `real` | `platform.windowCornerRadius` | readonly | `Md3WindowCapabilities` | — |
 | `roundedCorners` | `bool` | `platform.roundedCorners` | readonly | `Md3WindowCapabilities` | — |
+| `systemCorners` | `bool` | `platform.systemCorners` | readonly | `Md3WindowCapabilities` | OS clips window silhouette (Win/macOS); skip Qt MultiEffect chrome mask. |
 | `snapLayouts` | `bool` | `platform.snapLayouts` | readonly | `Md3WindowCapabilities` | — |
 | `systemBackdrop` | `bool` | `platform.systemBackdrop` | readonly | `Md3WindowCapabilities` | — |
 | `systemMenu` | `bool` | `platform.systemMenu` | readonly | `Md3WindowCapabilities` | — |

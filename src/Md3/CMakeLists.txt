@@ -478,10 +478,13 @@ elseif (WIN32)
 elseif (APPLE)
     list(APPEND MD3_PLATFORM_SOURCES
         window/platforms/macos/md3macosnative.cpp
+        window/platforms/macos/md3macos_chrome.mm
         window/platforms/macos/md3macos_nativeshell.mm
     )
-    set_source_files_properties(window/platforms/macos/md3macos_nativeshell.mm PROPERTIES
-        COMPILE_FLAGS "-fobjc-arc")
+    set_source_files_properties(
+        window/platforms/macos/md3macos_nativeshell.mm
+        window/platforms/macos/md3macos_chrome.mm
+        PROPERTIES COMPILE_FLAGS "-fobjc-arc")
     target_link_libraries(Md3 PRIVATE
         "-framework Carbon"
         "-framework AppKit"
