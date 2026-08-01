@@ -3,12 +3,18 @@
 - **Source:** `src/Md3/foundation/Md3Motion.qml`
 - **Extends:** `QtObject`
 - **Singleton:** `true` (`pragma Singleton`)
+- **Policy:** iOS / UIKit / Core Animation timing (see [tokens.md](../guides/tokens.md#motion-ios--uikit--core-animation))
 
 ## Import
 
 ```qml
 import Md3
 ```
+
+Curves: `iosDefault` (0.25, 0.1, 0.25, 1), `iosEaseIn`, `iosEaseOut`, `iosEaseInOut`, `iosSheet`, `iosSnap`.
+Material-era names (`emphasized`, `standard`, …) alias these iOS curves.
+
+Semantic durations: `uiDuration` 350 · `spatialDuration` 500 · `menuDuration`/`overlayDuration`/`effectsDuration` 250 · `stateDuration` 200.
 
 ## Properties
 

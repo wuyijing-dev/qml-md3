@@ -126,7 +126,7 @@ Window {
     property bool pageNavWarmPrefetch: true
     property bool _pageNavWarmDone: false
     property string pageTransition: "fade"
-    property int pageTransitionDuration: 180
+    property int pageTransitionDuration: Md3Motion.medium2  // 350ms — iOS push-like
     property bool pageSkeleton: false
     property alias pageHost: windowBody.pageHost
     property alias shellRail: windowBody.rail

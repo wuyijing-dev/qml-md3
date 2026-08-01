@@ -85,42 +85,42 @@ Levels 0–5. MD3 surfaces tint with `surfaceTint` as elevation increases.
 
 Shadows use a **key + ambient** pair (`Md3Shadow` + `MultiEffect` blur) so elevated controls (FAB, menus) separate clearly from the page.
 
-## Motion (Flutter `Durations` / `Easings`)
+## Motion (iOS / UIKit / Core Animation)
+
+Durations and cubic-bezier curves follow **CAMediaTimingFunction** and common UIKit intervals
+(0.25s controls, 0.35s navigation, 0.5s sheets). Historical Material token **names** remain as
+aliases so existing `Md3Motion.emphasized` call sites pick up iOS curves automatically.
 
 ### Durations
 
-| Token | ms |
-|-------|-----|
-| short1 | 50 |
-| short2 | 100 |
-| short3 | 150 |
-| short4 | 200 |
-| medium1 | 250 |
-| medium2 | 300 |
-| medium3 | 350 |
-| medium4 | 400 |
-| long1 | 450 |
-| long2 | 500 |
-| long3 | 550 |
-| long4 | 600 |
-| extraLong1 | 700 |
-| extraLong2 | 800 |
-| extraLong3 | 900 |
-| extraLong4 | 1000 |
+| Token | ms | iOS use |
+|-------|-----|---------|
+| short1 | 100 | micro |
+| short2 | 150 | quick chrome |
+| short3 | 200 | state / press |
+| short4 | 250 | UIView default-ish |
+| medium1 | 300 | |
+| medium2 | 350 | push / most UI (`uiDuration`) |
+| medium3 | 400 | |
+| medium4 | 450 | |
+| long1 | 500 | modal / sheet (`spatialDuration`) |
+| long2–4 | 550–650 | |
+| extraLong* | 700–1000 | rare |
 
 ### Easings (cubic-bezier → Qt `Easing.BezierSpline`)
 
-| Token | Curve |
-|-------|-------|
-| snapOut (`ui` / `uiSpatial`) | 0.0, 0.0, 0.2, 1.0 — fast start |
-| emphasized | 0.2, 0.0, 0.0, 1.0 |
-| emphasizedDecelerate | 0.05, 0.7, 0.1, 1.0 |
-| emphasizedAccelerate (`uiExit`) | 0.3, 0.0, 0.8, 0.15 |
-| standard | 0.2, 0.0, 0.0, 1.0 |
-| standardDecelerate | 0.0, 0.0, 0.0, 1.0 |
-| standardAccelerate | 0.3, 0.0, 1.0, 1.0 |
+| Token | Curve | CAMediaTimingFunction |
+|-------|-------|------------------------|
+| `iosDefault` / `emphasized` / `standard` / `ui` | 0.25, 0.1, 0.25, 1.0 | **Default** |
+| `iosEaseIn` / `emphasizedAccelerate` / `uiExit` | 0.42, 0.0, 1.0, 1.0 | **EaseIn** |
+| `iosEaseOut` / `emphasizedDecelerate` / `uiEnter` | 0.0, 0.0, 0.58, 1.0 | **EaseOut** |
+| `iosEaseInOut` / `legacy` | 0.42, 0.0, 0.58, 1.0 | **EaseInEaseOut** |
+| `iosSheet` / `spatialDefault` / `uiSpatial` | 0.32, 0.72, 0.0, 1.0 | sheet settle |
+| `iosSnap` / `spatialFast` / `uiSpatialSnap` | 0.2, 0.9, 0.1, 1.0 | snappy chrome |
 
-**Interactive UI** uses `SmoothedAnimation` + `Sync` (`smoothSnap*` / `smoothPanel*`) — see [Md3Motion](api/Md3Motion.md).
+Springs use higher damping (~0.82–0.88) to match SwiftUI `dampingFraction` (less Material bounce).
+
+**Interactive UI** uses `SmoothedAnimation` + `Sync` (`smoothSnap*` / `smoothPanel*`) — see [Md3Motion](../api/Md3Motion.md).
 
 ## Density & spacing
 

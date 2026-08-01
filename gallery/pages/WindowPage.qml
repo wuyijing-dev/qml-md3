@@ -427,14 +427,14 @@ toolBar: Md3AppToolBar {
                 tone: Md3Text.OnSurfaceVariant
             }
             Md3Button {
-                text: qsTr("淡入 220ms")
+                text: qsTr("淡入 350ms (iOS)")
                 variant: Md3Button.Text
                 enabled: !!root.appWin
                 onClicked: {
                     if (!root.appWin)
                         return
                     root.appWin.pageTransition = "fade"
-                    root.appWin.pageTransitionDuration = 220
+                    root.appWin.pageTransitionDuration = Md3Motion.medium2
                 }
             }
         }

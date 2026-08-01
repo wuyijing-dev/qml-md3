@@ -33,7 +33,7 @@ Md3ApplicationWindow {
     pageNavWarm: true
     // Short fade (keep sync/warm Profile F loading — not the same as pageTransition none).
     pageTransition: "fade"
-    pageTransitionDuration: 180
+    pageTransitionDuration: Md3Motion.medium2
     persistSession: true
     settingsOrganization: "QML_MD3"
     settingsApplication: "Gallery"
