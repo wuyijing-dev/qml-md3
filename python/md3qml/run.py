@@ -22,6 +22,8 @@ class RunOptions:
     app_user_model_id: str = ""
     """Prefer PySide6 (None = auto)."""
     binding: Optional[str] = None
+    """Print colorful Md3 intro banner on stderr (TTY only)."""
+    print_banner: bool = False
     """Shared Md3 install prefix (lib/qml). None = auto-discover / MD3_PREFIX."""
     md3_prefix: Optional[PathLike] = None
     """Require Qt6 / PySide6 when loading Md3 (default True)."""

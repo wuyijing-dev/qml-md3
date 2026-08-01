@@ -95,9 +95,10 @@ def run_gallery(
 
     opts = RunOptions(
         organization="QML_MD3",
-        application_name="Gallery",
+        application_name="Md3 Gallery",
         application_version="1.0.0",
         desktop_file_name="QML_MD3_Gallery",
+        print_banner=True,
         md3_prefix=md3_prefix,
         binding=binding,
         auto_fetch=auto_fetch,

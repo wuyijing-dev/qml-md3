@@ -34,6 +34,7 @@ def main(argv: list[str] | None = None) -> int:
         application_name="Hello Md3 PySide",
         application_version="1.0.0",
         desktop_file_name="Hello_Md3_PySide",
+        print_banner=True,
         md3_prefix=args.md3_prefix,
         binding="PySide6",
         require_qt6_for_md3=True,

@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
     opts.organization = QStringLiteral("QML_MD3");
     opts.applicationName = QStringLiteral("Md3 Gallery");
     opts.applicationVersion = QStringLiteral("1.0.0");
+    opts.printBanner = true;
 #if defined(Q_OS_WIN)
     opts.appUserModelId = QStringLiteral("QML_MD3.Md3Gallery");
 #endif

@@ -94,6 +94,15 @@ else()
 endif()
 md3_apply_qt_compat_definitions(Md3)
 
+# Quiet Qt qDebug/qInfo in Release (banner uses fprintf, not qInfo).
+target_compile_definitions(Md3 PRIVATE
+    $<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>
+    $<$<CONFIG:Release>:QT_NO_INFO_OUTPUT>
+    $<$<CONFIG:MinSizeRel>:QT_NO_DEBUG_OUTPUT>
+    $<$<CONFIG:MinSizeRel>:QT_NO_INFO_OUTPUT>
+    $<$<CONFIG:RelWithDebInfo>:QT_NO_DEBUG_OUTPUT>
+)
+
 # Dedicated font qrc (not only via qt_add_qml_module). Static MSVC links can drop
 # qml-module resource inits; Q_INIT_RESOURCE(md3_fonts) in loadFonts() is reliable.
 # Paths: :/md3/fonts/resources/fonts/HarmonyOS_SansSC_Regular.ttf …

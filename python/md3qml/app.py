@@ -56,6 +56,11 @@ class Md3Application:
         if self.opts.style:
             qt.QQuickStyle.setStyle(self.opts.style)
 
+        if self.opts.print_banner:
+            from .banner import print_banner
+
+            print_banner(self.opts.application_name, self.opts.application_version)
+
         desk = _sanitize_desktop_id(self.opts.desktop_file_name or self.opts.application_name)
         set_desk = getattr(self.app, "setDesktopFileName", None)
         if callable(set_desk):

@@ -29,6 +29,8 @@ struct RunOptions {
     bool loadFonts = true;
     /// Windows: enable translucent frames (Mica/Acrylic). Safe default.
     bool alphaBuffer = true;
+    /// Print a color ANSI banner introducing Md3 (Gallery / demos). Off by default for embeds.
+    bool printBanner = false;
     /// XDG desktop id / Unity LauncherEntry path element (no spaces). Empty → derive from applicationName.
     QString desktopFileName;
     /// Extra QML import roots (shared Md3 `lib/qml`, app `qml/`, …).
@@ -37,6 +39,9 @@ struct RunOptions {
     QString appUserModelId;
 #endif
 };
+
+/// Colorful console banner (ANSI). Safe no-op when stderr is not a TTY.
+MD3_API void printBanner(const QString &appTitle = {});
 
 /// Call before QGuiApplication (alpha buffer + optional RHI). Also invoked by run().
 MD3_API void applyEarly(int &argc, char **argv, const RunOptions &opts = {});

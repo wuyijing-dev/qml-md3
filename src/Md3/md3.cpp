@@ -20,6 +20,9 @@
 #include <QCoreApplication>
 #include <QtGlobal>
 
+#include <cstdio>
+#include <cstring>
+
 // Fallback when compiled outside md3_apply_qt_compat_definitions().
 #ifndef MD3_QT_AT_LEAST_68
 #  if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
@@ -31,11 +34,25 @@
 
 #if defined(Q_OS_WIN)
 #  include <windows.h>
+#  include <io.h>
+#  include <fcntl.h>
 extern "C" __declspec(dllimport) HRESULT WINAPI
 SetCurrentProcessExplicitAppUserModelID(PCWSTR appId);
 #  ifndef DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2
 #    define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 ((DPI_AWARENESS_CONTEXT)-4)
 #  endif
+#  ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#    define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#  endif
+#else
+#  include <unistd.h>
+#endif
+
+// Startup font probes — Debug only (Release stays quiet).
+#ifdef QT_DEBUG
+#  define MD3_DBG_INFO(...) qInfo(__VA_ARGS__)
+#else
+#  define MD3_DBG_INFO(...) do { } while (0)
 #endif
 
 // From qt_add_resources(Md3 "md3_fonts" / "md3_icons" …) — forces registration
@@ -50,7 +67,80 @@ static void ensureMd3IconResources()
     Q_INIT_RESOURCE(md3_icons);
 }
 
+namespace {
+
+bool stderrIsTty()
+{
+#if defined(Q_OS_WIN)
+    return _isatty(_fileno(stderr)) != 0;
+#else
+    return isatty(fileno(stderr)) != 0;
+#endif
+}
+
+bool enableAnsiStderr()
+{
+#if defined(Q_OS_WIN)
+    HANDLE h = GetStdHandle(STD_ERROR_HANDLE);
+    if (h == INVALID_HANDLE_VALUE || h == nullptr)
+        return false;
+    DWORD mode = 0;
+    if (!GetConsoleMode(h, &mode))
+        return false;
+    if ((mode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) == 0) {
+        if (!SetConsoleMode(h, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING))
+            return false;
+    }
+    return true;
+#else
+    return true;
+#endif
+}
+
+} // namespace
+
 namespace Md3 {
+
+void printBanner(const QString &appTitle)
+{
+    if (!stderrIsTty())
+        return;
+
+    const bool color = enableAnsiStderr();
+    const char *R = color ? "\033[0m" : "";
+    const char *P = color ? "\033[38;2;103;80;164m" : "";   // MD3 primary
+    const char *T = color ? "\033[38;2;0;150;136m" : "";    // teal
+    const char *S = color ? "\033[38;2;121;116;126m" : "";  // muted
+    const char *B = color ? "\033[1m" : "";
+
+    const QString title = appTitle.isEmpty()
+            ? (QCoreApplication::applicationName().isEmpty()
+                       ? QStringLiteral("Md3")
+                       : QCoreApplication::applicationName())
+            : appTitle;
+    const QString ver = QCoreApplication::applicationVersion().isEmpty()
+            ? QStringLiteral("1.0.0")
+            : QCoreApplication::applicationVersion();
+
+    std::fprintf(stderr, "\n");
+    std::fprintf(stderr, "%s%s", P, B);
+    std::fprintf(stderr, "        ╭──────────────────────────────────────╮\n");
+    std::fprintf(stderr, "        │%s  ███╗   ███╗██████╗  ██████╗ %s       │\n", T, P);
+    std::fprintf(stderr, "        │%s  ████╗ ████║██╔══██╗██╔════╝ %s       │\n", T, P);
+    std::fprintf(stderr, "        │%s  ██╔████╔██║██║  ██║██║  ███╗%s       │\n", T, P);
+    std::fprintf(stderr, "        │%s  ██║╚██╔╝██║██║  ██║██║   ██║%s       │\n", T, P);
+    std::fprintf(stderr, "        │%s  ██║ ╚═╝ ██║██████╔╝╚██████╔╝%s       │\n", T, P);
+    std::fprintf(stderr, "        │%s  ╚═╝     ╚═╝╚═════╝  ╚═════╝ %s       │\n", T, P);
+    std::fprintf(stderr, "        ╰──────────────────────────────────────╯%s\n", R);
+    std::fprintf(stderr, "          %s●%s %s●%s %s●%s %s●%s %s●%s   ",
+                 T, R, P, R, T, R, P, R, S, R);
+    std::fprintf(stderr, "%sMaterial Design 3%s · %sQt Quick%s\n", B, R, S, R);
+    std::fprintf(stderr, "          %s%s%s  %sv%s%s\n",
+                 B, qPrintable(title), R, S, qPrintable(ver), R);
+    std::fprintf(stderr, "          %simport Md3%s  ·  tokens · controls · chrome\n", T, R);
+    std::fprintf(stderr, "\n");
+    std::fflush(stderr);
+}
 
 void applyEarly(int &argc, char **argv, const RunOptions &opts)
 {
@@ -83,8 +173,8 @@ static bool addFontFile(const QString &path)
         return false;
     }
     const QStringList fams = QFontDatabase::applicationFontFamilies(id);
-    qInfo("Md3: loaded font %s → %s", qPrintable(path),
-          qPrintable(fams.join(QLatin1String(", "))));
+    MD3_DBG_INFO("Md3: loaded font %s → %s", qPrintable(path),
+                 qPrintable(fams.join(QLatin1String(", "))));
     return true;
 }
 
@@ -201,8 +291,8 @@ int loadFonts()
         QFont probe(hasUiFont ? uiFamily : families.value(0));
         probe.setStyleStrategy(QFont::PreferAntialias);
         const QFontInfo info(probe);
-        qInfo("Md3: probe family=\"%s\" style=\"%s\"",
-              qPrintable(info.family()), qPrintable(info.styleName()));
+        MD3_DBG_INFO("Md3: probe family=\"%s\" style=\"%s\"",
+                     qPrintable(info.family()), qPrintable(info.styleName()));
     }
 
     for (const QString &file : iconFiles) {
@@ -213,9 +303,9 @@ int loadFonts()
     // QtRendering (distance field) anti-aliases better than Native on GPU UIs.
     QQuickWindow::setTextRenderType(QQuickWindow::QtTextRendering);
 
-    qInfo("Md3: loadFonts done, %d faces, hasUiFont=%d, appFont=%s",
-          loaded, int(hasUiFont),
-          qPrintable(QGuiApplication::font().families().join(QLatin1Char(','))));
+    MD3_DBG_INFO("Md3: loadFonts done, %d faces, hasUiFont=%d, appFont=%s",
+                 loaded, int(hasUiFont),
+                 qPrintable(QGuiApplication::font().families().join(QLatin1Char(','))));
 
     cached = loaded;
     return loaded;
@@ -264,6 +354,9 @@ void initialize(QCoreApplication &app, const RunOptions &opts)
         loadFonts();
     else
         ensureMd3IconResources();
+
+    if (opts.printBanner)
+        printBanner(opts.applicationName);
 }
 
 int run(int argc, char **argv,
