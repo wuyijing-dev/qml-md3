@@ -52,7 +52,7 @@ Item {
             return
         }
         _paintPending = false
-        canvas.requestPaint()
+        (canvasLoader.item && canvasLoader.item.requestPaint())
     }
 
     Timer {
@@ -70,31 +70,42 @@ Item {
 
     function _rad(deg) { return deg * Math.PI / 180 }
 
-    Canvas {
-        id: canvas
+        Loader {
+        id: canvasLoader
         anchors.fill: parent
-        onPaint: {
-            const ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-            const cx = width / 2
-            const cy = height / 2
-            const r = Math.min(width, height) / 2 - root.strokeWidth
-            const n = Math.max(1, root.segments)
-            const gap = root.segmentGapDeg
-            const usable = root.sweepAngle - gap * n
-            const seg = Math.max(1, usable / n)
-            ctx.lineWidth = root.strokeWidth
-            ctx.lineCap = "round"
-            for (let i = 0; i < n; ++i) {
-                const a0 = root._rad(root.startAngle + i * (seg + gap) + gap * 0.5)
-                const a1 = root._rad(root.startAngle + i * (seg + gap) + gap * 0.5 + seg)
-                ctx.strokeStyle = i < root.filledSegments ? root.valueColor : root.trackColor
-                ctx.beginPath()
-                ctx.arc(cx, cy, r, a0, a1, false)
-                ctx.stroke()
-            }
-        }
+        active: root._treeShown
+        sourceComponent: canvasComp
+        onLoaded: if (item) item.requestPaint()
     }
+
+    Component {
+        id: canvasComp
+    Canvas {
+            id: canvas
+            anchors.fill: parent
+            onPaint: {
+                const ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+                const cx = width / 2
+                const cy = height / 2
+                const r = Math.min(width, height) / 2 - root.strokeWidth
+                const n = Math.max(1, root.segments)
+                const gap = root.segmentGapDeg
+                const usable = root.sweepAngle - gap * n
+                const seg = Math.max(1, usable / n)
+                ctx.lineWidth = root.strokeWidth
+                ctx.lineCap = "round"
+                for (let i = 0; i < n; ++i) {
+                    const a0 = root._rad(root.startAngle + i * (seg + gap) + gap * 0.5)
+                    const a1 = root._rad(root.startAngle + i * (seg + gap) + gap * 0.5 + seg)
+                    ctx.strokeStyle = i < root.filledSegments ? root.valueColor : root.trackColor
+                    ctx.beginPath()
+                    ctx.arc(cx, cy, r, a0, a1, false)
+                    ctx.stroke()
+                }
+            }
+        }    }
+
 
     onValueChanged: root._requestPaint()
     onSegmentsChanged: root._requestPaint()

@@ -30,6 +30,7 @@ Item {
 
     property bool _treeShown: true
     readonly property bool sceneActive: enabled && _treeShown && indeterminate
+            && Md3TreeVisibility.isPageActive(root)
 
     width: box
     height: box

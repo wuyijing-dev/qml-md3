@@ -190,7 +190,7 @@ Md3Chart {
         geom.sampleCount = maxLen
         geom.seriesCount = seriesCount
         rebuilt()
-        canvas.requestPaint()
+        (canvasLoader.item && canvasLoader.item.requestPaint())
         if (probeActive)
             _updateProbeAtPixel(probePixelX)
     }
@@ -248,7 +248,7 @@ Md3Chart {
                 ? (plotTop + (ii + 0.5) * plotHeight / visibleCount)
                 : (plotTop + plotHeight / 2)
         setProbe(idx, x, info, y)
-        canvas.requestPaint()
+        (canvasLoader.item && canvasLoader.item.requestPaint())
     }
 
     function nudgeProbe(delta) {
@@ -288,10 +288,10 @@ Md3Chart {
     onStackedChanged: requestRebuild()
     onHorizontalChanged: requestRebuild()
     onBarGapChanged: requestRebuild()
-    onProbeActiveChanged: canvas.requestPaint()
-    onProbeIndexChanged: canvas.requestPaint()
-    onCleared: canvas.requestPaint()
-    onRebuilt: canvas.requestPaint()
+    onProbeActiveChanged: (canvasLoader.item && canvasLoader.item.requestPaint())
+    onProbeIndexChanged: (canvasLoader.item && canvasLoader.item.requestPaint())
+    onCleared: (canvasLoader.item && canvasLoader.item.requestPaint())
+    onRebuilt: (canvasLoader.item && canvasLoader.item.requestPaint())
 
     Rectangle {
         anchors.fill: parent
@@ -299,47 +299,58 @@ Md3Chart {
         radius: Md3Theme.shape.small
     }
 
-    Canvas {
-        id: canvas
+        Loader {
+        id: canvasLoader
         anchors.fill: parent
-        onPaint: {
-            const ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-            const gridColor = root.resolvedGridColor()
-            if (root.showGrid) {
-                const n = root.horizontalGridLines + 1
-                ctx.strokeStyle = gridColor
-                ctx.globalAlpha = 0.45
-                ctx.lineWidth = 1
-                for (let i = 0; i < n; ++i) {
-                    const t = i / Math.max(1, root.horizontalGridLines)
-                    ctx.beginPath()
-                    if (root.horizontal) {
-                        const x = root.plotLeft + root.plotWidth * t
-                        ctx.moveTo(x, root.plotTop)
-                        ctx.lineTo(x, root.plotTop + root.plotHeight)
-                    } else {
-                        const y = root.plotTop + root.plotHeight * (1 - t)
-                        ctx.moveTo(root.plotLeft, y)
-                        ctx.lineTo(root.plotLeft + root.plotWidth, y)
+        active: root.chartActive
+        sourceComponent: canvasComp
+        onLoaded: if (item) item.requestPaint()
+    }
+
+    Component {
+        id: canvasComp
+    Canvas {
+            id: canvas
+            anchors.fill: parent
+            onPaint: {
+                const ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+                const gridColor = root.resolvedGridColor()
+                if (root.showGrid) {
+                    const n = root.horizontalGridLines + 1
+                    ctx.strokeStyle = gridColor
+                    ctx.globalAlpha = 0.45
+                    ctx.lineWidth = 1
+                    for (let i = 0; i < n; ++i) {
+                        const t = i / Math.max(1, root.horizontalGridLines)
+                        ctx.beginPath()
+                        if (root.horizontal) {
+                            const x = root.plotLeft + root.plotWidth * t
+                            ctx.moveTo(x, root.plotTop)
+                            ctx.lineTo(x, root.plotTop + root.plotHeight)
+                        } else {
+                            const y = root.plotTop + root.plotHeight * (1 - t)
+                            ctx.moveTo(root.plotLeft, y)
+                            ctx.lineTo(root.plotLeft + root.plotWidth, y)
+                        }
+                        ctx.stroke()
                     }
-                    ctx.stroke()
+                    ctx.globalAlpha = 1
+                }
+                const bars = geom.bars || []
+                const probeOn = root.probeActive
+                const probeIdx = root.probeIndex
+                for (let i = 0; i < bars.length; ++i) {
+                    const b = bars[i]
+                    ctx.fillStyle = b.color
+                    ctx.globalAlpha = probeOn && probeIdx === b.index ? 1 : 0.92
+                    const r = Math.min(root.barRadius, Math.min(b.w, b.h) / 2)
+                    root._roundRect(ctx, b.x, b.y, b.w, b.h, r)
                 }
                 ctx.globalAlpha = 1
             }
-            const bars = geom.bars || []
-            const probeOn = root.probeActive
-            const probeIdx = root.probeIndex
-            for (let i = 0; i < bars.length; ++i) {
-                const b = bars[i]
-                ctx.fillStyle = b.color
-                ctx.globalAlpha = probeOn && probeIdx === b.index ? 1 : 0.92
-                const r = Math.min(root.barRadius, Math.min(b.w, b.h) / 2)
-                root._roundRect(ctx, b.x, b.y, b.w, b.h, r)
-            }
-            ctx.globalAlpha = 1
-        }
-    }
+        }    }
+
 
     Repeater {
         model: root.showYLabels && !root.horizontal ? root.horizontalGridLines + 1 : 0

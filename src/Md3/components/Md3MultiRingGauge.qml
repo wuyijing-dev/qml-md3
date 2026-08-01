@@ -42,7 +42,7 @@ Item {
             return
         }
         _paintPending = false
-        canvas.requestPaint()
+        (canvasLoader.item && canvasLoader.item.requestPaint())
     }
 
     Timer {
@@ -83,42 +83,53 @@ Item {
         return Math.max(0, Math.min(1, (v - from) / Math.max(1e-6, to - from)))
     }
 
-    Canvas {
-        id: canvas
+        Loader {
+        id: canvasLoader
         anchors.fill: parent
-        onPaint: {
-            const ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-            const list = root.rings || []
-            if (!list.length)
-                return
-            const cx = width / 2
-            const cy = height / 2
-            const stroke = root._effStroke
-            const gap = root._effGap
-            let r = root._dialR - stroke * 0.5 - 1
-            ctx.lineWidth = stroke
-            ctx.lineCap = "round"
-            for (let i = 0; i < list.length; ++i) {
-                const ring = list[i]
-                const p = root._progress(ring)
-                const col = ring.color !== undefined ? ring.color : Md3Theme.colorScheme.primary
-                // Keep stroke outside the reserved center hole
-                if (r - stroke * 0.5 < root.innerHoleRadius)
-                    break
-                ctx.strokeStyle = root.trackColor
-                ctx.beginPath()
-                ctx.arc(cx, cy, r, 0, Math.PI * 2)
-                ctx.stroke()
-                ctx.strokeStyle = col
-                ctx.beginPath()
-                ctx.arc(cx, cy, r, root._rad(root.startAngle),
-                        root._rad(root.startAngle + 360 * p), false)
-                ctx.stroke()
-                r -= stroke + gap
-            }
-        }
+        active: root._treeShown
+        sourceComponent: canvasComp
+        onLoaded: if (item) item.requestPaint()
     }
+
+    Component {
+        id: canvasComp
+    Canvas {
+            id: canvas
+            anchors.fill: parent
+            onPaint: {
+                const ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+                const list = root.rings || []
+                if (!list.length)
+                    return
+                const cx = width / 2
+                const cy = height / 2
+                const stroke = root._effStroke
+                const gap = root._effGap
+                let r = root._dialR - stroke * 0.5 - 1
+                ctx.lineWidth = stroke
+                ctx.lineCap = "round"
+                for (let i = 0; i < list.length; ++i) {
+                    const ring = list[i]
+                    const p = root._progress(ring)
+                    const col = ring.color !== undefined ? ring.color : Md3Theme.colorScheme.primary
+                    // Keep stroke outside the reserved center hole
+                    if (r - stroke * 0.5 < root.innerHoleRadius)
+                        break
+                    ctx.strokeStyle = root.trackColor
+                    ctx.beginPath()
+                    ctx.arc(cx, cy, r, 0, Math.PI * 2)
+                    ctx.stroke()
+                    ctx.strokeStyle = col
+                    ctx.beginPath()
+                    ctx.arc(cx, cy, r, root._rad(root.startAngle),
+                            root._rad(root.startAngle + 360 * p), false)
+                    ctx.stroke()
+                    r -= stroke + gap
+                }
+            }
+        }    }
+
 
     onRingsChanged: root._requestPaint()
     onTrackColorChanged: root._requestPaint()

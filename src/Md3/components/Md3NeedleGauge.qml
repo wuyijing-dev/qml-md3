@@ -58,7 +58,7 @@ Item {
             return
         }
         _paintPending = false
-        ticks.requestPaint()
+        (ticksLoader.item && ticksLoader.item.requestPaint())
     }
 
     Timer {
@@ -113,52 +113,63 @@ Item {
     }
 
     // Ticks + needle via Canvas for simpler polar math
-    Canvas {
-        id: ticks
+        Loader {
+        id: ticksLoader
         anchors.fill: parent
-        onPaint: {
-            const ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-            const cx = root._cx
-            const cy = root._cy
-            const r = root._r
-            if (root.showTicks) {
-                const majors = Math.max(2, root.tickCount)
-                const minors = Math.max(0, root.minorTicksPerMajor)
-                const steps = (majors - 1) * (minors + 1)
-                for (let i = 0; i <= steps; ++i) {
-                    const t = i / steps
-                    const ang = root._rad(root.startAngle + root.sweepAngle * t)
-                    const major = (i % (minors + 1)) === 0
-                    const len = major ? 10 : 5
-                    const w = major ? 2 : 1
-                    const x0 = cx + Math.cos(ang) * (r - 2)
-                    const y0 = cy + Math.sin(ang) * (r - 2)
-                    const x1 = cx + Math.cos(ang) * (r - 2 - len)
-                    const y1 = cy + Math.sin(ang) * (r - 2 - len)
-                    ctx.strokeStyle = root.tickColor
-                    ctx.lineWidth = w
-                    ctx.beginPath()
-                    ctx.moveTo(x0, y0)
-                    ctx.lineTo(x1, y1)
-                    ctx.stroke()
-                }
-            }
-            // Needle
-            const nang = root._rad(root.startAngle + root.sweepAngle * root.progress)
-            ctx.strokeStyle = root.needleColor
-            ctx.fillStyle = root.needleColor
-            ctx.lineWidth = 2.5
-            ctx.lineCap = "round"
-            ctx.beginPath()
-            ctx.moveTo(cx - Math.cos(nang) * 8, cy - Math.sin(nang) * 8)
-            ctx.lineTo(cx + Math.cos(nang) * (r - 18), cy + Math.sin(nang) * (r - 18))
-            ctx.stroke()
-            ctx.beginPath()
-            ctx.arc(cx, cy, 5, 0, Math.PI * 2)
-            ctx.fill()
-        }
+        active: root._treeShown
+        sourceComponent: ticksComp
+        onLoaded: if (item) item.requestPaint()
     }
+
+    Component {
+        id: ticksComp
+    Canvas {
+            id: ticks
+            anchors.fill: parent
+            onPaint: {
+                const ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+                const cx = root._cx
+                const cy = root._cy
+                const r = root._r
+                if (root.showTicks) {
+                    const majors = Math.max(2, root.tickCount)
+                    const minors = Math.max(0, root.minorTicksPerMajor)
+                    const steps = (majors - 1) * (minors + 1)
+                    for (let i = 0; i <= steps; ++i) {
+                        const t = i / steps
+                        const ang = root._rad(root.startAngle + root.sweepAngle * t)
+                        const major = (i % (minors + 1)) === 0
+                        const len = major ? 10 : 5
+                        const w = major ? 2 : 1
+                        const x0 = cx + Math.cos(ang) * (r - 2)
+                        const y0 = cy + Math.sin(ang) * (r - 2)
+                        const x1 = cx + Math.cos(ang) * (r - 2 - len)
+                        const y1 = cy + Math.sin(ang) * (r - 2 - len)
+                        ctx.strokeStyle = root.tickColor
+                        ctx.lineWidth = w
+                        ctx.beginPath()
+                        ctx.moveTo(x0, y0)
+                        ctx.lineTo(x1, y1)
+                        ctx.stroke()
+                    }
+                }
+                // Needle
+                const nang = root._rad(root.startAngle + root.sweepAngle * root.progress)
+                ctx.strokeStyle = root.needleColor
+                ctx.fillStyle = root.needleColor
+                ctx.lineWidth = 2.5
+                ctx.lineCap = "round"
+                ctx.beginPath()
+                ctx.moveTo(cx - Math.cos(nang) * 8, cy - Math.sin(nang) * 8)
+                ctx.lineTo(cx + Math.cos(nang) * (r - 18), cy + Math.sin(nang) * (r - 18))
+                ctx.stroke()
+                ctx.beginPath()
+                ctx.arc(cx, cy, 5, 0, Math.PI * 2)
+                ctx.fill()
+            }
+        }    }
+
 
     onValueChanged: root._requestPaint()
     onWidthChanged: root._requestPaint()

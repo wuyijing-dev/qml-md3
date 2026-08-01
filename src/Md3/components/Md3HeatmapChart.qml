@@ -185,9 +185,14 @@ Item {
     }
 
     function requestPaint() {
-        canvas.requestPaint()
-        legendCanvas.requestPaint()
+        if (canvasLoader.item)
+            canvasLoader.item.requestPaint()
+        if (legendCanvasLoader.item)
+            legendCanvasLoader.item.requestPaint()
     }
+
+    /// Drop Canvas FBOs while page/window inactive.
+    readonly property bool _plotActive: Md3TreeVisibility.isLiveMotionScene(root, null)
 
     readonly property real _weekdayW: (style === Md3HeatmapChart.Contribution && showWeekdayLabels) ? 28 : (
                                           rowLabels && rowLabels.length ? 48 : 0)
@@ -220,29 +225,41 @@ Item {
     onWidthChanged: requestPaint()
     onHeightChanged: requestPaint()
     onCellSizeChanged: requestPaint()
+    on_PlotActiveChanged: if (_plotActive) requestPaint()
 
     Column {
         anchors.fill: parent
         spacing: 8
 
-        Canvas {
-            id: canvas
+        Loader {
+            id: canvasLoader
             width: parent.width
             height: parent.height - (root.showLegend ? root.legendHeight + 8 : 0)
-            renderTarget: Canvas.FramebufferObject
-            renderStrategy: Canvas.Cooperative
+            active: root._plotActive
+            sourceComponent: heatCanvasComp
+            onLoaded: if (item) item.requestPaint()
+        }
 
-            onPaint: {
-                const ctx = getContext("2d")
-                ctx.clearRect(0, 0, width, height)
-                const m = root.matrix
-                if (!m.length)
-                    return
+        Component {
+            id: heatCanvasComp
+            Canvas {
+                width: canvasLoader.width
+                height: canvasLoader.height
+                renderTarget: Canvas.FramebufferObject
+                renderStrategy: Canvas.Cooperative
 
-                if (root.style === Md3HeatmapChart.Contribution)
-                    root._paintContribution(ctx, width, height, m)
-                else
-                    root._paintMatrix(ctx, width, height, m)
+                onPaint: {
+                    const ctx = getContext("2d")
+                    ctx.clearRect(0, 0, width, height)
+                    const m = root.matrix
+                    if (!m.length)
+                        return
+
+                    if (root.style === Md3HeatmapChart.Contribution)
+                        root._paintContribution(ctx, width, height, m)
+                    else
+                        root._paintMatrix(ctx, width, height, m)
+                }
             }
         }
 
@@ -253,22 +270,33 @@ Item {
             width: parent.width
             height: root.legendHeight
 
-            Canvas {
-                id: legendCanvas
-                visible: root.style !== Md3HeatmapChart.Contribution
+            Loader {
+                id: legendCanvasLoader
                 anchors.fill: parent
-                onPaint: {
-                    if (root.style === Md3HeatmapChart.Contribution)
-                        return
-                    const ctx = getContext("2d")
-                    ctx.clearRect(0, 0, width, height)
-                    const g = ctx.createLinearGradient(0, 0, width, 0)
-                    const lo = root.lowColor
-                    const hi = root.highColor
-                    g.addColorStop(0, Qt.rgba(lo.r, lo.g, lo.b, 1))
-                    g.addColorStop(1, Qt.rgba(hi.r, hi.g, hi.b, 1))
-                    ctx.fillStyle = g
-                    ctx.fillRect(0, 4, width, height - 8)
+                active: root._plotActive && root.style !== Md3HeatmapChart.Contribution
+                sourceComponent: legendCanvasComp
+                onLoaded: if (item) item.requestPaint()
+            }
+
+            Component {
+                id: legendCanvasComp
+                Canvas {
+                    anchors.fill: parent
+                    renderTarget: Canvas.FramebufferObject
+                    renderStrategy: Canvas.Cooperative
+                    onPaint: {
+                        if (root.style === Md3HeatmapChart.Contribution)
+                            return
+                        const ctx = getContext("2d")
+                        ctx.clearRect(0, 0, width, height)
+                        const g = ctx.createLinearGradient(0, 0, width, 0)
+                        const lo = root.lowColor
+                        const hi = root.highColor
+                        g.addColorStop(0, Qt.rgba(lo.r, lo.g, lo.b, 1))
+                        g.addColorStop(1, Qt.rgba(hi.r, hi.g, hi.b, 1))
+                        ctx.fillStyle = g
+                        ctx.fillRect(0, 4, width, height - 8)
+                    }
                 }
             }
 

@@ -187,61 +187,68 @@ Flickable {
             tone: Md3Text.OnSurfaceVariant
         }
 
-        Md3GridLayout {
-            width: parent.width
-            columns: 2
-            spacing: 8
-            rowSpacing: 8
+        Md3DeferredSection {
+            preferredHeight: 520
+            delayMs: 32
+            asynchronous: true
+            sourceComponent: Component {
+                Md3GridLayout {
+                    width: parent ? parent.width : 400
+                    columns: 2
+                    spacing: 8
+                    rowSpacing: 8
 
-            Swatch {
-                roleName: "primary"
-                roleColor: Md3Theme.colorScheme.primary
-                labelColor: Md3Theme.colorScheme.colorOnPrimary
-            }
-            Swatch {
-                roleName: "primaryContainer"
-                roleColor: Md3Theme.colorScheme.primaryContainer
-                labelColor: Md3Theme.colorScheme.colorOnPrimaryContainer
-            }
-            Swatch {
-                roleName: "secondary"
-                roleColor: Md3Theme.colorScheme.secondary
-                labelColor: Md3Theme.colorScheme.colorOnSecondary
-            }
-            Swatch {
-                roleName: "secondaryContainer"
-                roleColor: Md3Theme.colorScheme.secondaryContainer
-                labelColor: Md3Theme.colorScheme.colorOnSecondaryContainer
-            }
-            Swatch {
-                roleName: "tertiary"
-                roleColor: Md3Theme.colorScheme.tertiary
-                labelColor: Md3Theme.colorScheme.colorOnTertiary
-            }
-            Swatch {
-                roleName: "tertiaryContainer"
-                roleColor: Md3Theme.colorScheme.tertiaryContainer
-                labelColor: Md3Theme.colorScheme.colorOnTertiaryContainer
-            }
-            Swatch {
-                roleName: "surface"
-                roleColor: Md3Theme.colorScheme.surface
-                labelColor: Md3Theme.colorScheme.colorOnSurface
-            }
-            Swatch {
-                roleName: "surfaceContainer"
-                roleColor: Md3Theme.colorScheme.surfaceContainer
-                labelColor: Md3Theme.colorScheme.colorOnSurface
-            }
-            Swatch {
-                roleName: "error"
-                roleColor: Md3Theme.colorScheme.error
-                labelColor: Md3Theme.colorScheme.colorOnError
-            }
-            Swatch {
-                roleName: "outline"
-                roleColor: Md3Theme.colorScheme.outline
-                labelColor: Md3Theme.colorScheme.colorOnPrimary
+                    Swatch {
+                        roleName: "primary"
+                        roleColor: Md3Theme.colorScheme.primary
+                        labelColor: Md3Theme.colorScheme.colorOnPrimary
+                    }
+                    Swatch {
+                        roleName: "primaryContainer"
+                        roleColor: Md3Theme.colorScheme.primaryContainer
+                        labelColor: Md3Theme.colorScheme.colorOnPrimaryContainer
+                    }
+                    Swatch {
+                        roleName: "secondary"
+                        roleColor: Md3Theme.colorScheme.secondary
+                        labelColor: Md3Theme.colorScheme.colorOnSecondary
+                    }
+                    Swatch {
+                        roleName: "secondaryContainer"
+                        roleColor: Md3Theme.colorScheme.secondaryContainer
+                        labelColor: Md3Theme.colorScheme.colorOnSecondaryContainer
+                    }
+                    Swatch {
+                        roleName: "tertiary"
+                        roleColor: Md3Theme.colorScheme.tertiary
+                        labelColor: Md3Theme.colorScheme.colorOnTertiary
+                    }
+                    Swatch {
+                        roleName: "tertiaryContainer"
+                        roleColor: Md3Theme.colorScheme.tertiaryContainer
+                        labelColor: Md3Theme.colorScheme.colorOnTertiaryContainer
+                    }
+                    Swatch {
+                        roleName: "surface"
+                        roleColor: Md3Theme.colorScheme.surface
+                        labelColor: Md3Theme.colorScheme.colorOnSurface
+                    }
+                    Swatch {
+                        roleName: "surfaceContainer"
+                        roleColor: Md3Theme.colorScheme.surfaceContainer
+                        labelColor: Md3Theme.colorScheme.colorOnSurface
+                    }
+                    Swatch {
+                        roleName: "error"
+                        roleColor: Md3Theme.colorScheme.error
+                        labelColor: Md3Theme.colorScheme.colorOnError
+                    }
+                    Swatch {
+                        roleName: "outline"
+                        roleColor: Md3Theme.colorScheme.outline
+                        labelColor: Md3Theme.colorScheme.colorOnPrimary
+                    }
+                }
             }
         }
 

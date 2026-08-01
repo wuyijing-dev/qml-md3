@@ -34,6 +34,8 @@ QtObject {
     /// Tree shown and window active.
     /// Pass explicit `win` / `hostWindow`, or `null`/`undefined` to resolve via Md3OverlayHost.
     function isSceneActive(item, win) {
+        if (!isPageActive(item))
+            return false
         if (!isItemShown(item))
             return false
         const w = (win !== undefined && win !== null)

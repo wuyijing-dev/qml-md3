@@ -50,7 +50,7 @@ Item {
             return
         }
         _paintPending = false
-        canvas.requestPaint()
+        (canvasLoader.item && canvasLoader.item.requestPaint())
     }
 
     Timer {
@@ -100,76 +100,87 @@ Item {
     onWidthChanged: root._requestPaint()
     onHeightChanged: root._requestPaint()
 
-    Canvas {
-        id: canvas
+        Loader {
+        id: canvasLoader
         anchors.fill: parent
-        onPaint: {
-            const ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-            const cx = width / 2
-            const cy = height / 2
-            const r = Math.min(width, height) / 2 - root.strokeWidth - 1
-            const phase = root.wavePhase
-
-            ctx.beginPath()
-            ctx.arc(cx, cy, r, 0, Math.PI * 2)
-            ctx.fillStyle = root.dialColor
-            ctx.fill()
-
-            ctx.save()
-            ctx.beginPath()
-            ctx.arc(cx, cy, r - 1, 0, Math.PI * 2)
-            ctx.clip()
-
-            const levelY = cy + r - (2 * r * root.progress)
-            const amp = 4 + 2 * (1 - Math.abs(root.progress - 0.5) * 2)
-            const steps = 40
-
-            ctx.beginPath()
-            ctx.moveTo(cx - r, cy + r + 2)
-            ctx.lineTo(cx - r, levelY)
-            for (let i = 0; i <= steps; ++i) {
-                const t = i / steps
-                const x = cx - r + t * 2 * r
-                const y = levelY
-                        + Math.sin(t * Math.PI * 2 + phase) * amp
-                        + Math.sin(t * Math.PI * 4 - phase * 2) * (amp * 0.35)
-                ctx.lineTo(x, y)
-            }
-            ctx.lineTo(cx + r, cy + r + 2)
-            ctx.closePath()
-            ctx.fillStyle = root.waveColor
-            ctx.fill()
-
-            ctx.beginPath()
-            ctx.moveTo(cx - r, cy + r + 2)
-            ctx.lineTo(cx - r, levelY + 3)
-            for (let i = 0; i <= steps; ++i) {
-                const t = i / steps
-                const x = cx - r + t * 2 * r
-                const y = levelY + 3 + Math.sin(t * Math.PI * 2 - phase) * (amp * 0.6)
-                ctx.lineTo(x, y)
-            }
-            ctx.lineTo(cx + r, cy + r + 2)
-            ctx.closePath()
-            ctx.fillStyle = root.valueColor
-            ctx.globalAlpha = 0.85
-            ctx.fill()
-            ctx.globalAlpha = 1
-            ctx.restore()
-
-            ctx.beginPath()
-            ctx.arc(cx, cy, r, 0, Math.PI * 2)
-            ctx.strokeStyle = root.valueColor
-            ctx.lineWidth = root.strokeWidth
-            ctx.stroke()
-            ctx.beginPath()
-            ctx.arc(cx, cy, r + root.strokeWidth * 0.5, 0, Math.PI * 2)
-            ctx.strokeStyle = Md3Theme.colorScheme.outlineVariant
-            ctx.lineWidth = 1
-            ctx.stroke()
-        }
+        active: root._treeShown
+        sourceComponent: canvasComp
+        onLoaded: if (item) item.requestPaint()
     }
+
+    Component {
+        id: canvasComp
+    Canvas {
+            id: canvas
+            anchors.fill: parent
+            onPaint: {
+                const ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+                const cx = width / 2
+                const cy = height / 2
+                const r = Math.min(width, height) / 2 - root.strokeWidth - 1
+                const phase = root.wavePhase
+
+                ctx.beginPath()
+                ctx.arc(cx, cy, r, 0, Math.PI * 2)
+                ctx.fillStyle = root.dialColor
+                ctx.fill()
+
+                ctx.save()
+                ctx.beginPath()
+                ctx.arc(cx, cy, r - 1, 0, Math.PI * 2)
+                ctx.clip()
+
+                const levelY = cy + r - (2 * r * root.progress)
+                const amp = 4 + 2 * (1 - Math.abs(root.progress - 0.5) * 2)
+                const steps = 40
+
+                ctx.beginPath()
+                ctx.moveTo(cx - r, cy + r + 2)
+                ctx.lineTo(cx - r, levelY)
+                for (let i = 0; i <= steps; ++i) {
+                    const t = i / steps
+                    const x = cx - r + t * 2 * r
+                    const y = levelY
+                            + Math.sin(t * Math.PI * 2 + phase) * amp
+                            + Math.sin(t * Math.PI * 4 - phase * 2) * (amp * 0.35)
+                    ctx.lineTo(x, y)
+                }
+                ctx.lineTo(cx + r, cy + r + 2)
+                ctx.closePath()
+                ctx.fillStyle = root.waveColor
+                ctx.fill()
+
+                ctx.beginPath()
+                ctx.moveTo(cx - r, cy + r + 2)
+                ctx.lineTo(cx - r, levelY + 3)
+                for (let i = 0; i <= steps; ++i) {
+                    const t = i / steps
+                    const x = cx - r + t * 2 * r
+                    const y = levelY + 3 + Math.sin(t * Math.PI * 2 - phase) * (amp * 0.6)
+                    ctx.lineTo(x, y)
+                }
+                ctx.lineTo(cx + r, cy + r + 2)
+                ctx.closePath()
+                ctx.fillStyle = root.valueColor
+                ctx.globalAlpha = 0.85
+                ctx.fill()
+                ctx.globalAlpha = 1
+                ctx.restore()
+
+                ctx.beginPath()
+                ctx.arc(cx, cy, r, 0, Math.PI * 2)
+                ctx.strokeStyle = root.valueColor
+                ctx.lineWidth = root.strokeWidth
+                ctx.stroke()
+                ctx.beginPath()
+                ctx.arc(cx, cy, r + root.strokeWidth * 0.5, 0, Math.PI * 2)
+                ctx.strokeStyle = Md3Theme.colorScheme.outlineVariant
+                ctx.lineWidth = 1
+                ctx.stroke()
+            }
+        }    }
+
 
     Column {
         anchors.centerIn: parent

@@ -247,10 +247,22 @@ Md3Chart {
         radius: Md3Theme.shape.small
     }
 
+    Connections {
+        target: root
+        function onChartActiveChanged() {
+            if (!root.chartActive) {
+                geom.seriesModel = []
+                return
+            }
+            root.requestRebuild()
+        }
+    }
+
     Item {
         id: plotClip
         anchors.fill: parent
         clip: true
+        visible: root.chartActive
 
         Shape {
             anchors.fill: parent
@@ -279,7 +291,7 @@ Md3Chart {
         }
 
         Repeater {
-            model: geom.seriesModel
+            model: root.chartActive ? geom.seriesModel : []
             delegate: Item {
                 id: seriesItem
                 required property var modelData

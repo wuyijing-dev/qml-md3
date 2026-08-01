@@ -50,7 +50,7 @@ Item {
             return
         }
         _paintPending = false
-        canvas.requestPaint()
+        (canvasLoader.item && canvasLoader.item.requestPaint())
     }
 
     Timer {
@@ -68,43 +68,54 @@ Item {
 
     function _rad(deg) { return deg * Math.PI / 180 }
 
-    Canvas {
-        id: canvas
+        Loader {
+        id: canvasLoader
         anchors.fill: parent
-        onPaint: {
-            const ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-            const cx = width / 2
-            const cy = height / 2
-            const r = Math.min(width, height) / 2 - root.strokeWidth - 6
-            const n = Math.max(8, root.tickCount)
+        active: root._treeShown
+        sourceComponent: canvasComp
+        onLoaded: if (item) item.requestPaint()
+    }
 
-            for (let i = 0; i < n; ++i) {
-                const t = i / n
-                const ang = root._rad(root.startAngle + 360 * t)
-                const major = (i % 3) === 0
-                const len = major ? 8 : 4
-                ctx.strokeStyle = t <= root.progress ? root.valueColor : root.tickColor
-                ctx.lineWidth = major ? 2 : 1
+    Component {
+        id: canvasComp
+    Canvas {
+            id: canvas
+            anchors.fill: parent
+            onPaint: {
+                const ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+                const cx = width / 2
+                const cy = height / 2
+                const r = Math.min(width, height) / 2 - root.strokeWidth - 6
+                const n = Math.max(8, root.tickCount)
+
+                for (let i = 0; i < n; ++i) {
+                    const t = i / n
+                    const ang = root._rad(root.startAngle + 360 * t)
+                    const major = (i % 3) === 0
+                    const len = major ? 8 : 4
+                    ctx.strokeStyle = t <= root.progress ? root.valueColor : root.tickColor
+                    ctx.lineWidth = major ? 2 : 1
+                    ctx.beginPath()
+                    ctx.moveTo(cx + Math.cos(ang) * (r + 2), cy + Math.sin(ang) * (r + 2))
+                    ctx.lineTo(cx + Math.cos(ang) * (r + 2 + len), cy + Math.sin(ang) * (r + 2 + len))
+                    ctx.stroke()
+                }
+
+                ctx.lineWidth = root.strokeWidth
+                ctx.lineCap = "round"
+                ctx.strokeStyle = root.trackColor
                 ctx.beginPath()
-                ctx.moveTo(cx + Math.cos(ang) * (r + 2), cy + Math.sin(ang) * (r + 2))
-                ctx.lineTo(cx + Math.cos(ang) * (r + 2 + len), cy + Math.sin(ang) * (r + 2 + len))
+                ctx.arc(cx, cy, r - 4, 0, Math.PI * 2)
+                ctx.stroke()
+                ctx.strokeStyle = root.valueColor
+                ctx.beginPath()
+                ctx.arc(cx, cy, r - 4, root._rad(root.startAngle),
+                        root._rad(root.startAngle + 360 * root.progress), false)
                 ctx.stroke()
             }
+        }    }
 
-            ctx.lineWidth = root.strokeWidth
-            ctx.lineCap = "round"
-            ctx.strokeStyle = root.trackColor
-            ctx.beginPath()
-            ctx.arc(cx, cy, r - 4, 0, Math.PI * 2)
-            ctx.stroke()
-            ctx.strokeStyle = root.valueColor
-            ctx.beginPath()
-            ctx.arc(cx, cy, r - 4, root._rad(root.startAngle),
-                    root._rad(root.startAngle + 360 * root.progress), false)
-            ctx.stroke()
-        }
-    }
 
     onValueChanged: root._requestPaint()
     onTrackColorChanged: root._requestPaint()

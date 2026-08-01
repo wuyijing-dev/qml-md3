@@ -21,6 +21,9 @@ Item {
     width: parent ? parent.width : implicitWidth
     height: implicitHeight
 
+    /// Drop Canvas while page/window inactive (FBO free).
+    readonly property bool _plotActive: Md3TreeVisibility.isLiveMotionScene(root, null)
+
     readonly property var bars: {
         const v = values || []
         const out = []
@@ -66,59 +69,74 @@ Item {
         return palette[i % palette.length]
     }
 
-    function requestPaint() { canvas.requestPaint() }
+    function requestPaint() {
+        if (canvasLoader.item)
+            canvasLoader.item.requestPaint()
+    }
 
     onValuesChanged: requestPaint()
+    on_PlotActiveChanged: if (_plotActive) requestPaint()
     onWidthChanged: requestPaint()
     onHeightChanged: requestPaint()
 
-    Canvas {
-        id: canvas
+        Loader {
+        id: canvasLoader
         anchors.fill: parent
-        anchors.margins: 8
-        onPaint: {
-            const ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-            const list = root.bars
-            const n = list.length
-            if (!n)
-                return
-            const cx = width / 2
-            const cy = height / 2
-            let r = Math.min(width, height) / 2 - 4
-            ctx.lineCap = "round"
-            ctx.lineWidth = root.barWidth
-
-            for (let i = 0; i < n; ++i) {
-                if (!(r > 0))
-                    break
-                const p = Math.max(0, Math.min(1, list[i].value / root._max))
-                const col = root._colorAt(i, list[i].color)
-                ctx.strokeStyle = root.trackColor
-                ctx.beginPath()
-                ctx.arc(cx, cy, r, root._rad(root.startAngle),
-                        root._rad(root.startAngle + root.sweepAngle), false)
-                ctx.stroke()
-                ctx.strokeStyle = col
-                ctx.beginPath()
-                ctx.arc(cx, cy, r, root._rad(root.startAngle),
-                        root._rad(root.startAngle + root.sweepAngle * p), false)
-                ctx.stroke()
-
-                if (root.showLabels) {
-                    ctx.fillStyle = Md3Theme.colorScheme.colorOnSurfaceVariant
-                    ctx.font = Md3Theme.typography.labelSmall.size + "px sans-serif"
-                    ctx.textAlign = "left"
-                    ctx.textBaseline = "middle"
-                    const a = root._rad(root.startAngle + root.sweepAngle + 6)
-                    ctx.fillText(list[i].label + " " + list[i].value,
-                                 cx + Math.cos(a) * (r - 2),
-                                 cy + Math.sin(a) * (r - 2))
-                }
-                r -= root.barWidth + root.barGap
-            }
-        }
+        active: root._plotActive
+        sourceComponent: canvasComp
+        onLoaded: if (item) item.requestPaint()
     }
+
+    Component {
+        id: canvasComp
+    Canvas {
+            id: canvas
+            anchors.fill: parent
+            anchors.margins: 8
+            onPaint: {
+                const ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+                const list = root.bars
+                const n = list.length
+                if (!n)
+                    return
+                const cx = width / 2
+                const cy = height / 2
+                let r = Math.min(width, height) / 2 - 4
+                ctx.lineCap = "round"
+                ctx.lineWidth = root.barWidth
+
+                for (let i = 0; i < n; ++i) {
+                    if (!(r > 0))
+                        break
+                    const p = Math.max(0, Math.min(1, list[i].value / root._max))
+                    const col = root._colorAt(i, list[i].color)
+                    ctx.strokeStyle = root.trackColor
+                    ctx.beginPath()
+                    ctx.arc(cx, cy, r, root._rad(root.startAngle),
+                            root._rad(root.startAngle + root.sweepAngle), false)
+                    ctx.stroke()
+                    ctx.strokeStyle = col
+                    ctx.beginPath()
+                    ctx.arc(cx, cy, r, root._rad(root.startAngle),
+                            root._rad(root.startAngle + root.sweepAngle * p), false)
+                    ctx.stroke()
+
+                    if (root.showLabels) {
+                        ctx.fillStyle = Md3Theme.colorScheme.colorOnSurfaceVariant
+                        ctx.font = Md3Theme.typography.labelSmall.size + "px sans-serif"
+                        ctx.textAlign = "left"
+                        ctx.textBaseline = "middle"
+                        const a = root._rad(root.startAngle + root.sweepAngle + 6)
+                        ctx.fillText(list[i].label + " " + list[i].value,
+                                     cx + Math.cos(a) * (r - 2),
+                                     cy + Math.sin(a) * (r - 2))
+                    }
+                    r -= root.barWidth + root.barGap
+                }
+            }
+        }    }
+
 
     Component.onCompleted: requestPaint()
 }

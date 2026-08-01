@@ -130,46 +130,52 @@ Md3Page {
                     leftPadding: 16
                 }
             }
-            Md3Stepper {
-                id: stepperDemo
-                width: parent.width
-                height: 220
-                currentStep: 0
-                model: [
-                    { title: "Details" },
-                    { title: "Review" },
-                    { title: "Confirm" }
-                ]
-                onFinished: Md3Notify.snackbar(qsTr("Stepper finished"))
-                Item {
-                    Md3VStack {
-                        anchors.centerIn: parent
-                        spacing: 8
-                        Md3Text {
-                            text: qsTr("Enter details")
-                            role: Md3Text.BodyMedium
+            Md3DeferredSection {
+                preferredHeight: 220
+                delayMs: 40
+                asynchronous: true
+                sourceComponent: Component {
+                    Md3Stepper {
+                        width: parent ? parent.width : 400
+                        height: 220
+                        currentStep: 0
+                        model: [
+                            { title: "Details" },
+                            { title: "Review" },
+                            { title: "Confirm" }
+                        ]
+                        onFinished: Md3Notify.snackbar(qsTr("Stepper finished"))
+                        Item {
+                            Md3VStack {
+                                anchors.centerIn: parent
+                                spacing: 8
+                                Md3Text {
+                                    text: qsTr("Enter details")
+                                    role: Md3Text.BodyMedium
+                                }
+                                Md3TextField {
+                                    width: 240
+                                    label: qsTr("Name")
+                                    placeholderText: qsTr("Ada Lovelace")
+                                }
+                            }
                         }
-                        Md3TextField {
-                            width: 240
-                            label: qsTr("Name")
-                            placeholderText: qsTr("Ada Lovelace")
+                        Item {
+                            Md3Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Review your choices")
+                                role: Md3Text.BodyMedium
+                                tone: Md3Text.OnSurfaceVariant
+                            }
                         }
-                    }
-                }
-                Item {
-                    Md3Text {
-                        anchors.centerIn: parent
-                        text: qsTr("Review your choices")
-                        role: Md3Text.BodyMedium
-                        tone: Md3Text.OnSurfaceVariant
-                    }
-                }
-                Item {
-                    Md3Text {
-                        anchors.centerIn: parent
-                        text: qsTr("Confirm and finish")
-                        role: Md3Text.BodyMedium
-                        tone: Md3Text.OnSurfaceVariant
+                        Item {
+                            Md3Text {
+                                anchors.centerIn: parent
+                                text: qsTr("Confirm and finish")
+                                role: Md3Text.BodyMedium
+                                tone: Md3Text.OnSurfaceVariant
+                            }
+                        }
                     }
                 }
             }
@@ -638,27 +644,38 @@ Md3Page {
                 text: qsTr("Skeleton")
                 role: Md3Text.TitleMedium
             }
-            Md3Card {
-                variant: Md3Card.Outlined
-                width: parent.width
-                height: 220
-                Md3SkeletonPane {
-                    anchors.fill: parent
-                    anchors.margins: 16
-                    layout: "page"
+            Md3DeferredSection {
+                preferredHeight: 280
+                delayMs: 64
+                asynchronous: true
+                sourceComponent: Component {
+                    Md3VStack {
+                        width: parent ? parent.width : 400
+                        spacing: 12
+                        Md3Card {
+                            variant: Md3Card.Outlined
+                            width: parent.width
+                            height: 220
+                            Md3SkeletonPane {
+                                anchors.fill: parent
+                                anchors.margins: 16
+                                layout: "page"
+                            }
+                        }
+                        Md3HStack {
+                            id: skeletonRow
+                            width: parent.width
+                            spacing: 12
+                            Md3Skeleton { variant: Md3Skeleton.Circular; width: 48; height: 48 }
+                            Md3Skeleton {
+                                variant: Md3Skeleton.Text
+                                width: Math.max(0, skeletonRow.width - 48 - 72 - skeletonRow.spacing * 2)
+                                height: 14
+                            }
+                            Md3Skeleton { variant: Md3Skeleton.Rounded; width: 72; height: 32 }
+                        }
+                    }
                 }
-            }
-            Md3HStack {
-                id: skeletonRow
-                width: parent.width
-                spacing: 12
-                Md3Skeleton { variant: Md3Skeleton.Circular; width: 48; height: 48 }
-                Md3Skeleton {
-                    variant: Md3Skeleton.Text
-                    width: Math.max(0, skeletonRow.width - 48 - 72 - skeletonRow.spacing * 2)
-                    height: 14
-                }
-                Md3Skeleton { variant: Md3Skeleton.Rounded; width: 72; height: 32 }
             }
 
             Item { width: parent.width; height: 24 }

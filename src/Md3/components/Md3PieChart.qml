@@ -54,7 +54,7 @@ Md3Chart {
         geom.total = total
         geom.slices = slices
         rebuilt()
-        canvas.requestPaint()
+        (canvasLoader.item && canvasLoader.item.requestPaint())
     }
 
     function _rad(deg) { return deg * Math.PI / 180 }
@@ -88,7 +88,7 @@ Md3Chart {
                     value: s.percent,
                     color: s.color
                 }], s.ly)
-                canvas.requestPaint()
+                (canvasLoader.item && canvasLoader.item.requestPaint())
                 return
             }
             acc += s.sweep
@@ -119,7 +119,7 @@ Md3Chart {
             value: s.percent,
             color: s.color
         }], s.ly)
-        canvas.requestPaint()
+        (canvasLoader.item && canvasLoader.item.requestPaint())
     }
 
     QtObject {
@@ -132,12 +132,12 @@ Md3Chart {
     onStartAngleChanged: requestRebuild()
     onShowPercentLabelsChanged: requestRebuild()
     onLabelsChanged: requestRebuild()
-    onProbeActiveChanged: canvas.requestPaint()
-    onProbeIndexChanged: canvas.requestPaint()
-    onCxChanged: canvas.requestPaint()
-    onCyChanged: canvas.requestPaint()
-    onOuterRChanged: canvas.requestPaint()
-    onInnerRChanged: canvas.requestPaint()
+    onProbeActiveChanged: (canvasLoader.item && canvasLoader.item.requestPaint())
+    onProbeIndexChanged: (canvasLoader.item && canvasLoader.item.requestPaint())
+    onCxChanged: (canvasLoader.item && canvasLoader.item.requestPaint())
+    onCyChanged: (canvasLoader.item && canvasLoader.item.requestPaint())
+    onOuterRChanged: (canvasLoader.item && canvasLoader.item.requestPaint())
+    onInnerRChanged: (canvasLoader.item && canvasLoader.item.requestPaint())
 
     Rectangle {
         anchors.fill: parent
@@ -145,48 +145,59 @@ Md3Chart {
         radius: Md3Theme.shape.small
     }
 
-    Canvas {
-        id: canvas
+        Loader {
+        id: canvasLoader
         anchors.fill: parent
-        onPaint: {
-            const ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-            const slices = geom.slices || []
-            if (!slices.length)
-                return
-            const cx = root.cx
-            const cy = root.cy
-            const outer = root.outerR
-            const inner = root.innerR
-            const probeOn = root.probeActive
-            const probeIdx = root.probeIndex
-            const donut = inner > 1
-
-            for (let i = 0; i < slices.length; ++i) {
-                const s = slices[i]
-                if (!(s.sweep > 0) || !(outer > 0))
-                    continue
-                const a0 = root._rad(s.start)
-                const a1 = root._rad(s.start + Math.max(0.01, s.sweep))
-                ctx.globalAlpha = probeOn && probeIdx !== s.index ? 0.45 : 1
-                ctx.fillStyle = s.color
-                ctx.strokeStyle = s.color
-                ctx.lineWidth = 1
-                ctx.beginPath()
-                if (donut) {
-                    ctx.arc(cx, cy, outer, a0, a1, false)
-                    ctx.arc(cx, cy, inner, a1, a0, true)
-                } else {
-                    ctx.moveTo(cx, cy)
-                    ctx.arc(cx, cy, outer, a0, a1, false)
-                }
-                ctx.closePath()
-                ctx.fill()
-                ctx.stroke()
-            }
-            ctx.globalAlpha = 1
-        }
+        active: root.chartActive
+        sourceComponent: canvasComp
+        onLoaded: if (item) item.requestPaint()
     }
+
+    Component {
+        id: canvasComp
+    Canvas {
+            id: canvas
+            anchors.fill: parent
+            onPaint: {
+                const ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+                const slices = geom.slices || []
+                if (!slices.length)
+                    return
+                const cx = root.cx
+                const cy = root.cy
+                const outer = root.outerR
+                const inner = root.innerR
+                const probeOn = root.probeActive
+                const probeIdx = root.probeIndex
+                const donut = inner > 1
+
+                for (let i = 0; i < slices.length; ++i) {
+                    const s = slices[i]
+                    if (!(s.sweep > 0) || !(outer > 0))
+                        continue
+                    const a0 = root._rad(s.start)
+                    const a1 = root._rad(s.start + Math.max(0.01, s.sweep))
+                    ctx.globalAlpha = probeOn && probeIdx !== s.index ? 0.45 : 1
+                    ctx.fillStyle = s.color
+                    ctx.strokeStyle = s.color
+                    ctx.lineWidth = 1
+                    ctx.beginPath()
+                    if (donut) {
+                        ctx.arc(cx, cy, outer, a0, a1, false)
+                        ctx.arc(cx, cy, inner, a1, a0, true)
+                    } else {
+                        ctx.moveTo(cx, cy)
+                        ctx.arc(cx, cy, outer, a0, a1, false)
+                    }
+                    ctx.closePath()
+                    ctx.fill()
+                    ctx.stroke()
+                }
+                ctx.globalAlpha = 1
+            }
+        }    }
+
 
     // Donut hole (also covers canvas center for solid background when needed)
     Rectangle {

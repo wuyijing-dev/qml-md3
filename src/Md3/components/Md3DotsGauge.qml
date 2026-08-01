@@ -50,7 +50,7 @@ Item {
             return
         }
         _paintPending = false
-        canvas.requestPaint()
+        (canvasLoader.item && canvasLoader.item.requestPaint())
     }
 
     Timer {
@@ -68,27 +68,38 @@ Item {
 
     function _rad(deg) { return deg * Math.PI / 180 }
 
-    Canvas {
-        id: canvas
+        Loader {
+        id: canvasLoader
         anchors.fill: parent
-        onPaint: {
-            const ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-            const n = Math.max(1, root.dotCount)
-            const cx = width / 2
-            const cy = height / 2
-            const ringR = Math.min(width, height) / 2 - root.dotRadius - 2
-            for (let i = 0; i < n; ++i) {
-                const ang = root._rad(root.startAngle + (360 / n) * i)
-                const x = cx + Math.cos(ang) * ringR
-                const y = cy + Math.sin(ang) * ringR
-                ctx.beginPath()
-                ctx.arc(x, y, root.dotRadius, 0, Math.PI * 2)
-                ctx.fillStyle = i < root.filledDots ? root.valueColor : root.trackColor
-                ctx.fill()
-            }
-        }
+        active: root._treeShown
+        sourceComponent: canvasComp
+        onLoaded: if (item) item.requestPaint()
     }
+
+    Component {
+        id: canvasComp
+    Canvas {
+            id: canvas
+            anchors.fill: parent
+            onPaint: {
+                const ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+                const n = Math.max(1, root.dotCount)
+                const cx = width / 2
+                const cy = height / 2
+                const ringR = Math.min(width, height) / 2 - root.dotRadius - 2
+                for (let i = 0; i < n; ++i) {
+                    const ang = root._rad(root.startAngle + (360 / n) * i)
+                    const x = cx + Math.cos(ang) * ringR
+                    const y = cy + Math.sin(ang) * ringR
+                    ctx.beginPath()
+                    ctx.arc(x, y, root.dotRadius, 0, Math.PI * 2)
+                    ctx.fillStyle = i < root.filledDots ? root.valueColor : root.trackColor
+                    ctx.fill()
+                }
+            }
+        }    }
+
 
     onValueChanged: root._requestPaint()
     onTrackColorChanged: root._requestPaint()

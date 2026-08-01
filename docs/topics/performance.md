@@ -44,6 +44,9 @@ Industry UI stacks converge on the same rules Md3 applies:
 28. **`Md3PageActivityGate`** — DataTable / VirtualList / TreeView / ListView / GridView / Carousel / ItemsView clear row models (or Loader) while `md3PageActive` is false; chrome size unchanged.
 29. **CodeBlock / Sparkline / FileDropZone / Form / Date* / TimePicker** — follow `md3PageActive` (clear HTML, Canvas FBO, drop-zone rows, calendar/dial cells; Form poll gated).
 30. **Gallery** — WindowPage platform panes Loader-per-tab; Extras frees 5k VirtualList array + Deferred carousels; Pickers modal Loaders; `pageIdleTrimMs` 45s.
+31. **`Md3TreeVisibility.isSceneActive`** — also requires `isPageActive` (PageHost `md3PageActive`).
+32. **Charts** — Bar/Pie/Radar/Area/Funnel/RadialBar/Waterfall/Heatmap Canvas via `Loader` when inactive; LineChart clears Shape series; Canvas gauges unload when `!_treeShown`.
+33. **Gallery DeferredSection** — Theme live swatches, Communication loaders/morph, Extras stepper/skeleton, NavigationView demo.
 
 ---
 
@@ -53,7 +56,7 @@ Industry UI stacks converge on the same rules Md3 applies:
 | **Scene Graph** | Draw calls for on-screen items | Off-screen *drawing* is usually culled; **FBOs still exist** if the Item is alive with `layer.enabled` |
 | **PageHost L1** | Live page Items in RAM | Default `arc` + `pageCacheLimit: 1`; inactive kept pages can unload DeferredSection via `md3PageActive` |
 | **PageHost L2** | Compiled `Component` (cheap to re-instantiate) | Default limit `1`; `pagePrefetchL1: false` warms neighbors as L2 only |
-| **Within page** | Charts / tables / long forms | `Md3DeferredSection` + `progressiveContent`; table/list bodies also follow `Md3PageActivityGate` |
+| **Within page** | Charts / tables / long forms | `Md3DeferredSection` + `progressiveContent`; table/list bodies also follow `Md3PageActivityGate`; chart/gauge Canvas Loader on inactive |
 
 “看不见不渲染也不算特效” ≈ **不要让重控件以 `layer.enabled: true` 活在树里**（滚动出视野仍占 FBO）。做法：出屏用 `Loader { active: false }` / `Md3DeferredSection` / 列表用 `Md3VirtualList`，而不是只设 `visible: false` 却保留 layer。
 

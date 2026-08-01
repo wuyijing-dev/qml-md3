@@ -56,7 +56,7 @@ Item {
             return
         }
         _paintPending = false
-        canvas.requestPaint()
+        (canvasLoader.item && canvasLoader.item.requestPaint())
     }
 
     Timer {
@@ -150,73 +150,84 @@ Item {
         }
     }
 
-    Canvas {
-        id: canvas
-        width: root.size
-        height: root.size
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        onPaint: {
-            const ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-            const cx = width / 2
-            const cy = height / 2
-            const r = Math.min(width, height) / 2 - 4
-            const a0 = root._rad(root.startAngle)
-            const a1 = root._rad(root.startAngle + root.sweepAngle)
-            const ap = root._rad(root.startAngle + root.sweepAngle * root.progress)
-
-            ctx.lineWidth = 6
-            ctx.lineCap = "round"
-            ctx.strokeStyle = root.trackColor
-            ctx.beginPath()
-            ctx.arc(cx, cy, r - 2, a0, a1, false)
-            ctx.stroke()
-            ctx.strokeStyle = root.valueColor
-            ctx.beginPath()
-            ctx.arc(cx, cy, r - 2, a0, ap, false)
-            ctx.stroke()
-
-            ctx.beginPath()
-            ctx.arc(cx, cy, r * 0.62, 0, Math.PI * 2)
-            ctx.fillStyle = root.knobColor
-            ctx.fill()
-            ctx.strokeStyle = Md3Theme.colorScheme.outline
-            ctx.lineWidth = 1.5
-            ctx.stroke()
-
-            const nr = r * 0.42
-            ctx.strokeStyle = root.valueColor
-            ctx.lineWidth = 3
-            ctx.lineCap = "round"
-            ctx.beginPath()
-            ctx.moveTo(cx + Math.cos(ap) * (nr * 0.25), cy + Math.sin(ap) * (nr * 0.25))
-            ctx.lineTo(cx + Math.cos(ap) * nr, cy + Math.sin(ap) * nr)
-            ctx.stroke()
-
-            ctx.beginPath()
-            ctx.arc(cx, cy, 4, 0, Math.PI * 2)
-            ctx.fillStyle = root.valueColor
-            ctx.fill()
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            enabled: root.interactive
-            hoverEnabled: true
-            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-            preventStealing: true
-            onPressed: function (mouse) {
-                root.forceActiveFocus()
-                root._setValue(root._valueFromCanvasPos(mouse.x, mouse.y), false)
-            }
-            onPositionChanged: function (mouse) {
-                if (pressed)
-                    root._setValue(root._valueFromCanvasPos(mouse.x, mouse.y), false)
-            }
-            onReleased: Md3Accessibility.announce(root.valueText)
-        }
+        Loader {
+        id: canvasLoader
+        anchors.fill: parent
+        active: root._treeShown
+        sourceComponent: canvasComp
+        onLoaded: if (item) item.requestPaint()
     }
+
+    Component {
+        id: canvasComp
+    Canvas {
+            id: canvas
+            width: root.size
+            height: root.size
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            onPaint: {
+                const ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+                const cx = width / 2
+                const cy = height / 2
+                const r = Math.min(width, height) / 2 - 4
+                const a0 = root._rad(root.startAngle)
+                const a1 = root._rad(root.startAngle + root.sweepAngle)
+                const ap = root._rad(root.startAngle + root.sweepAngle * root.progress)
+
+                ctx.lineWidth = 6
+                ctx.lineCap = "round"
+                ctx.strokeStyle = root.trackColor
+                ctx.beginPath()
+                ctx.arc(cx, cy, r - 2, a0, a1, false)
+                ctx.stroke()
+                ctx.strokeStyle = root.valueColor
+                ctx.beginPath()
+                ctx.arc(cx, cy, r - 2, a0, ap, false)
+                ctx.stroke()
+
+                ctx.beginPath()
+                ctx.arc(cx, cy, r * 0.62, 0, Math.PI * 2)
+                ctx.fillStyle = root.knobColor
+                ctx.fill()
+                ctx.strokeStyle = Md3Theme.colorScheme.outline
+                ctx.lineWidth = 1.5
+                ctx.stroke()
+
+                const nr = r * 0.42
+                ctx.strokeStyle = root.valueColor
+                ctx.lineWidth = 3
+                ctx.lineCap = "round"
+                ctx.beginPath()
+                ctx.moveTo(cx + Math.cos(ap) * (nr * 0.25), cy + Math.sin(ap) * (nr * 0.25))
+                ctx.lineTo(cx + Math.cos(ap) * nr, cy + Math.sin(ap) * nr)
+                ctx.stroke()
+
+                ctx.beginPath()
+                ctx.arc(cx, cy, 4, 0, Math.PI * 2)
+                ctx.fillStyle = root.valueColor
+                ctx.fill()
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                enabled: root.interactive
+                hoverEnabled: true
+                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                preventStealing: true
+                onPressed: function (mouse) {
+                    root.forceActiveFocus()
+                    root._setValue(root._valueFromCanvasPos(mouse.x, mouse.y), false)
+                }
+                onPositionChanged: function (mouse) {
+                    if (pressed)
+                        root._setValue(root._valueFromCanvasPos(mouse.x, mouse.y), false)
+                }
+                onReleased: Md3Accessibility.announce(root.valueText)
+            }
+        }    }
+
 
     onValueChanged: root._requestPaint()
     onKnobColorChanged: root._requestPaint()

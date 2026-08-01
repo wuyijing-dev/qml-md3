@@ -16,6 +16,8 @@ Item {
     property bool showGrid: true
     property real lineWidth: 2
     property real areaOpacity: 0.35
+    /// Drop Canvas while page/window inactive (FBO free).
+    readonly property bool _plotActive: Md3TreeVisibility.isLiveMotionScene(root, null)
 
     implicitWidth: 320
     implicitHeight: 200
@@ -72,79 +74,75 @@ Item {
         return palette[i % palette.length]
     }
 
-    function requestPaint() { canvas.requestPaint() }
+    function requestPaint() {
+        if (canvasLoader.item)
+            canvasLoader.item.requestPaint()
+    }
 
     onValuesChanged: requestPaint()
     onStackedChanged: requestPaint()
     onWidthChanged: requestPaint()
     onHeightChanged: requestPaint()
+    on_PlotActiveChanged: if (_plotActive) requestPaint()
 
-    Canvas {
-        id: canvas
+        Loader {
+        id: canvasLoader
         anchors.fill: parent
-        anchors.margins: 8
-        onPaint: {
-            const ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-            const list = root._seriesList
-            if (!list.length || !list[0].length)
-                return
-            const n = list[0].length
-            const padL = 28
-            const padB = 4
-            const plotW = width - padL
-            const plotH = height - padB
-            const lo = root._range.min
-            const hi = root._range.max
-            const span = Math.max(1e-6, hi - lo)
+        active: root._plotActive
+        sourceComponent: canvasComp
+        onLoaded: if (item) item.requestPaint()
+    }
 
-            if (root.showGrid) {
-                ctx.strokeStyle = Md3Theme.colorScheme.outlineVariant
-                ctx.lineWidth = 1
-                for (let g = 0; g <= 4; ++g) {
-                    const y = plotH * (1 - g / 4)
-                    ctx.beginPath()
-                    ctx.moveTo(padL, y)
-                    ctx.lineTo(width, y)
-                    ctx.stroke()
-                }
-            }
+    Component {
+        id: canvasComp
+    Canvas {
+            id: canvas
+            anchors.fill: parent
+            anchors.margins: 8
+            onPaint: {
+                const ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+                const list = root._seriesList
+                if (!list.length || !list[0].length)
+                    return
+                const n = list[0].length
+                const padL = 28
+                const padB = 4
+                const plotW = width - padL
+                const plotH = height - padB
+                const lo = root._range.min
+                const hi = root._range.max
+                const span = Math.max(1e-6, hi - lo)
 
-            const baselines = []
-            for (let i = 0; i < n; ++i)
-                baselines.push(0)
-
-            for (let s = 0; s < list.length; ++s) {
-                const series = list[s]
-                const col = root._colorAt(s)
-                const top = []
-                for (let i = 0; i < n; ++i) {
-                    const v = Number(series[i] || 0)
-                    const base = root.stacked ? baselines[i] : 0
-                    const yVal = root.stacked ? (base + v) : v
-                    top.push(yVal)
-                    if (root.stacked)
-                        baselines[i] = yVal
+                if (root.showGrid) {
+                    ctx.strokeStyle = Md3Theme.colorScheme.outlineVariant
+                    ctx.lineWidth = 1
+                    for (let g = 0; g <= 4; ++g) {
+                        const y = plotH * (1 - g / 4)
+                        ctx.beginPath()
+                        ctx.moveTo(padL, y)
+                        ctx.lineTo(width, y)
+                        ctx.stroke()
+                    }
                 }
 
-                ctx.beginPath()
-                for (let i = 0; i < n; ++i) {
-                    const x = padL + (n === 1 ? plotW / 2 : i * plotW / (n - 1))
-                    const y = plotH * (1 - (top[i] - lo) / span)
-                    if (i === 0) ctx.moveTo(x, y)
-                    else ctx.lineTo(x, y)
-                }
-                for (let i = n - 1; i >= 0; --i) {
-                    const base = root.stacked ? (top[i] - Number(series[i] || 0)) : lo
-                    const x = padL + (n === 1 ? plotW / 2 : i * plotW / (n - 1))
-                    const y = plotH * (1 - (base - lo) / span)
-                    ctx.lineTo(x, y)
-                }
-                ctx.closePath()
-                ctx.fillStyle = Qt.rgba(col.r, col.g, col.b, root.areaOpacity)
-                ctx.fill()
+                const baselines = []
+                for (let i = 0; i < n; ++i)
+                    baselines.push(0)
 
-                if (root.showLine) {
+                for (let s = 0; s < list.length; ++s) {
+                    const series = list[s]
+                    const col = root._colorAt(s)
+                    const top = []
+                    for (let i = 0; i < n; ++i) {
+                        const v = Number(series[i] || 0)
+                        const base = root.stacked ? baselines[i] : 0
+                        const yVal = root.stacked ? (base + v) : v
+                        top.push(yVal)
+                        if (root.stacked)
+                            baselines[i] = yVal
+                    }
+
                     ctx.beginPath()
                     for (let i = 0; i < n; ++i) {
                         const x = padL + (n === 1 ? plotW / 2 : i * plotW / (n - 1))
@@ -152,13 +150,32 @@ Item {
                         if (i === 0) ctx.moveTo(x, y)
                         else ctx.lineTo(x, y)
                     }
-                    ctx.strokeStyle = col
-                    ctx.lineWidth = root.lineWidth
-                    ctx.stroke()
+                    for (let i = n - 1; i >= 0; --i) {
+                        const base = root.stacked ? (top[i] - Number(series[i] || 0)) : lo
+                        const x = padL + (n === 1 ? plotW / 2 : i * plotW / (n - 1))
+                        const y = plotH * (1 - (base - lo) / span)
+                        ctx.lineTo(x, y)
+                    }
+                    ctx.closePath()
+                    ctx.fillStyle = Qt.rgba(col.r, col.g, col.b, root.areaOpacity)
+                    ctx.fill()
+
+                    if (root.showLine) {
+                        ctx.beginPath()
+                        for (let i = 0; i < n; ++i) {
+                            const x = padL + (n === 1 ? plotW / 2 : i * plotW / (n - 1))
+                            const y = plotH * (1 - (top[i] - lo) / span)
+                            if (i === 0) ctx.moveTo(x, y)
+                            else ctx.lineTo(x, y)
+                        }
+                        ctx.strokeStyle = col
+                        ctx.lineWidth = root.lineWidth
+                        ctx.stroke()
+                    }
                 }
             }
-        }
-    }
+        }    }
+
 
     Component.onCompleted: requestPaint()
 }

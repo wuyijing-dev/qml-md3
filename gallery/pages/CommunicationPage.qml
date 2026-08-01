@@ -49,44 +49,53 @@ Md3Page {
                 role: Md3Text.LabelLarge
                 tone: Md3Text.OnSurfaceVariant
             }
-            Md3LinearProgressIndicator { width: parent.width; value: 0.45 }
-            Md3LinearProgressIndicator { width: parent.width; indeterminate: true }
-
-            Md3Text {
-                text: qsTr("Loading indicator")
-                role: Md3Text.LabelLarge
-                tone: Md3Text.OnSurfaceVariant
-            }
-            Md3HStack {
-                spacing: 24
-                Md3LoadingIndicator { sizePreset: Md3LoadingIndicator.Small }
-                Md3LoadingIndicator { sizePreset: Md3LoadingIndicator.Medium; label: qsTr("Loading…") }
-                Md3LoadingIndicator { sizePreset: Md3LoadingIndicator.Large }
-                Md3LoadingIndicator {
-                    indeterminate: false
-                    value: 0.65
-                    label: qsTr("65%")
-                }
-            }
-
-            Md3Text {
-                text: qsTr("Morph loading (expressive)")
-                role: Md3Text.LabelLarge
-                tone: Md3Text.OnSurfaceVariant
-            }
-            Md3HStack {
-                spacing: 28
-                Md3MorphLoadingIndicator { sizePreset: Md3MorphLoadingIndicator.Small }
-                Md3MorphLoadingIndicator { }
-                Md3MorphLoadingIndicator { sizePreset: Md3MorphLoadingIndicator.Large }
-                Md3MorphLoadingIndicator {
-                    variant: Md3MorphLoadingIndicator.Contained
-                    sizePreset: Md3MorphLoadingIndicator.Small
-                }
-                Md3MorphLoadingIndicator { variant: Md3MorphLoadingIndicator.Contained }
-                Md3MorphLoadingIndicator {
-                    variant: Md3MorphLoadingIndicator.Contained
-                    sizePreset: Md3MorphLoadingIndicator.Large
+            Md3DeferredSection {
+                preferredHeight: 220
+                delayMs: 24
+                asynchronous: true
+                sourceComponent: Component {
+                    Md3VStack {
+                        width: parent ? parent.width : 400
+                        spacing: 16
+                        Md3LinearProgressIndicator { width: parent.width; value: 0.45 }
+                        Md3LinearProgressIndicator { width: parent.width; indeterminate: true }
+                        Md3Text {
+                            text: qsTr("Loading indicator")
+                            role: Md3Text.LabelLarge
+                            tone: Md3Text.OnSurfaceVariant
+                        }
+                        Md3HStack {
+                            spacing: 24
+                            Md3LoadingIndicator { sizePreset: Md3LoadingIndicator.Small }
+                            Md3LoadingIndicator { sizePreset: Md3LoadingIndicator.Medium; label: qsTr("Loading…") }
+                            Md3LoadingIndicator { sizePreset: Md3LoadingIndicator.Large }
+                            Md3LoadingIndicator {
+                                indeterminate: false
+                                value: 0.65
+                                label: qsTr("65%")
+                            }
+                        }
+                        Md3Text {
+                            text: qsTr("Morph loading (expressive)")
+                            role: Md3Text.LabelLarge
+                            tone: Md3Text.OnSurfaceVariant
+                        }
+                        Md3HStack {
+                            spacing: 28
+                            Md3MorphLoadingIndicator { sizePreset: Md3MorphLoadingIndicator.Small }
+                            Md3MorphLoadingIndicator { }
+                            Md3MorphLoadingIndicator { sizePreset: Md3MorphLoadingIndicator.Large }
+                            Md3MorphLoadingIndicator {
+                                variant: Md3MorphLoadingIndicator.Contained
+                                sizePreset: Md3MorphLoadingIndicator.Small
+                            }
+                            Md3MorphLoadingIndicator { variant: Md3MorphLoadingIndicator.Contained }
+                            Md3MorphLoadingIndicator {
+                                variant: Md3MorphLoadingIndicator.Contained
+                                sizePreset: Md3MorphLoadingIndicator.Large
+                            }
+                        }
+                    }
                 }
             }
 
