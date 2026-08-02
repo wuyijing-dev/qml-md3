@@ -6,8 +6,8 @@
 site_name: QML MD3
 site_description: Material Design 3 component library for Qt Quick / QML
 site_url: https://wuyijing-dev.github.io/QML_MD3_Document/
-repo_url: https://github.com/wuyijing-dev/QML_MD3
-repo_name: wuyijing-dev/QML_MD3
+repo_url: https://github.com/wuyijing-dev/qml-md3
+repo_name: wuyijing-dev/qml-md3
 
 docs_dir: docs
 site_dir: site
@@ -70,15 +70,25 @@ nav:
     - 无障碍抽检: topics/a11y-spotcheck.md
     - 国际化: topics/i18n.md
     - DataTable: topics/datatable.md
+    - 深链: topics/routing.md
+    - 多文档: topics/multi-document.md
+    - 托盘: topics/tray.md
+    - 原生窗口平台: topics/native-platforms.md
+    - Android: topics/android.md
+    - 校验: topics/validation.md
+    - 更新安全: topics/release-updater.md
     - Qt 版本矩阵: topics/qt-version-matrix.md
     - Qt 6.5–6.10 UI 差异: topics/qt65-610-ui-diffs.md
     - WebAssembly: topics/wasm.md
-    - 原生窗口平台: topics/native-platforms.md
-    - Android: topics/android.md
     - PySide: topics/pyside.md
     - Rust: topics/rust.md
+    - 消费方 Main.qml: topics/consumer-app-main-qml.md
     - 实验性 API: topics/experimental.md
     - 文档托管: topics/mkdocs-hosting.md
-  - API 索引: api/README.md
+  - API:
+    - 控件索引: api/README.md
+    - 手写附录: api-manual/README.md
+    - v1.1.1 宿主锁: api-manual/host-lock-1.1.1.md
+    - NativeShell: api-manual/Md3NativeShell.md
   - 维护:
     - 生产 TODO: project/professional-todo.md

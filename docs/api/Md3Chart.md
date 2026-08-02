@@ -62,7 +62,7 @@ import Md3
 | `viewMoving` | `bool` | `gestureActive \|\| Math.abs(_panVelocity) > 1e-5` | readonly | `Md3Chart` | True while dragging or coasting — skip Catmull / async Shape to avoid release flicker. |
 | `paused` | `bool` | `false` | read/write | `Md3Chart` | — |
 | `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3Chart` | Drop Canvas/Shape while page is off-display (PageHost `md3PageActive`). |
-| `chartActive` | `bool` | `!paused && enabled && pageGate.contentActive && _sceneLive` | readonly | `Md3Chart` | True while page/window/app allow live chart work; Gate tracks `md3PageActive`. |
+| `chartActive` | `bool` | `!paused && enabled && pageGate.contentActive` | readonly | `Md3Chart` | Page/window/app visibility — Gate tracks `md3PageActive` (bindings alone do not). |
 | `renderedPointCount` | `int` | `0` | read/write | `Md3Chart` | — |
 | `plotLeft` | `real` | `contentPadding + labelWidth` | readonly | `Md3Chart` | — |
 | `plotRight` | `real` | `width - contentPadding` | readonly | `Md3Chart` | — |
@@ -106,6 +106,7 @@ import Md3
 | `panByFrac(delta, trackVelocity)` | `Md3Chart` | — |
 | `setProbe(index, pixelX, seriesInfo, pixelY)` | `Md3Chart` | — |
 | `clearProbe()` | `Md3Chart` | — |
+| `nudgeProbe(delta)` | `Md3Chart` | Move probe by ±1 sample (Line/Bar override with geom.sampleCount). |
 | `categoryLabel(index)` | `Md3Chart` | — |
 | `windowIndices(n)` | `Md3Chart` | Visible sample window for length-n series under viewStart/viewSpan. |
 | `indexAtPlotX(px, n)` | `Md3Chart` | — |

@@ -33,6 +33,8 @@ import Md3
 | `progress` | `real` | `{…}` | readonly | `Md3SegmentGauge` | — |
 | `filledSegments` | `int` | `Math.round(progress * Math.max(1, segments))` | readonly | `Md3SegmentGauge` | — |
 | `valueText` | `string` | `Number(value).toFixed(decimals) + (unit.length ? unit : "")` | readonly | `Md3SegmentGauge` | — |
+| `hostWindow` | `var` | `null` | read/write | `Md3SegmentGauge` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3SegmentGauge` | — |
 
 ## Signals
 

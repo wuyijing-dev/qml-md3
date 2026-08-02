@@ -28,6 +28,7 @@ import Md3
 | `showValue` | `bool` | `true` | read/write | `Md3RingGauge` | — |
 | `roundedCaps` | `bool` | `true` | read/write | `Md3RingGauge` | — |
 | `size` | `real` | `140` | read/write | `Md3RingGauge` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3RingGauge` | Drop Shape geometry while page is off-display. |
 | `progress` | `real` | `{…}` | readonly | `Md3RingGauge` | — |
 | `valueText` | `string` | `Number(value).toFixed(decimals) + (unit.length ? unit : "")` | readonly | `Md3RingGauge` | — |
 

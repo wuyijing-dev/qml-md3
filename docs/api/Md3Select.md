@@ -43,6 +43,7 @@ import Md3
 | `activeColor` | `color` | `hasError ? Md3Theme.colorScheme.error : Md3Theme.colorScheme.primary` | readonly | `Md3Select` | — |
 | `open` | `bool` | `menu.open` | readonly | `Md3Select` | — |
 | `floated` | `bool` | `open \|\| hasSelection \|\| placeholderText.length === 0` | readonly | `Md3Select` | — |
+| `errorFeedbackEnabled` | `bool` | `true` | read/write | `Md3Select` | — |
 | `hasSelection` | `bool` | `multiSelect` | readonly | `Md3Select` | — |
 | `currentItem` | `var` | `{…}` | readonly | `Md3Select` | — |
 | `displayText` | `string` | `{…}` | readonly | `Md3Select` | — |

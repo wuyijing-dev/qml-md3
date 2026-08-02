@@ -35,6 +35,8 @@ import Md3
 | `size` | `real` | `160` | read/write | `Md3NeedleGauge` | — |
 | `progress` | `real` | `{…}` | readonly | `Md3NeedleGauge` | — |
 | `valueText` | `string` | `Number(value).toFixed(decimals) + (unit.length ? unit : "")` | readonly | `Md3NeedleGauge` | — |
+| `hostWindow` | `var` | `null` | read/write | `Md3NeedleGauge` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3NeedleGauge` | — |
 
 ## Signals
 

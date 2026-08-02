@@ -28,6 +28,8 @@ _None._
 | `isWindowActive(win)` | `Md3TreeVisibility` | Window is mapped and not minimized/hidden. Missing window → inactive. |
 | `isSceneActive(item, win)` | `Md3TreeVisibility` | Tree shown and window active. Pass explicit `win` / `hostWindow`, or `null`/`undefined` to resolve via Md3OverlayHost. |
 | `isLiveMotionScene(item, win)` | `Md3TreeVisibility` | Scene active and application not suspended/hidden (for live timers / FrameAnimation). |
+| `findPageRoot(item)` | `Md3TreeVisibility` | Nearest ancestor that declares boolean `md3PageActive` (PageHost injectable). |
+| `isPageActive(item)` | `Md3TreeVisibility` | True when no page root, or `md3PageActive` is true. |
 
 ## Example
 

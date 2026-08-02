@@ -1,6 +1,6 @@
 # Md3ScatterChart
 
-Scatter chart — X/Y points with zoom/pan/probe (parity with line chart ops).
+Scatter chart — X/Y points with zoom/pan/probe (parity with line chart ops). Points drawn on one Canvas; unloaded while !chartActive.
 
 - **Source:** `src/Md3/components/Md3ScatterChart.qml`
 - **Extends:** `Md3Chart`
@@ -67,7 +67,8 @@ import Md3
 | `hostWindow` | `var` | `null` | read/write | [`Md3Chart`](Md3Chart.md) | Optional Window for live-motion checks (else OverlayHost). |
 | `viewMoving` | `bool` | `gestureActive \|\| Math.abs(_panVelocity) > 1e-5` | readonly | [`Md3Chart`](Md3Chart.md) | True while dragging or coasting — skip Catmull / async Shape to avoid release flicker. |
 | `paused` | `bool` | `false` | read/write | [`Md3Chart`](Md3Chart.md) | — |
-| `chartActive` | `bool` | `!paused && enabled` | readonly | [`Md3Chart`](Md3Chart.md) | Page/window/app visibility — no per-scroll mapToItem (that starved the UI thread / rail). |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | [`Md3Chart`](Md3Chart.md) | Drop Canvas/Shape while page is off-display (PageHost `md3PageActive`). |
+| `chartActive` | `bool` | `!paused && enabled && pageGate.contentActive` | readonly | [`Md3Chart`](Md3Chart.md) | Page/window/app visibility — Gate tracks `md3PageActive` (bindings alone do not). |
 | `renderedPointCount` | `int` | `0` | read/write | [`Md3Chart`](Md3Chart.md) | — |
 | `plotLeft` | `real` | `contentPadding + labelWidth` | readonly | [`Md3Chart`](Md3Chart.md) | — |
 | `plotRight` | `real` | `width - contentPadding` | readonly | [`Md3Chart`](Md3Chart.md) | — |
@@ -111,6 +112,7 @@ import Md3
 | `panByFrac(delta, trackVelocity)` | [`Md3Chart`](Md3Chart.md) | — |
 | `setProbe(index, pixelX, seriesInfo, pixelY)` | [`Md3Chart`](Md3Chart.md) | — |
 | `clearProbe()` | [`Md3Chart`](Md3Chart.md) | — |
+| `nudgeProbe(delta)` | [`Md3Chart`](Md3Chart.md) | Move probe by ±1 sample (Line/Bar override with geom.sampleCount). |
 | `categoryLabel(index)` | [`Md3Chart`](Md3Chart.md) | — |
 | `windowIndices(n)` | [`Md3Chart`](Md3Chart.md) | Visible sample window for length-n series under viewStart/viewSpan. |
 | `indexAtPlotX(px, n)` | [`Md3Chart`](Md3Chart.md) | — |

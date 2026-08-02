@@ -15,6 +15,19 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `customChrome` | `bool` | `Md3WindowCapabilities.customChrome` | read/write | `Md3ApplicationWindow` | — |
 | `showTitleBar` | `bool` | `true` | read/write | `Md3ApplicationWindow` | — |
+| `adaptiveChrome` | `bool` | `true` | read/write | `Md3ApplicationWindow` | When true (default), chrome follows MD3 size class + mobile/desktop policy (Md3Adaptive). |
+| `widthClass` | `int` | `Md3Adaptive.widthClassFor(width)` | readonly | `Md3ApplicationWindow` | — |
+| `heightClass` | `int` | `Md3Adaptive.heightClassFor(height)` | readonly | `Md3ApplicationWindow` | — |
+| `deviceClass` | `int` | `Md3Adaptive.deviceClassFor(width, height)` | readonly | `Md3ApplicationWindow` | — |
+| `windowAppearance` | `int` | `Md3Adaptive.windowAppearanceFor(width, height)` | readonly | `Md3ApplicationWindow` | — |
+| `widthClassName` | `string` | `Md3Adaptive.widthClassName(widthClass)` | readonly | `Md3ApplicationWindow` | — |
+| `deviceClassName` | `string` | `Md3Adaptive.deviceClassName(deviceClass)` | readonly | `Md3ApplicationWindow` | — |
+| `windowAppearanceName` | `string` | `Md3Adaptive.windowAppearanceName(windowAppearance)` | readonly | `Md3ApplicationWindow` | — |
+| `useCustomChrome` | `bool` | `{…}` | readonly | `Md3ApplicationWindow` | Effective CSD flag after adaptive policy (use this instead of raw customChrome for chrome layout). |
+| `preferCompactTitleBar` | `bool` | `adaptiveChrome` | readonly | `Md3ApplicationWindow` | — |
+| `preferCaptionButtons` | `bool` | `adaptiveChrome` | readonly | `Md3ApplicationWindow` | — |
+| `preferNavigationBar` | `bool` | `Md3Adaptive.preferNavigationBar(width, height)` | readonly | `Md3ApplicationWindow` | — |
+| `preferNavigationRail` | `bool` | `Md3Adaptive.preferNavigationRail(width, height)` | readonly | `Md3ApplicationWindow` | — |
 | `roundedCorners` | `bool` | `Md3WindowCapabilities.roundedCorners` | read/write | `Md3ApplicationWindow` | — |
 | `cornerRadius` | `real` | `Md3WindowCapabilities.windowCornerRadius` | read/write | `Md3ApplicationWindow` | — |
 | `showWindowBorder` | `bool` | `true` | read/write | `Md3ApplicationWindow` | — |
@@ -53,8 +66,8 @@ import Md3
 | `pageCacheLimit` | `int` | `1` | read/write | `Md3ApplicationWindow` | — |
 | `pageIdleTrimMs` | `int` | `4000` | read/write | `Md3ApplicationWindow` | — |
 | `pagePadding` | `real` | `Md3Theme.pagePadding` | read/write | `Md3ApplicationWindow` | — |
-| `pagePrefetch` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Warm neighbor destinations after navigate. |
-| `pagePrefetchL1` | `bool` | `true` | read/write | `Md3ApplicationWindow` | With `pagePrefetch`: inflate neighbor L1 Items. Set `false` to warm L2 Components only (Gallery Profile F). |
+| `pagePrefetch` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
+| `pagePrefetchL1` | `bool` | `true` | read/write | `Md3ApplicationWindow` | With pagePrefetch: inflate neighbor L1 Items. False = warm neighbor Components (L2) only. |
 | `pagePredictPrefetch` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
 | `pageL2Cache` | `bool` | `true` | read/write | `Md3ApplicationWindow` | — |
 | `pageL2CacheLimit` | `int` | `1` | read/write | `Md3ApplicationWindow` | — |
@@ -70,16 +83,16 @@ import Md3
 | `pageNavWarmL2CacheLimit` | `int` | `-1` | read/write | `Md3ApplicationWindow` | -1 → max(32, destinations.length) |
 | `pageNavWarmPrefetch` | `bool` | `true` | read/write | `Md3ApplicationWindow` | — |
 | `pageTransition` | `string` | `"fade"` | read/write | `Md3ApplicationWindow` | — |
-| `pageTransitionDuration` | `int` | `100` | read/write | `Md3ApplicationWindow` | — |
+| `pageTransitionDuration` | `int` | `Md3Motion.medium2` | read/write | `Md3ApplicationWindow` | — |
 | `pageSkeleton` | `bool` | `false` | read/write | `Md3ApplicationWindow` | — |
 | `pageHost` | `alias` | `windowBody.pageHost` | read/write | `Md3ApplicationWindow` | Alias → `windowBody.pageHost` |
 | `shellRail` | `alias` | `windowBody.rail` | read/write | `Md3ApplicationWindow` | Alias → `windowBody.rail` |
 | `progressiveContent` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Within-page progressive sections (Md3DeferredSection). Default on. |
 | `resolvedPageSourceBase` | `url` | `{…}` | readonly | `Md3ApplicationWindow` | Effective pages root for PageHost (hot-reload disk path or `pageSourceBase`). |
 | `persistSession` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Persist geometry / theme / shell via Md3AppSettings (QSettings). |
-| `sessionSaveDebounceMs` | `int` | `400` | read/write | `Md3ApplicationWindow` | Coalesce session writes during window move/resize (immediate flush on close). |
 | `settingsOrganization` | `string` | `"QML_MD3"` | read/write | `Md3ApplicationWindow` | — |
 | `settingsApplication` | `string` | `"Md3"` | read/write | `Md3ApplicationWindow` | — |
+| `sessionSaveDebounceMs` | `int` | `400` | read/write | `Md3ApplicationWindow` | Coalesce geometry/theme writes so title-bar drag does not hit QSettings every move tick. |
 | `hotReload` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Dev hot-reload of QML sources (file watcher + clearComponentCache). |
 | `hotReloadAgent` | `alias` | `hotReloadInst` | read/write | `Md3ApplicationWindow` | Alias → `hotReloadInst` |
 | `showPerformanceButton` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Built-in performance overlay (title-bar speed button + floating panel). |
@@ -87,6 +100,11 @@ import Md3
 | `performanceDetached` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Optional: pop the panel into its own non-modal window. |
 | `performanceMonitor` | `alias` | `perfMonitor` | read/write | `Md3ApplicationWindow` | Alias → `perfMonitor` |
 | `performancePanel` | `alias` | `perfPanel` | read/write | `Md3ApplicationWindow` | Alias → `perfPanel` |
+| `shellInfoBarOpen` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Persistent shell banner under the chrome (offline / sync) — not a Snackbar. |
+| `shellInfoBarTitle` | `string` | `""` | read/write | `Md3ApplicationWindow` | — |
+| `shellInfoBarMessage` | `string` | `""` | read/write | `Md3ApplicationWindow` | — |
+| `shellInfoBarActionText` | `string` | `""` | read/write | `Md3ApplicationWindow` | — |
+| `shellInfoBarSeverity` | `int` | `0` | read/write | `Md3ApplicationWindow` | — |
 | `documentTabsEnabled` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Show Win11-style tab strip under the title bar. |
 | `documentTabsManaged` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Auto-handle activate / close / add / reorder / tear-off + sync with currentIndex. |
 | `documentTabsCloseWindowWhenEmpty` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Close this window when the last tab is closed (typical for torn-off windows). |
@@ -113,13 +131,15 @@ import Md3
 | `content` | `alias` | `customContent.content` | default read/write | `Md3ApplicationWindow` | Default property → `customContent.content` |
 | `isMaximizedLike` | `bool` | `visibility === Window.Maximized` | readonly | `Md3ApplicationWindow` | — |
 | `effectiveRadius` | `real` | `{…}` | readonly | `Md3ApplicationWindow` | — |
-| `usesSystemCorners` | `bool` | `…` | readonly | `Md3ApplicationWindow` | True when OS corner clip is active (skip chrome MultiEffect). |
-| `chromeMaskActive` | `bool` | `…` | readonly | `Md3ApplicationWindow` | Client MultiEffect mask when rounded and OS cannot clip. |
-| `useTransparentFrame` | `bool` | `customChrome && Md3WindowCapabilities.customChrome` | readonly | `Md3ApplicationWindow` | — |
+| `usesSystemCorners` | `bool` | `Md3WindowCapabilities.systemCorners` | readonly | `Md3ApplicationWindow` | OS clips the window frame (Win DWM / macOS layer) — skip MultiEffect chrome FBO. |
+| `useTransparentFrame` | `bool` | `useCustomChrome && effectiveRadius > 0` | readonly | `Md3ApplicationWindow` | — |
+| `chromeMaskActive` | `bool` | `effectiveRadius > 0` | readonly | `Md3ApplicationWindow` | Client mask FBO only when the OS cannot clip the silhouette. |
 | `windowNative` | `alias` | `windowHelper` | read/write | `Md3ApplicationWindow` | Access native helper (signals: thumbBarButtonClicked, trayActivated, dpiChanged). |
 | `chromeTop` | `real` | `chromeHost.height` | readonly | `Md3ApplicationWindow` | — |
 | `edge` | `real` | `6` | readonly | `Md3ApplicationWindow` | — |
-| `canResize` | `bool` | `customChrome && Md3WindowCapabilities.systemResize` | readonly | `Md3ApplicationWindow` | — |
+| `canResize` | `bool` | `useCustomChrome && Md3WindowCapabilities.systemResize` | readonly | `Md3ApplicationWindow` | — |
+| `chromeTopReserve` | `real` | `(showTitleBar && useCustomChrome) ? chromeHost.height : 0` | readonly | `Md3ApplicationWindow` | Keep QML resize grips off the title-bar caption strip (min/max/close). |
+| `chromeRightReserve` | `real` | `{…}` | readonly | `Md3ApplicationWindow` | — |
 | `themeRevealCx` | `real` | `0` | read/write | `Md3ApplicationWindow` | — |
 | `themeRevealCy` | `real` | `0` | read/write | `Md3ApplicationWindow` | — |
 | `themeRevealRadius` | `real` | `0` | read/write | `Md3ApplicationWindow` | — |
@@ -131,6 +151,7 @@ import Md3
 
 | Signal | Defined in | Description |
 |--------|------------|-------------|
+| `shellInfoBarActionClicked()` | `Md3ApplicationWindow` | — |
 | `documentTabActivated(int index)` | `Md3ApplicationWindow` | — |
 | `documentTabCloseRequested(int index)` | `Md3ApplicationWindow` | — |
 | `documentTabAddRequested()` | `Md3ApplicationWindow` | — |
@@ -141,6 +162,8 @@ import Md3
 
 | Method | Defined in | Description |
 |--------|------------|-------------|
+| `showShellInfoBar(message, options)` | `Md3ApplicationWindow` | — |
+| `dismissShellInfoBar()` | `Md3ApplicationWindow` | — |
 | `navigateTo(index, opts)` | `Md3ApplicationWindow` | — |
 | `pushRoute(index, params, opts)` | `Md3ApplicationWindow` | — |
 | `goBack(opts)` | `Md3ApplicationWindow` | — |
@@ -188,6 +211,21 @@ import Md3
 | `raiseWindow()` | `Md3ApplicationWindow` | — |
 | `setDockBadge(count)` | `Md3ApplicationWindow` | — |
 | `setIdleInhibit(inhibit, reason)` | `Md3ApplicationWindow` | — |
+| `openUrl(url)` | `Md3ApplicationWindow` | — |
+| `revealInFolder(pathOrUrl)` | `Md3ApplicationWindow` | — |
+| `beep()` | `Md3ApplicationWindow` | — |
+| `centerOnScreen()` | `Md3ApplicationWindow` | — |
+| `setWindowOpacity(opacity)` | `Md3ApplicationWindow` | — |
+| `setVisibleInTaskbar(visible)` | `Md3ApplicationWindow` | — |
+| `minimizeWindow()` | `Md3ApplicationWindow` | — |
+| `maximizeWindow()` | `Md3ApplicationWindow` | — |
+| `restoreWindow()` | `Md3ApplicationWindow` | — |
+| `setFullScreen(fullScreen)` | `Md3ApplicationWindow` | — |
+| `systemColorSchemeDark()` | `Md3ApplicationWindow` | — |
+| `shareText(text, title)` | `Md3ApplicationWindow` | — |
+| `vibrate(durationMs)` | `Md3ApplicationWindow` | — |
+| `setImmersiveSystemUi(immersive)` | `Md3ApplicationWindow` | — |
+| `requestAttention(on)` | `Md3ApplicationWindow` | — |
 | `openBlurSettings()` | `Md3ApplicationWindow` | — |
 | `setWindowCloaked(cloaked)` | `Md3ApplicationWindow` | — |
 | `setPreferredAppMode(dark)` | `Md3ApplicationWindow` | — |
@@ -197,6 +235,26 @@ import Md3
 | `setThumbnailTooltip(text)` | `Md3ApplicationWindow` | — |
 | `registerApplicationRestart(args)` | `Md3ApplicationWindow` | — |
 | `unregisterApplicationRestart()` | `Md3ApplicationWindow` | — |
+| `requestSingleInstanceLock(id)` | `Md3ApplicationWindow` | — |
+| `setOpenAtLoginEnabled(enabled, openAsHidden)` | `Md3ApplicationWindow` | — |
+| `registerGlobalShortcut(id, accelerator)` | `Md3ApplicationWindow` | — |
+| `unregisterGlobalShortcut(id)` | `Md3ApplicationWindow` | — |
+| `setAsDefaultProtocolClient(scheme, path, args)` | `Md3ApplicationWindow` | — |
+| `removeAsDefaultProtocolClient(scheme)` | `Md3ApplicationWindow` | — |
+| `getPath(name)` | `Md3ApplicationWindow` | — |
+| `setSystemBarColors(statusCss, navCss, lightIcons)` | `Md3ApplicationWindow` | — |
+| `setScreenOrientation(mode)` | `Md3ApplicationWindow` | — |
+| `showSoftInput()` | `Md3ApplicationWindow` | — |
+| `hideSoftInput()` | `Md3ApplicationWindow` | — |
+| `setSoftInputAdjustResize(enable)` | `Md3ApplicationWindow` | — |
+| `openAppSettings()` | `Md3ApplicationWindow` | — |
+| `nativeToast(message, durationMs)` | `Md3ApplicationWindow` | — |
+| `hapticFeedback(kind)` | `Md3ApplicationWindow` | — |
+| `requestIgnoreBatteryOptimizations()` | `Md3ApplicationWindow` | — |
+| `shareFile(fileUrl, mimeType, titleText)` | `Md3ApplicationWindow` | — |
+| `copyToClipboard(text)` | `Md3ApplicationWindow` | — |
+| `clipboardText()` | `Md3ApplicationWindow` | — |
+| `openNotificationSettings()` | `Md3ApplicationWindow` | — |
 
 ## Example
 
@@ -206,8 +264,8 @@ import Md3
 Md3ApplicationWindow {
     customChrome: Md3WindowCapabilities.customChrome
     showTitleBar: true
+    adaptiveChrome: true
     roundedCorners: Md3WindowCapabilities.roundedCorners
     cornerRadius: Md3WindowCapabilities.windowCornerRadius
-    showWindowBorder: true
 }
 ```

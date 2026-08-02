@@ -30,6 +30,7 @@ import Md3
 | `tableBodyHeight` | `real` | `168` | read/write | `Md3FileDropZone` | — |
 | `rowHeight` | `real` | `44` | read/write | `Md3FileDropZone` | — |
 | `appendOnDrop` | `bool` | `true` | read/write | `Md3FileDropZone` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3FileDropZone` | Drop table row Items while page is off-display (chrome height stays). |
 | `lastRejectMessage` | `string` | `""` | read/write | `Md3FileDropZone` | — |
 | `rejectExtensionText` | `string` | `qsTr("File type not allowed")` | read/write | `Md3FileDropZone` | — |
 | `announceRejections` | `bool` | `true` | read/write | `Md3FileDropZone` | — |

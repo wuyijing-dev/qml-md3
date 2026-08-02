@@ -45,7 +45,7 @@ Md3Page {
     md3HostWindow: null
     md3RouteParams: /* … */
     md3NavDepth: 0
+    md3PageActive: true
     md3GoBack: null
-    md3PushRoute: null
 }
 ```

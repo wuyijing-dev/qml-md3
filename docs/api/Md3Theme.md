@@ -18,7 +18,7 @@ import Md3
 | `seed` | `color` | `"#6750A4"` | read/write | `Md3Theme` | — |
 | `textScale` | `real` | `1.0` | read/write | `Md3Theme` | — |
 | `highContrast` | `bool` | `false` | read/write | `Md3Theme` | — |
-| `reduceMotion` | `bool` | `false` | read/write | `Md3Theme` | Prefer near-instant motion for vestibular / a11y preferences. |
+| `reduceMotion` | `bool` | `false` | read/write | `Md3Theme` | Prefer near-instant **decorative** motion (page fades, ripples, state layers). Loaders / progress use Md3Motion.essential() and keep full timing. |
 | `progressiveContent` | `bool` | `true` | read/write | `Md3Theme` | Within-page progressive load (Md3DeferredSection). Default on; set false to load everything immediately. |
 | `density` | `int` | `0` | read/write | `Md3Theme` | Desktop UI density: `0` Comfortable (默认) / `1` Compact（工具/数据密集）。 Aligns with `Md3DataTable.Density`; drives spacing* / pagePadding / controlHeight hints. |
 | `densityCompact` | `bool` | `density >= 1` | readonly | `Md3Theme` | — |
@@ -28,7 +28,14 @@ import Md3
 | `spacingLg` | `real` | `densityCompact ? 12 : 16` | readonly | `Md3Theme` | 16 → 12 |
 | `spacingXl` | `real` | `densityCompact ? 16 : 24` | readonly | `Md3Theme` | 24 → 16（区块之间） |
 | `pagePadding` | `real` | `densityCompact ? 12 : 20` | readonly | `Md3Theme` | Window / page content inset hint（`Md3ApplicationWindow.pagePadding` 可绑此值） |
-| `controlHeight` | `real` | `densityCompact ? 36 : 40` | readonly | `Md3Theme` | Default control row height hint（按钮/字段外壳；控件可自有高度） |
+| `controlHeight` | `real` | `densityCompact ? 36 : 40` | readonly | `Md3Theme` | Default control row height hint（按钮 Small / 菜单条） |
+| `fieldHeight` | `real` | `densityCompact ? 48 : 56` | readonly | `Md3Theme` | Text field / Select / Dropdown shell height |
+| `iconButtonSize` | `real` | `densityCompact ? 40 : 48` | readonly | `Md3Theme` | Icon button outer hit target |
+| `iconCircleSize` | `real` | `densityCompact ? 36 : 40` | readonly | `Md3Theme` | Icon button filled circle |
+| `chipHeight` | `real` | `densityCompact ? 28 : 32` | readonly | `Md3Theme` | Assist / Filter / Input / Suggestion chip height |
+| `appBarHeight` | `real` | `densityCompact ? 56 : 64` | readonly | `Md3Theme` | Top app bar Small / fullscreen dialog chrome |
+| `bottomBarHeight` | `real` | `densityCompact ? 68 : 80` | readonly | `Md3Theme` | Bottom app bar / navigation bar |
+| `navDestinationHeight` | `real` | `densityCompact ? 48 : 56` | readonly | `Md3Theme` | Navigation rail / drawer destination row |
 | `tableRowHeight` | `real` | `densityCompact ? 40 : 52` | readonly | `Md3Theme` | Data table row height hint（与 Md3DataTable Comfortable/Compact 对齐） |
 | `effectsLevel` | `int` | `1` | read/write | `Md3Theme` | Global visual-effects budget for device adaptation. 0 = Low (流畅), 1 = Balanced (均衡), 2 = High (画质). |
 | `effectsIntensity` | `real` | `1.0` | read/write | `Md3Theme` | Extra intensity on interaction ink / state layers (0.35–1.35). Multiplies tier defaults. |

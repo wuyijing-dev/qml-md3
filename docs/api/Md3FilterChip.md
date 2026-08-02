@@ -21,7 +21,7 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `elevated` | `bool` | `false` | read/write | `Md3FilterChip` | — |
 | `selected` | `bool` | `false` | read/write | `Md3FilterChip` | — |
-| `chipHeight` | `real` | `32` | read/write | `Md3FilterChip` | — |
+| `chipHeight` | `real` | `Md3Theme.chipHeight` | read/write | `Md3FilterChip` | — |
 | `iconSize` | `real` | `18` | read/write | `Md3FilterChip` | — |
 | `fontSize` | `real` | `Md3Theme.scaled(Md3Theme.typography.labelLarge.size)` | read/write | `Md3FilterChip` | — |
 | `text` | `string` | `""` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
@@ -36,6 +36,7 @@ import Md3
 | `checkable` | `bool` | `false` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | When true, Space/Enter/click toggle `checked` before emitting clicked. |
 | `checked` | `bool` | `false` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
 | `pressEnabled` | `bool` | `true` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | When false, the built-in MouseArea ignores presses (custom hit areas). |
+| `interactive` | `bool` | `true` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | Gate clicks / keyboard activate without forcing `enabled: false` (e.g. busy spinner). |
 | `pressRightMargin` | `real` | `0` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
 | `pressLeftMargin` | `real` | `0` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
 | `hovered` | `bool` | `mouse.containsMouse` | readonly | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
@@ -64,7 +65,7 @@ import Md3
 Md3FilterChip {
     elevated: false
     selected: false
-    chipHeight: 32
+    chipHeight: Md3Theme.chipHeight
     iconSize: 18
     fontSize: Md3Theme.scaled(Md3Theme.typography.labelLarge.size)
 }

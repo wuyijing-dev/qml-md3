@@ -48,6 +48,7 @@ import Md3
 | `showFilterBar` | `bool` | `false` | read/write | `Md3DataTable` | — |
 | `filterPlaceholder` | `string` | `qsTr("Search table…")` | read/write | `Md3DataTable` | — |
 | `overlayWindow` | `var` | `null` | read/write | `Md3DataTable` | Optional explicit Window for row-action menu overlay. |
+| `accessibleName` | `string` | `""` | read/write | `Md3DataTable` | Screen-reader label (defaults to “Data table”). |
 | `serverSidePagination` | `bool` | `false` | read/write | `Md3DataTable` | — |
 | `serverTotalCount` | `int` | `0` | read/write | `Md3DataTable` | — |
 | `keyboardNavigationEnabled` | `bool` | `true` | read/write | `Md3DataTable` | — |
@@ -56,8 +57,10 @@ import Md3
 | `showColumnFilterIcons` | `bool` | `false` | read/write | `Md3DataTable` | — |
 | `rowActions` | `var` | `[]` | read/write | `Md3DataTable` | — |
 | `cellDelegate` | `Component` | `null` | read/write | `Md3DataTable` | Optional cell renderer: set `rowData`, `columnDef`, `columnIndex`, `displayText`, `sourceIndex`. |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3DataTable` | Drop TableView row models while page is off-display (chrome height stays). |
 | `editingSourceIndex` | `int` | `-1` | read/write | `Md3DataTable` | In-cell edit target (−1 = none). Column must set `editable: true`. |
 | `editingColumnIndex` | `int` | `-1` | read/write | `Md3DataTable` | — |
+| `focusedColumnIndex` | `int` | `-1` | read/write | `Md3DataTable` | Keyboard focus column for F2 / Left-Right (first editable when unset). |
 | `columnWidths` | `var` | `[]` | read/write | `Md3DataTable` | — |
 | `columnWidthsPersistKey` | `string` | `""` | read/write | `Md3DataTable` | When set, columnWidths are loaded/saved via Md3AppSettings (JSON number array). |
 | `rowMenuSourceIndex` | `int` | `-1` | read/write | `Md3DataTable` | — |

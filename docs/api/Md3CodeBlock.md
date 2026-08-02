@@ -24,16 +24,21 @@ import Md3
 | `padding` | `int` | `12` | read/write | `Md3CodeBlock` | — |
 | `maxHeight` | `int` | `280` | read/write | `Md3CodeBlock` | — |
 | `scrollable` | `bool` | `true` | read/write | `Md3CodeBlock` | When false, height grows with content (still clipped by parent). |
+| `showCopyButton` | `bool` | `true` | read/write | `Md3CodeBlock` | Show a copy button in the top-right corner. |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3CodeBlock` | Drop RichText HTML while page is off-display (chrome size stays). |
 
 ## Signals
 
-_None._
+| Signal | Defined in | Description |
+|--------|------------|-------------|
+| `copied(string text)` | `Md3CodeBlock` | — |
 
 ## Methods
 
 | Method | Defined in | Description |
 |--------|------------|-------------|
 | `refresh()` | `Md3CodeBlock` | — |
+| `requestRefresh()` | `Md3CodeBlock` | — |
 
 ## Example
 

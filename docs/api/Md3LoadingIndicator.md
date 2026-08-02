@@ -1,6 +1,6 @@
 # Md3LoadingIndicator
 
-Material 3 Loading indicator — PathAngleArc updated in-place (no per-frame Shape rebuild).
+Material 3 Loading indicator — spins a fixed arc (no per-frame Path mutation).
 
 - **Source:** `src/Md3/components/Md3LoadingIndicator.qml`
 - **Extends:** `Item`
@@ -33,10 +33,6 @@ import Md3
 | `indicatorSize` | `real` | `{…}` | read/write | `Md3LoadingIndicator` | — |
 | `sceneActive` | `bool` | `enabled && _treeShown` | readonly | `Md3LoadingIndicator` | — |
 | `radius` | `real` | `indicatorSize / 2 - strokeWidth` | readonly | `Md3LoadingIndicator` | — |
-| `arcRotation` | `real` | `-Math.PI / 2` | read/write | `Md3LoadingIndicator` | Arc start angle in radians (not Item.rotation). |
-| `sweep` | `real` | `Math.PI * 0.65` | read/write | `Md3LoadingIndicator` | — |
-| `sweepDir` | `real` | `1` | read/write | `Md3LoadingIndicator` | — |
-| `spinSpeed` | `real` | `Math.PI * 2 / (Md3Motion.progressSpin / 1000)` | read/write | `Md3LoadingIndicator` | — |
 
 ## Signals
 
@@ -44,10 +40,7 @@ _None._
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `radToDeg(r)` | `Md3LoadingIndicator` | — |
-| `syncArc()` | `Md3LoadingIndicator` | — |
+_None._
 
 ## Example
 

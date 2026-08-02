@@ -25,6 +25,8 @@ import Md3
 | `centerValue` | `string` | `""` | read/write | `Md3MultiRingGauge` | — |
 | `size` | `real` | `160` | read/write | `Md3MultiRingGauge` | — |
 | `minCenterRatio` | `real` | `0.40` | read/write | `Md3MultiRingGauge` | Minimum center hole as a fraction of diameter (keeps text readable). |
+| `hostWindow` | `var` | `null` | read/write | `Md3MultiRingGauge` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3MultiRingGauge` | — |
 | `innerHoleRadius` | `real` | `Math.max(22, _dialR * minCenterRatio)` | readonly | `Md3MultiRingGauge` | Guaranteed readable hole; rings auto-thin to leave this clear. |
 
 ## Signals

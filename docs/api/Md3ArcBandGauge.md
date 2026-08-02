@@ -30,6 +30,7 @@ import Md3
 | `showValue` | `bool` | `true` | read/write | `Md3ArcBandGauge` | — |
 | `showMarker` | `bool` | `true` | read/write | `Md3ArcBandGauge` | — |
 | `size` | `real` | `140` | read/write | `Md3ArcBandGauge` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3ArcBandGauge` | Drop Shape geometry while page is off-display. |
 | `progress` | `real` | `{…}` | readonly | `Md3ArcBandGauge` | — |
 | `valueText` | `string` | `Number(value).toFixed(decimals) + (unit.length ? unit : "")` | readonly | `Md3ArcBandGauge` | — |
 

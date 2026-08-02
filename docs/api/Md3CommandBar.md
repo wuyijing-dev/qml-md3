@@ -21,6 +21,7 @@ import Md3
 | `showDivider` | `bool` | `true` | read/write | `Md3CommandBar` | — |
 | `overflowModel` | `var` | `[]` | read/write | `Md3CommandBar` | Secondary / overflow items: [{ text, icon?, enabled? }, ...] |
 | `overlayWindow` | `var` | `null` | read/write | `Md3CommandBar` | Optional explicit Window for overflow menu overlay. |
+| `accessibleName` | `string` | `qsTr("Command bar")` | read/write | `Md3CommandBar` | — |
 | `content` | `alias` | `primaryStack.content` | read/write | `Md3CommandBar` | Alias → `primaryStack.content` |
 | `data` | `alias` | `primaryStack.content` | default read/write | `Md3CommandBar` | Default property → `primaryStack.content` |
 | `overflowOpen` | `bool` | `overflowMenu.open` | readonly | `Md3CommandBar` | — |

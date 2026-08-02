@@ -27,6 +27,8 @@ import Md3
 | `scrollBarAutoHide` | `bool` | `true` | read/write | `Md3ScrollView` | — |
 | `scrollBarThickness` | `real` | `10` | read/write | `Md3ScrollView` | — |
 | `fillContentWidth` | `bool` | `true` | read/write | `Md3ScrollView` | When true (default), content width matches the viewport. |
+| `showScrollToTop` | `bool` | `false` | read/write | `Md3ScrollView` | Optional FAB that appears after scrolling down; animates back to top. |
+| `scrollToTopThreshold` | `real` | `120` | read/write | `Md3ScrollView` | — |
 | `content` | `alias` | `contentHost.data` | default read/write | `Md3ScrollView` | Default property → `contentHost.data` |
 
 ## Signals
@@ -35,7 +37,9 @@ _None._
 
 ## Methods
 
-_None._
+| Method | Defined in | Description |
+|--------|------------|-------------|
+| `scrollToTop()` | `Md3ScrollView` | — |
 
 ## Example
 

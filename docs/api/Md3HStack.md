@@ -1,6 +1,6 @@
 # Md3HStack
 
-Horizontal stack with spacing, padding, alignment, and expanding spacers.
+Horizontal stack with spacing, padding, alignment, and expanding spacers. Manual Item layout (not Row): setting y/height on Row children re-enters updatePolish and triggers "polish() loop" warnings.
 
 - **Source:** `src/Md3/layout/Md3HStack.qml`
 - **Extends:** `Item`
@@ -31,7 +31,7 @@ import Md3
 | `stretchChildren` | `bool` | `false` | read/write | `Md3HStack` | — |
 | `clipContent` | `bool` | `false` | read/write | `Md3HStack` | — |
 | `alignment` | `int` | `Md3HStack.Center` | read/write | `Md3HStack` | — |
-| `content` | `alias` | `contentRow.data` | default read/write | `Md3HStack` | Default property → `contentRow.data` |
+| `content` | `alias` | `contentHost.data` | default read/write | `Md3HStack` | Default property → `contentHost.data` |
 
 ## Signals
 

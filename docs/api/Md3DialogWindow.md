@@ -50,6 +50,8 @@ import Md3
 | `footer` | `alias` | `footerSlot.data` | read/write | `Md3DialogWindow` | Alias → `footerSlot.data` |
 | `isMaximizedLike` | `bool` | `visibility === Window.Maximized` | readonly | `Md3DialogWindow` | — |
 | `effectiveRadius` | `real` | `{…}` | readonly | `Md3DialogWindow` | — |
+| `usesSystemCorners` | `bool` | `windowHelper.systemCornersSupported` | readonly | `Md3DialogWindow` | — |
+| `chromeMaskActive` | `bool` | `effectiveRadius > 0` | readonly | `Md3DialogWindow` | — |
 | `windowNative` | `alias` | `windowHelper` | read/write | `Md3DialogWindow` | Alias → `windowHelper` |
 | `edge` | `real` | `6` | readonly | `Md3DialogWindow` | — |
 | `canResize` | `bool` | `resizable && customChrome && Md3WindowCapabilities.systemResize` | readonly | `Md3DialogWindow` | — |

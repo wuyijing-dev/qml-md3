@@ -15,9 +15,9 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `barHeight` | `real` | `44` | read/write | `Md3AppToolBar` | — |
-| `contentSpacing` | `real` | `8` | read/write | `Md3AppToolBar` | — |
-| `horizontalPadding` | `real` | `12` | read/write | `Md3AppToolBar` | — |
+| `barHeight` | `real` | `Md3Theme.controlHeight + 8` | read/write | `Md3AppToolBar` | — |
+| `contentSpacing` | `real` | `Md3Theme.spacingSm` | read/write | `Md3AppToolBar` | — |
+| `horizontalPadding` | `real` | `Md3Theme.spacingMd` | read/write | `Md3AppToolBar` | — |
 | `showDivider` | `bool` | `true` | read/write | `Md3AppToolBar` | — |
 | `content` | `alias` | `stack.content` | read/write | `Md3AppToolBar` | Alias → `stack.content` |
 | `data` | `alias` | `stack.content` | default read/write | `Md3AppToolBar` | Default property → `stack.content` |
@@ -36,9 +36,9 @@ _None._
 import Md3
 
 Md3AppToolBar {
-    barHeight: 44
-    contentSpacing: 8
-    horizontalPadding: 12
+    barHeight: Md3Theme.controlHeight + 8
+    contentSpacing: Md3Theme.spacingSm
+    horizontalPadding: Md3Theme.spacingMd
     showDivider: true
 }
 ```

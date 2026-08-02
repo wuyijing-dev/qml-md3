@@ -45,6 +45,7 @@ import Md3
 | `valueRange` | `var` | `{…}` | readonly | `Md3HeatmapChart` | — |
 | `effectiveLevelColors` | `var` | `{…}` | readonly | `Md3HeatmapChart` | — |
 | `monthLabels` | `var` | `style === Md3HeatmapChart.Contribution` | readonly | `Md3HeatmapChart` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3HeatmapChart` | Drop Canvas FBOs while page/window inactive. |
 
 ## Signals
 

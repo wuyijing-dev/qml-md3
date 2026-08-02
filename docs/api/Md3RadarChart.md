@@ -25,6 +25,7 @@ import Md3
 | `showLabels` | `bool` | `true` | read/write | `Md3RadarChart` | — |
 | `showDots` | `bool` | `true` | read/write | `Md3RadarChart` | — |
 | `strokeWidth` | `real` | `2` | read/write | `Md3RadarChart` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3RadarChart` | Drop Canvas while page/window inactive (FBO free). |
 
 ## Signals
 

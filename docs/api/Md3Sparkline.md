@@ -24,6 +24,7 @@ import Md3
 | `showArea` | `bool` | `true` | read/write | `Md3Sparkline` | — |
 | `showLastDot` | `bool` | `false` | read/write | `Md3Sparkline` | — |
 | `areaOpacity` | `real` | `0.22` | read/write | `Md3Sparkline` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3Sparkline` | Drop Canvas FBO while page is off-display (shell size stays). |
 | `effectiveFill` | `color` | `fill.a > 0.01 ? fill` | readonly | `Md3Sparkline` | — |
 
 ## Signals

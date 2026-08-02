@@ -25,6 +25,7 @@ import Md3
 | `showGrid` | `bool` | `true` | read/write | `Md3AreaChart` | — |
 | `lineWidth` | `real` | `2` | read/write | `Md3AreaChart` | — |
 | `areaOpacity` | `real` | `0.35` | read/write | `Md3AreaChart` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3AreaChart` | Drop Canvas while page/window inactive (FBO free). |
 
 ## Signals
 

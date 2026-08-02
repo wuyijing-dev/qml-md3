@@ -34,6 +34,8 @@ import Md3
 | `interactive` | `bool` | `true` | read/write | `Md3ListView` | — |
 | `emptyText` | `string` | `qsTr("No items")` | read/write | `Md3ListView` | — |
 | `emptyIcon` | `string` | `"inbox"` | read/write | `Md3ListView` | — |
+| `accessibleName` | `string` | `""` | read/write | `Md3ListView` | Screen-reader / AT name (defaults to “List”; do not reuse emptyText). |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3ListView` | Drop ListView delegates while page is off-display (shell size stays). |
 | `hasSections` | `bool` | `sectionRole.length > 0` | readonly | `Md3ListView` | — |
 
 ## Signals

@@ -34,6 +34,11 @@ import Md3
 | `password` | `bool` | `false` | read/write | `Md3TextField` | — |
 | `passwordVisible` | `bool` | `false` | read/write | `Md3TextField` | — |
 | `clearOnTrailing` | `bool` | `true` | read/write | `Md3TextField` | — |
+| `showClearButton` | `bool` | `false` | read/write | `Md3TextField` | When true, shows a clear affordance whenever the field has text (unless password). |
+| `announceErrors` | `bool` | `true` | read/write | `Md3TextField` | Shake + announce when error becomes active; optional Android haptic. |
+| `errorFeedbackEnabled` | `bool` | `true` | read/write | `Md3TextField` | — |
+| `errorShakeMs` | `int` | `Md3Motion.short3` | read/write | `Md3TextField` | — |
+| `errorShakePx` | `real` | `6` | read/write | `Md3TextField` | — |
 | `autoComplete` | `bool` | `false` | read/write | `Md3TextField` | Enable typeahead popup from `suggestions`. |
 | `suggestions` | `var` | `[]` | read/write | `Md3TextField` | string[] or [{ label, value }] |
 | `suggestionLimit` | `int` | `6` | read/write | `Md3TextField` | — |

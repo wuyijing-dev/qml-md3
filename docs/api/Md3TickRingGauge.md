@@ -31,6 +31,8 @@ import Md3
 | `size` | `real` | `140` | read/write | `Md3TickRingGauge` | — |
 | `progress` | `real` | `{…}` | readonly | `Md3TickRingGauge` | — |
 | `valueText` | `string` | `Number(value).toFixed(decimals) + (unit.length ? unit : "")` | readonly | `Md3TickRingGauge` | — |
+| `hostWindow` | `var` | `null` | read/write | `Md3TickRingGauge` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3TickRingGauge` | — |
 
 ## Signals
 

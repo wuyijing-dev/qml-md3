@@ -26,6 +26,7 @@ import Md3
 | `hasPages` | `bool` | `stepStack.children.length > 0` | readonly | `Md3Stepper` | — |
 | `isFirst` | `bool` | `currentStep <= 0` | readonly | `Md3Stepper` | — |
 | `isLast` | `bool` | `currentStep >= Math.max(0, model.length - 1)` | readonly | `Md3Stepper` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3Stepper` | Drop step-header Repeater while page is off-display (chrome height kept via preferredHeight). |
 
 ## Signals
 

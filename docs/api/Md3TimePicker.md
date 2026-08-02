@@ -38,6 +38,7 @@ import Md3
 | `modal` | `bool` | `false` | read/write | `Md3TimePicker` | — |
 | `open` | `bool` | `true` | read/write | `Md3TimePicker` | — |
 | `minuteStep` | `int` | `1` | read/write | `Md3TimePicker` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3TimePicker` | Drop dial ticks while modal closed or page off-display. |
 | `isPm` | `bool` | `hour >= 12` | readonly | `Md3TimePicker` | — |
 | `displayHour12` | `int` | `{…}` | readonly | `Md3TimePicker` | — |
 | `displayHour` | `int` | `use24Hour ? hour : displayHour12` | readonly | `Md3TimePicker` | — |

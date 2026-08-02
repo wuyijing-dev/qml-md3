@@ -22,6 +22,7 @@ import Md3
 | `lastIsTotal` | `bool` | `true` | read/write | `Md3WaterfallChart` | — |
 | `barGap` | `real` | `8` | read/write | `Md3WaterfallChart` | — |
 | `showValues` | `bool` | `true` | read/write | `Md3WaterfallChart` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3WaterfallChart` | Drop Canvas while page/window inactive (FBO free). |
 | `steps` | `var` | `{…}` | readonly | `Md3WaterfallChart` | — |
 
 ## Signals

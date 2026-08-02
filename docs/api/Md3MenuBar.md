@@ -15,6 +15,7 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `model` | `var` | `[]` | read/write | `Md3MenuBar` | [{ text, icon?, items?: [...] }] — use `items` (not `children`; that clashes with Item) |
 | `overlayWindow` | `var` | `null` | read/write | `Md3MenuBar` | Optional explicit Window for menu overlay (else Window.window). |
+| `highlightedIndex` | `int` | `0` | read/write | `Md3MenuBar` | Keyboard highlight among top-level menus. |
 
 ## Signals
 
@@ -34,5 +35,6 @@ import Md3
 Md3MenuBar {
     model: []
     overlayWindow: null
+    highlightedIndex: 0
 }
 ```

@@ -17,7 +17,7 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `model` | `var` | `[]` | read/write | `Md3TreeView` | — |
 | `selectedIndex` | `int` | `-1` | read/write | `Md3TreeView` | — |
-| `rowHeight` | `real` | `40` | read/write | `Md3TreeView` | — |
+| `rowHeight` | `real` | `Md3Theme.tableRowHeight` | read/write | `Md3TreeView` | Row height follows Theme density (override for custom trees). |
 | `indent` | `real` | `20` | read/write | `Md3TreeView` | — |
 | `showConnectors` | `bool` | `false` | read/write | `Md3TreeView` | — |
 | `checkEnabled` | `bool` | `false` | read/write | `Md3TreeView` | — |
@@ -30,7 +30,9 @@ import Md3
 | `lazyLoad` | `bool` | `false` | read/write | `Md3TreeView` | — |
 | `contextMenu` | `var` | `null` | read/write | `Md3TreeView` | — |
 | `overlayWindow` | `var` | `null` | read/write | `Md3TreeView` | Optional explicit Window for context-menu overlay coords. |
-| `flatRows` | `var` | `{…}` | readonly | `Md3TreeView` | — |
+| `preferredMaxHeight` | `real` | `0` | read/write | `Md3TreeView` | Cap scroll viewport in Column layouts (0 = natural full content height). |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3TreeView` | Drop ListView row delegates while page is off-display (chrome stays). |
+| `flatRows` | `var` | `[]` | read/write | `Md3TreeView` | — |
 
 ## Signals
 
@@ -63,7 +65,7 @@ import Md3
 Md3TreeView {
     model: []
     selectedIndex: -1
-    rowHeight: 40
+    rowHeight: Md3Theme.tableRowHeight
     indent: 20
     showConnectors: false
 }

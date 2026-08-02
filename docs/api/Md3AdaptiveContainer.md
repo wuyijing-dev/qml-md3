@@ -1,6 +1,6 @@
 # Md3AdaptiveContainer
 
-Standalone column-stacking adaptive container (gallery / direct use). Md3 container components embed `Md3ContainerBody` and expose `layoutMode` directly.
+Standalone column-stacking adaptive container (gallery / direct use). Md3 container components embed `Md3ContainerBody` and expose `layoutMode` directly. Uses Md3VStack (HeightSync) instead of bare Column to avoid Qt 6.8 height-collapse overlaps.
 
 - **Source:** `src/Md3/components/Md3AdaptiveContainer.qml`
 - **Extends:** `Item`
@@ -25,7 +25,7 @@ import Md3
 | `padding` | `real` | `0` | read/write | `Md3AdaptiveContainer` | — |
 | `clipContent` | `bool` | `true` | read/write | `Md3AdaptiveContainer` | — |
 | `contentSpacing` | `real` | `12` | read/write | `Md3AdaptiveContainer` | — |
-| `content` | `alias` | `contentColumn.data` | default read/write | `Md3AdaptiveContainer` | Default property → `contentColumn.data` |
+| `content` | `alias` | `contentStack.content` | default read/write | `Md3AdaptiveContainer` | Default property → `contentStack.content` |
 
 ## Signals
 

@@ -23,6 +23,7 @@ import Md3
 | Signal | Defined in | Description |
 |--------|------------|-------------|
 | `currentIndexChangedByUser(int index)` | `Md3NavigationBar` | — |
+| `destinationPreview(int index)` | `Md3NavigationBar` | Fired on long-press of a destination (preview / peek). |
 
 ## Methods
 

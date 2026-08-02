@@ -28,7 +28,10 @@ import Md3
 
 ## Methods
 
-_None._
+| Method | Defined in | Description |
+|--------|------------|-------------|
+| `accept()` | `Md3FullscreenDialog` | — |
+| `reject()` | `Md3FullscreenDialog` | — |
 
 ## Example
 

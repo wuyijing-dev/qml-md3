@@ -24,7 +24,7 @@ import Md3
 | `adaptiveTint` | `real` | `0.85` | read/write | `Md3LiquidGlass` | — |
 | `liquidDeform` | `real` | `1.0` | read/write | `Md3LiquidGlass` | — |
 | `quality` | `int` | `Md3Theme.effectsGlassQuality` | read/write | `Md3LiquidGlass` | 0=Low, 1=Medium, 2=High — scales sample res, frost taps, chroma. |
-| `liveSampling` | `bool` | `true` | read/write | `Md3LiquidGlass` | Keep sampling every frame (video). For static images set false — updates on move. |
+| `liveSampling` | `bool` | `false` | read/write | `Md3LiquidGlass` | Keep sampling every frame (video). Default off — updates on move/resize/drag (static chrome & lists); set true for video / animated backdrops. |
 | `blurAmount` | `real` | `0.4` | read/write | `Md3LiquidGlass` | — |
 | `blurMax` | `real` | `64` | read/write | `Md3LiquidGlass` | — |
 | `tintOpacity` | `real` | `0.08` | read/write | `Md3LiquidGlass` | — |

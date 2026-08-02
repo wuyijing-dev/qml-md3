@@ -42,6 +42,7 @@ import Md3
 | `dateFormat` | `string` | `"yyyy-MM-dd"` | read/write | `Md3DateRangePicker` | — |
 | `modal` | `bool` | `false` | read/write | `Md3DateRangePicker` | — |
 | `open` | `bool` | `true` | read/write | `Md3DateRangePicker` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3DateRangePicker` | Drop day/year cells while modal closed or page off-display. |
 | `today` | `date` | `{…}` | readonly | `Md3DateRangePicker` | — |
 
 ## Signals

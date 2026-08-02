@@ -33,6 +33,7 @@ import Md3
 | `cacheBufferPx` | `int` | `800` | read/write | `Md3GridView` | — |
 | `emptyText` | `string` | `qsTr("No items")` | read/write | `Md3GridView` | — |
 | `emptyIcon` | `string` | `"grid_view"` | read/write | `Md3GridView` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3GridView` | Drop GridView delegates while page is off-display (shell size stays). |
 
 ## Signals
 

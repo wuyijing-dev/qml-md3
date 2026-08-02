@@ -31,6 +31,7 @@ import Md3
 | `autoPlayInterval` | `int` | `4000` | read/write | `Md3Carousel` | — |
 | `wrap` | `bool` | `true` | read/write | `Md3Carousel` | — |
 | `shadowPad` | `real` | `10` | read/write | `Md3Carousel` | Shadow bleed around each card so elevation is not clipped. |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3Carousel` | Drop carousel delegates while page is off-display (shell size stays). |
 | `pageWidth` | `real` | `Math.max(120, width * (1 - _peek) - _spacing)` | readonly | `Md3Carousel` | — |
 
 ## Signals

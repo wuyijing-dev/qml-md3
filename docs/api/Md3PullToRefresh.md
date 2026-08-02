@@ -1,6 +1,6 @@
 # Md3PullToRefresh
 
-Pull-to-refresh host for a Flickable (touch / trackpad; desktop optional).
+Pull-to-refresh host for a Flickable (touch / trackpad; desktop via overscroll or `beginRefresh()`).
 
 - **Source:** `src/Md3/components/Md3PullToRefresh.qml`
 - **Extends:** `Item`
@@ -21,6 +21,8 @@ import Md3
 | `refreshingText` | `string` | `qsTr("Refreshing…")` | read/write | `Md3PullToRefresh` | — |
 | `pullText` | `string` | `qsTr("Pull to refresh")` | read/write | `Md3PullToRefresh` | — |
 | `releaseText` | `string` | `qsTr("Release to refresh")` | read/write | `Md3PullToRefresh` | — |
+| `showManualRefresh` | `bool` | `false` | read/write | `Md3PullToRefresh` | Show a compact control for mouse / keyboard hosts that cannot overscroll easily. |
+| `manualRefreshText` | `string` | `qsTr("Refresh")` | read/write | `Md3PullToRefresh` | — |
 
 ## Signals
 
@@ -34,6 +36,7 @@ import Md3
 |--------|------------|-------------|
 | `endRefresh()` | `Md3PullToRefresh` | — |
 | `beginRefresh()` | `Md3PullToRefresh` | — |
+| `attachOverscroll()` | `Md3PullToRefresh` | Enable DragOverBounds on the flickable so desktop drag can arm the gesture. |
 
 ## Example
 

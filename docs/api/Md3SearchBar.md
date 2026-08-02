@@ -16,6 +16,7 @@ import Md3
 | `text` | `alias` | `input.text` | read/write | `Md3SearchBar` | Alias → `input.text` |
 | `placeholderText` | `string` | `qsTr("Search")` | read/write | `Md3SearchBar` | — |
 | `searchView` | `var` | `null` | read/write | `Md3SearchBar` | When set, click / focus opens this Md3SearchView (forwards `text`). |
+| `showClearButton` | `bool` | `true` | read/write | `Md3SearchBar` | — |
 
 ## Signals
 
@@ -23,12 +24,14 @@ import Md3
 |--------|------------|-------------|
 | `accepted(string text)` | `Md3SearchBar` | — |
 | `clicked()` | `Md3SearchBar` | — |
+| `cleared()` | `Md3SearchBar` | — |
 
 ## Methods
 
 | Method | Defined in | Description |
 |--------|------------|-------------|
 | `openSearchView()` | `Md3SearchBar` | — |
+| `clear()` | `Md3SearchBar` | — |
 
 ## Example
 
@@ -38,5 +41,6 @@ import Md3
 Md3SearchBar {
     placeholderText: qsTr("Search")
     searchView: null
+    showClearButton: true
 }
 ```

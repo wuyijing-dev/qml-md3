@@ -31,6 +31,8 @@ import Md3
 | `progress` | `real` | `{…}` | readonly | `Md3DotsGauge` | — |
 | `filledDots` | `int` | `Math.round(progress * Math.max(1, dotCount))` | readonly | `Md3DotsGauge` | — |
 | `valueText` | `string` | `Number(value).toFixed(decimals) + (unit.length ? unit : "")` | readonly | `Md3DotsGauge` | — |
+| `hostWindow` | `var` | `null` | read/write | `Md3DotsGauge` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3DotsGauge` | — |
 
 ## Signals
 

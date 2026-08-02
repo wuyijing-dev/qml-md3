@@ -40,6 +40,7 @@ import Md3
 | `showMinimize` | `bool` | `true` | read/write | `Md3TitleBar` | — |
 | `showMaximize` | `bool` | `true` | read/write | `Md3TitleBar` | — |
 | `showClose` | `bool` | `true` | read/write | `Md3TitleBar` | — |
+| `showCaptionButtons` | `bool` | `true` | read/write | `Md3TitleBar` | Master switch for min/max/close (adaptive desktop vs system chrome). |
 | `dragEnabled` | `bool` | `Md3WindowCapabilities.systemMove` | read/write | `Md3TitleBar` | — |
 | `nativeCaptionHit` | `bool` | `Md3WindowCapabilities.captionHitTest` | read/write | `Md3TitleBar` | — |
 | `leadingInset` | `real` | `Md3WindowCapabilities.trafficLightsInset` | read/write | `Md3TitleBar` | — |
@@ -47,7 +48,7 @@ import Md3
 | `unifiedChrome` | `bool` | `false` | read/write | `Md3TitleBar` | When true, fill is transparent so a parent chrome strip paints title+tabs as one. |
 | `appIcon` | `url` | `""` | read/write | `Md3TitleBar` | Window / taskbar icon (qrc or file). Synced from Md3ApplicationWindow.windowIcon when bound. |
 | `preferredHeight` | `real` | `28` | read/write | `Md3TitleBar` | — |
-| `compactHeight` | `real` | `28` | read/write | `Md3TitleBar` | — |
+| `compactHeight` | `real` | `24` | read/write | `Md3TitleBar` | — |
 | `compact` | `bool` | `false` | read/write | `Md3TitleBar` | — |
 | `barHeight` | `real` | `-1` | read/write | `Md3TitleBar` | — |
 | `padding` | `real` | `6` | read/write | `Md3TitleBar` | — |
@@ -65,6 +66,7 @@ import Md3
 | `baseHeight` | `real` | `barHeight >= 0 ? barHeight` | readonly | `Md3TitleBar` | — |
 | `twoRow` | `bool` | `{…}` | readonly | `Md3TitleBar` | — |
 | `contentHeight` | `real` | `{…}` | readonly | `Md3TitleBar` | — |
+| `rightChromeWidth` | `real` | `rightChrome.width` | readonly | `Md3TitleBar` | Trailing chrome width so shell resize edges can leave caption buttons alone |
 
 ## Signals
 

@@ -20,7 +20,7 @@ import Md3
 | `title` | `string` | `""` | read/write | `Md3NavigationDrawer` | — |
 | `drawerWidth` | `real` | `360` | read/write | `Md3NavigationDrawer` | — |
 | `startMargin` | `real` | `0` | read/write | `Md3NavigationDrawer` | — |
-| `destinationHeight` | `real` | `56` | readonly | `Md3NavigationDrawer` | — |
+| `destinationHeight` | `real` | `Md3Theme.navDestinationHeight` | readonly | `Md3NavigationDrawer` | — |
 | `destinationSpacing` | `real` | `0` | readonly | `Md3NavigationDrawer` | — |
 | `panelWidth` | `real` | `Math.min(drawerWidth, Math.max(0, width - startMargin))` | readonly | `Md3NavigationDrawer` | — |
 

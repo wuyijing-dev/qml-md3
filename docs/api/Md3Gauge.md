@@ -28,6 +28,7 @@ import Md3
 | `valueColor` | `color` | `Md3Theme.colorScheme.primary` | read/write | `Md3Gauge` | — |
 | `showValue` | `bool` | `true` | read/write | `Md3Gauge` | — |
 | `size` | `real` | `140` | read/write | `Md3Gauge` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3Gauge` | Drop Shape geometry while page is off-display. |
 | `progress` | `real` | `{…}` | readonly | `Md3Gauge` | — |
 | `valueText` | `string` | `Number(value).toFixed(decimals) + (unit.length ? unit : "")` | readonly | `Md3Gauge` | — |
 

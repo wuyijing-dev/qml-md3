@@ -63,6 +63,8 @@ import Md3
 | `background` | `color` | `surface` | read/write | `Md3ColorScheme` | — |
 | `colorOnBackground` | `color` | `colorOnSurface` | read/write | `Md3ColorScheme` | — |
 | `surfaceVariant` | `color` | `surfaceContainerHighest` | read/write | `Md3ColorScheme` | — |
+| `disabledContentColor` | `color` | `Qt.rgba(colorOnSurface.r, colorOnSurface.g, colorOnSurface.b, 0.38)` | readonly | `Md3ColorScheme` | Cached disabled tokens — avoid Qt.rgba on every binding eval across buttons/lists. |
+| `disabledContainerColor` | `color` | `Qt.rgba(colorOnSurface.r, colorOnSurface.g, colorOnSurface.b, 0.12)` | readonly | `Md3ColorScheme` | — |
 | `gaugeTrack` | `color` | `dark ? outlineVariant : surfaceContainerHighest` | readonly | `Md3ColorScheme` | Inactive gauge / chart track — solid roles (opacity tracks look washed out). Dark uses outlineVariant so arcs stay visible on surface *and* container cards. |
 | `gaugeDial` | `color` | `dark ? surfaceContainerHigh : surfaceContainerHighest` | readonly | `Md3ColorScheme` | Filled dial face (wave / compass / knob). |
 

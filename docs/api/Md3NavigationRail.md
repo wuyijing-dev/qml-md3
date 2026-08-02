@@ -20,12 +20,14 @@ import Md3
 | `headerLabel` | `string` | `""` | read/write | `Md3NavigationRail` | — |
 | `showExpandToggle` | `bool` | `true` | read/write | `Md3NavigationRail` | — |
 | `hostWindow` | `var` | `null` | read/write | `Md3NavigationRail` | Optional Window for system-backdrop tint (else Window.window). |
+| `showCollapsedTooltips` | `bool` | `true` | read/write | `Md3NavigationRail` | When collapsed, show destination label tip on hover (reparented outside rail clip). |
+| `collapsedTooltipDelayMs` | `int` | `420` | read/write | `Md3NavigationRail` | — |
 | `scrolling` | `bool` | `flick.moving \|\| flick.dragging` | readonly | `Md3NavigationRail` | True while the destination list is being flicked/dragged. |
-| `destinationHeight` | `real` | `56` | readonly | `Md3NavigationRail` | — |
+| `destinationHeight` | `real` | `Md3Theme.navDestinationHeight` | readonly | `Md3NavigationRail` | — |
 | `destinationSpacing` | `real` | `4` | readonly | `Md3NavigationRail` | — |
 | `indicatorInset` | `real` | `12` | readonly | `Md3NavigationRail` | — |
 | `collapsedIndicatorWidth` | `real` | `56` | readonly | `Md3NavigationRail` | — |
-| `collapsedIndicatorHeight` | `real` | `32` | readonly | `Md3NavigationRail` | — |
+| `collapsedIndicatorHeight` | `real` | `Md3Theme.densityCompact ? 28 : 32` | readonly | `Md3NavigationRail` | — |
 | `expandDuration` | `int` | `Md3Motion.spatialDuration` | readonly | `Md3NavigationRail` | — |
 
 ## Signals
@@ -35,6 +37,7 @@ import Md3
 | `currentIndexChangedByUser(int index)` | `Md3NavigationRail` | — |
 | `destinationHovered(int index)` | `Md3NavigationRail` | — |
 | `destinationUnhovered(int index)` | `Md3NavigationRail` | — |
+| `destinationPreview(int index)` | `Md3NavigationRail` | Fired on long-press of a destination (preview / peek). |
 | `expandToggleClicked()` | `Md3NavigationRail` | — |
 
 ## Methods

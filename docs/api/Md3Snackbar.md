@@ -18,6 +18,8 @@ import Md3
 | `dualLine` | `bool` | `false` | read/write | `Md3Snackbar` | — |
 | `open` | `bool` | `false` | read/write | `Md3Snackbar` | — |
 | `durationMs` | `int` | `4000` | read/write | `Md3Snackbar` | — |
+| `actionDurationMs` | `int` | `6500` | read/write | `Md3Snackbar` | Extra dwell when an action is present (Undo / View). |
+| `politeAnnouncements` | `bool` | `true` | read/write | `Md3Snackbar` | When true, snackbar is not an assertive live region (avoids stealing AT focus). |
 | `slideY` | `real` | `open ? 0 : height + 8` | read/write | `Md3Snackbar` | — |
 
 ## Signals

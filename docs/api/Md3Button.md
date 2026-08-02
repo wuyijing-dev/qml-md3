@@ -29,6 +29,8 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `variant` | `int` | `Md3Button.Filled` | read/write | `Md3Button` | — |
 | `size` | `int` | `Md3Button.Small` | read/write | `Md3Button` | — |
+| `busy` | `bool` | `false` | read/write | `Md3Button` | Show spinner and block clicks while keeping the laid-out width. |
+| `effectivelyEnabled` | `bool` | `enabled` | readonly | `Md3Button` | Visual enabled (colors). Busy keeps brand colors and shows a spinner instead. |
 | `h` | `real` | `{…}` | readonly | `Md3Button` | — |
 | `padH` | `real` | `size === Md3Button.ExtraSmall ? 12 : (size === Md3Button.Large ? 24 : 16)` | readonly | `Md3Button` | — |
 | `elev` | `real` | `variant === Md3Button.Elevated ? (hovered \|\| pressed ? 2 : 1) : 0` | readonly | `Md3Button` | — |
@@ -44,6 +46,7 @@ import Md3
 | `checkable` | `bool` | `false` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | When true, Space/Enter/click toggle `checked` before emitting clicked. |
 | `checked` | `bool` | `false` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
 | `pressEnabled` | `bool` | `true` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | When false, the built-in MouseArea ignores presses (custom hit areas). |
+| `interactive` | `bool` | `true` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | Gate clicks / keyboard activate without forcing `enabled: false` (e.g. busy spinner). |
 | `pressRightMargin` | `real` | `0` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
 | `pressLeftMargin` | `real` | `0` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
 | `hovered` | `bool` | `mouse.containsMouse` | readonly | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
@@ -72,8 +75,8 @@ import Md3
 Md3Button {
     variant: Md3Button.Filled
     size: Md3Button.Small
+    busy: false
     text: ""
     icon: ""
-    accessibleName: text.length ? text : (icon.length ? icon : qsTr("Button"))
 }
 ```

@@ -31,7 +31,7 @@ import Md3
 | `badgeSizePreset` | `int` | `Md3Badge.Medium` | read/write | `Md3IconButton` | — |
 | `badgeColor` | `color` | `Md3Theme.colorScheme.error` | read/write | `Md3IconButton` | — |
 | `badgeLabelColor` | `color` | `Md3Theme.colorScheme.colorOnError` | read/write | `Md3IconButton` | — |
-| `circleSize` | `real` | `40` | readonly | `Md3IconButton` | — |
+| `circleSize` | `real` | `Md3Theme.iconCircleSize` | readonly | `Md3IconButton` | — |
 | `circleRadius` | `real` | `circleSize / 2` | readonly | `Md3IconButton` | — |
 | `text` | `string` | `""` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
 | `icon` | `string` | `""` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
@@ -45,6 +45,7 @@ import Md3
 | `checkable` | `bool` | `false` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | When true, Space/Enter/click toggle `checked` before emitting clicked. |
 | `checked` | `bool` | `false` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
 | `pressEnabled` | `bool` | `true` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | When false, the built-in MouseArea ignores presses (custom hit areas). |
+| `interactive` | `bool` | `true` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | Gate clicks / keyboard activate without forcing `enabled: false` (e.g. busy spinner). |
 | `pressRightMargin` | `real` | `0` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
 | `pressLeftMargin` | `real` | `0` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | — |
 | `hovered` | `bool` | `mouse.containsMouse` | readonly | [`Md3AbstractButton`](Md3AbstractButton.md) | — |

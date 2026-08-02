@@ -24,6 +24,7 @@ import Md3
 | `sweepAngle` | `real` | `270` | read/write | `Md3RadialBarChart` | — |
 | `trackColor` | `color` | `Md3Theme.colorScheme.gaugeTrack` | read/write | `Md3RadialBarChart` | — |
 | `showLabels` | `bool` | `true` | read/write | `Md3RadialBarChart` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3RadialBarChart` | Drop Canvas while page/window inactive (FBO free). |
 | `bars` | `var` | `{…}` | readonly | `Md3RadialBarChart` | — |
 
 ## Signals

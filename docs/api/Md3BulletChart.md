@@ -25,6 +25,7 @@ import Md3
 | `rangeColors` | `var` | `[]` | read/write | `Md3BulletChart` | — |
 | `barHeight` | `real` | `18` | read/write | `Md3BulletChart` | — |
 | `trackHeight` | `real` | `28` | read/write | `Md3BulletChart` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3BulletChart` | Drop qualitative bands while page is off-display. |
 | `progress` | `real` | `{…}` | readonly | `Md3BulletChart` | — |
 
 ## Signals

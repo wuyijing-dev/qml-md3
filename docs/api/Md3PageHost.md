@@ -23,6 +23,11 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
+| `edgeSwipeBackEnabled` | `bool` | `true` | read/write | `Md3PageHost` | Left-edge swipe back (phone / compact demos). Esc also goes back when canGoBack. |
+| `edgeSwipeDamping` | `real` | `0.55` | read/write | `Md3PageHost` | Rubber-band / damping factor while dragging from the left edge (0–1 applied to raw dx). |
+| `edgeSwipeCommitPx` | `real` | `48` | read/write | `Md3PageHost` | Release distance (logical px) after damping to commit goBack. |
+| `lightFadeOnCacheHit` | `bool` | `true` | read/write | `Md3PageHost` | When revisiting an L1-resident page, prefer a short fade instead of a heavy transition. |
+| `cacheHitFadeMs` | `int` | `90` | read/write | `Md3PageHost` | — |
 | `model` | `var` | `[]` | read/write | `Md3PageHost` | — |
 | `currentIndex` | `int` | `0` | read/write | `Md3PageHost` | — |
 | `displayedIndex` | `int` | `0` | read/write | `Md3PageHost` | — |
@@ -33,6 +38,7 @@ import Md3
 | `contentPadding` | `real` | `20` | read/write | `Md3PageHost` | — |
 | `asynchronous` | `bool` | `false` | read/write | `Md3PageHost` | — |
 | `prefetchNeighbors` | `bool` | `false` | read/write | `Md3PageHost` | — |
+| `prefetchNeighborsL1` | `bool` | `true` | read/write | `Md3PageHost` | When prefetchNeighbors is on: true = L1 warm neighbors; false = L2 Component only. |
 | `l2Components` | `bool` | `true` | read/write | `Md3PageHost` | — |
 | `l2CacheLimit` | `int` | `1` | read/write | `Md3PageHost` | Few compiled Components — enough for back/forward, not every destination |
 | `l2WarmIdle` | `bool` | `false` | read/write | `Md3PageHost` | If true, after idle delay pace-compile every destination Component (L2 only). |
@@ -41,6 +47,8 @@ import Md3
 | `leaveSnapOpacity` | `real` | `0` | read/write | `Md3PageHost` | — |
 | `leaveSnapHiRes` | `bool` | `false` | read/write | `Md3PageHost` | Full-res leave snapshot during launch (avoids chroma fringing on blurred text). |
 | `warmStart` | `bool` | `false` | read/write | `Md3PageHost` | — |
+| `sparseSlotThreshold` | `int` | `40` | read/write | `Md3PageHost` | Above this destination count (and cacheMode !== "all"), only live/kept pages get Item slots. |
+| `useSparseSlots` | `bool` | `{…}` | readonly | `Md3PageHost` | — |
 | `showBusyIndicator` | `bool` | `false` | read/write | `Md3PageHost` | — |
 | `showSkeleton` | `bool` | `false` | read/write | `Md3PageHost` | — |
 | `skeletonLayout` | `string` | `"page"` | read/write | `Md3PageHost` | — |
@@ -119,10 +127,10 @@ _None._
 import Md3
 
 Md3PageHost {
-    model: []
-    currentIndex: 0
-    displayedIndex: 0
-    cacheMode: "arc"
-    cacheLimit: 1
+    edgeSwipeBackEnabled: true
+    edgeSwipeDamping: 0.55
+    edgeSwipeCommitPx: 48
+    lightFadeOnCacheHit: true
+    cacheHitFadeMs: 90
 }
 ```

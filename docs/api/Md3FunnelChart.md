@@ -21,6 +21,7 @@ import Md3
 | `minWidthRatio` | `real` | `0.18` | read/write | `Md3FunnelChart` | — |
 | `showLabels` | `bool` | `true` | read/write | `Md3FunnelChart` | — |
 | `showValues` | `bool` | `true` | read/write | `Md3FunnelChart` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3FunnelChart` | Drop Canvas while page/window inactive (FBO free). |
 | `stages` | `var` | `{…}` | readonly | `Md3FunnelChart` | — |
 
 ## Signals

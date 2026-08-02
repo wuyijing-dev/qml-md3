@@ -14,7 +14,9 @@ import Md3
 
 ## Properties
 
-_None._
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `swipeRevealActive` | `var` | `null` | read/write | `Md3OverlayHost` | Exclusive open SwipeReveal (one open panel at a time). |
 
 ## Signals
 
@@ -28,6 +30,8 @@ _None._
 | `contentItem(win, anchor)` | `Md3OverlayHost` | Top-level contentItem for popup reparenting. |
 | `mapToOverlay(fromItem, x, y, win)` | `Md3OverlayHost` | Map local point on `fromItem` into overlay content coordinates. |
 | `ensureHostParent(host, win, anchor, zOrder)` | `Md3OverlayHost` | Reparent `host` to fill the overlay contentItem (menus / pickers). |
+| `claimSwipeReveal(item)` | `Md3OverlayHost` | — |
+| `releaseSwipeReveal(item)` | `Md3OverlayHost` | — |
 
 ## Example
 

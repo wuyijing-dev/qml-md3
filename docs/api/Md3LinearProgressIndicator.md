@@ -1,6 +1,6 @@
 # Md3LinearProgressIndicator
 
-Linear progress — Standard uses Rectangles; wavy uses sparse polylines + throttled rebuild.
+Linear progress — Standard uses Rectangles + NumberAnimation; wavy styles rebuild polylines on a capped cadence (not every vsync).
 
 - **Source:** `src/Md3/components/Md3LinearProgressIndicator.qml`
 - **Extends:** `Item`
@@ -47,9 +47,7 @@ _None._
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `rebuildWave()` | `Md3LinearProgressIndicator` | — |
+_None._
 
 ## Example
 
@@ -61,6 +59,6 @@ Md3LinearProgressIndicator {
     indeterminate: false
     style: Md3LinearProgressIndicator.Standard
     hostWindow: null
-    wavelength: style === Md3LinearProgressIndicator.Lively ? 28
+    unloadWhenPageInactive: true
 }
 ```

@@ -20,6 +20,7 @@ import Md3
 | `text` | `string` | `""` | read/write | `Md3BottomSheet` | — |
 | `confirmText` | `string` | `""` | read/write | `Md3BottomSheet` | — |
 | `dismissText` | `string` | `""` | read/write | `Md3BottomSheet` | — |
+| `dismissDragThreshold` | `real` | `96` | read/write | `Md3BottomSheet` | Drag distance (px) before release dismisses the sheet. |
 | `content` | `alias` | `bodySlot.data` | default read/write | `Md3BottomSheet` | Default property → `bodySlot.data` |
 | `maxSheetHeight` | `real` | `parent ? parent.height * 0.6 : 480` | readonly | `Md3BottomSheet` | — |
 
@@ -32,7 +33,10 @@ import Md3
 
 ## Methods
 
-_None._
+| Method | Defined in | Description |
+|--------|------------|-------------|
+| `accept()` | `Md3BottomSheet` | — |
+| `reject()` | `Md3BottomSheet` | — |
 
 ## Example
 

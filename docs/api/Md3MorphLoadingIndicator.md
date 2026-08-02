@@ -43,9 +43,7 @@ _None._
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `rebuildPath()` | `Md3MorphLoadingIndicator` | Flower / clover path: r(θ) = R*(a + b*cos(8θ)) with morphing a/b. |
+_None._
 
 ## Example
 

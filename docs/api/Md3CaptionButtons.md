@@ -22,6 +22,7 @@ import Md3
 | `cornerRadius` | `real` | `0` | read/write | `Md3CaptionButtons` | — |
 | `maximized` | `bool` | `{…}` | readonly | `Md3CaptionButtons` | — |
 | `maximizeButton` | `alias` | `maxBtn` | read/write | `Md3CaptionButtons` | Alias → `maxBtn` |
+| `snapLayoutsEnabled` | `bool` | `Md3WindowCapabilities.snapLayouts` | readonly | `Md3CaptionButtons` | — |
 
 ## Signals
 
@@ -31,7 +32,9 @@ _None._
 
 | Method | Defined in | Description |
 |--------|------------|-------------|
-| `reportMaximizeHitTest()` | `Md3CaptionButtons` | — |
+| `reportCaptionButtonsHitTest()` | `Md3CaptionButtons` | — |
+| `reportSnapMaximizeRect()` | `Md3CaptionButtons` | — |
+| `armSnapLayouts(armed)` | `Md3CaptionButtons` | — |
 
 ## Example
 

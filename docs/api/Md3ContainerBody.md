@@ -29,7 +29,7 @@ import Md3
 | `contentHost` | `alias` | `contentHost` | read/write | `Md3ContainerBody` | Alias → `contentHost` |
 | `contentImplicitWidth` | `real` | `contentHost.childrenRect.width` | readonly | `Md3ContainerBody` | — |
 | `hasParentFillChild` | `bool` | `_hasParentFillChild()` | readonly | `Md3ContainerBody` | — |
-| `contentImplicitHeight` | `real` | `_measureContentHeight()` | readonly | `Md3ContainerBody` | — |
+| `contentImplicitHeight` | `real` | `hasParentFillChild ? 0 : _measuredContentH` | readonly | `Md3ContainerBody` | — |
 
 ## Signals
 

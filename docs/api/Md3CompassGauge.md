@@ -30,6 +30,8 @@ import Md3
 | `size` | `real` | `140` | read/write | `Md3CompassGauge` | — |
 | `progress` | `real` | `{…}` | readonly | `Md3CompassGauge` | — |
 | `valueText` | `string` | `Number(value).toFixed(decimals) + (unit.length ? unit : "")` | readonly | `Md3CompassGauge` | — |
+| `hostWindow` | `var` | `null` | read/write | `Md3CompassGauge` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3CompassGauge` | — |
 
 ## Signals
 

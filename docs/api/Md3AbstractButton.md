@@ -27,6 +27,7 @@ import Md3
 | `checkable` | `bool` | `false` | read/write | `Md3AbstractButton` | When true, Space/Enter/click toggle `checked` before emitting clicked. |
 | `checked` | `bool` | `false` | read/write | `Md3AbstractButton` | — |
 | `pressEnabled` | `bool` | `true` | read/write | `Md3AbstractButton` | When false, the built-in MouseArea ignores presses (custom hit areas). |
+| `interactive` | `bool` | `true` | read/write | `Md3AbstractButton` | Gate clicks / keyboard activate without forcing `enabled: false` (e.g. busy spinner). |
 | `pressRightMargin` | `real` | `0` | read/write | `Md3AbstractButton` | — |
 | `pressLeftMargin` | `real` | `0` | read/write | `Md3AbstractButton` | — |
 | `hovered` | `bool` | `mouse.containsMouse` | readonly | `Md3AbstractButton` | — |

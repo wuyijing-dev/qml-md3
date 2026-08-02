@@ -25,7 +25,7 @@ import Md3
 | `showAnnotations` | `bool` | `annotations && annotations.length > 0` | read/write | `Md3ScrollBar` | — |
 | `annotationGutter` | `real` | `showAnnotations && vertical ? 18 : 0` | read/write | `Md3ScrollBar` | — |
 | `vertical` | `bool` | `orientation === Qt.Vertical` | readonly | `Md3ScrollBar` | — |
-| `needed` | `bool` | `flickable && _content > _view + 1` | readonly | `Md3ScrollBar` | — |
+| `needed` | `bool` | `false` | read/write | `Md3ScrollBar` | Writable + hysteresis avoids visible↔size binding loops with paired bars. |
 | `thumbRatio` | `real` | `needed ? Math.min(1, _view / Math.max(1, _content)) : 1` | readonly | `Md3ScrollBar` | — |
 | `thumbSize` | `real` | `needed ? Math.max(minThumb, (_view - 4) * thumbRatio) : 0` | readonly | `Md3ScrollBar` | — |
 | `travel` | `real` | `Math.max(0, _view - 4 - thumbSize)` | readonly | `Md3ScrollBar` | — |

@@ -26,15 +26,16 @@ import Md3
 | `valueColor` | `color` | `Md3Theme.colorScheme.primary` | read/write | `Md3WaveGauge` | — |
 | `waveColor` | `color` | `Qt.rgba(valueColor.r, valueColor.g, valueColor.b, 0.55)` | read/write | `Md3WaveGauge` | — |
 | `showValue` | `bool` | `true` | read/write | `Md3WaveGauge` | — |
-| `animated` | `bool` | `!Md3Theme.reduceMotion` | read/write | `Md3WaveGauge` | — |
+| `animated` | `bool` | `true` | read/write | `Md3WaveGauge` | — |
 | `animationFps` | `int` | `0` | read/write | `Md3WaveGauge` | 0 = display refresh (full quality). >0 only if you explicitly want a cap. |
 | `size` | `real` | `140` | read/write | `Md3WaveGauge` | — |
 | `strokeWidth` | `real` | `3` | read/write | `Md3WaveGauge` | — |
 | `waveSpeed` | `real` | `2.2` | read/write | `Md3WaveGauge` | Radians advanced per second (wave travel speed). |
 | `hostWindow` | `var` | `null` | read/write | `Md3WaveGauge` | Optional Window for live-motion checks (else OverlayHost). |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3WaveGauge` | — |
 | `progress` | `real` | `{…}` | readonly | `Md3WaveGauge` | — |
 | `valueText` | `string` | `Number(value).toFixed(decimals) + (unit.length ? unit : "")` | readonly | `Md3WaveGauge` | — |
-| `effectivelyShown` | `bool` | `Md3TreeVisibility.isLiveMotionScene(root, root.hostWindow)` | readonly | `Md3WaveGauge` | — |
+| `effectivelyShown` | `bool` | `_treeShown` | readonly | `Md3WaveGauge` | — |
 | `wavePhase` | `real` | `0` | read/write | `Md3WaveGauge` | — |
 
 ## Signals

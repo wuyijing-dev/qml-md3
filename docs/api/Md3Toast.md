@@ -26,6 +26,7 @@ import Md3
 | `durationMs` | `int` | `2200` | read/write | `Md3Toast` | — |
 | `open` | `bool` | `false` | read/write | `Md3Toast` | — |
 | `maxWidth` | `real` | `420` | read/write | `Md3Toast` | — |
+| `pauseOnHover` | `bool` | `true` | read/write | `Md3Toast` | — |
 | `bg` | `color` | `{…}` | readonly | `Md3Toast` | — |
 | `fg` | `color` | `{…}` | readonly | `Md3Toast` | — |
 

@@ -33,6 +33,7 @@ import Md3
 | `currentIndex` | `int` | `-1` | read/write | `Md3ItemsView` | — |
 | `sectionRole` | `string` | `""` | read/write | `Md3ItemsView` | — |
 | `emptyText` | `string` | `qsTr("No items")` | read/write | `Md3ItemsView` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3ItemsView` | Drop Stack/Grid hosts while page is off-display (shell size stays). |
 
 ## Signals
 

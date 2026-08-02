@@ -1,6 +1,6 @@
 # Md3KnobGauge
 
-Rotary knob-style gauge (value as dial rotation with notch).
+Rotary knob-style gauge — drag or arrow keys to change value.
 
 - **Source:** `src/Md3/components/Md3KnobGauge.qml`
 - **Extends:** `Item`
@@ -18,6 +18,7 @@ import Md3
 | `value` | `real` | `0` | read/write | `Md3KnobGauge` | — |
 | `from` | `real` | `0` | read/write | `Md3KnobGauge` | — |
 | `to` | `real` | `100` | read/write | `Md3KnobGauge` | — |
+| `step` | `real` | `1` | read/write | `Md3KnobGauge` | — |
 | `label` | `string` | `""` | read/write | `Md3KnobGauge` | — |
 | `unit` | `string` | `""` | read/write | `Md3KnobGauge` | — |
 | `decimals` | `int` | `0` | read/write | `Md3KnobGauge` | — |
@@ -27,13 +28,18 @@ import Md3
 | `valueColor` | `color` | `Md3Theme.colorScheme.primary` | read/write | `Md3KnobGauge` | — |
 | `knobColor` | `color` | `Md3Theme.colorScheme.gaugeDial` | read/write | `Md3KnobGauge` | — |
 | `showValue` | `bool` | `true` | read/write | `Md3KnobGauge` | — |
+| `interactive` | `bool` | `true` | read/write | `Md3KnobGauge` | — |
 | `size` | `real` | `140` | read/write | `Md3KnobGauge` | — |
 | `progress` | `real` | `{…}` | readonly | `Md3KnobGauge` | — |
 | `valueText` | `string` | `Number(value).toFixed(decimals) + (unit.length ? unit : "")` | readonly | `Md3KnobGauge` | — |
+| `hostWindow` | `var` | `null` | read/write | `Md3KnobGauge` | — |
+| `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3KnobGauge` | — |
 
 ## Signals
 
-_None._
+| Signal | Defined in | Description |
+|--------|------------|-------------|
+| `valueEdited(real value)` | `Md3KnobGauge` | — |
 
 ## Methods
 
@@ -48,7 +54,7 @@ Md3KnobGauge {
     value: 0
     from: 0
     to: 100
+    step: 1
     label: ""
-    unit: ""
 }
 ```
