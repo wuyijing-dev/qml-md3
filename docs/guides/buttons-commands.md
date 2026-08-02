@@ -1,6 +1,6 @@
 # 按钮与命令条
 
-WinUI 对照的按钮 / 工具栏选用约定。属性表见 [api/README.md](api/README.md)；Gallery：**按钮**页。
+WinUI 对照的按钮 / 工具栏选用约定。属性表见 [api/README.md](../api/README.md)；Gallery：**按钮**页。
 
 ## 选用一览
 
@@ -106,17 +106,17 @@ Md3ApplicationWindow {
 
 - **主命令**：默认子项（`Md3AppBarButton` / Toggle / 少量 `Md3Button.Text`）。
 - **次命令**：`overflowModel` → 右侧 `more_horiz` 菜单。
-- 只需任意自定义内容、无溢出：继续用 [`Md3AppToolBar`](api/Md3AppToolBar.md)。
+- 只需任意自定义内容、无溢出：继续用 [`Md3AppToolBar`](../api/Md3AppToolBar.md)。
 
 ## API 与附录
 
 | 控件 | API | 手写附录 |
 |------|-----|----------|
-| Toggle | [Md3ToggleButton](api/Md3ToggleButton.md) | [api-manual](api-manual/Md3ToggleButton.md) |
-| DropDown | [Md3DropDownButton](api/Md3DropDownButton.md) | [api-manual](api-manual/Md3DropDownButton.md) |
-| Hyperlink | [Md3Hyperlink](api/Md3Hyperlink.md) | [api-manual](api-manual/Md3Hyperlink.md) |
-| CommandBar | [Md3CommandBar](api/Md3CommandBar.md) | [api-manual](api-manual/Md3CommandBar.md) |
-| AppBar | [Md3AppBarButton](api/Md3AppBarButton.md) | [api-manual](api-manual/Md3AppBarButton.md) |
-| AppBar Toggle | [Md3AppBarToggleButton](api/Md3AppBarToggleButton.md) | [api-manual](api-manual/Md3AppBarToggleButton.md) |
+| Toggle | [Md3ToggleButton](../api/Md3ToggleButton.md) | [api-manual](../api-manual/Md3ToggleButton.md) |
+| DropDown | [Md3DropDownButton](../api/Md3DropDownButton.md) | [api-manual](../api-manual/Md3DropDownButton.md) |
+| Hyperlink | [Md3Hyperlink](../api/Md3Hyperlink.md) | [api-manual](../api-manual/Md3Hyperlink.md) |
+| CommandBar | [Md3CommandBar](../api/Md3CommandBar.md) | [api-manual](../api-manual/Md3CommandBar.md) |
+| AppBar | [Md3AppBarButton](../api/Md3AppBarButton.md) | [api-manual](../api-manual/Md3AppBarButton.md) |
+| AppBar Toggle | [Md3AppBarToggleButton](../api/Md3AppBarToggleButton.md) | [api-manual](../api-manual/Md3AppBarToggleButton.md) |
 
 `python tools/gen_api_docs.py` 会把 `docs/api-manual/<Type>.md` 拼到对应 API 页末尾。

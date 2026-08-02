@@ -45,7 +45,7 @@ app.openAppSettings()
 
 ## Build notes
 
-Android is detected via `MD3_IS_ANDROID` in [`cmake/Md3Platform.cmake`](../../cmake/Md3Platform.cmake) and must **not** use the Linux DBus/KF6 sources.
+Android is detected via `MD3_IS_ANDROID` in [`cmake/Md3Platform.cmake`](https://github.com/wuyijing-dev/qml-md3/blob/main/cmake/Md3Platform.cmake) and must **not** use the Linux DBus/KF6 sources.
 
 Native sources: `src/Md3/window/platforms/android/md3androidnative.cpp` + Android branches in `md3windowhelper.cpp`.
 

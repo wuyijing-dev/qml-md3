@@ -1,6 +1,6 @@
 # 设计与交互模式指南
 
-面向桌面 Qt Quick 应用的选用约定。细节 API 见 [api/README.md](api/README.md)；反馈控件分工见 [feedback.md](feedback.md)。
+面向桌面 Qt Quick 应用的选用约定。细节 API 见 [api/README.md](../api/README.md)；反馈控件分工见 [feedback.md](feedback.md)。
 
 ## 控件变体选用
 

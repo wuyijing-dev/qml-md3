@@ -39,7 +39,7 @@ Material Design 3 组件库（Qt Quick / QML）。站点：[QML_MD3_Document](ht
 
 ## API
 
-- [控件 API 索引](api/README.md)（`python tools/gen_api_docs.py`；手写附录在 [api-manual/](api-manual/)）
+- [控件 API 索引](api/README.md)（`python tools/gen_api_docs.py`；手写附录在 [api-manual/](api-manual/README.md)）
 - [**v1.1.1 宿主锁说明**](api-manual/host-lock-1.1.1.md)（C++ / PySide / Rust 能力边界）
 
 ## 维护

@@ -99,16 +99,16 @@ Md3Card {
 
 ## Related API
 
-- [Md3VStack](api/Md3VStack.md)
-- [Md3HStack](api/Md3HStack.md)
-- [Md3FlowLayout](api/Md3FlowLayout.md)
-- [Md3AnimatedFlow](api/Md3AnimatedFlow.md)
-- [Md3GridLayout](api/Md3GridLayout.md)
-- [Md3Spacer](api/Md3Spacer.md)
-- [Md3PageSection](api/Md3PageSection.md)
-- [Md3Card](api/Md3Card.md)
-- [Md3Text](api/Md3Text.md)
-- [Md3ContainerBody](api/Md3ContainerBody.md)
-- [Md3AdaptiveContainer](api/Md3AdaptiveContainer.md)
+- [Md3VStack](../api/Md3VStack.md)
+- [Md3HStack](../api/Md3HStack.md)
+- [Md3FlowLayout](../api/Md3FlowLayout.md)
+- [Md3AnimatedFlow](../api/Md3AnimatedFlow.md)
+- [Md3GridLayout](../api/Md3GridLayout.md)
+- [Md3Spacer](../api/Md3Spacer.md)
+- [Md3PageSection](../api/Md3PageSection.md)
+- [Md3Card](../api/Md3Card.md)
+- [Md3Text](../api/Md3Text.md)
+- [Md3ContainerBody](../api/Md3ContainerBody.md)
+- [Md3AdaptiveContainer](../api/Md3AdaptiveContainer.md)
 
 Also see [glue-less-api.md](glue-less-api.md) for Switch/Slider/ListTile/Sheet shortcuts.

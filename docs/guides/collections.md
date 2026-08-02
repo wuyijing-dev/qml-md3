@@ -110,4 +110,4 @@ Md3DataTable {
 
 ## API
 
-见 [api/README.md](api/README.md)；手写附录在 [api-manual/](api-manual/)。
+见 [api/README.md](../api/README.md)；手写附录在 [api-manual/](../api-manual/README.md)。

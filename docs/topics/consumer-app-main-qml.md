@@ -244,4 +244,4 @@ If `Md3.dll` or `qml/Md3/` is missing, enable `md3_deploy_shared_runtime` in CMa
 
 - [integration.md](../getting-started/integration.md) — `find_package(Md3)` and linking
 - [packaging.md](../getting-started/packaging.md) — build `dist/Md3` and deploy shared runtime
-- [api/Md3ApplicationWindow.md](api/Md3ApplicationWindow.md) — window shell API
+- [api/Md3ApplicationWindow.md](../api/Md3ApplicationWindow.md) — window shell API

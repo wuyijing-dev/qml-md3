@@ -63,7 +63,7 @@ python examples/gallery-pyside/main.py
 
 ## Hello example
 
-See [examples/hello-pyside/README.md](../../examples/hello-pyside/README.md).
+See [examples/hello-pyside/README.md](https://github.com/wuyijing-dev/qml-md3/blob/main/examples/hello-pyside/README.md).
 
 ## C ABI host (Rust parity)
 

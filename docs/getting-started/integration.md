@@ -17,7 +17,7 @@ Do **not** track floating `main` in a shipping app. Pin to the tagged release:
 | **Python** | `pip install "git+…@v1.1.1#subdirectory=python[pyside6]"` then `md3qml install --version 1.1.1` when using Release zips |
 | **Rust** | Depend on `rust/md3qml` from a checkout at `v1.1.1`; set `MD3_PREFIX` to a shared build from the same tag |
 
-Current lock tag: **`v1.1.1`** (see [CHANGELOG](../../CHANGELOG.md)). Upgrade only when you choose a newer tag.
+Current lock tag: **`v1.1.1`** (see [CHANGELOG](https://github.com/wuyijing-dev/qml-md3/blob/main/CHANGELOG.md)). Upgrade only when you choose a newer tag.
 
 ## Host stacks — what each layer provides
 
@@ -272,4 +272,4 @@ If the Linux app looks older than Windows after `git pull`:
 
 ## Versioning
 
-Semantic versioning. See [CHANGELOG.md](https://github.com/wuyijing-dev/QML_MD3/blob/main/CHANGELOG.md). See [docs/api](api/README.md) for the full control surface.
+Semantic versioning. See [CHANGELOG.md](https://github.com/wuyijing-dev/QML_MD3/blob/main/CHANGELOG.md). See [docs/api](../api/README.md) for the full control surface.

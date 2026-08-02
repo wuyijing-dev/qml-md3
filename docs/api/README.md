@@ -4,9 +4,9 @@
 
 由 `tools/gen_api_docs.py` 从 QML 源码生成；改完控件后请重跑该脚本。
 
-集成与 C++ 启动：[../integration.md](docs/getting-started/integration.md) · 主题令牌：[../tokens.md](docs/guides/tokens.md) · 按钮与命令：[../buttons-commands.md](docs/guides/buttons-commands.md)
+集成与 C++ 启动：[集成](../getting-started/integration.md) · 主题令牌：[令牌](../guides/tokens.md) · 按钮与命令：[按钮与命令](../guides/buttons-commands.md)
 
-手写附录（WinUI 对照等）放在 [`docs/api-manual/`](../api-manual/)；重新生成时会自动拼接到对应 API 页末尾。
+手写附录（WinUI 对照等）放在 [`docs/api-manual/`](../api-manual/README.md)；重新生成时会自动拼接到对应 API 页末尾。
 
 ## C++ / native
 

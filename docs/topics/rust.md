@@ -6,10 +6,10 @@ Host the **shared Md3 QML module** from Rust without rewriting components. Qt an
 
 | Path | Role |
 |------|------|
-| [`rust/md3qml`](../../rust/md3qml/) | `md3qml` library crate |
-| [`examples/hello-rust`](../../examples/hello-rust/) | `src/main.rs` + `Main.qml` |
-| [`src/Md3/md3_capi.h`](../../src/Md3/md3_capi.h) | Stable C entry points |
-| [`python/md3qml/capi.py`](../../python/md3qml/capi.py) | Python ctypes twin |
+| [`rust/md3qml`](https://github.com/wuyijing-dev/qml-md3/blob/main/rust/md3qml/) | `md3qml` library crate |
+| [`examples/hello-rust`](https://github.com/wuyijing-dev/qml-md3/blob/main/examples/hello-rust/) | `src/main.rs` + `Main.qml` |
+| [`src/Md3/md3_capi.h`](https://github.com/wuyijing-dev/qml-md3/blob/main/src/Md3/md3_capi.h) | Stable C entry points |
+| [`python/md3qml/capi.py`](https://github.com/wuyijing-dev/qml-md3/blob/main/python/md3qml/capi.py) | Python ctypes twin |
 
 ## Prerequisites
 
