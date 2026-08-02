@@ -111,3 +111,6 @@ coverage/
 /python/md3qml/_native/**
 !/python/md3qml/_native/.gitkeep
 
+
+# Python packaging leftovers
+*.egg-info/
