@@ -225,8 +225,10 @@ Item {
         }
     }
 
+    // Behind children so Checkbox / Chip / Button keep hit-testing priority.
     MouseArea {
         id: mouse
+        z: -1
         anchors.fill: parent
         enabled: root.clickable && root.enabled
         hoverEnabled: true

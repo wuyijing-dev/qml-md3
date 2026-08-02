@@ -12,6 +12,8 @@ Md3AbstractButton {
     property int size: Md3Button.Small
     /// Show spinner and block clicks while keeping the laid-out width.
     property bool busy: false
+    /// Destructive / error emphasis (Filled uses error container).
+    property bool danger: false
 
     accessibleName: text
     interactive: enabled && !busy
@@ -38,6 +40,13 @@ Md3AbstractButton {
 
     containerColor: {
         if (!effectivelyEnabled) return Md3Theme.colorScheme.disabledContainer()
+        if (danger) {
+            switch (variant) {
+            case Md3Button.Text:
+            case Md3Button.Outlined: return "transparent"
+            default: return Md3Theme.colorScheme.error
+            }
+        }
         switch (variant) {
         case Md3Button.Filled: return Md3Theme.colorScheme.primary
         case Md3Button.FilledTonal: return Md3Theme.colorScheme.secondaryContainer
@@ -49,6 +58,13 @@ Md3AbstractButton {
     }
     contentColor: {
         if (!effectivelyEnabled) return Md3Theme.colorScheme.disabledContent()
+        if (danger) {
+            switch (variant) {
+            case Md3Button.Text:
+            case Md3Button.Outlined: return Md3Theme.colorScheme.error
+            default: return Md3Theme.colorScheme.colorOnError
+            }
+        }
         switch (variant) {
         case Md3Button.Filled: return Md3Theme.colorScheme.colorOnPrimary
         case Md3Button.FilledTonal: return Md3Theme.colorScheme.colorOnSecondaryContainer

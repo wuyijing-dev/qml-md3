@@ -1,6 +1,6 @@
 # Md3VStack
 
-Vertical stack with spacing, padding, alignment, and optional child stretch.
+Vertical stack with spacing, padding, alignment, and optional child stretch.  **Default property is `content` (→ layout host), never `data`.** Wrappers must write `default property alias x: stack.content` — aliasing `stack.data` parks children on the stack root and they will not lay out.
 
 - **Source:** `src/Md3/layout/Md3VStack.qml`
 - **Extends:** `Item`
@@ -9,7 +9,7 @@ Vertical stack with spacing, padding, alignment, and optional child stretch.
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 11 | 0 | 0 | 1 |
+| 12 | 0 | 0 | 1 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -39,6 +39,7 @@ import Md3
 | `stretchChildren` | `bool` | `true` | read/write | `Md3VStack` | Stretch visible children to content width (skip Md3Spacer with expand). |
 | `clipContent` | `bool` | `false` | read/write | `Md3VStack` | Clip Content. |
 | `alignment` | `int (Md3VStack.Alignment)` | `Md3VStack.Start` | read/write | `Md3VStack` | Alignment. |
+| `contentItem` | `alias` | `contentCol` | read/write | `Md3VStack` | Layout host — use this (or the default property), not `data`. |
 | `content` | `alias` | `contentCol.data` | default read/write | `Md3VStack` | Content. |
 
 ## Signals

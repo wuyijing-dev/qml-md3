@@ -1,0 +1,21 @@
+---
+description: Public remote may only be pushed when the user explicitly commands it
+alwaysApply: true
+---
+
+# Public remote push gate
+
+This workspace has two GitHub remotes:
+
+| Remote | URL | Visibility |
+|--------|-----|------------|
+| `origin` | `https://github.com/wuyijing-dev/QML_MD3.git` (or equivalent) | **Private** |
+| `public` | `git@github.com:wuyijing-dev/qml-md3.git` | **Public** |
+
+## Rules
+
+1. **Never** `git push public` (or any push whose destination is `wuyijing-dev/qml-md3`) unless the user **explicitly** asks in that turn (e.g. 「推送 public」「同步到公开仓」「push public」).
+2. Auto-commit / auto-push after coding tasks applies **only to `origin` (private)**. Do not include `public` in post-task push.
+3. Do not set upstream of `main` to `public`. Keep tracking `origin/main`.
+4. If unsure whether the user meant public or private, push **only** `origin` and ask before touching `public`.
+5. Fetching from `public` is allowed when useful; **push** remains gated.

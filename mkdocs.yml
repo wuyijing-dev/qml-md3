@@ -64,6 +64,7 @@ nav:
     - 少写胶水: guides/glue-less-api.md
     - 模块边界: guides/module-boundaries.md
     - 令牌: guides/tokens.md
+    - 桌面任务模式: guides/desktop-task-patterns.md
   - 专题:
     - 性能: topics/performance.md
     - 无障碍: topics/a11y.md

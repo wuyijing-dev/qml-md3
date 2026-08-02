@@ -36,6 +36,19 @@ Flickable {
         }
 
         Md3Text {
+            text: qsTr("editingFinished / textEdited")
+            role: Md3Text.LabelLarge
+            tone: Md3Text.OnSurfaceVariant
+        }
+        Md3TextField {
+            width: Math.min(parent.width, 360)
+            variant: Md3TextField.Outlined
+            label: qsTr("Press Enter or leave field")
+            onTextEdited: supportingText = qsTr("Editing…")
+            onEditingFinished: supportingText = qsTr("Finished")
+        }
+
+        Md3Text {
             text: qsTr("Select")
             role: Md3Text.LabelLarge
             tone: Md3Text.OnSurfaceVariant

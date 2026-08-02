@@ -21,9 +21,12 @@ Use before tagging a version consumers will `find_package`.
 
 ## Docs
 
-- [ ] Guide pages updated if behavior changed (`integration`, `quickstart`, `packaging`)
-- [ ] If API surface changed: run `python tools/gen_api_docs.py` **and** intentionally commit `docs/api/`
+- [ ] Guide pages updated if behavior changed (`integration`, `quickstart`, `packaging`, cookbooks under `guides/`)
+- [ ] If API surface **or** promised default behavior changed: run `python tools/gen_api_docs.py` **and** intentionally commit `docs/api/` **in the same change** as the code
+- [ ] Keep guide/topic snippets aligned with real signals/properties (e.g. `editingFinished`, Stack `content`, `showFocusRings`)
+- [ ] Gallery demos updated when introducing a recommended app pattern
 - [ ] Document site sync is **manual** (`workflow_dispatch` or local `--push`) — not on every API regen
+- [ ] Agents: follow local Cursor rule `post-change-docs` (`.cursor/rules/`; may be gitignored) — same checklist as above
 
 ## Tag & announce
 

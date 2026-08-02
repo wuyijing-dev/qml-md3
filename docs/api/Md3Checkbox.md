@@ -7,7 +7,7 @@
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 5 | 1 | 1 | 0 |
+| 5 | 2 | 1 | 0 |
 
 ## Import
 
@@ -42,7 +42,8 @@ import Md3
 
 | Signal | Defined in | Description |
 |--------|------------|-------------|
-| `toggled(var state)` | `Md3Checkbox` | Emitted when toggled. |
+| `toggled(var state)` | `Md3Checkbox` | Qt.CheckState (Unchecked / Checked / PartiallyChecked). Prefer `onToggled: function (state) { … }` — do not inject bare `state`. |
+| `checkedToggled(bool checked)` | `Md3Checkbox` | Bool convenience alongside `toggled(state)` (Switch-compatible). |
 | `activated()` | [`Md3SelectionControl`](Md3SelectionControl.md) | Emitted when activated. |
 
 ## Methods

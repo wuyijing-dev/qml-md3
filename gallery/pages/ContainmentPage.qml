@@ -271,6 +271,8 @@ Md3Page {
         anchors.fill: parent
         title: "Dialog"
         text: "This is a Material 3 dialog."
+        bodyMaxHeight: 200
+        confirmTone: Md3Dialog.Primary
         Md3Checkbox { text: qsTr("Don't show again") }
     }
     Md3BottomSheet {

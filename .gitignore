@@ -11,7 +11,10 @@
 
 # Qt Creator / IDE local state
 /.qtcreator/
-.cursor/
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**/*.mdc
+
 CMakeLists.txt.user*
 *.pro.user*
 *.qmlproject.user*

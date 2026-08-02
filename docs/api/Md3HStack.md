@@ -1,6 +1,6 @@
 # Md3HStack
 
-Horizontal stack with spacing, padding, alignment, and expanding spacers. Manual Item layout (not Row): setting y/height on Row children re-enters updatePolish and triggers "polish() loop" warnings.
+Horizontal stack with spacing, padding, alignment, and expanding spacers. Manual Item layout (not Row): setting y/height on Row children re-enters updatePolish and triggers "polish() loop" warnings.  **Default property is `content` (→ layout host), never `data`.** Wrappers must write `default property alias x: stack.content` — aliasing `stack.data` parks children on the stack root and they will not lay out.
 
 - **Source:** `src/Md3/layout/Md3HStack.qml`
 - **Extends:** `Item`
@@ -9,7 +9,7 @@ Horizontal stack with spacing, padding, alignment, and expanding spacers. Manual
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 11 | 0 | 0 | 1 |
+| 12 | 0 | 0 | 1 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -39,6 +39,7 @@ import Md3
 | `stretchChildren` | `bool` | `false` | read/write | `Md3HStack` | Stretch Children. |
 | `clipContent` | `bool` | `false` | read/write | `Md3HStack` | Clip Content. |
 | `alignment` | `int (Md3HStack.Alignment)` | `Md3HStack.Center` | read/write | `Md3HStack` | Alignment. |
+| `contentItem` | `alias` | `contentHost` | read/write | `Md3HStack` | Layout host — use this (or the default property), not `data`. |
 | `content` | `alias` | `contentHost.data` | default read/write | `Md3HStack` | Content. |
 
 ## Signals

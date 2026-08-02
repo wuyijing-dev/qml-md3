@@ -9,11 +9,20 @@ See also [layout.md](layout.md) and [module-boundaries.md](module-boundaries.md)
 ## Selection controls
 
 ```qml
-Md3Switch { text: qsTr("Dark theme"); checked: true }
-Md3Checkbox { text: qsTr("Remember me") }
+Md3Switch {
+    text: qsTr("Dark theme")
+    checked: true
+    onToggled: function (checked) { Md3Theme.dark = checked }
+}
+Md3Checkbox {
+    text: qsTr("Remember me")
+    onToggled: function (state) { remember = state === Qt.Checked }
+    // Bool helper: onCheckedToggled: function (checked) { … }
+}
 Md3Radio { text: qsTr("Option A"); value: "a"; group: g }
 ```
 
+Always use `function (…)` handlers — bare `onToggled: x = checked` is deprecated in Qt 6.
 ## Slider / range
 
 ```qml

@@ -139,12 +139,31 @@ Item {
         }
     }
 
+    /// Keyboard-only ring (mouse focus must not force visualFocus).
+    property bool _keyboardVisualFocus: false
+
+    Keys.forwardTo: [input]
+    Keys.onPressed: function (event) {
+        if (event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab
+                || event.key === Qt.Key_Left || event.key === Qt.Key_Right
+                || event.key === Qt.Key_Up || event.key === Qt.Key_Down)
+            root._keyboardVisualFocus = true
+    }
+
+    Connections {
+        target: input
+        function onActiveFocusChanged() {
+            if (!input.activeFocus)
+                root._keyboardVisualFocus = false
+        }
+    }
+
     Md3FocusRing {
         anchors.fill: parent
         anchors.margins: -3
         radius: Md3Theme.shape.full
         focused: input.activeFocus
-        visualFocus: input.activeFocus
+        visualFocus: root._keyboardVisualFocus
         controlEnabled: root.enabled
     }
 
@@ -155,9 +174,11 @@ Item {
         cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
         z: -1
         onClicked: {
+            root._keyboardVisualFocus = false
             input.forceActiveFocus()
             root.openSearchView()
             root.clicked()
         }
+        onPressed: root._keyboardVisualFocus = false
     }
 }

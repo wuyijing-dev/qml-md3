@@ -7,6 +7,7 @@ Item {
 
     enum SelectionMode { None, Single, Multiple }
 
+    /// JS array / QVariantList, `ListModel`, or `QAbstractListModel` (roles via delegate `model`).
     property var model: []
     property Component delegate: null
     property real itemHeight: 56
@@ -97,14 +98,64 @@ Item {
         selectionChanged()
     }
 
+    function _isJsArrayLike(m) {
+        if (!m || typeof m === "string")
+            return false
+        if (Array.isArray(m))
+            return true
+        // QVariantList / string list: length + index access, no ListModel.get / AIM.rowCount
+        return m.length !== undefined
+               && typeof m.get !== "function"
+               && typeof m.rowCount !== "function"
+    }
+
     function _count() {
-        return model ? model.length : 0
+        if (!model)
+            return 0
+        if (_isJsArrayLike(model))
+            return model.length || 0
+        if (typeof model.count === "number")
+            return model.count
+        if (typeof model.rowCount === "function") {
+            try {
+                const n = model.rowCount()
+                if (typeof n === "number" && n >= 0)
+                    return n
+            } catch (e) { }
+            try {
+                const n2 = model.rowCount(null)
+                if (typeof n2 === "number" && n2 >= 0)
+                    return n2
+            } catch (e2) { }
+        }
+        // QAbstractItemModel: trust the view once assigned
+        if (list && list.count >= 0 && model === list.model)
+            return list.count
+        return 0
     }
 
     function _itemAt(index) {
-        if (!model || index < 0 || index >= model.length)
+        if (!model || index < 0)
             return null
-        return model[index]
+        if (_isJsArrayLike(model)) {
+            if (index >= model.length)
+                return null
+            return model[index]
+        }
+        if (typeof model.get === "function") {
+            try {
+                return model.get(index)
+            } catch (e) {
+                return null
+            }
+        }
+        // AIM / role models: prefer live delegate payload when visible
+        if (list) {
+            const del = list.itemAtIndex ? list.itemAtIndex(index) : null
+            if (del && del.rowPayload !== undefined)
+                return del.rowPayload
+        }
+        return { index: index }
     }
 
     function _syncDelegate(item, index, modelData, isCurrent, isSelected) {
@@ -161,7 +212,7 @@ Item {
     ListView {
         id: list
         anchors.fill: parent
-        model: pageGate.contentActive ? (root.model || []) : []
+        model: pageGate.contentActive ? (root.model !== undefined && root.model !== null ? root.model : []) : []
         clip: root.clipContent
         cacheBuffer: root.cacheBufferPx
         reuseItems: true
@@ -196,7 +247,19 @@ Item {
         delegate: Loader {
             id: rowLoader
             required property int index
-            required property var modelData
+            /// Present for JS array / QVariantList models (not required — AIM uses `model` roles).
+            property var modelData
+            /// AIM / ListModel role bag when `modelData` is absent.
+            property var model
+
+            readonly property var rowPayload: {
+                if (modelData !== undefined && modelData !== null)
+                    return modelData
+                if (model !== undefined && model !== null)
+                    return model
+                return null
+            }
+
             width: list.width
             height: root.itemHeight
             sourceComponent: root.delegate !== null ? root.delegate : fallbackDelegate
@@ -209,12 +272,14 @@ Item {
             readonly property bool rowCurrent: ListView.isCurrentItem
 
             function sync() {
-                root._syncDelegate(item, index, modelData, rowCurrent, rowSelected)
+                root._syncDelegate(item, index, rowPayload, rowCurrent, rowSelected)
             }
 
             onLoaded: sync()
             onIndexChanged: sync()
             onModelDataChanged: sync()
+            onModelChanged: sync()
+            onRowPayloadChanged: sync()
             onRowSelectedChanged: sync()
             onRowCurrentChanged: sync()
             ListView.onReused: sync()

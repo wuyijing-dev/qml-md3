@@ -1,8 +1,11 @@
 import QtQuick
 import Md3
 
+/// Modal dialog with optional scrollable body and confirm tone.
 Item {
     id: root
+
+    enum ConfirmTone { Primary, Error }
 
     property bool open: false
     property string title: ""
@@ -10,6 +13,10 @@ Item {
     property string confirmText: qsTr("OK")
     property string dismissText: qsTr("Cancel")
     property bool showDismiss: true
+    /// Cap body height; content scrolls when taller.
+    property real bodyMaxHeight: 280
+    /// Primary (default) or Error/destructive confirm button.
+    property int confirmTone: Md3Dialog.Primary
     /// Custom body between text and action buttons.
     default property alias content: bodySlot.data
 
@@ -138,7 +145,7 @@ Item {
             radius: panel.radius + 4
             focused: root.activeFocus
             controlEnabled: true
-            visualFocus: root.activeFocus
+            visualFocus: root.activeFocus && Md3Accessibility.showFocusRings
         }
 
         Column {
@@ -168,11 +175,30 @@ Item {
                 wrapMode: Text.Wrap
             }
 
-            Item {
-                id: bodySlot
+            Flickable {
+                id: bodyFlick
                 width: parent.width
-                height: childrenRect.height
-                visible: children.length > 0
+                visible: bodySlot.children.length > 0
+                contentWidth: width
+                contentHeight: bodySlot.childrenRect.height
+                height: Math.min(root.bodyMaxHeight, Math.max(0, contentHeight))
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+                interactive: contentHeight > height + 0.5
+
+                Item {
+                    id: bodySlot
+                    width: bodyFlick.width
+                    height: childrenRect.height
+                }
+
+                Md3ScrollBar {
+                    anchors.top: parent.top
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    flickable: bodyFlick
+                    orientation: Qt.Vertical
+                }
             }
 
             Row {
@@ -188,7 +214,8 @@ Item {
                 Md3Button {
                     id: confirmBtn
                     text: root.confirmText
-                    variant: Md3Button.Text
+                    variant: root.confirmTone === Md3Dialog.Error ? Md3Button.Filled : Md3Button.Text
+                    danger: root.confirmTone === Md3Dialog.Error
                     onClicked: root.accept()
                 }
             }

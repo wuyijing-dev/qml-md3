@@ -7,7 +7,7 @@
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 9 | 2 | 2 | 1 |
+| 10 | 2 | 2 | 1 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -27,7 +27,7 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `model` | `var` | `[]` | read/write | `Md3ChipGroup` | [{ text, icon?, enabled?, selected? }] |
+| `model` | `var` | `[]` | read/write | `Md3ChipGroup` | Object rows `[{ text, icon?, enabled?, selected? }]`, or a string list / QStringList (each entry becomes `{ text: String(entry) }`). |
 | `selectionMode` | `int (Md3ChipGroup.SelectionMode)` | `Md3ChipGroup.Single` | read/write | `Md3ChipGroup` | Selection Mode. |
 | `currentIndex` | `int` | `-1` | read/write | `Md3ChipGroup` | Current index. |
 | `selectedIndices` | `var` | `[]` | read/write | `Md3ChipGroup` | Multi-selection indices. |
@@ -36,6 +36,7 @@ import Md3
 | `chipHeight` | `real` | `32` | read/write | `Md3ChipGroup` | Chip Height. |
 | `iconSize` | `real` | `18` | read/write | `Md3ChipGroup` | Icon Size. |
 | `fontSize` | `real` | `Md3Theme.scaled(Md3Theme.typography.labelLarge.size)` | read/write | `Md3ChipGroup` | Font Size. |
+| `normalizedModel` | `var` | `{…}` | readonly | `Md3ChipGroup` | Normalize `model` so Repeater always sees `{ text, … }` objects. |
 
 ## Signals
 

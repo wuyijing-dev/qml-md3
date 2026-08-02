@@ -1,5 +1,7 @@
 # Md3Dialog
 
+Modal dialog with optional scrollable body and confirm tone.
+
 - **Source:** `src/Md3/components/Md3Dialog.qml`
 - **Extends:** `Item`
 
@@ -7,7 +9,7 @@
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 7 | 2 | 2 | 0 |
+| 9 | 2 | 2 | 1 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -16,6 +18,12 @@ _Also inherits Qt Quick `Item` members (not listed)._
 ```qml
 import Md3
 ```
+
+## Enums
+
+### `Md3Dialog.ConfirmTone`
+
+`Md3Dialog.Primary`, `Md3Dialog.Error`
 
 ## Properties
 
@@ -27,6 +35,8 @@ import Md3
 | `confirmText` | `string` | `qsTr("OK")` | read/write | `Md3Dialog` | Confirm Text. |
 | `dismissText` | `string` | `qsTr("Cancel")` | read/write | `Md3Dialog` | Dismiss Text. |
 | `showDismiss` | `bool` | `true` | read/write | `Md3Dialog` | Show Dismiss. |
+| `bodyMaxHeight` | `real` | `280` | read/write | `Md3Dialog` | Cap body height; content scrolls when taller. |
+| `confirmTone` | `int (Md3Dialog.ConfirmTone)` | `Md3Dialog.Primary` | read/write | `Md3Dialog` | Primary (default) or Error/destructive confirm button. |
 | `content` | `alias` | `bodySlot.data` | default read/write | `Md3Dialog` | Custom body between text and action buttons. |
 
 ## Signals

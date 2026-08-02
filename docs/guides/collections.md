@@ -8,6 +8,9 @@ WinUI 集合控件对照。Gallery：**扩展**页（List / Grid / Swipe / Flip�
 |------|------|-------|
 | 大数据一维列表 | `Md3VirtualList` | ItemsRepeater |
 | 分组 + 多选列表 | `Md3ListView` | ListView |
+| C++ `QAbstractListModel` / `ListModel` | `Md3ListView`（`model` 直传；delegate 用 `modelData` 或 AIM `model` roles） | ListView |
+| 点选填表 / 轻量推荐行 | `Md3ListTile` 或 `Md3ListView`（不要上 DataTable） | ListView |
+| 多列 + 筛选 + 分页 | `Md3DataTable`（只绑当前页 rows） | DataGrid |
 | 虚拟化网格 | `Md3GridView` | GridView |
 | Stack/Grid 切换同一数据 | `Md3ItemsView` | ItemsView |
 | 页指示点 | `Md3PipsPager` | PipsPager |
@@ -17,8 +20,12 @@ WinUI 集合控件对照。Gallery：**扩展**页（List / Grid / Swipe / Flip�
 | 下拉刷新 | `Md3PullToRefresh` | RefreshContainer |
 | 字母索引滚动条 | `Md3ScrollBar.annotations` | AnnotatedScrollBar |
 | 表格 + 就地编辑 | `Md3DataTable` `editable: true` | DataGrid |
+| 页头标题 + 尾部操作 / 溢出 | `Md3PageHeader` | — |
+| 多选后操作条 | `Md3SelectionToolbar` | — |
 
 SemanticZoom：**不做**。
+
+桌面扫描 / 索引 / 清理工作流见 [desktop-task-patterns.md](desktop-task-patterns.md)。
 
 ## ListView
 
@@ -34,8 +41,9 @@ Md3ListView {
 }
 ```
 
-Ctrl/Shift 点击多选；Ctrl+A 全选；Space 切换当前项。
+`model` 也可为 `ListModel` 或 `QAbstractListModel`。数组模型用 `modelData`；AIM 在自定义 delegate 里读 role（或 Loader 同步的 `model` 对象）。
 
+Ctrl/Shift 点击多选；Ctrl+A 全选；Space 切换当前项。
 ## GridView / ItemsView
 
 ```qml

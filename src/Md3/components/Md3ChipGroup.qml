@@ -7,7 +7,9 @@ Item {
 
     enum SelectionMode { Single, Multiple }
 
-    property var model: [] // [{ text, icon?, enabled?, selected? }]
+    /// Object rows `[{ text, icon?, enabled?, selected? }]`, or a string list / QStringList
+    /// (each entry becomes `{ text: String(entry) }`).
+    property var model: []
     property int selectionMode: Md3ChipGroup.Single
     property int currentIndex: -1
     property var selectedIndices: []
@@ -19,6 +21,34 @@ Item {
 
     signal clicked(int index)
     signal selectionChanged()
+
+    /// Normalize `model` so Repeater always sees `{ text, … }` objects.
+    readonly property var normalizedModel: {
+        const m = model
+        if (!m)
+            return []
+        if (typeof m === "string")
+            return [{ text: m }]
+        // QStringList / JS string array
+        const n = (m.length !== undefined) ? m.length
+                  : (m.count !== undefined ? m.count : 0)
+        if (!n)
+            return Array.isArray(m) ? m : []
+        const out = []
+        for (let i = 0; i < n; ++i) {
+            const entry = (m.length !== undefined) ? m[i]
+                          : (typeof m.get === "function" ? m.get(i) : m[i])
+            if (entry === undefined || entry === null)
+                continue
+            if (typeof entry === "string" || typeof entry === "number")
+                out.push({ text: String(entry) })
+            else if (typeof entry === "object")
+                out.push(entry)
+            else
+                out.push({ text: String(entry) })
+        }
+        return out
+    }
 
     implicitHeight: flow.implicitHeight
     implicitWidth: flow.implicitWidth
@@ -56,9 +86,10 @@ Item {
     }
 
     function select(index) {
-        if (!enabled || index < 0 || index >= model.length)
+        const rows = normalizedModel
+        if (!enabled || index < 0 || index >= rows.length)
             return
-        const item = model[index]
+        const item = rows[index]
         if (item && item.enabled === false)
             return
         if (selectionMode === Md3ChipGroup.Single)
@@ -74,7 +105,7 @@ Item {
         spacing: root.spacing
 
         Repeater {
-            model: root.model
+            model: root.normalizedModel
             delegate: Md3FilterChip {
                 required property int index
                 required property var modelData

@@ -25,7 +25,7 @@ Item {
     opacity: open ? _dragFade : 0
     z: 1200
 
-    Accessible.role: Accessible.Status
+    Accessible.role: Accessible.Alert
     Accessible.name: text.length ? text : qsTr("Snackbar")
     // Do not grab keyboard focus while other controls are focused.
     activeFocusOnTab: false

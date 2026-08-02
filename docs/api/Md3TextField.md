@@ -7,7 +7,7 @@
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 36 | 3 | 4 | 1 |
+| 36 | 5 | 4 | 1 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -69,8 +69,10 @@ import Md3
 | Signal | Defined in | Description |
 |--------|------------|-------------|
 | `trailingClicked()` | `Md3TextField` | Emitted when trailing Clicked. |
-| `accepted()` | `Md3TextField` | Emitted when accepted. |
+| `accepted()` | `Md3TextField` | Emitted on Enter / Return (same as Qt Quick Controls TextField.accepted). |
+| `editingFinished()` | `Md3TextField` | Emitted when editing ends: accepted, or focus leaves the field with text changed. Prefer this over a non-existent `editingFinished` on older snippets. |
 | `suggestionChosen(var suggestion)` | `Md3TextField` | Emitted when suggestion Chosen. |
+| `textEdited()` | `Md3TextField` | Emitted when text Edited. |
 
 ## Methods
 

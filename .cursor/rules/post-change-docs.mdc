@@ -1,0 +1,25 @@
+---
+description: After Md3 API/behavior changes, regenerate API docs and update guides before finishing.
+alwaysApply: true
+---
+
+# Post-change documentation
+
+When a coding task changes **public QML/C++ API**, **default behavior**, or **Gallery patterns** that docs promise:
+
+1. **Regenerate** API pages: `python tools/gen_api_docs.py` (from repo root). Include regenerated `docs/api/*.md` in the same commit when the change is intentional product/API work — not when the only ask was an unrelated regen.
+2. **Update hand-written docs** that would otherwise lie:
+   - Guides under `docs/guides/` (layout, collections, feedback, glue-less-api, …)
+   - Topics under `docs/topics/` (a11y, datatable, performance, …)
+   - Cookbooks under `docs/guides/` when adding workflow recipes
+   - `mkdocs.yml` nav if new pages are added
+3. **Keep contract alignment**: if docs mention a property/signal (e.g. `editingFinished`, `showFocusRings`, Stack `content`), the implementation must match in the same turn.
+4. **Document sync**: run `python tools/sync_document_repo.py` locally when docs changed; **`--push` only when the user explicitly asks** to publish Document/Pages (see auto-commit exceptions).
+5. Do **not** skip docs with “稍后补” after shipping behavior fixes that CleanSpace/Gallery already rely on.
+
+## Minimal checklist (copy mentally)
+
+- [ ] `gen_api_docs.py` if QML public props/signals/enums changed  
+- [ ] Guide/topic/cookbook snippet still compiles mentally against new API  
+- [ ] Gallery demo updated when introducing a new recommended pattern  
+- [ ] Commit includes docs with the code (same auto-commit)  

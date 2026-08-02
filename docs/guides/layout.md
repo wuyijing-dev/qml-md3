@@ -70,6 +70,22 @@ Md3HStack {
 }
 ```
 
+### Stack default property (`content`, not `data`)
+
+`Md3HStack` / `Md3VStack` lay out children on an internal host. The default property is **`content`**. Wrappers must alias that — never `stack.data` — or children disappear from layout. See [desktop-task-patterns.md](desktop-task-patterns.md).
+
+### Page header (title + actions + overflow)
+
+```qml
+Md3PageHeader {
+    width: parent.width
+    title: qsTr("Search")
+    subtitle: qsTr("Local index")
+    Md3Button { text: qsTr("Scan") }
+    Md3Button { text: qsTr("Stop"); variant: Md3Button.Outlined }
+}
+```
+
 ### Page section
 
 ```qml

@@ -7,7 +7,7 @@
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 133 | 6 | 93 | 0 |
+| 134 | 6 | 93 | 0 |
 
 _Also inherits Qt Quick `Window` members (not listed)._
 
@@ -65,6 +65,7 @@ import Md3
 | `themeRevealBusy` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Theme Reveal Busy. |
 | `themeRevealDuration` | `int` | `Md3Motion.long2` | read/write | `Md3ApplicationWindow` | Theme Reveal Duration. |
 | `themeRevealEasing` | `var` | `Md3Motion.emphasized` | read/write | `Md3ApplicationWindow` | Theme Reveal Easing. |
+| `defaultShowFocusRings` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Fallback for `a11y/showFocusRings` when QSettings has no value yet. Mouse-first desktop apps often set `false`; keyboard-first / Gallery leave default `true`. |
 | `destinations` | `var` | `[]` | read/write | `Md3ApplicationWindow` | When non-empty, window hosts left rail + on-demand pages (no manual layout needed). |
 | `currentIndex` | `int` | `0` | read/write | `Md3ApplicationWindow` | Current index. |
 | `navigationRail` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Navigation Rail. |

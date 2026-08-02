@@ -11,7 +11,11 @@ Md3SelectionControl {
     labelRole: Md3Text.BodyLarge
     onActivated: cycle()
 
+    /// Qt.CheckState (Unchecked / Checked / PartiallyChecked). Prefer
+    /// `onToggled: function (state) { … }` — do not inject bare `state`.
     signal toggled(var state)
+    /// Bool convenience alongside `toggled(state)` (Switch-compatible).
+    signal checkedToggled(bool checked)
 
     readonly property bool isChecked: checkState === Qt.Checked
     readonly property bool isPartial: checkState === Qt.PartiallyChecked
@@ -33,6 +37,7 @@ Md3SelectionControl {
         }
         checked = checkState === Qt.Checked
         toggled(checkState)
+        checkedToggled(checked)
     }
 
     onCheckedChanged: {

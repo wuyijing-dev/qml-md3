@@ -7,7 +7,7 @@
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 7 | 0 | 0 | 2 |
+| 8 | 0 | 0 | 2 |
 
 ## Import
 
@@ -36,6 +36,7 @@ import Md3
 | `variant` | `int (Md3Button.Variant)` | `Md3Button.Filled` | read/write | `Md3Button` | Visual / role variant (see Enums). |
 | `size` | `int (Md3Button.Size)` | `Md3Button.Small` | read/write | `Md3Button` | Control size token (see Enums). |
 | `busy` | `bool` | `false` | read/write | `Md3Button` | Show spinner and block clicks while keeping the laid-out width. |
+| `danger` | `bool` | `false` | read/write | `Md3Button` | Destructive / error emphasis (Filled uses error container). |
 | `effectivelyEnabled` | `bool` | `enabled` | readonly | `Md3Button` | Visual enabled (colors). Busy keeps brand colors and shows a spinner instead. |
 | `h` | `real` | `{…}` | readonly | `Md3Button` | H. |
 | `padH` | `real` | `size === Md3Button.ExtraSmall ? 12 : (size === Md3Button.Large ? 24 : 16)` | readonly | `Md3Button` | Pad H. |
@@ -82,8 +83,8 @@ Md3Button {
     variant: Md3Button.Filled
     size: Md3Button.Small
     busy: false
+    danger: false
     text: ""
     icon: ""
-    accessibleName: text.length ? text : (icon.length ? icon : qsTr("Button"))
 }
 ```

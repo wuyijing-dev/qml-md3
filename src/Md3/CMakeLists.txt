@@ -345,6 +345,10 @@ qt_add_qml_module(Md3
         components/Md3ExpansionTile.qml
         components/Md3DataTable.qml
         components/Md3StatusBar.qml
+        components/Md3StatusLine.qml
+        components/Md3SelectionToolbar.qml
+        components/Md3PageHeader.qml
+        components/Md3TaskProgress.qml
         components/Md3TreeView.qml
         components/Md3PathField.qml
         components/Md3KeySequenceField.qml

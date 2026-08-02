@@ -248,8 +248,9 @@ Md3Chart {
         const y = horizontal
                 ? (plotTop + (ii + 0.5) * plotHeight / visibleCount)
                 : (plotTop + plotHeight / 2)
-        setProbe(idx, x, info, y)
-        (canvasLoader.item && canvasLoader.item.requestPaint())
+        setProbe(idx, x, info, y);
+        if (canvasLoader.item)
+            canvasLoader.item.requestPaint()
     }
 
     function nudgeProbe(delta) {
@@ -289,10 +290,10 @@ Md3Chart {
     onStackedChanged: requestRebuild()
     onHorizontalChanged: requestRebuild()
     onBarGapChanged: requestRebuild()
-    onProbeActiveChanged: (canvasLoader.item && canvasLoader.item.requestPaint())
-    onProbeIndexChanged: (canvasLoader.item && canvasLoader.item.requestPaint())
-    onCleared: (canvasLoader.item && canvasLoader.item.requestPaint())
-    onRebuilt: (canvasLoader.item && canvasLoader.item.requestPaint())
+    onProbeActiveChanged: { if (canvasLoader.item) canvasLoader.item.requestPaint() }
+    onProbeIndexChanged: { if (canvasLoader.item) canvasLoader.item.requestPaint() }
+    onCleared: { if (canvasLoader.item) canvasLoader.item.requestPaint() }
+    onRebuilt: { if (canvasLoader.item) canvasLoader.item.requestPaint() }
 
     Rectangle {
         anchors.fill: parent

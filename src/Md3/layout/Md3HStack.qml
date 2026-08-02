@@ -4,6 +4,10 @@ import Md3
 /// Horizontal stack with spacing, padding, alignment, and expanding spacers.
 /// Manual Item layout (not Row): setting y/height on Row children re-enters
 /// updatePolish and triggers "polish() loop" warnings.
+///
+/// **Default property is `content` (→ layout host), never `data`.**
+/// Wrappers must write `default property alias x: stack.content` — aliasing
+/// `stack.data` parks children on the stack root and they will not lay out.
 Item {
     id: root
 
@@ -23,6 +27,8 @@ Item {
     property bool stretchChildren: false
     property bool clipContent: false
     property int alignment: Md3HStack.Center
+    /// Layout host — use this (or the default property), not `data`.
+    readonly property alias contentItem: contentHost
     default property alias content: contentHost.data
 
     property bool _applying: false

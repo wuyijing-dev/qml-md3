@@ -2,6 +2,10 @@ import QtQuick
 import Md3
 
 /// Vertical stack with spacing, padding, alignment, and optional child stretch.
+///
+/// **Default property is `content` (→ layout host), never `data`.**
+/// Wrappers must write `default property alias x: stack.content` — aliasing
+/// `stack.data` parks children on the stack root and they will not lay out.
 Item {
     id: root
 
@@ -22,6 +26,8 @@ Item {
     property bool stretchChildren: true
     property bool clipContent: false
     property int alignment: Md3VStack.Start
+    /// Layout host — use this (or the default property), not `data`.
+    readonly property alias contentItem: contentCol
     default property alias content: contentCol.data
 
     property bool _applying: false

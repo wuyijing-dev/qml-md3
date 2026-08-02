@@ -75,6 +75,10 @@ Window {
     property int themeRevealDuration: Md3Motion.long2
     property var themeRevealEasing: Md3Motion.emphasized
 
+    /// Fallback for `a11y/showFocusRings` when QSettings has no value yet.
+    /// Mouse-first desktop apps often set `false`; keyboard-first / Gallery leave default `true`.
+    property bool defaultShowFocusRings: true
+
     /// QSettings often returns REG_SZ "true"/"false" — never use !! on strings ("false" is truthy).
     function _settingsBool(key, fallback) {
         const v = Md3AppSettings.value(key, fallback)
@@ -759,7 +763,7 @@ Window {
         const fxi = Number(Md3AppSettings.value("perf/effectsIntensity", Md3Theme.effectsIntensity))
         if (isFinite(fxi))
             Md3Theme.setEffectsIntensity(fxi)
-        Md3Accessibility.showFocusRings = _settingsBool("a11y/showFocusRings", Md3Accessibility.showFocusRings)
+        Md3Accessibility.showFocusRings = _settingsBool("a11y/showFocusRings", root.defaultShowFocusRings)
         // One-shot: older Gallery builds could leave reduceMotion stuck ON (all motion ≈1ms).
         if (!_settingsBool("a11y/reduceMotionMigrated", false)) {
             Md3Theme.reduceMotion = false

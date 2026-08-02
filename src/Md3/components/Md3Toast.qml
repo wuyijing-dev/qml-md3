@@ -27,7 +27,7 @@ Item {
     activeFocusOnTab: false
     focus: false
 
-    Accessible.role: Accessible.Status
+    Accessible.role: Accessible.Alert
     Accessible.name: text.length ? text : qsTr("Toast")
 
     readonly property color bg: {

@@ -268,6 +268,70 @@ Md3Page {
             wrapMode: Text.WordWrap
         }
 
+        Md3PageHeader {
+            width: parent.width
+            title: qsTr("Workspace tools")
+            subtitle: qsTr("Narrow the window to fold trailing actions into overflow")
+            Md3Button {
+                text: qsTr("Scan")
+                onClicked: page.applyStatus(qsTr("Scan started"))
+            }
+            Md3Button {
+                text: qsTr("Stop")
+                variant: Md3Button.Outlined
+                onClicked: page.applyStatus(qsTr("Scan stopped"))
+            }
+            Md3Button {
+                text: qsTr("Rebuild index")
+                variant: Md3Button.Text
+                onClicked: page.applyStatus(qsTr("Rebuild index"))
+            }
+            Md3Button {
+                text: qsTr("Clean")
+                variant: Md3Button.Text
+                onClicked: page.applyStatus(qsTr("Clean"))
+            }
+            Md3Button {
+                text: qsTr("Delete forever")
+                variant: Md3Button.Text
+                danger: true
+                onClicked: page.applyStatus(qsTr("Delete forever"))
+            }
+        }
+
+        Md3TaskProgress {
+            width: parent.width
+            active: true
+            label: qsTr("Indexing local files…")
+            secondaryLabel: qsTr("Cancel stops the worker; UI stays responsive")
+            indeterminate: true
+            cancelable: true
+            onCanceled: page.applyStatus(qsTr("Index canceled"))
+        }
+
+        Md3StatusLine {
+            width: parent.width
+            icon: "database"
+            text: qsTr("Local index 24 entries")
+            secondaryText: qsTr("Built today · SQL LIMIT pages the table below")
+            actionText: qsTr("Details")
+            onActionClicked: page.applyStatus(qsTr("Index details"))
+        }
+
+        Md3SelectionToolbar {
+            width: parent.width
+            selectedCount: fileTable.selectedIndices.length
+            Md3Button {
+                text: qsTr("Clean selected")
+                onClicked: page.applyStatus(qsTr("Clean %1 rows").arg(fileTable.selectedIndices.length))
+            }
+            Md3Button {
+                text: qsTr("Clear")
+                variant: Md3Button.Text
+                onClicked: fileTable.clearSelection()
+            }
+        }
+
         Md3HStack {
             width: parent.width
             spacing: 8
@@ -310,7 +374,7 @@ Md3Page {
 
         Md3SplitView {
             width: parent.width
-            height: Math.max(0, page.height - 120)
+            height: Math.max(0, page.height - 320)
             splitRatio: 0.32
             minPane1: 240
             minPane2: 320

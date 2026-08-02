@@ -48,8 +48,15 @@ Item {
     property var overlayWindow: null
 
     signal trailingClicked()
+    /// Emitted on Enter / Return (same as Qt Quick Controls TextField.accepted).
     signal accepted()
+    /// Emitted when editing ends: accepted, or focus leaves the field with text changed.
+    /// Prefer this over a non-existent `editingFinished` on older snippets.
+    signal editingFinished()
     signal suggestionChosen(var suggestion)
+    signal textEdited()
+
+    property string _textAtFocus: ""
 
     readonly property bool focused: input.activeFocus
     readonly property bool floated: focused || text.length > 0
@@ -417,6 +424,15 @@ Item {
                         if (root.hasError && root.announceErrors)
                             root._errorFeedback()
                         root.accepted()
+                        root.editingFinished()
+                    }
+                    onTextEdited: root.textEdited()
+                    onActiveFocusChanged: {
+                        if (activeFocus) {
+                            root._textAtFocus = text
+                        } else if (text !== root._textAtFocus) {
+                            root.editingFinished()
+                        }
                     }
                 }
 
@@ -426,9 +442,15 @@ Item {
                     radius: Md3Theme.shape.extraSmall
                     focused: input.activeFocus
                     controlEnabled: root.enabled
-                    // Outlined already thickens its border on focus — a second outer ring looks like a double frame.
+                    // Outlined already thickens its border on focus — avoid double frame;
+                    // gate with showFocusRings (mouse focus alone should not force a ring).
                     visualFocus: root.variant !== Md3TextField.Outlined
-                                 && Md3Accessibility.showFocusRings && input.activeFocus
+                                 && Md3Accessibility.showFocusRings
+                                 && input.activeFocus
+                                 && (input.focusReason === Qt.TabFocusReason
+                                     || input.focusReason === Qt.BacktabFocusReason
+                                     || input.focusReason === Qt.ShortcutFocusReason)
+                }
                 }
 
                 Text {

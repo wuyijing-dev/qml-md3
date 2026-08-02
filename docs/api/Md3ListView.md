@@ -29,7 +29,7 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `model` | `var` | `[]` | read/write | `Md3ListView` | Data model. |
+| `model` | `var` | `[]` | read/write | `Md3ListView` | JS array / QVariantList, `ListModel`, or `QAbstractListModel` (roles via delegate `model`). |
 | `delegate` | `Component` | `null` | read/write | `Md3ListView` | Delegate. |
 | `itemHeight` | `real` | `56` | read/write | `Md3ListView` | Item Height. |
 | `sectionHeight` | `real` | `32` | read/write | `Md3ListView` | Section Height. |

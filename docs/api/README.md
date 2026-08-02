@@ -8,7 +8,7 @@
 
 手写附录（WinUI 对照等）放在 [`api-manual/`](../api-manual/README.md)；重新生成时会自动拼接到对应 API 页末尾。
 
-**QML types:** 181 · **C++ / native pages:** 9
+**QML types:** 185 · **C++ / native pages:** 9
 
 ## C++ / native
 
@@ -70,10 +70,10 @@
 - [Md3AnimatedFlow](Md3AnimatedFlow.md) — Flow layout: children reflow with spatial easing. Sizes use max(explicit, implicit) so callers need not mirror width/height into implicit*.
 - [Md3FlowLayout](Md3FlowLayout.md) — Wrapping flow — thin wrapper over Md3AnimatedFlow (no animation by default).
 - [Md3GridLayout](Md3GridLayout.md) — Responsive uniform grid for arbitrary child items.
-- [Md3HStack](Md3HStack.md) — Horizontal stack with spacing, padding, alignment, and expanding spacers. Manual Item layout (not Row): setting y/height on Row children re-enters updatePolish and triggers "polish() loop" warnings.
+- [Md3HStack](Md3HStack.md) — Horizontal stack with spacing, padding, alignment, and expanding spacers. Manual Item layout (not Row): setting y/height on Row children re-enters updatePolish and triggers "polish() loop" warnings.  **Default property is `content` (→ layout host), never `data`.** Wrappers must write `default property alias x: stack.content` — aliasing `stack.data` parks children on the stack root and they will not lay out.
 - [Md3PageSection](Md3PageSection.md) — Page section: title + optional subtitle + content — cuts gallery/form glue.
 - [Md3Spacer](Md3Spacer.md) — Lightweight spacer. Use `size` for fixed gaps, or `expand: true` inside Md3HStack / Md3VStack to absorb remaining space (SwiftUI-style).
-- [Md3VStack](Md3VStack.md) — Vertical stack with spacing, padding, alignment, and optional child stretch.
+- [Md3VStack](Md3VStack.md) — Vertical stack with spacing, padding, alignment, and optional child stretch.  **Default property is `content` (→ layout host), never `data`.** Wrappers must write `default property alias x: stack.content` — aliasing `stack.data` parks children on the stack root and they will not lay out.
 
 ## Actions & selection
 
@@ -119,6 +119,7 @@
 - [Md3SearchBar](Md3SearchBar.md)
 - [Md3SearchView](Md3SearchView.md)
 - [Md3Select](Md3Select.md) — Field-style select (ComboBox): label, helper/error, menu — aligned with Md3TextField. Supports searchable filtering and multi-select.
+- [Md3SelectionToolbar](Md3SelectionToolbar.md) — Selection action bar: “N selected” + trailing actions (for tables / lists).
 - [Md3TagField](Md3TagField.md) — Multi-tag / chip input — Enter or comma commits; Backspace removes last tag.
 - [Md3TextField](Md3TextField.md)
 - [Md3TimeField](Md3TimeField.md) — Docked MD3 time field: text field + time picker popup (peer of Md3DateField).
@@ -161,7 +162,7 @@
 - [Md3BottomSheet](Md3BottomSheet.md)
 - [Md3Card](Md3Card.md)
 - [Md3ContextMenuArea](Md3ContextMenuArea.md) — Transparent right-click host over a page / region. Left-clicks pass through; right-click opens `contextMenu` at the cursor.  ```qml Md3ContextMenuArea { anchors.fill: parent contextMenu: pageMenu } Md3Menu { id: pageMenu Md3MenuItem { text: qsTr("Refresh") } } ```
-- [Md3Dialog](Md3Dialog.md)
+- [Md3Dialog](Md3Dialog.md) — Modal dialog with optional scrollable body and confirm tone.
 - [Md3Divider](Md3Divider.md)
 - [Md3DropdownMenu](Md3DropdownMenu.md)
 - [Md3EmptyState](Md3EmptyState.md) — Empty / no-results placeholder: icon, title, body, optional CTA.
@@ -188,6 +189,7 @@
 - [Md3LinearProgressIndicator](Md3LinearProgressIndicator.md) — Linear progress — Standard uses Rectangles + NumberAnimation; wavy styles rebuild polylines on a capped cadence (not every vsync).
 - [Md3LoadingIndicator](Md3LoadingIndicator.md) — Material 3 Loading indicator — spins a fixed arc (no per-frame Path mutation).
 - [Md3MorphLoadingIndicator](Md3MorphLoadingIndicator.md) — Material 3 Expressive morph loading indicator — rounded 8-lobe clover / asterisk.
+- [Md3TaskProgress](Md3TaskProgress.md) — Long-running / cancellable activity strip (scan, index, delete…).
 
 ## Charts
 
@@ -225,6 +227,7 @@
 - [Md3ListTile](Md3ListTile.md)
 - [Md3MultiRingGauge](Md3MultiRingGauge.md) — Concentric multi-ring gauge — each ring is `{ value, from?, to?, color?, label? }`.
 - [Md3NeedleGauge](Md3NeedleGauge.md) — Analog needle gauge with tick marks (speedometer-style).
+- [Md3PageHeader](Md3PageHeader.md) — Page title row with optional subtitle and trailing actions (overflow on narrow width).  **Children go to the actions row** (`default property` → `actions`). Do not wrap this in another Item that aliases `pageHeader.data`.
 - [Md3ReleaseUpdater](Md3ReleaseUpdater.md) — GitHub Release update client: metadata check, ZIP download, and archive extract. NOTE: This is non-visual (0x0) but uses `Item` so it can safely host the C++ backend instance.
 - [Md3RingGauge](Md3RingGauge.md) — Full 360° ring / donut progress gauge.
 - [Md3ScrollBar](Md3ScrollBar.md) — Themed scrollbar attached to a Flickable (vertical or horizontal). Optional `annotations` enable WinUI AnnotatedScrollBar-style letter/tick labels.
@@ -232,6 +235,7 @@
 - [Md3SegmentGauge](Md3SegmentGauge.md) — Segmented arc gauge — discrete wedges (battery / steps style).
 - [Md3Sparkline](Md3Sparkline.md) — Lightweight sparkline for KPIs / lists — Canvas only (no Md3Chart overhead).
 - [Md3StatusBar](Md3StatusBar.md) — Desktop status bar — left / center / right zones, transient messages.
+- [Md3StatusLine](Md3StatusLine.md) — Compact persistent status line (index health, cache, non-alert state).
 - [Md3Text](Md3Text.md)
 - [Md3TickRingGauge](Md3TickRingGauge.md) — Tick-ring gauge — circular progress with radial tick marks (no needle).
 - [Md3Toast](Md3Toast.md) — Short-lived toast chip. Prefer Md3ToastHost / Md3Notify.toast for stacking & position.
