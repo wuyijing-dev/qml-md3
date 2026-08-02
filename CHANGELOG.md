@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased
+
+_(empty — next work goes here)_
+
+## 1.1.1
+
+Patch lock for consumer apps: UX polish + Linux D-Bus fix on top of 1.1.0. **No intentional Public API breaks.**
+
+### Highlights
+
+- **Snackbar / Toast** — Undo-friendly dwell when `actionText` is set; swipe fade + snap-back; toast pause-on-hover and id dedupe refresh.
+- **Forms / buttons** — `Md3Form.focusFirstError` on failed `submit`; `Md3Button.busy` spinner without width jump.
+- **Shell** — `Md3ApplicationWindow.showShellInfoBar` / `dismissShellInfoBar`; density soft transition on page padding / table / list tile; Dialog / Menu / CommandPalette focus restore.
+- **Gallery recipes** — Communication Undo + InfoBar + copy; Motion pageTransition playground; Patterns skeleton crossfade; DesktopPatterns delete/rename Undo; Containment scroll-to-top.
+- **Polish** — collapsed NavigationRail tip; Fab tooltip; SearchBar focus chrome; TabBar hover + arrow keys; `Md3Notify.copy`; CodeBlock copy; EmptyState enter; Select error shake; Pickers DeferredSection height; BarChart/PieChart ASI `requestPaint` fix.
+- **Linux** — portal D-Bus connect uses QObject slot (no lambda) so builds link cleanly.
+
+### Notes
+
+- Android / WASM remain **experimental**.
+- Prefer tag **`v1.1.1`** (not floating `main`) when starting a product app.
+
 ## 1.1.0
 
 Performance-focused maintenance release for desktop Gallery / embedded shells. **Appearance-preserving** page lifecycle, chart/gauge unload, and smoother window drag.
@@ -31,10 +53,6 @@ Performance-focused maintenance release for desktop Gallery / embedded shells. *
 - `docs/topics/performance.md` wins through session debounce + system corners.
 - Android device smoke checklist; native-platforms corner/backdrop honesty.
 - Release checklist exercised for this tag.
-
-## Unreleased
-
-_(empty — next work goes here)_
 
 ## 1.0.0
 

@@ -27,7 +27,7 @@ Enterprise Material Design 3 component library for **Qt Quick / QML 6.5+** (reco
 | **Experimental** | No SemVer promise | [docs/topics/experimental.md](docs/topics/experimental.md) |
 | **License** | LGPL-3.0 **or** Commercial (+ certification) | [docs/licensing.md](docs/licensing.md) · fonts/icons: [NOTICE](NOTICE) |
 
-Status: **1.1.0** (Windows-focused production tag; performance lifecycle + system corners). Android / WASM remain experimental — see [docs/project/professional-todo.md](docs/project/professional-todo.md). Releases follow [docs/getting-started/release-checklist.md](docs/getting-started/release-checklist.md).
+Status: **1.1.1** (Windows-focused production tag; 1.1.0 perf + UX polish lock). Android / WASM remain experimental — see [docs/project/professional-todo.md](docs/project/professional-todo.md). Releases follow [docs/getting-started/release-checklist.md](docs/getting-started/release-checklist.md).
 
 ## Import
 

@@ -47,7 +47,7 @@ Md3ApplicationWindow {
     showPerformanceButton: true
     showPerformanceOverlay: false
     showAboutButton: true
-    aboutVersion: "1.0.0"
+    aboutVersion: "1.1.1"
     aboutOrganization: "Md3"
     aboutText: qsTr("Material Design 3 组件图库 — 演示窗口、导航与控件。")
     aboutIcon: windowIcon
