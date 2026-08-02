@@ -451,7 +451,6 @@ Item {
                                      || input.focusReason === Qt.BacktabFocusReason
                                      || input.focusReason === Qt.ShortcutFocusReason)
                 }
-                }
 
                 Text {
                     anchors.fill: input
