@@ -18,8 +18,12 @@ Item {
     property int maxHeight: 280
     /// When false, height grows with content (still clipped by parent).
     property bool scrollable: true
+    /// Show a copy button in the top-right corner.
+    property bool showCopyButton: true
     /// Drop RichText HTML while page is off-display (chrome size stays).
     property bool unloadWhenPageInactive: true
+
+    signal copied(string text)
 
     readonly property string _lang: {
         const l = String(language).toLowerCase()
@@ -278,6 +282,7 @@ Item {
             id: flick
             anchors.fill: parent
             anchors.margins: root.padding
+            anchors.rightMargin: root.padding + (root.showCopyButton ? 36 : 0)
             contentWidth: Math.max(width, codeText.implicitWidth)
             contentHeight: codeText.implicitHeight
             clip: true
@@ -293,6 +298,20 @@ Item {
                 color: Md3Theme.colorScheme.colorOnSurface
                 wrapMode: root.wrap ? Text.WrapAnywhere : Text.NoWrap
                 property int gen: root._gen
+            }
+        }
+
+        Md3IconButton {
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.margins: 4
+            visible: root.showCopyButton && root.code.length > 0
+            icon: "content_copy"
+            accessibleName: qsTr("Copy code")
+            onClicked: {
+                const ok = Md3Notify.copy(root.code, { feedback: qsTr("Code copied") })
+                if (ok)
+                    root.copied(root.code)
             }
         }
     }

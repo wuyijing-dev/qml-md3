@@ -189,8 +189,10 @@ Md3Page {
                 spacing: 8
                 width: parent.width
                 Md3Button {
-                    text: qsTr("Toast")
-                    onClicked: Md3Notify.toast(qsTr("Copied to clipboard"), { severity: Md3Toast.Success })
+                    text: qsTr("Copy sample")
+                    onClicked: Md3Notify.copy(qsTr("Hello from Md3Notify.copy"), {
+                        feedback: qsTr("Copied to clipboard")
+                    })
                 }
                 Md3Button {
                     text: qsTr("Toast warning")

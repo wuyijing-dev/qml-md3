@@ -17,6 +17,10 @@ Rectangle {
     /// Optional Window for system-backdrop tint (else Window.window).
     property var hostWindow: null
 
+    /// When collapsed, show destination label tip on hover (reparented outside rail clip).
+    property bool showCollapsedTooltips: true
+    property int collapsedTooltipDelayMs: 420
+
     signal currentIndexChangedByUser(int index)
     signal destinationHovered(int index)
     signal destinationUnhovered(int index)
@@ -71,6 +75,82 @@ Rectangle {
             at = 0
         const next = ids[(at + delta + ids.length) % ids.length]
         _selectDest(next)
+    }
+
+    property var _tipAnchor: null
+    property string _tipText: ""
+    property bool _tipOpen: false
+
+    function _armCollapsedTip(anchor, label) {
+        _tipAnchor = anchor
+        _tipText = label || ""
+        tipDelay.restart()
+    }
+
+    function _disarmCollapsedTip(anchor) {
+        if (_tipAnchor === anchor) {
+            tipDelay.stop()
+            _hideCollapsedTip()
+        }
+    }
+
+    function _hideCollapsedTip() {
+        tipDelay.stop()
+        _tipOpen = false
+        _tipAnchor = null
+        _tipText = ""
+    }
+
+    function _showCollapsedTip() {
+        if (expanded || !showCollapsedTooltips || !_tipText.length || !_tipAnchor)
+            return
+        const content = Md3OverlayHost.contentItem(hostWindow, root)
+        if (!content)
+            return
+        if (collapsedTip.parent !== content)
+            collapsedTip.parent = content
+        const p = Md3OverlayHost.mapToOverlay(_tipAnchor, _tipAnchor.width + 8,
+                                              (_tipAnchor.height - collapsedTip.height) / 2, hostWindow)
+        collapsedTip.x = p.x
+        collapsedTip.y = Math.max(8, p.y)
+        collapsedTip.z = 6000
+        _tipOpen = true
+    }
+
+    onExpandedChanged: _hideCollapsedTip()
+
+    Timer {
+        id: tipDelay
+        interval: root.collapsedTooltipDelayMs
+        onTriggered: root._showCollapsedTip()
+    }
+
+    Rectangle {
+        id: collapsedTip
+        visible: root._tipOpen && root._tipText.length > 0
+        width: tipLabel.implicitWidth + 16
+        height: tipLabel.implicitHeight + 8
+        radius: Md3Theme.shape.extraSmall
+        color: Md3Theme.colorScheme.inverseSurface
+        opacity: visible ? 1 : 0
+        z: 6000
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: Md3Motion.overlayDuration
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.standard
+            }
+        }
+
+        Text {
+            id: tipLabel
+            anchors.centerIn: parent
+            text: root._tipText
+            color: Md3Theme.colorScheme.colorOnInverseSurface
+            font.family: Md3Theme.typography.fontFamily
+            font.pixelSize: Md3Theme.typography.bodySmall.size
+        }
     }
 
     Keys.onPressed: function (event) {
@@ -302,11 +382,17 @@ Rectangle {
                     // Don't prefetch while the user is dragging the rail — that freezes flicks.
                     if (!root.scrolling)
                         root.destinationHovered(dest.destIndex)
+                    if (root.showCollapsedTooltips && !root.expanded)
+                        root._armCollapsedTip(dest, String(modelData.label || ""))
                 }
-                onExited: root.destinationUnhovered(dest.destIndex)
+                onExited: {
+                    root.destinationUnhovered(dest.destIndex)
+                    root._disarmCollapsedTip(dest)
+                }
                 onClicked: function (mouse) {
                     const local = mapToItem(hit, mouse.x, mouse.y)
                     ripple.pulse(local.x, local.y)
+                    root._hideCollapsedTip()
                     root._selectDest(dest.destIndex)
                 }
                 onPressAndHold: root.destinationPreview(dest.destIndex)

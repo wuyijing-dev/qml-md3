@@ -41,6 +41,51 @@ Item {
     readonly property color activeColor: hasError ? Md3Theme.colorScheme.error : Md3Theme.colorScheme.primary
     readonly property bool open: menu.open
     readonly property bool floated: open || hasSelection || placeholderText.length === 0
+    property bool errorFeedbackEnabled: true
+    property real _shakeX: 0
+
+    function _errorFeedback() {
+        if (!errorFeedbackEnabled || !hasError)
+            return
+        if (!Md3Theme.reduceMotion) {
+            selectShake.stop()
+            selectShake.start()
+        }
+        if (typeof Md3Accessibility !== "undefined" && Md3Accessibility.announceError) {
+            const msg = errorText.length ? errorText : qsTr("Invalid selection")
+            Md3Accessibility.announceError(msg)
+        }
+    }
+
+    onHasErrorChanged: {
+        if (hasError)
+            Qt.callLater(_errorFeedback)
+    }
+
+    SequentialAnimation {
+        id: selectShake
+        NumberAnimation {
+            target: root
+            property: "_shakeX"
+            to: 6
+            duration: Math.max(1, Math.round(Md3Motion.short3 / 4))
+        }
+        NumberAnimation {
+            target: root
+            property: "_shakeX"
+            to: -6
+            duration: Math.max(1, Math.round(Md3Motion.short3 / 2))
+        }
+        NumberAnimation {
+            target: root
+            property: "_shakeX"
+            to: 0
+            duration: Math.max(1, Math.round(Md3Motion.short3 / 4))
+        }
+    }
+
+    transform: Translate { x: root._shakeX }
+
     readonly property bool hasSelection: multiSelect
                                          ? (selectedIndices && selectedIndices.length > 0)
                                          : currentIndex >= 0

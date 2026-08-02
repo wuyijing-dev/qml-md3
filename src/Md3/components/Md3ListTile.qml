@@ -50,13 +50,27 @@ Md3AbstractButton {
     implicitHeight: Math.max(minH, col.implicitHeight + 16)
     implicitWidth: 320
     height: implicitHeight
+    // Only ease when density flips — avoid hover/layout thrash animating every height write.
+    property bool _densityHeightAnim: false
     Behavior on height {
-        enabled: !Md3Theme.reduceMotion
+        enabled: !Md3Theme.reduceMotion && root._densityHeightAnim
         NumberAnimation {
             duration: Md3Motion.medium2
             easing.type: Easing.BezierSpline
             easing.bezierCurve: Md3Motion.standard
         }
+    }
+    Connections {
+        target: Md3Theme
+        function onDensityChanged() {
+            root._densityHeightAnim = true
+            densityAnimGate.restart()
+        }
+    }
+    Timer {
+        id: densityAnimGate
+        interval: Md3Motion.medium2 + 40
+        onTriggered: root._densityHeightAnim = false
     }
     width: fillWidth && parent ? parent.width : implicitWidth
     accessibleName: title

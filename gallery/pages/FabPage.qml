@@ -28,9 +28,9 @@ Flickable {
         Md3FlowLayout {
             width: parent.width
             spacing: 8
-            Md3Fab { size: Md3Fab.Small; colorRole: Md3Fab.Primary; icon: "add" }
-            Md3Fab { size: Md3Fab.Regular; colorRole: Md3Fab.Primary; icon: "edit" }
-            Md3Fab { size: Md3Fab.Large; colorRole: Md3Fab.Primary; icon: "favorite" }
+            Md3Fab { size: Md3Fab.Small; colorRole: Md3Fab.Primary; icon: "add"; tooltip: qsTr("Create") }
+            Md3Fab { size: Md3Fab.Regular; colorRole: Md3Fab.Primary; icon: "edit"; tooltip: qsTr("Edit") }
+            Md3Fab { size: Md3Fab.Large; colorRole: Md3Fab.Primary; icon: "favorite"; tooltip: qsTr("Favorite") }
             Md3Fab { size: Md3Fab.Regular; colorRole: Md3Fab.Secondary; icon: "add" }
             Md3Fab { size: Md3Fab.Regular; colorRole: Md3Fab.Tertiary; icon: "add" }
             Md3Fab { size: Md3Fab.Regular; colorRole: Md3Fab.Surface; icon: "add" }

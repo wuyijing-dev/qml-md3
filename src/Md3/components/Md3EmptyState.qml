@@ -32,11 +32,33 @@ Item {
     Accessible.role: Accessible.StaticText
     Accessible.name: title.length ? title : qsTr("Empty state")
 
+    property bool _entered: false
+    Component.onCompleted: _entered = true
+
     Column {
         id: col
         anchors.centerIn: parent
         width: Math.min(root.width - 32, root.maxContentWidth)
         spacing: 12
+        opacity: root._entered ? 1 : 0
+        scale: root._entered || Md3Theme.reduceMotion ? 1 : 0.97
+        transformOrigin: Item.Center
+        Behavior on opacity {
+            enabled: !Md3Theme.reduceMotion
+            NumberAnimation {
+                duration: Md3Motion.overlayDuration
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.standard
+            }
+        }
+        Behavior on scale {
+            enabled: !Md3Theme.reduceMotion
+            NumberAnimation {
+                duration: Md3Motion.spatialDuration
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.emphasizedDecelerate
+            }
+        }
 
         Image {
             anchors.horizontalCenter: parent.horizontalCenter

@@ -35,15 +35,28 @@ Item {
     Accessible.name: placeholderText.length ? placeholderText : qsTr("Search bar")
 
     Rectangle {
+        id: field
         anchors.fill: parent
         radius: Md3Theme.shape.full
         color: Md3Theme.colorScheme.surfaceContainerHigh
         clip: true
+        border.width: input.activeFocus ? 2 : 0
+        border.color: Md3Theme.colorScheme.primary
+
+        Behavior on border.width {
+            enabled: !Md3Theme.reduceMotion
+            NumberAnimation {
+                duration: Md3Motion.short2
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.standard
+            }
+        }
 
         Md3StateOverlay {
             overlayColor: Md3Theme.colorScheme.colorOnSurface
             hovered: mouse.containsMouse
             pressed: mouse.pressed
+            focused: input.activeFocus
             controlEnabled: root.enabled
             radius: parent.radius
         }
@@ -57,8 +70,16 @@ Item {
             Md3Icon {
                 icon: "search"
                 size: 24
-                iconColor: Md3Theme.colorScheme.colorOnSurfaceVariant
+                iconColor: input.activeFocus ? Md3Theme.colorScheme.primary
+                                             : Md3Theme.colorScheme.colorOnSurfaceVariant
                 anchors.verticalCenter: parent.verticalCenter
+                Behavior on iconColor {
+                    ColorAnimation {
+                        duration: Md3Motion.short2
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Md3Motion.standard
+                    }
+                }
             }
 
             TextInput {
@@ -103,11 +124,28 @@ Item {
         anchors.leftMargin: 52
         anchors.verticalCenter: parent.verticalCenter
         text: root.placeholderText
-        visible: input.text.length === 0 && !input.activeFocus
+        visible: opacity > 0.02
+        opacity: (input.text.length === 0 && !input.activeFocus) ? 0.7 : 0
         color: Md3Theme.colorScheme.colorOnSurfaceVariant
         font: input.font
-        opacity: 0.7
         z: 1
+        Behavior on opacity {
+            enabled: !Md3Theme.reduceMotion
+            NumberAnimation {
+                duration: Md3Motion.short2
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.standard
+            }
+        }
+    }
+
+    Md3FocusRing {
+        anchors.fill: parent
+        anchors.margins: -3
+        radius: Md3Theme.shape.full
+        focused: input.activeFocus
+        visualFocus: input.activeFocus
+        controlEnabled: root.enabled
     }
 
     MouseArea {

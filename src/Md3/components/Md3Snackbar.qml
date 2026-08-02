@@ -14,6 +14,7 @@ Item {
     /// When true, snackbar is not an assertive live region (avoids stealing AT focus).
     property bool politeAnnouncements: true
     property real _dragX: 0
+    readonly property real _dragFade: Math.max(0.35, 1 - Math.min(1, Math.abs(_dragX) / Math.max(48, width * 0.45)))
 
     signal actionClicked()
     signal closed()
@@ -21,7 +22,7 @@ Item {
     // Prefer anchoring from the caller to a viewport overlay (not Flickable contentItem).
     height: dualLine ? 68 : 48
     visible: open || opacity > 0.01
-    opacity: open ? 1 : 0
+    opacity: open ? _dragFade : 0
     z: 1200
 
     Accessible.role: Accessible.Status
@@ -64,6 +65,26 @@ Item {
             easing.type: Easing.BezierSpline
             easing.bezierCurve: Md3Motion.standard
         }
+    }
+
+    function _snapDragBack() {
+        if (Md3Theme.reduceMotion || Math.abs(_dragX) < 0.5) {
+            _dragX = 0
+            return
+        }
+        snapDragAnim.stop()
+        snapDragAnim.from = _dragX
+        snapDragAnim.to = 0
+        snapDragAnim.start()
+    }
+
+    NumberAnimation {
+        id: snapDragAnim
+        target: root
+        property: "_dragX"
+        duration: Md3Motion.short3
+        easing.type: Easing.BezierSpline
+        easing.bezierCurve: Md3Motion.emphasized
     }
 
     // Slide up from below the anchored bottom edge
@@ -125,6 +146,7 @@ Item {
             enabled: root.actionText.length === 0
             property real _sx: 0
             onPressed: function (mouse) {
+                snapDragAnim.stop()
                 _sx = mouse.x
                 hideTimer.stop()
             }
@@ -135,13 +157,13 @@ Item {
                 if (Math.abs(root._dragX) > Math.min(96, root.width * 0.28))
                     root.dismiss()
                 else {
-                    root._dragX = 0
+                    root._snapDragBack()
                     if (root.open)
                         hideTimer.restart()
                 }
             }
             onCanceled: {
-                root._dragX = 0
+                root._snapDragBack()
                 if (root.open)
                     hideTimer.restart()
             }
@@ -156,6 +178,7 @@ Item {
             visible: root.actionText.length > 0
             property real _sx: 0
             onPressed: function (mouse) {
+                snapDragAnim.stop()
                 _sx = mouse.x
                 hideTimer.stop()
             }
@@ -166,13 +189,13 @@ Item {
                 if (Math.abs(root._dragX) > Math.min(96, root.width * 0.28))
                     root.dismiss()
                 else {
-                    root._dragX = 0
+                    root._snapDragBack()
                     if (root.open)
                         hideTimer.restart()
                 }
             }
             onCanceled: {
-                root._dragX = 0
+                root._snapDragBack()
                 if (root.open)
                     hideTimer.restart()
             }

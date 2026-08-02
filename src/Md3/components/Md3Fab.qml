@@ -142,4 +142,52 @@ Md3AbstractButton {
         visualFocus: root.visualFocus
         controlEnabled: root.enabled
     }
+
+    property bool _tipOpen: false
+
+    HoverHandler {
+        enabled: root.tooltip.length > 0
+        onHoveredChanged: {
+            if (hovered) {
+                fabTipDelay.restart()
+            } else {
+                fabTipDelay.stop()
+                root._tipOpen = false
+            }
+        }
+    }
+
+    Timer {
+        id: fabTipDelay
+        interval: 450
+        onTriggered: root._tipOpen = root.tooltip.length > 0
+    }
+
+    Rectangle {
+        visible: root._tipOpen && root.tooltip.length > 0
+        anchors.horizontalCenter: bg.horizontalCenter
+        anchors.bottom: bg.top
+        anchors.bottomMargin: 8
+        width: fabTipLabel.implicitWidth + 16
+        height: fabTipLabel.implicitHeight + 8
+        radius: Md3Theme.shape.extraSmall
+        color: Md3Theme.colorScheme.inverseSurface
+        z: 20
+        opacity: visible ? 1 : 0
+        Behavior on opacity {
+            NumberAnimation {
+                duration: Md3Motion.overlayDuration
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.standard
+            }
+        }
+        Text {
+            id: fabTipLabel
+            anchors.centerIn: parent
+            text: root.tooltip
+            color: Md3Theme.colorScheme.colorOnInverseSurface
+            font.family: Md3Theme.typography.fontFamily
+            font.pixelSize: Md3Theme.typography.bodySmall.size
+        }
+    }
 }

@@ -48,6 +48,38 @@ QtObject {
         return ""
     }
 
+    /// Copy text then toast. options: { feedback?, severity?, durationMs?, id? }
+    /// feedback defaults to qsTr("Copied"). Set feedback: "" to skip toast.
+    function copy(text, options) {
+        const opts = options || {}
+        const value = text === undefined || text === null ? "" : String(text)
+        let ok = false
+        function tryCopy(node) {
+            let p = node
+            while (p) {
+                if (typeof p.copyToClipboard === "function") {
+                    ok = !!p.copyToClipboard(value)
+                    return true
+                }
+                p = p.parent
+            }
+            return false
+        }
+        if (!tryCopy(toastHost))
+            tryCopy(host)
+        if (!ok)
+            console.warn("Md3Notify.copy: no clipboard API (use Md3ApplicationWindow)")
+        const feedback = opts.feedback !== undefined ? String(opts.feedback) : qsTr("Copied")
+        if (ok && feedback.length) {
+            toast(feedback, {
+                severity: opts.severity !== undefined ? opts.severity : 1,
+                durationMs: opts.durationMs,
+                id: opts.id !== undefined ? opts.id : "clipboard-copy"
+            })
+        }
+        return ok
+    }
+
     function dismissAll() {
         if (host && typeof host.dismissAll === "function")
             host.dismissAll()

@@ -29,6 +29,31 @@ Item {
 
     Accessible.role: Accessible.PageTabList
     Accessible.name: qsTr("Tab bar")
+    activeFocusOnTab: true
+    focus: true
+
+    Keys.onPressed: function (event) {
+        const n = (root.model && root.model.length) ? root.model.length : 0
+        if (n <= 0)
+            return
+        if (event.key === Qt.Key_Left || event.key === Qt.Key_Up) {
+            currentIndex = (currentIndex - 1 + n) % n
+            currentIndexChangedByUser(currentIndex)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Right || event.key === Qt.Key_Down) {
+            currentIndex = (currentIndex + 1) % n
+            currentIndexChangedByUser(currentIndex)
+            event.accepted = true
+        } else if (event.key === Qt.Key_Home) {
+            currentIndex = 0
+            currentIndexChangedByUser(currentIndex)
+            event.accepted = true
+        } else if (event.key === Qt.Key_End) {
+            currentIndex = n - 1
+            currentIndexChangedByUser(currentIndex)
+            event.accepted = true
+        }
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -55,6 +80,22 @@ Item {
                                                      : (modelData.label !== undefined ? modelData.label
                                                      : String(modelData))
 
+                        Rectangle {
+                            anchors.fill: parent
+                            anchors.margins: 4
+                            radius: Md3Theme.shape.small
+                            color: tabMouse.containsMouse && !selected
+                                   ? Md3Theme.colorScheme.withOpacity(Md3Theme.colorScheme.colorOnSurface, 0.06)
+                                   : "transparent"
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: Md3Motion.short2
+                                    easing.type: Easing.BezierSpline
+                                    easing.bezierCurve: Md3Motion.standard
+                                }
+                            }
+                        }
+
                         Text {
                             id: label
                             anchors.centerIn: parent
@@ -66,8 +107,10 @@ Item {
                         }
 
                         MouseArea {
+                            id: tabMouse
                             cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                             anchors.fill: parent
+                            hoverEnabled: true
                             onClicked: {
                                 root.currentIndex = index
                                 root.currentIndexChangedByUser(index)

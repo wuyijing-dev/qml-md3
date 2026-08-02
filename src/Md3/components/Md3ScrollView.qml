@@ -18,6 +18,9 @@ Item {
     property real scrollBarThickness: 10
     /// When true (default), content width matches the viewport.
     property bool fillContentWidth: true
+    /// Optional FAB that appears after scrolling down; animates back to top.
+    property bool showScrollToTop: false
+    property real scrollToTopThreshold: 120
 
     default property alias content: contentHost.data
 
@@ -27,6 +30,18 @@ Item {
     property real _measuredContentW: 0
     property real _measuredContentH: 0
     property bool _measureGuard: false
+    readonly property bool _canScrollToTop: showScrollToTop && flick.contentY > scrollToTopThreshold
+
+    function scrollToTop() {
+        if (Md3Theme.reduceMotion) {
+            flick.contentY = 0
+            return
+        }
+        scrollTopAnim.stop()
+        scrollTopAnim.from = flick.contentY
+        scrollTopAnim.to = 0
+        scrollTopAnim.start()
+    }
 
     function _syncMeasuredSize() {
         if (_measureGuard)
@@ -35,6 +50,15 @@ Item {
         _measuredContentW = Math.max(0, contentHost.childrenRect.width)
         _measuredContentH = Math.max(0, contentHost.childrenRect.height)
         _measureGuard = false
+    }
+
+    NumberAnimation {
+        id: scrollTopAnim
+        target: flick
+        property: "contentY"
+        duration: Md3Motion.medium2
+        easing.type: Easing.BezierSpline
+        easing.bezierCurve: Md3Motion.emphasized
     }
 
     Flickable {
@@ -90,5 +114,38 @@ Item {
         orientation: Qt.Horizontal
         thickness: root.scrollBarThickness
         autoHide: root.scrollBarAutoHide
+    }
+
+    Md3Fab {
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: 4
+        size: Md3Fab.Small
+        colorRole: Md3Fab.Surface
+        icon: "keyboard_arrow_up"
+        tooltip: qsTr("Back to top")
+        shadowPad: 12
+        opacity: root._canScrollToTop ? 1 : 0
+        visible: root.showScrollToTop && opacity > 0.02
+        scale: root._canScrollToTop ? 1 : 0.86
+        z: 40
+        Accessible.name: qsTr("Scroll to top")
+        Behavior on opacity {
+            enabled: !Md3Theme.reduceMotion
+            NumberAnimation {
+                duration: Md3Motion.overlayDuration
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.standard
+            }
+        }
+        Behavior on scale {
+            enabled: !Md3Theme.reduceMotion
+            NumberAnimation {
+                duration: Md3Motion.short3
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Md3Motion.emphasized
+            }
+        }
+        onClicked: root.scrollToTop()
     }
 }

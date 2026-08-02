@@ -1538,7 +1538,7 @@ toolBar: Md3AppToolBar {
                             enabled: root.androidOpsEnabled
                             text: qsTr("复制测试")
                             variant: Md3Button.Text
-                            onClicked: if (root.appWin) root.appWin.copyToClipboard(qsTr("Md3 clipboard"))
+                            onClicked: Md3Notify.copy(qsTr("Md3 clipboard"), { feedback: qsTr("已复制") })
                         }
                         Md3Button {
                             enabled: root.androidOpsEnabled

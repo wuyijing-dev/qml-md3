@@ -45,6 +45,8 @@ Md3Page {
                     Md3ScrollView {
                         width: parent.width
                         height: 160
+                        showScrollToTop: true
+                        scrollToTopThreshold: 40
                         Md3VStack {
                             width: parent.width
                             spacing: 8
