@@ -18,7 +18,7 @@ env:
   QT_VERSION: "6.8.3"
   # Keep in sync with Qt above when publishing platform wheels.
   PYSIDE6_PIN: "PySide6==6.8.3"
-  MD3_VERSION: "1.1.1"
+  MD3_VERSION: "1.1.2"
 
 jobs:
   wheel:

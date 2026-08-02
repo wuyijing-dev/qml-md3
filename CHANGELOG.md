@@ -4,6 +4,27 @@
 
 _(empty — next work goes here)_
 
+## 1.1.2
+
+Patch on the 1.1.1 product lock: CleanSpace-driven desktop gaps + build/runtime fixes. **No intentional Public API breaks** relative to 1.1.1.
+
+### Highlights
+
+- **Desktop task chrome** — `Md3PageHeader` (actions overflow), `Md3TaskProgress`, `Md3SelectionToolbar`, `Md3StatusLine`; cookbook [desktop-task-patterns.md](docs/guides/desktop-task-patterns.md).
+- **Contracts** — Stack `content` (never `data`); FocusRing gated by `showFocusRings`; `Md3ApplicationWindow.defaultShowFocusRings`; TextField `editingFinished` / `textEdited`; Card clickable hit-test under children; ChipGroup accepts `string[]` / `QStringList`; Dialog `bodyMaxHeight` + `confirmTone` Error.
+- **ListView** — `ListModel` / `QAbstractListModel` support (not only JS arrays).
+- **Checkbox** — `checkedToggled(bool)` beside `toggled(state)`.
+- **Fixes** — TextField qmlcachegen brace mismatch; gauge / PieChart ASI (`false is not a function` after `_paintPending = false`); Loader-scoped `canvas` anchors on Knob/Compass.
+
+### Docs
+
+- Guides/topics updated; Cursor rule `post-change-docs`; API pages regenerated for new types.
+
+### Notes
+
+- Prefer tag **`v1.1.2`** for new product pins (1.1.1 host notes in [host-lock-1.1.1.md](docs/api-manual/host-lock-1.1.1.md) still apply).
+- Android / WASM remain **experimental**.
+
 ## 1.1.1
 
 Patch lock for consumer apps: UX polish + Linux D-Bus fix on top of 1.1.0. **No intentional Public API breaks.**

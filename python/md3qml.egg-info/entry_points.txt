@@ -1,0 +1,2 @@
+[console_scripts]
+md3qml = md3qml.__main__:main

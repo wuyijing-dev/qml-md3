@@ -87,7 +87,7 @@ const char *md3_version_string(void);
 int md3_load_fonts(void);
 ```
 
-UX (toast / snackbar / shell InfoBar / form busy) lives in **QML**; Rust only bootstraps. Pin checkout + `MD3_PREFIX` to the same tag (`v1.1.1`).
+UX (toast / snackbar / shell InfoBar / form busy) lives in **QML**; Rust only bootstraps. Pin checkout + `MD3_PREFIX` to the same tag (`v1.1.2`).
 
 ## Related
 

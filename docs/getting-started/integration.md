@@ -10,14 +10,14 @@ Do **not** track floating `main` in a shipping app. Pin to the tagged release:
 
 | Method | How |
 |--------|-----|
-| **Git tag / submodule** | `git checkout v1.1.1` or submodule at `v1.1.1` |
-| **FetchContent** | `GIT_TAG v1.1.1` (annotated tag) |
-| **add_subdirectory** | Clone/copy the tree at `v1.1.1`, then `add_subdirectory(...)` |
+| **Git tag / submodule** | `git checkout v1.1.2` or submodule at `v1.1.2` |
+| **FetchContent** | `GIT_TAG v1.1.2` (annotated tag) |
+| **add_subdirectory** | Clone/copy the tree at `v1.1.2`, then `add_subdirectory(...)` |
 | **Packaged `./Md3`** | Build/install from that tag; keep the prefix in VCS or CI cache |
-| **Python** | `pip install "git+…@v1.1.1#subdirectory=python[pyside6]"` then `md3qml install --version 1.1.1` when using Release zips |
-| **Rust** | Depend on `rust/md3qml` from a checkout at `v1.1.1`; set `MD3_PREFIX` to a shared build from the same tag |
+| **Python** | `pip install "git+…@v1.1.2#subdirectory=python[pyside6]"` then `md3qml install --version 1.1.2` when using Release zips |
+| **Rust** | Depend on `rust/md3qml` from a checkout at `v1.1.2`; set `MD3_PREFIX` to a shared build from the same tag |
 
-Current lock tag: **`v1.1.1`** (see [CHANGELOG](https://github.com/wuyijing-dev/qml-md3/blob/main/CHANGELOG.md)). Upgrade only when you choose a newer tag.
+Current lock tag: **`v1.1.2`** (see [CHANGELOG](https://github.com/wuyijing-dev/qml-md3/blob/main/CHANGELOG.md)). Upgrade only when you choose a newer tag.
 
 ## Host stacks — what each layer provides
 
@@ -30,7 +30,7 @@ Current lock tag: **`v1.1.1`** (see [CHANGELOG](https://github.com/wuyijing-dev/
 | Form `focusFirstError` / Button `busy` | — | — | — | Component API |
 | Window chrome / taskbar / tray | `Md3WindowHelper` | `app.native` (desktop subset) | — | Gallery / window APIs |
 
-**Product contract:** pin **`v1.1.1`**, build/install shared Md3 from that tag, put UX in QML. Hosts only bootstrap + optional system helpers. Do not expect Rust C ABI to grow WindowHelper parity.
+**Product contract:** pin **`v1.1.2`**, build/install shared Md3 from that tag, put UX in QML. Hosts only bootstrap + optional system helpers. Do not expect Rust C ABI to grow WindowHelper parity.
 
 For **writing less layout glue** (stacks, flow, grid, Card.title, layoutMode), see **[layout.md](../guides/layout.md)**.
 

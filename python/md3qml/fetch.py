@@ -17,7 +17,7 @@ _DEFAULT_REPO = "wuyijing-dev/qml-md3"
 
 def _platform_tags() -> List[str]:
     if sys.platform == "win32":
-        # Prefer packaging/cli Release names first (v1.1.1: Md3-windows-AMD64-shared.zip).
+        # Prefer packaging/cli Release names first (v1.1.2: Md3-windows-AMD64-shared.zip).
         return ["windows-AMD64", "windows-x64", "win64", "windows"]
     if sys.platform == "darwin":
         machine = os.uname().machine if hasattr(os, "uname") else ""
@@ -31,7 +31,7 @@ def candidate_asset_urls(version: str, *, repo: Optional[str] = None) -> List[st
     """
     Possible GitHub Release asset URLs (tried in order).
 
-    Matches both packaging naming ``Md3-windows-AMD64-shared.zip`` (v1.1.1 Release)
+    Matches both packaging naming ``Md3-windows-AMD64-shared.zip`` (v1.1.2 Release)
     and CI naming ``Md3-{ver}-shared-windows-x64.zip``.
     """
     repo = repo or os.environ.get("MD3_GITHUB_REPO", _DEFAULT_REPO)
@@ -68,7 +68,7 @@ def _download(url: str) -> bytes:
 def fetch_md3_prefix(
     dest: Path,
     *,
-    version: str = "1.1.1",
+    version: str = "1.1.2",
     url: Optional[str] = None,
     repo: Optional[str] = None,
 ) -> Path:
