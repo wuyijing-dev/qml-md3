@@ -4,6 +4,14 @@
 - **Extends:** `QtObject`
 - **Singleton:** `true` (`pragma Singleton`)
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 48 | 0 | 8 | 0 |
+
+_Also inherits Qt Quick `QtObject` members (not listed)._
+
 ## Import
 
 ```qml
@@ -14,14 +22,14 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `dark` | `bool` | `false` | read/write | `Md3Theme` | — |
-| `seed` | `color` | `"#6750A4"` | read/write | `Md3Theme` | — |
-| `textScale` | `real` | `1.0` | read/write | `Md3Theme` | — |
-| `highContrast` | `bool` | `false` | read/write | `Md3Theme` | — |
+| `dark` | `bool` | `false` | read/write | `Md3Theme` | Dark. |
+| `seed` | `color` | `"#6750A4"` | read/write | `Md3Theme` | Seed. |
+| `textScale` | `real` | `1.0` | read/write | `Md3Theme` | Text Scale. |
+| `highContrast` | `bool` | `false` | read/write | `Md3Theme` | High Contrast. |
 | `reduceMotion` | `bool` | `false` | read/write | `Md3Theme` | Prefer near-instant **decorative** motion (page fades, ripples, state layers). Loaders / progress use Md3Motion.essential() and keep full timing. |
 | `progressiveContent` | `bool` | `true` | read/write | `Md3Theme` | Within-page progressive load (Md3DeferredSection). Default on; set false to load everything immediately. |
 | `density` | `int` | `0` | read/write | `Md3Theme` | Desktop UI density: `0` Comfortable (默认) / `1` Compact（工具/数据密集）。 Aligns with `Md3DataTable.Density`; drives spacing* / pagePadding / controlHeight hints. |
-| `densityCompact` | `bool` | `density >= 1` | readonly | `Md3Theme` | — |
+| `densityCompact` | `bool` | `density >= 1` | readonly | `Md3Theme` | Density Compact. |
 | `spacingXs` | `real` | `4` | readonly | `Md3Theme` | 4 / 4 dp |
 | `spacingSm` | `real` | `densityCompact ? 6 : 8` | readonly | `Md3Theme` | 8 → 6 |
 | `spacingMd` | `real` | `densityCompact ? 8 : 12` | readonly | `Md3Theme` | 12 → 8（表单、区块内） |
@@ -39,8 +47,8 @@ import Md3
 | `tableRowHeight` | `real` | `densityCompact ? 40 : 52` | readonly | `Md3Theme` | Data table row height hint（与 Md3DataTable Comfortable/Compact 对齐） |
 | `effectsLevel` | `int` | `1` | read/write | `Md3Theme` | Global visual-effects budget for device adaptation. 0 = Low (流畅), 1 = Balanced (均衡), 2 = High (画质). |
 | `effectsIntensity` | `real` | `1.0` | read/write | `Md3Theme` | Extra intensity on interaction ink / state layers (0.35–1.35). Multiplies tier defaults. |
-| `effectsLow` | `bool` | `effectsLevel <= 0` | readonly | `Md3Theme` | — |
-| `effectsHigh` | `bool` | `effectsLevel >= 2` | readonly | `Md3Theme` | — |
+| `effectsLow` | `bool` | `effectsLevel <= 0` | readonly | `Md3Theme` | Effects Low. |
+| `effectsHigh` | `bool` | `effectsLevel >= 2` | readonly | `Md3Theme` | Effects High. |
 | `effectsChartSmooth` | `bool` | `effectsLevel >= 2 && !reduceMotion` | readonly | `Md3Theme` | Chart Catmull smoothing (expensive on pan settle). |
 | `effectsChartInertia` | `bool` | `effectsLevel >= 1 && !reduceMotion` | readonly | `Md3Theme` | Chart pan inertia after drag release. |
 | `effectsLiveMotion` | `bool` | `!reduceMotion` | readonly | `Md3Theme` | Live chart / wave continuous animation (all tiers; FPS capped on lower tiers). |
@@ -52,15 +60,15 @@ import Md3
 | `effectsRipple` | `bool` | `effectsLevel >= 1 && !reduceMotion` | readonly | `Md3Theme` | Ripple expand ink — 均衡/画质. 流畅 uses rounded press-flash instead (no mask FBO). |
 | `effectsRippleMasked` | `bool` | `effectsRipple` | readonly | `Md3Theme` | Rounded MultiEffect mask for expand ink (only when effectsRipple). |
 | `effectsRipplePeak` | `real` | `{…}` | readonly | `Md3Theme` | Peak / hold opacity for ripple / press-flash. |
-| `effectsRippleHold` | `real` | `effectsRipplePeak * 0.5` | readonly | `Md3Theme` | — |
+| `effectsRippleHold` | `real` | `effectsRipplePeak * 0.5` | readonly | `Md3Theme` | Effects Ripple Hold. |
 | `effectsRippleSpread` | `real` | `effectsLevel >= 2 ? 2.2 : 2.0` | readonly | `Md3Theme` | Expand factor for ink diameter. |
 | `effectsStateIntensity` | `real` | `{…}` | readonly | `Md3Theme` | Hover / press state-layer strength. |
-| `colorScheme` | `Md3ColorScheme` | `{…}` | read/write | `Md3Theme` | — |
-| `dynamicScheme` | `Md3DynamicScheme` | `{…}` | read/write | `Md3Theme` | — |
-| `typography` | `Md3Typography` | `{…}` | read/write | `Md3Theme` | — |
-| `shape` | `Md3Shape` | `{…}` | read/write | `Md3Theme` | — |
-| `elevation` | `Md3Elevation` | `{…}` | read/write | `Md3Theme` | — |
-| `stateLayer` | `Md3StateLayer` | `{…}` | read/write | `Md3Theme` | — |
+| `colorScheme` | `Md3ColorScheme` | `{…}` | read/write | `Md3Theme` | Color Scheme. |
+| `dynamicScheme` | `Md3DynamicScheme` | `{…}` | read/write | `Md3Theme` | Dynamic Scheme. |
+| `typography` | `Md3Typography` | `{…}` | read/write | `Md3Theme` | Typography. |
+| `shape` | `Md3Shape` | `{…}` | read/write | `Md3Theme` | Shape. |
+| `elevation` | `Md3Elevation` | `{…}` | read/write | `Md3Theme` | Elevation. |
+| `stateLayer` | `Md3StateLayer` | `{…}` | read/write | `Md3Theme` | State Layer. |
 | `accessibleOutline` | `color` | `highContrast` | readonly | `Md3Theme` | Outline role — stronger in high-contrast mode. |
 
 ## Signals
@@ -69,16 +77,16 @@ _None._
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `setEffectsLevel(level)` | `Md3Theme` | — |
-| `setEffectsIntensity(v)` | `Md3Theme` | — |
-| `setDensity(level)` | `Md3Theme` | — |
-| `densityLabel()` | `Md3Theme` | — |
-| `effectsLevelLabel()` | `Md3Theme` | — |
-| `applySeed(c)` | `Md3Theme` | Rebuild the full MD3 role set from seed + dark (Material You–style). |
-| `toggleDark()` | `Md3Theme` | — |
-| `scaled(px)` | `Md3Theme` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `setEffectsLevel(level)` | `—` | `Md3Theme` | Set Effects Level. |
+| `setEffectsIntensity(v)` | `—` | `Md3Theme` | Set Effects Intensity. |
+| `setDensity(level)` | `—` | `Md3Theme` | Set Density. |
+| `densityLabel()` | `—` | `Md3Theme` | Density Label. |
+| `effectsLevelLabel()` | `—` | `Md3Theme` | Effects Level Label. |
+| `applySeed(c)` | `—` | `Md3Theme` | Rebuild the full MD3 role set from seed + dark (Material You–style). |
+| `toggleDark()` | `—` | `Md3Theme` | Toggle Dark. |
+| `scaled(px)` | `—` | `Md3Theme` | Scaled. |
 
 ## Example
 

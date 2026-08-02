@@ -5,6 +5,14 @@ Radar / spider chart — categories around a polygon, one or more series.
 - **Source:** `src/Md3/components/Md3RadarChart.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 11 | 0 | 1 | 0 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -17,14 +25,14 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `categories` | `var` | `[]` | read/write | `Md3RadarChart` | Category labels around the axes |
 | `values` | `var` | `[]` | read/write | `Md3RadarChart` | One series: number[] aligned with categories; or multiple: [number[], ...] |
-| `maxValue` | `real` | `Number.NaN` | read/write | `Md3RadarChart` | — |
-| `fillColor` | `color` | `Qt.rgba(Md3Theme.colorScheme.primary.r, Md3Theme.colorScheme.primary.g, Md3Th…` | read/write | `Md3RadarChart` | — |
-| `strokeColor` | `color` | `Md3Theme.colorScheme.primary` | read/write | `Md3RadarChart` | — |
-| `seriesColors` | `var` | `[]` | read/write | `Md3RadarChart` | — |
-| `levels` | `int` | `4` | read/write | `Md3RadarChart` | — |
-| `showLabels` | `bool` | `true` | read/write | `Md3RadarChart` | — |
-| `showDots` | `bool` | `true` | read/write | `Md3RadarChart` | — |
-| `strokeWidth` | `real` | `2` | read/write | `Md3RadarChart` | — |
+| `maxValue` | `real` | `Number.NaN` | read/write | `Md3RadarChart` | Max Value. |
+| `fillColor` | `color` | `Qt.rgba(Md3Theme.colorScheme.primary.r, Md3Theme.colorScheme.primary.g, Md3Th…` | read/write | `Md3RadarChart` | Fill Color. |
+| `strokeColor` | `color` | `Md3Theme.colorScheme.primary` | read/write | `Md3RadarChart` | Stroke Color. |
+| `seriesColors` | `var` | `[]` | read/write | `Md3RadarChart` | Series Colors. |
+| `levels` | `int` | `4` | read/write | `Md3RadarChart` | Levels. |
+| `showLabels` | `bool` | `true` | read/write | `Md3RadarChart` | Show Labels. |
+| `showDots` | `bool` | `true` | read/write | `Md3RadarChart` | Show Dots. |
+| `strokeWidth` | `real` | `2` | read/write | `Md3RadarChart` | Stroke Width. |
 | `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3RadarChart` | Drop Canvas while page/window inactive (FBO free). |
 
 ## Signals
@@ -33,9 +41,9 @@ _None._
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `requestPaint()` | `Md3RadarChart` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `requestPaint()` | `—` | `Md3RadarChart` | Request Paint. |
 
 ## Example
 
@@ -48,5 +56,6 @@ Md3RadarChart {
     maxValue: Number.NaN
     fillColor: Qt.rgba(Md3Theme.colorScheme.primary.r, Md3Theme.colorScheme.primary.g, Md3Th…
     strokeColor: Md3Theme.colorScheme.primary
+    seriesColors: []
 }
 ```

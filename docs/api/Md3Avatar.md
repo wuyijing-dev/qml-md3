@@ -5,6 +5,14 @@ Circular avatar: image, initials, or icon fallback.
 - **Source:** `src/Md3/components/Md3Avatar.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 8 | 0 | 0 | 1 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -21,14 +29,14 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `sizePreset` | `int` | `Md3Avatar.Medium` | read/write | `Md3Avatar` | — |
-| `source` | `url` | `""` | read/write | `Md3Avatar` | — |
-| `initials` | `string` | `""` | read/write | `Md3Avatar` | — |
-| `icon` | `string` | `"person"` | read/write | `Md3Avatar` | — |
-| `color` | `color` | `Md3Theme.colorScheme.primaryContainer` | read/write | `Md3Avatar` | — |
-| `contentColor` | `color` | `Md3Theme.colorScheme.colorOnPrimaryContainer` | read/write | `Md3Avatar` | — |
-| `accessibleName` | `string` | `""` | read/write | `Md3Avatar` | — |
-| `pixelSize` | `real` | `{…}` | readonly | `Md3Avatar` | — |
+| `sizePreset` | `int (Md3Avatar.Size)` | `Md3Avatar.Medium` | read/write | `Md3Avatar` | Size Preset. |
+| `source` | `url` | `""` | read/write | `Md3Avatar` | Source. |
+| `initials` | `string` | `""` | read/write | `Md3Avatar` | Initials. |
+| `icon` | `string` | `"person"` | read/write | `Md3Avatar` | Material icon name or empty. |
+| `color` | `color` | `Md3Theme.colorScheme.primaryContainer` | read/write | `Md3Avatar` | Foreground / content color. |
+| `contentColor` | `color` | `Md3Theme.colorScheme.colorOnPrimaryContainer` | read/write | `Md3Avatar` | Content Color. |
+| `accessibleName` | `string` | `""` | read/write | `Md3Avatar` | Accessible name override. |
+| `pixelSize` | `real` | `{…}` | readonly | `Md3Avatar` | Pixel Size. |
 
 ## Signals
 
@@ -49,5 +57,6 @@ Md3Avatar {
     initials: ""
     icon: "person"
     color: Md3Theme.colorScheme.primaryContainer
+    contentColor: Md3Theme.colorScheme.colorOnPrimaryContainer
 }
 ```

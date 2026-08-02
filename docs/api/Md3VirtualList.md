@@ -5,6 +5,14 @@ Thin virtualized list wrapper for large models with jump/scroll helpers. Prefer 
 - **Source:** `src/Md3/components/Md3VirtualList.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 10 | 2 | 2 | 0 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -15,14 +23,14 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `model` | `var` | `[]` | read/write | `Md3VirtualList` | — |
-| `delegate` | `Component` | `null` | read/write | `Md3VirtualList` | — |
-| `itemHeight` | `real` | `Md3Theme.tableRowHeight` | read/write | `Md3VirtualList` | — |
-| `clipContent` | `bool` | `true` | read/write | `Md3VirtualList` | — |
-| `cacheBufferPx` | `int` | `800` | read/write | `Md3VirtualList` | — |
-| `currentIndex` | `int` | `-1` | read/write | `Md3VirtualList` | — |
-| `interactive` | `bool` | `true` | read/write | `Md3VirtualList` | — |
-| `emptyText` | `string` | `qsTr("No items")` | read/write | `Md3VirtualList` | — |
+| `model` | `var` | `[]` | read/write | `Md3VirtualList` | Data model. |
+| `delegate` | `Component` | `null` | read/write | `Md3VirtualList` | Delegate. |
+| `itemHeight` | `real` | `Md3Theme.tableRowHeight` | read/write | `Md3VirtualList` | Item Height. |
+| `clipContent` | `bool` | `true` | read/write | `Md3VirtualList` | Clip Content. |
+| `cacheBufferPx` | `int` | `800` | read/write | `Md3VirtualList` | Cache Buffer Px. |
+| `currentIndex` | `int` | `-1` | read/write | `Md3VirtualList` | Current index. |
+| `interactive` | `bool` | `true` | read/write | `Md3VirtualList` | Gate activation without forcing `enabled: false`. |
+| `emptyText` | `string` | `qsTr("No items")` | read/write | `Md3VirtualList` | Empty Text. |
 | `accessibleName` | `string` | `""` | read/write | `Md3VirtualList` | Screen-reader label (defaults to “Virtual list”). |
 | `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3VirtualList` | Drop ListView delegates while page is off-display (shell size stays). |
 
@@ -30,15 +38,15 @@ import Md3
 
 | Signal | Defined in | Description |
 |--------|------------|-------------|
-| `itemActivated(int index, var item)` | `Md3VirtualList` | — |
-| `currentIndexChangedByUser(int index, var item)` | `Md3VirtualList` | — |
+| `itemActivated(int index, var item)` | `Md3VirtualList` | Emitted when item Activated. |
+| `currentIndexChangedByUser(int index, var item)` | `Md3VirtualList` | Emitted when current Index Changed By User. |
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `scrollToIndex(index)` | `Md3VirtualList` | — |
-| `revealIndex(index)` | `Md3VirtualList` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `scrollToIndex(index)` | `—` | `Md3VirtualList` | Scroll To Index. |
+| `revealIndex(index)` | `—` | `Md3VirtualList` | Reveal Index. |
 
 ## Example
 
@@ -51,5 +59,6 @@ Md3VirtualList {
     itemHeight: Md3Theme.tableRowHeight
     clipContent: true
     cacheBufferPx: 800
+    currentIndex: -1
 }
 ```

@@ -3,6 +3,14 @@
 - **Source:** `src/Md3/components/Md3Text.qml`
 - **Extends:** `Text`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 4 | 0 | 0 | 2 |
+
+_Also inherits Qt Quick `Text` members (not listed)._
+
 ## Import
 
 ```qml
@@ -23,10 +31,10 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `role` | `int` | `Md3Text.BodyMedium` | read/write | `Md3Text` | — |
-| `tone` | `int` | `Md3Text.OnSurface` | read/write | `Md3Text` | — |
-| `customColor` | `color` | `Md3Theme.colorScheme.colorOnSurface` | read/write | `Md3Text` | — |
-| `monospace` | `bool` | `false` | read/write | `Md3Text` | — |
+| `role` | `int (Md3Text.Role)` | `Md3Text.BodyMedium` | read/write | `Md3Text` | Role. |
+| `tone` | `int (Md3Text.Tone)` | `Md3Text.OnSurface` | read/write | `Md3Text` | Tone. |
+| `customColor` | `color` | `Md3Theme.colorScheme.colorOnSurface` | read/write | `Md3Text` | Custom Color. |
+| `monospace` | `bool` | `false` | read/write | `Md3Text` | Monospace. |
 
 ## Signals
 

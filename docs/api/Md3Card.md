@@ -3,6 +3,14 @@
 - **Source:** `src/Md3/components/Md3Card.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 12 | 2 | 0 | 1 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -19,25 +27,25 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `variant` | `int` | `Md3Card.Elevated` | read/write | `Md3Card` | — |
-| `clickable` | `bool` | `false` | read/write | `Md3Card` | — |
-| `padding` | `real` | `Md3Theme.spacingLg` | read/write | `Md3Card` | — |
-| `layoutMode` | `int` | `Md3ContainerBody.Fit` | read/write | `Md3Card` | — |
+| `variant` | `int (Md3Card.Variant)` | `Md3Card.Elevated` | read/write | `Md3Card` | Visual / role variant (see Enums). |
+| `clickable` | `bool` | `false` | read/write | `Md3Card` | Clickable. |
+| `padding` | `real` | `Md3Theme.spacingLg` | read/write | `Md3Card` | Uniform padding. |
+| `layoutMode` | `int` | `Md3ContainerBody.Fit` | read/write | `Md3Card` | Layout Mode. |
 | `title` | `string` | `""` | read/write | `Md3Card` | Optional header — when set, users need not nest title Text manually. |
-| `subtitle` | `string` | `""` | read/write | `Md3Card` | — |
+| `subtitle` | `string` | `""` | read/write | `Md3Card` | Secondary supporting text. |
 | `headerTrailing` | `alias` | `headerTrailingSlot.data` | read/write | `Md3Card` | Trailing controls in the header row (e.g. Md3Button). |
 | `actions` | `var` | `[]` | read/write | `Md3Card` | [{ text, icon?, variant? }] — compact header actions without Row glue. |
-| `content` | `alias` | `bodySlot.data` | default read/write | `Md3Card` | Default property → `bodySlot.data` |
-| `elev` | `real` | `variant === Md3Card.Elevated ? 1 : 0` | readonly | `Md3Card` | — |
-| `hasHeader` | `bool` | `title.length > 0 \|\| subtitle.length > 0` | readonly | `Md3Card` | — |
-| `containerColor` | `color` | `{…}` | readonly | `Md3Card` | — |
+| `content` | `alias` | `bodySlot.data` | default read/write | `Md3Card` | Content. |
+| `elev` | `real` | `variant === Md3Card.Elevated ? 1 : 0` | readonly | `Md3Card` | Elev. |
+| `hasHeader` | `bool` | `title.length > 0 \|\| subtitle.length > 0` | readonly | `Md3Card` | Has Header. |
+| `containerColor` | `color` | `{…}` | readonly | `Md3Card` | Container Color. |
 
 ## Signals
 
 | Signal | Defined in | Description |
 |--------|------------|-------------|
-| `clicked()` | `Md3Card` | — |
-| `actionClicked(int index)` | `Md3Card` | — |
+| `clicked()` | `Md3Card` | Emitted when clicked. |
+| `actionClicked(int index)` | `Md3Card` | Emitted when action Clicked. |
 
 ## Methods
 
@@ -54,5 +62,6 @@ Md3Card {
     padding: Md3Theme.spacingLg
     layoutMode: Md3ContainerBody.Fit
     title: ""
+    subtitle: ""
 }
 ```

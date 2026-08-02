@@ -6,6 +6,14 @@ App-wide notify helpers. Hosts register from Md3ApplicationWindow automatically.
 - **Extends:** `QtObject`
 - **Singleton:** `true` (`pragma Singleton`)
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 2 | 0 | 8 | 0 |
+
+_Also inherits Qt Quick `QtObject` members (not listed)._
+
 ## Import
 
 ```qml
@@ -16,8 +24,8 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `host` | `var` | `null` | read/write | `Md3Notify` | — |
-| `toastHost` | `var` | `null` | read/write | `Md3Notify` | — |
+| `host` | `var` | `null` | read/write | `Md3Notify` | Host. |
+| `toastHost` | `var` | `null` | read/write | `Md3Notify` | Toast Host. |
 
 ## Signals
 
@@ -25,16 +33,16 @@ _None._
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `registerHost(h)` | `Md3Notify` | — |
-| `unregisterHost(h)` | `Md3Notify` | — |
-| `registerToastHost(h)` | `Md3Notify` | — |
-| `unregisterToastHost(h)` | `Md3Notify` | — |
-| `snackbar(message, options)` | `Md3Notify` | Bottom snackbar queue. options: { actionText, dualLine, durationMs, id, priority } |
-| `toast(message, options)` | `Md3Notify` | Toast. options: { severity, durationMs, position, id } position: Md3ToastHost.TopCenter\|TopRight\|TopLeft\|BottomRight\|BottomLeft or string "topCenter" / "topRight" / "topLeft" / "bottomRight" / "bottomLeft" severity: Md3Toast.Default \| Success \| Warning \| Error (or 0–3) |
-| `copy(text, options)` | `Md3Notify` | Copy text then toast. options: { feedback?, severity?, durationMs?, id? } feedback defaults to qsTr("Copied"). Set feedback: "" to skip toast. |
-| `dismissAll()` | `Md3Notify` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `registerHost(h)` | `—` | `Md3Notify` | Register Host. |
+| `unregisterHost(h)` | `—` | `Md3Notify` | Unregister Host. |
+| `registerToastHost(h)` | `—` | `Md3Notify` | Register Toast Host. |
+| `unregisterToastHost(h)` | `—` | `Md3Notify` | Unregister Toast Host. |
+| `snackbar(message, options)` | `—` | `Md3Notify` | Bottom snackbar queue. options: { actionText, dualLine, durationMs, id, priority } |
+| `toast(message, options)` | `—` | `Md3Notify` | Toast. options: { severity, durationMs, position, id } position: Md3ToastHost.TopCenter\|TopRight\|TopLeft\|BottomRight\|BottomLeft or string "topCenter" / "topRight" / "topLeft" / "bottomRight" / "bottomLeft" severity: Md3Toast.Default \| Success \| Warning \| Error (or 0–3) |
+| `copy(text, options)` | `—` | `Md3Notify` | Copy text then toast. options: { feedback?, severity?, durationMs?, id? } feedback defaults to qsTr("Copied"). Set feedback: "" to skip toast. |
+| `dismissAll()` | `—` | `Md3Notify` | Dismiss All. |
 
 ## Example
 

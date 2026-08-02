@@ -3,6 +3,14 @@
 - **Source:** `src/Md3/components/Md3MenuDivider.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 0 | 0 | 0 | 0 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml

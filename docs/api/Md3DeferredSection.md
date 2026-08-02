@@ -5,6 +5,14 @@ Within-page progressive load: placeholder first, then create `sourceComponent`. 
 - **Source:** `src/Md3/components/Md3DeferredSection.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 11 | 0 | 3 | 0 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -15,7 +23,7 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `sourceComponent` | `Component` | `null` | read/write | `Md3DeferredSection` | — |
+| `sourceComponent` | `Component` | `null` | read/write | `Md3DeferredSection` | Source Component. |
 | `delayMs` | `int` | `0` | read/write | `Md3DeferredSection` | Delay before arming when progressiveContent is on (ms). 0 = next event-loop tick. |
 | `preferredHeight` | `real` | `120` | read/write | `Md3DeferredSection` | Height reserved while empty / loading (also used as Layout.preferredHeight hint). |
 | `asynchronous` | `bool` | `false` | read/write | `Md3DeferredSection` | Prefer sync create to avoid "destroyed during incubation" on fast page switches. |
@@ -23,9 +31,9 @@ import Md3
 | `requireNearViewport` | `bool` | `true` | read/write | `Md3DeferredSection` | When progressive, also wait until near a parent Flickable viewport. |
 | `viewportMargin` | `real` | `240` | read/write | `Md3DeferredSection` | Extra pixels around the viewport before arming. |
 | `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3DeferredSection` | Drop Loader while page is off-display (keep preferredHeight shell). |
-| `progressive` | `bool` | `Md3Theme.progressiveContent && !forceImmediate` | readonly | `Md3DeferredSection` | — |
-| `ready` | `bool` | `loader.status === Loader.Ready` | readonly | `Md3DeferredSection` | — |
-| `item` | `Item` | `loader.item` | readonly | `Md3DeferredSection` | — |
+| `progressive` | `bool` | `Md3Theme.progressiveContent && !forceImmediate` | readonly | `Md3DeferredSection` | Progressive. |
+| `ready` | `bool` | `loader.status === Loader.Ready` | readonly | `Md3DeferredSection` | Ready. |
+| `item` | `Item` | `loader.item` | readonly | `Md3DeferredSection` | Item. |
 
 ## Signals
 
@@ -33,11 +41,11 @@ _None._
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `arm()` | `Md3DeferredSection` | — |
-| `disarm()` | `Md3DeferredSection` | Destroy heavy Loader item; keep placeholder height. |
-| `rearm()` | `Md3DeferredSection` | Re-arm after page return — delay already satisfied; viewport gate still applies. |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `arm()` | `—` | `Md3DeferredSection` | Arm. |
+| `disarm()` | `—` | `Md3DeferredSection` | Destroy heavy Loader item; keep placeholder height. |
+| `rearm()` | `—` | `Md3DeferredSection` | Re-arm after page return — delay already satisfied; viewport gate still applies. |
 
 ## Example
 
@@ -50,5 +58,6 @@ Md3DeferredSection {
     preferredHeight: 120
     asynchronous: false
     forceImmediate: false
+    requireNearViewport: true
 }
 ```

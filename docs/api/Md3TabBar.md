@@ -5,6 +5,14 @@ Tab strip + optional content pages (WinUI Pivot-style). When `pages` has childre
 - **Source:** `src/Md3/components/Md3TabBar.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 6 | 1 | 0 | 1 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -21,18 +29,18 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `variant` | `int` | `Md3TabBar.Primary` | read/write | `Md3TabBar` | — |
-| `model` | `var` | `[]` | read/write | `Md3TabBar` | — |
-| `currentIndex` | `int` | `0` | read/write | `Md3TabBar` | — |
+| `variant` | `int (Md3TabBar.Variant)` | `Md3TabBar.Primary` | read/write | `Md3TabBar` | Visual / role variant (see Enums). |
+| `model` | `var` | `[]` | read/write | `Md3TabBar` | Data model. |
+| `currentIndex` | `int` | `0` | read/write | `Md3TabBar` | Current index. |
 | `pages` | `alias` | `pageStack.data` | default read/write | `Md3TabBar` | Content pages (synced with currentIndex). Prefer over external StackLayout. |
 | `pageAreaHeight` | `real` | `96` | read/write | `Md3TabBar` | Extra height for page area when `pages` are present (Layout / implicit). |
-| `hasPages` | `bool` | `pageStack.children.length > 0` | readonly | `Md3TabBar` | — |
+| `hasPages` | `bool` | `pageStack.children.length > 0` | readonly | `Md3TabBar` | Has Pages. |
 
 ## Signals
 
 | Signal | Defined in | Description |
 |--------|------------|-------------|
-| `currentIndexChangedByUser(int index)` | `Md3TabBar` | — |
+| `currentIndexChangedByUser(int index)` | `Md3TabBar` | Emitted when current Index Changed By User. |
 
 ## Methods
 

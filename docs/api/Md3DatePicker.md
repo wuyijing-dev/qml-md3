@@ -5,6 +5,14 @@ Material 3 date picker — calendar / input, year grid, min/max, today, week sta
 - **Source:** `src/Md3/components/Md3DatePicker.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 21 | 3 | 16 | 1 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -21,56 +29,56 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `title` | `string` | `qsTr("Select date")` | read/write | `Md3DatePicker` | — |
-| `selectedDate` | `date` | `new Date()` | read/write | `Md3DatePicker` | — |
-| `viewDate` | `date` | `selectedDate` | read/write | `Md3DatePicker` | — |
-| `minimumDate` | `date` | `—` | read/write | `Md3DatePicker` | — |
-| `maximumDate` | `date` | `—` | read/write | `Md3DatePicker` | — |
+| `title` | `string` | `qsTr("Select date")` | read/write | `Md3DatePicker` | Title text. |
+| `selectedDate` | `date` | `new Date()` | read/write | `Md3DatePicker` | Selected Date. |
+| `viewDate` | `date` | `selectedDate` | read/write | `Md3DatePicker` | View Date. |
+| `minimumDate` | `date` | `—` | read/write | `Md3DatePicker` | Minimum Date. |
+| `maximumDate` | `date` | `—` | read/write | `Md3DatePicker` | Maximum Date. |
 | `weekStartsOn` | `int` | `{…}` | read/write | `Md3DatePicker` | 0 = Sunday … 6 = Saturday |
-| `displayMode` | `int` | `Md3DatePicker.Calendar` | read/write | `Md3DatePicker` | — |
-| `showModeToggle` | `bool` | `true` | read/write | `Md3DatePicker` | — |
-| `showTodayIndicator` | `bool` | `true` | read/write | `Md3DatePicker` | — |
-| `showOutsideDays` | `bool` | `true` | read/write | `Md3DatePicker` | — |
-| `showActions` | `bool` | `true` | read/write | `Md3DatePicker` | — |
-| `yearPickerOpen` | `bool` | `false` | read/write | `Md3DatePicker` | — |
-| `yearFrom` | `int` | `1900` | read/write | `Md3DatePicker` | — |
-| `yearTo` | `int` | `2100` | read/write | `Md3DatePicker` | — |
-| `confirmText` | `string` | `qsTr("OK")` | read/write | `Md3DatePicker` | — |
-| `dismissText` | `string` | `qsTr("Cancel")` | read/write | `Md3DatePicker` | — |
-| `dateFormat` | `string` | `"yyyy-MM-dd"` | read/write | `Md3DatePicker` | — |
-| `modal` | `bool` | `false` | read/write | `Md3DatePicker` | — |
-| `open` | `bool` | `true` | read/write | `Md3DatePicker` | — |
+| `displayMode` | `int (Md3DatePicker.DisplayMode)` | `Md3DatePicker.Calendar` | read/write | `Md3DatePicker` | Display Mode. |
+| `showModeToggle` | `bool` | `true` | read/write | `Md3DatePicker` | Show Mode Toggle. |
+| `showTodayIndicator` | `bool` | `true` | read/write | `Md3DatePicker` | Show Today Indicator. |
+| `showOutsideDays` | `bool` | `true` | read/write | `Md3DatePicker` | Show Outside Days. |
+| `showActions` | `bool` | `true` | read/write | `Md3DatePicker` | Show Actions. |
+| `yearPickerOpen` | `bool` | `false` | read/write | `Md3DatePicker` | Year Picker Open. |
+| `yearFrom` | `int` | `1900` | read/write | `Md3DatePicker` | Year From. |
+| `yearTo` | `int` | `2100` | read/write | `Md3DatePicker` | Year To. |
+| `confirmText` | `string` | `qsTr("OK")` | read/write | `Md3DatePicker` | Confirm Text. |
+| `dismissText` | `string` | `qsTr("Cancel")` | read/write | `Md3DatePicker` | Dismiss Text. |
+| `dateFormat` | `string` | `"yyyy-MM-dd"` | read/write | `Md3DatePicker` | Date Format. |
+| `modal` | `bool` | `false` | read/write | `Md3DatePicker` | Modal. |
+| `open` | `bool` | `true` | read/write | `Md3DatePicker` | Open the overlay / dialog. |
 | `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3DatePicker` | Drop day/year cells while modal closed or page off-display. |
-| `today` | `date` | `{…}` | readonly | `Md3DatePicker` | — |
+| `today` | `date` | `{…}` | readonly | `Md3DatePicker` | Today. |
 
 ## Signals
 
 | Signal | Defined in | Description |
 |--------|------------|-------------|
-| `accepted(date date)` | `Md3DatePicker` | — |
-| `cancelled()` | `Md3DatePicker` | — |
-| `dateClicked(date date)` | `Md3DatePicker` | — |
+| `accepted(date date)` | `Md3DatePicker` | Emitted when accepted. |
+| `cancelled()` | `Md3DatePicker` | Emitted when cancelled. |
+| `dateClicked(date date)` | `Md3DatePicker` | Emitted when date Clicked. |
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `daysInMonth(year, month)` | `Md3DatePicker` | — |
-| `stripTime(d)` | `Md3DatePicker` | — |
-| `sameDay(a, b)` | `Md3DatePicker` | — |
-| `hasMin()` | `Md3DatePicker` | — |
-| `hasMax()` | `Md3DatePicker` | — |
-| `isDateEnabled(d)` | `Md3DatePicker` | — |
-| `clampToBounds(d)` | `Md3DatePicker` | — |
-| `weekdayLabels()` | `Md3DatePicker` | — |
-| `calendarCells()` | `Md3DatePicker` | — |
-| `shiftMonth(delta)` | `Md3DatePicker` | — |
-| `selectDate(d)` | `Md3DatePicker` | — |
-| `commitInput()` | `Md3DatePicker` | — |
-| `confirm()` | `Md3DatePicker` | — |
-| `cancel()` | `Md3DatePicker` | — |
-| `toggleDisplayMode()` | `Md3DatePicker` | — |
-| `pickYear(y)` | `Md3DatePicker` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `daysInMonth(year, month)` | `—` | `Md3DatePicker` | Days In Month. |
+| `stripTime(d)` | `—` | `Md3DatePicker` | Strip Time. |
+| `sameDay(a, b)` | `—` | `Md3DatePicker` | Same Day. |
+| `hasMin()` | `—` | `Md3DatePicker` | Has Min. |
+| `hasMax()` | `—` | `Md3DatePicker` | Has Max. |
+| `isDateEnabled(d)` | `—` | `Md3DatePicker` | Is Date Enabled. |
+| `clampToBounds(d)` | `—` | `Md3DatePicker` | Clamp To Bounds. |
+| `weekdayLabels()` | `—` | `Md3DatePicker` | Weekday Labels. |
+| `calendarCells()` | `—` | `Md3DatePicker` | Calendar Cells. |
+| `shiftMonth(delta)` | `—` | `Md3DatePicker` | Shift Month. |
+| `selectDate(d)` | `—` | `Md3DatePicker` | Select Date. |
+| `commitInput()` | `—` | `Md3DatePicker` | Commit Input. |
+| `confirm()` | `—` | `Md3DatePicker` | Confirm. |
+| `cancel()` | `—` | `Md3DatePicker` | Cancel. |
+| `toggleDisplayMode()` | `—` | `Md3DatePicker` | Toggle Display Mode. |
+| `pickYear(y)` | `—` | `Md3DatePicker` | Pick Year. |
 
 ## Example
 
@@ -83,5 +91,6 @@ Md3DatePicker {
     viewDate: selectedDate
     minimumDate: /* … */
     maximumDate: /* … */
+    weekStartsOn: /* … */
 }
 ```

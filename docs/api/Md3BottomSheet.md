@@ -3,6 +3,14 @@
 - **Source:** `src/Md3/components/Md3BottomSheet.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 10 | 2 | 2 | 0 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -13,30 +21,30 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `open` | `bool` | `false` | read/write | `Md3BottomSheet` | — |
-| `modal` | `bool` | `true` | read/write | `Md3BottomSheet` | — |
-| `layoutMode` | `int` | `Md3ContainerBody.Fit` | read/write | `Md3BottomSheet` | — |
-| `title` | `string` | `""` | read/write | `Md3BottomSheet` | — |
-| `text` | `string` | `""` | read/write | `Md3BottomSheet` | — |
-| `confirmText` | `string` | `""` | read/write | `Md3BottomSheet` | — |
-| `dismissText` | `string` | `""` | read/write | `Md3BottomSheet` | — |
+| `open` | `bool` | `false` | read/write | `Md3BottomSheet` | Open the overlay / dialog. |
+| `modal` | `bool` | `true` | read/write | `Md3BottomSheet` | Modal. |
+| `layoutMode` | `int` | `Md3ContainerBody.Fit` | read/write | `Md3BottomSheet` | Layout Mode. |
+| `title` | `string` | `""` | read/write | `Md3BottomSheet` | Title text. |
+| `text` | `string` | `""` | read/write | `Md3BottomSheet` | Primary label text. |
+| `confirmText` | `string` | `""` | read/write | `Md3BottomSheet` | Confirm Text. |
+| `dismissText` | `string` | `""` | read/write | `Md3BottomSheet` | Dismiss Text. |
 | `dismissDragThreshold` | `real` | `96` | read/write | `Md3BottomSheet` | Drag distance (px) before release dismisses the sheet. |
-| `content` | `alias` | `bodySlot.data` | default read/write | `Md3BottomSheet` | Default property → `bodySlot.data` |
-| `maxSheetHeight` | `real` | `parent ? parent.height * 0.6 : 480` | readonly | `Md3BottomSheet` | — |
+| `content` | `alias` | `bodySlot.data` | default read/write | `Md3BottomSheet` | Content. |
+| `maxSheetHeight` | `real` | `parent ? parent.height * 0.6 : 480` | readonly | `Md3BottomSheet` | Max Sheet Height. |
 
 ## Signals
 
 | Signal | Defined in | Description |
 |--------|------------|-------------|
-| `dismissed()` | `Md3BottomSheet` | — |
-| `confirmed()` | `Md3BottomSheet` | — |
+| `dismissed()` | `Md3BottomSheet` | Emitted when dismissed. |
+| `confirmed()` | `Md3BottomSheet` | Emitted when confirmed. |
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `accept()` | `Md3BottomSheet` | — |
-| `reject()` | `Md3BottomSheet` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `accept()` | `—` | `Md3BottomSheet` | Accept. |
+| `reject()` | `—` | `Md3BottomSheet` | Reject. |
 
 ## Example
 
@@ -49,5 +57,6 @@ Md3BottomSheet {
     layoutMode: Md3ContainerBody.Fit
     title: ""
     text: ""
+    confirmText: ""
 }
 ```

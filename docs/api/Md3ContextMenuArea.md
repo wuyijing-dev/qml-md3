@@ -5,6 +5,14 @@ Transparent right-click host over a page / region. Left-clicks pass through; rig
 - **Source:** `src/Md3/components/Md3ContextMenuArea.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 3 | 3 | 2 | 0 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -16,23 +24,23 @@ import Md3
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
 | `contextMenu` | `var` | `null` | read/write | `Md3ContextMenuArea` | Target Md3Menu (required for a useful menu). |
-| `menuWidth` | `real` | `0` | read/write | `Md3ContextMenuArea` | — |
+| `menuWidth` | `real` | `0` | read/write | `Md3ContextMenuArea` | Menu Width. |
 | `overlayWindow` | `var` | `null` | read/write | `Md3ContextMenuArea` | Optional explicit Window for overlay mapping (else Window.window). |
 
 ## Signals
 
 | Signal | Defined in | Description |
 |--------|------------|-------------|
-| `aboutToShow(real x, real y)` | `Md3ContextMenuArea` | — |
-| `opened()` | `Md3ContextMenuArea` | — |
-| `closed()` | `Md3ContextMenuArea` | — |
+| `aboutToShow(real x, real y)` | `Md3ContextMenuArea` | Emitted when about To Show. |
+| `opened()` | `Md3ContextMenuArea` | Emitted when opened. |
+| `closed()` | `Md3ContextMenuArea` | Emitted when closed. |
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `popupAt(x, y)` | `Md3ContextMenuArea` | — |
-| `dismiss()` | `Md3ContextMenuArea` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `popupAt(x, y)` | `—` | `Md3ContextMenuArea` | Popup At. |
+| `dismiss()` | `—` | `Md3ContextMenuArea` | Dismiss. |
 
 ## Example
 

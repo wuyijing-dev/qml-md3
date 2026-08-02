@@ -5,6 +5,14 @@ Material 3 Expressive morph loading indicator — rounded 8-lobe clover / asteri
 - **Source:** `src/Md3/components/Md3MorphLoadingIndicator.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 11 | 0 | 0 | 2 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -25,17 +33,17 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `variant` | `int` | `Md3MorphLoadingIndicator.Bare` | read/write | `Md3MorphLoadingIndicator` | — |
-| `sizePreset` | `int` | `Md3MorphLoadingIndicator.Medium` | read/write | `Md3MorphLoadingIndicator` | — |
-| `indeterminate` | `bool` | `true` | read/write | `Md3MorphLoadingIndicator` | — |
-| `indicatorColor` | `color` | `Md3Theme.colorScheme.primary` | read/write | `Md3MorphLoadingIndicator` | — |
-| `containerColor` | `color` | `Md3Theme.colorScheme.primaryContainer` | read/write | `Md3MorphLoadingIndicator` | — |
-| `morphPhase` | `real` | `0` | read/write | `Md3MorphLoadingIndicator` | — |
-| `spin` | `real` | `0` | read/write | `Md3MorphLoadingIndicator` | — |
+| `variant` | `int (Md3MorphLoadingIndicator.Variant)` | `Md3MorphLoadingIndicator.Bare` | read/write | `Md3MorphLoadingIndicator` | Visual / role variant (see Enums). |
+| `sizePreset` | `int (Md3MorphLoadingIndicator.Size)` | `Md3MorphLoadingIndicator.Medium` | read/write | `Md3MorphLoadingIndicator` | Size Preset. |
+| `indeterminate` | `bool` | `true` | read/write | `Md3MorphLoadingIndicator` | Indeterminate. |
+| `indicatorColor` | `color` | `Md3Theme.colorScheme.primary` | read/write | `Md3MorphLoadingIndicator` | Indicator Color. |
+| `containerColor` | `color` | `Md3Theme.colorScheme.primaryContainer` | read/write | `Md3MorphLoadingIndicator` | Container Color. |
+| `morphPhase` | `real` | `0` | read/write | `Md3MorphLoadingIndicator` | Morph Phase. |
+| `spin` | `real` | `0` | read/write | `Md3MorphLoadingIndicator` | Spin. |
 | `hostWindow` | `var` | `null` | read/write | `Md3MorphLoadingIndicator` | Optional Window for scene-active checks (else OverlayHost). |
 | `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3MorphLoadingIndicator` | Drop Shape geometry while page is off-display. |
-| `box` | `real` | `{…}` | readonly | `Md3MorphLoadingIndicator` | — |
-| `sceneActive` | `bool` | `enabled && _treeShown && indeterminate` | readonly | `Md3MorphLoadingIndicator` | — |
+| `box` | `real` | `{…}` | readonly | `Md3MorphLoadingIndicator` | Box. |
+| `sceneActive` | `bool` | `enabled && _treeShown && indeterminate` | readonly | `Md3MorphLoadingIndicator` | Scene Active. |
 
 ## Signals
 
@@ -56,5 +64,6 @@ Md3MorphLoadingIndicator {
     indeterminate: true
     indicatorColor: Md3Theme.colorScheme.primary
     containerColor: Md3Theme.colorScheme.primaryContainer
+    morphPhase: 0
 }
 ```

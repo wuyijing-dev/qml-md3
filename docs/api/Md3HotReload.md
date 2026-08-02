@@ -1,23 +1,51 @@
 # Md3HotReload
 
+QML hot-reload watcher.
+
 - **Source:** `src/Md3/diagnostics/md3hotreload.h`
-- **Type:** `QML_ELEMENT` (instantiate; also used by `Md3ApplicationWindow.hotReload`)
+- **Extends:** `QObject`
+- **Kind:** C++ / QML_ELEMENT (generated from header)
+
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 4 | 0 | 3 | 0 |
+
+## Import
+
+```qml
+import Md3
+```
 
 ## Properties
 
-| Name | Type | Description |
-|------|------|-------------|
-| `enabled` | `bool` | Watch filesystem |
-| `watchPaths` | `list` | Dirs/files to watch |
-| `galleryPagesDir` | `string` | Auto-discovered gallery pages path |
-| `md3QmlDir` | `string` | Auto-discovered Md3 QML tree |
-
-## Methods
-
-`addWatchPath(path)`, `clearComponentCache(engineOwner)`, `rediscoverSourceTrees()`
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `enabled` | `bool` | `—` | read/write | `Md3HotReload` | Notify: `enabledChanged` |
+| `watchPaths` | `var` | `—` | read/write | `Md3HotReload` | Notify: `watchPathsChanged` |
+| `galleryPagesDir` | `string` | `—` | readonly | `Md3HotReload` | Notify: `galleryPagesDirChanged` |
+| `md3QmlDir` | `string` | `—` | readonly | `Md3HotReload` | Notify: `md3QmlDirChanged` |
 
 ## Signals
 
-`reloadRequested(path)` — ApplicationWindow clears cache and calls `pageHost.reloadCurrent()`.
+_None._
 
-Enable via `Md3ApplicationWindow.hotReload: true` or CLI `--hot-reload`.
+## Methods
+
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `addWatchPath(const QString &path)` | `void` | `Md3HotReload` | Add Watch Path. |
+| `clearComponentCache(QObject *engineOwner)` | `void` | `Md3HotReload` | Clear Component Cache. |
+| `rediscoverSourceTrees()` | `void` | `Md3HotReload` | Rediscover Source Trees. |
+
+## Example
+
+```qml
+import Md3
+
+// C++ / host type — typically used from QML as `Md3HotReload { }`
+Md3HotReload {
+    // see properties / methods above
+}
+```

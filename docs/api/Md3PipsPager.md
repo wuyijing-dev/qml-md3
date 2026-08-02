@@ -5,6 +5,14 @@ Page indicator / WinUI PipsPager — dots or pills bound to a page count.
 - **Source:** `src/Md3/components/Md3PipsPager.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 7 | 1 | 1 | 1 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -21,25 +29,25 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `count` | `int` | `0` | read/write | `Md3PipsPager` | — |
-| `currentIndex` | `int` | `0` | read/write | `Md3PipsPager` | — |
-| `style` | `int` | `Md3PipsPager.Pill` | read/write | `Md3PipsPager` | — |
-| `spacing` | `real` | `8` | read/write | `Md3PipsPager` | — |
-| `inactiveSize` | `real` | `8` | read/write | `Md3PipsPager` | — |
-| `activeWidth` | `real` | `18` | read/write | `Md3PipsPager` | — |
-| `interactive` | `bool` | `true` | read/write | `Md3PipsPager` | — |
+| `count` | `int` | `0` | read/write | `Md3PipsPager` | Item count. |
+| `currentIndex` | `int` | `0` | read/write | `Md3PipsPager` | Current index. |
+| `style` | `int (Md3PipsPager.Style)` | `Md3PipsPager.Pill` | read/write | `Md3PipsPager` | Style. |
+| `spacing` | `real` | `8` | read/write | `Md3PipsPager` | Child spacing. |
+| `inactiveSize` | `real` | `8` | read/write | `Md3PipsPager` | Inactive Size. |
+| `activeWidth` | `real` | `18` | read/write | `Md3PipsPager` | Active Width. |
+| `interactive` | `bool` | `true` | read/write | `Md3PipsPager` | Gate activation without forcing `enabled: false`. |
 
 ## Signals
 
 | Signal | Defined in | Description |
 |--------|------------|-------------|
-| `indexRequested(int index)` | `Md3PipsPager` | — |
+| `indexRequested(int index)` | `Md3PipsPager` | Emitted when index Requested. |
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `goTo(index)` | `Md3PipsPager` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `goTo(index)` | `—` | `Md3PipsPager` | Go To. |
 
 ## Example
 
@@ -52,6 +60,7 @@ Md3PipsPager {
     style: Md3PipsPager.Pill
     spacing: 8
     inactiveSize: 8
+    activeWidth: 18
 }
 ```
 

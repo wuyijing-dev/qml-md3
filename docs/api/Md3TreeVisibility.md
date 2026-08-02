@@ -6,6 +6,14 @@ Shared ancestor / window visibility checks (PageHost hides pages via opacity). P
 - **Extends:** `QtObject`
 - **Singleton:** `true` (`pragma Singleton`)
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 0 | 0 | 6 | 0 |
+
+_Also inherits Qt Quick `QtObject` members (not listed)._
+
 ## Import
 
 ```qml
@@ -22,14 +30,14 @@ _None._
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `isItemShown(item)` | `Md3TreeVisibility` | Walk `item` and ancestors: all must be visible with opacity > 0.01. |
-| `isWindowActive(win)` | `Md3TreeVisibility` | Window is mapped and not minimized/hidden. Missing window → inactive. |
-| `isSceneActive(item, win)` | `Md3TreeVisibility` | Tree shown and window active. Pass explicit `win` / `hostWindow`, or `null`/`undefined` to resolve via Md3OverlayHost. |
-| `isLiveMotionScene(item, win)` | `Md3TreeVisibility` | Scene active and application not suspended/hidden (for live timers / FrameAnimation). |
-| `findPageRoot(item)` | `Md3TreeVisibility` | Nearest ancestor that declares boolean `md3PageActive` (PageHost injectable). |
-| `isPageActive(item)` | `Md3TreeVisibility` | True when no page root, or `md3PageActive` is true. |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `isItemShown(item)` | `—` | `Md3TreeVisibility` | Walk `item` and ancestors: all must be visible with opacity > 0.01. |
+| `isWindowActive(win)` | `—` | `Md3TreeVisibility` | Window is mapped and not minimized/hidden. Missing window → inactive. |
+| `isSceneActive(item, win)` | `—` | `Md3TreeVisibility` | Tree shown and window active. Pass explicit `win` / `hostWindow`, or `null`/`undefined` to resolve via Md3OverlayHost. |
+| `isLiveMotionScene(item, win)` | `—` | `Md3TreeVisibility` | Scene active and application not suspended/hidden (for live timers / FrameAnimation). |
+| `findPageRoot(item)` | `—` | `Md3TreeVisibility` | Nearest ancestor that declares boolean `md3PageActive` (PageHost injectable). |
+| `isPageActive(item)` | `—` | `Md3TreeVisibility` | True when no page root, or `md3PageActive` is true. |
 
 ## Example
 

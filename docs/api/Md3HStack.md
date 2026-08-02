@@ -5,6 +5,14 @@ Horizontal stack with spacing, padding, alignment, and expanding spacers. Manual
 - **Source:** `src/Md3/layout/Md3HStack.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 11 | 0 | 0 | 1 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -21,17 +29,17 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `spacing` | `real` | `8` | read/write | `Md3HStack` | — |
-| `padding` | `real` | `0` | read/write | `Md3HStack` | — |
-| `leftPadding` | `real` | `padding` | read/write | `Md3HStack` | — |
-| `rightPadding` | `real` | `padding` | read/write | `Md3HStack` | — |
-| `topPadding` | `real` | `padding` | read/write | `Md3HStack` | — |
-| `bottomPadding` | `real` | `padding` | read/write | `Md3HStack` | — |
-| `fillHeight` | `bool` | `false` | read/write | `Md3HStack` | — |
-| `stretchChildren` | `bool` | `false` | read/write | `Md3HStack` | — |
-| `clipContent` | `bool` | `false` | read/write | `Md3HStack` | — |
-| `alignment` | `int` | `Md3HStack.Center` | read/write | `Md3HStack` | — |
-| `content` | `alias` | `contentHost.data` | default read/write | `Md3HStack` | Default property → `contentHost.data` |
+| `spacing` | `real` | `8` | read/write | `Md3HStack` | Child spacing. |
+| `padding` | `real` | `0` | read/write | `Md3HStack` | Uniform padding. |
+| `leftPadding` | `real` | `padding` | read/write | `Md3HStack` | Left Padding. |
+| `rightPadding` | `real` | `padding` | read/write | `Md3HStack` | Right Padding. |
+| `topPadding` | `real` | `padding` | read/write | `Md3HStack` | Top Padding. |
+| `bottomPadding` | `real` | `padding` | read/write | `Md3HStack` | Bottom Padding. |
+| `fillHeight` | `bool` | `false` | read/write | `Md3HStack` | Fill Height. |
+| `stretchChildren` | `bool` | `false` | read/write | `Md3HStack` | Stretch Children. |
+| `clipContent` | `bool` | `false` | read/write | `Md3HStack` | Clip Content. |
+| `alignment` | `int (Md3HStack.Alignment)` | `Md3HStack.Center` | read/write | `Md3HStack` | Alignment. |
+| `content` | `alias` | `contentHost.data` | default read/write | `Md3HStack` | Content. |
 
 ## Signals
 
@@ -52,5 +60,6 @@ Md3HStack {
     leftPadding: padding
     rightPadding: padding
     topPadding: padding
+    bottomPadding: padding
 }
 ```

@@ -5,6 +5,14 @@ Desktop command strip with primary actions and a secondary overflow menu (WinUI 
 - **Source:** `src/Md3/components/Md3CommandBar.qml`
 - **Extends:** `Rectangle`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 11 | 1 | 2 | 0 |
+
+_Also inherits Qt Quick `Rectangle` members (not listed)._
+
 ## Import
 
 ```qml
@@ -15,30 +23,30 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `barHeight` | `real` | `48` | read/write | `Md3CommandBar` | — |
-| `contentSpacing` | `real` | `4` | read/write | `Md3CommandBar` | — |
-| `horizontalPadding` | `real` | `8` | read/write | `Md3CommandBar` | — |
-| `showDivider` | `bool` | `true` | read/write | `Md3CommandBar` | — |
+| `barHeight` | `real` | `48` | read/write | `Md3CommandBar` | Bar Height. |
+| `contentSpacing` | `real` | `4` | read/write | `Md3CommandBar` | Content Spacing. |
+| `horizontalPadding` | `real` | `8` | read/write | `Md3CommandBar` | Horizontal Padding. |
+| `showDivider` | `bool` | `true` | read/write | `Md3CommandBar` | Show Divider. |
 | `overflowModel` | `var` | `[]` | read/write | `Md3CommandBar` | Secondary / overflow items: [{ text, icon?, enabled? }, ...] |
 | `overlayWindow` | `var` | `null` | read/write | `Md3CommandBar` | Optional explicit Window for overflow menu overlay. |
-| `accessibleName` | `string` | `qsTr("Command bar")` | read/write | `Md3CommandBar` | — |
-| `content` | `alias` | `primaryStack.content` | read/write | `Md3CommandBar` | Alias → `primaryStack.content` |
-| `data` | `alias` | `primaryStack.content` | default read/write | `Md3CommandBar` | Default property → `primaryStack.content` |
-| `overflowOpen` | `bool` | `overflowMenu.open` | readonly | `Md3CommandBar` | — |
-| `hasOverflow` | `bool` | `overflowModel.length > 0` | readonly | `Md3CommandBar` | — |
+| `accessibleName` | `string` | `qsTr("Command bar")` | read/write | `Md3CommandBar` | Accessible name override. |
+| `content` | `alias` | `primaryStack.content` | read/write | `Md3CommandBar` | Content. |
+| `data` | `alias` | `primaryStack.content` | default read/write | `Md3CommandBar` | Data. |
+| `overflowOpen` | `bool` | `overflowMenu.open` | readonly | `Md3CommandBar` | Overflow Open. |
+| `hasOverflow` | `bool` | `overflowModel.length > 0` | readonly | `Md3CommandBar` | Has Overflow. |
 
 ## Signals
 
 | Signal | Defined in | Description |
 |--------|------------|-------------|
-| `overflowItemClicked(int index)` | `Md3CommandBar` | — |
+| `overflowItemClicked(int index)` | `Md3CommandBar` | Emitted when overflow Item Clicked. |
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `openOverflow()` | `Md3CommandBar` | — |
-| `dismissOverflow()` | `Md3CommandBar` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `openOverflow()` | `—` | `Md3CommandBar` | Open Overflow. |
+| `dismissOverflow()` | `—` | `Md3CommandBar` | Dismiss Overflow. |
 
 ## Example
 
@@ -51,6 +59,7 @@ Md3CommandBar {
     horizontalPadding: 8
     showDivider: true
     overflowModel: []
+    overlayWindow: null
 }
 ```
 

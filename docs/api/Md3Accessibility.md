@@ -6,6 +6,14 @@ Library-wide accessibility preferences and helpers.
 - **Extends:** `QtObject`
 - **Singleton:** `true` (`pragma Singleton`)
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 7 | 0 | 5 | 0 |
+
+_Also inherits Qt Quick `QtObject` members (not listed)._
+
 ## Import
 
 ```qml
@@ -22,7 +30,7 @@ import Md3
 | `textScale` | `real` | `Md3Theme.textScale` | read/write | `Md3Accessibility` | Extra text scale convenience (delegates to Md3Theme.textScale). |
 | `livePoliteness` | `string` | `"polite"` | read/write | `Md3Accessibility` | "polite" \| "assertive" — hint for live region urgency. |
 | `liveMessage` | `string` | `_announceText` | readonly | `Md3Accessibility` | Screen-reader live message (read via Accessible on the gallery/window live region). |
-| `liveSerial` | `int` | `_announceSerial` | readonly | `Md3Accessibility` | — |
+| `liveSerial` | `int` | `_announceSerial` | readonly | `Md3Accessibility` | Live Serial. |
 
 ## Signals
 
@@ -30,13 +38,13 @@ _None._
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `announce(message)` | `Md3Accessibility` | Generic polite announcement (status / info). |
-| `announceSuccess(message)` | `Md3Accessibility` | Success feedback (form saved, copy done, …). |
-| `announceError(message)` | `Md3Accessibility` | Error / validation failure — assertive so ATTs interrupt. |
-| `syncFromTheme()` | `Md3Accessibility` | — |
-| `applyToTheme()` | `Md3Accessibility` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `announce(message)` | `—` | `Md3Accessibility` | Generic polite announcement (status / info). |
+| `announceSuccess(message)` | `—` | `Md3Accessibility` | Success feedback (form saved, copy done, …). |
+| `announceError(message)` | `—` | `Md3Accessibility` | Error / validation failure — assertive so ATTs interrupt. |
+| `syncFromTheme()` | `—` | `Md3Accessibility` | Sync From Theme. |
+| `applyToTheme()` | `—` | `Md3Accessibility` | Apply To Theme. |
 
 ## Example
 

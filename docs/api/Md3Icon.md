@@ -3,6 +3,14 @@
 - **Source:** `src/Md3/primitives/Md3Icon.qml`
 - **Extends:** `Text`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 4 | 0 | 1 | 0 |
+
+_Also inherits Qt Quick `Text` members (not listed)._
+
 ## Import
 
 ```qml
@@ -13,10 +21,10 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `icon` | `string` | `"circle"` | read/write | `Md3Icon` | — |
-| `size` | `int` | `24` | read/write | `Md3Icon` | — |
-| `iconColor` | `color` | `Md3Theme.colorScheme.colorOnSurface` | read/write | `Md3Icon` | — |
-| `variant` | `string` | `"filled"` | read/write | `Md3Icon` | — |
+| `icon` | `string` | `"circle"` | read/write | `Md3Icon` | Material icon name or empty. |
+| `size` | `int` | `24` | read/write | `Md3Icon` | Control size token (see Enums). |
+| `iconColor` | `color` | `Md3Theme.colorScheme.colorOnSurface` | read/write | `Md3Icon` | Icon Color. |
+| `variant` | `string` | `"filled"` | read/write | `Md3Icon` | Visual / role variant (see Enums). |
 
 ## Signals
 
@@ -24,9 +32,9 @@ _None._
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `ligatureFor(name)` | `Md3Icon` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `ligatureFor(name)` | `—` | `Md3Icon` | Ligature For. |
 
 ## Example
 

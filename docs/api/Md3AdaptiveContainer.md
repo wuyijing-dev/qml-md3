@@ -5,6 +5,14 @@ Standalone column-stacking adaptive container (gallery / direct use). Md3 contai
 - **Source:** `src/Md3/components/Md3AdaptiveContainer.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 5 | 0 | 0 | 1 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -21,11 +29,11 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `layoutMode` | `int` | `Md3AdaptiveContainer.Fit` | read/write | `Md3AdaptiveContainer` | — |
-| `padding` | `real` | `0` | read/write | `Md3AdaptiveContainer` | — |
-| `clipContent` | `bool` | `true` | read/write | `Md3AdaptiveContainer` | — |
-| `contentSpacing` | `real` | `12` | read/write | `Md3AdaptiveContainer` | — |
-| `content` | `alias` | `contentStack.content` | default read/write | `Md3AdaptiveContainer` | Default property → `contentStack.content` |
+| `layoutMode` | `int (Md3AdaptiveContainer.LayoutMode)` | `Md3AdaptiveContainer.Fit` | read/write | `Md3AdaptiveContainer` | Layout Mode. |
+| `padding` | `real` | `0` | read/write | `Md3AdaptiveContainer` | Uniform padding. |
+| `clipContent` | `bool` | `true` | read/write | `Md3AdaptiveContainer` | Clip Content. |
+| `contentSpacing` | `real` | `12` | read/write | `Md3AdaptiveContainer` | Content Spacing. |
+| `content` | `alias` | `contentStack.content` | default read/write | `Md3AdaptiveContainer` | Content. |
 
 ## Signals
 

@@ -6,6 +6,14 @@ Resolve overlay parents / popup coordinates without each control re-implementing
 - **Extends:** `QtObject`
 - **Singleton:** `true` (`pragma Singleton`)
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 1 | 0 | 6 | 0 |
+
+_Also inherits Qt Quick `QtObject` members (not listed)._
+
 ## Import
 
 ```qml
@@ -24,14 +32,14 @@ _None._
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `resolveWindow(win, anchor)` | `Md3OverlayHost` | — |
-| `contentItem(win, anchor)` | `Md3OverlayHost` | Top-level contentItem for popup reparenting. |
-| `mapToOverlay(fromItem, x, y, win)` | `Md3OverlayHost` | Map local point on `fromItem` into overlay content coordinates. |
-| `ensureHostParent(host, win, anchor, zOrder)` | `Md3OverlayHost` | Reparent `host` to fill the overlay contentItem (menus / pickers). |
-| `claimSwipeReveal(item)` | `Md3OverlayHost` | — |
-| `releaseSwipeReveal(item)` | `Md3OverlayHost` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `resolveWindow(win, anchor)` | `—` | `Md3OverlayHost` | Resolve Window. |
+| `contentItem(win, anchor)` | `—` | `Md3OverlayHost` | Top-level contentItem for popup reparenting. |
+| `mapToOverlay(fromItem, x, y, win)` | `—` | `Md3OverlayHost` | Map local point on `fromItem` into overlay content coordinates. |
+| `ensureHostParent(host, win, anchor, zOrder)` | `—` | `Md3OverlayHost` | Reparent `host` to fill the overlay contentItem (menus / pickers). |
+| `claimSwipeReveal(item)` | `—` | `Md3OverlayHost` | Claim Swipe Reveal. |
+| `releaseSwipeReveal(item)` | `—` | `Md3OverlayHost` | Release Swipe Reveal. |
 
 ## Example
 

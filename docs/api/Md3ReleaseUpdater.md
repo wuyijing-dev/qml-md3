@@ -5,6 +5,14 @@ GitHub Release update client: metadata check, ZIP download, and archive extract.
 - **Source:** `src/Md3/components/Md3ReleaseUpdater.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 22 | 5 | 5 | 0 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -15,48 +23,48 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `owner` | `alias` | `backend.owner` | read/write | `Md3ReleaseUpdater` | Alias → `backend.owner` |
-| `repo` | `alias` | `backend.repo` | read/write | `Md3ReleaseUpdater` | Alias → `backend.repo` |
-| `currentVersion` | `alias` | `backend.currentVersion` | read/write | `Md3ReleaseUpdater` | Alias → `backend.currentVersion` |
-| `includePrerelease` | `alias` | `backend.includePrerelease` | read/write | `Md3ReleaseUpdater` | Alias → `backend.includePrerelease` |
-| `assetNameContains` | `alias` | `backend.assetNameContains` | read/write | `Md3ReleaseUpdater` | Alias → `backend.assetNameContains` |
-| `checking` | `alias` | `backend.checking` | read/write | `Md3ReleaseUpdater` | Alias → `backend.checking` |
-| `downloading` | `alias` | `backend.downloading` | read/write | `Md3ReleaseUpdater` | Alias → `backend.downloading` |
-| `extracting` | `alias` | `backend.extracting` | read/write | `Md3ReleaseUpdater` | Alias → `backend.extracting` |
-| `errorString` | `alias` | `backend.errorString` | read/write | `Md3ReleaseUpdater` | Alias → `backend.errorString` |
-| `latestTag` | `alias` | `backend.latestTag` | read/write | `Md3ReleaseUpdater` | Alias → `backend.latestTag` |
-| `latestVersion` | `alias` | `backend.latestVersion` | read/write | `Md3ReleaseUpdater` | Alias → `backend.latestVersion` |
-| `latestName` | `alias` | `backend.latestName` | read/write | `Md3ReleaseUpdater` | Alias → `backend.latestName` |
-| `publishedAt` | `alias` | `backend.publishedAt` | read/write | `Md3ReleaseUpdater` | Alias → `backend.publishedAt` |
-| `releaseNotes` | `alias` | `backend.releaseNotes` | read/write | `Md3ReleaseUpdater` | Alias → `backend.releaseNotes` |
-| `downloadUrl` | `alias` | `backend.downloadUrl` | read/write | `Md3ReleaseUpdater` | Alias → `backend.downloadUrl` |
-| `downloadName` | `alias` | `backend.downloadName` | read/write | `Md3ReleaseUpdater` | Alias → `backend.downloadName` |
-| `hasUpdate` | `alias` | `backend.hasUpdate` | read/write | `Md3ReleaseUpdater` | Alias → `backend.hasUpdate` |
-| `downloadedBytes` | `alias` | `backend.downloadedBytes` | read/write | `Md3ReleaseUpdater` | Alias → `backend.downloadedBytes` |
-| `totalBytes` | `alias` | `backend.totalBytes` | read/write | `Md3ReleaseUpdater` | Alias → `backend.totalBytes` |
-| `downloadProgress` | `alias` | `backend.downloadProgress` | read/write | `Md3ReleaseUpdater` | Alias → `backend.downloadProgress` |
-| `downloadedFilePath` | `alias` | `backend.downloadedFilePath` | read/write | `Md3ReleaseUpdater` | Alias → `backend.downloadedFilePath` |
-| `extractedDirPath` | `alias` | `backend.extractedDirPath` | read/write | `Md3ReleaseUpdater` | Alias → `backend.extractedDirPath` |
+| `owner` | `alias` | `backend.owner` | read/write | `Md3ReleaseUpdater` | Owner. |
+| `repo` | `alias` | `backend.repo` | read/write | `Md3ReleaseUpdater` | Repo. |
+| `currentVersion` | `alias` | `backend.currentVersion` | read/write | `Md3ReleaseUpdater` | Current Version. |
+| `includePrerelease` | `alias` | `backend.includePrerelease` | read/write | `Md3ReleaseUpdater` | Include Prerelease. |
+| `assetNameContains` | `alias` | `backend.assetNameContains` | read/write | `Md3ReleaseUpdater` | Asset Name Contains. |
+| `checking` | `alias` | `backend.checking` | read/write | `Md3ReleaseUpdater` | Checking. |
+| `downloading` | `alias` | `backend.downloading` | read/write | `Md3ReleaseUpdater` | Downloading. |
+| `extracting` | `alias` | `backend.extracting` | read/write | `Md3ReleaseUpdater` | Extracting. |
+| `errorString` | `alias` | `backend.errorString` | read/write | `Md3ReleaseUpdater` | Error String. |
+| `latestTag` | `alias` | `backend.latestTag` | read/write | `Md3ReleaseUpdater` | Latest Tag. |
+| `latestVersion` | `alias` | `backend.latestVersion` | read/write | `Md3ReleaseUpdater` | Latest Version. |
+| `latestName` | `alias` | `backend.latestName` | read/write | `Md3ReleaseUpdater` | Latest Name. |
+| `publishedAt` | `alias` | `backend.publishedAt` | read/write | `Md3ReleaseUpdater` | Published At. |
+| `releaseNotes` | `alias` | `backend.releaseNotes` | read/write | `Md3ReleaseUpdater` | Release Notes. |
+| `downloadUrl` | `alias` | `backend.downloadUrl` | read/write | `Md3ReleaseUpdater` | Download Url. |
+| `downloadName` | `alias` | `backend.downloadName` | read/write | `Md3ReleaseUpdater` | Download Name. |
+| `hasUpdate` | `alias` | `backend.hasUpdate` | read/write | `Md3ReleaseUpdater` | Has Update. |
+| `downloadedBytes` | `alias` | `backend.downloadedBytes` | read/write | `Md3ReleaseUpdater` | Downloaded Bytes. |
+| `totalBytes` | `alias` | `backend.totalBytes` | read/write | `Md3ReleaseUpdater` | Total Bytes. |
+| `downloadProgress` | `alias` | `backend.downloadProgress` | read/write | `Md3ReleaseUpdater` | Download Progress. |
+| `downloadedFilePath` | `alias` | `backend.downloadedFilePath` | read/write | `Md3ReleaseUpdater` | Downloaded File Path. |
+| `extractedDirPath` | `alias` | `backend.extractedDirPath` | read/write | `Md3ReleaseUpdater` | Extracted Dir Path. |
 
 ## Signals
 
 | Signal | Defined in | Description |
 |--------|------------|-------------|
-| `checked()` | `Md3ReleaseUpdater` | — |
-| `updateAvailable(string version, string url)` | `Md3ReleaseUpdater` | — |
-| `checkFailed(string message)` | `Md3ReleaseUpdater` | — |
-| `downloadFinished(string filePath)` | `Md3ReleaseUpdater` | — |
-| `extractFinished(string directoryPath)` | `Md3ReleaseUpdater` | — |
+| `checked()` | `Md3ReleaseUpdater` | Checked / on state. |
+| `updateAvailable(string version, string url)` | `Md3ReleaseUpdater` | Emitted when update Available. |
+| `checkFailed(string message)` | `Md3ReleaseUpdater` | Emitted when check Failed. |
+| `downloadFinished(string filePath)` | `Md3ReleaseUpdater` | Emitted when download Finished. |
+| `extractFinished(string directoryPath)` | `Md3ReleaseUpdater` | Emitted when extract Finished. |
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `check()` | `Md3ReleaseUpdater` | — |
-| `downloadTo(directoryPath)` | `Md3ReleaseUpdater` | — |
-| `extractTo(directoryPath)` | `Md3ReleaseUpdater` | — |
-| `downloadAndExtract(downloadDirectory, extractDirectory)` | `Md3ReleaseUpdater` | — |
-| `clearDownloadedFile()` | `Md3ReleaseUpdater` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `check()` | `—` | `Md3ReleaseUpdater` | Check. |
+| `downloadTo(directoryPath)` | `—` | `Md3ReleaseUpdater` | Download To. |
+| `extractTo(directoryPath)` | `—` | `Md3ReleaseUpdater` | Extract To. |
+| `downloadAndExtract(downloadDirectory, extractDirectory)` | `—` | `Md3ReleaseUpdater` | Download And Extract. |
+| `clearDownloadedFile()` | `—` | `Md3ReleaseUpdater` | Clear Downloaded File. |
 
 ## Example
 

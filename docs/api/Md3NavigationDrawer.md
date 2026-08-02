@@ -3,6 +3,14 @@
 - **Source:** `src/Md3/components/Md3NavigationDrawer.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 10 | 2 | 2 | 0 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -13,30 +21,30 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `open` | `bool` | `false` | read/write | `Md3NavigationDrawer` | — |
-| `modal` | `bool` | `true` | read/write | `Md3NavigationDrawer` | — |
-| `model` | `var` | `[]` | read/write | `Md3NavigationDrawer` | — |
-| `currentIndex` | `int` | `0` | read/write | `Md3NavigationDrawer` | — |
-| `title` | `string` | `""` | read/write | `Md3NavigationDrawer` | — |
-| `drawerWidth` | `real` | `360` | read/write | `Md3NavigationDrawer` | — |
-| `startMargin` | `real` | `0` | read/write | `Md3NavigationDrawer` | — |
-| `destinationHeight` | `real` | `Md3Theme.navDestinationHeight` | readonly | `Md3NavigationDrawer` | — |
-| `destinationSpacing` | `real` | `0` | readonly | `Md3NavigationDrawer` | — |
-| `panelWidth` | `real` | `Math.min(drawerWidth, Math.max(0, width - startMargin))` | readonly | `Md3NavigationDrawer` | — |
+| `open` | `bool` | `false` | read/write | `Md3NavigationDrawer` | Open the overlay / dialog. |
+| `modal` | `bool` | `true` | read/write | `Md3NavigationDrawer` | Modal. |
+| `model` | `var` | `[]` | read/write | `Md3NavigationDrawer` | Data model. |
+| `currentIndex` | `int` | `0` | read/write | `Md3NavigationDrawer` | Current index. |
+| `title` | `string` | `""` | read/write | `Md3NavigationDrawer` | Title text. |
+| `drawerWidth` | `real` | `360` | read/write | `Md3NavigationDrawer` | Drawer Width. |
+| `startMargin` | `real` | `0` | read/write | `Md3NavigationDrawer` | Start Margin. |
+| `destinationHeight` | `real` | `Md3Theme.navDestinationHeight` | readonly | `Md3NavigationDrawer` | Destination Height. |
+| `destinationSpacing` | `real` | `0` | readonly | `Md3NavigationDrawer` | Destination Spacing. |
+| `panelWidth` | `real` | `Math.min(drawerWidth, Math.max(0, width - startMargin))` | readonly | `Md3NavigationDrawer` | Panel Width. |
 
 ## Signals
 
 | Signal | Defined in | Description |
 |--------|------------|-------------|
-| `currentIndexChangedByUser(int index)` | `Md3NavigationDrawer` | — |
-| `dismissed()` | `Md3NavigationDrawer` | — |
+| `currentIndexChangedByUser(int index)` | `Md3NavigationDrawer` | Emitted when current Index Changed By User. |
+| `dismissed()` | `Md3NavigationDrawer` | Emitted when dismissed. |
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `destinationY(index)` | `Md3NavigationDrawer` | — |
-| `dismiss()` | `Md3NavigationDrawer` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `destinationY(index)` | `—` | `Md3NavigationDrawer` | Destination Y. |
+| `dismiss()` | `—` | `Md3NavigationDrawer` | Dismiss. |
 
 ## Example
 
@@ -49,5 +57,6 @@ Md3NavigationDrawer {
     model: []
     currentIndex: 0
     title: ""
+    drawerWidth: 360
 }
 ```

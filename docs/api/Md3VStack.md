@@ -5,6 +5,14 @@ Vertical stack with spacing, padding, alignment, and optional child stretch.
 - **Source:** `src/Md3/layout/Md3VStack.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 11 | 0 | 0 | 1 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -21,17 +29,17 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `spacing` | `real` | `8` | read/write | `Md3VStack` | — |
-| `padding` | `real` | `0` | read/write | `Md3VStack` | — |
-| `leftPadding` | `real` | `padding` | read/write | `Md3VStack` | — |
-| `rightPadding` | `real` | `padding` | read/write | `Md3VStack` | — |
-| `topPadding` | `real` | `padding` | read/write | `Md3VStack` | — |
-| `bottomPadding` | `real` | `padding` | read/write | `Md3VStack` | — |
-| `fillWidth` | `bool` | `true` | read/write | `Md3VStack` | — |
+| `spacing` | `real` | `8` | read/write | `Md3VStack` | Child spacing. |
+| `padding` | `real` | `0` | read/write | `Md3VStack` | Uniform padding. |
+| `leftPadding` | `real` | `padding` | read/write | `Md3VStack` | Left Padding. |
+| `rightPadding` | `real` | `padding` | read/write | `Md3VStack` | Right Padding. |
+| `topPadding` | `real` | `padding` | read/write | `Md3VStack` | Top Padding. |
+| `bottomPadding` | `real` | `padding` | read/write | `Md3VStack` | Bottom Padding. |
+| `fillWidth` | `bool` | `true` | read/write | `Md3VStack` | Fill Width. |
 | `stretchChildren` | `bool` | `true` | read/write | `Md3VStack` | Stretch visible children to content width (skip Md3Spacer with expand). |
-| `clipContent` | `bool` | `false` | read/write | `Md3VStack` | — |
-| `alignment` | `int` | `Md3VStack.Start` | read/write | `Md3VStack` | — |
-| `content` | `alias` | `contentCol.data` | default read/write | `Md3VStack` | Default property → `contentCol.data` |
+| `clipContent` | `bool` | `false` | read/write | `Md3VStack` | Clip Content. |
+| `alignment` | `int (Md3VStack.Alignment)` | `Md3VStack.Start` | read/write | `Md3VStack` | Alignment. |
+| `content` | `alias` | `contentCol.data` | default read/write | `Md3VStack` | Content. |
 
 ## Signals
 
@@ -52,5 +60,6 @@ Md3VStack {
     leftPadding: padding
     rightPadding: padding
     topPadding: padding
+    bottomPadding: padding
 }
 ```

@@ -3,6 +3,14 @@
 - **Source:** `src/Md3/components/Md3MenuBar.qml`
 - **Extends:** `Rectangle`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 3 | 1 | 0 | 0 |
+
+_Also inherits Qt Quick `Rectangle` members (not listed)._
+
 ## Import
 
 ```qml
@@ -21,7 +29,7 @@ import Md3
 
 | Signal | Defined in | Description |
 |--------|------------|-------------|
-| `itemClicked(string path)` | `Md3MenuBar` | — |
+| `itemClicked(string path)` | `Md3MenuBar` | Emitted when item Clicked. |
 
 ## Methods
 

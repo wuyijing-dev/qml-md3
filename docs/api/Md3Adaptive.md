@@ -6,6 +6,14 @@ Material 3–aligned window size classes + desktop/mobile chrome policy. Breakpo
 - **Extends:** `QtObject`
 - **Singleton:** `true` (`pragma Singleton`)
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 13 | 0 | 13 | 4 |
+
+_Also inherits Qt Quick `QtObject` members (not listed)._
+
 ## Import
 
 ```qml
@@ -36,19 +44,19 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `compactMax` | `real` | `599` | readonly | `Md3Adaptive` | — |
-| `mediumMax` | `real` | `839` | readonly | `Md3Adaptive` | — |
-| `expandedMax` | `real` | `1199` | readonly | `Md3Adaptive` | — |
-| `largeMax` | `real` | `1599` | readonly | `Md3Adaptive` | — |
-| `heightCompactMax` | `real` | `479` | readonly | `Md3Adaptive` | — |
-| `heightMediumMax` | `real` | `899` | readonly | `Md3Adaptive` | — |
+| `compactMax` | `real` | `599` | readonly | `Md3Adaptive` | Compact Max. |
+| `mediumMax` | `real` | `839` | readonly | `Md3Adaptive` | Medium Max. |
+| `expandedMax` | `real` | `1199` | readonly | `Md3Adaptive` | Expanded Max. |
+| `largeMax` | `real` | `1599` | readonly | `Md3Adaptive` | Large Max. |
+| `heightCompactMax` | `real` | `479` | readonly | `Md3Adaptive` | Height Compact Max. |
+| `heightMediumMax` | `real` | `899` | readonly | `Md3Adaptive` | Height Medium Max. |
 | `navigationCompactBreakpoint` | `real` | `600` | readonly | `Md3Adaptive` | Same thresholds as Md3NavigationView Auto mode. |
-| `navigationExpandedBreakpoint` | `real` | `840` | readonly | `Md3Adaptive` | — |
+| `navigationExpandedBreakpoint` | `real` | `840` | readonly | `Md3Adaptive` | Navigation Expanded Breakpoint. |
 | `safeAreaWindow` | `var` | `null` | read/write | `Md3Adaptive` | Optional Window used to read Qt 6.9+ `safeAreaMargins` (falls back when unset). |
 | `safeBottomInset` | `real` | `{…}` | readonly | `Md3Adaptive` | Home-indicator / gesture-bar padding. On Qt 6.9+ uses Window.safeAreaMargins when `safeAreaWindow` is set; otherwise platform fallback (6.5 baseline). |
-| `safeTopInset` | `real` | `{…}` | readonly | `Md3Adaptive` | — |
-| `safeLeftInset` | `real` | `{…}` | readonly | `Md3Adaptive` | — |
-| `safeRightInset` | `real` | `{…}` | readonly | `Md3Adaptive` | — |
+| `safeTopInset` | `real` | `{…}` | readonly | `Md3Adaptive` | Safe Top Inset. |
+| `safeLeftInset` | `real` | `{…}` | readonly | `Md3Adaptive` | Safe Left Inset. |
+| `safeRightInset` | `real` | `{…}` | readonly | `Md3Adaptive` | Safe Right Inset. |
 
 ## Signals
 
@@ -56,21 +64,21 @@ _None._
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `widthClassFor(w)` | `Md3Adaptive` | — |
-| `heightClassFor(h)` | `Md3Adaptive` | — |
-| `widthClassName(wc)` | `Md3Adaptive` | — |
-| `deviceClassFor(w, h)` | `Md3Adaptive` | — |
-| `deviceClassName(dc)` | `Md3Adaptive` | — |
-| `windowAppearanceFor(w, h)` | `Md3Adaptive` | Recommended window chrome appearance for this size + platform. |
-| `windowAppearanceName(a)` | `Md3Adaptive` | — |
-| `useCustomChrome(w, h)` | `Md3Adaptive` | Whether frameless / CSD should be active. |
-| `preferCompactTitleBar(w, h)` | `Md3Adaptive` | — |
-| `preferCaptionButtons(w, h)` | `Md3Adaptive` | — |
-| `preferNavigationBar(w, h)` | `Md3Adaptive` | Navigation density hint for shells (rail vs bar). |
-| `preferNavigationRail(w, h)` | `Md3Adaptive` | — |
-| `safeInsetsFor(win)` | `Md3Adaptive` | Resolve insets from a Window (Qt 6.9+ `safeAreaMargins`) with platform fallback. |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `widthClassFor(w)` | `—` | `Md3Adaptive` | Width Class For. |
+| `heightClassFor(h)` | `—` | `Md3Adaptive` | Height Class For. |
+| `widthClassName(wc)` | `—` | `Md3Adaptive` | Width Class Name. |
+| `deviceClassFor(w, h)` | `—` | `Md3Adaptive` | Device Class For. |
+| `deviceClassName(dc)` | `—` | `Md3Adaptive` | Device Class Name. |
+| `windowAppearanceFor(w, h)` | `—` | `Md3Adaptive` | Recommended window chrome appearance for this size + platform. |
+| `windowAppearanceName(a)` | `—` | `Md3Adaptive` | Window Appearance Name. |
+| `useCustomChrome(w, h)` | `—` | `Md3Adaptive` | Whether frameless / CSD should be active. |
+| `preferCompactTitleBar(w, h)` | `—` | `Md3Adaptive` | Prefer Compact Title Bar. |
+| `preferCaptionButtons(w, h)` | `—` | `Md3Adaptive` | Prefer Caption Buttons. |
+| `preferNavigationBar(w, h)` | `—` | `Md3Adaptive` | Navigation density hint for shells (rail vs bar). |
+| `preferNavigationRail(w, h)` | `—` | `Md3Adaptive` | Prefer Navigation Rail. |
+| `safeInsetsFor(win)` | `—` | `Md3Adaptive` | Resolve insets from a Window (Qt 6.9+ `safeAreaMargins`) with platform fallback. |
 
 ## Example
 

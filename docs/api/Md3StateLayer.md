@@ -3,6 +3,14 @@
 - **Source:** `src/Md3/foundation/Md3StateLayer.qml`
 - **Extends:** `QtObject`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 4 | 0 | 1 | 0 |
+
+_Also inherits Qt Quick `QtObject` members (not listed)._
+
 ## Import
 
 ```qml
@@ -13,10 +21,10 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `hover` | `real` | `0.08` | readonly | `Md3StateLayer` | — |
-| `focus` | `real` | `0.12` | readonly | `Md3StateLayer` | — |
-| `pressed` | `real` | `0.12` | readonly | `Md3StateLayer` | — |
-| `dragged` | `real` | `0.16` | readonly | `Md3StateLayer` | — |
+| `hover` | `real` | `0.08` | readonly | `Md3StateLayer` | Hover. |
+| `focus` | `real` | `0.12` | readonly | `Md3StateLayer` | Focus. |
+| `pressed` | `real` | `0.12` | readonly | `Md3StateLayer` | Pressed. |
+| `dragged` | `real` | `0.16` | readonly | `Md3StateLayer` | Dragged. |
 
 ## Signals
 
@@ -24,9 +32,9 @@ _None._
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `opacityFor(isHovered, isFocused, isPressed, isDragged)` | `Md3StateLayer` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `opacityFor(isHovered, isFocused, isPressed, isDragged)` | `—` | `Md3StateLayer` | Opacity For. |
 
 ## Example
 

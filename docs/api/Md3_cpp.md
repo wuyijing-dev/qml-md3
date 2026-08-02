@@ -1,51 +1,60 @@
-# Md3::run / initialize (C++)
+# Md3_cpp
 
-Header: `md3.h` (`#include "md3.h"`)
+C++ bootstrap (`Md3::run` / `RunOptions`) and C ABI (`md3_capi.h`).
 
-Bootstrap helpers for fonts, Basic style, and early RHI/alpha setup.
+- **Source:** `src/Md3/md3.h`
+- **Extends:** `—`
+- **Kind:** C++ / QML_ELEMENT (generated from header)
 
-## `Md3::RunOptions`
+## Overview
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `organization` | `QString` | `"Md3"` | `QCoreApplication::setOrganizationName` |
-| `applicationName` | `QString` | `"Md3 App"` | Application name |
-| `applicationVersion` | `QString` | `"1.0.0"` | Application version |
-| `style` | `QString` | `"Basic"` | `QQuickStyle::setStyle` |
-| `loadFonts` | `bool` | `true` | Load HarmonyOS Sans SC Regular (+ optional Medium/Bold if present) and Material Icons from Md3 qrc / app `fonts/` |
-| `alphaBuffer` | `bool` | `true` | `QQuickWindow::setDefaultAlphaBuffer` before app |
-| `appUserModelId` | `QString` | empty | Windows only: AppUserModelID |
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 10 | 0 | 6 | 0 |
 
-## Functions
+## Import
 
-| API | Description |
-|-----|-------------|
-| `void applyEarly(int &argc, char **argv, const RunOptions &opts = {})` | Call **before** `QGuiApplication`. DPI (Win), alpha buffer, `Md3Graphics::applyEarly`. |
-| `int loadFonts()` | Register Regular (required) and Medium/Bold (optional) from `:/md3/fonts/resources/fonts/` and fallbacks. Returns count loaded. Sets app font to HarmonyOS Sans SC when available. |
-| `void initialize(QCoreApplication &app, const RunOptions &opts = {})` | After app exists: org/name/version, style, fonts. |
-| `int run(int argc, char **argv, const QString &moduleUri, const QString &mainComponent = "Main", const RunOptions &opts = {})` | One-shot: `applyEarly` → app → `initialize` → `loadFromModule` → `exec()`. |
+```qml
+import Md3
+```
+
+## Properties
+
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `organization` | `string` | `QStringLiteral("Md3")` | read/write | `Md3_cpp` | Organization. |
+| `applicationName` | `string` | `QStringLiteral("Md3 App")` | read/write | `Md3_cpp` | Application Name. |
+| `applicationVersion` | `string` | `QStringLiteral("1.1.1")` | read/write | `Md3_cpp` | Application Version. |
+| `style` | `string` | `QStringLiteral("Basic")` | read/write | `Md3_cpp` | Style. |
+| `loadFonts` | `bool` | `true` | read/write | `Md3_cpp` | Load Fonts. |
+| `alphaBuffer` | `bool` | `true` | read/write | `Md3_cpp` | Alpha Buffer. |
+| `printBanner` | `bool` | `false` | read/write | `Md3_cpp` | Print Banner. |
+| `desktopFileName` | `string` | `—` | read/write | `Md3_cpp` | Desktop File Name. |
+| `qmlImportPaths` | `var` | `—` | read/write | `Md3_cpp` | Qml Import Paths. |
+| `appUserModelId` | `string` | `—` | read/write | `Md3_cpp` | App User Model Id. |
+
+## Signals
+
+_None._
+
+## Methods
+
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `Md3::run(…)` | `see header` | `Md3_cpp` | Run. |
+| `Md3::loadFonts(…)` | `see header` | `Md3_cpp` | Load Fonts. |
+| `Md3::initialize(…)` | `see header` | `Md3_cpp` | Initialize. |
+| `md3_run_qml_file(…)` | `int/string` | `Md3_cpp` | Md3 run qml file. |
+| `md3_run_qml_module(…)` | `int/string` | `Md3_cpp` | Md3 run qml module. |
+| `md3_load_fonts(…)` | `int/string` | `Md3_cpp` | Md3 load fonts. |
 
 ## Example
 
-```cpp
-#include "md3.h"
+```qml
+import Md3
 
-int main(int argc, char *argv[]) {
-    Md3::RunOptions opts;
-    opts.applicationName = QStringLiteral("MyApp");
-    return Md3::run(argc, argv, QStringLiteral("MyApp"), QStringLiteral("Main"), opts);
+// C++ / host type — typically used from QML as `Md3_cpp { }`
+Md3_cpp {
+    // see properties / methods above
 }
 ```
-
-Split form:
-
-```cpp
-Md3::applyEarly(argc, argv);
-QGuiApplication app(argc, argv);
-Md3::initialize(app);
-QQmlApplicationEngine engine;
-engine.loadFromModule("MyApp", "Main");
-return app.exec();
-```
-
-See also: [Md3Graphics](Md3Graphics.md), [../integration.md](../getting-started/integration.md)

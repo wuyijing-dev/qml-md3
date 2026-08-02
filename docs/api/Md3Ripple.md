@@ -3,6 +3,14 @@
 - **Source:** `src/Md3/primitives/Md3Ripple.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 13 | 0 | 1 | 0 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -13,19 +21,19 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `rippleColor` | `color` | `Md3Theme.colorScheme.colorOnSurface` | read/write | `Md3Ripple` | — |
-| `clipRadius` | `real` | `-1` | read/write | `Md3Ripple` | — |
+| `rippleColor` | `color` | `Md3Theme.colorScheme.colorOnSurface` | read/write | `Md3Ripple` | Ripple Color. |
+| `clipRadius` | `real` | `-1` | read/write | `Md3Ripple` | Clip Radius. |
 | `topLeftRadius` | `real` | `-1` | read/write | `Md3Ripple` | Per-corner override (Connected button ends). <0 falls back to resolvedClipRadius. |
-| `topRightRadius` | `real` | `-1` | read/write | `Md3Ripple` | — |
-| `bottomLeftRadius` | `real` | `-1` | read/write | `Md3Ripple` | — |
-| `bottomRightRadius` | `real` | `-1` | read/write | `Md3Ripple` | — |
-| `active` | `bool` | `false` | read/write | `Md3Ripple` | — |
-| `originX` | `real` | `width / 2` | read/write | `Md3Ripple` | — |
-| `originY` | `real` | `height / 2` | read/write | `Md3Ripple` | — |
-| `useInkRipple` | `bool` | `Md3Theme.effectsRipple` | readonly | `Md3Ripple` | — |
-| `useMaskedRipple` | `bool` | `Md3Theme.effectsRippleMasked` | readonly | `Md3Ripple` | — |
-| `layersNeeded` | `bool` | `useMaskedRipple && (_layersArmed \|\| ripple.running \|\| interruptFade.running \|…` | readonly | `Md3Ripple` | — |
-| `resolvedClipRadius` | `real` | `{…}` | readonly | `Md3Ripple` | — |
+| `topRightRadius` | `real` | `-1` | read/write | `Md3Ripple` | Top Right Radius. |
+| `bottomLeftRadius` | `real` | `-1` | read/write | `Md3Ripple` | Bottom Left Radius. |
+| `bottomRightRadius` | `real` | `-1` | read/write | `Md3Ripple` | Bottom Right Radius. |
+| `active` | `bool` | `false` | read/write | `Md3Ripple` | Active. |
+| `originX` | `real` | `width / 2` | read/write | `Md3Ripple` | Origin X. |
+| `originY` | `real` | `height / 2` | read/write | `Md3Ripple` | Origin Y. |
+| `useInkRipple` | `bool` | `Md3Theme.effectsRipple` | readonly | `Md3Ripple` | Use Ink Ripple. |
+| `useMaskedRipple` | `bool` | `Md3Theme.effectsRippleMasked` | readonly | `Md3Ripple` | Use Masked Ripple. |
+| `layersNeeded` | `bool` | `useMaskedRipple && (_layersArmed \|\| ripple.running \|\| interruptFade.running \|…` | readonly | `Md3Ripple` | Layers Needed. |
+| `resolvedClipRadius` | `real` | `{…}` | readonly | `Md3Ripple` | Resolved Clip Radius. |
 
 ## Signals
 
@@ -33,9 +41,9 @@ _None._
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `pulse(x, y)` | `Md3Ripple` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `pulse(x, y)` | `—` | `Md3Ripple` | Pulse. |
 
 ## Example
 
@@ -48,5 +56,6 @@ Md3Ripple {
     topLeftRadius: -1
     topRightRadius: -1
     bottomLeftRadius: -1
+    bottomRightRadius: -1
 }
 ```

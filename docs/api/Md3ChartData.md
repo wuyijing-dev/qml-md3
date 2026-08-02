@@ -1,46 +1,52 @@
 # Md3ChartData
 
-- **Source:** `src/Md3/charts/md3chartdata.h`
-- **QML:** `Md3ChartData` (`QML_ELEMENT`)
-- **C++:** `#include "md3chartdata.h"`
+Chart series / downsampling.
 
-C++ helper for large series: ingest / generate in C++, expose a downsampled `points` list for QML charts.
+- **Source:** `src/Md3/charts/md3chartdata.h`
+- **Extends:** `QObject`
+- **Kind:** C++ / QML_ELEMENT (generated from header)
+
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 4 | 0 | 4 | 0 |
+
+## Import
+
+```qml
+import Md3
+```
 
 ## Properties
 
-| Name | Type | Access | Notify | Description |
-|------|------|--------|--------|-------------|
-| `points` | `list` (numbers) | readonly | `pointsChanged` | Downsampled Y values for plotting |
-| `rawCount` | `int` | readonly | `pointsChanged` | Raw sample count before downsample |
-| `pointCount` | `int` | readonly | `pointsChanged` | `points.length` |
-| `targetPoints` | `int` | read/write | `targetPointsChanged` | Downsample budget (default `512`) |
+| Name | Type | Default | Access | Defined in | Description |
+|------|------|---------|--------|------------|-------------|
+| `points` | `var` | `—` | readonly | `Md3ChartData` | Notify: `pointsChanged` |
+| `rawCount` | `int` | `—` | readonly | `Md3ChartData` | Notify: `pointsChanged` |
+| `pointCount` | `int` | `—` | readonly | `Md3ChartData` | Notify: `pointsChanged` |
+| `targetPoints` | `int` | `—` | read/write | `Md3ChartData` | Notify: `targetPointsChanged` |
 
 ## Signals
 
-| Signal | Description |
-|--------|-------------|
-| `pointsChanged()` | Display series updated |
-| `targetPointsChanged()` | `targetPoints` changed |
+_None._
 
 ## Methods
 
-| Method | Description |
-|--------|-------------|
-| `fillSine(count, mid = 50, amp1 = 30, amp2 = 12, noise = 6)` | Generate sine (+ noise) in C++, then downsample |
-| `setFloatValues(QByteArray floats)` | Ingest raw float binary blob |
-| `setValues(list values)` | Ingest QVariantList of numbers |
-| `clear()` | Clear series |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `fillSine(int count, qreal mid = 50.0, qreal amp1 = 30.0, qreal amp2 = 12.0, qreal noise = 6.0)` | `void` | `Md3ChartData` | Fill Sine. |
+| `setFloatValues(const QByteArray &floats)` | `void` | `Md3ChartData` | Set Float Values. |
+| `setValues(const QVariantList &values)` | `void` | `Md3ChartData` | Set Values. |
+| `clear()` | `void` | `Md3ChartData` | Clear value / selection. |
 
 ## Example
 
 ```qml
 import Md3
+
+// C++ / host type — typically used from QML as `Md3ChartData { }`
 Md3ChartData {
-    id: data
-    targetPoints: 256
-    Component.onCompleted: fillSine(100000)
-}
-Md3LineChart {
-    values: data.points
+    // see properties / methods above
 }
 ```

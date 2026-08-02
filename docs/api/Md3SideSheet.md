@@ -5,6 +5,14 @@ Modal/standard side sheet — slides from start (left) or end (right).
 - **Source:** `src/Md3/components/Md3SideSheet.qml`
 - **Extends:** `Item`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 10 | 1 | 1 | 1 |
+
+_Also inherits Qt Quick `Item` members (not listed)._
+
 ## Import
 
 ```qml
@@ -21,28 +29,28 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `open` | `bool` | `false` | read/write | `Md3SideSheet` | — |
-| `modal` | `bool` | `true` | read/write | `Md3SideSheet` | — |
-| `edge` | `int` | `Md3SideSheet.End` | read/write | `Md3SideSheet` | — |
-| `sheetWidth` | `real` | `360` | read/write | `Md3SideSheet` | — |
-| `title` | `string` | `""` | read/write | `Md3SideSheet` | — |
-| `text` | `string` | `""` | read/write | `Md3SideSheet` | — |
-| `layoutMode` | `int` | `Md3ContainerBody.Fit` | read/write | `Md3SideSheet` | — |
-| `content` | `alias` | `customSlot.data` | default read/write | `Md3SideSheet` | Default property → `customSlot.data` |
-| `fromEnd` | `bool` | `edge === Md3SideSheet.End` | readonly | `Md3SideSheet` | — |
-| `panelWidth` | `real` | `Math.min(sheetWidth, Math.max(240, width * 0.92))` | readonly | `Md3SideSheet` | — |
+| `open` | `bool` | `false` | read/write | `Md3SideSheet` | Open the overlay / dialog. |
+| `modal` | `bool` | `true` | read/write | `Md3SideSheet` | Modal. |
+| `edge` | `int (Md3SideSheet.Edge)` | `Md3SideSheet.End` | read/write | `Md3SideSheet` | Edge. |
+| `sheetWidth` | `real` | `360` | read/write | `Md3SideSheet` | Sheet Width. |
+| `title` | `string` | `""` | read/write | `Md3SideSheet` | Title text. |
+| `text` | `string` | `""` | read/write | `Md3SideSheet` | Primary label text. |
+| `layoutMode` | `int` | `Md3ContainerBody.Fit` | read/write | `Md3SideSheet` | Layout Mode. |
+| `content` | `alias` | `customSlot.data` | default read/write | `Md3SideSheet` | Content. |
+| `fromEnd` | `bool` | `edge === Md3SideSheet.End` | readonly | `Md3SideSheet` | From End. |
+| `panelWidth` | `real` | `Math.min(sheetWidth, Math.max(240, width * 0.92))` | readonly | `Md3SideSheet` | Panel Width. |
 
 ## Signals
 
 | Signal | Defined in | Description |
 |--------|------------|-------------|
-| `dismissed()` | `Md3SideSheet` | — |
+| `dismissed()` | `Md3SideSheet` | Emitted when dismissed. |
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `dismiss()` | `Md3SideSheet` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `dismiss()` | `—` | `Md3SideSheet` | Dismiss. |
 
 ## Example
 
@@ -55,5 +63,6 @@ Md3SideSheet {
     edge: Md3SideSheet.End
     sheetWidth: 360
     title: ""
+    text: ""
 }
 ```

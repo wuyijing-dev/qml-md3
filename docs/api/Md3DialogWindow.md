@@ -5,6 +5,14 @@ Separate OS-level dialog window (QWidget-like multi-window), not an overlay.
 - **Source:** `src/Md3/window/Md3DialogWindow.qml`
 - **Extends:** `Window`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 40 | 4 | 6 | 0 |
+
+_Also inherits Qt Quick `Window` members (not listed)._
+
 ## Import
 
 ```qml
@@ -15,66 +23,66 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `customChrome` | `bool` | `Md3WindowCapabilities.customChrome` | read/write | `Md3DialogWindow` | — |
-| `showTitleBar` | `bool` | `true` | read/write | `Md3DialogWindow` | — |
-| `roundedCorners` | `bool` | `Md3WindowCapabilities.roundedCorners` | read/write | `Md3DialogWindow` | — |
-| `cornerRadius` | `real` | `Md3WindowCapabilities.windowCornerRadius` | read/write | `Md3DialogWindow` | — |
-| `showWindowBorder` | `bool` | `true` | read/write | `Md3DialogWindow` | — |
-| `titleBarItem` | `alias` | `titleBarLoader.item` | read/write | `Md3DialogWindow` | Alias → `titleBarLoader.item` |
-| `overlay` | `alias` | `overlayHost.data` | read/write | `Md3DialogWindow` | Alias → `overlayHost.data` |
-| `titleBar` | `Component` | `null` | read/write | `Md3DialogWindow` | — |
-| `windowIcon` | `url` | `Md3AppIcons.window` | read/write | `Md3DialogWindow` | — |
-| `syncImmersiveDarkMode` | `bool` | `true` | read/write | `Md3DialogWindow` | — |
-| `systemBackdrop` | `int` | `0` | read/write | `Md3DialogWindow` | — |
-| `nativeBorderColor` | `string` | `""` | read/write | `Md3DialogWindow` | — |
-| `usesSystemBackdrop` | `bool` | `systemBackdrop > 0` | readonly | `Md3DialogWindow` | — |
-| `backdropTint` | `real` | `0.08` | read/write | `Md3DialogWindow` | — |
-| `backdropContentTint` | `real` | `0.18` | read/write | `Md3DialogWindow` | — |
-| `backdropTitleTint` | `real` | `0.06` | read/write | `Md3DialogWindow` | — |
+| `customChrome` | `bool` | `Md3WindowCapabilities.customChrome` | read/write | `Md3DialogWindow` | Custom Chrome. |
+| `showTitleBar` | `bool` | `true` | read/write | `Md3DialogWindow` | Show Title Bar. |
+| `roundedCorners` | `bool` | `Md3WindowCapabilities.roundedCorners` | read/write | `Md3DialogWindow` | Rounded Corners. |
+| `cornerRadius` | `real` | `Md3WindowCapabilities.windowCornerRadius` | read/write | `Md3DialogWindow` | Corner radius. |
+| `showWindowBorder` | `bool` | `true` | read/write | `Md3DialogWindow` | Show Window Border. |
+| `titleBarItem` | `alias` | `titleBarLoader.item` | read/write | `Md3DialogWindow` | Title Bar Item. |
+| `overlay` | `alias` | `overlayHost.data` | read/write | `Md3DialogWindow` | Overlay. |
+| `titleBar` | `Component` | `null` | read/write | `Md3DialogWindow` | Title Bar. |
+| `windowIcon` | `url` | `Md3AppIcons.window` | read/write | `Md3DialogWindow` | Window Icon. |
+| `syncImmersiveDarkMode` | `bool` | `true` | read/write | `Md3DialogWindow` | Sync Immersive Dark Mode. |
+| `systemBackdrop` | `int` | `0` | read/write | `Md3DialogWindow` | System Backdrop. |
+| `nativeBorderColor` | `string` | `""` | read/write | `Md3DialogWindow` | Native Border Color. |
+| `usesSystemBackdrop` | `bool` | `systemBackdrop > 0` | readonly | `Md3DialogWindow` | Uses System Backdrop. |
+| `backdropTint` | `real` | `0.08` | read/write | `Md3DialogWindow` | Backdrop Tint. |
+| `backdropContentTint` | `real` | `0.18` | read/write | `Md3DialogWindow` | Backdrop Content Tint. |
+| `backdropTitleTint` | `real` | `0.06` | read/write | `Md3DialogWindow` | Backdrop Title Tint. |
 | `owner` | `var` | `null` | read/write | `Md3DialogWindow` | Owner window for transient parenting (centers / groups with parent) |
 | `dialogModality` | `int` | `Qt.ApplicationModal` | read/write | `Md3DialogWindow` | ApplicationModal \| WindowModal \| NonModal |
-| `resizable` | `bool` | `true` | read/write | `Md3DialogWindow` | — |
-| `closable` | `bool` | `true` | read/write | `Md3DialogWindow` | — |
+| `resizable` | `bool` | `true` | read/write | `Md3DialogWindow` | Resizable. |
+| `closable` | `bool` | `true` | read/write | `Md3DialogWindow` | Closable. |
 | `showPinButton` | `bool` | `true` | read/write | `Md3DialogWindow` | Title-bar pin (always-on-top) — on by default for dialog windows |
-| `pinned` | `bool` | `false` | read/write | `Md3DialogWindow` | — |
-| `showMinimizeButton` | `bool` | `false` | read/write | `Md3DialogWindow` | — |
-| `showMaximizeButton` | `bool` | `false` | read/write | `Md3DialogWindow` | — |
-| `showThemeToggle` | `bool` | `false` | read/write | `Md3DialogWindow` | — |
-| `showStandardButtons` | `bool` | `true` | read/write | `Md3DialogWindow` | — |
-| `confirmText` | `string` | `qsTr("OK")` | read/write | `Md3DialogWindow` | — |
-| `dismissText` | `string` | `qsTr("Cancel")` | read/write | `Md3DialogWindow` | — |
-| `showDismiss` | `bool` | `true` | read/write | `Md3DialogWindow` | — |
-| `dialogText` | `string` | `""` | read/write | `Md3DialogWindow` | — |
-| `layoutMode` | `int` | `Md3ContainerBody.Fit` | read/write | `Md3DialogWindow` | — |
-| `content` | `alias` | `customContent.content` | default read/write | `Md3DialogWindow` | Default property → `customContent.content` |
-| `footer` | `alias` | `footerSlot.data` | read/write | `Md3DialogWindow` | Alias → `footerSlot.data` |
-| `isMaximizedLike` | `bool` | `visibility === Window.Maximized` | readonly | `Md3DialogWindow` | — |
-| `effectiveRadius` | `real` | `{…}` | readonly | `Md3DialogWindow` | — |
-| `usesSystemCorners` | `bool` | `windowHelper.systemCornersSupported` | readonly | `Md3DialogWindow` | — |
-| `chromeMaskActive` | `bool` | `effectiveRadius > 0` | readonly | `Md3DialogWindow` | — |
-| `windowNative` | `alias` | `windowHelper` | read/write | `Md3DialogWindow` | Alias → `windowHelper` |
-| `edge` | `real` | `6` | readonly | `Md3DialogWindow` | — |
-| `canResize` | `bool` | `resizable && customChrome && Md3WindowCapabilities.systemResize` | readonly | `Md3DialogWindow` | — |
+| `pinned` | `bool` | `false` | read/write | `Md3DialogWindow` | Pinned. |
+| `showMinimizeButton` | `bool` | `false` | read/write | `Md3DialogWindow` | Show Minimize Button. |
+| `showMaximizeButton` | `bool` | `false` | read/write | `Md3DialogWindow` | Show Maximize Button. |
+| `showThemeToggle` | `bool` | `false` | read/write | `Md3DialogWindow` | Show Theme Toggle. |
+| `showStandardButtons` | `bool` | `true` | read/write | `Md3DialogWindow` | Show Standard Buttons. |
+| `confirmText` | `string` | `qsTr("OK")` | read/write | `Md3DialogWindow` | Confirm Text. |
+| `dismissText` | `string` | `qsTr("Cancel")` | read/write | `Md3DialogWindow` | Dismiss Text. |
+| `showDismiss` | `bool` | `true` | read/write | `Md3DialogWindow` | Show Dismiss. |
+| `dialogText` | `string` | `""` | read/write | `Md3DialogWindow` | Dialog Text. |
+| `layoutMode` | `int` | `Md3ContainerBody.Fit` | read/write | `Md3DialogWindow` | Layout Mode. |
+| `content` | `alias` | `customContent.content` | default read/write | `Md3DialogWindow` | Content. |
+| `footer` | `alias` | `footerSlot.data` | read/write | `Md3DialogWindow` | Footer. |
+| `isMaximizedLike` | `bool` | `visibility === Window.Maximized` | readonly | `Md3DialogWindow` | Is Maximized Like. |
+| `effectiveRadius` | `real` | `{…}` | readonly | `Md3DialogWindow` | Effective Radius. |
+| `usesSystemCorners` | `bool` | `windowHelper.systemCornersSupported` | readonly | `Md3DialogWindow` | Uses System Corners. |
+| `chromeMaskActive` | `bool` | `effectiveRadius > 0` | readonly | `Md3DialogWindow` | Chrome Mask Active. |
+| `windowNative` | `alias` | `windowHelper` | read/write | `Md3DialogWindow` | Window Native. |
+| `edge` | `real` | `6` | readonly | `Md3DialogWindow` | Edge. |
+| `canResize` | `bool` | `resizable && customChrome && Md3WindowCapabilities.systemResize` | readonly | `Md3DialogWindow` | Can Resize. |
 
 ## Signals
 
 | Signal | Defined in | Description |
 |--------|------------|-------------|
-| `confirmed()` | `Md3DialogWindow` | — |
-| `dismissed()` | `Md3DialogWindow` | — |
-| `opened()` | `Md3DialogWindow` | — |
-| `closed()` | `Md3DialogWindow` | — |
+| `confirmed()` | `Md3DialogWindow` | Emitted when confirmed. |
+| `dismissed()` | `Md3DialogWindow` | Emitted when dismissed. |
+| `opened()` | `Md3DialogWindow` | Emitted when opened. |
+| `closed()` | `Md3DialogWindow` | Emitted when closed. |
 
 ## Methods
 
-| Method | Defined in | Description |
-|--------|------------|-------------|
-| `openDialog(ownerWindow)` | `Md3DialogWindow` | — |
-| `closeDialog()` | `Md3DialogWindow` | — |
-| `accept()` | `Md3DialogWindow` | — |
-| `reject()` | `Md3DialogWindow` | — |
-| `setPinned(onTop)` | `Md3DialogWindow` | — |
-| `togglePinned()` | `Md3DialogWindow` | — |
+| Method | Returns | Defined in | Description |
+|--------|---------|------------|-------------|
+| `openDialog(ownerWindow)` | `—` | `Md3DialogWindow` | Open Dialog. |
+| `closeDialog()` | `—` | `Md3DialogWindow` | Close Dialog. |
+| `accept()` | `—` | `Md3DialogWindow` | Accept. |
+| `reject()` | `—` | `Md3DialogWindow` | Reject. |
+| `setPinned(onTop)` | `—` | `Md3DialogWindow` | Set Pinned. |
+| `togglePinned()` | `—` | `Md3DialogWindow` | Toggle Pinned. |
 
 ## Example
 
@@ -87,5 +95,6 @@ Md3DialogWindow {
     roundedCorners: Md3WindowCapabilities.roundedCorners
     cornerRadius: Md3WindowCapabilities.windowCornerRadius
     showWindowBorder: true
+    titleBar: null
 }
 ```

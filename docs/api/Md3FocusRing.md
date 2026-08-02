@@ -3,6 +3,14 @@
 - **Source:** `src/Md3/primitives/Md3FocusRing.qml`
 - **Extends:** `Rectangle`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 3 | 0 | 0 | 0 |
+
+_Also inherits Qt Quick `Rectangle` members (not listed)._
+
 ## Import
 
 ```qml
@@ -13,9 +21,9 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `focused` | `bool` | `false` | read/write | `Md3FocusRing` | — |
-| `controlEnabled` | `bool` | `true` | read/write | `Md3FocusRing` | — |
-| `visualFocus` | `bool` | `false` | read/write | `Md3FocusRing` | — |
+| `focused` | `bool` | `false` | read/write | `Md3FocusRing` | Focused. |
+| `controlEnabled` | `bool` | `true` | read/write | `Md3FocusRing` | Control Enabled. |
+| `visualFocus` | `bool` | `false` | read/write | `Md3FocusRing` | Visual Focus. |
 
 ## Signals
 

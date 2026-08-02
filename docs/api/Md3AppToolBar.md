@@ -5,6 +5,14 @@ Compact app tool strip for `Md3ApplicationWindow.toolBar` (desktop chrome).
 - **Source:** `src/Md3/components/Md3AppToolBar.qml`
 - **Extends:** `Rectangle`
 
+## Overview
+
+| Properties | Signals | Methods | Enums |
+|------------|---------|---------|-------|
+| 6 | 0 | 0 | 0 |
+
+_Also inherits Qt Quick `Rectangle` members (not listed)._
+
 ## Import
 
 ```qml
@@ -15,12 +23,12 @@ import Md3
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `barHeight` | `real` | `Md3Theme.controlHeight + 8` | read/write | `Md3AppToolBar` | — |
-| `contentSpacing` | `real` | `Md3Theme.spacingSm` | read/write | `Md3AppToolBar` | — |
-| `horizontalPadding` | `real` | `Md3Theme.spacingMd` | read/write | `Md3AppToolBar` | — |
-| `showDivider` | `bool` | `true` | read/write | `Md3AppToolBar` | — |
-| `content` | `alias` | `stack.content` | read/write | `Md3AppToolBar` | Alias → `stack.content` |
-| `data` | `alias` | `stack.content` | default read/write | `Md3AppToolBar` | Default property → `stack.content` |
+| `barHeight` | `real` | `Md3Theme.controlHeight + 8` | read/write | `Md3AppToolBar` | Bar Height. |
+| `contentSpacing` | `real` | `Md3Theme.spacingSm` | read/write | `Md3AppToolBar` | Content Spacing. |
+| `horizontalPadding` | `real` | `Md3Theme.spacingMd` | read/write | `Md3AppToolBar` | Horizontal Padding. |
+| `showDivider` | `bool` | `true` | read/write | `Md3AppToolBar` | Show Divider. |
+| `content` | `alias` | `stack.content` | read/write | `Md3AppToolBar` | Content. |
+| `data` | `alias` | `stack.content` | default read/write | `Md3AppToolBar` | Data. |
 
 ## Signals
 
