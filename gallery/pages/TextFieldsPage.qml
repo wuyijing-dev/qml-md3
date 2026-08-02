@@ -49,6 +49,19 @@ Flickable {
         }
 
         Md3Text {
+            text: qsTr("Text area (Md3TextArea)")
+            role: Md3Text.LabelLarge
+            tone: Md3Text.OnSurfaceVariant
+        }
+        Md3TextArea {
+            width: Math.min(parent.width, 360)
+            variant: Md3TextField.Outlined
+            label: qsTr("Notes")
+            placeholderText: qsTr("Multiline alias of TextField")
+            text: qsTr("Line one\nLine two")
+        }
+
+        Md3Text {
             text: qsTr("Select")
             role: Md3Text.LabelLarge
             tone: Md3Text.OnSurfaceVariant

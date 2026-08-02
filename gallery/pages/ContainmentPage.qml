@@ -6,6 +6,8 @@ import Md3
 Md3Page {
     id: root
 
+    property bool fsOpen: false
+
     Flickable {
         anchors.fill: parent
         contentWidth: width
@@ -244,6 +246,11 @@ Md3Page {
             }
 
             Md3Button { text: "Open dialog"; onClicked: dlg.open = true }
+            Md3Button {
+                text: qsTr("Fullscreen (bound open)")
+                variant: Md3Button.Outlined
+                onClicked: root.fsOpen = true
+            }
             Md3Button { text: "Open bottom sheet"; variant: Md3Button.Outlined; onClicked: sheet.open = true }
             Md3Button { text: qsTr("Open side sheet"); variant: Md3Button.FilledTonal; onClicked: sideSheet.open = true }
             Md3Button {
@@ -275,6 +282,36 @@ Md3Page {
         confirmTone: Md3Dialog.Primary
         Md3Checkbox { text: qsTr("Don't show again") }
     }
+
+    Md3FullscreenDialog {
+        id: fsDlg
+        anchors.fill: parent
+        title: qsTr("Settings (bound open)")
+        confirmText: qsTr("Done")
+        open: root.fsOpen
+        writeOpenOnClose: false
+        contentMargins: 16
+        onConfirmed: root.fsOpen = false
+        onDismissed: root.fsOpen = false
+        Md3VStack {
+            width: parent.width
+            spacing: 12
+            Md3Text {
+                width: parent.width
+                wrapMode: Text.Wrap
+                text: qsTr("open is bound to fsOpen; writeOpenOnClose: false keeps the binding so you can reopen.")
+                role: Md3Text.BodyMedium
+                tone: Md3Text.OnSurfaceVariant
+            }
+            Md3Switch { text: qsTr("Sample setting") }
+            Md3TextArea {
+                width: parent.width
+                label: qsTr("Notes")
+                placeholderText: qsTr("Fullscreen body uses contentMargins: 16")
+            }
+        }
+    }
+
     Md3BottomSheet {
         id: sheet
         anchors.fill: parent

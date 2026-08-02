@@ -81,6 +81,40 @@ Md3Page {
                 }
 
                 Md3Text {
+                    text: qsTr("TabBar fillHeight (IDE page host)")
+                    role: Md3Text.LabelLarge
+                    tone: Md3Text.OnSurfaceVariant
+                }
+                Item {
+                    width: parent.width
+                    height: 160
+                    Md3TabBar {
+                        anchors.fill: parent
+                        fillHeight: true
+                        model: [
+                            { text: qsTr("Changes") },
+                            { text: qsTr("History") }
+                        ]
+                        Rectangle {
+                            color: Md3Theme.colorScheme.surfaceContainerLow
+                            Md3Text {
+                                anchors.centerIn: parent
+                                text: qsTr("fillHeight page — eats remaining height")
+                                role: Md3Text.BodyMedium
+                            }
+                        }
+                        Rectangle {
+                            color: Md3Theme.colorScheme.surfaceContainerHigh
+                            Md3Text {
+                                anchors.centerIn: parent
+                                text: qsTr("History page")
+                                role: Md3Text.BodyMedium
+                            }
+                        }
+                    }
+                }
+
+                Md3Text {
                     text: qsTr("Navigation rail")
                     role: Md3Text.LabelLarge
                     tone: Md3Text.OnSurfaceVariant

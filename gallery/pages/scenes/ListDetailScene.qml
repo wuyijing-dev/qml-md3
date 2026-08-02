@@ -73,6 +73,11 @@ Md3SplitView {
                 role: Md3Text.BodySmall
                 tone: Md3Text.OnSurfaceVariant
             }
+            Md3Button {
+                text: root.pane2Collapsed ? qsTr("Show detail pane") : qsTr("Collapse detail pane")
+                variant: Md3Button.Outlined
+                onClicked: root.pane2Collapsed = !root.pane2Collapsed
+            }
         }
     }
 }
