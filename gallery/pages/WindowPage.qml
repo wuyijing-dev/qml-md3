@@ -81,7 +81,7 @@ Flickable {
         id: releaseUpdater
         owner: "wuyijing-dev"
         repo: "QML_MD3"
-        currentVersion: "1.0.0"
+        currentVersion: "1.1.1"
         assetNameContains: ".zip"
     }
     property int _monitorIndex: 0

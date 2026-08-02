@@ -33,6 +33,7 @@ _None._
 | `unregisterToastHost(h)` | `Md3Notify` | — |
 | `snackbar(message, options)` | `Md3Notify` | Bottom snackbar queue. options: { actionText, dualLine, durationMs, id, priority } |
 | `toast(message, options)` | `Md3Notify` | Toast. options: { severity, durationMs, position, id } position: Md3ToastHost.TopCenter\|TopRight\|TopLeft\|BottomRight\|BottomLeft or string "topCenter" / "topRight" / "topLeft" / "bottomRight" / "bottomLeft" severity: Md3Toast.Default \| Success \| Warning \| Error (or 0–3) |
+| `copy(text, options)` | `Md3Notify` | Copy text then toast. options: { feedback?, severity?, durationMs?, id? }. feedback defaults to qsTr("Copied"); "" skips toast |
 | `dismissAll()` | `Md3Notify` | — |
 
 ## Example

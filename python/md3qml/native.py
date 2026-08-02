@@ -393,6 +393,14 @@ class WindowHelper:
     def beep(self) -> None:
         self._h.beep()
 
+    def copy_to_clipboard(self, text: str) -> bool:
+        """Mirror ``Md3WindowHelper.copyToClipboard`` / QML ``Md3Notify.copy`` host side."""
+        return bool(self._h.copyToClipboard(str(text or "")))
+
+    def clipboard_text(self) -> str:
+        """Mirror ``Md3WindowHelper.clipboardText``."""
+        return str(self._h.clipboardText())
+
     def center_on_screen(self, *, window: Optional[WindowLike] = None) -> bool:
         return bool(self._h.centerOnScreen(self._win(window)))
 

@@ -23,7 +23,7 @@ namespace Md3 {
 struct RunOptions {
     QString organization = QStringLiteral("Md3");
     QString applicationName = QStringLiteral("Md3 App");
-    QString applicationVersion = QStringLiteral("1.0.0");
+    QString applicationVersion = QStringLiteral("1.1.1");
     QString style = QStringLiteral("Basic");
     /// Load HarmonyOS Sans SC Regular (+ optional Medium/Bold if present) and icons.
     bool loadFonts = true;

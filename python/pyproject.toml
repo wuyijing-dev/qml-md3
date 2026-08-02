@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "md3qml"
-version = "1.0.0"
+version = "1.1.1"
 description = "Run the QML_MD3 shared module from PySide6"
 readme = "README.md"
 requires-python = ">=3.9"

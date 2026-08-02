@@ -2,92 +2,51 @@
 
 Thin Python host for the **shared** Md3 QML module. Qt comes from **PySide6**.
 
+**Lock tag:** pin git + shared Md3 to **`v1.1.1`** (see [integration.md](../docs/getting-started/integration.md)).
+
 ## Can I `pip install md3qml` from the network today?
 
-| Channel | Status (2026-07-31) |
-|---------|---------------------|
-| **PyPI** (`pip install md3qml`) | **No** — package not published (HTTP 404) |
-| **TestPyPI** | **No** |
-| **GitHub** (`pip install git+…#subdirectory=python`) | **Yes** — pure Python host |
-| **GitHub Release wheels** | **Not yet** — `pyside-wheels` CI has not uploaded `.whl`; Release has shared zip only |
+| Channel | Status |
+|---------|--------|
+| **PyPI** (`pip install md3qml`) | **No** — not published |
+| **GitHub** (`pip install git+…@v1.1.1#subdirectory=python[pyside6]`) | **Yes** — pure Python host |
+| **GitHub Release wheels / zip** | Optional — `md3qml install --version 1.1.1` when assets are attached |
 
-### Working network install (today)
+### Working network install
 
 ```bash
-pip install "git+https://github.com/wuyijing-dev/QML_MD3.git#subdirectory=python[pyside6]"
-md3qml install                  # downloads Md3-*-shared*.zip from GitHub Releases
+pip install "git+https://github.com/wuyijing-dev/QML_MD3.git@v1.1.1#subdirectory=python[pyside6]"
+md3qml install --version 1.1.1 --with-pyside6
 # Windows PowerShell:
 $env:MD3_PREFIX = "$HOME\.md3\prefix"   # or path printed by install
 md3qml doctor
 md3qml run path/to/Main.qml
 ```
 
-`md3qml fetch` / `install` try several asset names, including the v1.0.0 asset
-`Md3-windows-AMD64-shared.zip`.
+Prefer a **locally built** shared prefix from the same tag for product apps.
 
-### When PyPI / platform wheels land
+## Host vs QML
 
-```bash
-pip install "md3qml[pyside6]"   # after publish + PYPI_API_TOKEN / Release wheels
-md3qml info                     # shows bundled _native when present
-```
+| Need | Do this |
+|------|---------|
+| Toast / Snackbar / Undo / shell InfoBar / form busy | Implement in **QML** (`Md3Notify`, `Md3ApplicationWindow`, …) |
+| Clipboard from Python | `app.native.copy_to_clipboard("…")` |
+| Fonts | Default on (`RunOptions.load_fonts=True` → `md3_load_fonts`) |
+| Call a window method | `app.invoke("showShellInfoBar", msg, opts)` |
 
-## C++-parity native API
+`WindowHelper` covers **desktop** system APIs (clipboard, tray, taskbar, backdrop…). It is **not** a 1:1 dump of every Android invokable.
 
-```python
-from md3qml import Md3Application, RunOptions
-
-app = Md3Application(RunOptions(application_name="My App"))
-assert app.load_file("Main.qml")
-n = app.native  # wraps C++ Md3WindowHelper
-n.open_url("https://example.com")
-n.set_idle_inhibit(True, "work")
-n.center_on_screen()
-n.raise_window()
-print(n.platform_id, n.display_server, n.last_native_status)
-raise SystemExit(app.exec())
-```
-
-Also: `from md3qml import WindowHelper, create_window_helper`.
-
-## Stronger Python binding
+## C++-style Application
 
 ```python
 from md3qml import Md3Application, RunOptions
-from md3qml.qt import QObject, Signal, Slot
 
-class Host(QObject):
-    ping = Signal(str)
-
-    @Slot(str)
-    def log(self, text: str) -> None:
-        print(text)
-        self.ping.emit(text)
-
-app = Md3Application(RunOptions(application_name="My App", auto_fetch=True))
-app.set_context_property("host", Host())
-assert app.load_file("Main.qml")
+app = Md3Application(RunOptions(application_name="My App", load_fonts=True))
+app.load_file("Main.qml")
 raise SystemExit(app.exec())
 ```
 
-CLI: `info` · `doctor` · `install` · `fetch` · `run` · `run-c` · `gallery`.
+## Related
 
-## Gallery (same QML as C++)
-
-Uses the checkout’s `gallery/Main.qml` + `pages/` (no separate Gallery qml module build):
-
-```bash
-# from repo root, with MD3_PREFIX pointing at shared Md3 (or --auto-fetch)
-md3qml gallery
-# or
-python examples/gallery-pyside/main.py --auto-fetch
-```
-
-```python
-from md3qml import run_gallery
-raise SystemExit(run_gallery(auto_fetch=True))
-```
-
-Override location with `--gallery` / `MD3_GALLERY` if needed.
-
-See [docs/topics/pyside.md](../docs/topics/pyside.md).
+- [docs/topics/pyside.md](../docs/topics/pyside.md)
+- [docs/api-manual/host-lock-1.1.1.md](../docs/api-manual/host-lock-1.1.1.md)

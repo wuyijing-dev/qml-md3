@@ -80,21 +80,35 @@ def doctor(*, md3_prefix: str | None = None) -> Tuple[int, List[str]]:
     else:
         # C ABI (Rust / run-c)
         try:
-            from .capi import load_md3_library
+            from .capi import load_md3_library, version_string_c
 
             lib = load_md3_library(prefix)
             has_run = hasattr(lib, "md3_run_qml_file")
             has_mod = hasattr(lib, "md3_run_qml_module")
             has_ver = hasattr(lib, "md3_version_string")
+            has_fonts = hasattr(lib, "md3_load_fonts")
             if has_run and has_mod and has_ver:
                 lines.append(
                     "OK  C ABI md3_run_qml_file / md3_run_qml_module / md3_version_string"
                 )
             else:
                 lines.append(
-                    "WARN Md3 loaded but C ABI symbols incomplete — rebuild shared Md3 "
-                    "(need print_banner field + module entry)"
+                    "WARN Md3 loaded but C ABI symbols incomplete — rebuild shared Md3"
                 )
+            if has_fonts:
+                lines.append("OK  C ABI md3_load_fonts")
+            else:
+                lines.append("WARN md3_load_fonts missing — rebuild shared Md3 ≥ 1.1.1")
+            try:
+                ver = version_string_c(prefix)
+                if ver:
+                    lines.append(f"OK  md3_version_string={ver}")
+                    if ver != "1.1.1":
+                        lines.append(
+                            f"WARN package expects 1.1.1 lock; shared lib reports {ver}"
+                        )
+            except Exception as exc:  # noqa: BLE001
+                lines.append(f"WARN version_string: {exc}")
         except Exception as exc:  # noqa: BLE001 — doctor should never crash
             lines.append(f"WARN C ABI load: {exc}")
 

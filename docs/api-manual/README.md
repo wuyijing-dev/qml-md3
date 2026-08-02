@@ -4,4 +4,5 @@
 
 - 只放需要跨次生成保留的内容；属性表仍以生成结果为准。
 - 文件名必须与类型名一致，例如 `Md3ToggleButton.md`。
+- 宿主锁说明（非控件页）：[host-lock-1.1.1.md](host-lock-1.1.1.md)
 - 指南总览：[../buttons-commands.md](../guides/buttons-commands.md)

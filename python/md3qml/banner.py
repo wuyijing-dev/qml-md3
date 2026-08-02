@@ -34,7 +34,7 @@ def _enable_windows_ansi() -> bool:
         return False
 
 
-def print_banner(title: str = "Md3", version: str = "1.0.0") -> None:
+def print_banner(title: str = "Md3", version: str = "1.1.1") -> None:
     """
     Print a colorful Md3 intro to stderr when attached to a TTY.
 

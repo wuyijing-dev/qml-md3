@@ -35,6 +35,10 @@ MD3_API int md3_run_qml_module(int argc, char **argv,
 
 MD3_API const char *md3_version_string(void);
 
+/// Load HarmonyOS Sans SC + Material Icons (same as ``Md3::loadFonts``).
+/// Call after QGuiApplication exists. Returns number of faces loaded (may be 0).
+MD3_API int md3_load_fonts(void);
+
 #ifdef __cplusplus
 }
 #endif

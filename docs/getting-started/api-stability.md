@@ -37,6 +37,7 @@ Generated property tables in `docs/api/` are regenerated from QML; do not treat 
 
 ## Versioning today
 
-- CMake `project(QML_MD3 VERSION 1.0.0)` is the package version.
+- CMake `project(QML_MD3 VERSION 1.1.1)` is the package version (tag `v1.1.1`).
 - From **1.0.0** onward, Public API changes follow SemVer in this document (see CHANGELOG).
-- Do not rely on “1.0.0” meaning full multi-OS guarantees until [release-checklist.md](release-checklist.md) is satisfied for a tagged release.
+- Pin product apps to an annotated tag (`v1.1.1`), not floating `main` — see [integration.md](integration.md#lock-a-version-for-your-product-recommended).
+- Do not treat an untagged `main` tip as a SemVer guarantee until [release-checklist.md](release-checklist.md) is satisfied for a tagged release.

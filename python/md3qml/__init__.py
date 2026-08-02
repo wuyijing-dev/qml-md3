@@ -11,6 +11,7 @@ from .capi import (
     run_qml_file_c,
     run_qml_module_c,
     version_string_c,
+    load_fonts_c,
 )
 from .doctor import doctor
 from .fetch import candidate_asset_urls, fetch_md3_prefix
@@ -37,6 +38,7 @@ __all__ = [
     "find_child",
     "import_qt",
     "invoke",
+    "load_fonts_c",
     "load_md3_library",
     "print_banner",
     "resolve_gallery_dir",
@@ -50,4 +52,4 @@ __all__ = [
     "version_string_c",
 ]
 
-__version__ = "1.0.0"
+__version__ = "1.1.1"

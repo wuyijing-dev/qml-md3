@@ -75,7 +75,7 @@ def run_gallery(
     md3_prefix: Optional[PathLike] = None,
     binding: Optional[str] = None,
     auto_fetch: bool = False,
-    fetch_version: str = "1.0.0",
+    fetch_version: str = "1.1.1",
     fetch_dest: str = "~/.md3/prefix",
     fetch_url: Optional[str] = None,
     argv: Optional[List[str]] = None,
@@ -96,7 +96,7 @@ def run_gallery(
     opts = RunOptions(
         organization="QML_MD3",
         application_name="Md3 Gallery",
-        application_version="1.0.0",
+        application_version="1.1.1",
         desktop_file_name="QML_MD3_Gallery",
         print_banner=True,
         md3_prefix=md3_prefix,

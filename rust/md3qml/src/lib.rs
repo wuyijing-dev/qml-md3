@@ -49,7 +49,7 @@ impl Default for RunOptions {
         Self {
             organization: "Md3".into(),
             application_name: "Md3 App".into(),
-            application_version: "1.0.0".into(),
+            application_version: "1.1.1".into(),
             style: "Basic".into(),
             desktop_file_name: String::new(),
             app_user_model_id: String::new(),
@@ -495,5 +495,30 @@ pub fn version_string(prefix: Option<&Path>) -> Result<String, String> {
             return Ok(String::new());
         }
         Ok(CStr::from_ptr(p).to_string_lossy().into_owned())
+    }
+}
+
+type Md3LoadFonts = unsafe extern "C" fn() -> c_int;
+
+/// Call ``md3_load_fonts`` after a QGuiApplication exists (same as Python ``load_fonts_c``).
+pub fn load_fonts(prefix: Option<&Path>) -> Result<i32, String> {
+    let prefix_buf = resolve_md3_prefix(prefix).ok();
+    let lib_path = find_md3_library(prefix_buf.as_deref())?;
+    if let Some(ref p) = prefix_buf {
+        prepare_native_load(p, &lib_path)?;
+    } else if let Some(parent) = lib_path.parent() {
+        let prefix_guess = parent.parent().unwrap_or(parent);
+        prepare_native_load(prefix_guess, &lib_path)?;
+    }
+
+    unsafe {
+        let lib = open_md3(&lib_path).map_err(|e| load_error_hint(&lib_path, &e))?;
+        let load: Symbol<Md3LoadFonts> = lib.get(b"md3_load_fonts").map_err(|e| {
+            load_error_hint(
+                &lib_path,
+                &format!("symbol md3_load_fonts missing ({e}) — rebuild shared Md3 ≥ 1.1.1"),
+            )
+        })?;
+        Ok(load())
     }
 }

@@ -18,7 +18,7 @@ class CRunConfig:
 
     organization: str = "Md3"
     application_name: str = "Md3 App"
-    application_version: str = "1.0.0"
+    application_version: str = "1.1.1"
     style: str = "Basic"
     desktop_file_name: str = ""
     app_user_model_id: str = ""
@@ -292,3 +292,12 @@ def version_string_c(md3_prefix: Optional[PathLike] = None) -> str:
     if not raw:
         return ""
     return raw.decode("utf-8", errors="replace")
+
+
+def load_fonts_c(md3_prefix: Optional[PathLike] = None) -> int:
+    """Call ``md3_load_fonts`` after QGuiApplication exists — mirrors Rust ``load_fonts``."""
+    lib = load_md3_library(md3_prefix)
+    fn = lib.md3_load_fonts
+    fn.argtypes = []
+    fn.restype = ctypes.c_int
+    return int(fn())

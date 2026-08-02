@@ -57,7 +57,12 @@ int md3_run_qml_module(int argc, char **argv, const char *module_uri,
 
 const char *md3_version_string(void)
 {
-    return "1.0.0";
+    return "1.1.1";
+}
+
+int md3_load_fonts(void)
+{
+    return Md3::loadFonts();
 }
 
 } // extern "C"

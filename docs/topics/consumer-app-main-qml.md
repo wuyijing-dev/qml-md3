@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     Md3::RunOptions opts;
     opts.organization = QStringLiteral("YourOrg");
     opts.applicationName = QStringLiteral("YourApp");
-    opts.applicationVersion = QStringLiteral("1.0.0");
+    opts.applicationVersion = QStringLiteral("1.1.1");
 
     Md3::applyEarly(argc, argv, opts);
 

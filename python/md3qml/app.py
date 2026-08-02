@@ -67,7 +67,7 @@ class Md3Application:
             set_desk(desk)
 
         if self.opts.app_user_model_id and self.binding.is_pyside6:
-            # Best-effort; Windows AUMID is normally set via C++ / env before GUI.
+            # Applied in prepare_imports() via WindowHelper once Md3 is on the import path.
             pass
 
         self.engine = qt.QQmlApplicationEngine()
@@ -143,8 +143,29 @@ class Md3Application:
         self._import_paths = list(paths)
         for p in self._import_paths:
             self.engine.addImportPath(p)
+        if self.opts.load_fonts:
+            self._try_load_fonts(prefix)
+        if self.opts.app_user_model_id:
+            self._try_set_app_user_model_id(self.opts.app_user_model_id)
         return prefix
 
+    def _try_load_fonts(self, prefix: Path) -> None:
+        try:
+            from .capi import load_fonts_c
+
+            n = load_fonts_c(prefix)
+            if n <= 0:
+                print("md3qml: md3_load_fonts returned 0 (check Md3 qrc fonts)", file=sys.stderr)
+        except Exception as exc:  # noqa: BLE001 — best-effort host path
+            print(f"md3qml: load_fonts skipped ({exc})", file=sys.stderr)
+
+    def _try_set_app_user_model_id(self, app_id: str) -> None:
+        try:
+            helper = self.ensure_native()
+            if hasattr(helper, "set_app_user_model_id"):
+                helper.set_app_user_model_id(app_id)
+        except Exception as exc:  # noqa: BLE001
+            print(f"md3qml: app_user_model_id skipped ({exc})", file=sys.stderr)
     def _auto_fetch_prefix(self) -> Path:
         from .fetch import fetch_md3_prefix
 

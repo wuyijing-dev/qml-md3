@@ -169,7 +169,7 @@ def main(argv: list[str] | None = None) -> int:
 
     p_fetch = sub.add_parser("fetch", help="Download a shared Md3 zip into a local prefix")
     p_fetch.add_argument("--dest", default="~/.md3/prefix", help="Extract directory")
-    p_fetch.add_argument("--version", default="1.0.0", help="Release version (without v)")
+    p_fetch.add_argument("--version", default="1.1.1", help="Release version (without v)")
     p_fetch.add_argument("--url", default=None, help="Override zip URL (or MD3_FETCH_URL)")
     p_fetch.add_argument("--repo", default=None, help="GitHub owner/repo for release assets")
     p_fetch.set_defaults(func=_cmd_fetch)
@@ -179,7 +179,7 @@ def main(argv: list[str] | None = None) -> int:
         help="Fetch shared Md3 from GitHub Releases (+ optional pip install PySide6)",
     )
     p_inst.add_argument("--dest", default="~/.md3/prefix")
-    p_inst.add_argument("--version", default="1.0.0")
+    p_inst.add_argument("--version", default="1.1.1")
     p_inst.add_argument("--url", default=None)
     p_inst.add_argument("--repo", default=None)
     p_inst.add_argument(
@@ -201,7 +201,7 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="If MD3_PREFIX missing, download shared zip automatically",
     )
-    p_run.add_argument("--fetch-version", default="1.0.0")
+    p_run.add_argument("--fetch-version", default="1.1.1")
     p_run.add_argument("--fetch-dest", default="~/.md3/prefix")
     p_run.add_argument("--fetch-url", default=None)
     p_run.set_defaults(func=_cmd_run)
@@ -241,7 +241,7 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="If MD3_PREFIX missing, download shared zip automatically",
     )
-    p_gal.add_argument("--fetch-version", default="1.0.0")
+    p_gal.add_argument("--fetch-version", default="1.1.1")
     p_gal.add_argument("--fetch-dest", default="~/.md3/prefix")
     p_gal.add_argument("--fetch-url", default=None)
     p_gal.set_defaults(func=_cmd_gallery)

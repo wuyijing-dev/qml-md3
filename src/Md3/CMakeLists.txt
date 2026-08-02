@@ -28,7 +28,7 @@ if (NOT DEFINED MD3_VERSION)
     if (DEFINED PROJECT_VERSION AND NOT PROJECT_VERSION STREQUAL "")
         set(MD3_VERSION "${PROJECT_VERSION}")
     else()
-        set(MD3_VERSION "1.0.0")
+        set(MD3_VERSION "1.1.1")
     endif()
 endif()
 

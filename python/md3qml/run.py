@@ -14,7 +14,7 @@ from .paths import PathLike
 class RunOptions:
     organization: str = "Md3"
     application_name: str = "Md3 App"
-    application_version: str = "1.0.0"
+    application_version: str = "1.1.1"
     style: str = "Basic"
     alpha_buffer: bool = True
     desktop_file_name: str = ""
@@ -22,6 +22,8 @@ class RunOptions:
     app_user_model_id: str = ""
     """Prefer PySide6 (None = auto)."""
     binding: Optional[str] = None
+    """Load HarmonyOS Sans SC + Material Icons via ``md3_load_fonts`` (needs shared Md3)."""
+    load_fonts: bool = True
     """Print colorful Md3 intro on stderr (TTY). Skipped when MD3_DEBUG=1."""
     print_banner: bool = False
     """Shared Md3 install prefix (lib/qml). None = auto-discover / MD3_PREFIX."""
@@ -36,7 +38,7 @@ class RunOptions:
     module_component: str = "Main"
     """When prefix is missing, download a shared zip via md3qml.fetch (network)."""
     auto_fetch: bool = False
-    fetch_version: str = "1.0.0"
+    fetch_version: str = "1.1.1"
     fetch_dest: str = "~/.md3/prefix"
     fetch_url: Optional[str] = None
 

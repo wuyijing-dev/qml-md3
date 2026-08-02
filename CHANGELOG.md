@@ -21,6 +21,7 @@ Patch lock for consumer apps: UX polish + Linux D-Bus fix on top of 1.1.0. **No 
 
 - Android / WASM remain **experimental**.
 - Prefer tag **`v1.1.1`** (not floating `main`) when starting a product app.
+- Host stacks (PySide clipboard/fonts, C ABI `md3_load_fonts`, docs matrix): see [host-lock-1.1.1.md](docs/api-manual/host-lock-1.1.1.md).
 
 ## 1.1.0
 

@@ -34,17 +34,44 @@ Choose the lightest surface that fits the message lifetime and actions.
 Md3Notify.toast(qsTr("Copied"))
 Md3Notify.toast(qsTr("Upload failed"), { severity: Md3Toast.Error, durationMs: 3000 })
 Md3Notify.toast(qsTr("Saved"), { position: Md3ToastHost.TopRight, severity: Md3Toast.Success })
+Md3Notify.toast(qsTr("Still syncing…"), { id: "sync", severity: Md3Toast.Warning }) // id dedupe + refresh
 ```
+
+Hover pauses the dismiss timer (`pauseOnHover`, default on).
 
 ## Snackbar
 
 ```qml
 Md3Notify.snackbar(qsTr("Draft saved"), { actionText: qsTr("Undo"), priority: 0 })
+// With actionText, dwell is extended (~6.5s). Action click dismisses immediately.
+```
+
+## Copy helper
+
+```qml
+Md3Notify.copy(qsTr("Hello"), { feedback: qsTr("Copied") }) // clipboard + success toast
+```
+
+From Python: `app.native.copy_to_clipboard("Hello")` then optionally `app.invoke` / QML toast.
+
+## Shell InfoBar vs page InfoBar
+
+| | **Shell** (`showShellInfoBar`) | **Page** (`Md3InfoBar`) |
+|--|--------------------------------|-------------------------|
+| Place | Under app toolbar (window chrome) | Inline in page content |
+| Use | Syncing / offline / global status | Section-local notice |
+
+```qml
+Window.window.showShellInfoBar(qsTr("You’re offline"), {
+    title: qsTr("Connection"),
+    severity: Md3InfoBar.Warning,
+    actionText: qsTr("Dismiss")
+})
 ```
 
 ## InfoBar / Banner
 
-页内持久提示；Critical InfoBar 用于离线等状态。
+页内持久提示；Critical InfoBar 用于离线等状态。 Shell 条见上。
 
 ## Md3Notify vs 系统通知
 

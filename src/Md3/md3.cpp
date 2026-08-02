@@ -116,7 +116,7 @@ void printBanner(const QString &appTitle)
                        : QCoreApplication::applicationName())
             : appTitle;
     const QString ver = QCoreApplication::applicationVersion().isEmpty()
-            ? QStringLiteral("1.0.0")
+            ? QStringLiteral("1.1.1")
             : QCoreApplication::applicationVersion();
 
     std::fprintf(stderr, "\n");

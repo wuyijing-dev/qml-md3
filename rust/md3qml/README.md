@@ -32,7 +32,7 @@ md3qml::run_qml_file(std::path::Path::new("Main.qml"), &opts)?;
 | `RunOptions` | `CRunConfig` (+ `md3_prefix` kwarg) |
 | `run_qml_file` | `run_qml_file_c` |
 | `run_qml_module` | `run_qml_module_c` |
-| `version_string` | `version_string_c` |
+| `md3qml` | `version_string` / `load_fonts` |
 | `discover_qt_bin_dirs` | `discover_qt_bin_dirs` |
 | `find_md3_library` | `load_md3_library` |
 

@@ -112,7 +112,7 @@ def _auditwheel_repair(wheel_dir: Path) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=ROOT / "artifacts" / "wheels")
-    parser.add_argument("--version", default="1.0.0", help="Version stamped on fetch zip name")
+    parser.add_argument("--version", default="1.1.1", help="Version stamped on fetch zip name")
     parser.add_argument("--skip-zip", action="store_true")
     parser.add_argument("--skip-auditwheel", action="store_true")
     args = parser.parse_args(argv)

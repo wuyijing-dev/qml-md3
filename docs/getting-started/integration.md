@@ -4,6 +4,34 @@ Md3 is a **standalone QML library** (`URI Md3`). The Gallery demo is optional an
 
 For **prebuilt folder + same-directory layout**, see **[packaging.md](packaging.md)** first.
 
+## Lock a version for your product (recommended)
+
+Do **not** track floating `main` in a shipping app. Pin to the tagged release:
+
+| Method | How |
+|--------|-----|
+| **Git tag / submodule** | `git checkout v1.1.1` or submodule at `v1.1.1` |
+| **FetchContent** | `GIT_TAG v1.1.1` (annotated tag) |
+| **add_subdirectory** | Clone/copy the tree at `v1.1.1`, then `add_subdirectory(...)` |
+| **Packaged `./Md3`** | Build/install from that tag; keep the prefix in VCS or CI cache |
+| **Python** | `pip install "git+…@v1.1.1#subdirectory=python[pyside6]"` then `md3qml install --version 1.1.1` when using Release zips |
+| **Rust** | Depend on `rust/md3qml` from a checkout at `v1.1.1`; set `MD3_PREFIX` to a shared build from the same tag |
+
+Current lock tag: **`v1.1.1`** (see [CHANGELOG](../../CHANGELOG.md)). Upgrade only when you choose a newer tag.
+
+## Host stacks — what each layer provides
+
+| Capability | **C++** (`Md3::run`) | **PySide** (`md3qml`) | **Rust / C ABI** | **QML** (`import Md3`) |
+|------------|----------------------|------------------------|------------------|-------------------------|
+| Bootstrap / fonts / style | Full `RunOptions` | `RunOptions.load_fonts` → `md3_load_fonts` | `load_fonts` in `Md3RunConfig` + `md3qml::load_fonts` | — |
+| Clipboard | `window.copyToClipboard` | `app.native.copy_to_clipboard` | — (use QML) | `Md3Notify.copy` |
+| Toast / Snackbar / Undo dwell | — | — (call QML / `invoke`) | — | `Md3Notify.*` |
+| Shell InfoBar | — | `app.invoke("showShellInfoBar", …)` | — | `showShellInfoBar` on `Md3ApplicationWindow` |
+| Form `focusFirstError` / Button `busy` | — | — | — | Component API |
+| Window chrome / taskbar / tray | `Md3WindowHelper` | `app.native` (desktop subset) | — | Gallery / window APIs |
+
+**Product contract:** pin **`v1.1.1`**, build/install shared Md3 from that tag, put UX in QML. Hosts only bootstrap + optional system helpers. Do not expect Rust C ABI to grow WindowHelper parity.
+
 For **writing less layout glue** (stacks, flow, grid, Card.title, layoutMode), see **[layout.md](../guides/layout.md)**.
 
 For **selection / list / sheet / dialog shortcuts**, see **[glue-less-api.md](../guides/glue-less-api.md)**.  

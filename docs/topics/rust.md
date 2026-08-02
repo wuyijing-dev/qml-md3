@@ -43,6 +43,7 @@ md3qml::run_qml_file(&qml, &opts)?;
 | File | `Md3::runQmlFile` | `md3_run_qml_file` | `run_qml_file_c` | `run_qml_file` |
 | Module | `Md3::run` | `md3_run_qml_module` | `run_qml_module_c` | `run_qml_module` |
 | Version | — | `md3_version_string` | `version_string_c` | `version_string` |
+| Fonts (after QGuiApplication) | — | `md3_load_fonts` | `load_fonts_c` | `load_fonts` |
 | Qt bins | — | — | `discover_qt_bin_dirs` | `discover_qt_bin_dirs` |
 
 ### `Md3RunConfig` / `CRunConfig` / Rust `RunOptions` fields
@@ -83,7 +84,10 @@ typedef struct Md3RunConfig {
 int md3_run_qml_file(int argc, char **argv, const char *qml_file, const Md3RunConfig *config);
 int md3_run_qml_module(int argc, char **argv, const char *uri, const char *component, const Md3RunConfig *config);
 const char *md3_version_string(void);
+int md3_load_fonts(void);
 ```
+
+UX (toast / snackbar / shell InfoBar / form busy) lives in **QML**; Rust only bootstraps. Pin checkout + `MD3_PREFIX` to the same tag (`v1.1.1`).
 
 ## Related
 

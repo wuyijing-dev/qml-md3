@@ -227,4 +227,4 @@ python tools/gen_api_docs.py
 
 ## Version
 
-`1.0.0` — desktop-focused production release (see CHANGELOG).
+`1.1.1` — lock tag for product apps (see CHANGELOG). Pin `v1.1.1`, not floating `main`.
