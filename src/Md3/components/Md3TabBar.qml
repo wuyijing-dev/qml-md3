@@ -16,6 +16,8 @@ Item {
     default property alias pages: pageStack.data
     /// Extra height for page area when `pages` are present (Layout / implicit).
     property real pageAreaHeight: 96
+    /// When true with pages, height fills the parent (IDE pageHost). Strip stays 48px.
+    property bool fillHeight: false
 
     signal currentIndexChangedByUser(int index)
 
@@ -23,8 +25,12 @@ Item {
 
     implicitWidth: 360
     implicitHeight: hasPages ? (48 + pageAreaHeight) : 48
-    height: implicitHeight
-    // Do not bind height to parent.height — that fights ColumnLayout and overlaps siblings.
+    height: {
+        if (fillHeight && parent && parent.height > 0)
+            return parent.height
+        return implicitHeight
+    }
+    // Do not bind height to parent.height unless fillHeight — that fights ColumnLayout.
     width: parent && parent.width > 0 ? parent.width : implicitWidth
 
     Accessible.role: Accessible.PageTabList

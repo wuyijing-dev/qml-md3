@@ -9,7 +9,7 @@ Modal dialog with optional scrollable body and confirm tone.
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 9 | 2 | 2 | 1 |
+| 10 | 2 | 2 | 1 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -37,6 +37,7 @@ import Md3
 | `showDismiss` | `bool` | `true` | read/write | `Md3Dialog` | Show Dismiss. |
 | `bodyMaxHeight` | `real` | `280` | read/write | `Md3Dialog` | Cap body height; content scrolls when taller. |
 | `confirmTone` | `int (Md3Dialog.ConfirmTone)` | `Md3Dialog.Primary` | read/write | `Md3Dialog` | Primary (default) or Error/destructive confirm button. |
+| `writeOpenOnClose` | `bool` | `true` | read/write | `Md3Dialog` | When true (default), close writes ``open = false``. Set false if ``open`` is bound externally. |
 | `content` | `alias` | `bodySlot.data` | default read/write | `Md3Dialog` | Custom body between text and action buttons. |
 
 ## Signals

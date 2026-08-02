@@ -8,7 +8,7 @@
 
 手写附录（WinUI 对照等）放在 [`api-manual/`](../api-manual/README.md)；重新生成时会自动拼接到对应 API 页末尾。
 
-**QML types:** 185 · **C++ / native pages:** 9
+**QML types:** 186 · **C++ / native pages:** 9
 
 ## C++ / native
 
@@ -85,7 +85,7 @@
 - [Md3Checkbox](Md3Checkbox.md)
 - [Md3ChipGroup](Md3ChipGroup.md)
 - [Md3CommandBar](Md3CommandBar.md) — Desktop command strip with primary actions and a secondary overflow menu (WinUI CommandBar PrimaryCommands / SecondaryCommands).
-- [Md3DropDownButton](Md3DropDownButton.md) — Single-piece button that opens a menu (WinUI DropDownButton). Unlike Md3SplitButton, the whole control opens the menu — no primary action.
+- [Md3DropDownButton](Md3DropDownButton.md) — Button that opens a menu (WinUI DropDownButton). Default: whole control opens the menu. With ``split: true``, the label fires ``primaryClicked`` and the chevron opens the menu (toolbar Pull / Fetch pattern).
 - [Md3ExtendedFab](Md3ExtendedFab.md)
 - [Md3Fab](Md3Fab.md)
 - [Md3FabMenu](Md3FabMenu.md)
@@ -178,7 +178,7 @@
 - [Md3SkeletonPane](Md3SkeletonPane.md) — Full-pane skeleton used by Md3PageHost while a destination loads. Prefer `bones` (per-page outline); otherwise fall back to `layout` presets.
 - [Md3Snackbar](Md3Snackbar.md)
 - [Md3SnackbarHost](Md3SnackbarHost.md) — Window-level snackbar queue: stacks up to maxVisible, then queues the rest.
-- [Md3SplitView](Md3SplitView.md) — Horizontal (or vertical) draggable split panes for list/detail layouts.
+- [Md3SplitView](Md3SplitView.md) — Horizontal (or vertical) draggable split panes for list/detail layouts.  **Do not put ``anchors.fill: parent`` on direct pane children** — this control assigns ``x/y/width/height`` itself. Nest an inner ``Item { anchors.fill }`` if you need fill layout inside a pane.
 - [Md3Stepper](Md3Stepper.md) — Step indicator + optional step body pages and Next/Back actions.
 - [Md3Tooltip](Md3Tooltip.md) — Plain or rich tooltip: hover, keyboard focus, and long-press; flips to stay on-screen.
 - [Md3Tour](Md3Tour.md) — Guided tour overlay: rounded spotlight cutout + animated step transitions.
@@ -237,6 +237,7 @@
 - [Md3StatusBar](Md3StatusBar.md) — Desktop status bar — left / center / right zones, transient messages.
 - [Md3StatusLine](Md3StatusLine.md) — Compact persistent status line (index health, cache, non-alert state).
 - [Md3Text](Md3Text.md)
+- [Md3TextArea](Md3TextArea.md) — Multiline text field alias — same API as ``Md3TextField { multiline: true }``.
 - [Md3TickRingGauge](Md3TickRingGauge.md) — Tick-ring gauge — circular progress with radial tick marks (no needle).
 - [Md3Toast](Md3Toast.md) — Short-lived toast chip. Prefer Md3ToastHost / Md3Notify.toast for stacking & position.
 - [Md3ToastHost](Md3ToastHost.md) — Window-level toast host: stacked multi-toast with position + enter/exit animation.

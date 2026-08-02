@@ -23,7 +23,7 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `icon` | `string` | `"circle"` | read/write | `Md3Icon` | Material icon name or empty. |
 | `size` | `int` | `24` | read/write | `Md3Icon` | Control size token (see Enums). |
-| `iconColor` | `color` | `Md3Theme.colorScheme.colorOnSurface` | read/write | `Md3Icon` | Icon Color. |
+| `iconColor` | `alias` | `root.color` | read/write | `Md3Icon` | Preferred color API (also settable via ``color`` on this Text). |
 | `variant` | `string` | `"filled"` | read/write | `Md3Icon` | Visual / role variant (see Enums). |
 
 ## Signals
@@ -44,7 +44,6 @@ import Md3
 Md3Icon {
     icon: "circle"
     size: 24
-    iconColor: Md3Theme.colorScheme.colorOnSurface
     variant: "filled"
 }
 ```

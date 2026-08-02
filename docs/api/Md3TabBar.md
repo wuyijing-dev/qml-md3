@@ -9,7 +9,7 @@ Tab strip + optional content pages (WinUI Pivot-style). When `pages` has childre
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 6 | 1 | 0 | 1 |
+| 7 | 1 | 0 | 1 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -34,6 +34,7 @@ import Md3
 | `currentIndex` | `int` | `0` | read/write | `Md3TabBar` | Current index. |
 | `pages` | `alias` | `pageStack.data` | default read/write | `Md3TabBar` | Content pages (synced with currentIndex). Prefer over external StackLayout. |
 | `pageAreaHeight` | `real` | `96` | read/write | `Md3TabBar` | Extra height for page area when `pages` are present (Layout / implicit). |
+| `fillHeight` | `bool` | `false` | read/write | `Md3TabBar` | When true with pages, height fills the parent (IDE pageHost). Strip stays 48px. |
 | `hasPages` | `bool` | `pageStack.children.length > 0` | readonly | `Md3TabBar` | Has Pages. |
 
 ## Signals
@@ -56,5 +57,6 @@ Md3TabBar {
     model: []
     currentIndex: 0
     pageAreaHeight: 96
+    fillHeight: false
 }
 ```

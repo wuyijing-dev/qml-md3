@@ -7,7 +7,7 @@
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 134 | 6 | 93 | 0 |
+| 136 | 6 | 93 | 0 |
 
 _Also inherits Qt Quick `Window` members (not listed)._
 
@@ -61,6 +61,8 @@ import Md3
 | `aboutText` | `string` | `""` | read/write | `Md3ApplicationWindow` | About Text. |
 | `aboutIcon` | `url` | `""` | read/write | `Md3ApplicationWindow` | About Icon. |
 | `aboutContent` | `Component` | `null` | read/write | `Md3ApplicationWindow` | About Content. |
+| `aboutDialogHeight` | `real` | `420` | read/write | `Md3ApplicationWindow` | About dialog height (taller when shipping changelog in aboutContent). |
+| `aboutDialogWidth` | `real` | `420` | read/write | `Md3ApplicationWindow` | About Dialog Width. |
 | `themeRevealEnabled` | `bool` | `true` | read/write | `Md3ApplicationWindow` | Circular reveal when toggling light/dark (Material-style wipe from click) |
 | `themeRevealBusy` | `bool` | `false` | read/write | `Md3ApplicationWindow` | Theme Reveal Busy. |
 | `themeRevealDuration` | `int` | `Md3Motion.long2` | read/write | `Md3ApplicationWindow` | Theme Reveal Duration. |

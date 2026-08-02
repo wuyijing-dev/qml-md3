@@ -17,6 +17,8 @@ Item {
     property real bodyMaxHeight: 280
     /// Primary (default) or Error/destructive confirm button.
     property int confirmTone: Md3Dialog.Primary
+    /// When true (default), close writes ``open = false``. Set false if ``open`` is bound externally.
+    property bool writeOpenOnClose: true
     /// Custom body between text and action buttons.
     default property alias content: bodySlot.data
 
@@ -34,13 +36,15 @@ Item {
     property var _focusBeforeOpen: null
 
     function accept() {
-        open = false
         confirmed()
+        if (writeOpenOnClose)
+            open = false
     }
 
     function reject() {
-        open = false
         dismissed()
+        if (writeOpenOnClose)
+            open = false
     }
 
     function _restoreFocus() {

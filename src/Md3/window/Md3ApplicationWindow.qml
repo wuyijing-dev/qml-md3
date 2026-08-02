@@ -68,6 +68,9 @@ Window {
     property string aboutText: ""
     property url aboutIcon: ""
     property Component aboutContent: null
+    /// About dialog height (taller when shipping changelog in aboutContent).
+    property real aboutDialogHeight: 420
+    property real aboutDialogWidth: 420
 
     /// Circular reveal when toggling light/dark (Material-style wipe from click)
     property bool themeRevealEnabled: true
@@ -1662,8 +1665,8 @@ Window {
             Md3DialogWindow {
                 id: aboutDialog
                 title: qsTr("关于")
-                width: 420
-                height: 320
+                width: root.aboutDialogWidth
+                height: root.aboutDialogHeight
                 minimumWidth: 320
                 minimumHeight: 240
                 dialogModality: Qt.NonModal
@@ -1678,9 +1681,19 @@ Window {
                 windowIcon: root.aboutIcon.toString().length > 0 ? root.aboutIcon : root.windowIcon
                 onConfirmed: aboutDialog.closeDialog()
 
-                Column {
+                Flickable {
+                    id: aboutFlick
                     anchors.fill: parent
-                    spacing: 14
+                    contentWidth: width
+                    contentHeight: aboutCol.implicitHeight
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+                    flickableDirection: Flickable.VerticalFlick
+
+                    Column {
+                        id: aboutCol
+                        width: aboutFlick.width
+                        spacing: 14
 
                     Row {
                         spacing: 14
@@ -1753,6 +1766,7 @@ Window {
                         color: Md3Theme.colorScheme.colorOnSurfaceVariant
                         font.family: Md3Theme.typography.fontFamily
                         font.pixelSize: Md3Theme.typography.bodyMedium.size
+                    }
                     }
                 }
             }

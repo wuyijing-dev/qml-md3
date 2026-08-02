@@ -7,7 +7,7 @@
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 5 | 2 | 2 | 0 |
+| 7 | 2 | 2 | 0 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -25,6 +25,8 @@ import Md3
 | `title` | `string` | `""` | read/write | `Md3FullscreenDialog` | Title text. |
 | `confirmText` | `string` | `qsTr("Save")` | read/write | `Md3FullscreenDialog` | Confirm Text. |
 | `layoutMode` | `int` | `Md3ContainerBody.Fit` | read/write | `Md3FullscreenDialog` | Layout Mode. |
+| `contentMargins` | `real` | `24` | read/write | `Md3FullscreenDialog` | Body margins (was hard-coded 24). |
+| `writeOpenOnClose` | `bool` | `true` | read/write | `Md3FullscreenDialog` | When true (default), ``accept``/``reject`` assign ``open = false``. Set false when ``open`` is bound to an external property so the binding is not broken. |
 | `content` | `alias` | `body.content` | default read/write | `Md3FullscreenDialog` | Content. |
 
 ## Signals
@@ -51,5 +53,7 @@ Md3FullscreenDialog {
     title: ""
     confirmText: qsTr("Save")
     layoutMode: Md3ContainerBody.Fit
+    contentMargins: 24
+    writeOpenOnClose: true
 }
 ```

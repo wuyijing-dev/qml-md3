@@ -268,6 +268,36 @@ Md3Page {
             wrapMode: Text.WordWrap
         }
 
+        Md3HStack {
+            width: parent.width
+            spacing: 12
+            Md3DropDownButton {
+                text: qsTr("Pull")
+                split: true
+                menuModel: [
+                    { text: qsTr("Pull (ff-only)") },
+                    { text: qsTr("Pull --rebase") }
+                ]
+                onPrimaryClicked: page.applyStatus(qsTr("Pull ff-only"))
+                onMenuItemClicked: function (i) {
+                    page.applyStatus(i === 0 ? qsTr("Pull ff-only") : qsTr("Pull rebase"))
+                }
+            }
+            Md3Divider {
+                vertical: true
+                height: 28
+                anchors.verticalCenter: parent.verticalCenter
+            }
+            Md3EmptyState {
+                width: Math.min(280, parent.width * 0.4)
+                icon: "folder_off"
+                title: qsTr("No selection")
+                description: qsTr("description alias works")
+                actionText: qsTr("Refresh")
+                onActionClicked: page.applyStatus(qsTr("Refresh"))
+            }
+        }
+
         Md3PageHeader {
             width: parent.width
             title: qsTr("Workspace tools")

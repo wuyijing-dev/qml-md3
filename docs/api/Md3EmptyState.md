@@ -9,7 +9,7 @@ Empty / no-results placeholder: icon, title, body, optional CTA.
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 6 | 1 | 0 | 0 |
+| 7 | 1 | 0 | 0 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -26,6 +26,7 @@ import Md3
 | `icon` | `string` | `"inbox"` | read/write | `Md3EmptyState` | Material icon name or empty. |
 | `title` | `string` | `qsTr("Nothing here")` | read/write | `Md3EmptyState` | Title text. |
 | `body` | `string` | `""` | read/write | `Md3EmptyState` | Body. |
+| `description` | `alias` | `root.body` | read/write | `Md3EmptyState` | Alias for ``body`` (common intuition / design-tool naming). |
 | `actionText` | `string` | `""` | read/write | `Md3EmptyState` | Action Text. |
 | `illustration` | `url` | `""` | read/write | `Md3EmptyState` | Illustration. |
 | `maxContentWidth` | `real` | `360` | read/write | `Md3EmptyState` | Max Content Width. |

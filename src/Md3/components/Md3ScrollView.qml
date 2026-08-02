@@ -18,6 +18,9 @@ Item {
     property real scrollBarThickness: 10
     /// When true (default), content width matches the viewport.
     property bool fillContentWidth: true
+    /// When true, contentHeight is at least the viewport (old behavior — empty scroll room).
+    /// Default false: short content does not create a tall empty flick area.
+    property bool minContentHeightToViewport: false
     /// Optional FAB that appears after scrolling down; animates back to top.
     property bool showScrollToTop: false
     property real scrollToTopThreshold: 120
@@ -77,7 +80,9 @@ Item {
             return Flickable.VerticalFlick
         }
         contentWidth: root.fillContentWidth ? width : Math.max(width, root._measuredContentW)
-        contentHeight: Math.max(height, root._measuredContentH)
+        contentHeight: root.minContentHeightToViewport
+                       ? Math.max(height, root._measuredContentH)
+                       : Math.max(1, root._measuredContentH)
 
         Item {
             id: contentHost

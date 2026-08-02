@@ -1,6 +1,6 @@
 # Md3DropDownButton
 
-Single-piece button that opens a menu (WinUI DropDownButton). Unlike Md3SplitButton, the whole control opens the menu — no primary action.
+Button that opens a menu (WinUI DropDownButton). Default: whole control opens the menu. With ``split: true``, the label fires ``primaryClicked`` and the chevron opens the menu (toolbar Pull / Fetch pattern).
 
 - **Source:** `src/Md3/components/Md3DropDownButton.qml`
 - **Extends:** `Md3AbstractButton`
@@ -9,7 +9,7 @@ Single-piece button that opens a menu (WinUI DropDownButton). Unlike Md3SplitBut
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 6 | 1 | 3 | 1 |
+| 7 | 2 | 3 | 1 |
 
 ## Import
 
@@ -34,6 +34,7 @@ import Md3
 | `variant` | `int (Md3DropDownButton.Variant)` | `Md3DropDownButton.Filled` | read/write | `Md3DropDownButton` | Visual / role variant (see Enums). |
 | `menuModel` | `var` | `[]` | read/write | `Md3DropDownButton` | Menu Model. |
 | `overlayWindow` | `var` | `null` | read/write | `Md3DropDownButton` | Optional explicit Window for menu overlay. |
+| `split` | `bool` | `false` | read/write | `Md3DropDownButton` | When true, primary area emits ``primaryClicked``; chevron opens menu. |
 | `menuOpen` | `bool` | `menu.open` | readonly | `Md3DropDownButton` | Menu Open. |
 | `h` | `real` | `40` | readonly | `Md3DropDownButton` | H. |
 | `padH` | `real` | `16` | readonly | `Md3DropDownButton` | Pad H. |
@@ -60,6 +61,7 @@ import Md3
 | Signal | Defined in | Description |
 |--------|------------|-------------|
 | `menuItemClicked(int index)` | `Md3DropDownButton` | Emitted when menu Item Clicked. |
+| `primaryClicked()` | `Md3DropDownButton` | Emitted when primary Clicked. |
 | `clicked()` | [`Md3AbstractButton`](Md3AbstractButton.md) | Emitted when clicked. |
 | `toggled(bool checked)` | [`Md3AbstractButton`](Md3AbstractButton.md) | Emitted when toggled. |
 | `pressFeedback(real x, real y)` | [`Md3AbstractButton`](Md3AbstractButton.md) | Map click into `pressTarget` so subclasses can `ripple.pulse(x, y)`. |
@@ -83,9 +85,9 @@ Md3DropDownButton {
     variant: Md3DropDownButton.Filled
     menuModel: []
     overlayWindow: null
+    split: false
     text: ""
     icon: ""
-    accessibleName: text.length ? text : (icon.length ? icon : qsTr("Button"))
 }
 ```
 

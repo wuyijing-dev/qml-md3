@@ -28,7 +28,7 @@ if (NOT DEFINED MD3_VERSION)
     if (DEFINED PROJECT_VERSION AND NOT PROJECT_VERSION STREQUAL "")
         set(MD3_VERSION "${PROJECT_VERSION}")
     else()
-        set(MD3_VERSION "1.1.2")
+        set(MD3_VERSION "1.1.3")
     endif()
 endif()
 
@@ -286,6 +286,7 @@ qt_add_qml_module(Md3
         components/Md3TagField.qml
         components/Md3Text.qml
         components/Md3TextField.qml
+        components/Md3TextArea.qml
         components/Md3PasswordField.qml
         components/Md3NumberField.qml
         components/Md3Select.qml

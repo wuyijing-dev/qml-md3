@@ -8,6 +8,8 @@ Item {
     property string icon: "inbox"
     property string title: qsTr("Nothing here")
     property string body: ""
+    /// Alias for ``body`` (common intuition / design-tool naming).
+    property alias description: root.body
     property string actionText: ""
     property url illustration: ""
     property real maxContentWidth: 360

@@ -68,6 +68,8 @@ import Md3
 | `aboutText` | `string` | `""` | read/write | [`Md3ApplicationWindow`](Md3ApplicationWindow.md) | About Text. |
 | `aboutIcon` | `url` | `""` | read/write | [`Md3ApplicationWindow`](Md3ApplicationWindow.md) | About Icon. |
 | `aboutContent` | `Component` | `null` | read/write | [`Md3ApplicationWindow`](Md3ApplicationWindow.md) | About Content. |
+| `aboutDialogHeight` | `real` | `420` | read/write | [`Md3ApplicationWindow`](Md3ApplicationWindow.md) | About dialog height (taller when shipping changelog in aboutContent). |
+| `aboutDialogWidth` | `real` | `420` | read/write | [`Md3ApplicationWindow`](Md3ApplicationWindow.md) | About Dialog Width. |
 | `themeRevealEnabled` | `bool` | `true` | read/write | [`Md3ApplicationWindow`](Md3ApplicationWindow.md) | Circular reveal when toggling light/dark (Material-style wipe from click) |
 | `themeRevealBusy` | `bool` | `false` | read/write | [`Md3ApplicationWindow`](Md3ApplicationWindow.md) | Theme Reveal Busy. |
 | `themeRevealDuration` | `int` | `Md3Motion.long2` | read/write | [`Md3ApplicationWindow`](Md3ApplicationWindow.md) | Theme Reveal Duration. |

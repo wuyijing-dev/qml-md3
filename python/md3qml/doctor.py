@@ -98,14 +98,14 @@ def doctor(*, md3_prefix: str | None = None) -> Tuple[int, List[str]]:
             if has_fonts:
                 lines.append("OK  C ABI md3_load_fonts")
             else:
-                lines.append("WARN md3_load_fonts missing — rebuild shared Md3 ≥ 1.1.2")
+                lines.append("WARN md3_load_fonts missing — rebuild shared Md3 ≥ 1.1.3")
             try:
                 ver = version_string_c(prefix)
                 if ver:
                     lines.append(f"OK  md3_version_string={ver}")
-                    if ver != "1.1.2":
+                    if ver != "1.1.3":
                         lines.append(
-                            f"WARN package expects 1.1.2 lock; shared lib reports {ver}"
+                            f"WARN package expects 1.1.3 lock; shared lib reports {ver}"
                         )
             except Exception as exc:  # noqa: BLE001
                 lines.append(f"WARN version_string: {exc}")

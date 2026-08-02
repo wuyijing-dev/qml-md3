@@ -27,6 +27,19 @@ Prescribed in **C++** (`Md3QtCompat` + `Md3HeightSync`), not per-kit QML:
 
 `Column` / `Flickable.contentHeight` consume **`height`**. Prefer `contentHeight: column.implicitHeight` in Flickables. Do not bind `bodyHeight` to `height` on `Md3DataTable`.
 
+## Antipatterns (overlap / black voids)
+
+| Don't | Do |
+|-------|-----|
+| `anchors.fill` on a **direct** `Md3SplitView` child | Nested `Item { anchors.fill }` inside the pane |
+| `Md3ScrollView { expand: true }` as the only flex child fighting a sticky footer | Header + Scroll (anchors between) + footer |
+| Expect `contentHeight ≥ viewport` empty room under short content | Default ScrollView no longer pads to viewport; use `minContentHeightToViewport: true` only if you need the old behavior |
+| `Md3TabBar` with pages but no height budget | `fillHeight: true` **or** strip-only + external page host |
+| Alias wrapper `default property` to `hstack.data` | Alias to `hstack.content` |
+| Giant `Repeater` in `Md3SideSheet` | `Md3ListView` / `Md3VirtualList` |
+
+IDE shell recipes: [ide-shell.md](ide-shell.md). Dialog open binding: [dialogs-and-open.md](dialogs-and-open.md).
+
 ## Before / after
 
 ### Card header

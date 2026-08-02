@@ -6,12 +6,13 @@ Text {
 
     property string icon: "circle"
     property int size: 24
-    property color iconColor: Md3Theme.colorScheme.colorOnSurface
+    /// Preferred color API (also settable via ``color`` on this Text).
+    property alias iconColor: root.color
     // "filled" (default; reliable TTF ligatures) | "outlined"
     property string variant: "filled"
 
     text: ligatureFor(icon)
-    color: iconColor
+    color: Md3Theme.colorScheme.colorOnSurface
     font.pixelSize: size
     font.family: Md3IconFonts.familyFor(variant)
     font.weight: Font.Normal

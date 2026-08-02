@@ -4,6 +4,30 @@
 
 _(empty — next work goes here)_
 
+## 1.1.3
+
+GitDesk IDE-shell usability pass: layout contracts, dialog open binding, aliases, and chrome helpers. **No intentional Public API breaks** relative to 1.1.2.
+
+### Highlights
+
+- **SplitView** — `pane1Collapsed` / `pane2Collapsed`, `manageGeometry`, debug warn when a pane uses `anchors.fill`.
+- **ScrollView** — default no longer forces `contentHeight ≥ viewport` (`minContentHeightToViewport` opt-in for old padding).
+- **FullscreenDialog / Dialog** — `writeOpenOnClose` (bind `open` safely); FullscreenDialog `contentMargins`.
+- **TabBar** — `fillHeight` for strip+pages filling the parent.
+- **DropDownButton** — `split: true` + `primaryClicked` (label vs chevron).
+- **Divider** — `vertical` / `Orientation.Vertical`.
+- **Aliases** — `Md3EmptyState.description`, `Md3Icon.iconColor` ↔ `color`, `Md3TextArea` (= multiline TextField).
+- **About** — scrollable body; `aboutDialogHeight` / `aboutDialogWidth`.
+
+### Docs
+
+- [ide-shell.md](docs/guides/ide-shell.md), [dialogs-and-open.md](docs/guides/dialogs-and-open.md); layout antipatterns table.
+
+### Notes
+
+- Prefer tag **`v1.1.3`** for new IDE / GitDesk-style pins.
+- Android / WASM remain **experimental**.
+
 ## 1.1.2
 
 Patch on the 1.1.1 product lock: CleanSpace-driven desktop gaps + build/runtime fixes. **No intentional Public API breaks** relative to 1.1.1.

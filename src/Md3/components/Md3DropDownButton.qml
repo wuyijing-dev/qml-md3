@@ -2,8 +2,9 @@ import QtQuick
 import QtQuick.Effects
 import Md3
 
-/// Single-piece button that opens a menu (WinUI DropDownButton).
-/// Unlike Md3SplitButton, the whole control opens the menu — no primary action.
+/// Button that opens a menu (WinUI DropDownButton).
+/// Default: whole control opens the menu. With ``split: true``, the label fires
+/// ``primaryClicked`` and the chevron opens the menu (toolbar Pull / Fetch pattern).
 Md3AbstractButton {
     id: root
 
@@ -13,8 +14,11 @@ Md3AbstractButton {
     property var menuModel: []
     /// Optional explicit Window for menu overlay.
     property var overlayWindow: null
+    /// When true, primary area emits ``primaryClicked``; chevron opens menu.
+    property bool split: false
 
     signal menuItemClicked(int index)
+    signal primaryClicked()
 
     readonly property bool menuOpen: menu.open
     readonly property real h: 40
@@ -48,7 +52,12 @@ Md3AbstractButton {
     accessibleName: text
     pressTarget: bg
     onPressFeedback: function (x, y) { ripple.pulse(x, y) }
-    onClicked: toggleMenu()
+    onClicked: {
+        if (root.split)
+            root.primaryClicked()
+        else
+            root.toggleMenu()
+    }
 
     implicitWidth: Math.max(48, row.implicitWidth + padH * 2)
     implicitHeight: Math.max(48, h)
@@ -141,6 +150,7 @@ Md3AbstractButton {
                 anchors.verticalCenter: parent.verticalCenter
             }
             Md3Icon {
+                id: chevron
                 icon: "arrow_drop_down"
                 size: 24
                 iconColor: root.contentColor
@@ -153,6 +163,20 @@ Md3AbstractButton {
                         easing.bezierCurve: Md3Motion.emphasized
                     }
                 }
+            }
+        }
+
+        MouseArea {
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            width: 36
+            visible: root.split
+            enabled: root.split && root.enabled
+            cursorShape: Qt.PointingHandCursor
+            z: 5
+            onClicked: {
+                root.toggleMenu()
             }
         }
     }

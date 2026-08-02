@@ -9,7 +9,7 @@ Themed scroll view: Flickable + optional Md3ScrollBar overlays.
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 15 | 0 | 1 | 0 |
+| 16 | 0 | 1 | 0 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -35,6 +35,7 @@ import Md3
 | `scrollBarAutoHide` | `bool` | `true` | read/write | `Md3ScrollView` | Scroll Bar Auto Hide. |
 | `scrollBarThickness` | `real` | `10` | read/write | `Md3ScrollView` | Scroll Bar Thickness. |
 | `fillContentWidth` | `bool` | `true` | read/write | `Md3ScrollView` | When true (default), content width matches the viewport. |
+| `minContentHeightToViewport` | `bool` | `false` | read/write | `Md3ScrollView` | When true, contentHeight is at least the viewport (old behavior — empty scroll room). Default false: short content does not create a tall empty flick area. |
 | `showScrollToTop` | `bool` | `false` | read/write | `Md3ScrollView` | Optional FAB that appears after scrolling down; animates back to top. |
 | `scrollToTopThreshold` | `real` | `120` | read/write | `Md3ScrollView` | Scroll To Top Threshold. |
 | `content` | `alias` | `contentHost.data` | default read/write | `Md3ScrollView` | Content. |

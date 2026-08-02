@@ -1,6 +1,6 @@
 # Md3SplitView
 
-Horizontal (or vertical) draggable split panes for list/detail layouts.
+Horizontal (or vertical) draggable split panes for list/detail layouts.  **Do not put ``anchors.fill: parent`` on direct pane children** — this control assigns ``x/y/width/height`` itself. Nest an inner ``Item { anchors.fill }`` if you need fill layout inside a pane.
 
 - **Source:** `src/Md3/components/Md3SplitView.qml`
 - **Extends:** `Item`
@@ -9,7 +9,7 @@ Horizontal (or vertical) draggable split panes for list/detail layouts.
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 9 | 0 | 0 | 1 |
+| 13 | 0 | 0 | 1 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -36,6 +36,10 @@ import Md3
 | `handleThickness` | `real` | `6` | read/write | `Md3SplitView` | Handle Thickness. |
 | `showHandle` | `bool` | `true` | read/write | `Md3SplitView` | Show Handle. |
 | `handleColor` | `color` | `Md3Theme.colorScheme.outlineVariant` | read/write | `Md3SplitView` | Handle Color. |
+| `manageGeometry` | `bool` | `true` | read/write | `Md3SplitView` | When true (default), this control owns pane geometry. |
+| `pane1Collapsed` | `bool` | `false` | read/write | `Md3SplitView` | Collapse first / second pane (ratio → 0 / 1). Prefer SideSheet for transient detail. |
+| `pane2Collapsed` | `bool` | `false` | read/write | `Md3SplitView` | Pane2Collapsed. |
+| `warnAnchorsFill` | `bool` | `true` | read/write | `Md3SplitView` | Warn in console when a direct child uses anchors.fill (Debug / Qt.debug builds). |
 | `content` | `alias` | `paneHost.data` | default read/write | `Md3SplitView` | Content. |
 | `horizontal` | `bool` | `orientation === Md3SplitView.Horizontal` | readonly | `Md3SplitView` | Horizontal. |
 

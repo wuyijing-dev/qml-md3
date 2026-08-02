@@ -8,6 +8,11 @@ Item {
     property string title: ""
     property string confirmText: qsTr("Save")
     property int layoutMode: Md3ContainerBody.Fit
+    /// Body margins (was hard-coded 24).
+    property real contentMargins: 24
+    /// When true (default), ``accept``/``reject`` assign ``open = false``.
+    /// Set false when ``open`` is bound to an external property so the binding is not broken.
+    property bool writeOpenOnClose: true
     default property alias content: body.content
 
     signal confirmed()
@@ -23,14 +28,16 @@ Item {
     property var _restoreFocus: null
 
     function accept() {
-        open = false
         confirmed()
+        if (writeOpenOnClose)
+            open = false
         _restore()
     }
 
     function reject() {
-        open = false
         dismissed()
+        if (writeOpenOnClose)
+            open = false
         _restore()
     }
 
@@ -134,7 +141,7 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            anchors.margins: 24
+            anchors.margins: root.contentMargins
             layoutMode: root.layoutMode
         }
     }
