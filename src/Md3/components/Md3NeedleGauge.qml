@@ -66,7 +66,8 @@ Item {
             return
         }
         _paintPending = false
-        (ticksLoader.item && ticksLoader.item.requestPaint())
+        if (ticksLoader.item)
+            ticksLoader.item.requestPaint()
     }
 
     Connections {

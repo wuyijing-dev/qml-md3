@@ -89,7 +89,8 @@ Md3Chart {
                     value: s.percent,
                     color: s.color
                 }], s.ly)
-                (canvasLoader.item && canvasLoader.item.requestPaint())
+                if (canvasLoader.item)
+                    canvasLoader.item.requestPaint()
                 return
             }
             acc += s.sweep
@@ -120,7 +121,8 @@ Md3Chart {
             value: s.percent,
             color: s.color
         }], s.ly)
-        (canvasLoader.item && canvasLoader.item.requestPaint())
+        if (canvasLoader.item)
+            canvasLoader.item.requestPaint()
     }
 
     QtObject {
@@ -133,12 +135,12 @@ Md3Chart {
     onStartAngleChanged: requestRebuild()
     onShowPercentLabelsChanged: requestRebuild()
     onLabelsChanged: requestRebuild()
-    onProbeActiveChanged: (canvasLoader.item && canvasLoader.item.requestPaint())
-    onProbeIndexChanged: (canvasLoader.item && canvasLoader.item.requestPaint())
-    onCxChanged: (canvasLoader.item && canvasLoader.item.requestPaint())
-    onCyChanged: (canvasLoader.item && canvasLoader.item.requestPaint())
-    onOuterRChanged: (canvasLoader.item && canvasLoader.item.requestPaint())
-    onInnerRChanged: (canvasLoader.item && canvasLoader.item.requestPaint())
+    onProbeActiveChanged: { if (canvasLoader.item) canvasLoader.item.requestPaint() }
+    onProbeIndexChanged: { if (canvasLoader.item) canvasLoader.item.requestPaint() }
+    onCxChanged: { if (canvasLoader.item) canvasLoader.item.requestPaint() }
+    onCyChanged: { if (canvasLoader.item) canvasLoader.item.requestPaint() }
+    onOuterRChanged: { if (canvasLoader.item) canvasLoader.item.requestPaint() }
+    onInnerRChanged: { if (canvasLoader.item) canvasLoader.item.requestPaint() }
 
     Rectangle {
         anchors.fill: parent

@@ -60,7 +60,8 @@ Item {
             return
         }
         _paintPending = false
-        (canvasLoader.item && canvasLoader.item.requestPaint())
+        if (canvasLoader.item)
+            canvasLoader.item.requestPaint()
     }
 
     Connections {

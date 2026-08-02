@@ -64,7 +64,8 @@ Item {
             return
         }
         _paintPending = false
-        (canvasLoader.item && canvasLoader.item.requestPaint())
+        if (canvasLoader.item)
+            canvasLoader.item.requestPaint()
     }
 
     Connections {
@@ -107,8 +108,8 @@ Item {
 
     /// Map pointer in canvas coords → value along the dial arc.
     function _valueFromCanvasPos(px, py) {
-        const cx = canvas.width / 2
-        const cy = canvas.height / 2
+        const cx = root.size / 2
+        const cy = root.size / 2
         let deg = Math.atan2(py - cy, px - cx) * 180 / Math.PI
         // Normalize into [startAngle, startAngle+sweep]
         let rel = deg - startAngle
@@ -242,10 +243,11 @@ Item {
     Component.onCompleted: { root._refreshTreeShown(); root._requestPaint() }
 
     Md3FocusRing {
-        anchors.horizontalCenter: canvas.horizontalCenter
-        anchors.verticalCenter: canvas.verticalCenter
-        width: canvas.width + 8
-        height: canvas.height + 8
+        anchors.horizontalCenter: canvasLoader.horizontalCenter
+        anchors.top: canvasLoader.top
+        anchors.topMargin: -4
+        width: root.size + 8
+        height: root.size + 8
         radius: width / 2
         focused: root.activeFocus
         visualFocus: root.activeFocus
@@ -254,8 +256,8 @@ Item {
 
     Column {
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: canvas.bottom
-        anchors.topMargin: 2
+        anchors.top: parent.top
+        anchors.topMargin: root.size + 2
         width: root.size
         spacing: 0
 

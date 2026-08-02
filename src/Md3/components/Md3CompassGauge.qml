@@ -60,7 +60,8 @@ Item {
             return
         }
         _paintPending = false
-        (canvasLoader.item && canvasLoader.item.requestPaint())
+        if (canvasLoader.item)
+            canvasLoader.item.requestPaint()
     }
 
     Connections {
@@ -161,8 +162,8 @@ Item {
     // Caption sits under the dial — never over N/E/S/W
     Text {
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: canvas.bottom
-        anchors.topMargin: 2
+        anchors.top: parent.top
+        anchors.topMargin: root.size + 2
         width: root.size
         horizontalAlignment: Text.AlignHCenter
         visible: root.showValue || root.label.length > 0
