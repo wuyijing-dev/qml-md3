@@ -12,7 +12,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 # Override with MD3_WHEEL_URL / MD3_FETCH_URL for private mirrors.
-_DEFAULT_REPO = "wuyijing-dev/QML_MD3"
+_DEFAULT_REPO = "wuyijing-dev/qml-md3"
 
 
 def _platform_tags() -> List[str]:

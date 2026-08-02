@@ -15,10 +15,10 @@ dependencies = []
 optional-dependencies = { pyside6 = ["PySide6>=6.5"] }
 
 [project.urls]
-Homepage = "https://github.com/wuyijing-dev/QML_MD3"
-Documentation = "https://github.com/wuyijing-dev/QML_MD3/blob/main/docs/topics/pyside.md"
-Repository = "https://github.com/wuyijing-dev/QML_MD3"
-Issues = "https://github.com/wuyijing-dev/QML_MD3/issues"
+Homepage = "https://github.com/wuyijing-dev/qml-md3"
+Documentation = "https://github.com/wuyijing-dev/qml-md3/blob/main/docs/topics/pyside.md"
+Repository = "https://github.com/wuyijing-dev/qml-md3"
+Issues = "https://github.com/wuyijing-dev/qml-md3/issues"
 
 [project.scripts]
 md3qml = "md3qml.__main__:main"

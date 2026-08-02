@@ -365,23 +365,57 @@ def _install_windows(opt: PackageOptions) -> None:
     shutil.copytree(opt.stage_prefix, opt.install_prefix)
 
 
+def _package_version(root: Path) -> str:
+    cmake = root / "CMakeLists.txt"
+    try:
+        text = cmake.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return "0.0.0"
+    import re
+
+    m = re.search(r'project\s*\(\s*QML_MD3\s+VERSION\s+([0-9.]+)', text, re.I)
+    return m.group(1) if m else "0.0.0"
+
+
+def _archive_stem(opt: PackageOptions, shared_label: str) -> str:
+    """Unique archive name per OS / arch / link / Qt kit (multi-kit releases)."""
+    ver = _package_version(opt.root)
+    kit = opt.qt.kit.replace(" ", "_")
+    qt_ver = getattr(opt.qt, "version", None) or "qt"
+    if platform.system() == "Windows":
+        arch = os.environ.get("PROCESSOR_ARCHITECTURE", "x64")
+        return f"Md3-{ver}-windows-{arch}-{shared_label}-qt{qt_ver}-{kit}"
+    arch = platform.machine() or "unknown"
+    return f"Md3-{ver}-linux-{arch}-{shared_label}-qt{qt_ver}-{kit}"
+
+
 def _make_archive(opt: PackageOptions, shared_label: str) -> Path | None:
     assert opt.stage_prefix is not None
     dist = opt.root / "dist"
     dist.mkdir(parents=True, exist_ok=True)
+    stem = _archive_stem(opt, shared_label)
     if platform.system() == "Windows":
-        arch = os.environ.get("PROCESSOR_ARCHITECTURE", "x64")
-        out = dist / f"Md3-windows-{arch}-{shared_label}.zip"
+        out = dist / f"{stem}.zip"
         if out.exists():
             out.unlink()
         with zipfile.ZipFile(out, "w", compression=zipfile.ZIP_DEFLATED) as zf:
             for path in opt.stage_prefix.rglob("*"):
                 zf.write(path, path.relative_to(opt.stage_prefix.parent))
+        # Stable fetch alias (last-built Windows shared kit wins).
+        if shared_label == "shared":
+            alias = dist / f"Md3-windows-{os.environ.get('PROCESSOR_ARCHITECTURE', 'x64')}-shared.zip"
+            if alias.exists():
+                alias.unlink()
+            shutil.copy2(out, alias)
         return out
-    arch = platform.machine() or "unknown"
-    out = dist / f"Md3-linux-{arch}-{shared_label}.tar.gz"
+    out = dist / f"{stem}.tar.gz"
     with tarfile.open(out, "w:gz") as tf:
         tf.add(opt.stage_prefix, arcname=opt.stage_prefix.name)
+    if shared_label == "shared":
+        alias = dist / f"Md3-linux-{platform.machine() or 'unknown'}-shared.tar.gz"
+        if alias.exists():
+            alias.unlink()
+        shutil.copy2(out, alias)
     return out
 
 
