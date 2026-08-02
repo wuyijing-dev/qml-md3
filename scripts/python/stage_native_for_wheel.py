@@ -111,7 +111,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     info = stage_runtime(args.prefix, args.dest)
-    print(f"Staged Md3 runtime → {args.dest.resolve()}")
+    print(f"Staged Md3 runtime -> {args.dest.resolve()}")
     print(json.dumps(info, indent=2))
     return 0
 

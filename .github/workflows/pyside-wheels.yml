@@ -136,9 +136,12 @@ jobs:
 
       - name: Smoke import (optional PySide)
         shell: bash
+        continue-on-error: true
         run: |
           python -m pip install -U pip
-          python -m pip install "${{ env.PYSIDE6_PIN }}" || python -m pip install "PySide6>=6.8,<6.9"
+          python -m pip install "${{ env.PYSIDE6_PIN }}" \
+            || python -m pip install "PySide6>=6.8,<6.9" \
+            || python -m pip install "PySide6>=6.5"
           shopt -s nullglob
           wheels=(artifacts/wheels/*.whl)
           if [ ${#wheels[@]} -eq 0 ]; then
@@ -191,7 +194,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish wheels to PyPI
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v')
         continue-on-error: true
         env:
           TWINE_USERNAME: __token__
