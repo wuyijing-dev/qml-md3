@@ -2,7 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import Md3
 
-/// Spotlight-style command palette (Ctrl+K). model: [{ title, subtitle?, icon?, id? }]
+/// Spotlight-style command palette (Ctrl+K).
+/// model: [{ title, subtitle?, icon?, section?, visibleWhen?, id? }] or plain strings.
 Item {
     id: root
 
@@ -10,6 +11,10 @@ Item {
     property string placeholder: qsTr("Type a command…")
     property var model: []
     property int maxResults: 12
+    /// When true, insert section headers from item.section.
+    property bool groupBySection: true
+    /// Depend so app models that read ``Md3I18n.revision`` rebuild after language change.
+    readonly property int localeRevision: Md3I18n.revision
 
     signal activated(var item)
     signal closed()
@@ -25,20 +30,39 @@ Item {
     property var _focusBeforeOpen: null
 
     readonly property var filtered: {
+        void root.localeRevision
         if (!open)
             return []
         const q = String(query || "").trim().toLowerCase()
         const src = model || []
         const out = []
+        let lastSection = ""
         for (let i = 0; i < src.length; ++i) {
             const it = src[i]
             if (!it)
                 continue
+            if (typeof it !== "string" && it.visibleWhen === false)
+                continue
+            if (typeof it !== "string" && typeof it.visibleWhen === "function" && !it.visibleWhen())
+                continue
             const title = typeof it === "string" ? it : String(it.title || "")
             const sub = typeof it === "string" ? "" : String(it.subtitle || "")
-            if (!q.length || title.toLowerCase().indexOf(q) >= 0
-                    || sub.toLowerCase().indexOf(q) >= 0)
-                out.push(typeof it === "string" ? { title: it, subtitle: "", icon: "chevron_right" } : it)
+            if (q.length && title.toLowerCase().indexOf(q) < 0
+                    && sub.toLowerCase().indexOf(q) < 0)
+                continue
+            const row = typeof it === "string"
+                        ? { title: it, subtitle: "", icon: "chevron_right", section: "" }
+                        : it
+            if (groupBySection && row.section !== undefined) {
+                const sec = String(row.section || "")
+                if (sec.length && sec !== lastSection) {
+                    out.push({ _sectionHeader: true, title: sec })
+                    lastSection = sec
+                    if (out.length >= maxResults)
+                        break
+                }
+            }
+            out.push(row)
             if (out.length >= maxResults)
                 break
         }
@@ -77,14 +101,24 @@ Item {
     function activateIndex(i) {
         if (i < 0 || i >= filtered.length)
             return
-        activated(filtered[i])
+        const it = filtered[i]
+        if (it && it._sectionHeader)
+            return
+        activated(it)
         dismiss()
     }
 
     function moveHighlight(delta) {
         if (filtered.length === 0)
             return
-        highlightIndex = (highlightIndex + delta + filtered.length) % filtered.length
+        let next = highlightIndex
+        for (let n = 0; n < filtered.length; ++n) {
+            next = (next + delta + filtered.length) % filtered.length
+            if (!filtered[next] || !filtered[next]._sectionHeader) {
+                highlightIndex = next
+                break
+            }
+        }
         if (list.count > 0)
             list.positionViewAtIndex(highlightIndex, ListView.Contain)
     }
@@ -230,8 +264,9 @@ Item {
                     id: del
                     required property int index
                     required property var modelData
+                    readonly property bool isSection: !!(modelData && modelData._sectionHeader)
                     width: list.width
-                    height: 52
+                    height: isSection ? 32 : 52
 
                     Rectangle {
                         anchors.fill: parent
@@ -240,6 +275,7 @@ Item {
                         anchors.topMargin: 2
                         anchors.bottomMargin: 2
                         radius: Md3Theme.shape.small
+                        visible: !del.isSection
                         color: index === root.highlightIndex
                                ? Md3Theme.colorScheme.secondaryContainer
                                : "transparent"
@@ -253,7 +289,22 @@ Item {
                         }
                     }
 
+                    Text {
+                        visible: del.isSection
+                        anchors.fill: parent
+                        anchors.leftMargin: 20
+                        anchors.rightMargin: 20
+                        text: String(modelData.title || "")
+                        color: Md3Theme.colorScheme.colorOnSurfaceVariant
+                        font.family: Md3Theme.typography.fontFamily
+                        font.pixelSize: Md3Theme.typography.labelMedium.size
+                        font.weight: Font.DemiBold
+                        verticalAlignment: Text.AlignVCenter
+                        elide: Text.ElideRight
+                    }
+
                     RowLayout {
+                        visible: !del.isSection
                         anchors.fill: parent
                         anchors.leftMargin: 20
                         anchors.rightMargin: 20
@@ -294,6 +345,7 @@ Item {
 
                     MouseArea {
                         anchors.fill: parent
+                        enabled: !del.isSection
                         hoverEnabled: true
                         cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                         onEntered: root.highlightIndex = index

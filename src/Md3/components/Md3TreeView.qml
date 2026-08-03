@@ -26,6 +26,10 @@ Item {
     property var overlayWindow: null
     /// Cap scroll viewport in Column layouts (0 = natural full content height).
     property real preferredMaxHeight: 0
+    /// Fraction of parent height when parent is sized (0 = off). E.g. 0.42 in a scroll column.
+    property real preferredHeightFraction: 0
+    /// Minimum height when using preferredHeightFraction.
+    property real preferredMinHeight: 180
     /// Drop ListView row delegates while page is off-display (chrome stays).
     property bool unloadWhenPageInactive: true
 
@@ -57,9 +61,19 @@ Item {
     property string _filterApplied: ""
 
     readonly property real _contentH: flatRows.length * rowHeight
-    readonly property real _bodyH: preferredMaxHeight > 0
-                                   ? Math.min(_contentH, preferredMaxHeight)
-                                   : _contentH
+    readonly property real _fractionCap: {
+        if (preferredHeightFraction <= 0 || !parent || parent.height < 1)
+            return 0
+        return Math.max(preferredMinHeight, Math.floor(parent.height * preferredHeightFraction))
+    }
+    readonly property real _bodyH: {
+        let cap = preferredMaxHeight > 0 ? preferredMaxHeight : 0
+        if (_fractionCap > 0)
+            cap = cap > 0 ? Math.min(cap, _fractionCap) : _fractionCap
+        if (cap > 0)
+            return Math.min(_contentH, cap)
+        return _contentH
+    }
 
     function _rebuildFlatRows() {
         const out = []

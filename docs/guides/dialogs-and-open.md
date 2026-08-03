@@ -58,3 +58,39 @@ Md3Dialog {
 ```
 
 See [feedback.md](feedback.md).
+
+## Imperative confirm / prompt
+
+`Md3ApplicationWindow` registers a dialog service. From anywhere:
+
+```qml
+Md3DialogHost.confirm({
+    title: qsTr("Delete?"),
+    text: qsTr("This cannot be undone."),
+    confirmTone: Md3Dialog.Error,
+    confirmText: qsTr("Delete"),
+    onConfirmed: function () { /* … */ }
+})
+
+Md3DialogHost.prompt({
+    title: qsTr("Rename"),
+    label: qsTr("Name"),
+    value: currentName,
+    onConfirmed: function (value) { /* … */ }
+})
+```
+
+Prefer signals up to the window when possible; use DialogHost to avoid `Window.window.confirmX` glue.
+
+## Dialog form width
+
+```qml
+Md3Dialog {
+    preferredWidth: 480
+    Md3TextField {
+        width: parent ? parent.width : 280  // or bind to dialog.contentWidth from outside
+    }
+}
+```
+
+Child fields inside the dialog body already get `parent.width` from the column.

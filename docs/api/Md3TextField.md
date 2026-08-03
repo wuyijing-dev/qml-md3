@@ -7,7 +7,7 @@
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 36 | 5 | 4 | 1 |
+| 38 | 5 | 4 | 1 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -29,6 +29,8 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `variant` | `int (Md3TextField.Variant)` | `Md3TextField.Filled` | read/write | `Md3TextField` | Visual / role variant (see Enums). |
 | `text` | `alias` | `input.text` | read/write | `Md3TextField` | Primary label text. |
+| `boundText` | `string` | `""` | read/write | `Md3TextField` | External string mirror. Enable with ``syncBoundText: true`` (avoids clearing unbound fields). |
+| `syncBoundText` | `bool` | `false` | read/write | `Md3TextField` | Sync Bound Text. |
 | `label` | `string` | `""` | read/write | `Md3TextField` | Field / control label. |
 | `placeholderText` | `string` | `""` | read/write | `Md3TextField` | Placeholder when empty. |
 | `supportingText` | `string` | `""` | read/write | `Md3TextField` | Supporting Text. |
@@ -90,10 +92,10 @@ import Md3
 
 Md3TextField {
     variant: Md3TextField.Filled
+    boundText: ""
+    syncBoundText: false
     label: ""
     placeholderText: ""
     supportingText: ""
-    errorText: ""
-    error: false
 }
 ```

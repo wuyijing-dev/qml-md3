@@ -47,7 +47,14 @@ bool Md3I18n::loadLanguage(const QString &lang)
         return true;
     m_language = code;
     emit languageChanged();
+    bump();
     return true;
+}
+
+void Md3I18n::bump()
+{
+    ++m_revision;
+    emit revisionChanged();
 }
 
 bool Md3I18n::_install(const QString &lang)

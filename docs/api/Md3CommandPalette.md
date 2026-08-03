@@ -1,6 +1,6 @@
 # Md3CommandPalette
 
-Spotlight-style command palette (Ctrl+K). model: [{ title, subtitle?, icon?, id? }]
+Spotlight-style command palette (Ctrl+K). model: [{ title, subtitle?, icon?, section?, visibleWhen?, id? }] or plain strings.
 
 - **Source:** `src/Md3/components/Md3CommandPalette.qml`
 - **Extends:** `Item`
@@ -9,7 +9,7 @@ Spotlight-style command palette (Ctrl+K). model: [{ title, subtitle?, icon?, id?
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 7 | 2 | 3 | 0 |
+| 9 | 2 | 3 | 0 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -27,6 +27,8 @@ import Md3
 | `placeholder` | `string` | `qsTr("Type a command…")` | read/write | `Md3CommandPalette` | Placeholder. |
 | `model` | `var` | `[]` | read/write | `Md3CommandPalette` | Data model. |
 | `maxResults` | `int` | `12` | read/write | `Md3CommandPalette` | Max Results. |
+| `groupBySection` | `bool` | `true` | read/write | `Md3CommandPalette` | When true, insert section headers from item.section. |
+| `localeRevision` | `int` | `Md3I18n.revision` | readonly | `Md3CommandPalette` | Depend so app models that read ``Md3I18n.revision`` rebuild after language change. |
 | `query` | `string` | `""` | read/write | `Md3CommandPalette` | Query. |
 | `highlightIndex` | `int` | `0` | read/write | `Md3CommandPalette` | Highlight Index. |
 | `filtered` | `var` | `{…}` | readonly | `Md3CommandPalette` | Filtered. |
@@ -56,7 +58,7 @@ Md3CommandPalette {
     placeholder: qsTr("Type a command…")
     model: []
     maxResults: 12
+    groupBySection: true
     query: ""
-    highlightIndex: 0
 }
 ```

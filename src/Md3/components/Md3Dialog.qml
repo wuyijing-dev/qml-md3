@@ -19,6 +19,10 @@ Item {
     property int confirmTone: Md3Dialog.Primary
     /// When true (default), close writes ``open = false``. Set false if ``open`` is bound externally.
     property bool writeOpenOnClose: true
+    /// Panel width cap (also used as form ``contentWidth``).
+    property real preferredWidth: 560
+    /// Stable width for children (``parent ? parent.width : 280`` → use this).
+    readonly property real contentWidth: panel.width > 1 ? panel.width - 48 : Math.min(preferredWidth, 400)
     /// Custom body between text and action buttons.
     default property alias content: bodySlot.data
 
@@ -120,7 +124,7 @@ Item {
     Rectangle {
         id: panel
         anchors.centerIn: parent
-        width: Math.min(parent.width - 48, 560)
+        width: Math.min(parent.width - 48, preferredWidth)
         implicitHeight: col.implicitHeight + 24
         height: implicitHeight
         radius: Md3Theme.shape.extraLarge

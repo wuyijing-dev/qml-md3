@@ -1547,6 +1547,12 @@ Window {
                 z: 1300
             }
 
+            Md3DialogServiceHost {
+                id: dialogServiceHost
+                anchors.fill: parent
+                z: 1400
+            }
+
             Connections {
                 target: snackbarHost
                 function onActionTriggered(snackId, actionText) {

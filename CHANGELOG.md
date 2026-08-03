@@ -8,10 +8,21 @@
 - **InfoBar** — `secondaryActionText` + `secondaryActionClicked`.
 - **PageSection** — `trailing` header slot.
 - **ScrollView** — `verticalScrollbarGutter` + `contentAvailableWidth`.
+- **ListTile** — `trailingActions` + `maxVisibleTrailingActions` overflow.
+- **I18n** — `Md3I18n.revision` / `bump()` for dynamic `menuModel` / palette rebuilds.
+- **Lists / Tree** — `preferredMaxHeight`, `preferredHeightFraction`, `fillAvailableHeight`.
+- **DiffBlock** — hunk preview + `hunkActions`.
+- **DialogHost** — `Md3DialogHost.confirm` / `prompt` (auto-hosted by ApplicationWindow).
+- **Dialog** — `preferredWidth` + `contentWidth`.
+- **PageScaffold / ScrollPage / InspectorLayout / ActionRow**.
+- **CommandPalette** — `section` / `groupBySection` / `visibleWhen`.
+- **CodeBlock.fill**; **TextField** `boundText` + `syncBoundText`; **AbstractButton** `writeCheckedOnToggle`.
+- **AppToolBar** — `density: Compact` + `trailing` overflow slot; **DropDown** density height.
+- **Card** — `fillFallbackHeight`, `actionsMaxVisible`.
 
 ### Docs
 
-- [dialogs-and-open](docs/guides/dialogs-and-open.md) covers sheets/flyout; layout antipatterns for Split×VStack / Fit host / scrollbar gutter.
+- dialogs-and-open, layout, feedback, collections updated for the above.
 
 ## 1.1.3
 

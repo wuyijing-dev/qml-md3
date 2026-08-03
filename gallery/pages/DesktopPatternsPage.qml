@@ -339,6 +339,74 @@ Md3Page {
             }
         }
 
+        Md3ListTile {
+            width: parent.width
+            title: qsTr("feature/login")
+            subtitle: qsTr("trailingActions + overflow")
+            trailingActions: [
+                { icon: "merge", text: qsTr("Merge") },
+                { icon: "content_copy", text: qsTr("Copy") },
+                { icon: "push_pin", text: qsTr("Pin") },
+                { icon: "delete", text: qsTr("Delete") }
+            ]
+            maxVisibleTrailingActions: 2
+            onTrailingActionClicked: function (i) {
+                page.applyStatus(qsTr("Tile action %1").arg(i))
+            }
+        }
+
+        Md3DiffBlock {
+            width: parent.width
+            maxHeight: 160
+            previewLineCount: 4
+            code: "@@ -1,3 +1,4 @@\n context\n-old line\n+new line\n+another\n+more\n+lines\n+here"
+            hunkActions: [
+                { text: qsTr("Stage"), icon: "add" },
+                { text: qsTr("Discard"), icon: "undo" }
+            ]
+            onHunkActionClicked: function (i) {
+                page.applyStatus(i === 0 ? qsTr("Stage hunk") : qsTr("Discard hunk"))
+            }
+        }
+
+        Md3HStack {
+            width: parent.width
+            spacing: 8
+            Md3Button {
+                text: qsTr("DialogHost.confirm")
+                onClicked: Md3DialogHost.confirm({
+                    title: qsTr("Delete item?"),
+                    text: qsTr("Uses Md3DialogHost — no Window.window glue."),
+                    confirmTone: Md3Dialog.Error,
+                    confirmText: qsTr("Delete"),
+                    onConfirmed: function () { page.applyStatus(qsTr("Confirmed")) }
+                })
+            }
+            Md3Button {
+                text: qsTr("DialogHost.prompt")
+                variant: Md3Button.Outlined
+                onClicked: Md3DialogHost.prompt({
+                    title: qsTr("Rename"),
+                    label: qsTr("Name"),
+                    value: qsTr("untitled"),
+                    onConfirmed: function (v) { page.applyStatus(qsTr("Named: %1").arg(v)) }
+                })
+            }
+        }
+
+        Md3ActionRow {
+            width: parent.width
+            maxVisible: 3
+            model: [
+                { text: qsTr("Create branch"), icon: "add" },
+                { text: qsTr("Tag"), icon: "sell" },
+                { text: qsTr("Cherry-pick"), icon: "content_copy" },
+                { text: qsTr("Revert"), icon: "undo" },
+                { text: qsTr("Reset hard"), icon: "warning" }
+            ]
+            onActionClicked: function (i) { page.applyStatus(qsTr("Action %1").arg(i)) }
+        }
+
         Md3TaskProgress {
             width: parent.width
             active: true

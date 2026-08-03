@@ -21,8 +21,10 @@ Md3AbstractButton {
     signal primaryClicked()
 
     readonly property bool menuOpen: menu.open
-    readonly property real h: 40
+    readonly property real h: Md3Theme.controlHeight
     readonly property real padH: 16
+    /// Depend on locale revision so ``menuModel`` bindings that read ``Md3I18n.revision`` refresh.
+    readonly property int _localeRevision: Md3I18n.revision
 
     cornerRadius: h / 2
 

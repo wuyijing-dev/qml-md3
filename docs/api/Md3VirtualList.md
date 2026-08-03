@@ -9,7 +9,7 @@ Thin virtualized list wrapper for large models with jump/scroll helpers. Prefer 
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 10 | 2 | 2 | 0 |
+| 14 | 2 | 2 | 0 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -33,6 +33,10 @@ import Md3
 | `emptyText` | `string` | `qsTr("No items")` | read/write | `Md3VirtualList` | Empty Text. |
 | `accessibleName` | `string` | `""` | read/write | `Md3VirtualList` | Screen-reader label (defaults to “Virtual list”). |
 | `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3VirtualList` | Drop ListView delegates while page is off-display (shell size stays). |
+| `preferredMaxHeight` | `real` | `0` | read/write | `Md3VirtualList` | Preferred Max Height. |
+| `preferredHeightFraction` | `real` | `0` | read/write | `Md3VirtualList` | Preferred Height Fraction. |
+| `preferredMinHeight` | `real` | `120` | read/write | `Md3VirtualList` | Preferred Min Height. |
+| `fillAvailableHeight` | `bool` | `false` | read/write | `Md3VirtualList` | Fill Available Height. |
 
 ## Signals
 

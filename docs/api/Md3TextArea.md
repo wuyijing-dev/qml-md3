@@ -33,6 +33,8 @@ import Md3
 |------|------|---------|--------|------------|-------------|
 | `variant` | `int (Md3TextField.Variant)` | `Md3TextField.Filled` | read/write | [`Md3TextField`](Md3TextField.md) | Visual / role variant (see Enums). |
 | `text` | `alias` | `input.text` | read/write | [`Md3TextField`](Md3TextField.md) | Primary label text. |
+| `boundText` | `string` | `""` | read/write | [`Md3TextField`](Md3TextField.md) | External string mirror. Enable with ``syncBoundText: true`` (avoids clearing unbound fields). |
+| `syncBoundText` | `bool` | `false` | read/write | [`Md3TextField`](Md3TextField.md) | Sync Bound Text. |
 | `label` | `string` | `""` | read/write | [`Md3TextField`](Md3TextField.md) | Field / control label. |
 | `placeholderText` | `string` | `""` | read/write | [`Md3TextField`](Md3TextField.md) | Placeholder when empty. |
 | `supportingText` | `string` | `""` | read/write | [`Md3TextField`](Md3TextField.md) | Supporting Text. |
@@ -94,10 +96,10 @@ import Md3
 
 Md3TextArea {
     variant: Md3TextField.Filled
+    boundText: ""
+    syncBoundText: false
     label: ""
     placeholderText: ""
     supportingText: ""
-    errorText: ""
-    error: false
 }
 ```

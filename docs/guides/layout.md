@@ -108,7 +108,36 @@ Md3PageHeader {
 Md3PageSection {
     title: qsTr("Appearance")
     subtitle: qsTr("Theme and density")
+    trailing: Md3IconButton { icon: "add" }
     Md3Switch { /* ... */ }
+}
+```
+
+### Page scaffold / scroll page
+
+```qml
+Md3PageScaffold {
+    header: Md3PageHeader { title: qsTr("Changes") }
+    stickyFooter: Md3StatusLine { text: qsTr("Ready") }
+    Md3VStack {
+        width: parent.width
+        /* body scrolls between header and footer */
+    }
+}
+
+Md3ScrollPage {
+    pagePadding: 16
+    Md3Text { text: qsTr("Reliable page scroller in Tab/Fit hosts") }
+}
+```
+
+### Inspector (list | detail)
+
+```qml
+Md3InspectorLayout {
+    splitRatio: 0.38
+    Item { /* list pane — nest anchors.fill inside */ }
+    Item { /* detail pane */ }
 }
 ```
 

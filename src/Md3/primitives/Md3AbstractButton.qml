@@ -21,6 +21,9 @@ Item {
     /// When true, Space/Enter/click toggle `checked` before emitting clicked.
     property bool checkable: false
     property bool checked: false
+    /// When true (default), activate writes ``checked``. Set false if ``checked`` is bound
+    /// externally (same contract as overlay ``writeOpenOnClose``).
+    property bool writeCheckedOnToggle: true
 
     /// When false, the built-in MouseArea ignores presses (custom hit areas).
     property bool pressEnabled: true
@@ -50,8 +53,10 @@ Item {
         if (fromKeyboard)
             visualFocus = true
         if (checkable) {
-            checked = !checked
-            toggled(checked)
+            const next = !checked
+            if (writeCheckedOnToggle)
+                checked = next
+            toggled(next)
         }
         clicked()
     }

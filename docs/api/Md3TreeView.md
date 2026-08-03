@@ -9,7 +9,7 @@ Hierarchical tree: `{ title, icon?, children?, expanded?, checked?, data? }`.
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 18 | 5 | 8 | 0 |
+| 20 | 5 | 8 | 0 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -39,6 +39,8 @@ import Md3
 | `contextMenu` | `var` | `null` | read/write | `Md3TreeView` | Context Menu. |
 | `overlayWindow` | `var` | `null` | read/write | `Md3TreeView` | Optional explicit Window for context-menu overlay coords. |
 | `preferredMaxHeight` | `real` | `0` | read/write | `Md3TreeView` | Cap scroll viewport in Column layouts (0 = natural full content height). |
+| `preferredHeightFraction` | `real` | `0` | read/write | `Md3TreeView` | Fraction of parent height when parent is sized (0 = off). E.g. 0.42 in a scroll column. |
+| `preferredMinHeight` | `real` | `180` | read/write | `Md3TreeView` | Minimum height when using preferredHeightFraction. |
 | `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3TreeView` | Drop ListView row delegates while page is off-display (chrome stays). |
 | `flatRows` | `var` | `[]` | read/write | `Md3TreeView` | Flat Rows. |
 

@@ -9,6 +9,10 @@ Item {
 
     property int variant: Md3TextField.Filled
     property alias text: input.text
+    /// External string mirror. Enable with ``syncBoundText: true`` (avoids clearing unbound fields).
+    property string boundText: ""
+    property bool syncBoundText: false
+    property bool _boundTextGuard: false
     property string label: ""
     property string placeholderText: ""
     property string supportingText: ""
@@ -181,7 +185,21 @@ Item {
             _syncSuggestionPopup()
     }
     onAutoCompleteChanged: _syncSuggestionPopup()
+    onBoundTextChanged: {
+        if (!syncBoundText || _boundTextGuard)
+            return
+        if (text !== boundText) {
+            _boundTextGuard = true
+            text = boundText
+            _boundTextGuard = false
+        }
+    }
     onTextChanged: {
+        if (syncBoundText && !_boundTextGuard && boundText !== text) {
+            _boundTextGuard = true
+            boundText = text
+            _boundTextGuard = false
+        }
         if (autoComplete && focused) {
             // Typing resets highlight so Enter applies the top match unless arrows used
             if (suggestionIndex >= 0)

@@ -26,17 +26,40 @@ Item {
     property string accessibleName: ""
     /// Drop ListView delegates while page is off-display (shell size stays).
     property bool unloadWhenPageInactive: true
+    /// Cap viewport in Column layouts (0 = use default implicitHeight / content).
+    property real preferredMaxHeight: 0
+    /// Fraction of parent height (0 = off). Combined with preferredMaxHeight when both set.
+    property real preferredHeightFraction: 0
+    property real preferredMinHeight: 120
+    /// When true and parent has a height, fill parent height (nested sheet / pane).
+    property bool fillAvailableHeight: false
 
     signal itemActivated(int index, var item)
     signal itemClicked(int index, var item)
     signal selectionChanged()
     signal currentIndexChangedByUser(int index, var item)
 
+    readonly property real _fractionCap: {
+        if (preferredHeightFraction <= 0 || !parent || parent.height < 1)
+            return 0
+        return Math.max(preferredMinHeight, Math.floor(parent.height * preferredHeightFraction))
+    }
+    readonly property real _resolvedHeight: {
+        if (fillAvailableHeight && parent && parent.height > 1)
+            return parent.height
+        let cap = preferredMaxHeight > 0 ? preferredMaxHeight : 0
+        if (_fractionCap > 0)
+            cap = cap > 0 ? Math.min(cap, _fractionCap) : _fractionCap
+        if (cap > 0)
+            return cap
+        return 280
+    }
+
     implicitWidth: 320
-    implicitHeight: 280
+    implicitHeight: _resolvedHeight
     readonly property Md3HeightSync _heightSync: Md3HeightSync {
         target: root
-        enabled: !root.anchors.fill
+        enabled: !root.anchors.fill && !root.fillAvailableHeight
         policy: Md3HeightSync.AtLeastImplicit
     }
 

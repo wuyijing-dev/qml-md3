@@ -18,6 +18,10 @@ Item {
     property alias headerTrailing: headerTrailingSlot.data
     /// [{ text, icon?, variant? }] — compact header actions without Row glue.
     property var actions: []
+    /// Cap header actions before overflow menu (0 = show all).
+    property int actionsMaxVisible: 0
+    /// Body height when children use anchors.fill (StatTile-style).
+    property real fillFallbackHeight: 160
     default property alias content: bodySlot.data
 
     signal clicked()
@@ -153,15 +157,52 @@ Item {
                         id: actionsRow
                         visible: root.actions && root.actions.length > 0
                         spacing: 4
+                        readonly property int _cap: root.actionsMaxVisible > 0
+                                                   ? Math.min(root.actionsMaxVisible, root.actions.length)
+                                                   : (root.actions ? root.actions.length : 0)
+                        readonly property bool _overflow: root.actionsMaxVisible > 0
+                                                          && root.actions
+                                                          && root.actions.length > root.actionsMaxVisible
                         Repeater {
-                            model: root.actions
+                            model: actionsRow._cap
                             Md3Button {
                                 required property int index
-                                required property var modelData
+                                readonly property var modelData: root.actions[index]
                                 text: modelData.text !== undefined ? String(modelData.text) : String(modelData)
                                 icon: modelData.icon !== undefined ? String(modelData.icon) : ""
                                 variant: root._actionVariant(modelData)
                                 onClicked: root.actionClicked(index)
+                            }
+                        }
+                        Md3IconButton {
+                            visible: actionsRow._overflow
+                            icon: "more_vert"
+                            accessibleName: qsTr("More actions")
+                            onClicked: {
+                                const out = []
+                                for (let i = actionsRow._cap; i < root.actions.length; ++i) {
+                                    const e = root.actions[i]
+                                    out.push({
+                                        text: e && e.text !== undefined ? String(e.text) : String(e),
+                                        _index: i
+                                    })
+                                }
+                                cardOverflowMenu.model = out
+                                cardOverflowMenu.rebuildFromModel()
+                                cardOverflowMenu.open = true
+                            }
+                        }
+                        Md3Menu {
+                            id: cardOverflowMenu
+                            model: []
+                            onItemClicked: function (path) {
+                                const rows = cardOverflowMenu.model
+                                for (let i = 0; i < rows.length; ++i) {
+                                    if (String(rows[i].text) === String(path)) {
+                                        root.actionClicked(rows[i]._index)
+                                        return
+                                    }
+                                }
                             }
                         }
                     }
@@ -173,7 +214,7 @@ Item {
                     /// Measured without binding to childrenRect (avoids implicit size loops).
                     property real contentHeight: 0
                     property bool _measureGuard: false
-                    readonly property real fillFallback: 160
+                    readonly property real fillFallback: root.fillFallbackHeight
                     readonly property bool hasFillChild: {
                         void children.length
                         const kids = children

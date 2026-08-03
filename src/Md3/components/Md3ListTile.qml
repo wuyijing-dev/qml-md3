@@ -1,6 +1,7 @@
 import QtQuick
 import Md3
 
+/// List tile with optional trailing action icons and overflow (narrow panes).
 Md3AbstractButton {
     id: root
 
@@ -9,23 +10,23 @@ Md3AbstractButton {
     property string supportingText: ""
     property string leadingIcon: ""
     property string trailingIcon: ""
-    /// Initials for a leading Md3Avatar (when no `leading:` slot).
     property string leadingAvatar: ""
-    /// Image URL for a leading Md3Avatar.
     property url leadingAvatarSource: ""
-    /// Degrees applied to trailing icon (e.g. ExpansionTile chevron).
     property real trailingRotation: 0
     property bool selected: false
-    // Use Item.enabled (do not redeclare)
     property bool showDivider: false
-    /// Stretch to parent width (default) — removes `width: parent.width` glue.
     property bool fillWidth: true
-    /// Optional leading control slot (e.g. custom avatar) — peer of `trailing:`.
     property alias leading: leadingSlot.data
-    /// Optional trailing control slot (e.g. Md3Switch) — prefer over inventing a Row.
     property alias trailing: trailingSlot.data
+    /// [{ icon, text?, enabled?, accessibleName? }] — icons to the right of title.
+    property var trailingActions: []
+    /// Max icons before collapsing into overflow menu (0 = show all).
+    property int maxVisibleTrailingActions: 0
+    property bool trailingOverflowEnabled: true
+    property string trailingOverflowIcon: "more_vert"
 
     signal trailingClicked()
+    signal trailingActionClicked(int index)
 
     readonly property int lines: {
         if (supportingText.length > 0)
@@ -46,11 +47,18 @@ Md3AbstractButton {
     readonly property bool hasLeadingSlot: leadingSlot.children.length > 0
     readonly property bool hasLeadingAvatar: leadingAvatar.length > 0
                                                || (leadingAvatarSource && String(leadingAvatarSource).length > 0)
+    readonly property int _actionCount: trailingActions && trailingActions.length ? trailingActions.length : 0
+    readonly property bool _actionsOverflow: {
+        if (!trailingOverflowEnabled || maxVisibleTrailingActions <= 0 || _actionCount <= maxVisibleTrailingActions)
+            return false
+        return _actionCount > maxVisibleTrailingActions
+    }
+    readonly property int _visibleActionCount: _actionsOverflow ? Math.max(0, maxVisibleTrailingActions)
+                                                                : _actionCount
 
     implicitHeight: Math.max(minH, col.implicitHeight + 16)
     implicitWidth: 320
     height: implicitHeight
-    // Only ease when density flips — avoid hover/layout thrash animating every height write.
     property bool _densityHeightAnim: false
     Behavior on height {
         enabled: !Md3Theme.reduceMotion && root._densityHeightAnim
@@ -94,11 +102,44 @@ Md3AbstractButton {
     pressRightMargin: {
         if (root.hasTrailingSlot)
             return trailingSlot.width + 16
+        if (root._actionCount > 0)
+            return actionsHost.width + 16
         if (root.trailingIcon.length > 0)
             return 40
         return 0
     }
     onPressFeedback: function (x, y) { }
+
+    function _actionIcon(e) {
+        if (!e)
+            return "more_horiz"
+        if (e.icon !== undefined)
+            return String(e.icon)
+        return "more_horiz"
+    }
+
+    function _actionLabel(e, i) {
+        if (!e)
+            return qsTr("Action %1").arg(i + 1)
+        if (e.text !== undefined && String(e.text).length)
+            return String(e.text)
+        if (e.accessibleName !== undefined && String(e.accessibleName).length)
+            return String(e.accessibleName)
+        return _actionIcon(e)
+    }
+
+    function _overflowModel() {
+        const out = []
+        for (let i = root._visibleActionCount; i < root._actionCount; ++i) {
+            const e = root.trailingActions[i]
+            out.push({
+                text: root._actionLabel(e, i),
+                enabled: !e || e.enabled !== false,
+                _index: i
+            })
+        }
+        return out
+    }
 
     Row {
         anchors.fill: parent
@@ -142,10 +183,12 @@ Md3AbstractButton {
                     w -= 32 + 16
                 else if (root.leadingIcon.length > 0)
                     w -= 24 + 16
-                if (root.trailingIcon.length > 0)
+                if (root.trailingIcon.length > 0 && root._actionCount === 0 && !root.hasTrailingSlot)
                     w -= 24 + 16
                 if (root.hasTrailingSlot)
                     w -= trailingSlot.width + 16
+                if (root._actionCount > 0)
+                    w -= actionsHost.width + 16
                 return Math.max(0, w)
             }
             spacing: 2
@@ -184,6 +227,54 @@ Md3AbstractButton {
         }
 
         Item {
+            id: actionsHost
+            visible: root._actionCount > 0 && !root.hasTrailingSlot
+            width: actionsRow.width
+            height: Math.max(40, actionsRow.height)
+            anchors.verticalCenter: parent.verticalCenter
+
+            Row {
+                id: actionsRow
+                spacing: 0
+                Repeater {
+                    model: root._visibleActionCount
+                    Md3IconButton {
+                        required property int index
+                        icon: root._actionIcon(root.trailingActions[index])
+                        enabled: root.enabled && (!root.trailingActions[index]
+                                                  || root.trailingActions[index].enabled !== false)
+                        accessibleName: root._actionLabel(root.trailingActions[index], index)
+                        onClicked: root.trailingActionClicked(index)
+                    }
+                }
+                Md3IconButton {
+                    visible: root._actionsOverflow
+                    icon: root.trailingOverflowIcon
+                    accessibleName: qsTr("More actions")
+                    onClicked: {
+                        overflowMenu.model = root._overflowModel()
+                        overflowMenu.rebuildFromModel()
+                        overflowMenu.open = true
+                    }
+                }
+            }
+
+            Md3Menu {
+                id: overflowMenu
+                model: []
+                onItemClicked: function (path) {
+                    const rows = overflowMenu.model
+                    for (let i = 0; i < rows.length; ++i) {
+                        if (String(rows[i].text) === String(path)) {
+                            root.trailingActionClicked(rows[i]._index)
+                            return
+                        }
+                    }
+                }
+            }
+        }
+
+        Item {
             id: trailingSlot
             visible: root.hasTrailingSlot
             width: childrenRect.width
@@ -192,7 +283,7 @@ Md3AbstractButton {
         }
 
         Md3Icon {
-            visible: root.trailingIcon.length > 0 && !root.hasTrailingSlot
+            visible: root.trailingIcon.length > 0 && !root.hasTrailingSlot && root._actionCount === 0
             icon: root.trailingIcon
             size: 24
             iconColor: Md3Theme.colorScheme.colorOnSurfaceVariant
@@ -221,5 +312,4 @@ Md3AbstractButton {
         anchors.bottom: parent.bottom
         variant: Md3Divider.Inset
     }
-
 }

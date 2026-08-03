@@ -42,6 +42,53 @@ Md3ListView {
 `model` 也可为 `ListModel` 或 `QAbstractListModel`。数组模型用 `modelData`；AIM 在自定义 delegate 里读 role（或 Loader 同步的 `model` 对象）。
 
 Ctrl/Shift 点击多选；Ctrl+A 全选；Space 切换当前项。
+
+高度：`preferredMaxHeight` / `preferredHeightFraction` / `fillAvailableHeight`（`Md3VirtualList`、`Md3TreeView` 同理）。
+
+## ListTile trailing actions
+
+```qml
+Md3ListTile {
+    title: qsTr("main")
+    trailingActions: [
+        { icon: "merge", text: qsTr("Merge") },
+        { icon: "delete", text: qsTr("Delete") },
+        { icon: "content_copy", text: qsTr("Copy") }
+    ]
+    maxVisibleTrailingActions: 2
+    onTrailingActionClicked: (i) => { }
+}
+```
+
+## Diff hunks
+
+```qml
+Md3DiffBlock {
+    code: hunkText
+    previewLineCount: 12
+    hunkActions: [
+        { text: qsTr("Stage"), icon: "add" },
+        { text: qsTr("Discard"), icon: "undo" }
+    ]
+    onHunkActionClicked: (i) => { }
+}
+```
+
+## Command palette sections
+
+```qml
+Md3CommandPalette {
+    groupBySection: true
+    model: [
+        { section: qsTr("Repo"), title: qsTr("Fetch"), icon: "download" },
+        { section: qsTr("View"), title: qsTr("Toggle detail"), icon: "dock_to_left",
+          visibleWhen: true }
+    ]
+}
+```
+
+动态 `qsTr` 模型在语言切换后依赖 `Md3I18n.revision`（或 `Md3I18n.bump()`）重建。
+
 ## GridView / ItemsView
 
 ```qml

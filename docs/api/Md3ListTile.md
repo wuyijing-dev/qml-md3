@@ -1,5 +1,7 @@
 # Md3ListTile
 
+List tile with optional trailing action icons and overflow (narrow panes).
+
 - **Source:** `src/Md3/components/Md3ListTile.qml`
 - **Extends:** `Md3AbstractButton`
 
@@ -7,7 +9,7 @@
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 18 | 1 | 0 | 0 |
+| 22 | 2 | 0 | 0 |
 
 ## Import
 
@@ -28,14 +30,18 @@ import Md3
 | `supportingText` | `string` | `""` | read/write | `Md3ListTile` | Supporting Text. |
 | `leadingIcon` | `string` | `""` | read/write | `Md3ListTile` | Leading Icon. |
 | `trailingIcon` | `string` | `""` | read/write | `Md3ListTile` | Trailing Icon. |
-| `leadingAvatar` | `string` | `""` | read/write | `Md3ListTile` | Initials for a leading Md3Avatar (when no `leading:` slot). |
-| `leadingAvatarSource` | `url` | `""` | read/write | `Md3ListTile` | Image URL for a leading Md3Avatar. |
-| `trailingRotation` | `real` | `0` | read/write | `Md3ListTile` | Degrees applied to trailing icon (e.g. ExpansionTile chevron). |
+| `leadingAvatar` | `string` | `""` | read/write | `Md3ListTile` | Leading Avatar. |
+| `leadingAvatarSource` | `url` | `""` | read/write | `Md3ListTile` | Leading Avatar Source. |
+| `trailingRotation` | `real` | `0` | read/write | `Md3ListTile` | Trailing Rotation. |
 | `selected` | `bool` | `false` | read/write | `Md3ListTile` | Selected. |
 | `showDivider` | `bool` | `false` | read/write | `Md3ListTile` | Show Divider. |
-| `fillWidth` | `bool` | `true` | read/write | `Md3ListTile` | Stretch to parent width (default) — removes `width: parent.width` glue. |
-| `leading` | `alias` | `leadingSlot.data` | read/write | `Md3ListTile` | Optional leading control slot (e.g. custom avatar) — peer of `trailing:`. |
-| `trailing` | `alias` | `trailingSlot.data` | read/write | `Md3ListTile` | Optional trailing control slot (e.g. Md3Switch) — prefer over inventing a Row. |
+| `fillWidth` | `bool` | `true` | read/write | `Md3ListTile` | Fill Width. |
+| `leading` | `alias` | `leadingSlot.data` | read/write | `Md3ListTile` | Leading. |
+| `trailing` | `alias` | `trailingSlot.data` | read/write | `Md3ListTile` | Trailing. |
+| `trailingActions` | `var` | `[]` | read/write | `Md3ListTile` | [{ icon, text?, enabled?, accessibleName? }] — icons to the right of title. |
+| `maxVisibleTrailingActions` | `int` | `0` | read/write | `Md3ListTile` | Max icons before collapsing into overflow menu (0 = show all). |
+| `trailingOverflowEnabled` | `bool` | `true` | read/write | `Md3ListTile` | Trailing Overflow Enabled. |
+| `trailingOverflowIcon` | `string` | `"more_vert"` | read/write | `Md3ListTile` | Trailing Overflow Icon. |
 | `lines` | `int` | `{…}` | readonly | `Md3ListTile` | Lines. |
 | `minH` | `real` | `{…}` | readonly | `Md3ListTile` | Min H. |
 | `hasTrailingSlot` | `bool` | `trailingSlot.children.length > 0` | readonly | `Md3ListTile` | Has Trailing Slot. |
@@ -52,6 +58,7 @@ import Md3
 | `pressTarget` | `Item` | `root` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | Coordinate space for pressFeedback (usually the painted background item). |
 | `checkable` | `bool` | `false` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | When true, Space/Enter/click toggle `checked` before emitting clicked. |
 | `checked` | `bool` | `false` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | Checked / on state. |
+| `writeCheckedOnToggle` | `bool` | `true` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | When true (default), activate writes ``checked``. Set false if ``checked`` is bound externally (same contract as overlay ``writeOpenOnClose``). |
 | `pressEnabled` | `bool` | `true` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | When false, the built-in MouseArea ignores presses (custom hit areas). |
 | `interactive` | `bool` | `true` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | Gate clicks / keyboard activate without forcing `enabled: false` (e.g. busy spinner). |
 | `pressRightMargin` | `real` | `0` | read/write | [`Md3AbstractButton`](Md3AbstractButton.md) | Press Right Margin. |
@@ -64,6 +71,7 @@ import Md3
 | Signal | Defined in | Description |
 |--------|------------|-------------|
 | `trailingClicked()` | `Md3ListTile` | Emitted when trailing Clicked. |
+| `trailingActionClicked(int index)` | `Md3ListTile` | Emitted when trailing Action Clicked. |
 | `clicked()` | [`Md3AbstractButton`](Md3AbstractButton.md) | Emitted when clicked. |
 | `toggled(bool checked)` | [`Md3AbstractButton`](Md3AbstractButton.md) | Emitted when toggled. |
 | `pressFeedback(real x, real y)` | [`Md3AbstractButton`](Md3AbstractButton.md) | Map click into `pressTarget` so subclasses can `ripple.pulse(x, y)`. |

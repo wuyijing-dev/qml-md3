@@ -151,6 +151,7 @@ set_source_files_properties(
     foundation/Md3IconFonts.qml
     foundation/Md3AppIcons.qml
     foundation/Md3Notify.qml
+    foundation/Md3DialogHost.qml
     foundation/Md3TreeVisibility.qml
     foundation/Md3OverlayHost.qml
     window/Md3WindowCapabilities.qml
@@ -215,6 +216,7 @@ qt_add_qml_module(Md3
         foundation/Md3IconFonts.qml
         foundation/Md3AppIcons.qml
         foundation/Md3Notify.qml
+        foundation/Md3DialogHost.qml
         foundation/Md3TreeVisibility.qml
         foundation/Md3OverlayHost.qml
         foundation/Md3PageActivityGate.qml
@@ -257,6 +259,9 @@ qt_add_qml_module(Md3
         layout/Md3GridLayout.qml
         layout/Md3Spacer.qml
         layout/Md3PageSection.qml
+        layout/Md3PageScaffold.qml
+        layout/Md3ScrollPage.qml
+        layout/Md3InspectorLayout.qml
         components/Md3Button.qml
         components/Md3IconButton.qml
         components/Md3ToggleButton.qml
@@ -302,6 +307,9 @@ qt_add_qml_module(Md3
         components/Md3EmptyState.qml
         components/Md3ColorPicker.qml
         components/Md3Dialog.qml
+        components/Md3DialogServiceHost.qml
+        components/Md3ActionRow.qml
+        components/Md3DiffBlock.qml
         components/Md3FullscreenDialog.qml
         components/Md3BottomSheet.qml
         components/Md3SideSheet.qml

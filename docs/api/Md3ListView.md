@@ -9,7 +9,7 @@ WinUI-style list: virtualization, section headers, single/multi selection.
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 16 | 4 | 5 | 1 |
+| 20 | 4 | 5 | 1 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -44,6 +44,10 @@ import Md3
 | `emptyIcon` | `string` | `"inbox"` | read/write | `Md3ListView` | Empty-state icon name. |
 | `accessibleName` | `string` | `""` | read/write | `Md3ListView` | Screen-reader / AT name (defaults to “List”; do not reuse emptyText). |
 | `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3ListView` | Drop ListView delegates while page is off-display (shell size stays). |
+| `preferredMaxHeight` | `real` | `0` | read/write | `Md3ListView` | Cap viewport in Column layouts (0 = use default implicitHeight / content). |
+| `preferredHeightFraction` | `real` | `0` | read/write | `Md3ListView` | Fraction of parent height (0 = off). Combined with preferredMaxHeight when both set. |
+| `preferredMinHeight` | `real` | `120` | read/write | `Md3ListView` | Preferred Min Height. |
+| `fillAvailableHeight` | `bool` | `false` | read/write | `Md3ListView` | When true and parent has a height, fill parent height (nested sheet / pane). |
 | `hasSections` | `bool` | `sectionRole.length > 0` | readonly | `Md3ListView` | Has Sections. |
 
 ## Signals

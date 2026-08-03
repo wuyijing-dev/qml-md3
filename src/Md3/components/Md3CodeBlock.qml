@@ -18,6 +18,8 @@ Item {
     property int maxHeight: 280
     /// When false, height grows with content (still clipped by parent).
     property bool scrollable: true
+    /// When true, height fills the parent (ignore maxHeight); use in stretch layouts.
+    property bool fill: false
     /// Show a copy button in the top-right corner.
     property bool showCopyButton: true
     /// Drop RichText HTML while page is off-display (chrome size stays).
@@ -41,9 +43,11 @@ Item {
     }
 
     implicitWidth: 360
-    implicitHeight: scrollable ? Math.min(maxHeight, chrome.implicitHeight)
-                               : chrome.implicitHeight
-    height: implicitHeight
+    implicitHeight: fill ? Math.max(120, parent ? parent.height : maxHeight)
+                         : (scrollable ? Math.min(maxHeight, chrome.implicitHeight)
+                                       : chrome.implicitHeight)
+    width: fill && parent ? parent.width : implicitWidth
+    height: fill && parent ? parent.height : implicitHeight
 
     function _escapeHtml(s) {
         return String(s)

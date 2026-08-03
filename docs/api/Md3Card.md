@@ -7,7 +7,7 @@
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 12 | 2 | 0 | 1 |
+| 14 | 2 | 0 | 1 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -35,6 +35,8 @@ import Md3
 | `subtitle` | `string` | `""` | read/write | `Md3Card` | Secondary supporting text. |
 | `headerTrailing` | `alias` | `headerTrailingSlot.data` | read/write | `Md3Card` | Trailing controls in the header row (e.g. Md3Button). |
 | `actions` | `var` | `[]` | read/write | `Md3Card` | [{ text, icon?, variant? }] — compact header actions without Row glue. |
+| `actionsMaxVisible` | `int` | `0` | read/write | `Md3Card` | Cap header actions before overflow menu (0 = show all). |
+| `fillFallbackHeight` | `real` | `160` | read/write | `Md3Card` | Body height when children use anchors.fill (StatTile-style). |
 | `content` | `alias` | `bodySlot.data` | default read/write | `Md3Card` | Content. |
 | `elev` | `real` | `variant === Md3Card.Elevated ? 1 : 0` | readonly | `Md3Card` | Elev. |
 | `hasHeader` | `bool` | `title.length > 0 \|\| subtitle.length > 0` | readonly | `Md3Card` | Has Header. |

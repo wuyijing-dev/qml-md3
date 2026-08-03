@@ -9,7 +9,7 @@ Compact app tool strip for `Md3ApplicationWindow.toolBar` (desktop chrome).
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 6 | 0 | 0 | 0 |
+| 8 | 0 | 0 | 1 |
 
 _Also inherits Qt Quick `Rectangle` members (not listed)._
 
@@ -19,14 +19,22 @@ _Also inherits Qt Quick `Rectangle` members (not listed)._
 import Md3
 ```
 
+## Enums
+
+### `Md3AppToolBar.Density`
+
+`Md3AppToolBar.Standard`, `Md3AppToolBar.Compact`
+
 ## Properties
 
 | Name | Type | Default | Access | Defined in | Description |
 |------|------|---------|--------|------------|-------------|
-| `barHeight` | `real` | `Md3Theme.controlHeight + 8` | read/write | `Md3AppToolBar` | Bar Height. |
-| `contentSpacing` | `real` | `Md3Theme.spacingSm` | read/write | `Md3AppToolBar` | Content Spacing. |
+| `density` | `int (Md3AppToolBar.Density)` | `Md3AppToolBar.Standard` | read/write | `Md3AppToolBar` | Layout density (see Enums / theme). |
+| `barHeight` | `real` | `density === Md3AppToolBar.Compact` | read/write | `Md3AppToolBar` | Bar Height. |
+| `contentSpacing` | `real` | `density === Md3AppToolBar.Compact` | read/write | `Md3AppToolBar` | Content Spacing. |
 | `horizontalPadding` | `real` | `Md3Theme.spacingMd` | read/write | `Md3AppToolBar` | Horizontal Padding. |
 | `showDivider` | `bool` | `true` | read/write | `Md3AppToolBar` | Show Divider. |
+| `trailing` | `alias` | `trailingSlot.data` | read/write | `Md3AppToolBar` | Optional overflow control (e.g. Md3IconButton "more") pinned to the trailing edge. |
 | `content` | `alias` | `stack.content` | read/write | `Md3AppToolBar` | Content. |
 | `data` | `alias` | `stack.content` | default read/write | `Md3AppToolBar` | Data. |
 
@@ -44,8 +52,9 @@ _None._
 import Md3
 
 Md3AppToolBar {
-    barHeight: Md3Theme.controlHeight + 8
-    contentSpacing: Md3Theme.spacingSm
+    density: Md3AppToolBar.Standard
+    barHeight: density === Md3AppToolBar.Compact
+    contentSpacing: density === Md3AppToolBar.Compact
     horizontalPadding: Md3Theme.spacingMd
     showDivider: true
 }

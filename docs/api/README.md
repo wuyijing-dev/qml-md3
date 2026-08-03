@@ -8,7 +8,7 @@
 
 手写附录（WinUI 对照等）放在 [`api-manual/`](../api-manual/README.md)；重新生成时会自动拼接到对应 API 页末尾。
 
-**QML types:** 186 · **C++ / native pages:** 9
+**QML types:** 193 · **C++ / native pages:** 9
 
 ## C++ / native
 
@@ -28,6 +28,7 @@
 - [Md3Adaptive](Md3Adaptive.md) _(singleton)_ — Material 3–aligned window size classes + desktop/mobile chrome policy. Breakpoints match common MD3 / Material WindowSizeClass widths (dp ≈ logical px).
 - [Md3AppIcons](Md3AppIcons.md) _(singleton)_ — Default app / window icons shipped inside the Md3 module (resources/icons). Paths: qrc:/md3/icons/app-icon.png … — used when windowIcon is left empty.
 - [Md3ColorScheme](Md3ColorScheme.md)
+- [Md3DialogHost](Md3DialogHost.md) _(singleton)_ — Imperative confirm / prompt dialogs. ``Md3ApplicationWindow`` registers a host automatically.
 - [Md3DynamicScheme](Md3DynamicScheme.md)
 - [Md3Elevation](Md3Elevation.md)
 - [Md3IconFonts](Md3IconFonts.md) _(singleton)_ — Shared Material Icons font faces — one FontLoader pair for the whole app (not per Md3Icon).
@@ -71,7 +72,10 @@
 - [Md3FlowLayout](Md3FlowLayout.md) — Wrapping flow — thin wrapper over Md3AnimatedFlow (no animation by default).
 - [Md3GridLayout](Md3GridLayout.md) — Responsive uniform grid for arbitrary child items.
 - [Md3HStack](Md3HStack.md) — Horizontal stack with spacing, padding, alignment, and expanding spacers. Manual Item layout (not Row): setting y/height on Row children re-enters updatePolish and triggers "polish() loop" warnings.  **Default property is `content` (→ layout host), never `data`.** Wrappers must write `default property alias x: stack.content` — aliasing `stack.data` parks children on the stack root and they will not lay out.
+- [Md3InspectorLayout](Md3InspectorLayout.md) — List + detail nested split (inspector pattern). Direct children: pane0 = list, pane1 = detail.
+- [Md3PageScaffold](Md3PageScaffold.md) — Page chrome: fixed header, body (scroll or fit), optional sticky footer.
 - [Md3PageSection](Md3PageSection.md) — Page section: title + optional subtitle + content — cuts gallery/form glue.
+- [Md3ScrollPage](Md3ScrollPage.md) — Reliable page scroller: measured VStack inside ``Md3ScrollView`` (Tab / Fit hosts).
 - [Md3Spacer](Md3Spacer.md) — Lightweight spacer. Use `size` for fixed gaps, or `expand: true` inside Md3HStack / Md3VStack to absorb remaining space (SwiftUI-style).
 - [Md3VStack](Md3VStack.md) — Vertical stack with spacing, padding, alignment, and optional child stretch.  **Default property is `content` (→ layout host), never `data`.** Wrappers must write `default property alias x: stack.content` — aliasing `stack.data` parks children on the stack root and they will not lay out.
 
@@ -107,7 +111,7 @@
 ## Input
 
 - [Md3ColorPicker](Md3ColorPicker.md) — Compact HSL color picker for theme seed / design tools.
-- [Md3CommandPalette](Md3CommandPalette.md) — Spotlight-style command palette (Ctrl+K). model: [{ title, subtitle?, icon?, id? }]
+- [Md3CommandPalette](Md3CommandPalette.md) — Spotlight-style command palette (Ctrl+K). model: [{ title, subtitle?, icon?, section?, visibleWhen?, id? }] or plain strings.
 - [Md3DateField](Md3DateField.md) — Docked MD3 date field: text field + calendar popup (Material docked date picker).
 - [Md3DatePicker](Md3DatePicker.md) — Material 3 date picker — calendar / input, year grid, min/max, today, week start. Inline by default. Set `modal: true` and `open` with anchors.fill on a host for dialog overlay.
 - [Md3DateRangePicker](Md3DateRangePicker.md) — Material 3 date range picker — shared chrome with Md3DatePicker (calendar/input/year/min-max).
@@ -163,6 +167,7 @@
 - [Md3Card](Md3Card.md)
 - [Md3ContextMenuArea](Md3ContextMenuArea.md) — Transparent right-click host over a page / region. Left-clicks pass through; right-click opens `contextMenu` at the cursor.  ```qml Md3ContextMenuArea { anchors.fill: parent contextMenu: pageMenu } Md3Menu { id: pageMenu Md3MenuItem { text: qsTr("Refresh") } } ```
 - [Md3Dialog](Md3Dialog.md) — Modal dialog with optional scrollable body and confirm tone.
+- [Md3DialogServiceHost](Md3DialogServiceHost.md) — Overlay host for ``Md3DialogHost.confirm`` / ``prompt``. Placed by ApplicationWindow.
 - [Md3Divider](Md3Divider.md)
 - [Md3DropdownMenu](Md3DropdownMenu.md)
 - [Md3EmptyState](Md3EmptyState.md) — Empty / no-results placeholder: icon, title, body, optional CTA.
@@ -209,12 +214,14 @@
 
 ## Components
 
+- [Md3ActionRow](Md3ActionRow.md) — Compact vertical stack of full-width actions (detail cards / sheets).
 - [Md3AdaptiveContainer](Md3AdaptiveContainer.md) — Standalone column-stacking adaptive container (gallery / direct use). Md3 container components embed `Md3ContainerBody` and expose `layoutMode` directly. Uses Md3VStack (HeightSync) instead of bare Column to avoid Qt 6.8 height-collapse overlaps.
 - [Md3AppToolBar](Md3AppToolBar.md) — Compact app tool strip for `Md3ApplicationWindow.toolBar` (desktop chrome).
 - [Md3ArcBandGauge](Md3ArcBandGauge.md) — Thick arc-band gauge with an end cap marker (dashboard KPI band).
 - [Md3CompassGauge](Md3CompassGauge.md) — Compass-style circular dial with heading needle (0–360°).
 - [Md3ContainerBody](Md3ContainerBody.md) — Fit / Scroll content host embedded by Md3 container components.
 - [Md3DeferredSection](Md3DeferredSection.md) — Within-page progressive load: placeholder first, then create `sourceComponent`. Honors Md3Theme.progressiveContent (default on). Set forceImmediate to always load now. When `unloadWhenPageInactive`, disarms while ancestor `md3PageActive` is false (PageHost injects).
+- [Md3DiffBlock](Md3DiffBlock.md) — Diff / patch block with optional per-hunk action footer (stage, discard, …).
 - [Md3DotsGauge](Md3DotsGauge.md) — Circular dots gauge — progress as filled dots around a ring.
 - [Md3FileDropZone](Md3FileDropZone.md) — Desktop file drop target with scrollable table preview of dropped files.
 - [Md3Flyout](Md3Flyout.md) — Anchored light-dismiss panel (WinUI Flyout–inspired). Reparents onto Window.contentItem via Md3OverlayHost — not ApplicationWindow.overlay.
@@ -224,7 +231,7 @@
 - [Md3KnobGauge](Md3KnobGauge.md) — Rotary knob-style gauge — drag or arrow keys to change value.
 - [Md3LiquidGlass](Md3LiquidGlass.md) — EXPERIMENTAL: Liquid Glass API may change without compatibility guarantees. Draggable Liquid Glass — regional backdrop sample (not full-scene blur).
 - [Md3LiquidGlassFusionPlayground](Md3LiquidGlassFusionPlayground.md) — EXPERIMENTAL: Liquid Glass fusion demo API may change. Two draggable glass bodies rendered in one fused SDF pass (real metaball merge).
-- [Md3ListTile](Md3ListTile.md)
+- [Md3ListTile](Md3ListTile.md) — List tile with optional trailing action icons and overflow (narrow panes).
 - [Md3MultiRingGauge](Md3MultiRingGauge.md) — Concentric multi-ring gauge — each ring is `{ value, from?, to?, color?, label? }`.
 - [Md3NeedleGauge](Md3NeedleGauge.md) — Analog needle gauge with tick marks (speedometer-style).
 - [Md3PageHeader](Md3PageHeader.md) — Page title row with optional subtitle and trailing actions (overflow on narrow width).  **Children go to the actions row** (`default property` → `actions`). Do not wrap this in another Item that aliases `pageHeader.data`.

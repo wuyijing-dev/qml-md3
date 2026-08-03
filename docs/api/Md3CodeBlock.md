@@ -9,7 +9,7 @@ Read-only code block with lightweight syntax highlighting (QML / JS / C++ / JSON
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 11 | 1 | 2 | 0 |
+| 12 | 1 | 2 | 0 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -32,6 +32,7 @@ import Md3
 | `padding` | `int` | `12` | read/write | `Md3CodeBlock` | Uniform padding. |
 | `maxHeight` | `int` | `280` | read/write | `Md3CodeBlock` | Max Height. |
 | `scrollable` | `bool` | `true` | read/write | `Md3CodeBlock` | When false, height grows with content (still clipped by parent). |
+| `fill` | `bool` | `false` | read/write | `Md3CodeBlock` | When true, height fills the parent (ignore maxHeight); use in stretch layouts. |
 | `showCopyButton` | `bool` | `true` | read/write | `Md3CodeBlock` | Show a copy button in the top-right corner. |
 | `unloadWhenPageInactive` | `bool` | `true` | read/write | `Md3CodeBlock` | Drop RichText HTML while page is off-display (chrome size stays). |
 
