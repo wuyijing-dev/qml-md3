@@ -9,7 +9,7 @@ WinUI-style in-page info bar — persistent until dismissed (unlike Snackbar).
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 9 | 2 | 0 | 1 |
+| 10 | 3 | 0 | 1 |
 
 _Also inherits Qt Quick `Rectangle` members (not listed)._
 
@@ -33,6 +33,7 @@ import Md3
 | `title` | `string` | `""` | read/write | `Md3InfoBar` | Title text. |
 | `message` | `string` | `""` | read/write | `Md3InfoBar` | Message. |
 | `actionText` | `string` | `""` | read/write | `Md3InfoBar` | Action Text. |
+| `secondaryActionText` | `string` | `""` | read/write | `Md3InfoBar` | Optional second text action (e.g. Continue + Abort). |
 | `showClose` | `bool` | `true` | read/write | `Md3InfoBar` | Show Close. |
 | `open` | `bool` | `true` | read/write | `Md3InfoBar` | Open the overlay / dialog. |
 | `accent` | `color` | `{…}` | readonly | `Md3InfoBar` | Accent. |
@@ -44,6 +45,7 @@ import Md3
 | Signal | Defined in | Description |
 |--------|------------|-------------|
 | `actionClicked()` | `Md3InfoBar` | Emitted when action Clicked. |
+| `secondaryActionClicked()` | `Md3InfoBar` | Emitted when secondary Action Clicked. |
 | `closed()` | `Md3InfoBar` | Emitted when closed. |
 
 ## Methods
@@ -60,7 +62,7 @@ Md3InfoBar {
     title: ""
     message: ""
     actionText: ""
+    secondaryActionText: ""
     showClose: true
-    open: true
 }
 ```

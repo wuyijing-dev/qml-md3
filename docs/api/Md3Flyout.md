@@ -9,7 +9,7 @@ Anchored light-dismiss panel (WinUI Flyout–inspired). Reparents onto Window.co
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 13 | 3 | 6 | 0 |
+| 14 | 3 | 6 | 0 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -35,6 +35,7 @@ import Md3
 | `padding` | `real` | `12` | read/write | `Md3Flyout` | Uniform padding. |
 | `elevation` | `real` | `2` | read/write | `Md3Flyout` | Elevation. |
 | `accessibleName` | `string` | `qsTr("Flyout")` | read/write | `Md3Flyout` | Accessible name override. |
+| `writeOpenOnClose` | `bool` | `true` | read/write | `Md3Flyout` | When true (default), dismiss writes ``open = false``. Set false if ``open`` is bound externally. |
 | `content` | `alias` | `contentHost.data` | default read/write | `Md3Flyout` | Content. |
 
 ## Signals

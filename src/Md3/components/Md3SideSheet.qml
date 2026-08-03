@@ -14,6 +14,8 @@ Item {
     property string title: ""
     property string text: ""
     property int layoutMode: Md3ContainerBody.Fit
+    /// When true (default), dismiss writes ``open = false``. Set false if ``open`` is bound externally.
+    property bool writeOpenOnClose: true
     default property alias content: customSlot.data
 
     signal dismissed()
@@ -36,8 +38,9 @@ Item {
     Accessible.name: title.length ? title : qsTr("Side sheet")
 
     function dismiss() {
-        open = false
         dismissed()
+        if (writeOpenOnClose)
+            open = false
         const f = _restoreFocus
         _restoreFocus = null
         if (f && typeof f.forceActiveFocus === "function")

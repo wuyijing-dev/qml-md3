@@ -9,7 +9,7 @@ Themed scroll view: Flickable + optional Md3ScrollBar overlays.
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 16 | 0 | 1 | 0 |
+| 18 | 0 | 1 | 0 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -36,6 +36,8 @@ import Md3
 | `scrollBarThickness` | `real` | `10` | read/write | `Md3ScrollView` | Scroll Bar Thickness. |
 | `fillContentWidth` | `bool` | `true` | read/write | `Md3ScrollView` | When true (default), content width matches the viewport. |
 | `minContentHeightToViewport` | `bool` | `false` | read/write | `Md3ScrollView` | When true, contentHeight is at least the viewport (old behavior — empty scroll room). Default false: short content does not create a tall empty flick area. |
+| `verticalScrollbarGutter` | `real` | `0` | read/write | `Md3ScrollView` | Inset subtracted from content width when ``fillContentWidth`` (e.g. ``scrollBarThickness`` or ``4`` so labels are not clipped under the vertical overlay bar). |
+| `contentAvailableWidth` | `real` | `Math.max(0, width - verticalScrollbarGutter)` | readonly | `Md3ScrollView` | Viewport width minus ``verticalScrollbarGutter`` — bind child ``width`` to this in panes. |
 | `showScrollToTop` | `bool` | `false` | read/write | `Md3ScrollView` | Optional FAB that appears after scrolling down; animates back to top. |
 | `scrollToTopThreshold` | `real` | `120` | read/write | `Md3ScrollView` | Scroll To Top Threshold. |
 | `content` | `alias` | `contentHost.data` | default read/write | `Md3ScrollView` | Content. |

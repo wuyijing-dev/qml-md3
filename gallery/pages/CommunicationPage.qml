@@ -170,6 +170,16 @@ Md3Page {
             Md3InfoBar {
                 width: parent.width
                 severity: Md3InfoBar.Warning
+                title: qsTr("Conflict / rebase")
+                message: qsTr("Continue after resolving, or abort the operation.")
+                actionText: qsTr("Continue")
+                secondaryActionText: qsTr("Abort")
+                onActionClicked: Md3Notify.snackbar(qsTr("Continue"))
+                onSecondaryActionClicked: Md3Notify.snackbar(qsTr("Abort"))
+            }
+            Md3InfoBar {
+                width: parent.width
+                severity: Md3InfoBar.Warning
                 title: qsTr("Storage low")
                 message: qsTr("Free up space to keep uploads reliable.")
                 actionText: qsTr("Manage")

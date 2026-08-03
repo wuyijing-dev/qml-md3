@@ -13,6 +13,8 @@ Item {
     property string dismissText: ""
     /// Drag distance (px) before release dismisses the sheet.
     property real dismissDragThreshold: 96
+    /// When true (default), accept/reject writes ``open = false``. Set false if ``open`` is bound externally.
+    property bool writeOpenOnClose: true
     default property alias content: bodySlot.data
 
     signal dismissed()
@@ -30,14 +32,16 @@ Item {
     property bool _dragging: false
 
     function accept() {
-        open = false
         confirmed()
+        if (writeOpenOnClose)
+            open = false
         _restore()
     }
 
     function reject() {
-        open = false
         dismissed()
+        if (writeOpenOnClose)
+            open = false
         _restore()
     }
 

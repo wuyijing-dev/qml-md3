@@ -9,7 +9,7 @@ Page section: title + optional subtitle + content — cuts gallery/form glue.
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 6 | 0 | 0 | 0 |
+| 8 | 0 | 0 | 0 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -28,7 +28,9 @@ import Md3
 | `spacing` | `real` | `Md3Theme.spacingMd` | read/write | `Md3PageSection` | Child spacing. |
 | `padding` | `real` | `0` | read/write | `Md3PageSection` | Uniform padding. |
 | `fillWidth` | `bool` | `true` | read/write | `Md3PageSection` | Fill Width. |
+| `trailing` | `alias` | `trailingSlot.data` | read/write | `Md3PageSection` | Optional header trailing slot (icon buttons, etc.) — peer of ListTile trailing. |
 | `content` | `alias` | `body.data` | default read/write | `Md3PageSection` | Content. |
+| `hasTrailing` | `bool` | `trailingSlot.children.length > 0` | readonly | `Md3PageSection` | Has Trailing. |
 
 ## Signals
 

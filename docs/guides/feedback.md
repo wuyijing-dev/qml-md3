@@ -76,6 +76,20 @@ Window.window.showShellInfoBar(qsTr("You’re offline"), {
 
 页内持久提示；Critical InfoBar 用于离线等状态。 Shell 条见上。
 
+```qml
+Md3InfoBar {
+    severity: Md3InfoBar.Warning
+    title: qsTr("Rebase in progress")
+    message: qsTr("Resolve conflicts, then continue or abort.")
+    actionText: qsTr("Continue")
+    secondaryActionText: qsTr("Abort")
+    onActionClicked: /* … */
+    onSecondaryActionClicked: /* … */
+}
+```
+
+`Md3Banner` 用 `primaryAction` / `secondaryAction`（命名不同，语义相同）。
+
 ## Md3Notify vs 系统通知
 
 | | **Md3Notify**（Toast/Snackbar） | **系统托盘通知** |

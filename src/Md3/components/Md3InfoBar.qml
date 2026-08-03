@@ -11,10 +11,13 @@ Rectangle {
     property string title: ""
     property string message: ""
     property string actionText: ""
+    /// Optional second text action (e.g. Continue + Abort).
+    property string secondaryActionText: ""
     property bool showClose: true
     property bool open: true
 
     signal actionClicked()
+    signal secondaryActionClicked()
     signal closed()
 
     visible: open
@@ -75,6 +78,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             width: Math.max(60, contentRow.width - 22 - 12
                             - (root.actionText.length ? actionBtn.implicitWidth + 12 : 0)
+                            - (root.secondaryActionText.length ? secondaryBtn.implicitWidth + 12 : 0)
                             - (root.showClose ? 48 : 0))
             spacing: 2
 
@@ -97,6 +101,15 @@ Rectangle {
                 font.pixelSize: Md3Theme.typography.bodyMedium.size
                 wrapMode: Text.Wrap
             }
+        }
+
+        Md3Button {
+            id: secondaryBtn
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.secondaryActionText.length > 0
+            text: root.secondaryActionText
+            variant: Md3Button.Text
+            onClicked: root.secondaryActionClicked()
         }
 
         Md3Button {

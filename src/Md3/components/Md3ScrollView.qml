@@ -21,6 +21,11 @@ Item {
     /// When true, contentHeight is at least the viewport (old behavior — empty scroll room).
     /// Default false: short content does not create a tall empty flick area.
     property bool minContentHeightToViewport: false
+    /// Inset subtracted from content width when ``fillContentWidth`` (e.g. ``scrollBarThickness``
+    /// or ``4`` so labels are not clipped under the vertical overlay bar).
+    property real verticalScrollbarGutter: 0
+    /// Viewport width minus ``verticalScrollbarGutter`` — bind child ``width`` to this in panes.
+    readonly property real contentAvailableWidth: Math.max(0, width - verticalScrollbarGutter)
     /// Optional FAB that appears after scrolling down; animates back to top.
     property bool showScrollToTop: false
     property real scrollToTopThreshold: 120
@@ -79,15 +84,18 @@ Item {
                 return Flickable.HorizontalFlick
             return Flickable.VerticalFlick
         }
-        contentWidth: root.fillContentWidth ? width : Math.max(width, root._measuredContentW)
+        contentWidth: root.fillContentWidth
+                      ? Math.max(1, width - root.verticalScrollbarGutter)
+                      : Math.max(width, root._measuredContentW)
         contentHeight: root.minContentHeightToViewport
                        ? Math.max(height, root._measuredContentH)
                        : Math.max(1, root._measuredContentH)
 
         Item {
             id: contentHost
-            width: root.fillContentWidth ? flick.width
-                                         : Math.max(flick.width, root._measuredContentW)
+            width: root.fillContentWidth
+                   ? Math.max(1, flick.width - root.verticalScrollbarGutter)
+                   : Math.max(flick.width, root._measuredContentW)
             // Never bind height to childrenRect — polish loop with contentHeight.
             height: Math.max(root._measuredContentH, 1)
 

@@ -7,6 +7,7 @@ Md3Page {
     id: root
 
     property bool fsOpen: false
+    property bool sideOpen: false
 
     Flickable {
         anchors.fill: parent
@@ -252,7 +253,7 @@ Md3Page {
                 onClicked: root.fsOpen = true
             }
             Md3Button { text: "Open bottom sheet"; variant: Md3Button.Outlined; onClicked: sheet.open = true }
-            Md3Button { text: qsTr("Open side sheet"); variant: Md3Button.FilledTonal; onClicked: sideSheet.open = true }
+            Md3Button { text: qsTr("Open side sheet"); variant: Md3Button.FilledTonal; onClicked: root.sideOpen = true }
             Md3Button {
                 text: "Open dialog window"
                 variant: Md3Button.FilledTonal
@@ -323,10 +324,13 @@ Md3Page {
     Md3SideSheet {
         id: sideSheet
         anchors.fill: parent
-        title: qsTr("Side sheet")
-        text: qsTr("Use side sheets for secondary detail without leaving the page. Esc / outside click dismisses; focus returns.")
+        title: qsTr("Side sheet (bound open)")
+        text: qsTr("open is bound to sideOpen; writeOpenOnClose: false keeps the binding so you can reopen.")
         edge: Md3SideSheet.End
+        open: root.sideOpen
+        writeOpenOnClose: false
         modal: sideSheetModal.checked
+        onDismissed: root.sideOpen = false
         Md3VStack {
             width: parent.width
             spacing: 12
@@ -351,7 +355,10 @@ Md3Page {
             }
             Md3Button {
                 text: qsTr("Done")
-                onClicked: sideSheet.dismiss()
+                onClicked: {
+                    root.sideOpen = false
+                    sideSheet.dismiss()
+                }
             }
         }
     }

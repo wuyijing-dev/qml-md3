@@ -1,4 +1,4 @@
-# Dialog `open` binding
+# Dialog / Sheet `open` binding
 
 ## The trap
 
@@ -9,11 +9,11 @@ Md3FullscreenDialog {
 }
 ```
 
-`accept()` / `reject()` historically did `open = false`, which **breaks** the binding to `settingsOpen`. The next `settingsOpen = true` no longer opens the dialog.
+`accept()` / `reject()` / `dismiss()` historically did `open = false`, which **breaks** the binding to `settingsOpen`. The next `settingsOpen = true` no longer opens the overlay.
 
-Same risk on `Md3Dialog`.
+Same risk on `Md3Dialog`, `Md3SideSheet`, `Md3BottomSheet`, and `Md3Flyout`.
 
-## Fix (1.1.3+)
+## Fix (1.1.3+ dialogs; 1.1.4+ sheets / flyout)
 
 ```qml
 Md3FullscreenDialog {
@@ -22,9 +22,15 @@ Md3FullscreenDialog {
     onConfirmed: window.settingsOpen = false
     onDismissed: window.settingsOpen = false
 }
+
+Md3SideSheet {
+    open: window.detailOpen
+    writeOpenOnClose: false
+    onDismissed: window.detailOpen = false
+}
 ```
 
-Or avoid binding: only assign both sides from functions:
+Or avoid binding: only assign both sides from functions (App-side sync):
 
 ```qml
 function openSettings() {

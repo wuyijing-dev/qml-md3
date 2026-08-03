@@ -2,7 +2,16 @@
 
 ## Unreleased
 
-_(empty — next work goes here)_
+### Highlights
+
+- **SideSheet / BottomSheet / Flyout** — `writeOpenOnClose` (same contract as Dialog / FullscreenDialog).
+- **InfoBar** — `secondaryActionText` + `secondaryActionClicked`.
+- **PageSection** — `trailing` header slot.
+- **ScrollView** — `verticalScrollbarGutter` + `contentAvailableWidth`.
+
+### Docs
+
+- [dialogs-and-open](docs/guides/dialogs-and-open.md) covers sheets/flyout; layout antipatterns for Split×VStack / Fit host / scrollbar gutter.
 
 ## 1.1.3
 

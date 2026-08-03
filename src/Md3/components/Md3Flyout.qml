@@ -24,6 +24,8 @@ Item {
     property real padding: 12
     property real elevation: 2
     property string accessibleName: qsTr("Flyout")
+    /// When true (default), dismiss writes ``open = false``. Set false if ``open`` is bound externally.
+    property bool writeOpenOnClose: true
 
     default property alias content: contentHost.data
 
@@ -88,10 +90,11 @@ Item {
     function dismiss() {
         if (!open && !host.visible)
             return
-        open = false
-        host.visible = false
         dismissed()
         closed()
+        if (writeOpenOnClose)
+            open = false
+        host.visible = false
         const f = _restoreFocus
         _restoreFocus = null
         if (f && typeof f.forceActiveFocus === "function")

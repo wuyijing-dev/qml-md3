@@ -34,6 +34,9 @@ Prescribed in **C++** (`Md3QtCompat` + `Md3HeightSync`), not per-kit QML:
 | `anchors.fill` on a **direct** `Md3SplitView` child | Nested `Item { anchors.fill }` inside the pane |
 | `Md3ScrollView { expand: true }` as the only flex child fighting a sticky footer | Header + Scroll (anchors between) + footer |
 | Expect `contentHeight ≥ viewport` empty room under short content | Default ScrollView no longer pads to viewport; use `minContentHeightToViewport: true` only if you need the old behavior |
+| Labels clipped under the vertical overlay scrollbar | `verticalScrollbarGutter: scrollBarThickness` (or `4`) / bind child `width` to `contentAvailableWidth` |
+| `Md3VStack { expand }` as a **direct** SplitView pane child for Tab + pageHost | Nested `Item` + pure `anchors` for the page host (VStack expand can measure height **0** in Split panes) |
+| Multiple competing children under ApplicationWindow Fit | One content host `Item`; switch views with `visible` / Loader — avoid multi-child Fit fighting |
 | `Md3TabBar` with pages but no height budget | `fillHeight: true` **or** strip-only + external page host |
 | Alias wrapper `default property` to `hstack.data` | Alias to `hstack.content` |
 | Giant `Repeater` in `Md3SideSheet` | `Md3ListView` / `Md3VirtualList` |

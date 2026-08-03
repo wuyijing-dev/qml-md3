@@ -7,7 +7,7 @@
 
 | Properties | Signals | Methods | Enums |
 |------------|---------|---------|-------|
-| 10 | 2 | 2 | 0 |
+| 11 | 2 | 2 | 0 |
 
 _Also inherits Qt Quick `Item` members (not listed)._
 
@@ -29,6 +29,7 @@ import Md3
 | `confirmText` | `string` | `""` | read/write | `Md3BottomSheet` | Confirm Text. |
 | `dismissText` | `string` | `""` | read/write | `Md3BottomSheet` | Dismiss Text. |
 | `dismissDragThreshold` | `real` | `96` | read/write | `Md3BottomSheet` | Drag distance (px) before release dismisses the sheet. |
+| `writeOpenOnClose` | `bool` | `true` | read/write | `Md3BottomSheet` | When true (default), accept/reject writes ``open = false``. Set false if ``open`` is bound externally. |
 | `content` | `alias` | `bodySlot.data` | default read/write | `Md3BottomSheet` | Content. |
 | `maxSheetHeight` | `real` | `parent ? parent.height * 0.6 : 480` | readonly | `Md3BottomSheet` | Max Sheet Height. |
 
