@@ -120,15 +120,16 @@ Md3Page {
                     tone: Md3Text.OnSurfaceVariant
                 }
 
-                Md3HStack {
+                Item {
                     id: railRow
                     width: parent.width
                     height: 220
-                    fillHeight: true
-                    spacing: 12
 
                     Md3NavigationRail {
                         id: railDemo
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
                         expanded: railExpanded.checked
                         model: [
                             { icon: "home", label: "Home", badgeDot: true },
@@ -138,8 +139,11 @@ Md3Page {
                     }
 
                     Md3VStack {
-                        width: Math.max(0, railRow.width - railDemo.width - railRow.spacing)
-                        height: railRow.height
+                        anchors.left: railDemo.right
+                        anchors.leftMargin: 12
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
                         spacing: 8
                         Md3Switch {
                             id: railExpanded
@@ -181,42 +185,34 @@ Md3Page {
                     color: Md3Theme.colorScheme.surfaceContainerLow
                     clipContent: true
 
-                    Md3DeferredSection {
+                    Md3NavigationView {
+                        id: navViewDemo
                         anchors.fill: parent
-                        preferredHeight: 278
-                        delayMs: 24
-                        asynchronous: true
-                        sourceComponent: Component {
-                            Md3NavigationView {
-                                id: navViewDemo
-                                anchors.fill: parent
-                                anchors.margins: 1
-                                paneDisplayMode: {
-                                    switch (navViewMode.currentIndex) {
-                                    case 1: return Md3NavigationView.Left
-                                    case 2: return Md3NavigationView.LeftCompact
-                                    case 3: return Md3NavigationView.Top
-                                    default: return Md3NavigationView.Auto
-                                    }
-                                }
-                                compactBreakpoint: 420
-                                expandedBreakpoint: 560
-                                headerLabel: qsTr("Mail")
-                                destinations: [
-                                    { icon: "inbox", label: qsTr("Inbox"), badge: "3" },
-                                    { icon: "send", label: qsTr("Sent") },
-                                    { icon: "drafts", label: qsTr("Drafts") },
-                                    { icon: "settings", label: qsTr("Settings"), pin: "bottom" }
-                                ]
-                                Md3Text {
-                                    anchors.centerIn: parent
-                                    text: qsTr("NavigationView content · index %1 · mode %2")
-                                          .arg(navViewDemo.currentIndex)
-                                          .arg(navViewDemo.effectivePaneDisplayMode)
-                                    role: Md3Text.BodyMedium
-                                    tone: Md3Text.OnSurfaceVariant
-                                }
+                        anchors.margins: 1
+                        paneDisplayMode: {
+                            switch (navViewMode.currentIndex) {
+                            case 1: return Md3NavigationView.Left
+                            case 2: return Md3NavigationView.LeftCompact
+                            case 3: return Md3NavigationView.Top
+                            default: return Md3NavigationView.Auto
                             }
+                        }
+                        compactBreakpoint: 420
+                        expandedBreakpoint: 560
+                        headerLabel: qsTr("Mail")
+                        destinations: [
+                            { icon: "inbox", label: qsTr("Inbox"), badge: "3" },
+                            { icon: "send", label: qsTr("Sent") },
+                            { icon: "drafts", label: qsTr("Drafts") },
+                            { icon: "settings", label: qsTr("Settings"), pin: "bottom" }
+                        ]
+                        Md3Text {
+                            anchors.centerIn: parent
+                            text: qsTr("NavigationView content · index %1 · mode %2")
+                                  .arg(navViewDemo.currentIndex)
+                                  .arg(navViewDemo.effectivePaneDisplayMode)
+                            role: Md3Text.BodyMedium
+                            tone: Md3Text.OnSurfaceVariant
                         }
                     }
                 }

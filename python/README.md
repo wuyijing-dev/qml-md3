@@ -2,21 +2,21 @@
 
 Thin Python host for the **shared** Md3 QML module. Qt comes from **PySide6**.
 
-**Lock tag:** pin git + shared Md3 to **`v1.1.3`** (see [integration.md](../docs/getting-started/integration.md)).
+**Lock tag:** pin git + shared Md3 to **`v1.1.4`** (see [integration.md](../docs/getting-started/integration.md)).
 
 ## Can I `pip install md3qml` from the network today?
 
 | Channel | Status |
 |---------|--------|
 | **PyPI** (`pip install md3qml`) | **No** — not published |
-| **GitHub** (`pip install git+…@v1.1.3#subdirectory=python[pyside6]`) | **Yes** — pure Python host |
-| **GitHub Release wheels / zip** | Optional — `md3qml install --version 1.1.3` when assets are attached |
+| **GitHub** (`pip install git+…@v1.1.4#subdirectory=python[pyside6]`) | **Yes** — pure Python host |
+| **GitHub Release wheels / zip** | Optional — `md3qml install --version 1.1.4` when assets are attached |
 
 ### Working network install
 
 ```bash
-pip install "git+https://github.com/wuyijing-dev/QML_MD3.git@v1.1.3#subdirectory=python[pyside6]"
-md3qml install --version 1.1.3 --with-pyside6
+pip install "git+https://github.com/wuyijing-dev/QML_MD3.git@v1.1.4#subdirectory=python[pyside6]"
+md3qml install --version 1.1.4 --with-pyside6
 # Windows PowerShell:
 $env:MD3_PREFIX = "$HOME\.md3\prefix"   # or path printed by install
 md3qml doctor
@@ -49,4 +49,4 @@ raise SystemExit(app.exec())
 ## Related
 
 - [docs/topics/pyside.md](../docs/topics/pyside.md)
-- [docs/api-manual/host-lock-1.1.3.md](../docs/api-manual/host-lock-1.1.3.md)
+- [docs/api-manual/host-lock-1.1.4.md](../docs/api-manual/host-lock-1.1.4.md)

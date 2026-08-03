@@ -217,6 +217,10 @@ Item {
             if (!item)
                 return
             item.width = Qt.binding(function () { return loader.width })
+            // Prefer filling the deferred shell when the item has no intrinsic height
+            // (e.g. NavigationView with anchors.fill) — avoid 1px collapse.
+            if (!(item.implicitHeight > 1) && root.preferredHeight > 1)
+                item.height = Qt.binding(function () { return Math.max(root.preferredHeight, loader.height) })
         }
         onStatusChanged: if (status === Loader.Ready)
             Qt.callLater(function () { root.height = root._shellHeight })

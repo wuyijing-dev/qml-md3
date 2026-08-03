@@ -36,15 +36,8 @@ Item {
 
     implicitWidth: leftPadding + rightPadding + contentHost._laidOutWidth
     implicitHeight: Math.max(1, topPadding + bottomPadding + contentHost._laidOutHeight)
-    // Sync height for Column's first pass (same Binding+HeightSync pattern as VStack).
-    // Never bind height when anchors.fill — fights vertical anchors on Qt 6.8/6.10.
-    Binding {
-        target: root
-        property: "height"
-        value: root.implicitHeight
-        when: !root.anchors.fill
-        restoreMode: Binding.RestoreNone
-    }
+    // Raise height to at least implicitHeight for Column's first pass.
+    // Do NOT bind height === implicitHeight — that clobbers explicit height: N (gallery demos).
     readonly property Md3HeightSync _heightSync: Md3HeightSync {
         target: root
         enabled: !root.anchors.fill

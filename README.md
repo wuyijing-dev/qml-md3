@@ -27,7 +27,7 @@ Enterprise Material Design 3 component library for **Qt Quick / QML 6.5+** (reco
 | **Experimental** | No SemVer promise | [docs/topics/experimental.md](docs/topics/experimental.md) |
 | **License** | LGPL-3.0 **or** Commercial (+ certification) | [docs/licensing.md](docs/licensing.md) · fonts/icons: [NOTICE](NOTICE) |
 
-Status: **1.1.3** (layout/dialog usability + 1.1.2 desktop chrome components). Android / WASM remain experimental — see [docs/project/professional-todo.md](docs/project/professional-todo.md). Releases follow [docs/getting-started/release-checklist.md](docs/getting-started/release-checklist.md).
+Status: **1.1.4** (layout/dialog usability + 1.1.2 desktop chrome components). Android / WASM remain experimental — see [docs/project/professional-todo.md](docs/project/professional-todo.md). Releases follow [docs/getting-started/release-checklist.md](docs/getting-started/release-checklist.md).
 
 ## Import
 
@@ -227,4 +227,4 @@ python tools/gen_api_docs.py
 
 ## Version
 
-`1.1.3` — lock tag for product apps (see CHANGELOG). Pin `v1.1.3`, not floating `main`.
+`1.1.4` — lock tag for product apps (see CHANGELOG). Pin `v1.1.4`, not floating `main`.

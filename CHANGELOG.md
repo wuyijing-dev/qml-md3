@@ -2,27 +2,34 @@
 
 ## Unreleased
 
+_(empty — next work goes here)_
+
+## 1.1.4
+
+Usability APIs from consumer gaps + Gallery Navigation demos. **No intentional Public API breaks** relative to 1.1.3.
+
 ### Highlights
 
-- **SideSheet / BottomSheet / Flyout** — `writeOpenOnClose` (same contract as Dialog / FullscreenDialog).
+- **SideSheet / BottomSheet / Flyout** — `writeOpenOnClose`.
 - **InfoBar** — `secondaryActionText` + `secondaryActionClicked`.
-- **PageSection** — `trailing` header slot.
+- **PageSection** — `trailing`; **ListTile** — `trailingActions` + overflow.
 - **ScrollView** — `verticalScrollbarGutter` + `contentAvailableWidth`.
-- **ListTile** — `trailingActions` + `maxVisibleTrailingActions` overflow.
-- **I18n** — `Md3I18n.revision` / `bump()` for dynamic `menuModel` / palette rebuilds.
+- **I18n** — `Md3I18n.revision` / `bump()`.
 - **Lists / Tree** — `preferredMaxHeight`, `preferredHeightFraction`, `fillAvailableHeight`.
-- **DiffBlock** — hunk preview + `hunkActions`.
-- **DialogHost** — `Md3DialogHost.confirm` / `prompt` (auto-hosted by ApplicationWindow).
-- **Dialog** — `preferredWidth` + `contentWidth`.
-- **PageScaffold / ScrollPage / InspectorLayout / ActionRow**.
+- **DiffBlock**, **DialogHost** (`confirm` / `prompt`), **PageScaffold** / **ScrollPage** / **InspectorLayout** / **ActionRow**.
 - **CommandPalette** — `section` / `groupBySection` / `visibleWhen`.
 - **CodeBlock.fill**; **TextField** `boundText` + `syncBoundText`; **AbstractButton** `writeCheckedOnToggle`.
-- **AppToolBar** — `density: Compact` + `trailing` overflow slot; **DropDown** density height.
-- **Card** — `fillFallbackHeight`, `actionsMaxVisible`.
+- **AppToolBar** density + trailing; **Dialog** `preferredWidth` / `contentWidth`; **Card** `fillFallbackHeight` / `actionsMaxVisible`.
+- **Fix** — `Md3HStack` no longer clobbers explicit `height:` (Navigation rail Gallery was empty); DeferredSection fills preferred height when item has no intrinsic size.
 
 ### Docs
 
-- dialogs-and-open, layout, feedback, collections updated for the above.
+- dialogs-and-open, layout, feedback, collections; Gallery Navigation + Desktop Patterns demos.
+
+### Notes
+
+- Prefer tag **`v1.1.4`**.
+- Android / WASM remain **experimental**.
 
 ## 1.1.3
 
