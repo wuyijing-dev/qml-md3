@@ -243,10 +243,19 @@ Md3Page {
             selectNode(fileTreeModel[0])
     }
 
-    Md3VStack {
+    Flickable {
+        id: flick
         anchors.fill: parent
-        width: parent.width
-        spacing: 12
+        contentWidth: width
+        contentHeight: col.implicitHeight + 24
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
+        interactive: true
+
+        Md3VStack {
+            id: col
+            width: flick.width
+            spacing: 12
 
         Md3Text {
             text: qsTr("Desktop Patterns")
@@ -289,11 +298,12 @@ Md3Page {
                 anchors.verticalCenter: parent.verticalCenter
             }
             Md3EmptyState {
-                width: Math.min(280, parent.width * 0.4)
+                width: Math.min(220, parent.width * 0.35)
                 icon: "folder_off"
                 title: qsTr("No selection")
                 description: qsTr("description alias works")
                 actionText: qsTr("Refresh")
+                maxContentWidth: 200
                 onActionClicked: page.applyStatus(qsTr("Refresh"))
             }
         }
@@ -404,7 +414,7 @@ Md3Page {
 
         Md3SplitView {
             width: parent.width
-            height: Math.max(0, page.height - 320)
+            height: 420
             splitRatio: 0.32
             minPane1: 240
             minPane2: 320
@@ -555,7 +565,8 @@ Md3Page {
                 }
             }
         }
-    }
+        } // Md3VStack col
+    } // Flickable
 
     property var lazyPath: []
 
