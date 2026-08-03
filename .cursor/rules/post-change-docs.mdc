@@ -11,11 +11,11 @@ When a coding task changes **public QML/C++ API**, **default behavior**, or **Ga
 2. **Update hand-written docs** that would otherwise lie:
    - Guides under `docs/guides/` (layout, collections, feedback, glue-less-api, …)
    - Topics under `docs/topics/` (a11y, datatable, performance, …)
-   - Cookbooks under `docs/guides/` when adding workflow recipes
+   - Generic cookbooks only — **no** consumer-app-named guides (see `library-not-consumer-chrome`)
    - `mkdocs.yml` nav if new pages are added
 3. **Keep contract alignment**: if docs mention a property/signal (e.g. `editingFinished`, `showFocusRings`, Stack `content`), the implementation must match in the same turn.
 4. **Document sync**: run `python tools/sync_document_repo.py` locally when docs changed; **`--push` only when the user explicitly asks** to publish Document/Pages (see auto-commit exceptions).
-5. Do **not** skip docs with “稍后补” after shipping behavior fixes that CleanSpace/Gallery already rely on.
+5. Do **not** skip docs with “稍后补” after shipping behavior fixes that Gallery or public API already promise.
 
 ## Minimal checklist (copy mentally)
 

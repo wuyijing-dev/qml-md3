@@ -1,0 +1,19 @@
+---
+description: Fix library gaps generically; never add consumer-app-specific docs, Gallery pages, or examples.
+alwaysApply: true
+---
+
+# Library-only fixes (no consumer product chrome)
+
+When improving Md3 from **consumer feedback** (CleanSpace, GitDesk, SerialFlow, or any external app notes under `md3-gaps` / `md3-improvements`):
+
+1. **Fix the library** — components, contracts, Gallery demos of the **API**, and **generic** guides (`layout`, `dialogs-and-open`, `collections`, …).
+2. **Do not** add material framed for one product:
+   - Docs named or titled for an app or shell style (e.g. `ide-shell.md`, `desktop-task-patterns.md`, “GitDesk 配方”, “CleanSpace cookbook”)
+   - Gallery destinations that recreate that app’s chrome (e.g. “IDE 壳”, fake Blame/Pull/Commit workspaces)
+   - `examples/hello-<product>` or other sample apps that mirror a specific consumer UI
+3. **Gallery** may show new APIs on existing pages (TextFields, Containment, DesktopPatterns, Navigation) with **neutral** labels — not product workflows.
+4. Consumer gap READMEs live in **those** repos (often gitignored locally). Do **not** copy them into QML_MD3 as product guides; at most close the **library** items and leave product-layer notes where they are.
+5. CHANGELOG / release notes describe **component** changes, not “for GitDesk/CleanSpace”.
+
+If a request sounds like “做一套某某应用壳”, reinterpret as: harden the underlying controls and document the **generic** contract only.
