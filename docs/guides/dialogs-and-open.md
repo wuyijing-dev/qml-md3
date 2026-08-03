@@ -51,4 +51,4 @@ Md3Dialog {
 }
 ```
 
-See [ide-shell.md](ide-shell.md) and [feedback.md](feedback.md).
+See [feedback.md](feedback.md).

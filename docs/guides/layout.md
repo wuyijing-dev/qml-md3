@@ -38,7 +38,7 @@ Prescribed in **C++** (`Md3QtCompat` + `Md3HeightSync`), not per-kit QML:
 | Alias wrapper `default property` to `hstack.data` | Alias to `hstack.content` |
 | Giant `Repeater` in `Md3SideSheet` | `Md3ListView` / `Md3VirtualList` |
 
-IDE shell recipes: [ide-shell.md](ide-shell.md). Dialog open binding: [dialogs-and-open.md](dialogs-and-open.md).
+Dialog open binding: [dialogs-and-open.md](dialogs-and-open.md).
 
 ## Before / after
 
@@ -85,7 +85,7 @@ Md3HStack {
 
 ### Stack default property (`content`, not `data`)
 
-`Md3HStack` / `Md3VStack` lay out children on an internal host. The default property is **`content`**. Wrappers must alias that — never `stack.data` — or children disappear from layout. See [desktop-task-patterns.md](desktop-task-patterns.md).
+`Md3HStack` / `Md3VStack` lay out children on an internal host. The default property is **`content`**. Wrappers must alias that — never `stack.data` — or children disappear from layout.
 
 ### Page header (title + actions + overflow)
 

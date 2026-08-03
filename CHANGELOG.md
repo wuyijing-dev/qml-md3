@@ -6,7 +6,7 @@ _(empty — next work goes here)_
 
 ## 1.1.3
 
-GitDesk IDE-shell usability pass: layout contracts, dialog open binding, aliases, and chrome helpers. **No intentional Public API breaks** relative to 1.1.2.
+Layout and dialog usability fixes for all consumers. **No intentional Public API breaks** relative to 1.1.2.
 
 ### Highlights
 
@@ -18,14 +18,15 @@ GitDesk IDE-shell usability pass: layout contracts, dialog open binding, aliases
 - **Divider** — `vertical` / `Orientation.Vertical`.
 - **Aliases** — `Md3EmptyState.description`, `Md3Icon.iconColor` ↔ `color`, `Md3TextArea` (= multiline TextField).
 - **About** — scrollable body; `aboutDialogHeight` / `aboutDialogWidth`.
+- **Components** — `Md3PageHeader`, `Md3TaskProgress`, `Md3SelectionToolbar`, `Md3StatusLine` (from 1.1.2 line).
 
 ### Docs
 
-- [ide-shell.md](docs/guides/ide-shell.md), [dialogs-and-open.md](docs/guides/dialogs-and-open.md); layout antipatterns table.
+- [dialogs-and-open.md](docs/guides/dialogs-and-open.md); layout antipatterns table.
 
 ### Notes
 
-- Prefer tag **`v1.1.3`** for new IDE / GitDesk-style pins.
+- Prefer tag **`v1.1.3`**.
 - Android / WASM remain **experimental**.
 
 ## 1.1.2
@@ -34,7 +35,7 @@ Patch on the 1.1.1 product lock: CleanSpace-driven desktop gaps + build/runtime 
 
 ### Highlights
 
-- **Desktop task chrome** — `Md3PageHeader` (actions overflow), `Md3TaskProgress`, `Md3SelectionToolbar`, `Md3StatusLine`; cookbook [desktop-task-patterns.md](docs/guides/desktop-task-patterns.md).
+- **Desktop task chrome** — `Md3PageHeader` (actions overflow), `Md3TaskProgress`, `Md3SelectionToolbar`, `Md3StatusLine`.
 - **Contracts** — Stack `content` (never `data`); FocusRing gated by `showFocusRings`; `Md3ApplicationWindow.defaultShowFocusRings`; TextField `editingFinished` / `textEdited`; Card clickable hit-test under children; ChipGroup accepts `string[]` / `QStringList`; Dialog `bodyMaxHeight` + `confirmTone` Error.
 - **ListView** — `ListModel` / `QAbstractListModel` support (not only JS arrays).
 - **Checkbox** — `checkedToggled(bool)` beside `toggled(state)`.

@@ -28,7 +28,7 @@ Choose the lightest surface that fits the message lifetime and actions.
 - 不要用 Dialog 报「已复制」——用 Toast。  
 - 破坏性操作：Dialog 确认，而不是 Snackbar 带 Undo 就完事（Undo 可作补充）。
 - 长清单确认：`bodyMaxHeight` + 默认可滚动内容；永久删除用 `confirmTone: Md3Dialog.Error`。
-- 可取消长任务：用 `Md3TaskProgress`，不要硬套 InfoBar（见 [desktop-task-patterns.md](desktop-task-patterns.md)）。
+- 可取消长任务：用 `Md3TaskProgress`，不要硬套 InfoBar。
 - 非告警持久状态：`Md3StatusLine`；批量多选操作：`Md3SelectionToolbar`。
 
 ## Toast

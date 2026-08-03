@@ -25,8 +25,6 @@ WinUI 集合控件对照。Gallery：**扩展**页（List / Grid / Swipe / Flip�
 
 SemanticZoom：**不做**。
 
-桌面扫描 / 索引 / 清理工作流见 [desktop-task-patterns.md](desktop-task-patterns.md)。
-
 ## ListView
 
 ```qml
